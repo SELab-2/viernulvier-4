@@ -9,7 +9,10 @@
   "description": "SELab 2 Project voor viernulvier",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "turbo build",
+    "start:prod": "turbo start:prod",
+    "start:dev": "turbo start:dev"
   },
   "repository": {
     "type": "git",

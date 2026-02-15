@@ -11,6 +11,14 @@
 * **Diana Dendauw:** front-end verantwoordelijke
 
 ## Frameworks
-* **Back-end:** Typescript
-* **Front-end:** Vue
-* **Database:** MongoDB
+* **Back-end:** Typescript + NestJS
+* **Front-end:** Vue + Nuxt 4
+* **Database:** PostrgeSQL
+
+## Instructies developer start
+
+Om beide backend en frontend op te starten voer je volgende commando uit in je terminal:
+
+* `npm run start:dev`
+
+Dit zal de *backend* opstarten op poot **3000** en de *frontend* op poort **3001**.
