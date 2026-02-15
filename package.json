@@ -1,7 +1,12 @@
 {
   "name": "viernulvier-4",
   "version": "1.0.0",
-  "description": "* **Matthieu De Clercq:** Groepsleider, back-end verantwoordelijke\r * **Alex Nollet:** Technische lead, back-end verantwoordelijke\r * **Sebastien Harris:** Systeembeheerder, back-end verantwoordelijke\r * **Lander De Geeter:** Customer Relations Officer, testverantwoordelijke\r * **Robin De Ridder:** Secretaris, testverantwoordelijke\r * **Dominik Nowak:** front-end verantwoordelijke\r * **Jill Van Ham:** front-end verantwoordelijke\r * **Diana Dendauw:** front-end verantwoordelijke",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "description": "SELab 2 Project voor viernulvier",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,5 +22,9 @@
   "bugs": {
     "url": "https://github.com/SELab-2/viernulvier-4/issues"
   },
-  "homepage": "https://github.com/SELab-2/viernulvier-4#readme"
+  "homepage": "https://github.com/SELab-2/viernulvier-4#readme",
+  "packageManager": "npm@11.10.0",
+  "devDependencies": {
+    "turbo": "^2.8.9"
+  }
 }
