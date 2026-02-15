@@ -8,6 +8,16 @@ export default defineVitestConfig({
         rootDir: "./"
       }
     },
-    globals: true
+    globals: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json-summary", "json", "lcov"],
+      include: ["**/*.vue"],
+
+      // TODO: Bespreek welke percentage we dit willen hebben
+      // thresholds: {
+      //   lines: 70
+      // }
+    },
   }
 })

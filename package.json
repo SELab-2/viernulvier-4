@@ -12,7 +12,8 @@
     "build": "turbo build",
     "start:prod": "turbo start:prod",
     "start:dev": "turbo start:dev",
-    "test": "turbo test"
+    "test": "turbo test",
+    "test:coverage": "turbo test:coverage"
   },
   "repository": {
     "type": "git",

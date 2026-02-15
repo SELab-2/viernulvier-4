@@ -18,7 +18,25 @@
     },
     "test": {
       "outputs": [],
-      "inputs": ["apps/**"]
+      "inputs": [
+        "src/**",
+        "test/**",
+        "vitest.config.ts",
+        "jest.config.ts",
+        "package.json",
+        "tsconfig.json"
+      ]
+    },
+    "test:coverage": {
+      "outputs": [],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "vitest.config.ts",
+        "jest.config.ts",
+        "package.json",
+        "tsconfig.json"
+      ]
     }
   }
 }
