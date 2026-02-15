@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "frontend",
+    "backend",
+    "common"
   ],
   "description": "SELab 2 Project voor viernulvier",
   "main": "index.js",
