@@ -21,6 +21,5 @@ Belangrijke commandos (allemaal uitgevoerd in de *root* map):
 
 * `npm i`: Installeert alle benodigde dependencies om het project te kunnen uitvoeren.
 * `npm run start:dev`: Start lokaal de *backend* op poort **3000** en de *frontend* op poort **3001**.
-* `npm run start:prod`: Nog niet geïmplementeerd...
 * `npm run test`: Run alle testen voor de hele stack.
 * `npm run test:coverage`: Run alle testen voor de hele stack **en** genereer/print coverage statistieken.
