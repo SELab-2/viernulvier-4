@@ -1,5 +1,5 @@
 #!/bin/bash
-# either run this as a script in the /backend/database folder or line by line in the CLI
+# either run this as a script in the /backend/database/database_proper folder or line by line in the CLI
 
 # install and enable docker service
 sudo apt install docker # or dnf/pacman -S/...
@@ -29,7 +29,9 @@ PGPASSWORD=404 psql -h 127.0.0.1 -p 5432 -U selab2 -d selab2_dev
 
 # restore db from thz dump so you have a working database:
 pg_restore -h 127.0.0.1 -p 5432 -U selab2 -d selab2_dev -v devdb.dump
-# pg_dump -h 127.0.0.1 -p 5432 -U dev -d dev -F c -b -v -f devdb.dump # overwride the dump (share through git with others)
+
+# be careful with script under here -> overwrites the current db backup!
+# pg_dump -h 127.0.0.1 -p 5432 -U selab2 -d selab2_dev -F c -b -v -f devdb.dump # overwrite the dump (share through git with others)
 
 # to setup the database in webstorm use user "selab2" with pw "404" and db "selab2_dev" on port 5432.
 # please check to make sure you can use the db for instance: "SELECT * FROM productions"
