@@ -11,12 +11,12 @@ const config: Config = {
   coverageDirectory: "../coverage",
   testEnvironment: "node",
 
-  // TODO: Bespreek welke percentage we dit willen hebben
-  // coverageThreshold: {
-  //   global: {
-  //     lines: 50,
-  //   },
-  // },
+  // Fail tests if global coverage under 70%
+  coverageThreshold: {
+    global: {
+      lines: 70,
+    },
+  },
 };
 
 export default config;

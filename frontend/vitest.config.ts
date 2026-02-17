@@ -14,10 +14,11 @@ export default defineVitestConfig({
       reporter: ["text", "json-summary", "json", "lcov"],
       include: ["**/*.vue"],
 
-      // TODO: Bespreek welke percentage we dit willen hebben
-      // thresholds: {
-      //   lines: 70
-      // }
+
+      // Fail tests if global coverage under 70%
+      thresholds: {
+        lines: 70
+      }
     },
   }
 })
