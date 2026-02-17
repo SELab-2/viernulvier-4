@@ -1,0 +1,43 @@
+{
+  "name": "viernulvier-4",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "common"
+  ],
+  "description": "SELab 2 Project voor viernulvier",
+  "main": "index.js",
+  "scripts": {
+    "build": "turbo build",
+    "start:prod": "turbo start:prod",
+    "start:dev": "turbo start:dev",
+    "test": "turbo test",
+    "test:coverage": "turbo test:coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SELab-2/viernulvier-4.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SELab-2/viernulvier-4/issues"
+  },
+  "homepage": "https://github.com/SELab-2/viernulvier-4#readme",
+  "packageManager": "npm@11.10.0",
+  "devDependencies": {
+    "turbo": "^2.8.9",
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "globals": "^16.0.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  }
+}

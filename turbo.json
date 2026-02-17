@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "tasks": {
+    "build": {
+      "outputs": ["dist/**"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "start:dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "start:prod": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "outputs": [],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "vitest.config.ts",
+        "jest.config.ts",
+        "package.json",
+        "tsconfig.json"
+      ]
+    },
+    "test:coverage": {
+      "outputs": [],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "vitest.config.ts",
+        "jest.config.ts",
+        "package.json",
+        "tsconfig.json"
+      ]
+    }
+  }
+}
