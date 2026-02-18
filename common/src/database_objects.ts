@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Production object
-export const Production = z.object({
+export const ProductionSchema = z.object({
   id: z.number(),
   titel: z.string(),
   ondertitel: z.string(),
@@ -14,7 +14,7 @@ export const Production = z.object({
 });
 
 // event object
-export const Event = z.object({
+export const EventSchema = z.object({
   id: z.number(),
   starttime: z.iso.datetime(),
   endtime: z.iso.datetime().nullable(),
@@ -24,5 +24,5 @@ export const Event = z.object({
 });
 
 // export
-export type Production = z.infer<typeof Production>;
-export type Event = z.infer<typeof Event>;
+export type ProductionSchema = z.infer<typeof ProductionSchema>;
+export type EventSchema = z.infer<typeof EventSchema>;
