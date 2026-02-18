@@ -1,9 +1,0 @@
-services:
-  db:
-    image: postgres:16 # need version 16 exactly for pg_restore to work.
-    network_mode: "host" # host for connectivity reasons.
-    environment:
-      POSTGRES_USER: selab2 # do not change user
-      POSTGRES_PASSWORD: dev # change to a passw of your choice
-      POSTGRES_DB: selab2_dev # do not change database name
-    restart: always

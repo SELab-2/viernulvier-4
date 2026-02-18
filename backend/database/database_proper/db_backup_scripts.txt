@@ -14,6 +14,7 @@ CREATE TABLE events (
     id SERIAL PRIMARY KEY,
     starttime DATE NOT NULL,
     endtime DATE NOT NULL,
+    price NUMERIC(5, 2),
     hall TEXT,
     production_id INT NOT NULL,
     CONSTRAINT fk_production
@@ -22,6 +23,7 @@ CREATE TABLE events (
             ON DELETE CASCADE
 );
 
+# small example data:
 #------------------#
 
 INSERT INTO productions (titel, ondertitel, description1, description2, genre, planning_id, blog_titel, blog_text)

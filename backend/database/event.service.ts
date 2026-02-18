@@ -58,7 +58,7 @@ export class EventDatabaseService {
 
     // p is defined, ignore error
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id
+      SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id, e.price
       FROM events e
         JOIN productions p ON e.production_id = p.id 
           ${whereClause}
