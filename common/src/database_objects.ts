@@ -24,5 +24,5 @@ export const EventSchema = z.object({
 });
 
 // export
-export type ProductionSchema = z.infer<typeof ProductionSchema>;
-export type EventSchema = z.infer<typeof EventSchema>;
+export type Production = z.infer<typeof ProductionSchema>;
+export type Event = z.infer<typeof EventSchema>;

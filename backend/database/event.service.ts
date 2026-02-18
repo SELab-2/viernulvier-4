@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { EventSchema } from "../../common/src/database_objects";
+import { Event } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -16,7 +16,7 @@ export class EventDatabaseService {
       hall: string;
       id: number;
     }>,
-  ): Promise<EventSchema[]> {
+  ): Promise<Event[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -60,16 +60,16 @@ export class EventDatabaseService {
     const query = `
       SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id, e.price
       FROM events e
-        JOIN productions p ON e.production_id = p.id 
+        JOIN productions p ON e.production_id = p.id
           ${whereClause}
       ORDER BY e.starttime
         `;
 
-    return this.db.query<EventSchema>(query, values);
+    return this.db.query<Event>(query, values);
   }
 
   // generic PUT function (used only as intermediary end-point)
-  async createEvent(event: Omit<EventSchema, "id">): Promise<EventSchema> {
+  async createEvent(event: Omit<Event, "id">): Promise<Event> {
     // Validate input, throw error if not all
     if (!event.starttime || !event.hall || !event.production_id) {
       throw new BadRequestException("Missing required fields");
@@ -81,7 +81,7 @@ export class EventDatabaseService {
       RETURNING id, starttime, endtime, hall, production_id, price
     `;
 
-    const result = await this.db.query<EventSchema>(query, [
+    const result = await this.db.query<Event>(query, [
       event.starttime,
       event.endtime,
       event.hall,
@@ -98,13 +98,13 @@ export class EventDatabaseService {
   }
 
   // generic POST function
-  async updateEvent(event: Omit<EventSchema, "id">): Promise<EventSchema> {
+  async updateEvent(event: Omit<Event, "id">): Promise<Event> {
     // TODO this needed?
     return new Promise(async (resolve, reject) => {});
   }
 
   // generic DELETE function
-  async deleteEvent(id: number, date: string): Promise<EventSchema> {
+  async deleteEvent(id: number, date: string): Promise<Event> {
     // TODO this needed?
     // + wouldnt work on id would need id and date?
     return new Promise(async (resolve, reject) => {});
