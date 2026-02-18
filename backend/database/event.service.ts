@@ -1,16 +1,21 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { DbService } from "../db.service";
-import { Event } from "../database_objects";
+import { DbService } from "./db.service";
+import { Event } from "../../common/src/database_objects";
 
 @Injectable()
-export class EventsService {
+export class EventDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
   // generic GET function (used only as intermediary end-point)
   // TODO add price filtering?
   async getEvents(
-    filters: Partial<{ genre: string; date: string; hall: string }>,
+    filters: Partial<{
+      genre: string;
+      date: string;
+      hall: string;
+      id: number;
+    }>,
   ): Promise<Event[]> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -38,17 +43,26 @@ export class EventsService {
       i++;
     }
 
+    // Filer by id
+    if (filters.id) {
+      conditions.push(`p.id = $${i}`);
+      values.push(filters.id);
+      i++;
+    }
+
+    // add more filters here if needed.
+
     const whereClause = conditions.length
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
     // p is defined, ignore error
     const query = `
-            SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id
-            FROM events e
-                     JOIN productions p ON e.production_id = p.id 
-                ${whereClause}
-            ORDER BY e.starttime
+      SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id
+      FROM events e
+        JOIN productions p ON e.production_id = p.id 
+          ${whereClause}
+      ORDER BY e.starttime
         `;
 
     return this.db.query<Event>(query, values);
@@ -62,9 +76,9 @@ export class EventsService {
     }
 
     const query = `
-        INSERT INTO events (starttime, endtime, hall, production_id, price)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, starttime, endtime, hall, production_id, price
+      INSERT INTO events (starttime, endtime, hall, production_id, price)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, starttime, endtime, hall, production_id, price
     `;
 
     const result = await this.db.query<Event>(query, [
@@ -90,7 +104,7 @@ export class EventsService {
   }
 
   // generic DELETE function
-  async deleteEvent(id: number): Promise<Event> {
+  async deleteEvent(id: number, date: string): Promise<Event> {
     // TODO this needed?
     // + wouldnt work on id would need id and date?
     return new Promise(async (resolve, reject) => {});

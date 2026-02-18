@@ -5,14 +5,14 @@ import { Injectable } from "@nestjs/common";
 export class DbService {
   private pool: Pool;
 
-  // edit this for new db params (i.e. non-static def) -> TODO
+  // to edit database params go to your .env file.
   constructor() {
     this.pool = new Pool({
-      user: "selab",
-      host: "127.0.0.1", // = localhost
-      database: "selab2_dev",
-      password: "404",
-      port: 5432,
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: Number(process.env.DB_PORT),
     });
   }
 
