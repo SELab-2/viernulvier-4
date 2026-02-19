@@ -1,0 +1,42 @@
+CREATE TABLE productions
+(
+    titel        TEXT,
+    ondertitel   TEXT,
+    description1 TEXT,
+    description2 TEXT,
+    genre        TEXT,
+    id           SERIAL PRIMARY KEY,
+    planning_id  INT,
+    blog_titel   TEXT,
+    blog_text    TEXT
+);
+
+CREATE TABLE events
+(
+    id            SERIAL PRIMARY KEY,
+    starttime     DATE NOT NULL,
+    endtime       DATE NOT NULL,
+    price         NUMERIC(5, 2),
+    hall          TEXT,
+    production_id INT  NOT NULL,
+    CONSTRAINT fk_production
+        FOREIGN KEY (production_id)
+            REFERENCES productions (id)
+            ON DELETE CASCADE
+);
+
+-- small example data:
+
+INSERT INTO productions (titel, ondertitel, description1, description2, genre, planning_id, blog_titel, blog_text)
+VALUES ('The Great Escape', 'Epic Adventure', 'An adventure film...', 'Set during WWII...', 'Adventure', 1,
+        'Behind the Scenes', 'Making of the movie...'),
+       ('Love in Paris', 'Romantic Drama', 'A love story...', 'Set in Paris...', 'Romance', 2, 'Director Notes',
+        'Filming tips and insights...'),
+       ('Mystery Manor', 'Thriller', 'A suspenseful tale...', 'Secrets in the manor...', 'Thriller', 3,
+        'Cast Interview', 'Interview with actors...');
+
+-- might need to change ids to what works for you #
+INSERT INTO events (starttime, endtime, hall, production_id, price)
+VALUES ('2026-02-20', '2026-02-22', 'Main Hall', 1, 5),
+       ('2026-02-23', '2026-02-25', 'Side Hall', 2, 7.50),
+       ('2026-02-26', '2026-02-27', 'Main Hall', 3, 10);
