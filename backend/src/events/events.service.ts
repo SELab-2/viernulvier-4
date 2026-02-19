@@ -49,4 +49,15 @@ export class EventsService {
 
     return updatedEvent;
   }
+
+  /**
+   * Deletes an event from the database.
+   * @param id ID of the Event we want to delete.
+   * @returns Nothing.
+   */
+  async deleteEvent(id: number): Promise<void> {
+    // TODO: Why do we need the date here??
+    await this.eventDBService.deleteEvent(id, "");
+    return;
+  }
 }

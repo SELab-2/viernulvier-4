@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -57,5 +58,15 @@ export class EventsController {
     @Body() patchData: UpdateEvent,
   ): Promise<Event> {
     return await this.eventsService.modifyEvent(id, patchData);
+  }
+
+  /**
+   * Responds to a DELETE to "/events/:id".
+   * @param id ID in the URL of the request.
+   * @returns Nothing.
+   */
+  @Delete(":id")
+  async deleteEvent(@Param("id", ParseIntPipe) id: number): Promise<void> {
+    return await this.eventsService.deleteEvent(id);
   }
 }
