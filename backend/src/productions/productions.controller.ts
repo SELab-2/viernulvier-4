@@ -70,6 +70,11 @@ export class ProductionsController {
     return await this.productionsService.deleteProduction(id);
   }
 
+  /**
+   * Responds to a POST to "/productions/".
+   * @param newProduction The new Production data we want to add
+   * @returns The newly created Production.
+   */
   @Post()
   @UsePipes(new ZodValidationPipe(CreateProductionSchema))
   async createProduction(

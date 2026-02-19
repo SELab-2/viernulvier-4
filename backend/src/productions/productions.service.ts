@@ -73,6 +73,11 @@ export class ProductionsService {
     return;
   }
 
+  /**
+   * Creates a Production and adds it to the database
+   * @param newProduction The new Production data we want to add
+   * @returns The newly created Production.
+   */
   async createProduction(newProduction: CreateProduction) : Promise<Production> {
     return await this.productionDBService.createProduction(newProduction)
   }
