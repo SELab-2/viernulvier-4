@@ -1,7 +1,9 @@
 import { z } from "zod";
 import {
   Event,
+  UpdateEvent,
   EventSchema,
+  UpdateEventSchema,
   Production,
   ProductionSchema,
 } from "./database_objects";
@@ -12,6 +14,6 @@ export const HelloWorldSchema = z.object({
 });
 
 // list of all exports: (this way only need to import this file.)
-export { ProductionSchema, EventSchema };
-export type { Production, Event };
+export { ProductionSchema, EventSchema, UpdateEventSchema };
+export type { Production, Event, UpdateEvent };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

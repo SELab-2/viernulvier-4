@@ -13,7 +13,9 @@ export const ProductionSchema = z.object({
   blog_text: z.string().nullable(),
 });
 
-// event object
+/**
+ * Schemas for events.
+ */
 export const EventSchema = z.object({
   id: z.number(),
   starttime: z.iso.datetime(),
@@ -22,7 +24,9 @@ export const EventSchema = z.object({
   production_id: z.number(),
   price: z.number(),
 });
+export const UpdateEventSchema = EventSchema.partial();
 
-// export
+// Type exports
 export type Production = z.infer<typeof ProductionSchema>;
 export type Event = z.infer<typeof EventSchema>;
+export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
