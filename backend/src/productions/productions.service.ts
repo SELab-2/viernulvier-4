@@ -72,4 +72,9 @@ export class ProductionsService {
     await this.productionDBService.deleteProduction(id);
     return;
   }
+
+  async createProduction(newProduction: Production) : Promise<Production> {
+    return await this.productionDBService.createProduction(newProduction)
+  }
+
 }

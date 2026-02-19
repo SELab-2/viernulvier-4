@@ -5,7 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
+  Patch, Post,
   Put,
   UsePipes,
 } from "@nestjs/common";
@@ -68,5 +68,13 @@ export class ProductionsController {
   @Delete(":id")
   async deleteProduction(@Param("id", ParseIntPipe) id: number): Promise<void> {
     return await this.productionsService.deleteProduction(id);
+  }
+
+  @Post()
+  @UsePipes(new ZodValidationPipe(ProductionSchema))
+  async createProduction(
+    @Body() newProduction: Production,
+  ): Promise<Production> {
+    return this.productionsService.createProduction(newProduction);
   }
 }
