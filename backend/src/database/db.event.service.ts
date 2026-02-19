@@ -7,6 +7,19 @@ export class EventDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
+  /**
+   * Get a single Event by their ID.
+   * @param id The ID we're trying to fetch.
+   * @returns The Event if there is one.
+   */
+  async getEventById(id: number): Promise<Event> {
+    const events: Event[] = await this.getEvents({ id: id });
+    if (events.length === 0)
+      throw new BadRequestException(`No Event exists for provided ID(${id})`);
+
+    return events[0]; // There should be an Event in here if the length is not 0.
+  }
+
   // generic GET function (used only as intermediary end-point)
   // TODO add price filtering?
   async getEvents(
