@@ -1,8 +1,10 @@
 import { z } from "zod";
 import {
   Event,
+  CreateEvent,
   UpdateEvent,
   EventSchema,
+  CreateEventSchema,
   UpdateEventSchema,
   Production,
   ProductionSchema,
@@ -23,7 +25,8 @@ export {
   CreateProductionSchema,
   UpdateProductionSchema,
   EventSchema,
+  CreateEventSchema,
   UpdateEventSchema,
 };
-export type { Production, CreateProduction, UpdateProduction, Event, UpdateEvent };
+export type { Production, CreateProduction, UpdateProduction, Event, CreateEvent, UpdateEvent };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

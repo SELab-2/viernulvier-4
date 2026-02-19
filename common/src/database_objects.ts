@@ -26,6 +26,7 @@ export const EventSchema = z.object({
   production_id: z.number(),
   price: z.number(),
 });
+export const CreateEventSchema = EventSchema.omit({id: true});
 export const UpdateEventSchema = EventSchema.partial();
 
 // Type exports
@@ -33,4 +34,5 @@ export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
 export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
 export type Event = z.infer<typeof EventSchema>;
+export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;

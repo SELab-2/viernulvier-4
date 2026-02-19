@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import type { Event, UpdateEvent } from "@repo/common";
+import type { CreateEvent, Event, UpdateEvent } from "@repo/common";
 import { EventDatabaseService } from "src/database/db.event.service";
 
 @Injectable()
@@ -59,5 +59,14 @@ export class EventsService {
     // TODO: Why do we need the date here??
     await this.eventDBService.deleteEvent(id, "");
     return;
+  }
+
+  /**
+   * Creates an Event and adds it to the database
+   * @param newEvent The new Event data we want to add
+   * @returns The newly created Event.
+   */
+  async createEvent(newEvent: CreateEvent) : Promise<Event> {
+    return await this.eventDBService.createEvent(newEvent)
   }
 }

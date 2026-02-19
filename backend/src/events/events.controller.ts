@@ -5,14 +5,14 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
+  Patch, Post,
   Put,
   UsePipes,
 } from "@nestjs/common";
 import { EventsService } from "./events.service";
 import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
-import { EventSchema, UpdateEventSchema } from "@repo/common";
-import type { Event, UpdateEvent } from "@repo/common";
+import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
+import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
 
 @Controller("events")
 export class EventsController {
@@ -68,5 +68,18 @@ export class EventsController {
   @Delete(":id")
   async deleteEvent(@Param("id", ParseIntPipe) id: number): Promise<void> {
     return await this.eventsService.deleteEvent(id);
+  }
+
+  /**
+   * Responds to a POST to "/events/".
+   * @param newEvent The new Event data we want to add
+   * @returns The newly created Event.
+   */
+  @Post()
+  @UsePipes(new ZodValidationPipe(CreateEventSchema))
+  async createProduction(
+    @Body() newEvent: CreateEvent,
+  ): Promise<Event> {
+    return this.eventsService.createEvent(newEvent);
   }
 }
