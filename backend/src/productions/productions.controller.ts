@@ -1,19 +1,27 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
 import { ProductionsService } from "./productions.service";
+import { Production } from "@repo/common";
 
 @Controller("productions")
 export class ProductionsController {
   constructor(private readonly productionsService: ProductionsService) {}
 
-  // GET /productions
+  /**
+   * Responds to GET /productions
+   * @returns All Production objects
+   */
   @Get()
-  getAll(): string[] {
-    return this.productionsService.getAll();
+  async getAllProductions(): Promise<Production[]> {
+    return await this.productionsService.getAllProductions();
   }
 
-  // GET /productions/:id
+  /**
+   * Responds to GET /productions/:id
+   * @param id ID in the URL of the request.
+   * @returns The Production object with corresponding ID
+   */
   @Get(":id")
-  getById(@Param("id") id: string): string {
-    return this.productionsService.getById(id);
+  async getById(@Param("id", ParseIntPipe) id: number): Promise<Production> {
+    return await this.productionsService.getProductionById(id);
   }
 }
