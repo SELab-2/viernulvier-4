@@ -10,6 +10,21 @@ import { Production, ProductionSchema } from "@repo/common";
 export class ProductionDatabaseService {
   constructor(private db: DbService) {}
 
+  /**
+   * Get a single Production by their ID.
+   * @param id The ID we are looking for.
+   * @returns The production if there is one.
+   */
+  async getProductionById(id: number): Promise<Production> {
+    const productions: Production[] = await this.getProductions({ id: id });
+    if (productions.length === 0)
+      throw new BadRequestException(
+        `No Production exists for provided ID(${id})`,
+      );
+
+    return productions[0]; // There should be a Production in here if the length is not 0.
+  }
+
   // generic GET function (used only as intermediary end-point)
   // TODO add extra search terms?
   async getProductions(
