@@ -1,11 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
 import type { Event } from "@repo/common";
-import { EventsService } from "./events.service";
+import { EventService } from "./event.service";
 
 
 @Controller("events")
-export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+export class EventController {
+  constructor(private readonly eventsService: EventService) {}
 
   /**
    * Responds to GET /events

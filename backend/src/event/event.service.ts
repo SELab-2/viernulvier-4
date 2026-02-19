@@ -4,7 +4,7 @@ import { EventDatabaseService } from "src/database/db.event.service";
 
 
 @Injectable()
-export class EventsService {
+export class EventService {
   constructor(private readonly eventDBService: EventDatabaseService) {}
 
   /**

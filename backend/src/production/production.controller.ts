@@ -1,10 +1,10 @@
 import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
-import { ProductionsService } from "./productions.service";
+import { ProductionService } from "./production.service";
 import { Production } from "@repo/common";
 
 @Controller("productions")
-export class ProductionsController {
-  constructor(private readonly productionsService: ProductionsService) {}
+export class ProductionController {
+  constructor(private readonly productionsService: ProductionService) {}
 
   /**
    * Responds to GET /productions
