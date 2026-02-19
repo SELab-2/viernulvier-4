@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import type { Event, UpdateEvent } from "@repo/common";
 import { EventDatabaseService } from "src/database/db.event.service";
 
@@ -36,15 +36,10 @@ export class EventsService {
    * @returns The updated Event object.
    */
   async modifyEvent(id: number, patchData: UpdateEvent): Promise<Event> {
-    const existingEvents: Event[] = await this.eventDBService.getEvents({
-      id: id,
-    }); // Should return only one event.
-
-    if (existingEvents.length === 0)
-      throw new NotFoundException(`Event with ID(${id}) does not exist.`);
+    const existingEvent: Event = await this.eventDBService.getEventById(id);
 
     const mergedEvent: Event = {
-      ...existingEvents[0],
+      ...existingEvent,
       ...patchData,
       id, // Force ID.
     };

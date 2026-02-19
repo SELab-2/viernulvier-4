@@ -44,6 +44,12 @@ export class EventsController {
     return await this.eventsService.replaceEvent(id, event);
   }
 
+  /**
+   * Responds to a PATCH to "/events/:id".
+   * @param id ID in the URL of the request.
+   * @param patchData The partial Event object that is used to modify.
+   * @returns The updated Event object.
+   */
   @Patch(":id")
   @UsePipes(new ZodValidationPipe(UpdateEventSchema))
   async modifyEvent(
