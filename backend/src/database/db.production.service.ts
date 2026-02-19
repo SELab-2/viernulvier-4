@@ -249,6 +249,7 @@ export class ProductionDatabaseService {
   }
 
   // generic DELETE function
+  // TODO: Make this also remove all Events linked to this Production?
   async deleteProduction(id: number): Promise<Production> {
     const query = `
       DELETE FROM productions

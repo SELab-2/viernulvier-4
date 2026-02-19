@@ -12,6 +12,7 @@ export const ProductionSchema = z.object({
   blog_titel: z.string().nullable(),
   blog_text: z.string().nullable(),
 });
+export const UpdateProductionSchema = ProductionSchema.partial();
 
 /**
  * Schemas for events.
@@ -28,5 +29,6 @@ export const UpdateEventSchema = EventSchema.partial();
 
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
+export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
 export type Event = z.infer<typeof EventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;

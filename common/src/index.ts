@@ -6,6 +6,8 @@ import {
   UpdateEventSchema,
   Production,
   ProductionSchema,
+  UpdateProduction,
+  UpdateProductionSchema,
 } from "./database_objects";
 
 // Een voorbeeld van een globaal schema...
@@ -14,6 +16,11 @@ export const HelloWorldSchema = z.object({
 });
 
 // list of all exports: (this way only need to import this file.)
-export { ProductionSchema, EventSchema, UpdateEventSchema };
-export type { Production, Event, UpdateEvent };
+export {
+  ProductionSchema,
+  UpdateProductionSchema,
+  EventSchema,
+  UpdateEventSchema,
+};
+export type { Production, UpdateProduction, Event, UpdateEvent };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;
