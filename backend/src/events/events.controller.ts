@@ -1,19 +1,28 @@
-import { Controller, Get, Param } from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
+import type { Event } from "@repo/common";
 import { EventsService } from "./events.service";
+
 
 @Controller("events")
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
-  // GET /events
+  /**
+   * Responds to GET /events
+   * @returns All Event objects.
+   */
   @Get()
-  getAll(): string[] {
-    return this.eventsService.getAll();
+  async getAllEvents(): Promise<Event[]> {
+    return await this.eventsService.getAllEvents();
   }
 
-  // GET /events/:id
+  /**
+   * Responds to GET /events/:id
+   * @param id ID in the URL of the request.
+   * @returns The Event object with corresponding ID
+   */
   @Get(":id")
-  getById(@Param("id") id: string): string {
-    return this.eventsService.getById(id);
+  async getEventById(@Param("id", ParseIntPipe) id: number): Promise<Event> {
+    return await this.eventsService.getEventById(id);
   }
 }

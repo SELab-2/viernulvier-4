@@ -1,12 +1,26 @@
 import { Injectable } from "@nestjs/common";
+import type { Event } from "@repo/common";
+import { EventDatabaseService } from "src/database/db.event.service";
+
 
 @Injectable()
 export class EventsService {
-  getAll(): string[] {
-    return ["Cool event (placeholder)", "Another cool event (placeholder)"];
+  constructor(private readonly eventDBService: EventDatabaseService) {}
+
+  /**
+   * Responds to GET /events
+   * @returns All Event objects.
+   */
+  async getAllEvents(): Promise<Event[]> {
+    return await this.eventDBService.getEvents({});
   }
 
-  getById(id: string): string {
-    return `Event with id ${id} (placeholder)`;
+  /**
+   * Responds to GET /events/:id
+   * @param id ID of the event as it was in the URL.
+   * @returns The Event object with corresponding ID
+   */
+  async getEventById(id: number): Promise<Event> {
+    return await this.eventDBService.getEventById(id);
   }
 }
