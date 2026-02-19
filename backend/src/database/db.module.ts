@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { ProductionDatabaseService } from "./production.service";
-import { EventDatabaseService } from "./event.service";
+import { ProductionDatabaseService } from "./db.production.service";
+import { EventDatabaseService } from "./db.event.service";
 
 @Module({
   imports: [],
