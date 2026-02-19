@@ -11,8 +11,8 @@ import {
 } from "@nestjs/common";
 import { ProductionsService } from "./productions.service";
 import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
-import { ProductionSchema, UpdateProductionSchema } from "@repo/common";
-import type { Production, UpdateProduction } from "@repo/common";
+import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
+import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
 
 @Controller("productions")
 export class ProductionsController {
@@ -71,9 +71,9 @@ export class ProductionsController {
   }
 
   @Post()
-  @UsePipes(new ZodValidationPipe(ProductionSchema))
+  @UsePipes(new ZodValidationPipe(CreateProductionSchema))
   async createProduction(
-    @Body() newProduction: Production,
+    @Body() newProduction: CreateProduction,
   ): Promise<Production> {
     return this.productionsService.createProduction(newProduction);
   }

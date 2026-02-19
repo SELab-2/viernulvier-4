@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { Production, UpdateProduction } from "@repo/common";
+import { CreateProduction, Production, UpdateProduction } from "@repo/common";
 import { ProductionDatabaseService } from "src/database/db.production.service";
 
 @Injectable()
@@ -73,7 +73,7 @@ export class ProductionsService {
     return;
   }
 
-  async createProduction(newProduction: Production) : Promise<Production> {
+  async createProduction(newProduction: CreateProduction) : Promise<Production> {
     return await this.productionDBService.createProduction(newProduction)
   }
 
