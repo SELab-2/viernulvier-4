@@ -14,7 +14,6 @@ import { ConfigModule } from "@nestjs/config";
     ProductionsModule,
     EventsModule,
   ],
-
   controllers: [AppController],
   providers: [AppService],
 })
