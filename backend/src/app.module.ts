@@ -12,7 +12,7 @@ import { ConfigModule } from "@nestjs/config";
       envFilePath: "../.env",
     }),
     ProductionsModule, 
-    EventsModule
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
