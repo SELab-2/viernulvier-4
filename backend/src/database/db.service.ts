@@ -8,11 +8,11 @@ export class DbService {
   // to edit database params go to your .env file.
   constructor() {
     this.pool = new Pool({
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      port: Number(process.env.DB_PORT),
+      user: process.env.DB_USER_DEV,
+      host: process.env.DB_HOST_DEV,
+      database: process.env.DB_NAME_DEV,
+      password: process.env.DB_PASSWORD_DEV,
+      port: Number(process.env.DB_PORT_DEV),
     });
   }
 
