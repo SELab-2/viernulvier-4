@@ -52,10 +52,9 @@ export class ProductionsController {
    * @returns The newly updated Production.
    */
   @Patch(":id")
-  @UsePipes(new ZodValidationPipe(UpdateProductionSchema))
   async modifyProduction(
     @Param("id", ParseIntPipe) id: number,
-    @Body() patchData: UpdateProduction,
+    @Body(new ZodValidationPipe(UpdateProductionSchema)) patchData: UpdateProduction,
   ): Promise<Production> {
     return await this.productionsService.modifyProduction(id, patchData);
   }
