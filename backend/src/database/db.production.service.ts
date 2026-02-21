@@ -81,7 +81,7 @@ export class ProductionDatabaseService {
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     // p is defined, ignore error
-    // need DISTINCT as multiple events for each prod.
+    // need DISTINCT as multiple event for each prod.
     const query = `
       SELECT DISTINCT
         p.id,
@@ -249,6 +249,7 @@ export class ProductionDatabaseService {
   }
 
   // generic DELETE function
+  // TODO: Make this also remove all Events linked to this Production?
   async deleteProduction(id: number): Promise<Production> {
     const query = `
       DELETE FROM productions

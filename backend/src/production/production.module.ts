@@ -6,6 +6,6 @@ import { DbModule } from "../database/db.module";
 @Module({
   providers: [ProductionService],
   controllers: [ProductionController],
-  imports: [DbModule],  
+  imports: [DbModule],
 })
 export class ProductionModule {}

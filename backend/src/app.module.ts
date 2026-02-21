@@ -10,10 +10,10 @@ import { ConfigModule } from "@nestjs/config";
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: "../.env", // Make sure .env is inside of root of project.
+      envFilePath: "../.env",
     }),
     ProductionModule,
-    EventModule
+    EventModule,
   ],
   controllers: [AppController],
   providers: [AppService],
