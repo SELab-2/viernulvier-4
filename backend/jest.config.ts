@@ -10,6 +10,10 @@ const config: Config = {
   collectCoverageFrom: ["**/*.(t|j)s"],
   coverageDirectory: "../coverage",
   testEnvironment: "node",
+  coveragePathIgnorePatterns: [
+  "main\\.ts$",
+  ".*\\.module\\.ts$"
+  ],
 
   // Fail tests if global coverage under 70%
   coverageThreshold: {
