@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type { Production, CreateProduction, UpdateProduction } from "@repo/common";
+import type { Production, UpdateProduction } from "@repo/common";
 import { BadRequestException } from "@nestjs/common";
 
 describe("ProductionService", () => {

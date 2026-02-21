@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import { EventService } from "./event.service";
-import type { Event } from "@repo/common";
+import type { Event, UpdateEvent } from "@repo/common";
 
 describe("EventController", () => {
   let controller: EventController;
@@ -27,7 +27,9 @@ describe("EventController", () => {
           useValue: {
             getAllEvents: jest.fn().mockResolvedValue(mockEvents),
             getEventById: jest.fn().mockResolvedValue(mockEvent),
-            updateEvent: jest.fn().mockResolvedValue({}),
+            replaceEvent: jest.fn().mockResolvedValue(mockEvent),
+            modifyEvent: jest.fn().mockResolvedValue(mockEvent),
+            deleteEvent: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -59,6 +61,7 @@ describe("EventController", () => {
       expect(result).toEqual([]);
     });
   });
+
   // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return a single event by id", async () => {
@@ -79,4 +82,35 @@ describe("EventController", () => {
       expect(service.getEventById).toHaveBeenCalledWith(5);
     });
   });
+
+  describe("replaceEvent", () => {
+    it("should replace and return the event", async () => {
+      const result = await controller.replaceEvent(1, mockEvent);
+      expect(service.replaceEvent).toHaveBeenCalledWith(1, mockEvent);
+      expect(result).toEqual(mockEvent);
+    });
+  });
+
+  describe("modifyEvent", () => {
+    it("should modify and return the event", async () => {
+      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      const patchedEvent = { ...mockEvent, hall: "Secondary Hall" };
+      
+      jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(patchedEvent);
+      
+      const result = await controller.modifyEvent(1, patchData);
+      expect(service.modifyEvent).toHaveBeenCalledWith(1, patchData);
+      expect(result).toEqual(patchedEvent);
+    });
+  });
+
+  describe("deleteEvent", () => {
+    it("should delete the event by id", async () => {
+      const result = await controller.deleteEvent(1);
+      expect(service.deleteEvent).toHaveBeenCalledWith(1);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  // TODO: Missing test for createEvent.
 });

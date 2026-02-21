@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "./production.service";
-import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
+import type { Production, UpdateProduction } from "@repo/common";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -33,7 +33,6 @@ describe("ProductionController", () => {
             replaceProduction: jest.fn().mockResolvedValue(mockProduction),
             modifyProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
-            createProduction: jest.fn().mockResolvedValue(mockProduction),
           },
         },
       ],

@@ -1,7 +1,8 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventService } from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type { Event } from "@repo/common";
+import type { Event, UpdateEvent } from "@repo/common";
+import { BadRequestException } from "@nestjs/common";
 
 describe("EventService", () => {
   let service: EventService;
@@ -27,7 +28,8 @@ describe("EventService", () => {
           useValue: {
             getEvents: jest.fn().mockResolvedValue(mockEvents),
             getEventById: jest.fn().mockResolvedValue(mockEvent),
-            updateEvent: jest.fn().mockResolvedValue({}),
+            updateEvent: jest.fn().mockResolvedValue(mockEvent),
+            deleteEvent: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -67,6 +69,7 @@ describe("EventService", () => {
       await expect(service.getAllEvents()).rejects.toThrow("Database error");
     });
   });
+
   // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return event by id from database", async () => {
@@ -98,4 +101,47 @@ describe("EventService", () => {
       );
     });
   });
+
+  describe("replaceEvent", () => {
+    it("should successfully replace and return the event", async () => {
+      const result = await service.replaceEvent(1, mockEvent);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(mockEvent);
+      expect(result).toEqual(mockEvent);
+    });
+
+    it("should throw BadRequestException if url id and body id do not match", async () => {
+      await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
+        BadRequestException
+      );
+      await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
+        "ID in the URL must match ID in the body."
+      );
+    });
+  });
+
+  describe("modifyEvent", () => {
+    it("should fetch, merge, update, and return the modified event", async () => {
+      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      const expectedMergedEvent = { ...mockEvent, ...patchData, id: 1 };
+      
+      jest.spyOn(dbService, "updateEvent").mockResolvedValueOnce(expectedMergedEvent);
+
+      const result = await service.modifyEvent(1, patchData);
+
+      expect(dbService.getEventById).toHaveBeenCalledWith(1);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(expectedMergedEvent);
+      expect(result).toEqual(expectedMergedEvent);
+    });
+  });
+
+  describe("deleteEvent", () => {
+    it("should delete the event by id and pass an empty string for the date", async () => {
+      const result = await service.deleteEvent(1);
+      // Validates your existing implementation: `this.eventDBService.deleteEvent(id, "");`
+      expect(dbService.deleteEvent).toHaveBeenCalledWith(1, "");
+      expect(result).toBeUndefined();
+    });
+  });
+
+  // TODO: Missing createEvent test
 });
