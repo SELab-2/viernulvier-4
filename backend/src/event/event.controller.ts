@@ -5,7 +5,7 @@ import { EventService } from "./event.service";
 
 @Controller("events")
 export class EventController {
-  constructor(private readonly eventsService: EventService) {}
+  constructor(private readonly eventService: EventService) {}
 
   /**
    * Responds to GET /events
@@ -13,7 +13,7 @@ export class EventController {
    */
   @Get()
   async getAllEvents(): Promise<Event[]> {
-    return await this.eventsService.getAllEvents();
+    return await this.eventService.getAllEvents();
   }
 
   /**
@@ -24,6 +24,6 @@ export class EventController {
   // TODO: return multiple events with same production id
   @Get(":id")
   async getEventById(@Param("id", ParseIntPipe) id: number): Promise<Event> {
-    return await this.eventsService.getEventById(id);
+    return await this.eventService.getEventById(id);
   }
 }

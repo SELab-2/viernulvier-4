@@ -4,7 +4,7 @@ import { Production } from "@repo/common";
 
 @Controller("productions")
 export class ProductionController {
-  constructor(private readonly productionsService: ProductionService) {}
+  constructor(private readonly productionService: ProductionService) {}
 
   /**
    * Responds to GET /productions
@@ -12,7 +12,7 @@ export class ProductionController {
    */
   @Get()
   async getAllProductions(): Promise<Production[]> {
-    return await this.productionsService.getAllProductions();
+    return await this.productionService.getAllProductions();
   }
 
   /**
@@ -22,6 +22,6 @@ export class ProductionController {
    */
   @Get(":id")
   async getById(@Param("id", ParseIntPipe) id: number): Promise<Production> {
-    return await this.productionsService.getProductionById(id);
+    return await this.productionService.getProductionById(id);
   }
 }
