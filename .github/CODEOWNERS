@@ -1,0 +1,22 @@
+# =========================================================================
+# CODEOWNERS configuratie
+# =========================================================================
+
+# Standard return
+* @MatthieuDC @Alikznollet @MrLegitFTW @landgeet @Robindr145 @Nowak-Dominik @jillvanham @ddndauw
+
+# 1. Back-end verantwoordelijken (Matthieu, Alex, Sebastien)
+/backend/ @MatthieuDC @Alikznollet @MrLegitFTW
+
+# 2. Front-end verantwoordelijken (Dominik, Jill, Diana)
+/frontend/ @Nowak-Dominik @jillvanham @ddndauw
+
+# 3. Testverantwoordelijken (Lander, Robin)
+/backend/test/ @landgeet @Robindr145
+/frontend/test/ @landgeet @Robindr145
+*.test.* @landgeet @Robindr145
+*.spec.* @landgeet @Robindr145
+
+# 4. Optioneel: Systeembeheer / Configuratie
+/docker/ @MrLegitFTW
+/.github/workflows/ @MrLegitFTW @Alikznollet
