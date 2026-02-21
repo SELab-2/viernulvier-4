@@ -8,7 +8,7 @@ export class EventService {
   constructor(private readonly eventDBService: EventDatabaseService) {}
 
   /**
-   * Responds to GET /events
+   * Fetches all Event objects from the DBService
    * @returns All Event objects.
    */
   async getAllEvents(): Promise<Event[]> {
@@ -16,7 +16,7 @@ export class EventService {
   }
 
   /**
-   * Responds to GET /events/:id
+   * Fetches Event object from the DBService with given ID.
    * @param id ID of the event as it was in the URL.
    * @returns The Event object with corresponding ID
    */

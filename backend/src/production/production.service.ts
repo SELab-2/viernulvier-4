@@ -7,7 +7,7 @@ export class ProductionService {
   constructor(private readonly productionDBService: ProductionDatabaseService) {}
 
   /**
-   * Responds to GET /productions
+   * Fetches all Production objects from the DBService
    * @returns All Production objects
    */
   async getAllProductions(): Promise<Production[]> {
@@ -15,7 +15,7 @@ export class ProductionService {
   }
 
   /**
-   * Responds to GET /productions/:id
+   * Fetches Production object from the DBService with given ID.
    * @param id ID in the URL of the request.
    * @returns The Production object with corresponding ID
    */
