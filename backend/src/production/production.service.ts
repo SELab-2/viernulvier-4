@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateProduction, Production, UpdateProduction } from "@repo/common";
-import { ProductionDatabaseService } from "src/database/db.production.service";
+import { ProductionDatabaseService } from "../database/db.production.service";
 
 @Injectable()
 export class ProductionService {

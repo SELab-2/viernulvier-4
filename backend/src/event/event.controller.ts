@@ -10,7 +10,7 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { EventService } from "./event.service";
-import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
+import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
 import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
 

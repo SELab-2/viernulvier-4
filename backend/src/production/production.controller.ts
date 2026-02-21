@@ -10,7 +10,7 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "./production.service";
-import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
+import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
 import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
 
