@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { Event } from "@repo/common";
-import { EventDatabaseService } from "src/database/db.event.service";
+import { EventDatabaseService } from "../database/db.event.service";
 
 
 @Injectable()

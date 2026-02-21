@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { Production } from "@repo/common";
-import { ProductionDatabaseService } from "src/database/db.production.service";
+import { ProductionDatabaseService } from "../database/db.production.service";
 
 @Injectable()
 export class ProductionService {

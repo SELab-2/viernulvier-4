@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ProductionService } from "./production.service";
 import { ProductionController } from "./production.controller";
-import { DbModule } from "src/database/db.module";
+import { DbModule } from "../database/db.module";
 
 @Module({
   providers: [ProductionService],
