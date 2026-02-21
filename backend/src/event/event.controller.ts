@@ -14,24 +14,24 @@ import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
 import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
 import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
 
-@Controller("events")
+@Controller("event")
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  // GET /events
+  // GET /event
   @Get()
   getAll(): string[] {
     return this.eventService.getAll();
   }
 
-  // GET /events/:id
+  // GET /event/:id
   @Get(":id")
   getById(@Param("id") id: string): string {
     return this.eventService.getById(id);
   }
 
   /**
-   * Responds to a PUT to "/events/:id".
+   * Responds to a PUT to "/event/:id".
    * @param id ID in the URL of the request.
    * @param event The parsed Event object.
    * @returns The updated Event object.
@@ -46,7 +46,7 @@ export class EventController {
   }
 
   /**
-   * Responds to a PATCH to "/events/:id".
+   * Responds to a PATCH to "/event/:id".
    * @param id ID in the URL of the request.
    * @param patchData The partial Event object that is used to modify.
    * @returns The updated Event object.
@@ -61,7 +61,7 @@ export class EventController {
   }
 
   /**
-   * Responds to a DELETE to "/events/:id".
+   * Responds to a DELETE to "/event/:id".
    * @param id ID in the URL of the request.
    * @returns Nothing.
    */
@@ -71,7 +71,7 @@ export class EventController {
   }
 
   /**
-   * Responds to a POST to "/events/".
+   * Responds to a POST to "/event/".
    * @param newEvent The new Event data we want to add
    * @returns The newly created Event.
    */

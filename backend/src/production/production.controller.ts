@@ -14,24 +14,24 @@ import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
 import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
 
-@Controller("productions")
+@Controller("production")
 export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
-  // GET /productions
+  // GET /production
   @Get()
   getAll(): string[] {
     return this.productionService.getAll();
   }
 
-  // GET /productions/:id
+  // GET /production/:id
   @Get(":id")
   getById(@Param("id") id: string): string {
     return this.productionService.getById(id);
   }
 
   /**
-   * Responds to a PUT to "/productions/:id".
+   * Responds to a PUT to "/production/:id".
    * @param id The ID in the URL.
    * @param production The parsed Production object.
    * @returns The newly updated Production.
@@ -46,7 +46,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a PATCH to "/productions/:id".
+   * Responds to a PATCH to "/production/:id".
    * @param id The ID in the URL.
    * @param patchData The parsed UpdateProduction object.
    * @returns The newly updated Production.
@@ -61,7 +61,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a DELETE to "/productions/:id".
+   * Responds to a DELETE to "/production/:id".
    * @param id The ID in the URL.
    * @returns Nothing.
    */
@@ -71,7 +71,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a POST to "/productions/".
+   * Responds to a POST to "/production/".
    * @param newProduction The new Production data we want to add
    * @returns The newly created Production.
    */
