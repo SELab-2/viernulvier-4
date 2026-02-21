@@ -21,6 +21,7 @@ export class EventController {
    * @param id ID in the URL of the request.
    * @returns The Event object with corresponding ID
    */
+  // TODO: return multiple events with same production id
   @Get(":id")
   async getEventById(@Param("id", ParseIntPipe) id: number): Promise<Event> {
     return await this.eventsService.getEventById(id);

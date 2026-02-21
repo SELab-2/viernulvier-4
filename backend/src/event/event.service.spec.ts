@@ -67,7 +67,7 @@ describe("EventService", () => {
       await expect(service.getAllEvents()).rejects.toThrow("Database error");
     });
   });
-
+  // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return event by id from database", async () => {
       const result = await service.getEventById(1);

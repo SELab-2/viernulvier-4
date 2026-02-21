@@ -20,6 +20,7 @@ export class EventService {
    * @param id ID of the event as it was in the URL.
    * @returns The Event object with corresponding ID
    */
+  // TODO: return multiple events with same production id
   async getEventById(id: number): Promise<Event> {
     return await this.eventDBService.getEventById(id);
   }

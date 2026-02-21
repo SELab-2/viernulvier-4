@@ -59,7 +59,7 @@ describe("EventController", () => {
       expect(result).toEqual([]);
     });
   });
-
+  // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return a single event by id", async () => {
       const result = await controller.getEventById(1);
