@@ -12,6 +12,7 @@ export class EventDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The Event if there is one.
    */
+  // TODO: return multiple events with same production id
   async getEventById(id: number): Promise<Event> {
     const events: Event[] = await this.getEvents({ id: id });
     if (events.length === 0)

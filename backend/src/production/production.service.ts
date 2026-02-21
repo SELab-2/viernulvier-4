@@ -8,15 +8,21 @@ export class ProductionService {
     private readonly productionDBService: ProductionDatabaseService,
   ) {}
 
-  getAll(): string[] {
-    return [
-      "Cool production (placeholder)",
-      "Another cool production (placeholder)",
-    ];
+  /**
+   * Fetches all Production objects from the DBService
+   * @returns All Production objects
+   */
+  async getAllProductions(): Promise<Production[]> {
+    return await this.productionDBService.getProductions({});
   }
 
-  getById(id: string): string {
-    return `Production with id ${id} (placeholder)`;
+  /**
+   * Fetches Production object from the DBService with given ID.
+   * @param id ID in the URL of the request.
+   * @returns The Production object with corresponding ID
+   */
+  async getProductionById(id: number): Promise<Production> {
+    return await this.productionDBService.getProductionById(id);
   }
 
   /**
@@ -81,5 +87,4 @@ export class ProductionService {
   async createProduction(newProduction: CreateProduction) : Promise<Production> {
     return await this.productionDBService.createProduction(newProduction)
   }
-
 }

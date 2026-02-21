@@ -1,17 +1,27 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import type { CreateEvent, Event, UpdateEvent } from "@repo/common";
-import { EventDatabaseService } from "src/database/db.event.service";
+import { EventDatabaseService } from "../database/db.event.service";
 
 @Injectable()
 export class EventService {
   constructor(private readonly eventDBService: EventDatabaseService) {}
 
-  getAll(): string[] {
-    return ["Cool event (placeholder)", "Another cool event (placeholder)"];
+  /**
+   * Fetches all Event objects from the DBService
+   * @returns All Event objects.
+   */
+  async getAllEvents(): Promise<Event[]> {
+    return await this.eventDBService.getEvents({});
   }
 
-  getById(id: string): string {
-    return `Event with id ${id} (placeholder)`;
+  /**
+   * Fetches Event object from the DBService with given ID.
+   * @param id ID of the event as it was in the URL.
+   * @returns The Event object with corresponding ID
+   */
+  // TODO: return multiple events with same production id
+  async getEventById(id: number): Promise<Event> {
+    return await this.eventDBService.getEventById(id);
   }
 
   /**

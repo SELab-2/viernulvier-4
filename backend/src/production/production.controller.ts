@@ -18,16 +18,23 @@ import type { Production, UpdateProduction, CreateProduction } from "@repo/commo
 export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
-  // GET /production
+  /**
+   * Responds to GET /productions
+   * @returns All Production objects
+   */
   @Get()
-  getAll(): string[] {
-    return this.productionService.getAll();
+  async getAllProductions(): Promise<Production[]> {
+    return await this.productionService.getAllProductions();
   }
 
-  // GET /production/:id
+  /**
+   * Responds to GET /productions/:id
+   * @param id ID in the URL of the request.
+   * @returns The Production object with corresponding ID
+   */
   @Get(":id")
-  getById(@Param("id") id: string): string {
-    return this.productionService.getById(id);
+  async getById(@Param("id", ParseIntPipe) id: number): Promise<Production> {
+    return await this.productionService.getProductionById(id);
   }
 
   /**

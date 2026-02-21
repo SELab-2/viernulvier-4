@@ -18,16 +18,24 @@ import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  // GET /event
+  /**
+   * Responds to GET /events
+   * @returns All Event objects.
+   */
   @Get()
-  getAll(): string[] {
-    return this.eventService.getAll();
+  async getAllEvents(): Promise<Event[]> {
+    return await this.eventService.getAllEvents();
   }
 
-  // GET /event/:id
+  /**
+   * Responds to GET /events/:id
+   * @param id ID in the URL of the request.
+   * @returns The Event object with corresponding ID
+   */
+  // TODO: return multiple events with same production id
   @Get(":id")
-  getById(@Param("id") id: string): string {
-    return this.eventService.getById(id);
+  async getEventById(@Param("id", ParseIntPipe) id: number): Promise<Event> {
+    return await this.eventService.getEventById(id);
   }
 
   /**
