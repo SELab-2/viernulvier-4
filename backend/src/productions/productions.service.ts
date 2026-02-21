@@ -3,7 +3,7 @@ import { CreateProduction, Production, UpdateProduction } from "@repo/common";
 import { ProductionDatabaseService } from "src/database/db.production.service";
 
 @Injectable()
-export class ProductionsService {
+export class ProductionService {
   constructor(
     private readonly productionDBService: ProductionDatabaseService,
   ) {}

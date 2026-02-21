@@ -9,25 +9,25 @@ import {
   Put,
   UsePipes,
 } from "@nestjs/common";
-import { EventsService } from "./events.service";
+import { EventService } from "./events.service";
 import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
 import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
 import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
 
 @Controller("events")
-export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+export class EventController {
+  constructor(private readonly eventService: EventService) {}
 
   // GET /events
   @Get()
   getAll(): string[] {
-    return this.eventsService.getAll();
+    return this.eventService.getAll();
   }
 
   // GET /events/:id
   @Get(":id")
   getById(@Param("id") id: string): string {
-    return this.eventsService.getById(id);
+    return this.eventService.getById(id);
   }
 
   /**
@@ -42,7 +42,7 @@ export class EventsController {
     @Param("id", ParseIntPipe) id: number,
     @Body() event: Event,
   ): Promise<Event> {
-    return await this.eventsService.replaceEvent(id, event);
+    return await this.eventService.replaceEvent(id, event);
   }
 
   /**
@@ -57,7 +57,7 @@ export class EventsController {
     @Param("id", ParseIntPipe) id: number,
     @Body() patchData: UpdateEvent,
   ): Promise<Event> {
-    return await this.eventsService.modifyEvent(id, patchData);
+    return await this.eventService.modifyEvent(id, patchData);
   }
 
   /**
@@ -67,7 +67,7 @@ export class EventsController {
    */
   @Delete(":id")
   async deleteEvent(@Param("id", ParseIntPipe) id: number): Promise<void> {
-    return await this.eventsService.deleteEvent(id);
+    return await this.eventService.deleteEvent(id);
   }
 
   /**
@@ -80,6 +80,6 @@ export class EventsController {
   async createProduction(
     @Body() newEvent: CreateEvent,
   ): Promise<Event> {
-    return this.eventsService.createEvent(newEvent);
+    return this.eventService.createEvent(newEvent);
   }
 }

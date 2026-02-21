@@ -9,25 +9,25 @@ import {
   Put,
   UsePipes,
 } from "@nestjs/common";
-import { ProductionsService } from "./productions.service";
+import { ProductionService } from "./productions.service";
 import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
 import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
 
 @Controller("productions")
 export class ProductionsController {
-  constructor(private readonly productionsService: ProductionsService) {}
+  constructor(private readonly productionService: ProductionService) {}
 
   // GET /productions
   @Get()
   getAll(): string[] {
-    return this.productionsService.getAll();
+    return this.productionService.getAll();
   }
 
   // GET /productions/:id
   @Get(":id")
   getById(@Param("id") id: string): string {
-    return this.productionsService.getById(id);
+    return this.productionService.getById(id);
   }
 
   /**
@@ -42,7 +42,7 @@ export class ProductionsController {
     @Param("id", ParseIntPipe) id: number,
     @Body() production: Production,
   ): Promise<Production> {
-    return await this.productionsService.replaceProduction(id, production);
+    return await this.productionService.replaceProduction(id, production);
   }
 
   /**
@@ -57,7 +57,7 @@ export class ProductionsController {
     @Param("id", ParseIntPipe) id: number,
     @Body() patchData: UpdateProduction,
   ): Promise<Production> {
-    return await this.productionsService.modifyProduction(id, patchData);
+    return await this.productionService.modifyProduction(id, patchData);
   }
 
   /**
@@ -67,7 +67,7 @@ export class ProductionsController {
    */
   @Delete(":id")
   async deleteProduction(@Param("id", ParseIntPipe) id: number): Promise<void> {
-    return await this.productionsService.deleteProduction(id);
+    return await this.productionService.deleteProduction(id);
   }
 
   /**
@@ -80,6 +80,6 @@ export class ProductionsController {
   async createProduction(
     @Body() newProduction: CreateProduction,
   ): Promise<Production> {
-    return this.productionsService.createProduction(newProduction);
+    return this.productionService.createProduction(newProduction);
   }
 }
