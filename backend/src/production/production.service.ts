@@ -1,22 +1,28 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { Production, UpdateProduction } from "@repo/common";
-import { ProductionDatabaseService } from "src/database/db.production.service";
+import { CreateProduction, Production, UpdateProduction } from "@repo/common";
+import { ProductionDatabaseService } from "../database/db.production.service";
 
 @Injectable()
-export class ProductionsService {
+export class ProductionService {
   constructor(
     private readonly productionDBService: ProductionDatabaseService,
   ) {}
 
-  getAll(): string[] {
-    return [
-      "Cool production (placeholder)",
-      "Another cool production (placeholder)",
-    ];
+  /**
+   * Fetches all Production objects from the DBService
+   * @returns All Production objects
+   */
+  async getAllProductions(): Promise<Production[]> {
+    return await this.productionDBService.getProductions({});
   }
 
-  getById(id: string): string {
-    return `Production with id ${id} (placeholder)`;
+  /**
+   * Fetches Production object from the DBService with given ID.
+   * @param id ID in the URL of the request.
+   * @returns The Production object with corresponding ID
+   */
+  async getProductionById(id: number): Promise<Production> {
+    return await this.productionDBService.getProductionById(id);
   }
 
   /**
@@ -71,5 +77,14 @@ export class ProductionsService {
   async deleteProduction(id: number): Promise<void> {
     await this.productionDBService.deleteProduction(id);
     return;
+  }
+
+  /**
+   * Creates a Production and adds it to the database
+   * @param newProduction The new Production data we want to add
+   * @returns The newly created Production.
+   */
+  async createProduction(newProduction: CreateProduction) : Promise<Production> {
+    return await this.productionDBService.createProduction(newProduction)
   }
 }
