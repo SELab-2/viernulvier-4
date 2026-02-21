@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "./production.service";
-import type { Production } from "@repo/common";
+import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -30,7 +30,10 @@ describe("ProductionController", () => {
           useValue: {
             getAllProductions: jest.fn().mockResolvedValue(mockProductions),
             getProductionById: jest.fn().mockResolvedValue(mockProduction),
-            updateProduction: jest.fn().mockResolvedValue({}),
+            replaceProduction: jest.fn().mockResolvedValue(mockProduction),
+            modifyProduction: jest.fn().mockResolvedValue(mockProduction),
+            deleteProduction: jest.fn().mockResolvedValue(undefined),
+            createProduction: jest.fn().mockResolvedValue(mockProduction),
           },
         },
       ],
@@ -83,4 +86,35 @@ describe("ProductionController", () => {
       expect(service.getProductionById).toHaveBeenCalledWith(2);
     });
   });
+
+  describe("replaceProduction", () => {
+    it("should replace and return the production", async () => {
+      const result = await controller.replaceProduction(1, mockProduction);
+      expect(service.replaceProduction).toHaveBeenCalledWith(1, mockProduction);
+      expect(result).toEqual(mockProduction);
+    });
+  });
+
+  describe("modifyProduction", () => {
+    it("should modify and return the production", async () => {
+      const patchData: UpdateProduction = { titel: "A New Title" };
+      const patchedProduction = { ...mockProduction, titel: "A New Title" };
+      
+      jest.spyOn(service, "modifyProduction").mockResolvedValueOnce(patchedProduction);
+      
+      const result = await controller.modifyProduction(1, patchData);
+      expect(service.modifyProduction).toHaveBeenCalledWith(1, patchData);
+      expect(result).toEqual(patchedProduction);
+    });
+  });
+
+  describe("deleteProduction", () => {
+    it("should delete the production by id", async () => {
+      const result = await controller.deleteProduction(1);
+      expect(service.deleteProduction).toHaveBeenCalledWith(1);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  // TODO: Missing createProduction test
 });
