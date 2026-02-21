@@ -45,10 +45,9 @@ export class EventController {
    * @returns The updated Event object.
    */
   @Put(":id")
-  @UsePipes(new ZodValidationPipe(EventSchema))
   async replaceEvent(
     @Param("id", ParseIntPipe) id: number,
-    @Body() event: Event,
+    @Body(new ZodValidationPipe(EventSchema)) event: Event,
   ): Promise<Event> {
     return await this.eventService.replaceEvent(id, event);
   }
@@ -60,10 +59,9 @@ export class EventController {
    * @returns The updated Event object.
    */
   @Patch(":id")
-  @UsePipes(new ZodValidationPipe(UpdateEventSchema))
   async modifyEvent(
     @Param("id", ParseIntPipe) id: number,
-    @Body() patchData: UpdateEvent,
+    @Body(new ZodValidationPipe(UpdateEventSchema)) patchData: UpdateEvent,
   ): Promise<Event> {
     return await this.eventService.modifyEvent(id, patchData);
   }
