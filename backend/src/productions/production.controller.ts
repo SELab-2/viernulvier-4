@@ -9,13 +9,13 @@ import {
   Put,
   UsePipes,
 } from "@nestjs/common";
-import { ProductionService } from "./productions.service";
+import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "src/common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
 import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
 
 @Controller("productions")
-export class ProductionsController {
+export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
   // GET /productions

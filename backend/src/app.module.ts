@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { ProductionModule } from "./productions/productions.module";
-import { EventModule } from "./events/events.module";
+import { ProductionModule } from "./productions/production.module";
+import { EventModule } from "./events/event.module";
 import { ConfigModule } from "@nestjs/config";
 
 @Module({
