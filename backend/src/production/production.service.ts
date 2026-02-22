@@ -38,7 +38,7 @@ export class ProductionService {
     if (id !== production.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    return await this.productionDBService.updateProduction(id, production);
+    return await this.productionDBService.updateProduction(production);
   }
 
   /**
@@ -60,10 +60,7 @@ export class ProductionService {
       id,
     };
 
-    return await this.productionDBService.updateProduction(
-      id,
-      mergedProduction,
-    );
+    return await this.productionDBService.updateProduction(mergedProduction);
   }
 
   /**

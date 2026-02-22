@@ -1,10 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException, } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateProduction, Production, ProductionSchema } from "@repo/common";
+import { CreateProduction, Production, ProductionSchema, UpdateProduction, } from "@repo/common";
+import { EventDatabaseService } from "./db.event.service";
 
 @Injectable()
 export class ProductionDatabaseService {
-  constructor(private db: DbService) {}
+  constructor(
+    private db: DbService,
+    private readonly eventDBService: EventDatabaseService, // needed for auto deleting all events from a production.
+  ) {}
 
   /**
    * Get a single Production by their ID.
@@ -21,8 +25,14 @@ export class ProductionDatabaseService {
     return productions[0]; // There should be a Production in here if the length is not 0.
   }
 
-  // generic GET function (used only as intermediary end-point)
-  // TODO add extra search terms?
+  /**
+   * Generic get function for productions.
+   * @param filters gives the freedom to define the filters of the search you want.
+   * All filters are filtered by equals.
+   * Not all filters need to be defined, only the ones you want to use.
+   * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
+   * @returns All productions for the given filters.
+   */
   async getProductions(
     filters: Partial<{
       genre: string;
@@ -96,161 +106,149 @@ export class ProductionDatabaseService {
     return this.db.query<Production>(query, values);
   }
 
-  // generic PUT function (used only as intermediary end-point)
+  /**
+   * Create production function, creates a production in the database.
+   * @param production must be of the type "CreateProduction" which has all fields defined,
+   * besides primary key id. (database auto-generates that)
+   * @returns the added production if it was successful.
+   */
   async createProduction(production: CreateProduction): Promise<Production> {
-    if (!production.titel || !production.ondertitel || !production.genre) {
+    if (!production.titel || !production.genre) {
       throw new BadRequestException("Missing required fields");
     }
 
-    let query: string;
-    let values: any[];
+    const query = `
+    INSERT INTO productions (
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        genre,
+        planning_id
+    )
+    VALUES ($1,$2,$3,$4,$5,$6)
+    RETURNING
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        genre,
+        planning_id
+  `;
 
-    // If id is provided → include it
-    if (production.id !== undefined && production.id !== null) {
-      query = `
-        INSERT INTO productions (
-                id,
-                titel,
-                ondertitel,
-                description1,
-                description2,
-                genre,
-                planning_id,
-                blog_titel,
-                blog_text
-            )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-            RETURNING
-                id,
-                titel,
-                ondertitel,
-                description1,
-                description2,
-                genre,
-                planning_id,
-                blog_titel,
-                blog_text
-        `;
-
-      values = [
-        production.id,
-        production.titel,
-        production.ondertitel,
-        production.description1,
-        production.description2,
-        production.genre,
-        production.planning_id ?? null,
-      ];
-    }
-    // if not, fallback to db autogenerate
-    else {
-      query = `
-            INSERT INTO productions (
-                titel,
-                ondertitel,
-                description1,
-                description2,
-                genre,
-                planning_id,
-                blog_titel,
-                blog_text
-            )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-            RETURNING
-                id,
-                titel,
-                ondertitel,
-                description1,
-                description2,
-                genre,
-                planning_id,
-                blog_titel,
-                blog_text
-        `;
-
-      values = [
-        production.titel,
-        production.ondertitel,
-        production.description1,
-        production.description2,
-        production.genre,
-        production.planning_id ?? null,
-      ];
-    }
+    const values = [
+      production.titel,
+      production.ondertitel ?? null,
+      production.description1 ?? null,
+      production.description2 ?? null,
+      production.genre,
+      production.planning_id ?? null,
+    ];
 
     const result = await this.db.query<Production>(query, values);
 
-    if (!result?.length) {
+    if (!result.length) {
       throw new Error("Failed to create production");
     }
 
     return ProductionSchema.parse(result[0]);
   }
 
-  // generic POST function
-  async updateProduction(
-    id: number,
-    production: Omit<Production, "id">,
-  ): Promise<Production> {
-    // Validate input fields
-    if (
-      !production.titel ||
-      !production.ondertitel ||
-      !production.description1 ||
-      !production.genre
-    ) {
-      throw new BadRequestException("Missing required fields");
+  /**
+   * Update function for productions. Updates the production in the database.
+   * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
+   * The id field in the production MUST be defined.
+   * @returns the updated production if successful.
+   */
+  async updateProduction(production: UpdateProduction): Promise<Production> {
+    if (!production.id) {
+      throw new Error("Production id is required for update");
     }
 
-    const query = `
-      UPDATE productions
-      SET 
-        titel = $1,
-        ondertitel = $2,
-        description1 = $3,
-        description2 = $4,
-        genre = $5,
-        planning_id = $6
-      WHERE id = $7
-      RETURNING *
-    `;
+    const fields: string[] = [];
+    const values: any[] = [];
+    let index = 1;
 
-    const values = [
-      production.titel,
-      production.ondertitel,
-      production.description1,
-      production.description2,
-      production.genre,
-      production.planning_id,
-      id,
-    ];
+    if (production.titel !== undefined) {
+      fields.push(`titel = $${index++}`);
+      values.push(production.titel);
+    }
+
+    if (production.ondertitel !== undefined) {
+      fields.push(`ondertitel = $${index++}`);
+      values.push(production.ondertitel);
+    }
+
+    if (production.description1 !== undefined) {
+      fields.push(`description1 = $${index++}`);
+      values.push(production.description1);
+    }
+
+    if (production.description2 !== undefined) {
+      fields.push(`description2 = $${index++}`);
+      values.push(production.description2);
+    }
+
+    if (production.genre !== undefined) {
+      fields.push(`genre = $${index++}`);
+      values.push(production.genre);
+    }
+
+    if (production.planning_id !== undefined) {
+      fields.push(`planning_id = $${index++}`);
+      values.push(production.planning_id);
+    }
+
+    if (fields.length === 0) {
+      throw new Error("No fields provided to update");
+    }
+
+    // Add id as the last parameter
+    values.push(production.id);
+
+    // ignore error on "RETURNING", query is correct.
+    const query = `
+    UPDATE productions
+    SET ${fields.join(", ")}
+    WHERE id = $${index}
+    RETURNING *;
+    `;
 
     const result = await this.db.query<Production>(query, values);
 
-    if (!result || result.length === 0) {
-      throw new NotFoundException(`Production with id ${id} not found`);
+    if (result.length === 0) {
+      throw new Error("Production not found");
     }
 
     return ProductionSchema.parse(result[0]);
   }
 
-  // generic DELETE function
-  // TODO: Make this also remove all Events linked to this Production?
-  async deleteProduction(id: number): Promise<Production> {
-    const query = `
-      DELETE FROM productions
-      WHERE id = $1
-      RETURNING *
-    `;
+  /**
+   * Delete function for deleting productions from the database.
+   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteProduction(id: number): Promise<void> {
+    const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
 
-    const result = await this.db.query<Production>(query, [id]);
-
-    if (!result || result.length === 0) {
-      throw new NotFoundException(`Production with id ${id} not found`);
-    }
-
-    return ProductionSchema.parse(result[0]);
+    await this.db.query<Production>(query, [id]);
   }
 
-  // TODO add extra functionality here. I.e. search by id  function, get all possible genres, etc...
+  /**
+   * Delete function for deleting productions from the database.
+   * This function will also delete all events tied to this production.
+   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteProductionWithEvents(id: number): Promise<void> {
+    const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
+
+    await this.db.query<Production>(query, [id]);
+
+    // delete events:
+    await this.eventDBService.deleteEventsWithPID(id);
+  }
 }

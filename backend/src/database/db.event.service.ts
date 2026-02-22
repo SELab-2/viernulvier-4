@@ -34,7 +34,7 @@ export class EventDatabaseService {
       date: string;
       hall: string;
       id: number;
-      p_id: number;
+      production_id: number;
     }>,
   ): Promise<Event[]> {
     const conditions: string[] = [];
@@ -71,9 +71,9 @@ export class EventDatabaseService {
     }
 
     // Filter by p_id
-    if (filters.p_id) {
+    if (filters.production_id) {
       conditions.push(`p.production_id = $${i}`);
-      values.push(filters.p_id);
+      values.push(filters.production_id);
       i++;
     }
 
@@ -84,6 +84,7 @@ export class EventDatabaseService {
       : "";
 
     // p is defined, ignore error
+    // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
       SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id, e.price
       FROM events e
