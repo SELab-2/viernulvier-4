@@ -7,7 +7,7 @@ export class TagDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
-  // note: no update as not necessary. If you want you can just remove and add a new tag instead.
+  // note: no update-tag-function as it is not necessary. If you want, you can just remove and add a new tag instead.
 
   /**
    * Get a single tag by their ID.
@@ -95,4 +95,6 @@ export class TagDatabaseService {
 
     await this.db.query(query, [production_id]);
   }
+
+  // insert extra functions here if desired
 }
