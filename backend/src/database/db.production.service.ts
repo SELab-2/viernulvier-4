@@ -1,14 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateProduction, Production, ProductionSchema, UpdateProduction, } from "@repo/common";
-import { EventDatabaseService } from "./db.event.service";
 
 @Injectable()
 export class ProductionDatabaseService {
-  constructor(
-    private db: DbService,
-    private readonly eventDBService: EventDatabaseService, // needed for auto deleting all events from a production.
-  ) {}
+  constructor(private db: DbService) {}
 
   /**
    * Get a single Production by their ID.
@@ -226,6 +222,7 @@ export class ProductionDatabaseService {
 
   /**
    * Delete function for deleting productions from the database.
+   * note: deleting a production will auto-delete events from this production.
    * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * (silent handling)
    * @returns nothing.
@@ -234,21 +231,5 @@ export class ProductionDatabaseService {
     const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
 
     await this.db.query<Production>(query, [id]);
-  }
-
-  /**
-   * Delete function for deleting productions from the database.
-   * This function will also delete all events tied to this production.
-   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteProductionWithEvents(id: number): Promise<void> {
-    const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
-
-    await this.db.query<Production>(query, [id]);
-
-    // delete events:
-    await this.eventDBService.deleteEventsWithPID(id);
   }
 }

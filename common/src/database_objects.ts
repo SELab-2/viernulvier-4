@@ -39,7 +39,7 @@ export const UpdateEventSchema = EventSchema.partial();
 // note: to get the blog from a prod or the other way around, use the api service with the id.
 export const BlogSchema = z.object({
   id: z.number(),
-  title: z.string(),
+  titel: z.string(),
   description: z.string(),
 });
 
