@@ -83,7 +83,7 @@ export class EventController {
    */
   @Post()
   @UsePipes(new ZodValidationPipe(CreateEventSchema))
-  async createProduction(
+  async createEvent(
     @Body() newEvent: CreateEvent,
   ): Promise<Event> {
     return this.eventService.createEvent(newEvent);

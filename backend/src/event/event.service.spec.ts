@@ -132,6 +132,16 @@ describe("EventService", () => {
       expect(dbService.updateEvent).toHaveBeenCalledWith(expectedMergedEvent);
       expect(result).toEqual(expectedMergedEvent);
     });
+
+    it("should throw an error if the event to modify does not exist", async () => {
+      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      
+      // Service fetches by ID first, so mock that fetch to fail
+      jest.spyOn(dbService, "getEventById").mockRejectedValueOnce(new Error("No Event exists for provided ID"));
+    
+      await expect(service.modifyEvent(999, patchData)).rejects.toThrow("No Event exists for provided ID");
+      expect(dbService.updateEvent).not.toHaveBeenCalled();
+    });
   });
 
   describe("deleteEvent", () => {
@@ -140,6 +150,12 @@ describe("EventService", () => {
       // Validates your existing implementation: `this.eventDBService.deleteEvent(id, "");`
       expect(dbService.deleteEvent).toHaveBeenCalledWith(1, "");
       expect(result).toBeUndefined();
+    });
+
+    it("should handle database errors when deletion fails", async () => {
+      jest.spyOn(dbService, "deleteEvent").mockRejectedValueOnce(new Error("Failed to delete record"));
+    
+      await expect(service.deleteEvent(999)).rejects.toThrow("Failed to delete record");
     });
   });
 

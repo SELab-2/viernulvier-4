@@ -134,6 +134,17 @@ describe("ProductionService", () => {
       expect(dbService.updateProduction).toHaveBeenCalledWith(1, expectedMergedProduction);
       expect(result).toEqual(expectedMergedProduction);
     });
+
+    it("should throw an error if the production to modify does not exist", async () => {
+      const patchData: UpdateProduction = { titel: "Patched Title" };
+      
+      // Simulate the database failing to find the record
+      jest.spyOn(dbService, "getProductionById").mockRejectedValueOnce(new Error("No Production exists for provided ID"));
+
+      // The service should halt and bubble up the fetch error, never calling updateProduction
+      await expect(service.modifyProduction(999, patchData)).rejects.toThrow("No Production exists for provided ID");
+      expect(dbService.updateProduction).not.toHaveBeenCalled();
+    });
   });
 
   describe("deleteProduction", () => {
@@ -141,6 +152,13 @@ describe("ProductionService", () => {
       const result = await service.deleteProduction(1);
       expect(dbService.deleteProduction).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
+    });
+
+    it("should handle database errors when deletion fails", async () => {
+      // Simulate a database failure
+      jest.spyOn(dbService, "deleteProduction").mockRejectedValueOnce(new Error("Failed to delete record"));
+
+      await expect(service.deleteProduction(999)).rejects.toThrow("Failed to delete record");
     });
   });
 

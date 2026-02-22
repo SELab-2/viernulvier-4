@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import { EventService } from "./event.service";
 import type { Event, UpdateEvent } from "@repo/common";
+import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("EventController", () => {
   let controller: EventController;
@@ -81,6 +82,11 @@ describe("EventController", () => {
       expect(result.id).toBe(5);
       expect(service.getEventById).toHaveBeenCalledWith(5);
     });
+
+    it("should throw a NotFoundException if event does not exist", async () => {
+      jest.spyOn(service, "getEventById").mockRejectedValueOnce(new NotFoundException());
+      await expect(controller.getEventById(999)).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe("replaceEvent", () => {
@@ -88,6 +94,11 @@ describe("EventController", () => {
       const result = await controller.replaceEvent(1, mockEvent);
       expect(service.replaceEvent).toHaveBeenCalledWith(1, mockEvent);
       expect(result).toEqual(mockEvent);
+    });
+
+    it("should throw a NotFoundException if event to replace does not exist", async () => {
+      jest.spyOn(service, "replaceEvent").mockRejectedValueOnce(new NotFoundException());
+      await expect(controller.replaceEvent(999, mockEvent)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -102,6 +113,12 @@ describe("EventController", () => {
       expect(service.modifyEvent).toHaveBeenCalledWith(1, patchData);
       expect(result).toEqual(patchedEvent);
     });
+
+    it("should throw a NotFoundException if event to modify does not exist", async () => {
+      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      jest.spyOn(service, "modifyEvent").mockRejectedValueOnce(new NotFoundException());
+      await expect(controller.modifyEvent(999, patchData)).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe("deleteEvent", () => {
@@ -109,6 +126,11 @@ describe("EventController", () => {
       const result = await controller.deleteEvent(1);
       expect(service.deleteEvent).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
+    });
+
+    it("should throw a NotFoundException if event to delete does not exist", async () => {
+      jest.spyOn(service, "deleteEvent").mockRejectedValueOnce(new NotFoundException());
+      await expect(controller.deleteEvent(999)).rejects.toThrow(NotFoundException);
     });
   });
 

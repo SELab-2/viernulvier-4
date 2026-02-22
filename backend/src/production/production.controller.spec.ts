@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "./production.service";
 import type { Production, UpdateProduction } from "@repo/common";
+import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -84,6 +85,14 @@ describe("ProductionController", () => {
       expect(result.id).toBe(2);
       expect(service.getProductionById).toHaveBeenCalledWith(2);
     });
+
+    it("should throw a NotFoundException if the production does not exist", async () => {
+      // Simulate the service not finding the ID in the database
+      jest.spyOn(service, "getProductionById").mockRejectedValueOnce(new NotFoundException("Production not found"));
+    
+      // Verify the controller passes the exact same exception up
+      await expect(controller.getById(999)).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe("replaceProduction", () => {
@@ -91,6 +100,12 @@ describe("ProductionController", () => {
       const result = await controller.replaceProduction(1, mockProduction);
       expect(service.replaceProduction).toHaveBeenCalledWith(1, mockProduction);
       expect(result).toEqual(mockProduction);
+    });
+
+    it("should throw a NotFoundException if trying to replace a non-existent production", async () => {
+      jest.spyOn(service, "replaceProduction").mockRejectedValueOnce(new NotFoundException("Production not found"));
+    
+      await expect(controller.replaceProduction(999, mockProduction)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -105,6 +120,14 @@ describe("ProductionController", () => {
       expect(service.modifyProduction).toHaveBeenCalledWith(1, patchData);
       expect(result).toEqual(patchedProduction);
     });
+
+    it("should throw a NotFoundException if trying to modify a non-existent production", async () => {
+      const patchData: UpdateProduction = { titel: "A New Title" };
+      
+      jest.spyOn(service, "modifyProduction").mockRejectedValueOnce(new NotFoundException("Production not found"));
+    
+      await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe("deleteProduction", () => {
@@ -112,6 +135,12 @@ describe("ProductionController", () => {
       const result = await controller.deleteProduction(1);
       expect(service.deleteProduction).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
+    });
+
+    it("should throw a NotFoundException if trying to delete a non-existent production", async () => {
+      jest.spyOn(service, "deleteProduction").mockRejectedValueOnce(new NotFoundException("Production not found"));
+    
+      await expect(controller.deleteProduction(999)).rejects.toThrow(NotFoundException);
     });
   });
 
