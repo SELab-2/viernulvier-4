@@ -4,7 +4,7 @@ import { AppService } from "./app.service";
 import { ProductionModule } from "./production/production.module";
 import { EventModule } from "./event/event.module";
 import { ConfigModule } from "@nestjs/config";
-import { TagsModule } from './tags/tags.module';
+import { TagModule } from './tag/tag.module';
 
 
 @Module({
@@ -15,7 +15,7 @@ import { TagsModule } from './tags/tags.module';
     }),
     ProductionModule,
     EventModule,
-    TagsModule,
+    TagModule,
   ],
   controllers: [AppController],
   providers: [AppService],

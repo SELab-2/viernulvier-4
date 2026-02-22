@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTag, Tag } from "@repo/common";
+import { CreateTag, UpdateTag, Tag } from "@repo/common";
 
 @Injectable()
 export class TagDatabaseService {
@@ -36,7 +36,7 @@ export class TagDatabaseService {
     const result = await this.db.query(query, [production_id]);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new Error("No tags found for this production");
     }
     return result;
   }
@@ -69,6 +69,32 @@ export class TagDatabaseService {
     }
 
     return result[0];
+  }
+
+  async getAllTags(): Promise<Tag[]> {
+    const query = `SELECT * FROM tags`;
+
+    const result = await this.db.query<Tag>(query);
+
+    return result;
+  }
+
+  async updateTag(id: number, tag: UpdateTag): Promise<Tag> {
+    if (!tag.tag) {
+      throw new BadRequestException("Missing required fields: tag");
+    }
+    const query = `
+        UPDATE tags
+        SET tag = $1
+        WHERE id = $2
+        RETURNING *;
+      `;
+      const params = [tag.tag, id];
+      const result = await this.db.query(query, params);
+      if (result.length === 0) {
+        throw new Error("Failed to update tag");
+      }
+      return result[0];
   }
 
   /**
