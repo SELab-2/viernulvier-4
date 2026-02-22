@@ -6,9 +6,7 @@ CREATE TABLE productions
     description2 TEXT,
     genre        TEXT,
     id           SERIAL PRIMARY KEY,
-    planning_id  INT,
-    blog_titel   TEXT,
-    blog_text    TEXT
+    planning_id  INT
 );
 
 CREATE TABLE events
@@ -19,6 +17,61 @@ CREATE TABLE events
     price         NUMERIC(5, 2),
     hall          TEXT,
     production_id INT  NOT NULL,
+    CONSTRAINT fk_production
+        FOREIGN KEY (production_id)
+            REFERENCES productions (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE blogs
+(
+    id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    titel       TEXT NOT NULL,
+    description TEXT NOT NULL
+);
+
+CREATE TABLE production_blogs
+(
+    production_id INT NOT NULL,
+    blog_id       INT NOT NULL,
+
+    PRIMARY KEY (production_id, blog_id),
+
+    CONSTRAINT fk_production
+        FOREIGN KEY (production_id)
+            REFERENCES productions (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_blog
+        FOREIGN KEY (blog_id)
+            REFERENCES blogs (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE event_blogs
+(
+    event_id INT NOT NULL,
+    blog_id  INT NOT NULL,
+
+    PRIMARY KEY (event_id, blog_id),
+
+    CONSTRAINT fk_event
+        FOREIGN KEY (event_id)
+            REFERENCES events (id)
+            ON DELETE CASCADE,
+
+    CONSTRAINT fk_blog
+        FOREIGN KEY (blog_id)
+            REFERENCES blogs (id)
+            ON DELETE CASCADE
+);
+
+CREATE TABLE tags
+(
+    id            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    production_id INT  NOT NULL,
+    tag           TEXT NOT NULL,
+
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
@@ -40,3 +93,45 @@ INSERT INTO events (starttime, endtime, hall, production_id, price)
 VALUES ('2026-02-20', '2026-02-22', 'Main Hall', 1, 5),
        ('2026-02-23', '2026-02-25', 'Side Hall', 2, 7.50),
        ('2026-02-26', '2026-02-27', 'Main Hall', 3, 10);
+
+INSERT INTO blogs (titel, description)
+VALUES ('Behind the Scenes of Hamlet',
+        'Discover how our actors prepared for Hamlet, including rehearsals, costume design, and stage setup.'),
+
+       ('New Season Announcement',
+        'We are excited to announce our new theatre season featuring classics and modern productions.'),
+
+       ('Interview with the Director',
+        'An exclusive interview with our director about their vision and creative process.'),
+
+       ('Stage Design Insights',
+        'Learn how our stage designers transform ideas into immersive environments.'),
+
+       ('Opening Night Highlights',
+        'A recap of our opening night, including audience reactions and memorable moments.');
+
+INSERT INTO production_blogs (production_id, blog_id)
+VALUES (1, 1),
+       (1, 2),
+       (2, 3);
+
+INSERT INTO event_blogs (event_id, blog_id)
+VALUES (2, 1);
+
+INSERT INTO tags (production_id, tag)
+VALUES (1, 'Drama'),
+       (1, 'Classic'),
+       (2, 'Comedy'),
+       (2, 'Family'),
+       (3, 'Musical');
+
+
+-- remove all mock data:
+TRUNCATE TABLE
+    event_blogs,
+    production_blogs,
+    tags,
+    events,
+    blogs,
+    productions
+    RESTART IDENTITY CASCADE;

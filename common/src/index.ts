@@ -1,17 +1,29 @@
 import { z } from "zod";
 import {
-  Event,
+  Blog,
+  BlogSchema,
+  CreateBlog,
+  CreateBlogSchema,
   CreateEvent,
-  UpdateEvent,
-  EventSchema,
   CreateEventSchema,
-  UpdateEventSchema,
-  Production,
-  ProductionSchema,
   CreateProduction,
   CreateProductionSchema,
+  CreateTag,
+  CreateTagSchema,
+  Event,
+  EventSchema,
+  Production,
+  ProductionSchema,
+  Tag,
+  TagSchema,
+  UpdateBlog,
+  UpdateBlogSchema,
+  UpdateEvent,
+  UpdateEventSchema,
   UpdateProduction,
   UpdateProductionSchema,
+  UpdateTag,
+  UpdateTagSchema,
 } from "./database_objects";
 
 // Een voorbeeld van een globaal schema...
@@ -27,6 +39,25 @@ export {
   EventSchema,
   CreateEventSchema,
   UpdateEventSchema,
+  BlogSchema,
+  UpdateBlogSchema,
+  CreateBlogSchema,
+  TagSchema,
+  CreateTagSchema,
+  UpdateTagSchema,
 };
-export type { Production, CreateProduction, UpdateProduction, Event, CreateEvent, UpdateEvent };
+export type {
+  Production,
+  CreateProduction,
+  UpdateProduction,
+  Event,
+  CreateEvent,
+  UpdateEvent,
+  Tag,
+  CreateTag,
+  UpdateTag,
+  Blog,
+  CreateBlog,
+  UpdateBlog,
+};
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

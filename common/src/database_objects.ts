@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-// Production object
+/**
+ * Schemas for productions.
+ */
+
+// TODO add _EN and _NL fields in db for titel, ondertitel and descs?
 export const ProductionSchema = z.object({
   id: z.number(),
   titel: z.string(),
@@ -9,10 +13,9 @@ export const ProductionSchema = z.object({
   description2: z.string().nullable(),
   genre: z.string(),
   planning_id: z.number().nullable(),
-  blog_titel: z.string().nullable(),
-  blog_text: z.string().nullable(),
 });
-export const CreateProductionSchema = ProductionSchema.omit({id: true});
+
+export const CreateProductionSchema = ProductionSchema.omit({ id: true });
 export const UpdateProductionSchema = ProductionSchema.partial();
 
 /**
@@ -26,13 +29,48 @@ export const EventSchema = z.object({
   production_id: z.number(),
   price: z.number(),
 });
-export const CreateEventSchema = EventSchema.omit({id: true});
+
+export const CreateEventSchema = EventSchema.omit({ id: true });
 export const UpdateEventSchema = EventSchema.partial();
+
+/**
+ * Schemas for blogs.
+ */
+// note: to get the blog from a prod or the other way around, use the api service with the id.
+export const BlogSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  description: z.string(),
+});
+
+export const CreateBlogSchema = BlogSchema.omit({ id: true });
+export const UpdateBlogSchema = BlogSchema.partial();
+
+/**
+ * Schemas for tags.
+ */
+export const TagSchema = z.object({
+  id: z.number(),
+  tag: z.string(),
+  production_id: z.number(),
+});
+
+export const CreateTagSchema = TagSchema.omit({ id: true });
+export const UpdateTagSchema = TagSchema.partial();
 
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
 export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
+
 export type Event = z.infer<typeof EventSchema>;
 export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
+
+export type Blog = z.infer<typeof BlogSchema>;
+export type CreateBlog = z.infer<typeof CreateBlogSchema>;
+export type UpdateBlog = z.infer<typeof UpdateBlogSchema>;
+
+export type Tag = z.infer<typeof TagSchema>;
+export type CreateTag = z.infer<typeof CreateTagSchema>;
+export type UpdateTag = z.infer<typeof UpdateTagSchema>;

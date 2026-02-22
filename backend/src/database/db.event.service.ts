@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Event } from "@repo/common";
+import { CreateEvent, Event, UpdateEvent } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -12,7 +12,6 @@ export class EventDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The Event if there is one.
    */
-  // TODO: return multiple events with same production id
   async getEventById(id: number): Promise<Event> {
     const events: Event[] = await this.getEvents({ id: id });
     if (events.length === 0)
@@ -21,14 +20,21 @@ export class EventDatabaseService {
     return events[0]; // There should be an Event in here if the length is not 0.
   }
 
-  // generic GET function (used only as intermediary end-point)
-  // TODO add price filtering?
+  /**
+   * Generic get function for events.
+   * @param filters gives the freedom to define the filters of the search you want.
+   * All filters are filtered by equals.
+   * Not all filters need to be defined, only the ones you want to use.
+   * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
+   * @returns All events for the given filters.
+   */
   async getEvents(
     filters: Partial<{
       genre: string;
       date: string;
       hall: string;
       id: number;
+      p_id: number;
     }>,
   ): Promise<Event[]> {
     const conditions: string[] = [];
@@ -43,7 +49,7 @@ export class EventDatabaseService {
     }
 
     // Filter by specific date (matches starttime or endtime)
-    // can be split between start and end. TODO -> discuss this
+    // can be split between start and end.
     if (filters.date) {
       conditions.push(`DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i}`);
       values.push(filters.date);
@@ -61,6 +67,13 @@ export class EventDatabaseService {
     if (filters.id) {
       conditions.push(`p.id = $${i}`);
       values.push(filters.id);
+      i++;
+    }
+
+    // Filter by p_id
+    if (filters.p_id) {
+      conditions.push(`p.production_id = $${i}`);
+      values.push(filters.p_id);
       i++;
     }
 
@@ -82,8 +95,12 @@ export class EventDatabaseService {
     return this.db.query<Event>(query, values);
   }
 
-  // generic PUT function (used only as intermediary end-point)
-  async createEvent(event: Omit<Event, "id">): Promise<Event> {
+  /**
+   * Create event function, creates an event in the database.
+   * @param event must be of the type "CreateEvent" which has all fields defined besides the primary key id.
+   * @returns the added event if it was successful.
+   */
+  async createEvent(event: CreateEvent): Promise<Event> {
     // Validate input, throw error if not all
     if (!event.starttime || !event.hall || !event.production_id) {
       throw new BadRequestException("Missing required fields");
@@ -111,16 +128,93 @@ export class EventDatabaseService {
     return result[0];
   }
 
-  // generic POST function
-  async updateEvent(event: Omit<Event, "id">): Promise<Event> {
-    // TODO this needed?
-    return new Promise(async (resolve, reject) => {});
+  /**
+   * Update function for events. Updates the event in the database.
+   * @param event must be of the type "UpdateEvent", gives the freedom to define only what needs to be updated.
+   * The id field in the event MUST be defined.
+   * @returns the updated event if successful.
+   */
+  async updateEvent(event: UpdateEvent): Promise<Event> {
+    if (!event.id) {
+      throw new Error("Event id is required for update");
+    }
+
+    const fields: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    if (event.starttime !== undefined) {
+      fields.push(`starttime = $${index++}`);
+      values.push(event.starttime);
+    }
+
+    if (event.endtime !== undefined) {
+      fields.push(`endtime = $${index++}`);
+      values.push(event.endtime);
+    }
+
+    if (event.price !== undefined) {
+      fields.push(`price = $${index++}`);
+      values.push(event.price);
+    }
+
+    if (event.hall !== undefined) {
+      fields.push(`hall = $${index++}`);
+      values.push(event.hall);
+    }
+
+    if (event.production_id !== undefined) {
+      fields.push(`production_id = $${index++}`);
+      values.push(event.production_id);
+    }
+
+    if (fields.length === 0) {
+      throw new Error("No fields provided to update");
+    }
+
+    values.push(event.id);
+
+    // ignore error on "RETURNING", query is correct.
+    const query = `
+    UPDATE events
+    SET ${fields.join(", ")}
+    WHERE id = $${index}
+    RETURNING *;
+    `;
+
+    const result = await this.db.query(query, values);
+
+    if (result.length === 0) {
+      throw new Error("Event not found");
+    }
+
+    return result[0]; // should have the updated event only.
   }
 
-  // generic DELETE function
-  async deleteEvent(id: number, date: string): Promise<Event> {
-    // TODO this needed?
-    // + wouldnt work on id would need id and date?
-    return new Promise(async (resolve, reject) => {});
+  /**
+   * Delete function for deleting events from the database.
+   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteEvent(id: number): Promise<void> {
+    // note we delete on id not p_id as that would affect more events.
+    // to delete all events using p_id -> use deleteEventsWithPID()
+    const query = `DELETE FROM events WHERE id = $1`;
+
+    await this.db.query(query, [id]);
+  }
+
+  /**
+   * Delete function for deleting all events from the database given a certain p_id.
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteEventsWithPID(production_id: number): Promise<void> {
+    // note: here we delete using the production id so possibly multiple events are affected!
+    const query = `DELETE FROM events WHERE production_id = $1`;
+
+    await this.db.query(query, [production_id]);
   }
 }

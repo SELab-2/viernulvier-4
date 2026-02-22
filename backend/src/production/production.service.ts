@@ -38,10 +38,7 @@ export class ProductionService {
     if (id !== production.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    const updatedProduction: Production =
-      await this.productionDBService.updateProduction(id, production);
-
-    return updatedProduction;
+    return await this.productionDBService.updateProduction(id, production);
   }
 
   /**
@@ -63,10 +60,10 @@ export class ProductionService {
       id,
     };
 
-    const updatedProduction: Production =
-      await this.productionDBService.updateProduction(id, mergedProduction);
-
-    return updatedProduction;
+    return await this.productionDBService.updateProduction(
+      id,
+      mergedProduction,
+    );
   }
 
   /**
@@ -84,7 +81,7 @@ export class ProductionService {
    * @param newProduction The new Production data we want to add
    * @returns The newly created Production.
    */
-  async createProduction(newProduction: CreateProduction) : Promise<Production> {
-    return await this.productionDBService.createProduction(newProduction)
+  async createProduction(newProduction: CreateProduction): Promise<Production> {
+    return await this.productionDBService.createProduction(newProduction);
   }
 }

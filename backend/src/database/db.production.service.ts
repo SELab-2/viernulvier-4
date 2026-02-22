@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException, } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Production, ProductionSchema } from "@repo/common";
+import { CreateProduction, Production, ProductionSchema } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -90,9 +86,7 @@ export class ProductionDatabaseService {
         p.description1,
         p.description2,
         p.genre,
-        p.planning_id,
-        p.blog_titel,
-        p.blog_text
+        p.planning_id
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id 
           ${whereClause}
@@ -103,7 +97,7 @@ export class ProductionDatabaseService {
   }
 
   // generic PUT function (used only as intermediary end-point)
-  async createProduction(production: Partial<Production>): Promise<Production> {
+  async createProduction(production: CreateProduction): Promise<Production> {
     if (!production.titel || !production.ondertitel || !production.genre) {
       throw new BadRequestException("Missing required fields");
     }
@@ -146,8 +140,6 @@ export class ProductionDatabaseService {
         production.description2,
         production.genre,
         production.planning_id ?? null,
-        production.blog_titel ?? null,
-        production.blog_text ?? null,
       ];
     }
     // if not, fallback to db autogenerate
@@ -183,8 +175,6 @@ export class ProductionDatabaseService {
         production.description2,
         production.genre,
         production.planning_id ?? null,
-        production.blog_titel ?? null,
-        production.blog_text ?? null,
       ];
     }
 
@@ -220,10 +210,8 @@ export class ProductionDatabaseService {
         description1 = $3,
         description2 = $4,
         genre = $5,
-        planning_id = $6,
-        blog_titel = $7,
-        blog_text = $8
-      WHERE id = $9
+        planning_id = $6
+      WHERE id = $7
       RETURNING *
     `;
 
@@ -234,8 +222,6 @@ export class ProductionDatabaseService {
       production.description2,
       production.genre,
       production.planning_id,
-      production.blog_titel,
-      production.blog_text,
       id,
     ];
 

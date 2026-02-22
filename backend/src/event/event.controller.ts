@@ -5,14 +5,19 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch, Post,
+  Patch,
+  Post,
   Put,
   UsePipes,
 } from "@nestjs/common";
 import { EventService } from "./event.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
-import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
+import type { CreateEvent, Event, UpdateEvent } from "@repo/common";
+import {
+  CreateEventSchema,
+  EventSchema,
+  UpdateEventSchema,
+} from "@repo/common";
 
 @Controller("event")
 export class EventController {
@@ -32,7 +37,6 @@ export class EventController {
    * @param id ID in the URL of the request.
    * @returns The Event object with corresponding ID
    */
-  // TODO: return multiple events with same production id
   @Get(":id")
   async getEventById(@Param("id", ParseIntPipe) id: number): Promise<Event> {
     return await this.eventService.getEventById(id);
@@ -85,9 +89,7 @@ export class EventController {
    */
   @Post()
   @UsePipes(new ZodValidationPipe(CreateEventSchema))
-  async createProduction(
-    @Body() newEvent: CreateEvent,
-  ): Promise<Event> {
+  async createProduction(@Body() newEvent: CreateEvent): Promise<Event> {
     return this.eventService.createEvent(newEvent);
   }
 }

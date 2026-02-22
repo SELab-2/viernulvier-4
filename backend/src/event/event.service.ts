@@ -19,7 +19,6 @@ export class EventService {
    * @param id ID of the event as it was in the URL.
    * @returns The Event object with corresponding ID
    */
-  // TODO: return multiple events with same production id
   async getEventById(id: number): Promise<Event> {
     return await this.eventDBService.getEventById(id);
   }
@@ -34,9 +33,7 @@ export class EventService {
     if (id !== event.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    const updatedEvent: Event = await this.eventDBService.updateEvent(event);
-
-    return updatedEvent;
+    return await this.eventDBService.updateEvent(event);
   }
 
   /**
@@ -54,10 +51,7 @@ export class EventService {
       id, // Force ID.
     };
 
-    const updatedEvent: Event =
-      await this.eventDBService.updateEvent(mergedEvent);
-
-    return updatedEvent;
+    return await this.eventDBService.updateEvent(mergedEvent);
   }
 
   /**
@@ -66,8 +60,7 @@ export class EventService {
    * @returns Nothing.
    */
   async deleteEvent(id: number): Promise<void> {
-    // TODO: Why do we need the date here??
-    await this.eventDBService.deleteEvent(id, "");
+    await this.eventDBService.deleteEvent(id);
     return;
   }
 
@@ -76,7 +69,7 @@ export class EventService {
    * @param newEvent The new Event data we want to add
    * @returns The newly created Event.
    */
-  async createEvent(newEvent: CreateEvent) : Promise<Event> {
-    return await this.eventDBService.createEvent(newEvent)
+  async createEvent(newEvent: CreateEvent): Promise<Event> {
+    return await this.eventDBService.createEvent(newEvent);
   }
 }
