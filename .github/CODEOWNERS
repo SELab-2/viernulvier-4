@@ -2,8 +2,8 @@
 # CODEOWNERS configuratie
 # =========================================================================
 
-# Standard return
-* @MatthieuDC @Alikznollet @MrLegitFTW @landgeet @Robindr145 @Nowak-Dominik @jillvanham @ddndauw
+# 1. Common
+/common/ @Alikznollet @MrLegitFTW @Nowak-Dominik
 
 # 1. Back-end verantwoordelijken (Matthieu, Alex, Sebastien)
 /backend/ @MatthieuDC @Alikznollet @MrLegitFTW

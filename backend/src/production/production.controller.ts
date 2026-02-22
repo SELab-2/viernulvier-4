@@ -44,10 +44,9 @@ export class ProductionController {
    * @returns The newly updated Production.
    */
   @Put(":id")
-  @UsePipes(new ZodValidationPipe(ProductionSchema))
   async replaceProduction(
     @Param("id", ParseIntPipe) id: number,
-    @Body() production: Production,
+    @Body(new ZodValidationPipe(ProductionSchema)) production: Production,
   ): Promise<Production> {
     return await this.productionService.replaceProduction(id, production);
   }
@@ -59,10 +58,9 @@ export class ProductionController {
    * @returns The newly updated Production.
    */
   @Patch(":id")
-  @UsePipes(new ZodValidationPipe(UpdateProductionSchema))
   async modifyProduction(
     @Param("id", ParseIntPipe) id: number,
-    @Body() patchData: UpdateProduction,
+    @Body(new ZodValidationPipe(UpdateProductionSchema)) patchData: UpdateProduction,
   ): Promise<Production> {
     return await this.productionService.modifyProduction(id, patchData);
   }
