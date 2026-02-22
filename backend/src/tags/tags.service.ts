@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { DbService } from 'src/database/db.service';
+import { DbService } from '../database/db.service';
 
 @Injectable()
 export class TagsService {
