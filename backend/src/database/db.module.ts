@@ -14,6 +14,7 @@ import { BlogDatabaseService } from "./db.blog.service";
   ],
   controllers: [],
   exports: [
+    DbService,
     ProductionDatabaseService,
     EventDatabaseService,
     BlogDatabaseService,
