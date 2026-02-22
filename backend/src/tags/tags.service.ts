@@ -46,6 +46,7 @@ export class TagsService {
       }
       return result[0];
     } catch (error) {
+      if (error instanceof NotFoundException) throw error;
       console.error('Error retrieving tag with id:', id, error);
       throw new InternalServerErrorException('Failed to retrieve tag from database.');
     }
