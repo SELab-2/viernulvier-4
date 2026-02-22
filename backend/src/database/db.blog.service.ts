@@ -109,8 +109,6 @@ export class BlogDatabaseService {
    * @returns nothing.
    */
   async deleteBlog(id: number): Promise<void> {
-    // note we delete on id not p_id as that would affect more events.
-    // to delete all events using p_id -> use deleteEventsWithPID()
     const query = `DELETE FROM blogs WHERE id = $1`;
 
     await this.db.query(query, [id]);

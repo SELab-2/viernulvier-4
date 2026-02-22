@@ -78,8 +78,6 @@ export class TagDatabaseService {
    * @returns nothing.
    */
   async deleteTag(id: number): Promise<void> {
-    // note we delete on id not p_id as that would affect more events.
-    // to delete all events using p_id -> use deleteEventsWithPID()
     const query = `DELETE FROM tags WHERE id = $1`;
 
     await this.db.query(query, [id]);
@@ -93,8 +91,6 @@ export class TagDatabaseService {
    * @returns nothing.
    */
   async deleteTagsWithProductionID(production_id: number): Promise<void> {
-    // note we delete on id not p_id as that would affect more events.
-    // to delete all events using p_id -> use deleteEventsWithPID()
     const query = `DELETE FROM tags WHERE production_id = $1`;
 
     await this.db.query(query, [production_id]);
