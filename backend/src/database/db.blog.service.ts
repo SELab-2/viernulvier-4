@@ -24,6 +24,21 @@ export class BlogDatabaseService {
   }
 
   /**
+   * Get a single Blog by their ID.
+   * @returns All blogs.
+   */
+  async getBlogs(): Promise<Blog[]> {
+    const query = `SELECT * FROM blogs`;
+
+    const result = await this.db.query(query);
+
+    if (result.length === 0) {
+      throw new Error("no blogs found");
+    }
+    return result;
+  }
+
+  /**
    * Create blog function, creates a blog in the database.
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
    * @returns the added blog if it was successful.
