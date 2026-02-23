@@ -129,51 +129,5 @@ export class BlogDatabaseService {
     await this.db.query(query, [id]);
   }
 
-  /**
-   * Link an existing blog to an event.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async linkBlogWithEventID(
-    blog_id: number,
-    event_id: number,
-  ): Promise<boolean> {
-    const query = `
-      INSERT INTO event_blogs (event_id, blog_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    const result = await this.db.query(query, [event_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
-  }
-
-  /**
-   * Link an existing blog to a production.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async linkBlogWithProductionID(
-    blog_id: number,
-    production_id: number,
-  ): Promise<boolean> {
-    const query = `
-      INSERT INTO production_blogs (production_id, blog_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    const result = await this.db.query(query, [production_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
-  }
-
   // insert extra functions here if desired.
 }

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTag, Tag } from "@repo/common";
+import { CreateTag, Production, Tag } from "@repo/common";
 
 @Injectable()
 export class TagDatabaseService {
@@ -23,6 +23,22 @@ export class TagDatabaseService {
       throw new Error("Tag not found");
     }
     return result[0];
+  }
+
+  /**
+   * Get all productions listed under a given tag.
+   * @param tag the tag we want to get the productions connected to.
+   * @returns a list of productions that fall under the given tag.
+   */
+  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+    const query = `
+    SELECT p.*
+    FROM productions p
+    JOIN production_tag pt ON p.id = pt.production_id
+    WHERE pt.tag_id = $1
+  `;
+
+    return await this.db.query(query, [tag.id]);
   }
 
   /**
