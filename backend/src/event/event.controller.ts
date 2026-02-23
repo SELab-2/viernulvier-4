@@ -95,4 +95,12 @@ export class EventController {
   async getEventBlogs(@Param("id", ParseIntPipe) id: number): Promise<Blog[]> {
     return [];
   }
+
+  @Put(":id/blog/:id2")
+  async linkBlogToEvent(
+    @Param("id", ParseIntPipe) event_id: number,
+    @Param("id2", ParseIntPipe) blog_id: number,
+  ): Promise<void> {
+    
+  }
 }

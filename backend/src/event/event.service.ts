@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import type { CreateEvent, Event, UpdateEvent } from "@repo/common";
+import type { Blog, CreateEvent, Event, UpdateEvent } from "@repo/common";
 import { EventDatabaseService } from "../database/db.event.service";
 
 @Injectable()
@@ -75,7 +75,11 @@ export class EventService {
 
   // -- Blogs -- //
 
-  async getEventBlogs(eventId: number): Promise<Event[]> {
+  async getEventBlogs(eventId: number): Promise<Blog[]> {
     return [];
+  }
+
+  async linkBlogToEvent(eventId: number, blogId: number): Promise<Blog> {
+    return null;
   }
 }
