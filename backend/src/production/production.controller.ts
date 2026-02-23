@@ -12,7 +12,7 @@ import {
 import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
+import type { Production, UpdateProduction, CreateProduction, Blog } from "@repo/common";
 
 @Controller("production")
 export class ProductionController {
@@ -86,5 +86,45 @@ export class ProductionController {
     @Body() newProduction: CreateProduction,
   ): Promise<Production> {
     return this.productionService.createProduction(newProduction);
+  }
+
+  // -- BLOGS -- //
+
+  /**
+   * Responds to a GET to "/:id/blog".
+   * @param id The id of the Production.
+   * @returns A list of all Blog objects linked to this Production.
+   */
+  @Get(":id/blog")
+  async getProductionBlogs(@Param("id", ParseIntPipe) id: number): Promise<Blog[]> {
+    return await this.productionService.getProductionBlogs(id);
+  }
+
+  /**
+   * Responds to a PUT to "/:id/blog/:id2"
+   * @param productionId ID of the Production.
+   * @param blogId ID of the Blog.
+   * @returns The newly linked Blog object.
+   */
+  @Put(":id/blog/:id2")
+  async linkBlogToProduction(
+    @Param("id", ParseIntPipe) productionId: number,
+    @Param("id2", ParseIntPipe) blogId: number,
+  ): Promise<Blog> {
+    return await this.productionService.linkBlogToProduction(productionId, blogId)
+  }
+
+  /**
+   * Responds to a DELETE to "/:id/blog/:id2"
+   * @param productionId ID of the Production.
+   * @param blogId ID of the Blog.
+   * @returns The Production we just unlinked the Blog from.
+   */
+  @Delete(":id/blog/:id2")
+  async unlinkBlogFromEvent(
+    @Param("id", ParseIntPipe) productionId: number,
+    @Param("id2", ParseIntPipe) blogId: number
+  ): Promise<Production> {
+    return await this.productionService.unlinkBlogFromProduction(productionId, blogId);
   }
 }

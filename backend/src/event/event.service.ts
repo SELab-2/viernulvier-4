@@ -80,12 +80,12 @@ export class EventService {
   // -- Blogs -- //
 
   /**
-   * Queries the 
-   * @param eventId 
-   * @returns 
+   * Returns all Blog objects linked to an Event.
+   * @param eventId The ID of the Event.
+   * @returns A list of Blogs.
    */
   async getEventBlogs(eventId: number): Promise<Blog[]> {
-    return []; // TODO: Replace with DB query;
+    return await this.eventDBService.getBlogsOfEvent(eventId);
   }
 
   /**

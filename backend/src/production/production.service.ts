@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateProduction, Production, UpdateProduction } from "@repo/common";
+import { Blog, CreateProduction, Production, UpdateProduction } from "@repo/common";
 import { ProductionDatabaseService } from "../database/db.production.service";
+import { BlogDatabaseService } from "src/database/db.blog.service";
 
 @Injectable()
 export class ProductionService {
   constructor(
     private readonly productionDBService: ProductionDatabaseService,
+    private readonly blogDbService: BlogDatabaseService
   ) {}
 
   /**
@@ -81,4 +83,37 @@ export class ProductionService {
   async createProduction(newProduction: CreateProduction): Promise<Production> {
     return await this.productionDBService.createProduction(newProduction);
   }
+
+  // -- Blogs -- //
+
+  /**
+   * Returns all Blog objects linked to a Production.
+   * @param productionId The ID of the production. 
+   * @returns A list of Blogs.
+   */
+  async getProductionBlogs(productionId: number): Promise<Blog[]> {
+    return await this.productionDBService.getBlogsOfProduction(productionId);
+  }
+
+  /**
+   * Links a Blog to a Production.
+   * @param productionId The ID of the Production in question.
+   * @param blogId The ID of the Blog in question.
+   * @returns The Blog that was just linked to the Production.
+   */
+  async linkBlogToProduction(productionId: number, blogId: number): Promise<Blog> {
+    await this.productionDBService.linkBlogWithProductionID(blogId, productionId);
+    return await this.blogDbService.getBlogById(blogId);
+  }
+
+  /**
+   * Unlinks a Blog from a Production.
+   * @param productionId The ID of the Production in question.
+   * @param blogId The ID of the Blog in question.
+   * @returns The Production the Blog was unlinked from.
+   */
+  async unlinkBlogFromProduction(productionId: number, blogId: number): Promise<Production> {
+    await this.productionDBService.deleteBlogFromProduction(productionId, blogId);
+    return await this.productionDBService.getProductionById(productionId);
+  } 
 }
