@@ -38,6 +38,22 @@ export class ProductionDatabaseService {
   }
 
   /**
+   * Get all productions listed under a given tag.
+   * @param tag the tag we want to get the productions connected to.
+   * @returns a list of productions that fall under the given tag.
+   */
+  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+    const query = `
+    SELECT p.*
+    FROM productions p
+    JOIN production_tag pt ON p.id = pt.production_id
+    WHERE pt.tag_id = $1
+  `;
+
+    return await this.db.query(query, [tag.id]);
+  }
+
+  /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals.
@@ -247,5 +263,45 @@ export class ProductionDatabaseService {
     const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
 
     await this.db.query<Production>(query, [id]);
+  }
+
+  /**
+   * Delete function for deleting blogs from the database.
+   * This function deletes all blogs associated with a given production_id
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
+    const query = `
+      DELETE FROM blogs
+        USING production_blogs
+      WHERE blogs.id = production_blogs.blog_id
+        AND production_blogs.production_id = $1
+    `;
+
+    await this.db.query(query, [production_id]);
+  }
+
+  /**
+   * Delete function for deleting blogs from the database.
+   * This function deletes a single blog-LINK associated with a given prod_id
+   * note: it does not delete the blog itself only from being linked to the given production.
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteBlogFromProduction(
+    production_id: number,
+    blog_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM production_blogs
+      WHERE production_blogs.blog_id = $1
+        AND production_blogs.production_id = $2
+    `;
+
+    await this.db.query(query, [blog_id, production_id]);
   }
 }
