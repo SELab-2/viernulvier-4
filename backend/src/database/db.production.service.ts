@@ -39,10 +39,10 @@ export class ProductionDatabaseService {
 
   /**
    * Get all blogs listed under a given production.
-   * @param production the production we want all blogs of.
+   * @param id the id of the production we want all blogs of.
    * @returns a list of blogs connected to the given production.
    */
-  async getBlogsOfProduction(production: Production): Promise<Blog[]> {
+  async getBlogsOfProduction(id: number): Promise<Blog[]> {
     const query = `
     SELECT b.*
     FROM blogs b
@@ -50,7 +50,7 @@ export class ProductionDatabaseService {
     WHERE pb.production_id = $1
   `;
 
-    return await this.db.query(query, [production.id]);
+    return await this.db.query(query, [id]);
   }
 
   /**

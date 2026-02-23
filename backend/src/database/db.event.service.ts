@@ -22,10 +22,10 @@ export class EventDatabaseService {
 
   /**
    * Get all blogs listed under a given event.
-   * @param event the event we want all blogs of.
+   * @param id the id of an event you want the blogs of.
    * @returns a list of blogs connected to the given event.
    */
-  async getBlogsOfEvent(event: Event): Promise<Blog[]> {
+  async getBlogsOfEvent(id: number): Promise<Blog[]> {
     const query = `
     SELECT b.*
     FROM blogs b
@@ -33,7 +33,7 @@ export class EventDatabaseService {
     WHERE eb.event_id = $1
   `;
 
-    return await this.db.query(query, [event.id]);
+    return await this.db.query(query, [id]);
   }
 
   /**
