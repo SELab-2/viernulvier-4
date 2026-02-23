@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateProduction, Production, ProductionSchema, Tag, UpdateProduction, } from "@repo/common";
+import { Blog, CreateProduction, Production, ProductionSchema, Tag, UpdateProduction, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -32,6 +32,22 @@ export class ProductionDatabaseService {
     FROM tags t
     JOIN production_tag pt ON t.id = pt.tag_id
     WHERE pt.production_id = $1
+  `;
+
+    return await this.db.query(query, [production.id]);
+  }
+
+  /**
+   * Get all blogs listed under a given production.
+   * @param production the production we want all blogs of.
+   * @returns a list of blogs connected to the given production.
+   */
+  async getBlogsOfProduction(production: Production): Promise<Blog[]> {
+    const query = `
+    SELECT b.*
+    FROM blogs b
+    JOIN production_blogs pb ON b.id = pb.blog_id
+    WHERE pb.production_id = $1
   `;
 
     return await this.db.query(query, [production.id]);

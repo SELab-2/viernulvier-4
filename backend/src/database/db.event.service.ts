@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEvent, Event, UpdateEvent } from "@repo/common";
+import { Blog, CreateEvent, Event, UpdateEvent } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -18,6 +18,22 @@ export class EventDatabaseService {
       throw new BadRequestException(`No Event exists for provided ID(${id})`);
 
     return events[0]; // There should be an Event in here if the length is not 0.
+  }
+
+  /**
+   * Get all blogs listed under a given event.
+   * @param event the event we want all blogs of.
+   * @returns a list of blogs connected to the given event.
+   */
+  async getBlogsOfEvent(event: Event): Promise<Blog[]> {
+    const query = `
+    SELECT b.*
+    FROM blogs b
+    JOIN event_blogs eb ON b.id = eb.blog_id
+    WHERE eb.event_id = $1
+  `;
+
+    return await this.db.query(query, [event.id]);
   }
 
   /**
