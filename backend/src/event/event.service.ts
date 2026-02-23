@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import type { Blog, CreateEvent, Event, UpdateEvent } from "@repo/common";
 import { EventDatabaseService } from "../database/db.event.service";
+import { BlogDatabaseService } from "src/database/db.blog.service";
 
 @Injectable()
 export class EventService {
-  constructor(private readonly eventDBService: EventDatabaseService) {}
+  constructor(
+    private readonly eventDBService: EventDatabaseService,
+    private readonly blogDBService: BlogDatabaseService
+  ) {}
 
   /**
    * Fetches all Event objects from the DBService
@@ -75,11 +79,34 @@ export class EventService {
 
   // -- Blogs -- //
 
+  /**
+   * Queries the 
+   * @param eventId 
+   * @returns 
+   */
   async getEventBlogs(eventId: number): Promise<Blog[]> {
-    return [];
+    return []; // TODO: Replace with DB query;
   }
 
+  /**
+   * Links a Blog to an Event.
+   * @param eventId The ID of the Event in question.
+   * @param blogId The ID of the Blog in question.
+   * @returns The Blog that was just linked to the Event.
+   */
   async linkBlogToEvent(eventId: number, blogId: number): Promise<Blog> {
-    return null;
+    await this.eventDBService.linkBlogWithEventID(blogId, eventId);
+    return await this.blogDBService.getBlogById(blogId);
   }
+
+  /**
+   * Unlinks a Blog from an Event.
+   * @param eventId The ID of the Event in question.
+   * @param blogId The ID of the Blog in question.
+   * @returns The Event the Blog was unlinked from.
+   */
+  async unlinkBlogFromEvent(eventId: number, blogId: number): Promise<Event> {
+    await this.eventDBService.deleteBlogFromEvent(eventId, blogId);
+    return await this.eventDBService.getEventById(eventId);
+  } 
 }

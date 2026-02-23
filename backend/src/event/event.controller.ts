@@ -91,16 +91,41 @@ export class EventController {
 
   // -- BLOGS -- //
 
+  /**
+   * Responds to a GET to "/:id/blog".
+   * @param id The id of the Event.
+   * @returns A list of all Blog objects linked to this Event.
+   */
   @Get(":id/blog")
   async getEventBlogs(@Param("id", ParseIntPipe) id: number): Promise<Blog[]> {
-    return [];
+    return await this.eventService.getEventBlogs(id);
   }
 
+  /**
+   * Responds to a PUT to "/:id/blog/:id2"
+   * @param eventId ID of the Event.
+   * @param blogId ID of the Blog.
+   * @returns The newly linked Blog object.
+   */
   @Put(":id/blog/:id2")
   async linkBlogToEvent(
-    @Param("id", ParseIntPipe) event_id: number,
-    @Param("id2", ParseIntPipe) blog_id: number,
-  ): Promise<void> {
-    
+    @Param("id", ParseIntPipe) eventId: number,
+    @Param("id2", ParseIntPipe) blogId: number,
+  ): Promise<Blog> {
+    return await this.eventService.linkBlogToEvent(eventId, blogId)
+  }
+
+  /**
+   * Responds to a DELETE to "/:id/blog/:id2"
+   * @param eventId ID of the Event.
+   * @param blogId ID of the Blog.
+   * @returns The Event we just unlinked the Blog from.
+   */
+  @Delete(":id/blog/:id2")
+  async unlinkBlogFromEvent(
+    @Param("id", ParseIntPipe) eventId: number,
+    @Param("id2", ParseIntPipe) blogId: number
+  ): Promise<Event> {
+    return await this.eventService.unlinkBlogFromEvent(eventId, blogId);
   }
 }
