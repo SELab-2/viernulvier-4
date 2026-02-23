@@ -38,6 +38,22 @@ export class ProductionDatabaseService {
   }
 
   /**
+   * Get all productions listed under a given tag.
+   * @param tag the tag we want to get the productions connected to.
+   * @returns a list of productions that fall under the given tag.
+   */
+  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+    const query = `
+    SELECT p.*
+    FROM productions p
+    JOIN production_tag pt ON p.id = pt.production_id
+    WHERE pt.tag_id = $1
+  `;
+
+    return await this.db.query(query, [tag.id]);
+  }
+
+  /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals.

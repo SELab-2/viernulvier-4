@@ -218,4 +218,6 @@ export class EventDatabaseService {
 
     await this.db.query(query, [production_id]);
   }
+
+  // TODO DISTINCT query
 }
