@@ -12,7 +12,7 @@ import {
 import { EventService } from "./event.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
-import type { Event, CreateEvent, UpdateEvent } from "@repo/common";
+import type { Event, CreateEvent, UpdateEvent, Blog } from "@repo/common";
 
 @Controller("event")
 export class EventController {
@@ -87,5 +87,12 @@ export class EventController {
     @Body() newEvent: CreateEvent,
   ): Promise<Event> {
     return this.eventService.createEvent(newEvent);
+  }
+
+  // -- BLOGS -- //
+
+  @Get(":id/blog")
+  async getEventBlogs(@Param("id", ParseIntPipe) id: number): Promise<Blog[]> {
+    return [];
   }
 }

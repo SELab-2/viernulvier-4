@@ -72,4 +72,10 @@ export class EventService {
   async createEvent(newEvent: CreateEvent): Promise<Event> {
     return await this.eventDBService.createEvent(newEvent);
   }
+
+  // -- Blogs -- //
+
+  async getEventBlogs(eventId: number): Promise<Event[]> {
+    return [];
+  }
 }
