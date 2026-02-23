@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateProduction, Production, ProductionSchema, Tag, UpdateProduction, } from "@repo/common";
+import { Blog, CreateProduction, Production, ProductionSchema, Tag, UpdateProduction, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -38,19 +38,19 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * Get all productions listed under a given tag.
-   * @param tag the tag we want to get the productions connected to.
-   * @returns a list of productions that fall under the given tag.
+   * Get all blogs listed under a given production.
+   * @param id the id of the production we want all blogs of.
+   * @returns a list of blogs connected to the given production.
    */
-  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+  async getBlogsOfProduction(id: number): Promise<Blog[]> {
     const query = `
-    SELECT p.*
-    FROM productions p
-    JOIN production_tag pt ON p.id = pt.production_id
-    WHERE pt.tag_id = $1
+    SELECT b.*
+    FROM blogs b
+    JOIN production_blogs pb ON b.id = pb.blog_id
+    WHERE pb.production_id = $1
   `;
 
-    return await this.db.query(query, [tag.id]);
+    return await this.db.query(query, [id]);
   }
 
   /**
@@ -303,5 +303,25 @@ export class ProductionDatabaseService {
     `;
 
     await this.db.query(query, [blog_id, production_id]);
+  }
+
+  /**
+   * Link an existing blog to a production.
+   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async linkBlogWithProductionID(
+    blog_id: number,
+    production_id: number,
+  ): Promise<void> {
+    const query = `
+      INSERT INTO production_blogs (production_id, blog_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+    `;
+
+    await this.db.query(query, [production_id, blog_id]);
   }
 }

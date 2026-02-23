@@ -1,13 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTag, Tag } from "@repo/common";
+import { CreateTag, Production, Tag, UpdateTag } from "@repo/common";
 
 @Injectable()
 export class TagDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
-
-  // note: no update-tag-function as it is not necessary. If you want, you can just remove and add a new tag instead.
 
   /**
    * Get a single tag by their ID.
@@ -23,6 +21,22 @@ export class TagDatabaseService {
       throw new Error("Tag not found");
     }
     return result[0];
+  }
+
+  /**
+   * Get all productions listed under a given tag.
+   * @param tag the tag we want to get the productions connected to.
+   * @returns a list of productions that fall under the given tag.
+   */
+  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+    const query = `
+    SELECT p.*
+    FROM productions p
+    JOIN production_tag pt ON p.id = pt.production_id
+    WHERE pt.tag_id = $1
+  `;
+
+    return await this.db.query(query, [tag.id]);
   }
 
   /**
@@ -64,6 +78,50 @@ export class TagDatabaseService {
 
     if (result.length === 0) {
       throw new Error("Failed to create tag");
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Update function for tags. Updates the tag in the database.
+   * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
+   * The id field in the tag MUST be defined.
+   * @returns the updated blog if successful.
+   */
+  async updateTag(tag: UpdateTag): Promise<Tag> {
+    if (!tag.id) {
+      throw new Error("Tag id is required for update");
+    }
+
+    const fields: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    if (tag.tag !== undefined) {
+      fields.push(`tag = $${index++}`);
+      values.push(tag.tag);
+    }
+
+    if (fields.length === 0) {
+      throw new Error("No fields provided to update");
+    }
+
+    // Add id as final parameter
+    values.push(tag.id);
+
+    // ignore "RETURNING" error, query is correct.
+    const query = `
+    UPDATE tags
+    SET ${fields.join(", ")}
+    WHERE id = $${index}
+    RETURNING id, tag;
+  `;
+
+    const result = await this.db.query<Tag>(query, values);
+
+    if (result.length === 0) {
+      throw new Error("Tag not found");
     }
 
     return result[0];
