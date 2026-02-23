@@ -52,7 +52,6 @@ export const UpdateBlogSchema = BlogSchema.partial();
 export const TagSchema = z.object({
   id: z.number(),
   tag: z.string(),
-  production_id: z.number(),
 });
 
 export const CreateTagSchema = TagSchema.omit({ id: true });

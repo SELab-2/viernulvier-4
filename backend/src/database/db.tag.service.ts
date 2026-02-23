@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTag, Tag } from "@repo/common";
+import { CreateTag, Production, Tag } from "@repo/common";
 
 @Injectable()
 export class TagDatabaseService {
@@ -26,19 +26,19 @@ export class TagDatabaseService {
   }
 
   /**
-   * Get tags by their production ID.
-   * @param production_id The ID we're trying to fetch.
-   * @returns The tags if there are any.
+   * Get all productions listed under a given tag.
+   * @param tag the tag we want to get the productions connected to.
+   * @returns a list of productions that fall under the given tag.
    */
-  async getTagsByProductionID(production_id: number): Promise<Tag[]> {
-    const query = `SELECT * FROM tags WHERE production_id = $1`;
+  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+    const query = `
+    SELECT p.*
+    FROM productions p
+    JOIN production_tag pt ON p.id = pt.production_id
+    WHERE pt.tag_id = $1
+  `;
 
-    const result = await this.db.query(query, [production_id]);
-
-    if (result.length === 0) {
-      throw new Error("Blog not found");
-    }
-    return result;
+    return await this.db.query(query, [tag.id]);
   }
 
   /**
@@ -47,20 +47,19 @@ export class TagDatabaseService {
    * @returns the added tag if it was successful.
    */
   async createTag(tag: CreateTag): Promise<Tag> {
-    if (!tag.production_id || !tag.tag) {
+    if (!tag.tag) {
       throw new BadRequestException("Missing required fields");
     }
 
     const query = `
     INSERT INTO tags (
-      production_id,
       tag
     )
-    VALUES ($1, $2)
-    RETURNING id, production_id, tag;
+    VALUES ($1)
+    RETURNING id, tag;
   `;
 
-    const values = [tag.production_id, tag.tag];
+    const values = [tag.tag];
 
     const result = await this.db.query<Tag>(query, values);
 
@@ -81,19 +80,6 @@ export class TagDatabaseService {
     const query = `DELETE FROM tags WHERE id = $1`;
 
     await this.db.query(query, [id]);
-  }
-
-  /**
-   * Delete function for deleting tags from the database.
-   * note: deletes all tags with a corresponding production_id
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteTagsWithProductionID(production_id: number): Promise<void> {
-    const query = `DELETE FROM tags WHERE production_id = $1`;
-
-    await this.db.query(query, [production_id]);
   }
 
   // insert extra functions here if desired
