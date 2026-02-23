@@ -264,4 +264,44 @@ export class ProductionDatabaseService {
 
     await this.db.query<Production>(query, [id]);
   }
+
+  /**
+   * Delete function for deleting blogs from the database.
+   * This function deletes all blogs associated with a given production_id
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
+    const query = `
+      DELETE FROM blogs
+        USING production_blogs
+      WHERE blogs.id = production_blogs.blog_id
+        AND production_blogs.production_id = $1
+    `;
+
+    await this.db.query(query, [production_id]);
+  }
+
+  /**
+   * Delete function for deleting blogs from the database.
+   * This function deletes a single blog-LINK associated with a given prod_id
+   * note: it does not delete the blog itself only from being linked to the given production.
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteBlogFromProduction(
+    production_id: number,
+    blog_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM production_blogs
+      WHERE production_blogs.blog_id = $1
+        AND production_blogs.production_id = $2
+    `;
+
+    await this.db.query(query, [blog_id, production_id]);
+  }
 }
