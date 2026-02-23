@@ -1,14 +1,14 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventService } from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type { Event, UpdateEvent } from "@repo/common";
+import type { EventDto, UpdateEventDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 
 describe("EventService", () => {
   let service: EventService;
   let dbService: EventDatabaseService;
 
-  const mockEvent: Event = {
+  const mockEvent: EventDto = {
     id: 1,
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
@@ -17,7 +17,7 @@ describe("EventService", () => {
     price: 25,
   };
 
-  const mockEvents: Event[] = [mockEvent];
+  const mockEvents: EventDto[] = [mockEvent];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -95,9 +95,9 @@ describe("EventService", () => {
     it("should handle database error when event not found", async () => {
       jest
         .spyOn(dbService, "getEventById")
-        .mockRejectedValueOnce(new Error("No Event exists for provided ID"));
+        .mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
       await expect(service.getEventById(999)).rejects.toThrow(
-        "No Event exists for provided ID"
+        "No EventDto exists for provided ID"
       );
     });
   });
@@ -121,7 +121,7 @@ describe("EventService", () => {
 
   describe("modifyEvent", () => {
     it("should fetch, merge, update, and return the modified event", async () => {
-      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
       const expectedMergedEvent = { ...mockEvent, ...patchData, id: 1 };
       
       jest.spyOn(dbService, "updateEvent").mockResolvedValueOnce(expectedMergedEvent);
@@ -134,12 +134,12 @@ describe("EventService", () => {
     });
 
     it("should throw an error if the event to modify does not exist", async () => {
-      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
       
       // Service fetches by ID first, so mock that fetch to fail
-      jest.spyOn(dbService, "getEventById").mockRejectedValueOnce(new Error("No Event exists for provided ID"));
+      jest.spyOn(dbService, "getEventById").mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
     
-      await expect(service.modifyEvent(999, patchData)).rejects.toThrow("No Event exists for provided ID");
+      await expect(service.modifyEvent(999, patchData)).rejects.toThrow("No EventDto exists for provided ID");
       expect(dbService.updateEvent).not.toHaveBeenCalled();
     });
   });
