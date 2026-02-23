@@ -263,19 +263,13 @@ export class EventDatabaseService {
    * (silent handling)
    * @returns nothing.
    */
-  async linkBlogWithEventID(
-    blog_id: number,
-    event_id: number,
-  ): Promise<boolean> {
+  async linkBlogWithEventID(blog_id: number, event_id: number): Promise<void> {
     const query = `
       INSERT INTO event_blogs (event_id, blog_id)
       VALUES ($1, $2)
       ON CONFLICT DO NOTHING
     `;
 
-    const result = await this.db.query(query, [event_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
+    await this.db.query(query, [event_id, blog_id]);
   }
 }
