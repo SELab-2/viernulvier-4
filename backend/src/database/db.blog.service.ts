@@ -130,42 +130,6 @@ export class BlogDatabaseService {
   }
 
   /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given event_id
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithEventID(event_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING event_blogs
-      WHERE blogs.id = event_blogs.blog_id
-        AND event_blogs.event_id = $1
-    `;
-
-    await this.db.query(query, [event_id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given production_id
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING production_blogs
-      WHERE blogs.id = production_blogs.blog_id
-        AND production_blogs.production_id = $1
-    `;
-
-    await this.db.query(query, [production_id]);
-  }
-
-  /**
    * Link an existing blog to an event.
    * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
