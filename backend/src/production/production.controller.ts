@@ -12,7 +12,8 @@ import {
 import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import type { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../dto/dto";
+import { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../dto/dto";
+import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("production")
 export class ProductionController {
@@ -22,6 +23,8 @@ export class ProductionController {
    * Responds to GET /productions
    * @returns All ProductionDto objects
    */
+  @ApiOperation({ summary: "Returns all Production objects." })
+  @ApiOkResponse({ type: ProductionDto, isArray: true, description: "All Productions returned." })
   @Get()
   async getAllProductions(): Promise<ProductionDto[]> {
     return await this.productionService.getAllProductions();
@@ -32,6 +35,8 @@ export class ProductionController {
    * @param id ID in the URL of the request.
    * @returns The ProductionDto object with corresponding ID
    */
+  @ApiOperation({ summary: "Returns the Production with id in the URL." })
+  @ApiOkResponse({ type: ProductionDto, description: "Production Found." })
   @Get(":id")
   async getById(@Param("id", ParseIntPipe) id: number): Promise<ProductionDto> {
     return await this.productionService.getProductionById(id);
@@ -43,6 +48,9 @@ export class ProductionController {
    * @param production The parsed ProductionDto object.
    * @returns The newly updated ProductionDto.
    */
+  @ApiOperation({ summary: "Replaces a Production." })
+  @ApiBody({ type: ProductionDto })
+  @ApiOkResponse({ type: ProductionDto, description: "Production Replaced." })
   @Put(":id")
   async replaceProduction(
     @Param("id", ParseIntPipe) id: number,
@@ -57,6 +65,9 @@ export class ProductionController {
    * @param patchData The parsed UpdateProductionDto object.
    * @returns The newly updated ProductionDto.
    */
+  @ApiOperation({ summary: "Modifies an existing Production." })
+  @ApiBody({ type: UpdateProductionDto })
+  @ApiOkResponse({ type: ProductionDto, description: "Production Modified." })
   @Patch(":id")
   async modifyProduction(
     @Param("id", ParseIntPipe) id: number,
@@ -70,6 +81,8 @@ export class ProductionController {
    * @param id The ID in the URL.
    * @returns Nothing.
    */
+  @ApiOperation({ summary: "Deletes a Production." })
+  @ApiOkResponse({ description: "Production Deleted." })
   @Delete(":id")
   async deleteProduction(@Param("id", ParseIntPipe) id: number): Promise<void> {
     return await this.productionService.deleteProduction(id);
@@ -80,6 +93,9 @@ export class ProductionController {
    * @param newProduction The new ProductionDto data we want to add
    * @returns The newly created ProductionDto.
    */
+  @ApiOperation({ summary: "Creates a new Production." })
+  @ApiBody({ type: CreateProductionDto })
+  @ApiOkResponse({ type: ProductionDto, description: "Production Created." })
   @Post()
   @UsePipes(new ZodValidationPipe(CreateProductionSchema))
   async createProduction(
