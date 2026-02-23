@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEvent, Event, UpdateEvent } from "@repo/common";
+import { Blog, CreateEvent, Event, UpdateEvent } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -18,6 +18,22 @@ export class EventDatabaseService {
       throw new BadRequestException(`No Event exists for provided ID(${id})`);
 
     return events[0]; // There should be an Event in here if the length is not 0.
+  }
+
+  /**
+   * Get all blogs listed under a given event.
+   * @param id the id of an event you want the blogs of.
+   * @returns a list of blogs connected to the given event.
+   */
+  async getBlogsOfEvent(id: number): Promise<Blog[]> {
+    const query = `
+    SELECT b.*
+    FROM blogs b
+    JOIN event_blogs eb ON b.id = eb.blog_id
+    WHERE eb.event_id = $1
+  `;
+
+    return await this.db.query(query, [id]);
   }
 
   /**
@@ -263,19 +279,13 @@ export class EventDatabaseService {
    * (silent handling)
    * @returns nothing.
    */
-  async linkBlogWithEventID(
-    blog_id: number,
-    event_id: number,
-  ): Promise<boolean> {
+  async linkBlogWithEventID(blog_id: number, event_id: number): Promise<void> {
     const query = `
       INSERT INTO event_blogs (event_id, blog_id)
       VALUES ($1, $2)
       ON CONFLICT DO NOTHING
     `;
 
-    const result = await this.db.query(query, [event_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
+    await this.db.query(query, [event_id, blog_id]);
   }
 }

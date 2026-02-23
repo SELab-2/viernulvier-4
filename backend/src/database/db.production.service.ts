@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateProduction, Production, ProductionSchema, Tag, UpdateProduction, } from "@repo/common";
+import { Blog, CreateProduction, Production, ProductionSchema, Tag, UpdateProduction, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -35,6 +35,22 @@ export class ProductionDatabaseService {
   `;
 
     return await this.db.query(query, [production.id]);
+  }
+
+  /**
+   * Get all blogs listed under a given production.
+   * @param id the id of the production we want all blogs of.
+   * @returns a list of blogs connected to the given production.
+   */
+  async getBlogsOfProduction(id: number): Promise<Blog[]> {
+    const query = `
+    SELECT b.*
+    FROM blogs b
+    JOIN production_blogs pb ON b.id = pb.blog_id
+    WHERE pb.production_id = $1
+  `;
+
+    return await this.db.query(query, [id]);
   }
 
   /**
@@ -299,16 +315,13 @@ export class ProductionDatabaseService {
   async linkBlogWithProductionID(
     blog_id: number,
     production_id: number,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const query = `
       INSERT INTO production_blogs (production_id, blog_id)
       VALUES ($1, $2)
       ON CONFLICT DO NOTHING
     `;
 
-    const result = await this.db.query(query, [production_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
+    await this.db.query(query, [production_id, blog_id]);
   }
 }
