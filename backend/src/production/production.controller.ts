@@ -12,7 +12,7 @@ import {
 import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import type { Production, UpdateProduction, CreateProduction } from "@repo/common";
+import type { Production, UpdateProduction, CreateProduction, Tag } from "@repo/common";
 
 @Controller("production")
 export class ProductionController {
@@ -33,8 +33,18 @@ export class ProductionController {
    * @returns The Production object with corresponding ID
    */
   @Get(":id")
-  async getById(@Param("id", ParseIntPipe) id: number): Promise<Production> {
+  async getProductionById(@Param("id", ParseIntPipe) id: number): Promise<Production> {
     return await this.productionService.getProductionById(id);
+  }
+
+  /**
+   * Responds to GET /productions/:id/tags
+   * @param id ID in the URL of the request.
+   * @returns The list of Tag objects for the Production
+   */
+  @Get(":id/tags")
+  async getTagsOfProductionByID(@Param("id", ParseIntPipe) id: number): Promise<Tag[]> {
+    return await this.productionService.getTagsById(id);
   }
 
   /**

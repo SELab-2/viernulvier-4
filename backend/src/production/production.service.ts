@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateProduction, Production, UpdateProduction } from "@repo/common";
+import { CreateProduction, Production, UpdateProduction, Tag } from "@repo/common";
 import { ProductionDatabaseService } from "../database/db.production.service";
 
 @Injectable()
@@ -23,6 +23,16 @@ export class ProductionService {
    */
   async getProductionById(id: number): Promise<Production> {
     return await this.productionDBService.getProductionById(id);
+  }
+
+  /**
+   * Fetches all Tag objects for a given production id.
+   * @param id ID in the URL of the request.
+   * @returns The list of Tag objects for the Production
+   */
+  async getTagsById(id: number): Promise<Tag[]> {
+    const production: Production = await this.productionDBService.getProductionById(id);
+    return await this.productionDBService.getTagsOfProduction(production);
   }
 
   /**
