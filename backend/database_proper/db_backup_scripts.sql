@@ -68,16 +68,24 @@ CREATE TABLE event_blogs
 
 CREATE TABLE tags
 (
-    id            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    production_id INT  NOT NULL,
-    tag           TEXT NOT NULL,
+    id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tag TEXT NOT NULL
+);
 
+CREATE TABLE production_tags
+(
+    production_id INT NOT NULL,
+    tag_id        INT NOT NULL,
+    PRIMARY KEY (production_id, tag_id),
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_tag
+        FOREIGN KEY (tag_id)
+            REFERENCES tags (id)
             ON DELETE CASCADE
 );
-
 -- small example data:
 
 INSERT INTO productions (titel, ondertitel, description1, description2, genre, planning_id, blog_titel, blog_text)
