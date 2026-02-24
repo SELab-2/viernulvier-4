@@ -16,8 +16,6 @@ describe("ProductionController", () => {
     description2: "With great actors",
     genre: "Drama",
     planning_id: 1,
-    blog_titel: "Blog title",
-    blog_text: "Blog content",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];
@@ -80,7 +78,9 @@ describe("ProductionController", () => {
 
     it("should handle different production ids", async () => {
       const production2 = { ...mockProduction, id: 2 };
-      jest.spyOn(service, "getProductionById").mockResolvedValueOnce(production2);
+      jest
+        .spyOn(service, "getProductionById")
+        .mockResolvedValueOnce(production2);
       const result = await controller.getById(2);
       expect(result.id).toBe(2);
       expect(service.getProductionById).toHaveBeenCalledWith(2);

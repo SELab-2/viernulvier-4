@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { EventService } from "./event.service";
+import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
 import type { EventDto, UpdateEventDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
@@ -97,7 +97,7 @@ describe("EventService", () => {
         .spyOn(dbService, "getEventById")
         .mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
       await expect(service.getEventById(999)).rejects.toThrow(
-        "No EventDto exists for provided ID"
+        "No EventDto exists for provided ID",
       );
     });
   });
@@ -111,10 +111,10 @@ describe("EventService", () => {
 
     it("should throw BadRequestException if url id and body id do not match", async () => {
       await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
-        BadRequestException
+        BadRequestException,
       );
       await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
-        "ID in the URL must match ID in the body."
+        "ID in the URL must match ID in the body.",
       );
     });
   });
@@ -123,8 +123,10 @@ describe("EventService", () => {
     it("should fetch, merge, update, and return the modified event", async () => {
       const patchData: UpdateEventDto = { hall: "Secondary Hall" };
       const expectedMergedEvent = { ...mockEvent, ...patchData, id: 1 };
-      
-      jest.spyOn(dbService, "updateEvent").mockResolvedValueOnce(expectedMergedEvent);
+
+      jest
+        .spyOn(dbService, "updateEvent")
+        .mockResolvedValueOnce(expectedMergedEvent);
 
       const result = await service.modifyEvent(1, patchData);
 
@@ -135,11 +137,15 @@ describe("EventService", () => {
 
     it("should throw an error if the event to modify does not exist", async () => {
       const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-      
+
       // Service fetches by ID first, so mock that fetch to fail
-      jest.spyOn(dbService, "getEventById").mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
-    
-      await expect(service.modifyEvent(999, patchData)).rejects.toThrow("No EventDto exists for provided ID");
+      jest
+        .spyOn(dbService, "getEventById")
+        .mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
+
+      await expect(service.modifyEvent(999, patchData)).rejects.toThrow(
+        "No EventDto exists for provided ID",
+      );
       expect(dbService.updateEvent).not.toHaveBeenCalled();
     });
   });
@@ -153,9 +159,13 @@ describe("EventService", () => {
     });
 
     it("should handle database errors when deletion fails", async () => {
-      jest.spyOn(dbService, "deleteEvent").mockRejectedValueOnce(new Error("Failed to delete record"));
-    
-      await expect(service.deleteEvent(999)).rejects.toThrow("Failed to delete record");
+      jest
+        .spyOn(dbService, "deleteEvent")
+        .mockRejectedValueOnce(new Error("Failed to delete record"));
+
+      await expect(service.deleteEvent(999)).rejects.toThrow(
+        "Failed to delete record",
+      );
     });
   });
 

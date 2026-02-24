@@ -5,14 +5,19 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch, Post,
+  Patch,
+  Post,
   Put,
   UsePipes,
 } from "@nestjs/common";
-import { EventService } from "./event.service";
+import EventService from "./event.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
-import { EventDto, CreateEventDto, UpdateEventDto } from "../dto/dto";
+import {
+  CreateEventSchema,
+  EventSchema,
+  UpdateEventSchema,
+} from "@repo/common";
+import { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("event")
@@ -24,7 +29,11 @@ export class EventController {
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
-  @ApiOkResponse({ type: EventDto, isArray: true, description: "All Events returned." })
+  @ApiOkResponse({
+    type: EventDto,
+    isArray: true,
+    description: "All Events returned.",
+  })
   @Get()
   async getAllEvents(): Promise<EventDto[]> {
     return await this.eventService.getAllEvents();
@@ -99,9 +108,7 @@ export class EventController {
   @ApiOkResponse({ type: EventDto, description: "Event created." })
   @Post()
   @UsePipes(new ZodValidationPipe(CreateEventSchema))
-  async createEvent(
-    @Body() newEvent: CreateEventDto,
-  ): Promise<EventDto> {
+  async createEvent(@Body() newEvent: CreateEventDto): Promise<EventDto> {
     return this.eventService.createEvent(newEvent);
   }
 }

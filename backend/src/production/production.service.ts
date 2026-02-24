@@ -1,5 +1,9 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateProductionDto, ProductionDto, UpdateProductionDto } from "../dto/dto";
+import {
+  CreateProductionDto,
+  ProductionDto,
+  UpdateProductionDto,
+} from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 
 @Injectable()
@@ -38,10 +42,7 @@ export class ProductionService {
     if (id !== production.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    const updatedProduction: ProductionDto =
-      await this.productionDBService.updateProduction(id, production);
-
-    return updatedProduction;
+    return await this.productionDBService.updateProduction(production);
   }
 
   /**
@@ -63,10 +64,7 @@ export class ProductionService {
       id,
     };
 
-    const updatedProduction: ProductionDto =
-      await this.productionDBService.updateProduction(id, mergedProduction);
-
-    return updatedProduction;
+    return await this.productionDBService.updateProduction(mergedProduction);
   }
 
   /**
@@ -84,7 +82,9 @@ export class ProductionService {
    * @param newProduction The new ProductionDto data we want to add
    * @returns The newly created ProductionDto.
    */
-  async createProduction(newProduction: CreateProductionDto) : Promise<ProductionDto> {
-    return await this.productionDBService.createProduction(newProduction)
+  async createProduction(
+    newProduction: CreateProductionDto,
+  ): Promise<ProductionDto> {
+    return await this.productionDBService.createProduction(newProduction);
   }
 }
