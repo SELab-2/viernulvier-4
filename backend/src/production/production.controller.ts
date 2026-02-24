@@ -47,6 +47,8 @@ export class ProductionController {
    * @param id ID in the URL of the request.
    * @returns The list of Tag objects for the Production
    */
+  @ApiOperation({ summary: "Returns the Tags of the Production with id in the URL." })
+  @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
   @Get(":id/tags")
   async getTagsOfProductionByID(@Param("id", ParseIntPipe) id: number): Promise<TagDto[]> {
     return await this.productionService.getTagsById(id);
