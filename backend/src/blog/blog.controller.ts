@@ -9,6 +9,10 @@ import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
+  /**
+   * Responds to a GET to "/blog"
+   * @returns A list of all Blog objects.
+   */
   @ApiOperation({ summary: "Returns all blogs." })
   @ApiOkResponse({ type: BlogDto, isArray: true, description: "Returned all blogs." })
   @Get()
@@ -16,6 +20,11 @@ export class BlogController {
     return await this.blogService.getAllBlogs();
   }
 
+  /**
+   * Responds to a GET to "/blog/:id"
+   * @param id The ID of the Blog that will be fetched.
+   * @returns The Blog corresponding to ID if there was one.
+   */
   @ApiOperation({ summary: "Returns a single blog." })
   @ApiOkResponse({ type: BlogDto, description: "Found Blog." })
   @Get(":id")
@@ -23,6 +32,11 @@ export class BlogController {
     return await this.blogService.getBlogById(id);
   }
 
+  /**
+   * Responds to a POST to "/blog"
+   * @param createBlog The Blog object that should be created, excluding the id.
+   * @returns The newly created Blog object.
+   */
   @ApiOperation({ summary: "Creates a new blog." })
   @ApiBody({ type: CreateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Created a new Blog." })
@@ -33,6 +47,12 @@ export class BlogController {
     return await this.blogService.createBlog(createBlog);
   }
 
+  /**
+   * Responds to a PUT to "/blog/:id"
+   * @param id The ID of the Blog we want to replace.
+   * @param blog The Blog we want to replace it with.
+   * @returns The replaced Blog.
+   */
   @ApiOperation({ summary: "Replaces an existing blog." })
   @ApiBody({ type: BlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Replaced Blog." })
@@ -44,6 +64,12 @@ export class BlogController {
     return await this.blogService.replaceBlog(id, blog);
   }
 
+  /**
+   * Responds to a PATCH to "/blog/:id"
+   * @param id The ID of the Blog we want to modify.
+   * @param blog The Partial Blog object with fields filled that we want to modify.
+   * @returns The modified Blog.
+   */
   @ApiOperation({ summary: "Modifies an existing blog." })
   @ApiBody({ type: UpdateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Modified Blog." })
@@ -55,6 +81,11 @@ export class BlogController {
     return await this.blogService.modifyBlog(id, blog);
   }
 
+  /**
+   * Responds to a DELETE to "/blog/:id"
+   * @param id The ID of the Blog we want to delete.
+   * @returns Nothing.
+   */
   @ApiOperation({ summary: "Delete an existing blog." })
   @ApiOkResponse({ description: "Deleted Blog." })
   @Delete(":id")
