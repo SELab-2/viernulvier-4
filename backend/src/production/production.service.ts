@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateProduction, Production, UpdateProduction, Tag } from "@repo/common";
+import {
+  CreateProductionDto,
+  ProductionDto,
+  TagDto,
+  UpdateProductionDto,
+} from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 
 @Injectable()
@@ -9,42 +14,42 @@ export class ProductionService {
   ) {}
 
   /**
-   * Fetches all Production objects from the DBService
-   * @returns All Production objects
+   * Fetches all ProductionDto objects from the DBService
+   * @returns All ProductionDto objects
    */
-  async getAllProductions(): Promise<Production[]> {
+  async getAllProductions(): Promise<ProductionDto[]> {
     return await this.productionDBService.getProductions({});
   }
 
   /**
-   * Fetches Production object from the DBService with given ID.
+   * Fetches ProductionDto object from the DBService with given ID.
    * @param id ID in the URL of the request.
-   * @returns The Production object with corresponding ID
+   * @returns The ProductionDto object with corresponding ID
    */
-  async getProductionById(id: number): Promise<Production> {
+  async getProductionById(id: number): Promise<ProductionDto> {
     return await this.productionDBService.getProductionById(id);
   }
 
   /**
-   * Fetches all Tag objects for a given production id.
+   * Fetches all TagDto objects for a given production id.
    * @param id ID in the URL of the request.
-   * @returns The list of Tag objects for the Production
+   * @returns The list of TagDto objects for the Production
    */
-  async getTagsById(id: number): Promise<Tag[]> {
-    const production: Production = await this.productionDBService.getProductionById(id);
+  async getTagsById(id: number): Promise<TagDto[]> {
+    const production: ProductionDto = await this.productionDBService.getProductionById(id);
     return await this.productionDBService.getTagsOfProduction(production);
   }
 
   /**
-   * Replaces a Production in the database and returns the updated one.
+   * Replaces a ProductionDto in the database and returns the updated one.
    * @param id The ID of the production.
-   * @param production The Production Object itself.
-   * @returns The newly updated Production.
+   * @param production The ProductionDto Object itself.
+   * @returns The newly updated ProductionDto.
    */
   async replaceProduction(
     id: number,
-    production: Production,
-  ): Promise<Production> {
+    production: ProductionDto,
+  ): Promise<ProductionDto> {
     if (id !== production.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
@@ -52,19 +57,19 @@ export class ProductionService {
   }
 
   /**
-   * Modifies an existing Production with the data provided in the body.
+   * Modifies an existing ProductionDto with the data provided in the body.
    * @param id The ID of the production.
    * @param patchData The data we want to update.
-   * @returns The newly updated Production.
+   * @returns The newly updated ProductionDto.
    */
   async modifyProduction(
     id: number,
-    patchData: UpdateProduction,
-  ): Promise<Production> {
-    const existingProduction: Production =
+    patchData: UpdateProductionDto,
+  ): Promise<ProductionDto> {
+    const existingProduction: ProductionDto =
       await this.productionDBService.getProductionById(id);
 
-    const mergedProduction: Production = {
+    const mergedProduction: ProductionDto = {
       ...existingProduction,
       ...patchData,
       id,
@@ -74,8 +79,8 @@ export class ProductionService {
   }
 
   /**
-   * Deletes a Production from the database.
-   * @param id The ID of the Production.
+   * Deletes a ProductionDto from the database.
+   * @param id The ID of the ProductionDto.
    * @returns Nothing.
    */
   async deleteProduction(id: number): Promise<void> {
@@ -84,11 +89,13 @@ export class ProductionService {
   }
 
   /**
-   * Creates a Production and adds it to the database
-   * @param newProduction The new Production data we want to add
-   * @returns The newly created Production.
+   * Creates a ProductionDto and adds it to the database
+   * @param newProduction The new ProductionDto data we want to add
+   * @returns The newly created ProductionDto.
    */
-  async createProduction(newProduction: CreateProduction): Promise<Production> {
+  async createProduction(
+    newProduction: CreateProductionDto,
+  ): Promise<ProductionDto> {
     return await this.productionDBService.createProduction(newProduction);
   }
 }

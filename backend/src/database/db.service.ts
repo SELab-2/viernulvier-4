@@ -16,12 +16,17 @@ export class DbService {
     });
   }
 
-  // sends query to the db (all query types.) (to see what it returns exactly, see query)
+  /**
+   * This function sends a query to the database.
+   * @param query This is the to be executed query
+   * @param params These are the possible parameters used in the query annotated by "$1",... as is convention in sql.
+   * @return a generic type that is a scheme of the database.
+   * */
   async query<T extends QueryResultRow = any>(
-    text: string,
+    query: string,
     params?: any[],
   ): Promise<T[]> {
-    const res = await this.pool.query<T>(text, params); // keep await.
+    const res = await this.pool.query<T>(query, params); // keep await.
     return res.rows;
   }
 }

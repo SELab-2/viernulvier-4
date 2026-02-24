@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Blog, CreateEvent, Event, UpdateEvent } from "@repo/common";
+import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 
 @Injectable()
 export class EventDatabaseService {
@@ -8,16 +8,18 @@ export class EventDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * Get a single Event by their ID.
+   * Get a single EventDto by their ID.
    * @param id The ID we're trying to fetch.
-   * @returns The Event if there is one.
+   * @returns The EventDto if there is one.
    */
-  async getEventById(id: number): Promise<Event> {
-    const events: Event[] = await this.getEvents({ id: id });
+  async getEventById(id: number): Promise<EventDto> {
+    const events: EventDto[] = await this.getEvents({ id: id });
     if (events.length === 0)
-      throw new BadRequestException(`No Event exists for provided ID(${id})`);
+      throw new BadRequestException(
+        `No EventDto exists for provided ID(${id})`,
+      );
 
-    return events[0]; // There should be an Event in here if the length is not 0.
+    return events[0]; // There should be an EventDto in here if the length is not 0.
   }
 
   /**
@@ -25,7 +27,7 @@ export class EventDatabaseService {
    * @param id the id of an event you want the blogs of.
    * @returns a list of blogs connected to the given event.
    */
-  async getBlogsOfEvent(id: number): Promise<Blog[]> {
+  async getBlogsOfEvent(id: number): Promise<BlogDto[]> {
     const query = `
     SELECT b.*
     FROM blogs b
@@ -52,7 +54,7 @@ export class EventDatabaseService {
       id: number;
       production_id: number;
     }>,
-  ): Promise<Event[]> {
+  ): Promise<EventDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -109,7 +111,7 @@ export class EventDatabaseService {
       ORDER BY e.starttime
         `;
 
-    return this.db.query<Event>(query, values);
+    return this.db.query<EventDto>(query, values);
   }
 
   /**
@@ -117,7 +119,7 @@ export class EventDatabaseService {
    * @param event must be of the type "CreateEvent" which has all fields defined besides the primary key id.
    * @returns the added event if it was successful.
    */
-  async createEvent(event: CreateEvent): Promise<Event> {
+  async createEvent(event: CreateEventDto): Promise<EventDto> {
     // Validate input, throw error if not all
     if (!event.starttime || !event.hall || !event.production_id) {
       throw new BadRequestException("Missing required fields");
@@ -129,7 +131,7 @@ export class EventDatabaseService {
       RETURNING id, starttime, endtime, hall, production_id, price
     `;
 
-    const result = await this.db.query<Event>(query, [
+    const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
       event.hall,
@@ -151,7 +153,7 @@ export class EventDatabaseService {
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
-  async updateEvent(event: UpdateEvent): Promise<Event> {
+  async updateEvent(event: UpdateEventDto): Promise<EventDto> {
     if (!event.id) {
       throw new Error("Event id is required for update");
     }
