@@ -7,6 +7,5 @@ import { DbModule } from '../database/db.module';
   imports: [DbModule],
   controllers: [TagController],
   providers: [TagService],
-  exports: [TagService],
 })
 export class TagModule {}
