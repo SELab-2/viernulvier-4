@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "./production.service";
-import { ProductionDto, UpdateProductionDto } from "../dto/dto"; 
+import { BlogDto, ProductionDto, UpdateProductionDto } from "../dto/dto"; 
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ProductionController", () => {
@@ -32,6 +32,11 @@ describe("ProductionController", () => {
             replaceProduction: jest.fn().mockResolvedValue(mockProduction),
             modifyProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
+            // New mock methods
+            createProduction: jest.fn(),
+            getProductionBlogs: jest.fn(),
+            linkBlogToProduction: jest.fn(),
+            unlinkBlogFromProduction: jest.fn(),
           },
         },
       ],
@@ -111,8 +116,8 @@ describe("ProductionController", () => {
 
   describe("modifyProduction", () => {
     it("should modify and return the production", async () => {
-      const patchData: UpdateProductionDto = { titel: "A New Title" };
-      const patchedProduction = { ...mockProduction, titel: "A New Title" };
+      const patchData: UpdateProductionDto = { titel: "A New titel" };
+      const patchedProduction = { ...mockProduction, titel: "A New titel" };
       
       jest.spyOn(service, "modifyProduction").mockResolvedValueOnce(patchedProduction);
       
@@ -122,7 +127,7 @@ describe("ProductionController", () => {
     });
 
     it("should throw a NotFoundException if trying to modify a non-existent production", async () => {
-      const patchData: UpdateProductionDto = { titel: "A New Title" };
+      const patchData: UpdateProductionDto = { titel: "A New titel" };
       
       jest.spyOn(service, "modifyProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
     
@@ -141,6 +146,66 @@ describe("ProductionController", () => {
       jest.spyOn(service, "deleteProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
     
       await expect(controller.deleteProduction(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe("-- Blogs --", () => {
+    const mockBlog: BlogDto = {
+      id: 1,
+      titel: "Behind the Scenes",
+      description: "Looking at the set of The Great Show.",
+    };
+
+    describe("getProductionBlogs", () => {
+      it("should return an array of blogs linked to the production", async () => {
+        const expectedBlogs = [mockBlog];
+        jest.spyOn(service, "getProductionBlogs").mockResolvedValueOnce(expectedBlogs);
+
+        const result = await controller.getProductionBlogs(1);
+
+        expect(service.getProductionBlogs).toHaveBeenCalledWith(1);
+        expect(result).toEqual(expectedBlogs);
+      });
+
+      it("should throw a NotFoundException if the production is not found", async () => {
+        jest.spyOn(service, "getProductionBlogs").mockRejectedValueOnce(new NotFoundException());
+
+        await expect(controller.getProductionBlogs(999)).rejects.toThrow(NotFoundException);
+      });
+    });
+
+    describe("linkBlogToProduction", () => {
+      it("should link a blog to a production and return the blog", async () => {
+        jest.spyOn(service, "linkBlogToProduction").mockResolvedValueOnce(mockBlog);
+
+        const result = await controller.linkBlogToProduction(1, 2);
+
+        expect(service.linkBlogToProduction).toHaveBeenCalledWith(1, 2);
+        expect(result).toEqual(mockBlog);
+      });
+
+      it("should pass through errors when linking fails", async () => {
+        jest.spyOn(service, "linkBlogToProduction").mockRejectedValueOnce(new BadRequestException("Already linked"));
+
+        await expect(controller.linkBlogToProduction(1, 2)).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe("unlinkBlogFromEvent", () => {
+      it("should unlink a blog from a production and return the production", async () => {
+        jest.spyOn(service, "unlinkBlogFromProduction").mockResolvedValueOnce(mockProduction);
+
+        const result = await controller.unlinkBlogFromEvent(1, 2);
+
+        expect(service.unlinkBlogFromProduction).toHaveBeenCalledWith(1, 2);
+        expect(result).toEqual(mockProduction);
+      });
+
+      it("should pass through errors when unlinking fails", async () => {
+        jest.spyOn(service, "unlinkBlogFromProduction").mockRejectedValueOnce(new NotFoundException("Link not found"));
+
+        await expect(controller.unlinkBlogFromEvent(1, 2)).rejects.toThrow(NotFoundException);
+      });
     });
   });
 

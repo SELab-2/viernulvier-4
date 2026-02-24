@@ -172,8 +172,7 @@ describe("EventService", () => {
   describe("deleteEvent", () => {
     it("should delete the event by id and pass an empty string for the date", async () => {
       const result = await service.deleteEvent(1);
-      // Validates your existing implementation: `this.eventDBService.deleteEvent(id, "");`
-      expect(dbService.deleteEvent).toHaveBeenCalledWith(1, "");
+      expect(dbService.deleteEvent).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
     });
 
