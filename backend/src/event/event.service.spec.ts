@@ -233,4 +233,13 @@ describe("EventService", () => {
   });
 
   // TODO: Missing createEvent test
+  describe("createEvent", () => {
+    it("should create an event", async () => {
+
+    });
+
+    it("should handle database errors when creation fails", async () => {
+
+    });
+  });
 });

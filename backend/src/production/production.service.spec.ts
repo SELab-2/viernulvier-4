@@ -302,4 +302,14 @@ describe("ProductionService", () => {
   });
 
   // TODO: Missing createProduction test
+  describe("createProduction", () => {
+    it("should create a production", async () => {
+
+    });
+
+    it("should handle database errors when creation fails", async () => {
+
+    });
+  });
+
 });

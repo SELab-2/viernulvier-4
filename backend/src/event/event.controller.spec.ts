@@ -203,4 +203,13 @@ describe("EventController", () => {
   });
 
   // TODO: Missing test for createEvent.
+  describe("createEvent", () => {
+    it("should create an event", async () => {
+
+    });
+
+    it("should handle database errors when creation fails", async () => {
+
+    });
+  });
 });
