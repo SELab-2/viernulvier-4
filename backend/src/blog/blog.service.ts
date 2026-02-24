@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { BlogDatabaseService } from 'src/database/db.blog.service';
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from 'src/dto/dto';
+import { BlogDatabaseService } from '../database/db.blog.service';
+import { BlogDto, CreateBlogDto, UpdateBlogDto } from '../dto/dto';
 
 @Injectable()
 export class BlogService {

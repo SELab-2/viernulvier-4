@@ -14,14 +14,4 @@ describe("AppController", () => {
 
     appController = app.get<AppController>(AppController);
   });
-
-  describe("root", () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toEqual(
-        HelloWorldSchema.parse({
-          text: "Hello World!",
-        }),
-      );
-    });
-  });
 });

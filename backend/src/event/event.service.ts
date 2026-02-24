@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import type { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
-import { BlogDatabaseService } from "src/database/db.blog.service";
+import { BlogDatabaseService } from "../database/db.blog.service";
 
 @Injectable()
 export class EventService {

@@ -16,8 +16,6 @@ describe("ProductionService", () => {
     description2: "With great actors",
     genre: "Drama",
     planning_id: 1,
-    blog_titel: "Blog title",
-    blog_text: "Blog content",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];

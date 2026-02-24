@@ -6,7 +6,7 @@ import {
   UpdateProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import { BlogDatabaseService } from "src/database/db.blog.service";
+import { BlogDatabaseService } from "../database/db.blog.service";
 
 @Injectable()
 export class ProductionService {
