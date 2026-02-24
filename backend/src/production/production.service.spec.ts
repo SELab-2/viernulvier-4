@@ -1,14 +1,14 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type { Production, UpdateProduction } from "@repo/common";
+import type { ProductionDto, UpdateProductionDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 
 describe("ProductionService", () => {
   let service: ProductionService;
   let dbService: ProductionDatabaseService;
 
-  const mockProduction: Production = {
+  const mockProduction: ProductionDto = {
     id: 1,
     titel: "The Great Show",
     ondertitel: "A masterpiece",
@@ -20,7 +20,7 @@ describe("ProductionService", () => {
     blog_text: "Blog content",
   };
 
-  const mockProductions: Production[] = [mockProduction];
+  const mockProductions: ProductionDto[] = [mockProduction];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -97,9 +97,9 @@ describe("ProductionService", () => {
     it("should handle database error when production not found", async () => {
       jest
         .spyOn(dbService, "getProductionById")
-        .mockRejectedValueOnce(new Error("No Production exists for provided ID"));
+        .mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
       await expect(service.getProductionById(999)).rejects.toThrow(
-        "No Production exists for provided ID"
+        "No ProductionDto exists for provided ID"
       );
     });
   });
@@ -123,7 +123,7 @@ describe("ProductionService", () => {
 
   describe("modifyProduction", () => {
     it("should fetch, merge, update, and return the modified production", async () => {
-      const patchData: UpdateProduction = { titel: "Patched Title" };
+      const patchData: UpdateProductionDto = { titel: "Patched Title" };
       const expectedMergedProduction = { ...mockProduction, ...patchData, id: 1 };
       
       jest.spyOn(dbService, "updateProduction").mockResolvedValueOnce(expectedMergedProduction);
@@ -136,13 +136,13 @@ describe("ProductionService", () => {
     });
 
     it("should throw an error if the production to modify does not exist", async () => {
-      const patchData: UpdateProduction = { titel: "Patched Title" };
+      const patchData: UpdateProductionDto = { titel: "Patched Title" };
       
       // Simulate the database failing to find the record
-      jest.spyOn(dbService, "getProductionById").mockRejectedValueOnce(new Error("No Production exists for provided ID"));
+      jest.spyOn(dbService, "getProductionById").mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
 
       // The service should halt and bubble up the fetch error, never calling updateProduction
-      await expect(service.modifyProduction(999, patchData)).rejects.toThrow("No Production exists for provided ID");
+      await expect(service.modifyProduction(999, patchData)).rejects.toThrow("No ProductionDto exists for provided ID");
       expect(dbService.updateProduction).not.toHaveBeenCalled();
     });
   });
