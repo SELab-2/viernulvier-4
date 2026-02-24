@@ -1,14 +1,14 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import { EventService } from "./event.service";
-import type { Event, UpdateEvent } from "@repo/common";
+import type { EventDto, UpdateEventDto } from "../dto/dto";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("EventController", () => {
   let controller: EventController;
   let service: EventService;
 
-  const mockEvent: Event = {
+  const mockEvent: EventDto = {
     id: 1,
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
@@ -17,7 +17,7 @@ describe("EventController", () => {
     price: 25,
   };
 
-  const mockEvents: Event[] = [mockEvent];
+  const mockEvents: EventDto[] = [mockEvent];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -104,7 +104,7 @@ describe("EventController", () => {
 
   describe("modifyEvent", () => {
     it("should modify and return the event", async () => {
-      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
       const patchedEvent = { ...mockEvent, hall: "Secondary Hall" };
       
       jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(patchedEvent);
@@ -115,7 +115,7 @@ describe("EventController", () => {
     });
 
     it("should throw a NotFoundException if event to modify does not exist", async () => {
-      const patchData: UpdateEvent = { hall: "Secondary Hall" };
+      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
       jest.spyOn(service, "modifyEvent").mockRejectedValueOnce(new NotFoundException());
       await expect(controller.modifyEvent(999, patchData)).rejects.toThrow(NotFoundException);
     });

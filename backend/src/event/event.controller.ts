@@ -12,7 +12,9 @@ import {
 import { EventService } from "./event.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { EventSchema, CreateEventSchema, UpdateEventSchema } from "@repo/common";
-import type { Event, CreateEvent, UpdateEvent, Blog } from "@repo/common";
+import { EventDto, CreateEventDto, UpdateEventDto } from "../dto/dto";
+import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import type { Blog } from "@repo/common";
 
 @Controller("event")
 export class EventController {
@@ -20,49 +22,59 @@ export class EventController {
 
   /**
    * Responds to GET /events
-   * @returns All Event objects.
+   * @returns All EventDto objects.
    */
+  @ApiOperation({ summary: "Returns all Event objects." })
+  @ApiOkResponse({ type: EventDto, isArray: true, description: "All Events returned." })
   @Get()
-  async getAllEvents(): Promise<Event[]> {
+  async getAllEvents(): Promise<EventDto[]> {
     return await this.eventService.getAllEvents();
   }
 
   /**
    * Responds to GET /events/:id
    * @param id ID in the URL of the request.
-   * @returns The Event object with corresponding ID
+   * @returns The EventDto object with corresponding ID
    */
   // TODO: return multiple events with same production id
+  @ApiOperation({ summary: "Returns the Event with the ID in the URL." })
+  @ApiOkResponse({ type: EventDto, description: "Event Found." })
   @Get(":id")
-  async getEventById(@Param("id", ParseIntPipe) id: number): Promise<Event> {
+  async getEventById(@Param("id", ParseIntPipe) id: number): Promise<EventDto> {
     return await this.eventService.getEventById(id);
   }
 
   /**
    * Responds to a PUT to "/event/:id".
    * @param id ID in the URL of the request.
-   * @param event The parsed Event object.
-   * @returns The updated Event object.
+   * @param event The parsed EventDto object.
+   * @returns The updated EventDto object.
    */
+  @ApiOperation({ summary: "Replaces an existing Event." })
+  @ApiBody({ type: EventDto })
+  @ApiOkResponse({ type: EventDto, description: "Event replaced." })
   @Put(":id")
   async replaceEvent(
     @Param("id", ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(EventSchema)) event: Event,
-  ): Promise<Event> {
+    @Body(new ZodValidationPipe(EventSchema)) event: EventDto,
+  ): Promise<EventDto> {
     return await this.eventService.replaceEvent(id, event);
   }
 
   /**
    * Responds to a PATCH to "/event/:id".
    * @param id ID in the URL of the request.
-   * @param patchData The partial Event object that is used to modify.
-   * @returns The updated Event object.
+   * @param patchData The partial EventDto object that is used to modify.
+   * @returns The updated EventDto object.
    */
+  @ApiOperation({ summary: "Modifies an existing Event." })
+  @ApiBody({ type: UpdateEventDto })
+  @ApiOkResponse({ type: EventDto, description: "Event modified." })
   @Patch(":id")
   async modifyEvent(
     @Param("id", ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(UpdateEventSchema)) patchData: UpdateEvent,
-  ): Promise<Event> {
+    @Body(new ZodValidationPipe(UpdateEventSchema)) patchData: UpdateEventDto,
+  ): Promise<EventDto> {
     return await this.eventService.modifyEvent(id, patchData);
   }
 
@@ -71,6 +83,8 @@ export class EventController {
    * @param id ID in the URL of the request.
    * @returns Nothing.
    */
+  @ApiOperation({ summary: "Deletes an Event." })
+  @ApiOkResponse({ description: "Event deleted." })
   @Delete(":id")
   async deleteEvent(@Param("id", ParseIntPipe) id: number): Promise<void> {
     return await this.eventService.deleteEvent(id);
@@ -78,14 +92,17 @@ export class EventController {
 
   /**
    * Responds to a POST to "/event/".
-   * @param newEvent The new Event data we want to add
-   * @returns The newly created Event.
+   * @param newEvent The new EventDto data we want to add
+   * @returns The newly created EventDto.
    */
+  @ApiOperation({ summary: "Creates an Event." })
+  @ApiBody({ type: CreateEventDto })
+  @ApiOkResponse({ type: EventDto, description: "Event created." })
   @Post()
   @UsePipes(new ZodValidationPipe(CreateEventSchema))
   async createEvent(
-    @Body() newEvent: CreateEvent,
-  ): Promise<Event> {
+    @Body() newEvent: CreateEventDto,
+  ): Promise<EventDto> {
     return this.eventService.createEvent(newEvent);
   }
 
@@ -125,7 +142,7 @@ export class EventController {
   async unlinkBlogFromEvent(
     @Param("id", ParseIntPipe) eventId: number,
     @Param("id2", ParseIntPipe) blogId: number
-  ): Promise<Event> {
+  ): Promise<EventDto> {
     return await this.eventService.unlinkBlogFromEvent(eventId, blogId);
   }
 }
