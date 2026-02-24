@@ -23,8 +23,8 @@ export class ZodValidationPipe implements PipeTransform {
     try {
       const parsedValue = this.schema.parse(value);
       return parsedValue;
-    } catch {
-      throw new BadRequestException("Schema Validation Failed");
+    } catch (error) {
+      throw new BadRequestException(error.errors);
     }
   }
 }

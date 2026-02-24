@@ -1,24 +1,56 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateProduction, Production, ProductionSchema, UpdateProduction, } from "@repo/common";
+import { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
 
 @Injectable()
 export class ProductionDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * Get a single Production by their ID.
+   * Get a single ProductionDto by their ID.
    * @param id The ID we are looking for.
    * @returns The production if there is one.
    */
-  async getProductionById(id: number): Promise<Production> {
-    const productions: Production[] = await this.getProductions({ id: id });
+  async getProductionById(id: number): Promise<ProductionDto> {
+    const productions: ProductionDto[] = await this.getProductions({ id: id });
     if (productions.length === 0)
       throw new BadRequestException(
-        `No Production exists for provided ID(${id})`,
+        `No ProductionDto exists for provided ID(${id})`,
       );
 
-    return productions[0]; // There should be a Production in here if the length is not 0.
+    return productions[0]; // There should be a ProductionDto in here if the length is not 0.
+  }
+
+  /**
+   * Get all tags listed under a given production.
+   * @param production the production we want all tags of.
+   * @returns a list of tags connected to the given production.
+   */
+  async getTagsOfProduction(production: ProductionDto): Promise<TagDto[]> {
+    const query = `
+    SELECT t.*
+    FROM tags t
+    JOIN production_tag pt ON t.id = pt.tag_id
+    WHERE pt.production_id = $1
+  `;
+
+    return await this.db.query(query, [production.id]);
+  }
+
+  /**
+   * Get all blogs listed under a given production.
+   * @param id the id of the production we want all blogs of.
+   * @returns a list of blogs connected to the given production.
+   */
+  async getBlogsOfProduction(id: number): Promise<BlogDto[]> {
+    const query = `
+    SELECT b.*
+    FROM blogs b
+    JOIN production_blogs pb ON b.id = pb.blog_id
+    WHERE pb.production_id = $1
+  `;
+
+    return await this.db.query(query, [id]);
   }
 
   /**
@@ -37,7 +69,7 @@ export class ProductionDatabaseService {
       titel: string;
       id: number;
     }>,
-  ): Promise<Production[]> {
+  ): Promise<ProductionDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -99,7 +131,7 @@ export class ProductionDatabaseService {
       ORDER BY p.id
     `;
 
-    return this.db.query<Production>(query, values);
+    return this.db.query<ProductionDto>(query, values);
   }
 
   /**
@@ -108,7 +140,9 @@ export class ProductionDatabaseService {
    * besides primary key id. (database auto-generates that)
    * @returns the added production if it was successful.
    */
-  async createProduction(production: CreateProduction): Promise<Production> {
+  async createProduction(
+    production: CreateProductionDto,
+  ): Promise<ProductionDto> {
     if (!production.titel || !production.genre) {
       throw new BadRequestException("Missing required fields");
     }
@@ -142,13 +176,13 @@ export class ProductionDatabaseService {
       production.planning_id ?? null,
     ];
 
-    const result = await this.db.query<Production>(query, values);
+    const result = await this.db.query<ProductionDto>(query, values);
 
     if (!result.length) {
       throw new Error("Failed to create production");
     }
 
-    return ProductionSchema.parse(result[0]);
+    return result[0];
   }
 
   /**
@@ -157,7 +191,9 @@ export class ProductionDatabaseService {
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
-  async updateProduction(production: UpdateProduction): Promise<Production> {
+  async updateProduction(
+    production: UpdateProductionDto,
+  ): Promise<ProductionDto> {
     if (!production.id) {
       throw new Error("Production id is required for update");
     }
@@ -211,13 +247,13 @@ export class ProductionDatabaseService {
     RETURNING *;
     `;
 
-    const result = await this.db.query<Production>(query, values);
+    const result = await this.db.query<ProductionDto>(query, values);
 
     if (result.length === 0) {
       throw new Error("Production not found");
     }
 
-    return ProductionSchema.parse(result[0]);
+    return result[0];
   }
 
   /**
@@ -230,6 +266,66 @@ export class ProductionDatabaseService {
   async deleteProduction(id: number): Promise<void> {
     const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
 
-    await this.db.query<Production>(query, [id]);
+    await this.db.query<ProductionDto>(query, [id]);
+  }
+
+  /**
+   * Delete function for deleting blogs from the database.
+   * This function deletes all blogs associated with a given production_id
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
+    const query = `
+      DELETE FROM blogs
+        USING production_blogs
+      WHERE blogs.id = production_blogs.blog_id
+        AND production_blogs.production_id = $1
+    `;
+
+    await this.db.query(query, [production_id]);
+  }
+
+  /**
+   * Delete function for deleting blogs from the database.
+   * This function deletes a single blog-LINK associated with a given prod_id
+   * note: it does not delete the blog itself only from being linked to the given production.
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async deleteBlogFromProduction(
+    production_id: number,
+    blog_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM production_blogs
+      WHERE production_blogs.blog_id = $1
+        AND production_blogs.production_id = $2
+    `;
+
+    await this.db.query(query, [blog_id, production_id]);
+  }
+
+  /**
+   * Link an existing blog to a production.
+   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * (silent handling)
+   * @returns nothing.
+   */
+  async linkBlogWithProductionID(
+    blog_id: number,
+    production_id: number,
+  ): Promise<void> {
+    const query = `
+      INSERT INTO production_blogs (production_id, blog_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+    `;
+
+    await this.db.query(query, [production_id, blog_id]);
   }
 }

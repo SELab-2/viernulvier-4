@@ -24,6 +24,21 @@ export class BlogDatabaseService {
   }
 
   /**
+   * Get a single Blog by their ID.
+   * @returns All blogs.
+   */
+  async getBlogs(): Promise<Blog[]> {
+    const query = `SELECT * FROM blogs`;
+
+    const result = await this.db.query(query);
+
+    if (result.length === 0) {
+      throw new Error("no blogs found");
+    }
+    return result;
+  }
+
+  /**
    * Create blog function, creates a blog in the database.
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
    * @returns the added blog if it was successful.
@@ -112,88 +127,6 @@ export class BlogDatabaseService {
     const query = `DELETE FROM blogs WHERE id = $1`;
 
     await this.db.query(query, [id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given event_id
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithEventID(event_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING event_blogs
-      WHERE blogs.id = event_blogs.blog_id
-        AND event_blogs.event_id = $1
-    `;
-
-    await this.db.query(query, [event_id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given production_id
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING production_blogs
-      WHERE blogs.id = production_blogs.blog_id
-        AND production_blogs.production_id = $1
-    `;
-
-    await this.db.query(query, [production_id]);
-  }
-
-  /**
-   * Link an existing blog to an event.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async linkBlogWithEventID(
-    blog_id: number,
-    event_id: number,
-  ): Promise<boolean> {
-    const query = `
-      INSERT INTO event_blogs (event_id, blog_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    const result = await this.db.query(query, [event_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
-  }
-
-  /**
-   * Link an existing blog to a production.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async linkBlogWithProductionID(
-    blog_id: number,
-    production_id: number,
-  ): Promise<boolean> {
-    const query = `
-      INSERT INTO production_blogs (production_id, blog_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    const result = await this.db.query(query, [production_id, blog_id]);
-
-    // if more than 1 row returned -> success.
-    return result.length > 0;
   }
 
   // insert extra functions here if desired.

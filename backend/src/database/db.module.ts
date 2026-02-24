@@ -13,6 +13,7 @@ import { TagDatabaseService } from "./db.tag.service";
     ProductionDatabaseService,
     EventDatabaseService,
     BlogDatabaseService,
+    TagDatabaseService,
   ],
   controllers: [],
   exports: [
@@ -21,6 +22,7 @@ import { TagDatabaseService } from "./db.tag.service";
     ProductionDatabaseService,
     EventDatabaseService,
     BlogDatabaseService,
+    TagDatabaseService,
   ],
 })
 export class DbModule {}
