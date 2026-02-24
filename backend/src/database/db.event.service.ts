@@ -83,14 +83,14 @@ export class EventDatabaseService {
 
     // Filer by id
     if (filters.id) {
-      conditions.push(`p.id = $${i}`);
+      conditions.push(`e.id = $${i}`);
       values.push(filters.id);
       i++;
     }
 
     // Filter by p_id
     if (filters.production_id) {
-      conditions.push(`p.production_id = $${i}`);
+      conditions.push(`p.id = $${i}`);
       values.push(filters.production_id);
       i++;
     }
