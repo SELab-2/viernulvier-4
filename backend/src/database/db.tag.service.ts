@@ -91,24 +91,6 @@ export class TagDatabaseService {
     return result;
   }
 
-  async updateTag(id: number, tag: UpdateTag): Promise<Tag> {
-    if (!tag.tag) {
-      throw new BadRequestException("Missing required fields: tag");
-    }
-    const query = `
-        UPDATE tags
-        SET tag = $1
-        WHERE id = $2
-        RETURNING *;
-      `;
-      const params = [tag.tag, id];
-      const result = await this.db.query(query, params);
-      if (result.length === 0) {
-        throw new Error("Failed to update tag");
-      }
-      return result[0];
-  }
-
   /**
    * Update function for tags. Updates the tag in the database.
    * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
