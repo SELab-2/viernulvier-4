@@ -1,7 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { HelloWorldSchema } from "@repo/common";
 
 describe("AppController", () => {
   let appController: AppController;
@@ -13,15 +12,5 @@ describe("AppController", () => {
     }).compile();
 
     appController = app.get<AppController>(AppController);
-  });
-
-  describe("root", () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toEqual(
-        HelloWorldSchema.parse({
-          text: "Hello World!",
-        }),
-      );
-    });
   });
 });

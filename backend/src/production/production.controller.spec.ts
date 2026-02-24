@@ -66,13 +66,13 @@ describe("ProductionController", () => {
 
   describe("getById", () => {
     it("should return a single production by id", async () => {
-      const result = await controller.getById(1);
+      const result = await controller.getProductionById(1);
       expect(result).toEqual(mockProduction);
       expect(service.getProductionById).toHaveBeenCalledWith(1);
     });
 
     it("should call service.getProductionById with correct id", async () => {
-      await controller.getById(1);
+      await controller.getProductionById(1);
       expect(service.getProductionById).toHaveBeenCalledWith(1);
     });
 
@@ -81,7 +81,7 @@ describe("ProductionController", () => {
       jest
         .spyOn(service, "getProductionById")
         .mockResolvedValueOnce(production2);
-      const result = await controller.getById(2);
+      const result = await controller.getProductionById(2);
       expect(result.id).toBe(2);
       expect(service.getProductionById).toHaveBeenCalledWith(2);
     });
@@ -91,7 +91,7 @@ describe("ProductionController", () => {
       jest.spyOn(service, "getProductionById").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
     
       // Verify the controller passes the exact same exception up
-      await expect(controller.getById(999)).rejects.toThrow(NotFoundException);
+      await expect(controller.getProductionById(999)).rejects.toThrow(NotFoundException);
     });
   });
 

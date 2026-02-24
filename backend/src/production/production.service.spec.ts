@@ -16,8 +16,6 @@ describe("ProductionService", () => {
     description2: "With great actors",
     genre: "Drama",
     planning_id: 1,
-    blog_titel: "Blog title",
-    blog_text: "Blog content",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];
@@ -107,7 +105,7 @@ describe("ProductionService", () => {
   describe("replaceProduction", () => {
     it("should successfully replace and return the production", async () => {
       const result = await service.replaceProduction(1, mockProduction);
-      expect(dbService.updateProduction).toHaveBeenCalledWith(1, mockProduction);
+      expect(dbService.updateProduction).toHaveBeenCalledWith(mockProduction);
       expect(result).toEqual(mockProduction);
     });
 
@@ -131,7 +129,7 @@ describe("ProductionService", () => {
       const result = await service.modifyProduction(1, patchData);
 
       expect(dbService.getProductionById).toHaveBeenCalledWith(1);
-      expect(dbService.updateProduction).toHaveBeenCalledWith(1, expectedMergedProduction);
+      expect(dbService.updateProduction).toHaveBeenCalledWith(expectedMergedProduction);
       expect(result).toEqual(expectedMergedProduction);
     });
 
