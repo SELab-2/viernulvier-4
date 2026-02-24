@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import type { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import type { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
 import { BlogDatabaseService } from "src/database/db.blog.service";
-import type { Blog } from "@repo/common";
 
 @Injectable()
 export class EventService {
@@ -86,7 +85,7 @@ export class EventService {
    * @param eventId The ID of the Event.
    * @returns A list of Blogs.
    */
-  async getEventBlogs(eventId: number): Promise<Blog[]> {
+  async getEventBlogs(eventId: number): Promise<BlogDto[]> {
     return await this.eventDBService.getBlogsOfEvent(eventId);
   }
 
@@ -96,7 +95,7 @@ export class EventService {
    * @param blogId The ID of the Blog in question.
    * @returns The Blog that was just linked to the Event.
    */
-  async linkBlogToEvent(eventId: number, blogId: number): Promise<Blog> {
+  async linkBlogToEvent(eventId: number, blogId: number): Promise<BlogDto> {
     await this.eventDBService.linkBlogWithEventID(blogId, eventId);
     return await this.blogDBService.getBlogById(blogId);
   }

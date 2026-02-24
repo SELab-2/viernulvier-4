@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import {
+  BlogDto,
   CreateProductionDto,
   ProductionDto,
   UpdateProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "src/database/db.blog.service";
-import type { Blog } from "@repo/common";
 
 @Injectable()
 export class ProductionService {
@@ -98,7 +98,7 @@ export class ProductionService {
    * @param productionId The ID of the production. 
    * @returns A list of Blogs.
    */
-  async getProductionBlogs(productionId: number): Promise<Blog[]> {
+  async getProductionBlogs(productionId: number): Promise<BlogDto[]> {
     return await this.productionDBService.getBlogsOfProduction(productionId);
   }
 
@@ -108,7 +108,7 @@ export class ProductionService {
    * @param blogId The ID of the Blog in question.
    * @returns The Blog that was just linked to the Production.
    */
-  async linkBlogToProduction(productionId: number, blogId: number): Promise<Blog> {
+  async linkBlogToProduction(productionId: number, blogId: number): Promise<BlogDto> {
     await this.productionDBService.linkBlogWithProductionID(blogId, productionId);
     return await this.blogDbService.getBlogById(blogId);
   }

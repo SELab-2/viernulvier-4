@@ -17,9 +17,8 @@ import {
   EventSchema,
   UpdateEventSchema,
 } from "@repo/common";
-import { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
-import type { Blog } from "@repo/common";
 
 @Controller("event")
 export class EventController {
@@ -121,7 +120,7 @@ export class EventController {
    * @returns A list of all Blog objects linked to this Event.
    */
   @Get(":id/blog")
-  async getEventBlogs(@Param("id", ParseIntPipe) id: number): Promise<Blog[]> {
+  async getEventBlogs(@Param("id", ParseIntPipe) id: number): Promise<BlogDto[]> {
     return await this.eventService.getEventBlogs(id);
   }
 
@@ -135,7 +134,7 @@ export class EventController {
   async linkBlogToEvent(
     @Param("id", ParseIntPipe) eventId: number,
     @Param("id2", ParseIntPipe) blogId: number,
-  ): Promise<Blog> {
+  ): Promise<BlogDto> {
     return await this.eventService.linkBlogToEvent(eventId, blogId)
   }
 

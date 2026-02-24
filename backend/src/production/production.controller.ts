@@ -12,8 +12,7 @@ import {
 import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import type { Blog } from "@repo/common";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../dto/dto";
+import { ProductionDto, UpdateProductionDto, CreateProductionDto, BlogDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("production")
@@ -113,7 +112,7 @@ export class ProductionController {
    * @returns A list of all Blog objects linked to this Production.
    */
   @Get(":id/blog")
-  async getProductionBlogs(@Param("id", ParseIntPipe) id: number): Promise<Blog[]> {
+  async getProductionBlogs(@Param("id", ParseIntPipe) id: number): Promise<BlogDto[]> {
     return await this.productionService.getProductionBlogs(id);
   }
 
@@ -127,7 +126,7 @@ export class ProductionController {
   async linkBlogToProduction(
     @Param("id", ParseIntPipe) productionId: number,
     @Param("id2", ParseIntPipe) blogId: number,
-  ): Promise<Blog> {
+  ): Promise<BlogDto> {
     return await this.productionService.linkBlogToProduction(productionId, blogId)
   }
 
