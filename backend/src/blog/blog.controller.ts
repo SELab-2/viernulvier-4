@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import type { Blog, CreateBlog, UpdateBlog } from "@repo/common";
 import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from '@repo/common';
 import { ZodValidationPipe } from 'src/common/pipes/zod.validation.pipe';
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from 'src/dto/dto';

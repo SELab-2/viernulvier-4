@@ -111,6 +111,8 @@ export class ProductionController {
    * @param id The id of the Production.
    * @returns A list of all Blog objects linked to this Production.
    */
+  @ApiOperation({ summary: "Get all Blogs linked to a Production." })
+  @ApiOkResponse({ type: BlogDto, isArray: true, description: "Returned all Linked blogs." })
   @Get(":id/blog")
   async getProductionBlogs(@Param("id", ParseIntPipe) id: number): Promise<BlogDto[]> {
     return await this.productionService.getProductionBlogs(id);
@@ -122,6 +124,8 @@ export class ProductionController {
    * @param blogId ID of the Blog.
    * @returns The newly linked Blog object.
    */
+  @ApiOperation({ summary: "Link a Blog to an existing Production." })
+  @ApiOkResponse({ type: BlogDto, description: "Linked Blog to Production." })
   @Put(":id/blog/:id2")
   async linkBlogToProduction(
     @Param("id", ParseIntPipe) productionId: number,
@@ -136,6 +140,8 @@ export class ProductionController {
    * @param blogId ID of the Blog.
    * @returns The Production we just unlinked the Blog from.
    */
+  @ApiOperation({ summary: "Unlink a Blog from an existing Production." })
+  @ApiOkResponse({ type: ProductionDto, description: "Unlinked Blog from Production." })
   @Delete(":id/blog/:id2")
   async unlinkBlogFromEvent(
     @Param("id", ParseIntPipe) productionId: number,
