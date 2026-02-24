@@ -4,25 +4,26 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Production, ProductionSchema } from "@repo/common";
+import { ProductionDto } from "../dto/dto"; 
+import { ProductionSchema } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * Get a single Production by their ID.
+   * Get a single ProductionDto by their ID.
    * @param id The ID we are looking for.
    * @returns The production if there is one.
    */
-  async getProductionById(id: number): Promise<Production> {
-    const productions: Production[] = await this.getProductions({ id: id });
+  async getProductionById(id: number): Promise<ProductionDto> {
+    const productions: ProductionDto[] = await this.getProductions({ id: id });
     if (productions.length === 0)
       throw new BadRequestException(
-        `No Production exists for provided ID(${id})`,
+        `No ProductionDto exists for provided ID(${id})`,
       );
 
-    return productions[0]; // There should be a Production in here if the length is not 0.
+    return productions[0]; // There should be a ProductionDto in here if the length is not 0.
   }
 
   // generic GET function (used only as intermediary end-point)
@@ -35,7 +36,7 @@ export class ProductionDatabaseService {
       titel: string;
       id: number;
     }>,
-  ): Promise<Production[]> {
+  ): Promise<ProductionDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -99,11 +100,11 @@ export class ProductionDatabaseService {
       ORDER BY p.id
     `;
 
-    return this.db.query<Production>(query, values);
+    return this.db.query<ProductionDto>(query, values);
   }
 
   // generic PUT function (used only as intermediary end-point)
-  async createProduction(production: Partial<Production>): Promise<Production> {
+  async createProduction(production: Partial<ProductionDto>): Promise<ProductionDto> {
     if (!production.titel || !production.ondertitel || !production.genre) {
       throw new BadRequestException("Missing required fields");
     }
@@ -188,7 +189,7 @@ export class ProductionDatabaseService {
       ];
     }
 
-    const result = await this.db.query<Production>(query, values);
+    const result = await this.db.query<ProductionDto>(query, values);
 
     if (!result?.length) {
       throw new Error("Failed to create production");
@@ -200,8 +201,8 @@ export class ProductionDatabaseService {
   // generic POST function
   async updateProduction(
     id: number,
-    production: Omit<Production, "id">,
-  ): Promise<Production> {
+    production: Omit<ProductionDto, "id">,
+  ): Promise<ProductionDto> {
     // Validate input fields
     if (
       !production.titel ||
@@ -239,28 +240,28 @@ export class ProductionDatabaseService {
       id,
     ];
 
-    const result = await this.db.query<Production>(query, values);
+    const result = await this.db.query<ProductionDto>(query, values);
 
     if (!result || result.length === 0) {
-      throw new NotFoundException(`Production with id ${id} not found`);
+      throw new NotFoundException(`ProductionDto with id ${id} not found`);
     }
 
     return ProductionSchema.parse(result[0]);
   }
 
   // generic DELETE function
-  // TODO: Make this also remove all Events linked to this Production?
-  async deleteProduction(id: number): Promise<Production> {
+  // TODO: Make this also remove all Events linked to this ProductionDto?
+  async deleteProduction(id: number): Promise<ProductionDto> {
     const query = `
       DELETE FROM productions
       WHERE id = $1
       RETURNING *
     `;
 
-    const result = await this.db.query<Production>(query, [id]);
+    const result = await this.db.query<ProductionDto>(query, [id]);
 
     if (!result || result.length === 0) {
-      throw new NotFoundException(`Production with id ${id} not found`);
+      throw new NotFoundException(`ProductionDto with id ${id} not found`);
     }
 
     return ProductionSchema.parse(result[0]);

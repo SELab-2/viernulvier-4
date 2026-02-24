@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Event } from "@repo/common";
+import { EventDto } from "../dto/dto";
 
 @Injectable()
 export class EventDatabaseService {
@@ -8,17 +8,17 @@ export class EventDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * Get a single Event by their ID.
+   * Get a single EventDto by their ID.
    * @param id The ID we're trying to fetch.
-   * @returns The Event if there is one.
+   * @returns The EventDto if there is one.
    */
   // TODO: return multiple events with same production id
-  async getEventById(id: number): Promise<Event> {
-    const events: Event[] = await this.getEvents({ id: id });
+  async getEventById(id: number): Promise<EventDto> {
+    const events: EventDto[] = await this.getEvents({ id: id });
     if (events.length === 0)
-      throw new BadRequestException(`No Event exists for provided ID(${id})`);
+      throw new BadRequestException(`No EventDto exists for provided ID(${id})`);
 
-    return events[0]; // There should be an Event in here if the length is not 0.
+    return events[0]; // There should be an EventDto in here if the length is not 0.
   }
 
   // generic GET function (used only as intermediary end-point)
@@ -30,7 +30,7 @@ export class EventDatabaseService {
       hall: string;
       id: number;
     }>,
-  ): Promise<Event[]> {
+  ): Promise<EventDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -79,11 +79,11 @@ export class EventDatabaseService {
       ORDER BY e.starttime
         `;
 
-    return this.db.query<Event>(query, values);
+    return this.db.query<EventDto>(query, values);
   }
 
   // generic PUT function (used only as intermediary end-point)
-  async createEvent(event: Omit<Event, "id">): Promise<Event> {
+  async createEvent(event: Omit<EventDto, "id">): Promise<EventDto> {
     // Validate input, throw error if not all
     if (!event.starttime || !event.hall || !event.production_id) {
       throw new BadRequestException("Missing required fields");
@@ -95,7 +95,7 @@ export class EventDatabaseService {
       RETURNING id, starttime, endtime, hall, production_id, price
     `;
 
-    const result = await this.db.query<Event>(query, [
+    const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
       event.hall,
@@ -112,13 +112,13 @@ export class EventDatabaseService {
   }
 
   // generic POST function
-  async updateEvent(event: Omit<Event, "id">): Promise<Event> {
+  async updateEvent(event: Omit<EventDto, "id">): Promise<EventDto> {
     // TODO this needed?
     return new Promise(async (resolve, reject) => {});
   }
 
   // generic DELETE function
-  async deleteEvent(id: number, date: string): Promise<Event> {
+  async deleteEvent(id: number, date: string): Promise<EventDto> {
     // TODO this needed?
     // + wouldnt work on id would need id and date?
     return new Promise(async (resolve, reject) => {});

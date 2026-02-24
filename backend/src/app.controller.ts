@@ -1,4 +1,4 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Redirect } from "@nestjs/common";
 import { AppService } from "./app.service";
 import type { HelloWorld } from "@repo/common";
 
@@ -7,7 +7,6 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): HelloWorld {
-    return this.appService.getHello();
-  }
+  @Redirect("/docs", 301)
+  root(): void {}
 }
