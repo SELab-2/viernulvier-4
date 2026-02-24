@@ -43,7 +43,7 @@ Table event_blogs {
 
 Table tags {
   id int [pk, increment]
-  tag text [not null]
+  tag text [not null, unique]
 }
 
 Table production_tags {

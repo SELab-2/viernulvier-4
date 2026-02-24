@@ -69,7 +69,7 @@ CREATE TABLE event_blogs
 CREATE TABLE tags
 (
     id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tag TEXT NOT NULL
+    tag TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE production_tags
@@ -126,12 +126,12 @@ VALUES (1, 1),
 INSERT INTO event_blogs (event_id, blog_id)
 VALUES (2, 1);
 
-INSERT INTO tags (production_id, tag)
-VALUES (1, 'Drama'),
-       (1, 'Classic'),
-       (2, 'Comedy'),
-       (2, 'Family'),
-       (3, 'Musical');
+INSERT INTO tags (tag)
+VALUES ('Drama'),
+       ('Classic'),
+       ('Comedy'),
+       ('Family'),
+       ('Musical');
 
 
 -- remove all mock data:
