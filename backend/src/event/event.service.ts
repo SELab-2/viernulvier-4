@@ -75,7 +75,7 @@ export class EventService {
    * @param newEvent The new EventDto data we want to add
    * @returns The newly created EventDto.
    */
-  async createEvent(newEvent: CreateEventDto) : Promise<EventDto> {
+  async createEvent(newEvent: CreateEventDto): Promise<EventDto> {
     return await this.eventDBService.createEvent(newEvent);
   }
 
@@ -112,3 +112,5 @@ export class EventService {
     return await this.eventDBService.getEventById(eventId);
   } 
 }
+
+export default EventService;

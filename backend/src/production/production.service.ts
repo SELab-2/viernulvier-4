@@ -1,5 +1,9 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { CreateProductionDto, ProductionDto, UpdateProductionDto } from "../dto/dto";
+import {
+  CreateProductionDto,
+  ProductionDto,
+  UpdateProductionDto,
+} from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "src/database/db.blog.service";
 import type { Blog } from "@repo/common";
@@ -81,8 +85,10 @@ export class ProductionService {
    * @param newProduction The new ProductionDto data we want to add
    * @returns The newly created ProductionDto.
    */
-  async createProduction(newProduction: CreateProductionDto) : Promise<ProductionDto> {
-    return await this.productionDBService.createProduction(newProduction)
+  async createProduction(
+    newProduction: CreateProductionDto,
+  ): Promise<ProductionDto> {
+    return await this.productionDBService.createProduction(newProduction);
   }
 
   // -- Blogs -- //

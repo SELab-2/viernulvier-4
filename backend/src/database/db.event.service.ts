@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { EventDto, UpdateEventDto } from "../dto/dto";
-import type { Blog } from "@repo/common";
+import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 
 @Injectable()
 export class EventDatabaseService {
@@ -16,7 +15,9 @@ export class EventDatabaseService {
   async getEventById(id: number): Promise<EventDto> {
     const events: EventDto[] = await this.getEvents({ id: id });
     if (events.length === 0)
-      throw new BadRequestException(`No EventDto exists for provided ID(${id})`);
+      throw new BadRequestException(
+        `No EventDto exists for provided ID(${id})`,
+      );
 
     return events[0]; // There should be an EventDto in here if the length is not 0.
   }
@@ -26,7 +27,7 @@ export class EventDatabaseService {
    * @param id the id of an event you want the blogs of.
    * @returns a list of blogs connected to the given event.
    */
-  async getBlogsOfEvent(id: number): Promise<Blog[]> {
+  async getBlogsOfEvent(id: number): Promise<BlogDto[]> {
     const query = `
     SELECT b.*
     FROM blogs b
@@ -118,7 +119,7 @@ export class EventDatabaseService {
    * @param event must be of the type "CreateEvent" which has all fields defined besides the primary key id.
    * @returns the added event if it was successful.
    */
-  async createEvent(event: Omit<EventDto, "id">): Promise<EventDto> {
+  async createEvent(event: CreateEventDto): Promise<EventDto> {
     // Validate input, throw error if not all
     if (!event.starttime || !event.hall || !event.production_id) {
       throw new BadRequestException("Missing required fields");

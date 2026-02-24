@@ -1,8 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateProductionDto, ProductionDto, UpdateProductionDto } from "../dto/dto"; 
-import { ProductionSchema } from "@repo/common";
-import type { Tag, Blog } from "@repo/common";
+import { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -28,7 +26,7 @@ export class ProductionDatabaseService {
    * @param production the production we want all tags of.
    * @returns a list of tags connected to the given production.
    */
-  async getTagsOfProduction(production: ProductionDto): Promise<Tag[]> {
+  async getTagsOfProduction(production: ProductionDto): Promise<TagDto[]> {
     const query = `
     SELECT t.*
     FROM tags t
@@ -44,7 +42,7 @@ export class ProductionDatabaseService {
    * @param id the id of the production we want all blogs of.
    * @returns a list of blogs connected to the given production.
    */
-  async getBlogsOfProduction(id: number): Promise<Blog[]> {
+  async getBlogsOfProduction(id: number): Promise<BlogDto[]> {
     const query = `
     SELECT b.*
     FROM blogs b
@@ -142,8 +140,10 @@ export class ProductionDatabaseService {
    * besides primary key id. (database auto-generates that)
    * @returns the added production if it was successful.
    */
-  async createProduction(production: CreateProductionDto): Promise<ProductionDto> {
-    if (!production.titel || !production.ondertitel || !production.genre) {
+  async createProduction(
+    production: CreateProductionDto,
+  ): Promise<ProductionDto> {
+    if (!production.titel || !production.genre) {
       throw new BadRequestException("Missing required fields");
     }
 
@@ -182,7 +182,7 @@ export class ProductionDatabaseService {
       throw new Error("Failed to create production");
     }
 
-    return ProductionSchema.parse(result[0]);
+    return result[0];
   }
 
   /**
@@ -191,17 +191,11 @@ export class ProductionDatabaseService {
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
-  async updateProduction(production: UpdateProductionDto): Promise<ProductionDto> {
+  async updateProduction(
+    production: UpdateProductionDto,
+  ): Promise<ProductionDto> {
     if (!production.id) {
       throw new Error("Production id is required for update");
-    }
-    if (
-      !production.titel ||
-      !production.ondertitel ||
-      !production.description1 ||
-      !production.genre
-    ) {
-      throw new BadRequestException("Missing required fields");
     }
 
     const fields: string[] = [];
@@ -255,11 +249,11 @@ export class ProductionDatabaseService {
 
     const result = await this.db.query<ProductionDto>(query, values);
 
-    if (!result || result.length === 0) {
-      throw new NotFoundException(`ProductionDto with id ${production.id} not found`);
+    if (result.length === 0) {
+      throw new Error("Production not found");
     }
 
-    return ProductionSchema.parse(result[0]);
+    return result[0];
   }
 
   /**

@@ -1,4 +1,17 @@
-import { BlogSchema, CreateBlogSchema, CreateEventSchema, CreateProductionSchema, EventSchema, ProductionSchema, UpdateBlogSchema, UpdateEventSchema, UpdateProductionSchema } from "@repo/common";
+import {
+  BlogSchema,
+  CreateBlogSchema,
+  CreateEventSchema,
+  CreateProductionSchema,
+  CreateTagSchema,
+  EventSchema,
+  ProductionSchema,
+  TagSchema,
+  UpdateBlogSchema,
+  UpdateEventSchema,
+  UpdateProductionSchema,
+  UpdateTagSchema,
+} from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
 
@@ -12,7 +25,12 @@ export class EventDto extends createZodDto(EventSchema) {}
 export class CreateEventDto extends createZodDto(CreateEventSchema) {}
 export class UpdateEventDto extends createZodDto(UpdateEventSchema) {}
 
-// Blogs
+// Blog Wrappers
 export class BlogDto extends createZodDto(BlogSchema) {}
 export class CreateBlogDto extends createZodDto(CreateBlogSchema) {}
 export class UpdateBlogDto extends createZodDto(UpdateBlogSchema) {}
+
+// Tag Wrappers
+export class TagDto extends createZodDto(TagSchema) {}
+export class CreateTagDto extends createZodDto(CreateTagSchema) {}
+export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
