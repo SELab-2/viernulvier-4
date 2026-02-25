@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type { BlogDto, ProductionDto, UpdateProductionDto, TagDto } from "../dto/dto";
+import type { BlogDto, ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 
@@ -301,5 +301,47 @@ describe("ProductionService", () => {
     });
   });
 
-  // TODO: Missing createProduction test
+  describe("createProduction", () => {
+    it("should create a production successfully", async () => {
+      const newProduction: CreateProductionDto = {
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: 2,
+      };
+
+      const createdProduction: ProductionDto = { id: 2, ...newProduction };
+
+      jest
+        .spyOn(dbService, "createProduction")
+        .mockResolvedValueOnce(createdProduction);
+
+      const result = await service.createProduction(newProduction);
+
+      expect(dbService.createProduction).toHaveBeenCalledWith(newProduction);
+      expect(result).toEqual(createdProduction);
+    });
+
+    it("should handle database errors when creation fails", async () => {
+      const newProduction: CreateProductionDto = {
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: 2,
+      };
+
+      jest
+        .spyOn(dbService, "createProduction")
+        .mockRejectedValueOnce(new Error("Failed to create production"));
+
+      await expect(service.createProduction(newProduction)).rejects.toThrow(
+        "Failed to create production"
+      );
+    });
+  });
+
 });

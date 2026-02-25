@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "./production.service";
-import { BlogDto, ProductionDto, UpdateProductionDto, TagDto } from "../dto/dto"; 
+import { BlogDto, ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto } from "../dto/dto";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ProductionController", () => {
@@ -259,5 +259,46 @@ describe("ProductionController", () => {
     });
   });
 
-  // TODO: Missing createProduction test
+  describe("createProduction", () => {
+    it("should create a production successfully", async () => {
+      const newProduction: CreateProductionDto = {
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: 2,
+      };
+
+      const createdProduction: ProductionDto = { id: 2, ...newProduction };
+
+      jest
+        .spyOn(service, "createProduction")
+        .mockResolvedValueOnce(createdProduction);
+
+      const result = await controller.createProduction(newProduction);
+
+      expect(service.createProduction).toHaveBeenCalledWith(newProduction);
+      expect(result).toEqual(createdProduction);
+    });
+
+    it("should handle database errors when creation fails", async () => {
+      const newProduction: CreateProductionDto = {
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: 2,
+      };
+
+      jest
+        .spyOn(service, "createProduction")
+        .mockRejectedValueOnce(new Error("Failed to create production"));
+
+      await expect(controller.createProduction(newProduction)).rejects.toThrow(
+        "Failed to create production"
+      );
+    });
+  });
 });
