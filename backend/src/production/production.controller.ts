@@ -12,7 +12,7 @@ import {
 import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../dto/dto";
+import { ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto, BlogDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("production")
@@ -38,8 +38,20 @@ export class ProductionController {
   @ApiOperation({ summary: "Returns the Production with id in the URL." })
   @ApiOkResponse({ type: ProductionDto, description: "Production Found." })
   @Get(":id")
-  async getById(@Param("id", ParseIntPipe) id: number): Promise<ProductionDto> {
+  async getProductionById(@Param("id", ParseIntPipe) id: number): Promise<ProductionDto> {
     return await this.productionService.getProductionById(id);
+  }
+
+  /**
+   * Responds to GET /productions/:id/tags
+   * @param id ID in the URL of the request.
+   * @returns The list of Tag objects for the Production
+   */
+  @ApiOperation({ summary: "Returns the Tags of the Production with id in the URL." })
+  @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
+  @Get(":id/tags")
+  async getTagsOfProductionByID(@Param("id", ParseIntPipe) id: number): Promise<TagDto[]> {
+    return await this.productionService.getTagsById(id);
   }
 
   /**
@@ -102,5 +114,51 @@ export class ProductionController {
     @Body() newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
     return this.productionService.createProduction(newProduction);
+  }
+
+  // -- BLOGS -- //
+
+  /**
+   * Responds to a GET to "/:id/blog".
+   * @param id The id of the Production.
+   * @returns A list of all Blog objects linked to this Production.
+   */
+  @ApiOperation({ summary: "Get all Blogs linked to a Production." })
+  @ApiOkResponse({ type: BlogDto, isArray: true, description: "Returned all Linked blogs." })
+  @Get(":id/blog")
+  async getProductionBlogs(@Param("id", ParseIntPipe) id: number): Promise<BlogDto[]> {
+    return await this.productionService.getProductionBlogs(id);
+  }
+
+  /**
+   * Responds to a PUT to "/:id/blog/:id2"
+   * @param productionId ID of the Production.
+   * @param blogId ID of the Blog.
+   * @returns The newly linked Blog object.
+   */
+  @ApiOperation({ summary: "Link a Blog to an existing Production." })
+  @ApiOkResponse({ type: BlogDto, description: "Linked Blog to Production." })
+  @Put(":id/blog/:id2")
+  async linkBlogToProduction(
+    @Param("id", ParseIntPipe) productionId: number,
+    @Param("id2", ParseIntPipe) blogId: number,
+  ): Promise<BlogDto> {
+    return await this.productionService.linkBlogToProduction(productionId, blogId)
+  }
+
+  /**
+   * Responds to a DELETE to "/:id/blog/:id2"
+   * @param productionId ID of the Production.
+   * @param blogId ID of the Blog.
+   * @returns The Production we just unlinked the Blog from.
+   */
+  @ApiOperation({ summary: "Unlink a Blog from an existing Production." })
+  @ApiOkResponse({ type: ProductionDto, description: "Unlinked Blog from Production." })
+  @Delete(":id/blog/:id2")
+  async unlinkBlogFromEvent(
+    @Param("id", ParseIntPipe) productionId: number,
+    @Param("id2", ParseIntPipe) blogId: number
+  ): Promise<ProductionDto> {
+    return await this.productionService.unlinkBlogFromProduction(productionId, blogId);
   }
 }

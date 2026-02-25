@@ -41,7 +41,7 @@ export class EventDatabaseService {
   /**
    * Generic get function for events.
    * @param filters gives the freedom to define the filters of the search you want.
-   * All filters are filtered by equals.
+   * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
    * @returns All events for the given filters.
@@ -50,6 +50,12 @@ export class EventDatabaseService {
     filters: Partial<{
       genre: string;
       date: string;
+      // Return events where the provided date lies between starttime and endtime
+      date_between: string;
+      // Return events where starttime is before the provided date
+      date_before: string;
+      // Return events where endtime is after the provided date
+      date_after: string;
       hall: string;
       id: number;
       production_id: number;
@@ -74,6 +80,28 @@ export class EventDatabaseService {
       i++;
     }
 
+    // Filter by given date lying between starttime and endtime (inclusive)
+    if (filters.date_between) {
+      // Use explicit timestamp comparison to include time component
+      conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
+      values.push(filters.date_between);
+      i++;
+    }
+
+    // Filter events whose starttime is before the provided date
+    if (filters.date_before) {
+      conditions.push(`e.starttime < $${i}::timestamp`);
+      values.push(filters.date_before);
+      i++;
+    }
+
+    // Filter events whose endtime is after the provided date
+    if (filters.date_after) {
+      conditions.push(`e.endtime > $${i}::timestamp`);
+      values.push(filters.date_after);
+      i++;
+    }
+
     // Filter by hall
     if (filters.hall) {
       conditions.push(`e.hall = $${i}`);
@@ -83,14 +111,14 @@ export class EventDatabaseService {
 
     // Filer by id
     if (filters.id) {
-      conditions.push(`p.id = $${i}`);
+      conditions.push(`e.id = $${i}`);
       values.push(filters.id);
       i++;
     }
 
     // Filter by p_id
     if (filters.production_id) {
-      conditions.push(`p.production_id = $${i}`);
+      conditions.push(`p.id = $${i}`);
       values.push(filters.production_id);
       i++;
     }

@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Production } from "@repo/common";
-import { CreateTagDto, TagDto, UpdateTagDto } from "src/dto/dto";
+import { CreateTagDto, ProductionDto, TagDto, UpdateTagDto } from "../dto/dto";
 
 @Injectable()
 export class TagDatabaseService {
@@ -29,7 +28,7 @@ export class TagDatabaseService {
    * @param tag the tag we want to get the productions connected to.
    * @returns a list of productions that fall under the given tag.
    */
-  async getProductionsByTag(tag: TagDto): Promise<Production[]> {
+  async getProductionsByTag(tag: TagDto): Promise<ProductionDto[]> {
     const query = `
     SELECT p.*
     FROM productions p

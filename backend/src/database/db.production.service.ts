@@ -56,7 +56,7 @@ export class ProductionDatabaseService {
   /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
-   * All filters are filtered by equals.
+   * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
    * @returns All productions for the given filters.
@@ -66,6 +66,12 @@ export class ProductionDatabaseService {
       genre: string;
       hall: string;
       date: string;
+      // Return events where the provided date lies between starttime and endtime
+      date_between: string;
+      // Return events where starttime is before the provided date
+      date_before: string;
+      // Return events where endtime is after the provided date
+      date_after: string;
       titel: string;
       id: number;
     }>,
@@ -92,6 +98,28 @@ export class ProductionDatabaseService {
     if (filters.date) {
       conditions.push(`(DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i})`);
       values.push(filters.date);
+      i++;
+    }
+
+    // Filter by given date lying between starttime and endtime (inclusive)
+    if (filters.date_between) {
+      // Use explicit timestamp comparison to include time component
+      conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
+      values.push(filters.date_between);
+      i++;
+    }
+
+    // Filter events whose starttime is before the provided date
+    if (filters.date_before) {
+      conditions.push(`e.starttime < $${i}::timestamp`);
+      values.push(filters.date_before);
+      i++;
+    }
+
+    // Filter events whose endtime is after the provided date
+    if (filters.date_after) {
+      conditions.push(`e.endtime > $${i}::timestamp`);
+      values.push(filters.date_after);
       i++;
     }
 

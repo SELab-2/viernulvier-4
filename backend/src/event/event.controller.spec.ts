@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import EventService from "./event.service";
-import type { EventDto, UpdateEventDto } from "../dto/dto";
+import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 
 describe("EventController", () => {
@@ -31,6 +31,10 @@ describe("EventController", () => {
             replaceEvent: jest.fn().mockResolvedValue(mockEvent),
             modifyEvent: jest.fn().mockResolvedValue(mockEvent),
             deleteEvent: jest.fn().mockResolvedValue(undefined),
+            createEvent: jest.fn(),
+            getEventBlogs: jest.fn(),
+            linkBlogToEvent: jest.fn(),
+            unlinkBlogFromEvent: jest.fn(),
           },
         },
       ],
@@ -152,5 +156,89 @@ describe("EventController", () => {
     });
   });
 
-  // TODO: Missing test for createEvent.
+  // ... existing tests ...
+
+  describe("-- Blogs --", () => {
+    const mockBlog = {
+      id: 1,
+      title: "Event Update",
+      content: "This is a blog about the event.",
+    };
+
+    describe("getEventBlogs", () => {
+      it("should return an array of blogs linked to the event", async () => {
+        const expectedBlogs = [mockBlog];
+        service.getEventBlogs = jest.fn().mockResolvedValue(expectedBlogs);
+
+        const result = await controller.getEventBlogs(1);
+
+        expect(result).toEqual(expectedBlogs);
+        expect(service.getEventBlogs).toHaveBeenCalledWith(1);
+        expect(service.getEventBlogs).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("linkBlogToEvent", () => {
+      it("should link a blog to an event and return the blog", async () => {
+        service.linkBlogToEvent = jest.fn().mockResolvedValue(mockBlog);
+
+        const result = await controller.linkBlogToEvent(1, 2);
+
+        expect(result).toEqual(mockBlog);
+        expect(service.linkBlogToEvent).toHaveBeenCalledWith(1, 2);
+        expect(service.linkBlogToEvent).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("unlinkBlogFromEvent", () => {
+      it("should unlink a blog from an event and return the unlinked event", async () => {
+        service.unlinkBlogFromEvent = jest.fn().mockResolvedValue(mockEvent);
+
+        const result = await controller.unlinkBlogFromEvent(1, 2);
+
+        expect(result).toEqual(mockEvent);
+        expect(service.unlinkBlogFromEvent).toHaveBeenCalledWith(1, 2);
+        expect(service.unlinkBlogFromEvent).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe("createEvent", () => {
+    it("should create an event successfully", async () => {
+      const newEvent: CreateEventDto = {
+        starttime: "2024-02-10T18:00:00Z",
+        endtime: "2024-02-10T20:00:00Z",
+        hall: "Grand Hall",
+        production_id: 2,
+        price: 30,
+      };
+
+      const createdEvent: EventDto = { id: 2, ...newEvent };
+
+      jest.spyOn(service, "createEvent").mockResolvedValueOnce(createdEvent);
+
+      const result = await controller.createEvent(newEvent);
+
+      expect(service.createEvent).toHaveBeenCalledWith(newEvent);
+      expect(result).toEqual(createdEvent);
+    });
+
+    it("should handle database errors when creation fails", async () => {
+      const newEvent: CreateEventDto = {
+        starttime: "2024-02-10T18:00:00Z",
+        endtime: "2024-02-10T20:00:00Z",
+        hall: "Grand Hall",
+        production_id: 2,
+        price: 30,
+      };
+
+      jest
+        .spyOn(service, "createEvent")
+        .mockRejectedValueOnce(new Error("Failed to create event"));
+
+      await expect(controller.createEvent(newEvent)).rejects.toThrow(
+        "Failed to create event"
+      );
+    });
+  });
 });
