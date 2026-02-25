@@ -19,8 +19,15 @@ export class TagController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a single tag by ID' })
   @ApiOkResponse({ type: TagDto, description: "Returns the requested tag" })
-  findOneTag(@Param('id', ParseIntPipe) id: number) {
-    return this.tagService.findOneTag(id);
+  findTagById(@Param('id', ParseIntPipe) id: number) {
+    return this.tagService.findTagById(id);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all tags' })
+  @ApiOkResponse({ type: [TagDto], description: "Returns all tags" })
+  findAllTags() {
+    return this.tagService.findAllTags();
   }
 
   @Patch(':id')

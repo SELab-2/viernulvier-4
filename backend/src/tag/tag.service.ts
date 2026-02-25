@@ -1,34 +1,59 @@
 import {
   Injectable,
-  InternalServerErrorException,
-  NotFoundException,
   BadRequestException
 } from '@nestjs/common';
-import { CreateTag, Tag, UpdateTag } from '@repo/common';
 import { TagDatabaseService } from '../database/db.tag.service';
+import { CreateTagDto, TagDto, UpdateTagDto } from 'src/dto/dto';
 
 @Injectable()
 export class TagService {
   constructor(private readonly dbTagService: TagDatabaseService) {}
-  // creates a new tag in the database, returns the created tag.
-  async createTag(createTag: CreateTag): Promise<Tag> {
+
+  /**
+   * Creates a TagDto and adds it to the database
+   * @param createTag The new TagDto data we want to add
+   * @returns The newly created TagDto.
+   */
+  async createTag(createTag: CreateTagDto): Promise<TagDto> {
     return await this.dbTagService.createTag(createTag);
   }
 
-  // retrieves a single tag by its ID, returns the tag if found, otherwise throws a NotFoundException.
-  async findOneTag(id: number): Promise<Tag> {
+  /**
+   * Fetches TagDto object from the DBService with given ID.
+   * @param id ID in the URL of the request.
+   * @returns The TagDto object with corresponding ID
+   */
+  async findTagById(id: number): Promise<TagDto> {
     return await this.dbTagService.getTagById(id);
   }
 
-  // updates a tag by its ID, returns the updated tag if successful, otherwise throws a NotFoundException if the tag does not exist.
-  async updateTag(id: number, updateTag: UpdateTag): Promise<Tag> {
+  /**
+   * Fetches all TagDto objects from the DBService.
+   * @returns All TagDto objects
+   */
+  async findAllTags(): Promise<TagDto[]> {
+    return await this.dbTagService.getTags();
+  }
+
+  /**
+   * Modifies an exising TagDto with the data provided in the body.
+   * @param id The ID of the tag.
+   * @param updateTag The data we want to update.
+   * @returns The newly updated TagDto.
+   */
+  async updateTag(id: number, updateTag: UpdateTagDto): Promise<TagDto> {
     if (updateTag.id && updateTag.id !== id) {
       throw new BadRequestException('ID in the body does not match ID in the path.');
     }
+    // De DatabaseService handelt de merge en update af
     return await this.dbTagService.updateTag(updateTag);
   }
 
-  // deletes a tag by its ID, returns a success message if deleted, otherwise throws a NotFoundException if the tag does not exist.
+  /**
+   * Deletes a TagDto from the database.
+   * @param id The ID of the TagDto.
+   * @returns A success message.
+   */
   async deleteTag(id: number): Promise<{ message: string }> {
       await this.dbTagService.deleteTag(id);
       return {

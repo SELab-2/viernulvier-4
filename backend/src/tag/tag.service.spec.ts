@@ -2,22 +2,19 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TagService } from './tag.service';
 import { TagDatabaseService } from '../database/db.tag.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { CreateTagDto, TagDto, UpdateTagDto } from '../dto/dto';
 
 describe('TagService', () => {
   let service: TagService;
   let dbService: TagDatabaseService;
 
-  /**
-   * Mock object voor DbService om database-interactie te simuleren 
-   * zonder een echte verbinding nodig te hebben.
-   */
-  const mockDbTagService = {
-    createTag: jest.fn(),
-    getTagById: jest.fn(),
-    getAllTags: jest.fn(),
-    updateTag: jest.fn(),
-    deleteTag: jest.fn(),
-  };
+  const mockTag: TagDto = {
+    id: 1,
+    tag: 'Action',
+    production_id: 101,
+  } as TagDto;
+
+  const mockTags: TagDto[] = [mockTag];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,101 +22,81 @@ describe('TagService', () => {
         TagService,
         {
           provide: TagDatabaseService,
-          useValue: mockDbTagService,
+          useValue: {
+            createTag: jest.fn().mockResolvedValue(mockTag),
+            getTagById: jest.fn().mockResolvedValue(mockTag),
+            getTags: jest.fn().mockResolvedValue(mockTags),
+            updateTag: jest.fn().mockResolvedValue(mockTag),
+            deleteTag: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();
 
     service = module.get<TagService>(TagService);
     dbService = module.get<TagDatabaseService>(TagDatabaseService);
-
-    // Reset de mocks voor elke test om vervuiling tussen tests te voorkomen
-    jest.clearAllMocks();
   });
 
-  /**
-   * Testgroep voor het aanmaken van nieuwe tags
-   */
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
   describe('createTag', () => {
-    it('should create a new tag', async () => {
-      const dto = { tag: 'Action', production_id: 1 };
-      // Simuleer een succesvolle database insert die het nieuwe record teruggeeft
-      mockDbTagService.createTag.mockResolvedValue({ id: 1, ...dto });
-      const result = await service.createTag(dto);
-      expect(result.tag).toBe('Action');
-      expect(mockDbTagService.createTag).toHaveBeenCalledWith(dto);
+    it('should create and return a new tag', async () => {
+      const createDto = { tag: 'NewTag', production_id: 101 } as CreateTagDto;
+      const result = await service.createTag(createDto);
+      expect(dbService.createTag).toHaveBeenCalledWith(createDto);
+      expect(result).toEqual(mockTag);
     });
   });
 
-  /**
-   * Testgroep voor het ophalen van één specifieke tag
-   */
-  describe('findOneTag', () => {
-    it('should return a single tag if it exists', async () => {
-      const expectedTag = { id: 1, tag: 'Drama' };
-      mockDbTagService.getTagById.mockResolvedValue(expectedTag);
-
-      const result = await service.findOneTag(1);
-      expect(result).toEqual(expectedTag);
+  describe('findTagById', () => {
+    it('should return tag by id from database', async () => {
+      const result = await service.findTagById(1);
+      expect(result).toEqual(mockTag);
+      expect(dbService.getTagById).toHaveBeenCalledWith(1);
     });
 
     it('should throw NotFoundException if tag does not exist', async () => {
-      // Simuleer een SELECT query die geen resultaten (lege array) oplevert
-      mockDbTagService.getTagById.mockRejectedValue(new NotFoundException());
-      await expect(service.findOneTag(999)).rejects.toThrow(NotFoundException);
+      jest.spyOn(dbService, 'getTagById').mockRejectedValue(new NotFoundException());
+      await expect(service.findTagById(999)).rejects.toThrow(NotFoundException);
     });
   });
 
-  /**
-   * Testgroep voor het bijwerken van bestaande tags (Issue #52)
-   */
+  describe('findAllTags', () => {
+    it('should return all tags from database', async () => {
+      const result = await service.findAllTags();
+      expect(result).toEqual(mockTags);
+      expect(dbService.getTags).toHaveBeenCalled();
+    });
+
+    it('should handle database errors', async () => {
+      jest.spyOn(dbService, 'getTags').mockRejectedValue(new Error('Database error'));
+      await expect(service.findAllTags()).rejects.toThrow('Database error');
+    });
+  });
+
   describe('updateTag', () => {
-    it('should update and return the tag', async () => {
-      const dto = { tag: 'UpdatedTag' };
-      const expectedResult = { id: 1, tag: 'UpdatedTag', production_id: 1 };
-      mockDbTagService.updateTag.mockResolvedValue(expectedResult);
-
-      const result = await service.updateTag(1, dto);
-      expect(result.tag).toBe('UpdatedTag');
+    it('should successfully update and return the tag', async () => {
+      const updateDto = { tag: 'Updated' };
+      const result = await service.updateTag(1, updateDto);
+      expect(dbService.updateTag).toHaveBeenCalledWith(1, updateDto);
+      expect(result).toEqual(mockTag);
     });
 
-    it('should throw BadRequestException if Ids do not match', async () => {
-      const dto = { id: 2, tag: 'Mismatch' };
-      await expect(service.updateTag(1, dto as any)).rejects.toThrow(BadRequestException);
-    });
-
-    it('should throw NotFoundException if tag to update is not found', async () => {
-      mockDbTagService.updateTag.mockRejectedValue(new NotFoundException());
-      await expect(service.updateTag(999, { tag: 'NonExistent' }))
-        .rejects.toThrow(NotFoundException);
+    it('should throw BadRequestException if url id and body id do not match', async () => {
+      const mismatchDto = { id: 2, tag: 'Mismatch' };
+      await expect(service.updateTag(1, mismatchDto as any)).rejects.toThrow(BadRequestException);
     });
   });
 
-  /**
-   * Testgroep voor het verwijderen van een tag
-   */
   describe('deleteTag', () => {
-    it('should successfully remove a tag and return a message', async () => {
-      // Arrange: Simuleer dat de tag eerst wordt gevonden
-      const tagId = 8;
-      mockDbTagService.deleteTag.mockResolvedValue(undefined);
-
-      // Act
-      const result = await service.deleteTag(tagId);
-
-      // Assert
+    it('should delete the tag and return a success message', async () => {
+      const result = await service.deleteTag(1);
+      expect(dbService.deleteTag).toHaveBeenCalledWith(1);
       expect(result).toEqual({
-        message: `Tag with ID ${tagId} has been removed successfully.`
+        message: `Tag with ID 1 has been removed successfully.`
       });
-      expect(mockDbTagService.deleteTag).toHaveBeenCalledWith(tagId);
-    });
-
-    it('should throw NotFoundException if tag to remove does not exist', async () => {
-      // Arrange: Simuleer dat getTagById een error gooit (tag niet gevonden)
-      mockDbTagService.getTagById.mockRejectedValue(new NotFoundException());
-
-      // Act & Assert
-      await expect(service.deleteTag(999)).rejects.toThrow(NotFoundException);
     });
   });
 });

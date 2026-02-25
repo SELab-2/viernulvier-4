@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTag, Production, Tag, UpdateTag } from "@repo/common";
+import { Production } from "@repo/common";
+import { CreateTagDto, TagDto, UpdateTagDto } from "src/dto/dto";
 
 @Injectable()
 export class TagDatabaseService {
@@ -12,7 +13,7 @@ export class TagDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The tag if there is one.
    */
-  async getTagById(id: number): Promise<Tag> {
+  async getTagById(id: number): Promise<TagDto> {
     const query = `SELECT * FROM tags WHERE id = $1`;
 
     const result = await this.db.query(query, [id]);
@@ -28,7 +29,7 @@ export class TagDatabaseService {
    * @param tag the tag we want to get the productions connected to.
    * @returns a list of productions that fall under the given tag.
    */
-  async getProductionsByTag(tag: Tag): Promise<Production[]> {
+  async getProductionsByTag(tag: TagDto): Promise<Production[]> {
     const query = `
     SELECT p.*
     FROM productions p
@@ -43,7 +44,7 @@ export class TagDatabaseService {
    * Get all tags.
    * @returns The tags if there are any.
    */
-  async getTags(): Promise<Tag[]> {
+  async getTags(): Promise<TagDto[]> {
     const query = `SELECT * FROM tags`;
 
     const result = await this.db.query(query);
@@ -59,7 +60,7 @@ export class TagDatabaseService {
    * @param tag must be of the type "CreateTag" which has all fields defined besides the primary key id.
    * @returns the added tag if it was successful.
    */
-  async createTag(tag: CreateTag): Promise<Tag> {
+  async createTag(tag: CreateTagDto): Promise<TagDto> {
     if (!tag.tag) {
       throw new BadRequestException("Missing required fields");
     }
@@ -74,7 +75,7 @@ export class TagDatabaseService {
 
     const values = [tag.tag];
 
-    const result = await this.db.query<Tag>(query, values);
+    const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
       throw new Error("Failed to create tag");
@@ -83,21 +84,13 @@ export class TagDatabaseService {
     return result[0];
   }
 
-  async getAllTags(): Promise<Tag[]> {
-    const query = `SELECT * FROM tags`;
-
-    const result = await this.db.query<Tag>(query);
-
-    return result;
-  }
-
   /**
    * Update function for tags. Updates the tag in the database.
    * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
    * The id field in the tag MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateTag(tag: UpdateTag): Promise<Tag> {
+  async updateTag(tag: UpdateTagDto): Promise<TagDto> {
     if (!tag.id) {
       throw new Error("Tag id is required for update");
     }
@@ -126,7 +119,7 @@ export class TagDatabaseService {
     RETURNING id, tag;
   `;
 
-    const result = await this.db.query<Tag>(query, values);
+    const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
       throw new Error("Tag not found");

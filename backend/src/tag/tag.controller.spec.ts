@@ -1,18 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TagController } from './tag.controller';
 import { TagService } from './tag.service';
-import { ParseIntPipe } from '@nestjs/common';
+import { TagDto, CreateTagDto, UpdateTagDto } from '../dto/dto';
+import { NotFoundException } from '@nestjs/common';
 
 describe('TagController', () => {
   let controller: TagController;
   let service: TagService;
 
-  const mockTagService = {
-    createTag: jest.fn(),
-    findOneTag: jest.fn(),
-    updateTag: jest.fn(),
-    deleteTag: jest.fn(),
-  };
+  const mockTag: TagDto = {
+    id: 1,
+    tag: 'Drama',
+    production_id: 101,
+  } as TagDto;
+
+  const mockTags: TagDto[] = [mockTag];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,15 +22,19 @@ describe('TagController', () => {
       providers: [
         {
           provide: TagService,
-          useValue: mockTagService,
+          useValue: {
+            findAllTags: jest.fn().mockResolvedValue(mockTags),
+            findTagById: jest.fn().mockResolvedValue(mockTag),
+            createTag: jest.fn().mockResolvedValue(mockTag),
+            updateTag: jest.fn().mockResolvedValue(mockTag),
+            deleteTag: jest.fn().mockResolvedValue({ message: 'Success' }),
+          },
         },
       ],
     }).compile();
 
     controller = module.get<TagController>(TagController);
     service = module.get<TagService>(TagService);
-
-    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -36,25 +42,41 @@ describe('TagController', () => {
   });
 
   describe('createTag', () => {
-    it('should call service.creatTag', async () => {
-      const dto = { tag: 'Action', production_id: 1 };
-      await controller.createTag(dto);
+    it('should create and return a new tag', async () => {
+      const dto = { tag: 'Action', production_id: 101 };
+      const result = await controller.createTag(dto as CreateTagDto);
       expect(service.createTag).toHaveBeenCalledWith(dto);
+      expect(result).toEqual(mockTag);
     });
   });
 
-  describe('findOneTag', () => {
-    it('should call service.findOneTag', async () => {
-      await controller.findOneTag(1);
-      expect(service.findOneTag).toHaveBeenCalledWith(1);
+  describe('findTagById', () => {
+    it('should return a single tag by id', async () => {
+      const result = await controller.findTagById(1);
+      expect(result).toEqual(mockTag);
+      expect(service.findTagById).toHaveBeenCalledWith(1);
+    });
+
+    it('should throw NotFoundException if tag not found', async () => {
+      jest.spyOn(service, 'findTagById').mockRejectedValue(new NotFoundException());
+      await expect(controller.findTagById(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('findAllTags', () => {
+    it('should return an array of tags', async () => {
+      const result = await controller.findAllTags();
+      expect(result).toEqual(mockTags);
+      expect(service.findAllTags).toHaveBeenCalled();
     });
   });
 
   describe('updateTag', () => {
-    it('should call service.updateTag', async () => {
-      const dto = { tag: 'Sci-Fi' };
-      await controller.updateTag(1, dto);
+    it('should update and return the tag', async () => {
+      const dto = { tag: 'Updated' };
+      const result = await controller.updateTag(1, dto as UpdateTagDto);
       expect(service.updateTag).toHaveBeenCalledWith(1, dto);
+      expect(result).toEqual(mockTag);
     });
   });
 
