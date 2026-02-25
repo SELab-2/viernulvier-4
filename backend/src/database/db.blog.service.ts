@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { Blog, CreateBlog, UpdateBlog } from "@repo/common";
+import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -12,7 +12,7 @@ export class BlogDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The Blog if there is one.
    */
-  async getBlogById(id: number): Promise<Blog> {
+  async getBlogById(id: number): Promise<BlogDto> {
     const query = `SELECT * FROM blogs WHERE id = $1`;
 
     const result = await this.db.query(query, [id]);
@@ -27,7 +27,7 @@ export class BlogDatabaseService {
    * Get a single Blog by their ID.
    * @returns All blogs.
    */
-  async getBlogs(): Promise<Blog[]> {
+  async getBlogs(): Promise<BlogDto[]> {
     const query = `SELECT * FROM blogs`;
 
     const result = await this.db.query(query);
@@ -43,7 +43,7 @@ export class BlogDatabaseService {
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
    * @returns the added blog if it was successful.
    */
-  async createBlog(blog: CreateBlog): Promise<Blog> {
+  async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
     if (!blog.titel || !blog.description) {
       throw new BadRequestException("Missing required fields");
     }
@@ -59,7 +59,7 @@ export class BlogDatabaseService {
 
     const values = [blog.titel, blog.description];
 
-    const result = await this.db.query<Blog>(query, values);
+    const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
       throw new Error("Failed to create blog");
@@ -74,7 +74,7 @@ export class BlogDatabaseService {
    * The id field in the blog MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlog): Promise<Blog> {
+  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
     if (!blog.id) {
       throw new Error("Blog id is required for update");
     }
@@ -108,7 +108,7 @@ export class BlogDatabaseService {
     RETURNING id, titel, description;
   `;
 
-    const result = await this.db.query<Blog>(query, values);
+    const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
       throw new Error("Blog not found");
