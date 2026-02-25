@@ -3,7 +3,7 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { TagDatabaseService } from '../database/db.tag.service';
-import { CreateTagDto, TagDto, UpdateTagDto } from 'src/dto/dto';
+import { CreateTagDto, TagDto, UpdateTagDto } from '../dto/dto';
 
 @Injectable()
 export class TagService {
