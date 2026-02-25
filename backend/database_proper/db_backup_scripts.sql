@@ -68,16 +68,24 @@ CREATE TABLE event_blogs
 
 CREATE TABLE tags
 (
-    id            INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    production_id INT  NOT NULL,
-    tag           TEXT NOT NULL,
+    id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tag TEXT NOT NULL UNIQUE
+);
 
+CREATE TABLE production_tags
+(
+    production_id INT NOT NULL,
+    tag_id        INT NOT NULL,
+    PRIMARY KEY (production_id, tag_id),
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_tag
+        FOREIGN KEY (tag_id)
+            REFERENCES tags (id)
             ON DELETE CASCADE
 );
-
 -- small example data:
 
 INSERT INTO productions (titel, ondertitel, description1, description2, genre, planning_id, blog_titel, blog_text)
@@ -118,12 +126,12 @@ VALUES (1, 1),
 INSERT INTO event_blogs (event_id, blog_id)
 VALUES (2, 1);
 
-INSERT INTO tags (production_id, tag)
-VALUES (1, 'Drama'),
-       (1, 'Classic'),
-       (2, 'Comedy'),
-       (2, 'Family'),
-       (3, 'Musical');
+INSERT INTO tags (tag)
+VALUES ('Drama'),
+       ('Classic'),
+       ('Comedy'),
+       ('Family'),
+       ('Musical');
 
 
 -- remove all mock data:

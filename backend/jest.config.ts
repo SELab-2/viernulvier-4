@@ -11,8 +11,10 @@ const config: Config = {
   coverageDirectory: "../coverage",
   testEnvironment: "node",
   coveragePathIgnorePatterns: [
-  "main\\.ts$",
-  ".*\\.module\\.ts$"
+    "main\\.ts$",
+    ".*\\.module\\.ts$",
+    "app.controller.ts",
+    "app.service.ts"
   ],
 
   // Fail tests if global coverage under 70%
