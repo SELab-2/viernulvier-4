@@ -111,14 +111,14 @@ export class ProductionDatabaseService {
 
     // Filter events whose starttime is before the provided date
     if (filters.date_before) {
-      conditions.push(`e.starttime < $${i}::timestamp OR e.endtime < $${i}::timestamp`);
+      conditions.push(`e.starttime < $${i}::timestamp`);
       values.push(filters.date_before);
       i++;
     }
 
     // Filter events whose endtime is after the provided date
     if (filters.date_after) {
-      conditions.push(`e.endtime > $${i}::timestamp OR e.starttime > $${i}::timestamp`);
+      conditions.push(`e.endtime > $${i}::timestamp`);
       values.push(filters.date_after);
       i++;
     }
