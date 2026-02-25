@@ -80,7 +80,7 @@ describe('TagService', () => {
     it('should successfully update and return the tag', async () => {
       const updateDto = { tag: 'Updated' };
       const result = await service.updateTag(1, updateDto);
-      expect(dbService.updateTag).toHaveBeenCalledWith(1, updateDto);
+      expect(dbService.updateTag).toHaveBeenCalledWith(updateDto);
       expect(result).toEqual(mockTag);
     });
 
