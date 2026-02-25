@@ -3,6 +3,7 @@ import {
   BlogDto,
   CreateProductionDto,
   ProductionDto,
+  TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
@@ -30,6 +31,16 @@ export class ProductionService {
    */
   async getProductionById(id: number): Promise<ProductionDto> {
     return await this.productionDBService.getProductionById(id);
+  }
+
+  /**
+   * Fetches all TagDto objects for a given production id.
+   * @param id ID in the URL of the request.
+   * @returns The list of TagDto objects for the Production
+   */
+  async getTagsById(id: number): Promise<TagDto[]> {
+    const production: ProductionDto = await this.productionDBService.getProductionById(id);
+    return await this.productionDBService.getTagsOfProduction(production);
   }
 
   /**

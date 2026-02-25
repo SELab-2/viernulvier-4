@@ -12,7 +12,7 @@ import {
 import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto, BlogDto } from "../dto/dto";
+import { ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto, BlogDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("production")
@@ -38,8 +38,20 @@ export class ProductionController {
   @ApiOperation({ summary: "Returns the Production with id in the URL." })
   @ApiOkResponse({ type: ProductionDto, description: "Production Found." })
   @Get(":id")
-  async getById(@Param("id", ParseIntPipe) id: number): Promise<ProductionDto> {
+  async getProductionById(@Param("id", ParseIntPipe) id: number): Promise<ProductionDto> {
     return await this.productionService.getProductionById(id);
+  }
+
+  /**
+   * Responds to GET /productions/:id/tags
+   * @param id ID in the URL of the request.
+   * @returns The list of Tag objects for the Production
+   */
+  @ApiOperation({ summary: "Returns the Tags of the Production with id in the URL." })
+  @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
+  @Get(":id/tags")
+  async getTagsOfProductionByID(@Param("id", ParseIntPipe) id: number): Promise<TagDto[]> {
+    return await this.productionService.getTagsById(id);
   }
 
   /**

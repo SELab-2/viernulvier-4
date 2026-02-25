@@ -1,13 +1,14 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type { BlogDto, ProductionDto, UpdateProductionDto } from "../dto/dto";
+import type { BlogDto, ProductionDto, UpdateProductionDto, TagDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 
 describe("ProductionService", () => {
   let service: ProductionService;
   let dbService: ProductionDatabaseService;
+  let blogDbService: BlogDatabaseService;
 
   const mockProduction: ProductionDto = {
     id: 1,
@@ -21,7 +22,16 @@ describe("ProductionService", () => {
 
   const mockProductions: ProductionDto[] = [mockProduction];
 
-  let blogDbService: BlogDatabaseService; // Add this near 'let dbService;'
+  const mockTags: TagDto[] = [
+    {
+      id: 1,
+      tag: "Drama",
+    },
+    {
+      id: 2,
+      tag: "Classical",
+    },
+  ];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,6 +42,7 @@ describe("ProductionService", () => {
           useValue: {
             getProductions: jest.fn().mockResolvedValue(mockProductions),
             getProductionById: jest.fn().mockResolvedValue(mockProduction),
+            getTagsOfProduction: jest.fn().mockResolvedValue(mockTags),
             updateProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
             // New mock methods
@@ -172,6 +183,54 @@ describe("ProductionService", () => {
       jest.spyOn(dbService, "deleteProduction").mockRejectedValueOnce(new Error("Failed to delete record"));
 
       await expect(service.deleteProduction(999)).rejects.toThrow("Failed to delete record");
+    });
+  });
+
+  describe("getTagsById", () => {
+    it("should fetch production and return its tags", async () => {
+      const result = await service.getTagsById(1);
+      expect(result).toEqual(mockTags);
+      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+      expect(dbService.getTagsOfProduction).toHaveBeenCalledWith(mockProduction);
+    });
+
+    it("should call getProductionById with the correct id", async () => {
+      await service.getTagsById(1);
+      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+      expect(dbService.getProductionById).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call getTagsOfProduction with the fetched production", async () => {
+      await service.getTagsById(1);
+      expect(dbService.getTagsOfProduction).toHaveBeenCalledWith(mockProduction);
+      expect(dbService.getTagsOfProduction).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return empty array when production has no tags", async () => {
+      jest.spyOn(dbService, "getTagsOfProduction").mockResolvedValueOnce([]);
+      const result = await service.getTagsById(1);
+      expect(result).toEqual([]);
+      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+    });
+
+    it("should handle database error when production is not found", async () => {
+      jest
+        .spyOn(dbService, "getProductionById")
+        .mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
+
+      await expect(service.getTagsById(999)).rejects.toThrow(
+        "No ProductionDto exists for provided ID"
+      );
+      expect(dbService.getTagsOfProduction).not.toHaveBeenCalled();
+    });
+
+    it("should handle database error when fetching tags fails", async () => {
+      jest
+        .spyOn(dbService, "getTagsOfProduction")
+        .mockRejectedValueOnce(new Error("Failed to fetch tags"));
+
+      await expect(service.getTagsById(1)).rejects.toThrow("Failed to fetch tags");
+      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
     });
   });
 

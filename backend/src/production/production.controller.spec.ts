@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "./production.service";
-import { BlogDto, ProductionDto, UpdateProductionDto } from "../dto/dto"; 
+import { BlogDto, ProductionDto, UpdateProductionDto, TagDto } from "../dto/dto"; 
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ProductionController", () => {
@@ -20,6 +20,17 @@ describe("ProductionController", () => {
 
   const mockProductions: ProductionDto[] = [mockProduction];
 
+  const mockTags: TagDto[] = [
+    {
+      id: 1,
+      tag: "Drama",
+    },
+    {
+      id: 2,
+      tag: "Classical",
+    },
+  ];
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProductionController],
@@ -29,6 +40,7 @@ describe("ProductionController", () => {
           useValue: {
             getAllProductions: jest.fn().mockResolvedValue(mockProductions),
             getProductionById: jest.fn().mockResolvedValue(mockProduction),
+            getTagsById: jest.fn().mockResolvedValue(mockTags),
             replaceProduction: jest.fn().mockResolvedValue(mockProduction),
             modifyProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
@@ -71,13 +83,13 @@ describe("ProductionController", () => {
 
   describe("getById", () => {
     it("should return a single production by id", async () => {
-      const result = await controller.getById(1);
+      const result = await controller.getProductionById(1);
       expect(result).toEqual(mockProduction);
       expect(service.getProductionById).toHaveBeenCalledWith(1);
     });
 
     it("should call service.getProductionById with correct id", async () => {
-      await controller.getById(1);
+      await controller.getProductionById(1);
       expect(service.getProductionById).toHaveBeenCalledWith(1);
     });
 
@@ -86,7 +98,7 @@ describe("ProductionController", () => {
       jest
         .spyOn(service, "getProductionById")
         .mockResolvedValueOnce(production2);
-      const result = await controller.getById(2);
+      const result = await controller.getProductionById(2);
       expect(result.id).toBe(2);
       expect(service.getProductionById).toHaveBeenCalledWith(2);
     });
@@ -96,7 +108,7 @@ describe("ProductionController", () => {
       jest.spyOn(service, "getProductionById").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
     
       // Verify the controller passes the exact same exception up
-      await expect(controller.getById(999)).rejects.toThrow(NotFoundException);
+      await expect(controller.getProductionById(999)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -146,6 +158,44 @@ describe("ProductionController", () => {
       jest.spyOn(service, "deleteProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
     
       await expect(controller.deleteProduction(999)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+
+  describe("getTagsOfProductionByID", () => {
+    it("should return tags for a production", async () => {
+      const result = await controller.getTagsOfProductionByID(1);
+      expect(result).toEqual(mockTags);
+      expect(service.getTagsById).toHaveBeenCalledWith(1);
+    });
+
+    it("should call service.getTagsById with the correct production id", async () => {
+      await controller.getTagsOfProductionByID(1);
+      expect(service.getTagsById).toHaveBeenCalledWith(1);
+      expect(service.getTagsById).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return empty array when production has no tags", async () => {
+      jest.spyOn(service, "getTagsById").mockResolvedValueOnce([]);
+      const result = await controller.getTagsOfProductionByID(1);
+      expect(result).toEqual([]);
+    });
+
+    it("should handle different production ids", async () => {
+      await controller.getTagsOfProductionByID(2);
+      expect(service.getTagsById).toHaveBeenCalledWith(2);
+    });
+
+    it("should throw a NotFoundException if the production does not exist", async () => {
+      jest.spyOn(service, "getTagsById").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
+
+      await expect(controller.getTagsOfProductionByID(999)).rejects.toThrow(NotFoundException);
+    });
+
+    it("should handle database errors when fetching tags fails", async () => {
+      jest.spyOn(service, "getTagsById").mockRejectedValueOnce(new Error("Failed to fetch tags"));
+
+      await expect(controller.getTagsOfProductionByID(1)).rejects.toThrow("Failed to fetch tags");
     });
   });
 
