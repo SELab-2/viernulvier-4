@@ -23,8 +23,8 @@ describe('TagController', () => {
         {
           provide: TagService,
           useValue: {
-            findAllTags: jest.fn().mockResolvedValue(mockTags),
-            findTagById: jest.fn().mockResolvedValue(mockTag),
+            getAllTags: jest.fn().mockResolvedValue(mockTags),
+            getTagById: jest.fn().mockResolvedValue(mockTag),
             createTag: jest.fn().mockResolvedValue(mockTag),
             updateTag: jest.fn().mockResolvedValue(mockTag),
             deleteTag: jest.fn().mockResolvedValue({ message: 'Success' }),
@@ -50,24 +50,24 @@ describe('TagController', () => {
     });
   });
 
-  describe('findTagById', () => {
+  describe('getTagById', () => {
     it('should return a single tag by id', async () => {
-      const result = await controller.findTagById(1);
+      const result = await controller.getTagById(1);
       expect(result).toEqual(mockTag);
-      expect(service.findTagById).toHaveBeenCalledWith(1);
+      expect(service.getTagById).toHaveBeenCalledWith(1);
     });
 
     it('should throw NotFoundException if tag not found', async () => {
-      jest.spyOn(service, 'findTagById').mockRejectedValue(new NotFoundException());
-      await expect(controller.findTagById(999)).rejects.toThrow(NotFoundException);
+      jest.spyOn(service, 'getTagById').mockRejectedValue(new NotFoundException());
+      await expect(controller.getTagById(999)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('findAllTags', () => {
+  describe('getAllTags', () => {
     it('should return an array of tags', async () => {
-      const result = await controller.findAllTags();
+      const result = await controller.getAllTags();
       expect(result).toEqual(mockTags);
-      expect(service.findAllTags).toHaveBeenCalled();
+      expect(service.getAllTags).toHaveBeenCalled();
     });
   });
 

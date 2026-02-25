@@ -23,7 +23,7 @@ export class TagService {
    * @param id ID in the URL of the request.
    * @returns The TagDto object with corresponding ID
    */
-  async findTagById(id: number): Promise<TagDto> {
+  async getTagById(id: number): Promise<TagDto> {
     return await this.dbTagService.getTagById(id);
   }
 
@@ -31,7 +31,7 @@ export class TagService {
    * Fetches all TagDto objects from the DBService.
    * @returns All TagDto objects
    */
-  async findAllTags(): Promise<TagDto[]> {
+  async getAllTags(): Promise<TagDto[]> {
     return await this.dbTagService.getTags();
   }
 

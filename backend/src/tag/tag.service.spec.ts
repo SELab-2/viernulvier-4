@@ -50,29 +50,29 @@ describe('TagService', () => {
     });
   });
 
-  describe('findTagById', () => {
+  describe('getTagById', () => {
     it('should return tag by id from database', async () => {
-      const result = await service.findTagById(1);
+      const result = await service.getTagById(1);
       expect(result).toEqual(mockTag);
       expect(dbService.getTagById).toHaveBeenCalledWith(1);
     });
 
     it('should throw NotFoundException if tag does not exist', async () => {
       jest.spyOn(dbService, 'getTagById').mockRejectedValue(new NotFoundException());
-      await expect(service.findTagById(999)).rejects.toThrow(NotFoundException);
+      await expect(service.getTagById(999)).rejects.toThrow(NotFoundException);
     });
   });
 
-  describe('findAllTags', () => {
+  describe('getAllTags', () => {
     it('should return all tags from database', async () => {
-      const result = await service.findAllTags();
+      const result = await service.getAllTags();
       expect(result).toEqual(mockTags);
       expect(dbService.getTags).toHaveBeenCalled();
     });
 
     it('should handle database errors', async () => {
       jest.spyOn(dbService, 'getTags').mockRejectedValue(new Error('Database error'));
-      await expect(service.findAllTags()).rejects.toThrow('Database error');
+      await expect(service.getAllTags()).rejects.toThrow('Database error');
     });
   });
 

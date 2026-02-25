@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { TagService } from './tag.service';
 import { CreateTagDto, UpdateTagDto, TagDto } from '../dto/dto';
-import { ApiOperation, ApiBody, ApiOkResponse, ApiTags, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('tag')
 @Controller('tag')
@@ -9,67 +9,67 @@ export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   /**
-   * Maakt een nieuwe tag aan in de database.
-   * @param createTag De data voor de nieuwe tag.
-   * @returns De aangemaakte TagDto.
+   * Responds to GET /tag
+   * @returns All TagDto objects
    */
-  @Post()
-  @ApiOperation({ summary: 'Create a new tag', description: 'Adds a new tag category to the system.' })
-  @ApiBody({ type: CreateTagDto })
-  @ApiOkResponse({ type: TagDto, description: "The tag has been successfully created" })
-  createTag(@Body() createTag: CreateTagDto) {
-    return this.tagService.createTag(createTag);
-  }
-
-  /**
-   * Haalt één specifieke tag op basis van het ID.
-   * @param id Het unieke ID van de tag.
-   * @returns De gevonden TagDto.
-   */
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a single tag by ID', description: 'Fetches detailed information about a specific tag.' })
-  @ApiParam({ name: 'id', description: 'The unique identifier of the tag', type: Number })
-  @ApiOkResponse({ type: TagDto, description: "Returns the requested tag" })
-  findTagById(@Param('id', ParseIntPipe) id: number) {
-    return this.tagService.findTagById(id);
-  }
-
-  /**
-   * Haalt een lijst op van alle beschikbare tags.
-   * @returns Een array van TagDto's.
-   */
+  @ApiOperation({ summary: "Returns all Tag objects." })
+  @ApiOkResponse({ type: TagDto, isArray: true, description: "All Tags returned." })
   @Get()
-  @ApiOperation({ summary: 'Get all tags', description: 'Retrieves a list of all tags currently in the database.' })
-  @ApiOkResponse({ type: [TagDto], description: "Returns all tags" })
-  findAllTags() {
-    return this.tagService.findAllTags();
+  async getAllTags(): Promise<TagDto[]> {
+    return await this.tagService.getAllTags();
   }
 
   /**
-   * Werkt een bestaande tag bij.
-   * @param id Het ID van de tag die gewijzigd moet worden.
-   * @param updateTag De nieuwe data voor de tag.
-   * @returns De bijgewerkte TagDto.
+   * Responds to GET /tag/:id
+   * @param id ID in the URL of the request.
+   * @returns The TagDto object with corresponding ID
    */
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update an existing tag', description: 'Modifies the properties of an existing tag.' })
-  @ApiParam({ name: 'id', description: 'The ID of the tag to update', type: Number })
+  @ApiOperation({ summary: "Returns the Tag with id in the URL." })
+  @ApiOkResponse({ type: TagDto, description: "Tag Found." })
+  @Get(':id')
+  async getTagById(@Param('id', ParseIntPipe) id: number): Promise<TagDto> {
+    return await this.tagService.getTagById(id);
+  }
+
+  /**
+   * Responds to a POST to "/tag".
+   * @param createTag The new TagDto data we want to add
+   * @returns The newly created TagDto.
+   */
+  @ApiOperation({ summary: "Creates a new Tag." })
+  @ApiBody({ type: CreateTagDto })
+  @ApiOkResponse({ type: TagDto, description: "Tag Created." })
+  @Post()
+  async createTag(@Body() createTag: CreateTagDto): Promise<TagDto> {
+    return await this.tagService.createTag(createTag);
+  }
+
+  /**
+   * Responds to a PATCH to "/tag/:id".
+   * @param id The ID in the URL.
+   * @param updateTag The parsed UpdateTagDto object.
+   * @returns The newly updated TagDto.
+   */
+  @ApiOperation({ summary: "Modifies an existing Tag." })
   @ApiBody({ type: UpdateTagDto })
-  @ApiOkResponse({ type: TagDto, description: "The tag has been successfully updated" })
-  updateTag(@Param('id', ParseIntPipe) id: number, @Body() updateTag: UpdateTagDto) {
-    return this.tagService.updateTag(id, updateTag);
+  @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
+  @Patch(':id')
+  async updateTag(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() updateTag: UpdateTagDto
+  ): Promise<TagDto> {
+    return await this.tagService.updateTag(id, updateTag);
   }
 
   /**
-   * Verwijdert een tag uit het systeem.
-   * @param id Het ID van de tag die verwijderd moet worden.
-   * @returns Een succesmelding.
+   * Responds to a DELETE to "/tag/:id".
+   * @param id The ID in the URL.
+   * @returns Nothing.
    */
+  @ApiOperation({ summary: "Deletes a Tag." })
+  @ApiOkResponse({ description: "Tag Deleted." })
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a tag by ID', description: 'Permanently removes a tag from the database.' })
-  @ApiParam({ name: 'id', description: 'The ID of the tag to delete', type: Number })
-  @ApiOkResponse({ description: "Success message confirming deletion" })
-  deleteTag(@Param('id', ParseIntPipe) id: number) {
-    return this.tagService.deleteTag(id);
+  async deleteTag(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+    return await this.tagService.deleteTag(id);
   }
 }
