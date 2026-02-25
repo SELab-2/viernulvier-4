@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import EventService from "./event.service";
-import type { EventDto, UpdateEventDto } from "../dto/dto";
+import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 
 describe("EventController", () => {
@@ -31,6 +31,7 @@ describe("EventController", () => {
             replaceEvent: jest.fn().mockResolvedValue(mockEvent),
             modifyEvent: jest.fn().mockResolvedValue(mockEvent),
             deleteEvent: jest.fn().mockResolvedValue(undefined),
+            createEvent: jest.fn(),
             getEventBlogs: jest.fn(),
             linkBlogToEvent: jest.fn(),
             unlinkBlogFromEvent: jest.fn(),
@@ -202,14 +203,42 @@ describe("EventController", () => {
     });
   });
 
-  // TODO: Missing test for createEvent.
   describe("createEvent", () => {
-    it("should create an event", async () => {
+    it("should create an event successfully", async () => {
+      const newEvent: CreateEventDto = {
+        starttime: "2024-02-10T18:00:00Z",
+        endtime: "2024-02-10T20:00:00Z",
+        hall: "Grand Hall",
+        production_id: 2,
+        price: 30,
+      };
 
+      const createdEvent: EventDto = { id: 2, ...newEvent };
+
+      jest.spyOn(service, "createEvent").mockResolvedValueOnce(createdEvent);
+
+      const result = await controller.createEvent(newEvent);
+
+      expect(service.createEvent).toHaveBeenCalledWith(newEvent);
+      expect(result).toEqual(createdEvent);
     });
 
     it("should handle database errors when creation fails", async () => {
+      const newEvent: CreateEventDto = {
+        starttime: "2024-02-10T18:00:00Z",
+        endtime: "2024-02-10T20:00:00Z",
+        hall: "Grand Hall",
+        production_id: 2,
+        price: 30,
+      };
 
+      jest
+        .spyOn(service, "createEvent")
+        .mockRejectedValueOnce(new Error("Failed to create event"));
+
+      await expect(controller.createEvent(newEvent)).rejects.toThrow(
+        "Failed to create event"
+      );
     });
   });
 });

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type { EventDto, UpdateEventDto } from "../dto/dto";
+import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 
@@ -38,6 +38,7 @@ describe("EventService", () => {
             getEventById: jest.fn().mockResolvedValue(mockEvent),
             updateEvent: jest.fn().mockResolvedValue(mockEvent),
             deleteEvent: jest.fn().mockResolvedValue(undefined),
+            createEvent: jest.fn(),
             getBlogsOfEvent: jest.fn(),
             linkBlogWithEventID: jest.fn(),
             deleteBlogFromEvent: jest.fn(),
@@ -232,14 +233,44 @@ describe("EventService", () => {
     });
   });
 
-  // TODO: Missing createEvent test
   describe("createEvent", () => {
-    it("should create an event", async () => {
+    it("should create an event successfully", async () => {
+      const newEvent: CreateEventDto = {
+        starttime: "2024-02-10T18:00:00Z",
+        endtime: "2024-02-10T20:00:00Z",
+        hall: "Grand Hall",
+        production_id: 2,
+        price: 30,
+      };
 
+      const createdEvent: EventDto = { id: 2, ...newEvent };
+
+      // Mock dbService.createEvent om de nieuwe event terug te geven
+      jest.spyOn(dbService, "createEvent").mockResolvedValueOnce(createdEvent);
+
+      const result = await service.createEvent(newEvent);
+
+      expect(dbService.createEvent).toHaveBeenCalledWith(newEvent);
+      expect(result).toEqual(createdEvent);
     });
 
     it("should handle database errors when creation fails", async () => {
+      const newEvent: CreateEventDto = {
+        starttime: "2024-02-10T18:00:00Z",
+        endtime: "2024-02-10T20:00:00Z",
+        hall: "Grand Hall",
+        production_id: 2,
+        price: 30,
+      };
 
+      // Mock dbService.createEvent om een error te throwen
+      jest.spyOn(dbService, "createEvent").mockRejectedValueOnce(
+        new Error("Failed to create event")
+      );
+
+      await expect(service.createEvent(newEvent)).rejects.toThrow(
+        "Failed to create event"
+      );
     });
   });
 });
