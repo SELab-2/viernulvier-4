@@ -18,7 +18,7 @@ import {
   UpdateEventSchema,
 } from "@repo/common";
 import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("event")
 export class EventController {

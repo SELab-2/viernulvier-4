@@ -13,7 +13,7 @@ import { ProductionService } from "./production.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
 import { ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto, BlogDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("production")
 export class ProductionController {
