@@ -15,7 +15,7 @@ export class BlogDatabaseService {
   async getBlogById(id: number): Promise<BlogDto> {
     const query = `SELECT * FROM blogs WHERE id = $1`;
 
-    const result = await this.db.query(query, [id]);
+    const result = await this.db.query<BlogDto>(query, [id]);
 
     if (result.length === 0) {
       throw new Error("Blog not found");
@@ -30,7 +30,7 @@ export class BlogDatabaseService {
   async getBlogs(): Promise<BlogDto[]> {
     const query = `SELECT * FROM blogs`;
 
-    const result = await this.db.query(query);
+    const result = await this.db.query<BlogDto>(query);
 
     if (result.length === 0) {
       throw new Error("no blogs found");

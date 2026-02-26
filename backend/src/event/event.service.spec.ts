@@ -209,7 +209,7 @@ describe("EventService", () => {
       it("should link a blog to an event and return the blog", async () => {
         // Note: Ensure `linkBlogWithEventID` is in your EventDatabaseService mock
         dbService.linkBlogWithEventID = jest.fn().mockResolvedValue(undefined);
-  
+
         const result = await service.linkBlogToEvent(1, 2);
 
         expect(dbService.linkBlogWithEventID).toHaveBeenCalledWith(2, 1); // blogId first, then eventId
@@ -264,12 +264,12 @@ describe("EventService", () => {
       };
 
       // Mock dbService.createEvent om een error te throwen
-      jest.spyOn(dbService, "createEvent").mockRejectedValueOnce(
-        new Error("Failed to create event")
-      );
+      jest
+        .spyOn(dbService, "createEvent")
+        .mockRejectedValueOnce(new Error("Failed to create event"));
 
       await expect(service.createEvent(newEvent)).rejects.toThrow(
-        "Failed to create event"
+        "Failed to create event",
       );
     });
   });

@@ -120,9 +120,15 @@ export class EventController {
    * @returns A list of all Blog objects linked to this Event.
    */
   @ApiOperation({ summary: "Get Blogs linked to a specific Event." })
-  @ApiOkResponse({ type: BlogDto, isArray: true, description: "Returned all linked Blogs." })
+  @ApiOkResponse({
+    type: BlogDto,
+    isArray: true,
+    description: "Returned all linked Blogs.",
+  })
   @Get(":id/blog")
-  async getEventBlogs(@Param("id", ParseIntPipe) id: number): Promise<BlogDto[]> {
+  async getEventBlogs(
+    @Param("id", ParseIntPipe) id: number,
+  ): Promise<BlogDto[]> {
     return await this.eventService.getEventBlogs(id);
   }
 
@@ -139,7 +145,7 @@ export class EventController {
     @Param("id", ParseIntPipe) eventId: number,
     @Param("id2", ParseIntPipe) blogId: number,
   ): Promise<BlogDto> {
-    return await this.eventService.linkBlogToEvent(eventId, blogId)
+    return await this.eventService.linkBlogToEvent(eventId, blogId);
   }
 
   /**
@@ -153,7 +159,7 @@ export class EventController {
   @Delete(":id/blog/:id2")
   async unlinkBlogFromEvent(
     @Param("id", ParseIntPipe) eventId: number,
-    @Param("id2", ParseIntPipe) blogId: number
+    @Param("id2", ParseIntPipe) blogId: number,
   ): Promise<EventDto> {
     return await this.eventService.unlinkBlogFromEvent(eventId, blogId);
   }

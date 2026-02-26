@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
+import {
+  BlogDto,
+  CreateProductionDto,
+  ProductionDto,
+  TagDto,
+  UpdateProductionDto,
+} from "../dto/dto";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -390,7 +396,7 @@ export class ProductionDatabaseService {
       DELETE FROM production_tag
       WHERE production_tag.tag_id = $1
         AND production_tag.production_id = $2
-    `
+    `;
 
     await this.db.query(query, [tag_id, production_id]);
   }

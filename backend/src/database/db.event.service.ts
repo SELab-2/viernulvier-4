@@ -229,7 +229,7 @@ export class EventDatabaseService {
     RETURNING *;
     `;
 
-    const result = await this.db.query(query, values);
+    const result = await this.db.query<EventDto>(query, values);
 
     if (result.length === 0) {
       throw new Error("Event not found");

@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException } from '@nestjs/common';
-import { BlogService } from './blog.service';
-import { BlogDatabaseService } from '../database/db.blog.service';
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from '../dto/dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { BadRequestException } from "@nestjs/common";
+import { BlogService } from "./blog.service";
+import { BlogDatabaseService } from "../database/db.blog.service";
+import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
 
-describe('BlogService', () => {
+describe("BlogService", () => {
   let service: BlogService;
   let blogDbService: BlogDatabaseService;
 
@@ -20,8 +20,8 @@ describe('BlogService', () => {
   // Sample data for testing
   const mockBlog: BlogDto = {
     id: 1,
-    titel: 'My First Blog',
-    description: 'Hello World!',
+    titel: "My First Blog",
+    description: "Hello World!",
   };
 
   beforeEach(async () => {
@@ -45,14 +45,14 @@ describe('BlogService', () => {
     jest.clearAllMocks();
   });
 
-  describe('Initialization', () => {
-    it('should be defined', () => {
+  describe("Initialization", () => {
+    it("should be defined", () => {
       expect(service).toBeDefined();
     });
   });
 
-  describe('getAllBlogs', () => {
-    it('should return an array of blogs', async () => {
+  describe("getAllBlogs", () => {
+    it("should return an array of blogs", async () => {
       const expectedBlogs = [mockBlog];
       mockBlogDbService.getBlogs.mockResolvedValue(expectedBlogs);
 
@@ -63,8 +63,8 @@ describe('BlogService', () => {
     });
   });
 
-  describe('getBlogById', () => {
-    it('should return a single blog', async () => {
+  describe("getBlogById", () => {
+    it("should return a single blog", async () => {
       mockBlogDbService.getBlogById.mockResolvedValue(mockBlog);
 
       const result = await service.getBlogById(1);
@@ -74,9 +74,12 @@ describe('BlogService', () => {
     });
   });
 
-  describe('createBlog', () => {
-    it('should create and return a new blog', async () => {
-      const createDto: CreateBlogDto = { titel: 'My First Blog', description: 'Hello World!' };
+  describe("createBlog", () => {
+    it("should create and return a new blog", async () => {
+      const createDto: CreateBlogDto = {
+        titel: "My First Blog",
+        description: "Hello World!",
+      };
       mockBlogDbService.createBlog.mockResolvedValue(mockBlog);
 
       const result = await service.createBlog(createDto);
@@ -86,8 +89,8 @@ describe('BlogService', () => {
     });
   });
 
-  describe('replaceBlog', () => {
-    it('should replace and return the blog when IDs match', async () => {
+  describe("replaceBlog", () => {
+    it("should replace and return the blog when IDs match", async () => {
       const replaceDto: BlogDto = { ...mockBlog };
       mockBlogDbService.updateBlog.mockResolvedValue(mockBlog);
 
@@ -97,16 +100,16 @@ describe('BlogService', () => {
       expect(blogDbService.updateBlog).toHaveBeenCalledWith(replaceDto);
     });
 
-    it('should throw a BadRequestException when IDs do not match', async () => {
+    it("should throw a BadRequestException when IDs do not match", async () => {
       const replaceDto: BlogDto = { ...mockBlog, id: 2 }; // ID mismatch here
 
       // We expect the promise to reject with the specific exception
       await expect(service.replaceBlog(1, replaceDto)).rejects.toThrow(
         BadRequestException,
       );
-      
+
       await expect(service.replaceBlog(1, replaceDto)).rejects.toThrow(
-        'Blog ID and URL ID do not match. Cannot replace Blog.',
+        "Blog ID and URL ID do not match. Cannot replace Blog.",
       );
 
       // Ensure the database service was never called
@@ -114,11 +117,11 @@ describe('BlogService', () => {
     });
   });
 
-  describe('modifyBlog', () => {
-    it('should assign the ID to the DTO and update the blog', async () => {
-      const updateDto: UpdateBlogDto = { titel: 'Updated titel' };
-      const expectedUpdatedBlog = { ...mockBlog, titel: 'Updated titel' };
-      
+  describe("modifyBlog", () => {
+    it("should assign the ID to the DTO and update the blog", async () => {
+      const updateDto: UpdateBlogDto = { titel: "Updated titel" };
+      const expectedUpdatedBlog = { ...mockBlog, titel: "Updated titel" };
+
       mockBlogDbService.updateBlog.mockResolvedValue(expectedUpdatedBlog);
 
       const result = await service.modifyBlog(1, updateDto);
@@ -127,13 +130,13 @@ describe('BlogService', () => {
       // Validate that the ID was injected into the DTO before calling the DB
       expect(blogDbService.updateBlog).toHaveBeenCalledWith({
         id: 1,
-        titel: 'Updated titel',
+        titel: "Updated titel",
       });
     });
   });
 
-  describe('deleteBlog', () => {
-    it('should call delete on the database service', async () => {
+  describe("deleteBlog", () => {
+    it("should call delete on the database service", async () => {
       mockBlogDbService.deleteBlog.mockResolvedValue(undefined);
 
       await service.deleteBlog(1);

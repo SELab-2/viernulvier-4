@@ -1,9 +1,6 @@
-import {
-  Injectable,
-  BadRequestException
-} from '@nestjs/common';
-import { TagDatabaseService } from '../database/db.tag.service';
-import { CreateTagDto, TagDto, UpdateTagDto } from '../dto/dto';
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { TagDatabaseService } from "../database/db.tag.service";
+import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
 
 @Injectable()
 export class TagService {
@@ -43,7 +40,9 @@ export class TagService {
    */
   async updateTag(id: number, updateTag: UpdateTagDto): Promise<TagDto> {
     if (updateTag.id && updateTag.id !== id) {
-      throw new BadRequestException('ID in the body does not match ID in the path.');
+      throw new BadRequestException(
+        "ID in the body does not match ID in the path.",
+      );
     }
     // De DatabaseService handelt de merge en update af
     return await this.dbTagService.updateTag(updateTag);
@@ -55,9 +54,9 @@ export class TagService {
    * @returns A success message.
    */
   async deleteTag(id: number): Promise<{ message: string }> {
-      await this.dbTagService.deleteTag(id);
-      return {
-        message: `Tag with ID ${id} has been removed successfully.`
-      };
+    await this.dbTagService.deleteTag(id);
+    return {
+      message: `Tag with ID ${id} has been removed successfully.`,
+    };
   }
 }

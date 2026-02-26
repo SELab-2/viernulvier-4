@@ -13,7 +13,7 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 export class ProductionService {
   constructor(
     private readonly productionDBService: ProductionDatabaseService,
-    private readonly blogDbService: BlogDatabaseService
+    private readonly blogDbService: BlogDatabaseService,
   ) {}
 
   /**
@@ -96,7 +96,7 @@ export class ProductionService {
 
   /**
    * Returns all Blog objects linked to a Production.
-   * @param productionId The ID of the production. 
+   * @param productionId The ID of the production.
    * @returns A list of Blogs.
    */
   async getProductionBlogs(productionId: number): Promise<BlogDto[]> {
@@ -109,8 +109,14 @@ export class ProductionService {
    * @param blogId The ID of the Blog in question.
    * @returns The Blog that was just linked to the Production.
    */
-  async linkBlogToProduction(productionId: number, blogId: number): Promise<BlogDto> {
-    await this.productionDBService.linkBlogWithProductionID(blogId, productionId);
+  async linkBlogToProduction(
+    productionId: number,
+    blogId: number,
+  ): Promise<BlogDto> {
+    await this.productionDBService.linkBlogWithProductionID(
+      blogId,
+      productionId,
+    );
     return await this.blogDbService.getBlogById(blogId);
   }
 
@@ -120,10 +126,16 @@ export class ProductionService {
    * @param blogId The ID of the Blog in question.
    * @returns The Production the Blog was unlinked from.
    */
-  async unlinkBlogFromProduction(productionId: number, blogId: number): Promise<ProductionDto> {
-    await this.productionDBService.deleteBlogFromProduction(productionId, blogId);
+  async unlinkBlogFromProduction(
+    productionId: number,
+    blogId: number,
+  ): Promise<ProductionDto> {
+    await this.productionDBService.deleteBlogFromProduction(
+      productionId,
+      blogId,
+    );
     return await this.productionDBService.getProductionById(productionId);
-  } 
+  }
 
   // -- Tags -- //
 
@@ -133,7 +145,8 @@ export class ProductionService {
    * @returns The list of TagDto objects for the Production
    */
   async getTagsById(id: number): Promise<TagDto[]> {
-    const production: ProductionDto = await this.productionDBService.getProductionById(id);
+    const production: ProductionDto =
+      await this.productionDBService.getProductionById(id);
     return await this.productionDBService.getTagsOfProduction(production);
   }
 
@@ -143,7 +156,10 @@ export class ProductionService {
    * @param tagId The ID of the Tag we want to link.
    * @returns The Production in question.
    */
-  async addTagToProduction(productionId: number, tagId: number): Promise<ProductionDto> {
+  async addTagToProduction(
+    productionId: number,
+    tagId: number,
+  ): Promise<ProductionDto> {
     await this.productionDBService.addTagToProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
   }
@@ -155,7 +171,10 @@ export class ProductionService {
    * @param tagId The ID of the Tag we want to remove.
    * @returns The Production in question.
    */
-  async removeTagFromProduction(productionId: number, tagId: number): Promise<ProductionDto> {
+  async removeTagFromProduction(
+    productionId: number,
+    tagId: number,
+  ): Promise<ProductionDto> {
     await this.productionDBService.removeTagFromProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
   }

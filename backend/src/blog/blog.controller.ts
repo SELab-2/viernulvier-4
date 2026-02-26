@@ -1,11 +1,21 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Put } from '@nestjs/common';
-import { BlogService } from './blog.service';
-import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from '@repo/common';
-import { ZodValidationPipe } from '../common/pipes/zod.validation.pipe';
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from '../dto/dto';
-import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from "@nestjs/common";
+import { BlogService } from "./blog.service";
+import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
+import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
+import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
-@Controller('blog')
+@Controller("blog")
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
@@ -14,7 +24,11 @@ export class BlogController {
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
-  @ApiOkResponse({ type: BlogDto, isArray: true, description: "Returned all blogs." })
+  @ApiOkResponse({
+    type: BlogDto,
+    isArray: true,
+    description: "Returned all blogs.",
+  })
   @Get()
   async getAllBlogs(): Promise<BlogDto[]> {
     return await this.blogService.getAllBlogs();
@@ -42,7 +56,7 @@ export class BlogController {
   @ApiOkResponse({ type: BlogDto, description: "Created a new Blog." })
   @Post()
   async createBlog(
-    @Body(new ZodValidationPipe(CreateBlogSchema)) createBlog: CreateBlogDto
+    @Body(new ZodValidationPipe(CreateBlogSchema)) createBlog: CreateBlogDto,
   ): Promise<BlogDto> {
     return await this.blogService.createBlog(createBlog);
   }
