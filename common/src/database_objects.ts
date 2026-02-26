@@ -57,6 +57,20 @@ export const TagSchema = z.object({
 export const CreateTagSchema = TagSchema.omit({ id: true });
 export const UpdateTagSchema = TagSchema.partial();
 
+/**
+ * Schemas for accounts.
+ */
+export const AccountSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  password: z.string(), // TODO discuss
+  key: z.string(),
+  super_admin: z.boolean(),
+});
+
+export const CreateAccountSchema = AccountSchema.omit({ id: true });
+export const UpdateAccountSchema = AccountSchema.partial();
+
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
@@ -73,3 +87,7 @@ export type UpdateBlog = z.infer<typeof UpdateBlogSchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
 export type UpdateTag = z.infer<typeof UpdateTagSchema>;
+
+export type Account = z.infer<typeof AccountSchema>;
+export type CreateAccount = z.infer<typeof CreateAccountSchema>;
+export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;

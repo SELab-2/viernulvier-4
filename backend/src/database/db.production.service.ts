@@ -1,19 +1,13 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  BlogDto,
-  CreateProductionDto,
-  ProductionDto,
-  TagDto,
-  UpdateProductionDto,
-} from "../dto/dto";
+import { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
 
 @Injectable()
 export class ProductionDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * Get a single ProductionDto by their ID.
+   * Get a single Production by their ID.
    * @param id The ID we are looking for.
    * @returns The production if there is one.
    */

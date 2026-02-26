@@ -4,6 +4,7 @@ import { ProductionDatabaseService } from "./db.production.service";
 import { EventDatabaseService } from "./db.event.service";
 import { BlogDatabaseService } from "./db.blog.service";
 import { TagDatabaseService } from "./db.tag.service";
+import { AccountDatabaseService } from "./db.account.service";
 
 @Module({
   imports: [],
@@ -14,6 +15,7 @@ import { TagDatabaseService } from "./db.tag.service";
     EventDatabaseService,
     BlogDatabaseService,
     TagDatabaseService,
+    AccountDatabaseService,
   ],
   controllers: [],
   exports: [
@@ -23,6 +25,7 @@ import { TagDatabaseService } from "./db.tag.service";
     EventDatabaseService,
     BlogDatabaseService,
     TagDatabaseService,
+    AccountDatabaseService,
   ],
 })
 export class DbModule {}
