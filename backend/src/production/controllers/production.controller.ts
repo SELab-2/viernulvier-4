@@ -5,14 +5,23 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch, Post,
+  Patch,
+  Post,
   Put,
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
-import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto } from "../../dto/dto";
+import {
+  ProductionSchema,
+  UpdateProductionSchema,
+  CreateProductionSchema,
+} from "@repo/common";
+import {
+  ProductionDto,
+  UpdateProductionDto,
+  CreateProductionDto,
+} from "../../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 /**
@@ -27,7 +36,11 @@ export class ProductionController {
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
-  @ApiOkResponse({ type: ProductionDto, isArray: true, description: "All Productions returned." })
+  @ApiOkResponse({
+    type: ProductionDto,
+    isArray: true,
+    description: "All Productions returned.",
+  })
   @Get()
   async getAllProductions(): Promise<ProductionDto[]> {
     return await this.productionService.getAllProductions();
@@ -41,7 +54,9 @@ export class ProductionController {
   @ApiOperation({ summary: "Returns the Production with id in the URL." })
   @ApiOkResponse({ type: ProductionDto, description: "Production Found." })
   @Get(":productionId")
-  async getProductionById(@Param("productionId", ParseIntPipe) productionId: number): Promise<ProductionDto> {
+  async getProductionById(
+    @Param("productionId", ParseIntPipe) productionId: number,
+  ): Promise<ProductionDto> {
     return await this.productionService.getProductionById(productionId);
   }
 
@@ -59,7 +74,10 @@ export class ProductionController {
     @Param("productionId", ParseIntPipe) productionId: number,
     @Body(new ZodValidationPipe(ProductionSchema)) production: ProductionDto,
   ): Promise<ProductionDto> {
-    return await this.productionService.replaceProduction(productionId, production);
+    return await this.productionService.replaceProduction(
+      productionId,
+      production,
+    );
   }
 
   /**
@@ -74,9 +92,13 @@ export class ProductionController {
   @Patch(":productionId")
   async modifyProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Body(new ZodValidationPipe(UpdateProductionSchema)) patchData: UpdateProductionDto,
+    @Body(new ZodValidationPipe(UpdateProductionSchema))
+    patchData: UpdateProductionDto,
   ): Promise<ProductionDto> {
-    return await this.productionService.modifyProduction(productionId, patchData);
+    return await this.productionService.modifyProduction(
+      productionId,
+      patchData,
+    );
   }
 
   /**
@@ -88,7 +110,7 @@ export class ProductionController {
   @ApiOkResponse({ description: "Production Deleted." })
   @Delete(":productionId")
   async deleteProduction(
-    @Param("productionId", ParseIntPipe) productionId: number
+    @Param("productionId", ParseIntPipe) productionId: number,
   ): Promise<void> {
     return await this.productionService.deleteProduction(productionId);
   }

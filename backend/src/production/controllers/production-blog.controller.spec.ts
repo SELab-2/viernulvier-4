@@ -50,7 +50,9 @@ describe("ProductionBlogController", () => {
   describe("getProductionBlogs", () => {
     it("should return an array of blogs linked to the production", async () => {
       const expectedBlogs = [mockBlog];
-      jest.spyOn(service, "getProductionBlogs").mockResolvedValueOnce(expectedBlogs);
+      jest
+        .spyOn(service, "getProductionBlogs")
+        .mockResolvedValueOnce(expectedBlogs);
 
       const result = await controller.getProductionBlogs(1);
 
@@ -59,15 +61,21 @@ describe("ProductionBlogController", () => {
     });
 
     it("should throw a NotFoundException if the production is not found", async () => {
-      jest.spyOn(service, "getProductionBlogs").mockRejectedValueOnce(new NotFoundException());
+      jest
+        .spyOn(service, "getProductionBlogs")
+        .mockRejectedValueOnce(new NotFoundException());
 
-      await expect(controller.getProductionBlogs(999)).rejects.toThrow(NotFoundException);
+      await expect(controller.getProductionBlogs(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe("linkBlogToProduction", () => {
     it("should link a blog to a production and return the blog", async () => {
-      jest.spyOn(service, "linkBlogToProduction").mockResolvedValueOnce(mockBlog);
+      jest
+        .spyOn(service, "linkBlogToProduction")
+        .mockResolvedValueOnce(mockBlog);
 
       const result = await controller.linkBlogToProduction(1, 2);
 
@@ -76,15 +84,21 @@ describe("ProductionBlogController", () => {
     });
 
     it("should pass through errors when linking fails", async () => {
-      jest.spyOn(service, "linkBlogToProduction").mockRejectedValueOnce(new BadRequestException("Already linked"));
+      jest
+        .spyOn(service, "linkBlogToProduction")
+        .mockRejectedValueOnce(new BadRequestException("Already linked"));
 
-      await expect(controller.linkBlogToProduction(1, 2)).rejects.toThrow(BadRequestException);
+      await expect(controller.linkBlogToProduction(1, 2)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
   describe("unlinkBlogFromProduction", () => {
     it("should unlink a blog from a production and return the production", async () => {
-      jest.spyOn(service, "unlinkBlogFromProduction").mockResolvedValueOnce(mockProduction);
+      jest
+        .spyOn(service, "unlinkBlogFromProduction")
+        .mockResolvedValueOnce(mockProduction);
 
       const result = await controller.unlinkBlogFromProduction(1, 2);
 
@@ -93,9 +107,13 @@ describe("ProductionBlogController", () => {
     });
 
     it("should pass through errors when unlinking fails", async () => {
-      jest.spyOn(service, "unlinkBlogFromProduction").mockRejectedValueOnce(new NotFoundException("Link not found"));
+      jest
+        .spyOn(service, "unlinkBlogFromProduction")
+        .mockRejectedValueOnce(new NotFoundException("Link not found"));
 
-      await expect(controller.unlinkBlogFromProduction(1, 2)).rejects.toThrow(NotFoundException);
+      await expect(controller.unlinkBlogFromProduction(1, 2)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

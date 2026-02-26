@@ -1,9 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
-import { TagService } from './tag.service';
-import { CreateTagDto, UpdateTagDto, TagDto } from '../dto/dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+} from "@nestjs/common";
+import { TagService } from "./tag.service";
+import { CreateTagDto, UpdateTagDto, TagDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
-@Controller('tag')
+@Controller("tag")
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
@@ -12,7 +21,11 @@ export class TagController {
    * @returns All TagDto objects
    */
   @ApiOperation({ summary: "Returns all Tag objects." })
-  @ApiOkResponse({ type: TagDto, isArray: true, description: "All Tags returned." })
+  @ApiOkResponse({
+    type: TagDto,
+    isArray: true,
+    description: "All Tags returned.",
+  })
   @Get()
   async getAllTags(): Promise<TagDto[]> {
     return await this.tagService.getAllTags();
@@ -25,8 +38,8 @@ export class TagController {
    */
   @ApiOperation({ summary: "Returns the Tag with id in the URL." })
   @ApiOkResponse({ type: TagDto, description: "Tag Found." })
-  @Get(':id')
-  async getTagById(@Param('id', ParseIntPipe) id: number): Promise<TagDto> {
+  @Get(":id")
+  async getTagById(@Param("id", ParseIntPipe) id: number): Promise<TagDto> {
     return await this.tagService.getTagById(id);
   }
 
@@ -52,10 +65,10 @@ export class TagController {
   @ApiOperation({ summary: "Modifies an existing Tag." })
   @ApiBody({ type: UpdateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
-  @Patch(':id')
+  @Patch(":id")
   async updateTag(
-    @Param('id', ParseIntPipe) id: number, 
-    @Body() updateTag: UpdateTagDto
+    @Param("id", ParseIntPipe) id: number,
+    @Body() updateTag: UpdateTagDto,
   ): Promise<TagDto> {
     return await this.tagService.updateTag(id, updateTag);
   }
@@ -67,8 +80,10 @@ export class TagController {
    */
   @ApiOperation({ summary: "Deletes a Tag." })
   @ApiOkResponse({ description: "Tag Deleted." })
-  @Delete(':id')
-  async deleteTag(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+  @Delete(":id")
+  async deleteTag(
+    @Param("id", ParseIntPipe) id: number,
+  ): Promise<{ message: string }> {
     return await this.tagService.deleteTag(id);
   }
 }

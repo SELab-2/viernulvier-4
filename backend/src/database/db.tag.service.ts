@@ -15,7 +15,7 @@ export class TagDatabaseService {
   async getTagById(id: number): Promise<TagDto> {
     const query = `SELECT * FROM tags WHERE id = $1`;
 
-    const result = await this.db.query(query, [id]);
+    const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
       throw new Error("Tag not found");
@@ -46,7 +46,7 @@ export class TagDatabaseService {
   async getTags(): Promise<TagDto[]> {
     const query = `SELECT * FROM tags`;
 
-    const result = await this.db.query(query);
+    const result = await this.db.query<TagDto>(query);
 
     if (result.length === 0) {
       throw new Error("no tags found");

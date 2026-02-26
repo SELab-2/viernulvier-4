@@ -1,6 +1,5 @@
 import { Controller, Get, Redirect } from "@nestjs/common";
 import { AppService } from "./app.service";
-import type { HelloWorld } from "@repo/common";
 
 @Controller()
 export class AppController {

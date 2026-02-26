@@ -77,21 +77,33 @@ describe("ProductionTagController", () => {
     });
 
     it("should throw a NotFoundException if the production does not exist", async () => {
-      jest.spyOn(service, "getTagsById").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
+      jest
+        .spyOn(service, "getTagsById")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
 
-      await expect(controller.getTagsOfProductionByID(999)).rejects.toThrow(NotFoundException);
+      await expect(controller.getTagsOfProductionByID(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it("should handle database errors when fetching tags fails", async () => {
-      jest.spyOn(service, "getTagsById").mockRejectedValueOnce(new Error("Failed to fetch tags"));
+      jest
+        .spyOn(service, "getTagsById")
+        .mockRejectedValueOnce(new Error("Failed to fetch tags"));
 
-      await expect(controller.getTagsOfProductionByID(1)).rejects.toThrow("Failed to fetch tags");
+      await expect(controller.getTagsOfProductionByID(1)).rejects.toThrow(
+        "Failed to fetch tags",
+      );
     });
   });
 
   describe("addTagToProduction", () => {
     it("should add a tag to a production and return the production", async () => {
-      jest.spyOn(service, "addTagToProduction").mockResolvedValueOnce(mockProduction);
+      jest
+        .spyOn(service, "addTagToProduction")
+        .mockResolvedValueOnce(mockProduction);
 
       const result = await controller.addTagToProduction(1, 2);
 
@@ -100,15 +112,23 @@ describe("ProductionTagController", () => {
     });
 
     it("should pass through errors if adding a tag fails (e.g., production not found)", async () => {
-      jest.spyOn(service, "addTagToProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
+      jest
+        .spyOn(service, "addTagToProduction")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
 
-      await expect(controller.addTagToProduction(999, 2)).rejects.toThrow(NotFoundException);
+      await expect(controller.addTagToProduction(999, 2)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe("removeTagFromProduction", () => {
     it("should remove a tag from a production and return the production", async () => {
-      jest.spyOn(service, "removeTagFromProduction").mockResolvedValueOnce(mockProduction);
+      jest
+        .spyOn(service, "removeTagFromProduction")
+        .mockResolvedValueOnce(mockProduction);
 
       const result = await controller.removeTagFromProduction(1, 2);
 
@@ -117,9 +137,15 @@ describe("ProductionTagController", () => {
     });
 
     it("should pass through errors if removing a tag fails (e.g., production not found)", async () => {
-      jest.spyOn(service, "removeTagFromProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
+      jest
+        .spyOn(service, "removeTagFromProduction")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
 
-      await expect(controller.removeTagFromProduction(999, 2)).rejects.toThrow(NotFoundException);
+      await expect(controller.removeTagFromProduction(999, 2)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import type { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import type {
+  BlogDto,
+  CreateEventDto,
+  EventDto,
+  UpdateEventDto,
+} from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
 
@@ -7,7 +12,7 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 export class EventService {
   constructor(
     private readonly eventDBService: EventDatabaseService,
-    private readonly blogDBService: BlogDatabaseService
+    private readonly blogDBService: BlogDatabaseService,
   ) {}
 
   /**
@@ -106,10 +111,13 @@ export class EventService {
    * @param blogId The ID of the Blog in question.
    * @returns The Event the Blog was unlinked from.
    */
-  async unlinkBlogFromEvent(eventId: number, blogId: number): Promise<EventDto> {
+  async unlinkBlogFromEvent(
+    eventId: number,
+    blogId: number,
+  ): Promise<EventDto> {
     await this.eventDBService.deleteBlogFromEvent(eventId, blogId);
     return await this.eventDBService.getEventById(eventId);
-  } 
+  }
 }
 
 export default EventService;

@@ -1,4 +1,11 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Put } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Put,
+} from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ProductionDto, TagDto } from "../../dto/dto";
@@ -16,15 +23,17 @@ export class ProductionTagController {
    * @param productionId ID in the URL of the request.
    * @returns The list of Tag objects for the Production
    */
-  @ApiOperation({ summary: "Returns the Tags of the Production with id in the URL." })
+  @ApiOperation({
+    summary: "Returns the Tags of the Production with id in the URL.",
+  })
   @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
   @Get()
   async getTagsOfProductionByID(
-    @Param("productionId", ParseIntPipe) productionId: number
+    @Param("productionId", ParseIntPipe) productionId: number,
   ): Promise<TagDto[]> {
     return await this.productionService.getTagsById(productionId);
   }
-  
+
   /**
    * Responds to PUT to "/production/:productionId/tag/:tagId".
    * @param productionId The ID of the Production.
@@ -32,7 +41,10 @@ export class ProductionTagController {
    * @returns The altered Production.
    */
   @ApiOperation({ summary: "Adds a Tag to a Production." })
-  @ApiOkResponse({ type: ProductionDto, description: "Successfully added Tag to Production." })
+  @ApiOkResponse({
+    type: ProductionDto,
+    description: "Successfully added Tag to Production.",
+  })
   @Put(":tagId")
   async addTagToProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
@@ -48,12 +60,18 @@ export class ProductionTagController {
    * @returns The altered Production.
    */
   @ApiOperation({ summary: "Removes a Tag from a Production." })
-  @ApiOkResponse({ type: ProductionDto, description: "Successfully removed Tag from Production." })
+  @ApiOkResponse({
+    type: ProductionDto,
+    description: "Successfully removed Tag from Production.",
+  })
   @Delete(":tagId")
   async removeTagFromProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
     @Param("tagId", ParseIntPipe) tagId: number,
   ): Promise<ProductionDto> {
-    return await this.productionService.removeTagFromProduction(productionId, tagId);
+    return await this.productionService.removeTagFromProduction(
+      productionId,
+      tagId,
+    );
   }
 }

@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BlogController } from './blog.controller';
-import { BlogService } from './blog.service';
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from '../dto/dto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { BlogController } from "./blog.controller";
+import { BlogService } from "./blog.service";
+import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
 
-describe('BlogController', () => {
+describe("BlogController", () => {
   let controller: BlogController;
   let blogService: BlogService;
 
@@ -20,8 +20,8 @@ describe('BlogController', () => {
   // Sample data for assertions
   const mockBlog: BlogDto = {
     id: 1,
-    titel: 'My First Blog',
-    description: 'Hello World!',
+    titel: "My First Blog",
+    description: "Hello World!",
   };
 
   beforeEach(async () => {
@@ -45,14 +45,14 @@ describe('BlogController', () => {
     jest.clearAllMocks();
   });
 
-  describe('Initialization', () => {
-    it('should be defined', () => {
+  describe("Initialization", () => {
+    it("should be defined", () => {
       expect(controller).toBeDefined();
     });
   });
 
-  describe('getAllBlogs', () => {
-    it('should return an array of blogs', async () => {
+  describe("getAllBlogs", () => {
+    it("should return an array of blogs", async () => {
       const expectedBlogs = [mockBlog];
       mockBlogService.getAllBlogs.mockResolvedValue(expectedBlogs);
 
@@ -63,8 +63,8 @@ describe('BlogController', () => {
     });
   });
 
-  describe('getBlogById', () => {
-    it('should return a single blog by ID', async () => {
+  describe("getBlogById", () => {
+    it("should return a single blog by ID", async () => {
       const blogId = 1;
       mockBlogService.getBlogById.mockResolvedValue(mockBlog);
 
@@ -76,9 +76,12 @@ describe('BlogController', () => {
     });
   });
 
-  describe('createBlog', () => {
-    it('should create and return a new blog', async () => {
-      const createDto: CreateBlogDto = { titel: 'My First Blog', description: 'Hello World!' };
+  describe("createBlog", () => {
+    it("should create and return a new blog", async () => {
+      const createDto: CreateBlogDto = {
+        titel: "My First Blog",
+        description: "Hello World!",
+      };
       mockBlogService.createBlog.mockResolvedValue(mockBlog);
 
       const result = await controller.createBlog(createDto);
@@ -89,8 +92,8 @@ describe('BlogController', () => {
     });
   });
 
-  describe('replaceBlog', () => {
-    it('should replace and return the updated blog', async () => {
+  describe("replaceBlog", () => {
+    it("should replace and return the updated blog", async () => {
       const blogId = 1;
       const replaceDto: BlogDto = { ...mockBlog };
       mockBlogService.replaceBlog.mockResolvedValue(mockBlog);
@@ -103,12 +106,12 @@ describe('BlogController', () => {
     });
   });
 
-  describe('modifyBlog', () => {
-    it('should modify and return the updated blog', async () => {
+  describe("modifyBlog", () => {
+    it("should modify and return the updated blog", async () => {
       const blogId = 1;
-      const updateDto: UpdateBlogDto = { titel: 'Updated titel' };
-      const expectedUpdatedBlog = { ...mockBlog, titel: 'Updated titel' };
-      
+      const updateDto: UpdateBlogDto = { titel: "Updated titel" };
+      const expectedUpdatedBlog = { ...mockBlog, titel: "Updated titel" };
+
       mockBlogService.modifyBlog.mockResolvedValue(expectedUpdatedBlog);
 
       const result = await controller.modifyBlog(blogId, updateDto);
@@ -119,8 +122,8 @@ describe('BlogController', () => {
     });
   });
 
-  describe('deleteBlog', () => {
-    it('should successfully delete a blog', async () => {
+  describe("deleteBlog", () => {
+    it("should successfully delete a blog", async () => {
       const blogId = 1;
       mockBlogService.deleteBlog.mockResolvedValue(undefined);
 

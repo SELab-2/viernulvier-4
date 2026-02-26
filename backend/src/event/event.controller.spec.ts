@@ -237,7 +237,7 @@ describe("EventController", () => {
         .mockRejectedValueOnce(new Error("Failed to create event"));
 
       await expect(controller.createEvent(newEvent)).rejects.toThrow(
-        "Failed to create event"
+        "Failed to create event",
       );
     });
   });

@@ -44,9 +44,5 @@
   "dependencies": {
     "dotenv": "^17.3.1",
     "pg": "^8.18.0"
-  },
-  "overrides": {
-    "ajv": "^8.18.0",
-    "minimatch": "^10.2.1"
   }
 }
