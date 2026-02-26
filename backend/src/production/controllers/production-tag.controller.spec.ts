@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionTagController } from "./production-tag.controller";
-import { ProductionService } from "./production.service";
-import { ProductionDto, TagDto } from "../dto/dto";
+import { ProductionService } from "../production.service";
+import { ProductionDto, TagDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 
 describe("ProductionTagController", () => {

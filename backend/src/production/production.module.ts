@@ -1,9 +1,9 @@
 import { Module } from "@nestjs/common";
 import { ProductionService } from "./production.service";
-import { ProductionController } from "./production.controller";
+import { ProductionController } from "./controllers/production.controller";
 import { DbModule } from "../database/db.module";
-import { ProductionBlogController } from "./production-blog.controller";
-import { ProductionTagController } from "./production-tag.controller";
+import { ProductionBlogController } from "./controllers/production-blog.controller";
+import { ProductionTagController } from "./controllers/production-tag.controller";
 
 @Module({
   providers: [ProductionService],

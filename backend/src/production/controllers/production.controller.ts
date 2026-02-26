@@ -9,10 +9,10 @@ import {
   Put,
   UsePipes,
 } from "@nestjs/common";
-import { ProductionService } from "./production.service";
-import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
+import { ProductionService } from "../production.service";
+import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import { ProductionSchema, UpdateProductionSchema, CreateProductionSchema } from "@repo/common";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto } from "../dto/dto";
+import { ProductionDto, UpdateProductionDto, CreateProductionDto, TagDto } from "../../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 /**

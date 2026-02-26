@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionBlogController } from "./production-blog.controller";
-import { ProductionService } from "./production.service";
-import { BlogDto, ProductionDto } from "../dto/dto";
+import { ProductionService } from "../production.service";
+import { BlogDto, ProductionDto } from "../../dto/dto";
 import { NotFoundException, BadRequestException } from "@nestjs/common";
 
 describe("ProductionBlogController", () => {

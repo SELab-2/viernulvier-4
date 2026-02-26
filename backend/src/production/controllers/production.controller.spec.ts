@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
-import { ProductionService } from "./production.service";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../dto/dto";
+import { ProductionService } from "../production.service";
+import { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 
 describe("ProductionController", () => {

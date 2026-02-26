@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, Param, ParseIntPipe, Put } from "@nestjs/common";
-import { ProductionService } from "./production.service";
+import { ProductionService } from "../production.service";
 import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { BlogDto, ProductionDto } from "../dto/dto";
+import { BlogDto, ProductionDto } from "../../dto/dto";
 
 /**
  * Handles the Relationships between Productions and Blogs.
