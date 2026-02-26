@@ -137,13 +137,24 @@ export class ProductionService {
     return await this.productionDBService.getTagsOfProduction(production);
   }
 
-  // TODO: Docs
+  /**
+   * Adds a specific Tag to a Production.
+   * @param productionId The ID of the Production we want to link the Tag to.
+   * @param tagId The ID of the Tag we want to link.
+   * @returns The Production in question.
+   */
   async addTagToProduction(productionId: number, tagId: number): Promise<ProductionDto> {
     await this.productionDBService.addTagToProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
   }
 
-  // TODO: Docs
+  /**
+   * Removes a specific Tag from a Production. If the Tag wasn't linked to the
+   * Production nothing happens.
+   * @param productionId The ID of the Production we want to remove the Tag from.
+   * @param tagId The ID of the Tag we want to remove.
+   * @returns The Production in question.
+   */
   async removeTagFromProduction(productionId: number, tagId: number): Promise<ProductionDto> {
     await this.productionDBService.removeTagFromProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
