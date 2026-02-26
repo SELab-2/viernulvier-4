@@ -9,6 +9,7 @@ import { TagDatabaseService } from "./db.tag.service";
   imports: [],
   providers: [
     DbService,
+    TagDatabaseService,
     ProductionDatabaseService,
     EventDatabaseService,
     BlogDatabaseService,
@@ -16,6 +17,8 @@ import { TagDatabaseService } from "./db.tag.service";
   ],
   controllers: [],
   exports: [
+    DbService,
+    TagDatabaseService,
     ProductionDatabaseService,
     EventDatabaseService,
     BlogDatabaseService,
