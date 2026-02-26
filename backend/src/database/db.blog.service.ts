@@ -24,17 +24,43 @@ export class BlogDatabaseService {
   }
 
   /**
-   * Get a single Blog by their ID.
-   * @returns All blogs.
+   * Get blogs with pagination
+   * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
+   * @param page page index (starts at 0)
+   * @returns blogs
    */
-  async getBlogs(): Promise<BlogDto[]> {
-    const query = `SELECT * FROM blogs`;
+  async getBlogs(amount: number = 0, page: number = 0): Promise<BlogDto[]> {
+    const offset = page * amount;
 
-    const result = await this.db.query<BlogDto>(query);
+    if (amount === 0) {
+      const query = `
+      SELECT *
+      FROM blogs
+      ORDER BY id
+      `;
+
+      const result = await this.db.query<BlogDto>(query);
+
+      if (result.length === 0) {
+        throw new Error("no blogs found");
+      }
+
+      return result;
+    }
+
+    let query = `
+    SELECT *
+    FROM blogs
+    ORDER BY id
+    LIMIT $1 OFFSET $2
+    `;
+
+    const result = await this.db.query<BlogDto>(query, [amount, offset]);
 
     if (result.length === 0) {
       throw new Error("no blogs found");
     }
+
     return result;
   }
 
