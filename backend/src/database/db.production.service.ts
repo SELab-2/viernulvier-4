@@ -369,7 +369,7 @@ export class ProductionDatabaseService {
     production_id: number,
   ): Promise<void> {
     const query = `
-      INSERT INTO production_tags (production_id, tag_id)
+      INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
       ON CONFLICT DO NOTHING
     `;
@@ -387,9 +387,9 @@ export class ProductionDatabaseService {
     production_id: number,
   ): Promise<void> {
     const query = `
-      DELETE FROM production_tags
-      WHERE production_tags.tag_id = $1
-        AND production_tags.production_id = $2
+      DELETE FROM production_tag
+      WHERE production_tag.tag_id = $1
+        AND production_tag.production_id = $2
     `
 
     await this.db.query(query, [tag_id, production_id]);
