@@ -43,18 +43,6 @@ export class ProductionController {
   }
 
   /**
-   * Responds to GET /productions/:id/tags
-   * @param id ID in the URL of the request.
-   * @returns The list of Tag objects for the Production
-   */
-  @ApiOperation({ summary: "Returns the Tags of the Production with id in the URL." })
-  @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
-  @Get(":id/tags")
-  async getTagsOfProductionByID(@Param("id", ParseIntPipe) id: number): Promise<TagDto[]> {
-    return await this.productionService.getTagsById(id);
-  }
-
-  /**
    * Responds to a PUT to "/production/:id".
    * @param id The ID in the URL.
    * @param production The parsed ProductionDto object.
@@ -119,7 +107,7 @@ export class ProductionController {
   // -- BLOGS -- //
 
   /**
-   * Responds to a GET to "/:id/blog".
+   * Responds to a GET to "/production/:id/blog".
    * @param id The id of the Production.
    * @returns A list of all Blog objects linked to this Production.
    */
@@ -131,7 +119,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a PUT to "/:id/blog/:id2"
+   * Responds to a PUT to "/production/:id/blog/:id2"
    * @param productionId ID of the Production.
    * @param blogId ID of the Blog.
    * @returns The newly linked Blog object.
@@ -147,7 +135,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a DELETE to "/:id/blog/:id2"
+   * Responds to a DELETE to "/production/:id/blog/:id2"
    * @param productionId ID of the Production.
    * @param blogId ID of the Blog.
    * @returns The Production we just unlinked the Blog from.
@@ -160,5 +148,52 @@ export class ProductionController {
     @Param("id2", ParseIntPipe) blogId: number
   ): Promise<ProductionDto> {
     return await this.productionService.unlinkBlogFromProduction(productionId, blogId);
+  }
+
+  // -- Tags -- //
+
+  /**
+   * Responds to GET /production/:id/tag
+   * @param id ID in the URL of the request.
+   * @returns The list of Tag objects for the Production
+   */
+  @ApiOperation({ summary: "Returns the Tags of the Production with id in the URL." })
+  @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
+  @Get(":id/tag")
+  async getTagsOfProductionByID(@Param("id", ParseIntPipe) id: number): Promise<TagDto[]> {
+    return await this.productionService.getTagsById(id);
+  }
+
+  
+  /**
+   * Responds to PUT to "/production/:id/tag/:id2".
+   * @param productionId The ID of the Production.
+   * @param tagId The ID of the Tag.
+   * @returns The altered Production.
+   */
+  @ApiOperation({ summary: "Adds a Tag to a Production." })
+  @ApiOkResponse({ type: ProductionDto, description: "Successfully added Tag to Production." })
+  @Put(":id/tag/:id2")
+  async addTagToProduction(
+    @Param("id", ParseIntPipe) productionId: number,
+    @Param("id2", ParseIntPipe) tagId: number,
+  ): Promise<ProductionDto> {
+    return await this.productionService.addTagToProduction(productionId, tagId);
+  }
+
+  /**
+   * Responds to a DELETE to "/production/:id/tag/:id2".
+   * @param productionId The ID of the Production.
+   * @param tagId The ID of the Tag.
+   * @returns The altered Production.
+   */
+  @ApiOperation({ summary: "Removes a Tag from a Production." })
+  @ApiOkResponse({ type: ProductionDto, description: "Successfully removed Tag from Production." })
+  @Delete(":id/tag/:id2")
+  async removeTagFromProduction(
+    @Param("id", ParseIntPipe) productionId: number,
+    @Param("id2", ParseIntPipe) tagId: number,
+  ): Promise<ProductionDto> {
+    return await this.productionService.removeTagFromProduction(productionId, tagId);
   }
 }

@@ -72,7 +72,7 @@ CREATE TABLE tags
     tag TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE production_tags
+CREATE TABLE production_tag
 (
     production_id INT NOT NULL,
     tag_id        INT NOT NULL,

@@ -356,4 +356,42 @@ export class ProductionDatabaseService {
 
     await this.db.query(query, [production_id, blog_id]);
   }
+
+  // -- Tags -- //
+
+  /**
+   * Adds an existing Tag to an existing Production in the Database.
+   * @param tag_id The ID of the Tag.
+   * @param production_id The ID of the Production.
+   */
+  async addTagToProduction(
+    tag_id: number,
+    production_id: number,
+  ): Promise<void> {
+    const query = `
+      INSERT INTO production_tag (production_id, tag_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+    `;
+
+    await this.db.query(query, [production_id, tag_id]);
+  }
+
+  /**
+   * Removes a previously linked Tag from an existing Production in the Database.
+   * @param tag_id The ID of the Tag.
+   * @param production_id The ID of the Production.
+   */
+  async removeTagFromProduction(
+    tag_id: number,
+    production_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM production_tag
+      WHERE production_tag.tag_id = $1
+        AND production_tag.production_id = $2
+    `
+
+    await this.db.query(query, [tag_id, production_id]);
+  }
 }

@@ -45,11 +45,13 @@ describe("ProductionService", () => {
             getTagsOfProduction: jest.fn().mockResolvedValue(mockTags),
             updateProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
-            // New mock methods
             createProduction: jest.fn(),
             getBlogsOfProduction: jest.fn(),
             linkBlogWithProductionID: jest.fn(),
             deleteBlogFromProduction: jest.fn(),
+            // New mock methods
+            addTagToProduction: jest.fn(),
+            removeTagFromProduction: jest.fn(),
           },
         },
         {
@@ -186,54 +188,6 @@ describe("ProductionService", () => {
     });
   });
 
-  describe("getTagsById", () => {
-    it("should fetch production and return its tags", async () => {
-      const result = await service.getTagsById(1);
-      expect(result).toEqual(mockTags);
-      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
-      expect(dbService.getTagsOfProduction).toHaveBeenCalledWith(mockProduction);
-    });
-
-    it("should call getProductionById with the correct id", async () => {
-      await service.getTagsById(1);
-      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
-      expect(dbService.getProductionById).toHaveBeenCalledTimes(1);
-    });
-
-    it("should call getTagsOfProduction with the fetched production", async () => {
-      await service.getTagsById(1);
-      expect(dbService.getTagsOfProduction).toHaveBeenCalledWith(mockProduction);
-      expect(dbService.getTagsOfProduction).toHaveBeenCalledTimes(1);
-    });
-
-    it("should return empty array when production has no tags", async () => {
-      jest.spyOn(dbService, "getTagsOfProduction").mockResolvedValueOnce([]);
-      const result = await service.getTagsById(1);
-      expect(result).toEqual([]);
-      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
-    });
-
-    it("should handle database error when production is not found", async () => {
-      jest
-        .spyOn(dbService, "getProductionById")
-        .mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
-
-      await expect(service.getTagsById(999)).rejects.toThrow(
-        "No ProductionDto exists for provided ID"
-      );
-      expect(dbService.getTagsOfProduction).not.toHaveBeenCalled();
-    });
-
-    it("should handle database error when fetching tags fails", async () => {
-      jest
-        .spyOn(dbService, "getTagsOfProduction")
-        .mockRejectedValueOnce(new Error("Failed to fetch tags"));
-
-      await expect(service.getTagsById(1)).rejects.toThrow("Failed to fetch tags");
-      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
-    });
-  });
-
   describe("-- Blogs --", () => {
     const mockBlog: BlogDto = {
       id: 1,
@@ -301,6 +255,96 @@ describe("ProductionService", () => {
     });
   });
 
+  describe("-- Tags --", () => {
+    describe("getTagsById", () => {
+      it("should fetch production and return its tags", async () => {
+        const result = await service.getTagsById(1);
+        expect(result).toEqual(mockTags);
+        expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+        expect(dbService.getTagsOfProduction).toHaveBeenCalledWith(mockProduction);
+      });
+
+      it("should call getProductionById with the correct id", async () => {
+        await service.getTagsById(1);
+        expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+        expect(dbService.getProductionById).toHaveBeenCalledTimes(1);
+      });
+
+      it("should call getTagsOfProduction with the fetched production", async () => {
+        await service.getTagsById(1);
+        expect(dbService.getTagsOfProduction).toHaveBeenCalledWith(mockProduction);
+        expect(dbService.getTagsOfProduction).toHaveBeenCalledTimes(1);
+      });
+
+      it("should return empty array when production has no tags", async () => {
+        jest.spyOn(dbService, "getTagsOfProduction").mockResolvedValueOnce([]);
+        const result = await service.getTagsById(1);
+        expect(result).toEqual([]);
+        expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+      });
+
+      it("should handle database error when production is not found", async () => {
+        jest
+          .spyOn(dbService, "getProductionById")
+          .mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
+
+        await expect(service.getTagsById(999)).rejects.toThrow(
+          "No ProductionDto exists for provided ID"
+        );
+        expect(dbService.getTagsOfProduction).not.toHaveBeenCalled();
+      });
+
+      it("should handle database error when fetching tags fails", async () => {
+        jest
+          .spyOn(dbService, "getTagsOfProduction")
+          .mockRejectedValueOnce(new Error("Failed to fetch tags"));
+
+        await expect(service.getTagsById(1)).rejects.toThrow("Failed to fetch tags");
+        expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+      });
+    });
+
+    describe("addTagToProduction", () => {
+      it("should silently attempt to add a tag and return the production object", async () => {
+        jest.spyOn(dbService, "addTagToProduction").mockResolvedValueOnce(undefined);
+        jest.spyOn(dbService, "getProductionById").mockResolvedValueOnce(mockProduction);
+
+        const result = await service.addTagToProduction(1, 2);
+
+        expect(dbService.addTagToProduction).toHaveBeenCalledWith(2, 1); // tagId, productionId
+        expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+        expect(result).toEqual(mockProduction);
+      });
+
+      it("should handle failure when fetching the production to return fails", async () => {
+        jest.spyOn(dbService, "addTagToProduction").mockResolvedValueOnce(undefined);
+        jest.spyOn(dbService, "getProductionById").mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
+
+        await expect(service.addTagToProduction(999, 2)).rejects.toThrow("No ProductionDto exists for provided ID");
+      });
+    });
+
+    describe("removeTagFromProduction", () => {
+      it("should silently attempt to remove a tag and return the production object", async () => {
+        jest.spyOn(dbService, "removeTagFromProduction").mockResolvedValueOnce(undefined);
+        jest.spyOn(dbService, "getProductionById").mockResolvedValueOnce(mockProduction);
+
+        const result = await service.removeTagFromProduction(1, 2);
+
+        expect(dbService.removeTagFromProduction).toHaveBeenCalledWith(2, 1); // tagId, productionId
+        expect(dbService.getProductionById).toHaveBeenCalledWith(1);
+        expect(result).toEqual(mockProduction);
+      });
+
+      it("should handle failure when fetching the production to return fails", async () => {
+        jest.spyOn(dbService, "removeTagFromProduction").mockResolvedValueOnce(undefined);
+        jest.spyOn(dbService, "getProductionById").mockRejectedValueOnce(new Error("No ProductionDto exists for provided ID"));
+
+        await expect(service.removeTagFromProduction(999, 2)).rejects.toThrow("No ProductionDto exists for provided ID");
+      });
+    });
+  });
+
   describe("createProduction", () => {
     it("should create a production successfully", async () => {
       const newProduction: CreateProductionDto = {
@@ -343,5 +387,4 @@ describe("ProductionService", () => {
       );
     });
   });
-
 });
