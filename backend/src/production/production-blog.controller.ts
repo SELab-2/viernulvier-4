@@ -50,7 +50,7 @@ export class ProductionBlogController {
   @ApiOperation({ summary: "Unlink a Blog from an existing Production." })
   @ApiOkResponse({ type: ProductionDto, description: "Unlinked Blog from Production." })
   @Delete(":blogId")
-  async unlinkBlogFromEvent(
+  async unlinkBlogFromProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
     @Param("blogId", ParseIntPipe) blogId: number
   ): Promise<ProductionDto> {
