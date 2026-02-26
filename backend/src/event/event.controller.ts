@@ -18,7 +18,7 @@ import {
   UpdateEventSchema,
 } from "@repo/common";
 import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 
 @Controller("event")
 export class EventController {
@@ -28,6 +28,7 @@ export class EventController {
    * Responds to GET /events
    * @returns All EventDto objects.
    */
+  @ApiTags("Event")
   @ApiOperation({ summary: "Returns all Event objects." })
   @ApiOkResponse({
     type: EventDto,
@@ -45,6 +46,7 @@ export class EventController {
    * @returns The EventDto object with corresponding ID
    */
   // TODO: return multiple events with same production id
+  @ApiTags("Event")
   @ApiOperation({ summary: "Returns the Event with the ID in the URL." })
   @ApiOkResponse({ type: EventDto, description: "Event Found." })
   @Get(":id")
@@ -58,6 +60,7 @@ export class EventController {
    * @param event The parsed EventDto object.
    * @returns The updated EventDto object.
    */
+  @ApiTags("Event")
   @ApiOperation({ summary: "Replaces an existing Event." })
   @ApiBody({ type: EventDto })
   @ApiOkResponse({ type: EventDto, description: "Event replaced." })
@@ -75,6 +78,7 @@ export class EventController {
    * @param patchData The partial EventDto object that is used to modify.
    * @returns The updated EventDto object.
    */
+  @ApiTags("Event")
   @ApiOperation({ summary: "Modifies an existing Event." })
   @ApiBody({ type: UpdateEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event modified." })
@@ -91,6 +95,7 @@ export class EventController {
    * @param id ID in the URL of the request.
    * @returns Nothing.
    */
+  @ApiTags("Event")
   @ApiOperation({ summary: "Deletes an Event." })
   @ApiOkResponse({ description: "Event deleted." })
   @Delete(":id")
@@ -103,6 +108,7 @@ export class EventController {
    * @param newEvent The new EventDto data we want to add
    * @returns The newly created EventDto.
    */
+  @ApiTags("Event")
   @ApiOperation({ summary: "Creates an Event." })
   @ApiBody({ type: CreateEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event created." })
@@ -119,6 +125,7 @@ export class EventController {
    * @param id The id of the Event.
    * @returns A list of all Blog objects linked to this Event.
    */
+  @ApiTags("Event - Blog")
   @ApiOperation({ summary: "Get Blogs linked to a specific Event." })
   @ApiOkResponse({ type: BlogDto, isArray: true, description: "Returned all linked Blogs." })
   @Get(":id/blog")
@@ -132,6 +139,7 @@ export class EventController {
    * @param blogId ID of the Blog.
    * @returns The newly linked Blog object.
    */
+  @ApiTags("Event - Blog")
   @ApiOperation({ summary: "Link a blog to an existing Event." })
   @ApiOkResponse({ type: BlogDto, description: "Linked Blog to Event." })
   @Put(":id/blog/:id2")
@@ -148,6 +156,7 @@ export class EventController {
    * @param blogId ID of the Blog.
    * @returns The Event we just unlinked the Blog from.
    */
+  @ApiTags("Event - Blog")
   @ApiOperation({ summary: "Unlink a blog from an existing Event." })
   @ApiOkResponse({ type: EventDto, description: "Unlinked Blog from Event." })
   @Delete(":id/blog/:id2")

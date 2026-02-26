@@ -34,16 +34,6 @@ export class ProductionService {
   }
 
   /**
-   * Fetches all TagDto objects for a given production id.
-   * @param id ID in the URL of the request.
-   * @returns The list of TagDto objects for the Production
-   */
-  async getTagsById(id: number): Promise<TagDto[]> {
-    const production: ProductionDto = await this.productionDBService.getProductionById(id);
-    return await this.productionDBService.getTagsOfProduction(production);
-  }
-
-  /**
    * Replaces a ProductionDto in the database and returns the updated one.
    * @param id The ID of the production.
    * @param production The ProductionDto Object itself.
@@ -134,4 +124,28 @@ export class ProductionService {
     await this.productionDBService.deleteBlogFromProduction(productionId, blogId);
     return await this.productionDBService.getProductionById(productionId);
   } 
+
+  // -- Tags -- //
+
+  /**
+   * Fetches all TagDto objects for a given production id.
+   * @param id ID in the URL of the request.
+   * @returns The list of TagDto objects for the Production
+   */
+  async getTagsById(id: number): Promise<TagDto[]> {
+    const production: ProductionDto = await this.productionDBService.getProductionById(id);
+    return await this.productionDBService.getTagsOfProduction(production);
+  }
+
+  // TODO: Docs
+  async addTagToProduction(productionId: number, tagId: number): Promise<ProductionDto> {
+    await this.productionDBService.addTagToProduction(tagId, productionId);
+    return await this.productionDBService.getProductionById(productionId);
+  }
+
+  // TODO: Docs
+  async removeTagFromProduction(productionId: number, tagId: number): Promise<ProductionDto> {
+    await this.productionDBService.removeTagFromProduction(tagId, productionId);
+    return await this.productionDBService.getProductionById(productionId);
+  }
 }
