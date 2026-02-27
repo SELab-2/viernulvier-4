@@ -270,3 +270,121 @@ describe("BlogController (e2e)", () => {
     });
   });
 });
+
+// TAG endpoints
+
+describe("TagController (e2e)", () => {
+  let app: INestApplication;
+  let tagDb: TagDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    tagDb = app.get<TagDatabaseService>(TagDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /tag
+  describe("GET /tag", () => {
+    it("should return 200 with an array of tags", () => {
+      return request(app.getHttpServer())
+        .get("/tag")
+        .expect(200)
+        .expect([mockTag, mockTag2]);
+    });
+
+    it("should return 200 with empty array when no tags exist", async () => {
+      jest.spyOn(tagDb, "getTags").mockResolvedValueOnce([]);
+      return request(app.getHttpServer()).get("/tag").expect(200).expect([]);
+    });
+  });
+
+  // GET /tag/:id
+  describe("GET /tag/:id", () => {
+    it("should return 200 with the correct tag", () => {
+      return request(app.getHttpServer())
+        .get("/tag/1")
+        .expect(200)
+        .expect(mockTag);
+    });
+
+    it("should call tagDb.getTagById with the correct id", async () => {
+      await request(app.getHttpServer()).get("/tag/1");
+      expect(tagDb.getTagById).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).get("/tag/abc").expect(400);
+    });
+  });
+
+  // POST /tag
+  describe("POST /tag", () => {
+    const createPayload = { tag: "Thriller" };
+
+    it("should return 201 with the created tag", () => {
+      return request(app.getHttpServer())
+        .post("/tag")
+        .send(createPayload)
+        .expect(201)
+        .expect(mockTag);
+    });
+
+    it("should call tagDb.createTag with the payload", async () => {
+      await request(app.getHttpServer()).post("/tag").send(createPayload);
+      expect(tagDb.createTag).toHaveBeenCalledWith(createPayload);
+    });
+
+    it("should return 400 when body is missing required field 'tag'", () => {
+      return request(app.getHttpServer()).post("/tag").send({}).expect(400);
+    });
+  });
+
+  // PATCH /tag/:id
+  describe("PATCH /tag/:id", () => {
+    it("should return 200 with the updated tag", () => {
+      return request(app.getHttpServer())
+        .patch("/tag/1")
+        .send({ tag: "Thriller" })
+        .expect(200)
+        .expect(mockTag);
+    });
+
+    it("should return 400 when body id does not match URL id", () => {
+      return request(app.getHttpServer())
+        .patch("/tag/1")
+        .send({ id: 99, tag: "Other" })
+        .expect(400);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer())
+        .patch("/tag/abc")
+        .send({ tag: "Something" })
+        .expect(400);
+    });
+  });
+
+  // DELETE /tag/:id
+  describe("DELETE /tag/:id", () => {
+    it("should return 200 with a success message", async () => {
+      const response = await request(app.getHttpServer())
+        .delete("/tag/1")
+        .expect(200);
+      expect(response.body).toHaveProperty("message");
+      expect(response.body.message).toContain("1");
+    });
+
+    it("should call tagDb.deleteTag with the correct id", async () => {
+      await request(app.getHttpServer()).delete("/tag/1");
+      expect(tagDb.deleteTag).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).delete("/tag/abc").expect(400);
+    });
+  });
+});
+
