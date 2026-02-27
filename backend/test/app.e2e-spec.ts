@@ -388,3 +388,154 @@ describe("TagController (e2e)", () => {
   });
 });
 
+// PRODUCTION endpoints
+
+describe("ProductionController (e2e)", () => {
+  let app: INestApplication;
+  let productionDb: ProductionDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /production
+  describe("GET /production", () => {
+    it("should return 200 with an array of productions", () => {
+      return request(app.getHttpServer())
+        .get("/production")
+        .expect(200)
+        .expect([mockProduction]);
+    });
+
+    it("should return 200 with empty array when no productions exist", async () => {
+      jest.spyOn(productionDb, "getProductions").mockResolvedValueOnce([]);
+      return request(app.getHttpServer())
+        .get("/production")
+        .expect(200)
+        .expect([]);
+    });
+  });
+
+  // GET /production/:productionId
+  describe("GET /production/:productionId", () => {
+    it("should return 200 with the correct production", () => {
+      return request(app.getHttpServer())
+        .get("/production/1")
+        .expect(200)
+        .expect(mockProduction);
+    });
+
+    it("should call productionDb.getProductionById with the correct id", async () => {
+      await request(app.getHttpServer()).get("/production/1");
+      expect(productionDb.getProductionById).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).get("/production/abc").expect(400);
+    });
+  });
+
+  // POST /production
+  describe("POST /production", () => {
+    const createPayload = {
+      titel: "New Production",
+      ondertitel: "Subtitle",
+      description1: "Desc 1",
+      description2: "Desc 2",
+      genre: "Drama",
+      planning_id: 2,
+    };
+
+    it("should return 201 with the created production", () => {
+      return request(app.getHttpServer())
+        .post("/production")
+        .send(createPayload)
+        .expect(201)
+        .expect(mockProduction);
+    });
+
+    it("should call productionDb.createProduction with the payload", async () => {
+      await request(app.getHttpServer()).post("/production").send(createPayload);
+      expect(productionDb.createProduction).toHaveBeenCalledWith(createPayload);
+    });
+
+    it("should return 400 when required fields are missing", () => {
+      return request(app.getHttpServer())
+        .post("/production")
+        .send({ titel: "Incomplete" })
+        .expect(400);
+    });
+  });
+
+  // PUT /production/:productionId
+  describe("PUT /production/:productionId", () => {
+    it("should return 200 with the replaced production when ids match", () => {
+      return request(app.getHttpServer())
+        .put("/production/1")
+        .send(mockProduction)
+        .expect(200)
+        .expect(mockProduction);
+    });
+
+    it("should return 400 when URL id and body id do not match", () => {
+      return request(app.getHttpServer())
+        .put("/production/2")
+        .send(mockProduction) // id: 1 in body
+        .expect(400);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/production/abc")
+        .send(mockProduction)
+        .expect(400);
+    });
+  });
+
+  // PATCH /production/:productionId
+  describe("PATCH /production/:productionId", () => {
+    it("should return 200 with the modified production", () => {
+      return request(app.getHttpServer())
+        .patch("/production/1")
+        .send({ titel: "Patched titel" })
+        .expect(200)
+        .expect(mockProduction);
+    });
+
+    it("should call productionDb.updateProduction", async () => {
+      await request(app.getHttpServer())
+        .patch("/production/1")
+        .send({ titel: "Patched titel" });
+      expect(productionDb.updateProduction).toHaveBeenCalled();
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer())
+        .patch("/production/abc")
+        .send({ titel: "Patched" })
+        .expect(400);
+    });
+  });
+
+  // DELETE /production/:productionId
+  describe("DELETE /production/:productionId", () => {
+    it("should return 200 when production is deleted", () => {
+      return request(app.getHttpServer()).delete("/production/1").expect(200);
+    });
+
+    it("should call productionDb.deleteProduction with the correct id", async () => {
+      await request(app.getHttpServer()).delete("/production/1");
+      expect(productionDb.deleteProduction).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).delete("/production/abc").expect(400);
+    });
+  });
+});
+
