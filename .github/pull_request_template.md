@@ -1,35 +1,35 @@
 ## 🎯 MAIN GOAL
-- [ ] deze PR implementeert een nieuwe feature
-* beschrijf welke features er geïmplementeerd worden
-- [ ] deze PR fixt één of meerdere bugs
-* beschrijf welke bugs er gefixed worden
+- [ ] this PR implements a new feature
+* describe the newly implemented features
+- [ ] this PR fixes some existing bugs
+* describe the fixed bugs
 
 ## 🛠️ TESTING
-- [ ] Er zijn voldoende testen geschreven voor deze code
-- [ ] Alle testen slagen
+- [ ] there is enough test coverage for this code
+- [ ] all tests succeed
 
-**Ontbrekende testen:**
-* geef aan of bepaalde edge-cases nog testen nodig hebben
+**Missing tests:**
+* clarify if certain edge-cases still need testing
 
 ## 📝 DOCUMENTATION
-- [ ] Er is voldoende documentatie geschreven voor deze code
-- [ ] Als er externe documentatie aangepast moet worden (bv. README), is dit gebeurd
+- [ ] there is enough documentation written for this code
+- [ ] external documentation (README, etc.) has been changed
 
-**Nog missende documentatie:**
-* geef aan waar in je code nog verdere documentatie nodig is
+**Missing documentation:**
+* clarify where in the code extra documentation is required
 
 ## 🔍 HOW TO TEST
-1. Ga naar pagina X / Run commando Y
-2. Klik op knop Z
-3. Verwacht resultaat: ...
+1. Go to page X / Run command Y
+2. Press Z
+3. Expected result: ...
 
 ## ⚠️ REMAINING ISSUES
-- [ ] Er bevinden zich nog onopgeloste bugs in de code
-* geef aan waar deze bugs voorkomen
-- [ ] Deze code vereist dat er ergens anders nog iets aangepast wordt (bv. een aangepaste database structuur, API-endpoint, ...)
-* verduidelijking wat er nog aangepast moet worden
+- [ ] there are still remaining bugs in the code
+* explain where the bugs are located
+- [ ] this code requires changes elsewhere (changed database structure, API-endpoint, etc.)
+* clarify what needs to be changed
 
-## 📸 SCREENSHOTS (indien nodig):
+## 📸 SCREENSHOTS (if necessary):
 
 ## ✅ CLOSED ISSUES
 - #issuenumber
