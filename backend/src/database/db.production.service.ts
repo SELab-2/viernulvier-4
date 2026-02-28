@@ -116,6 +116,7 @@ export class ProductionDatabaseService {
       date_after: string;
       titel: string;
       id: number;
+      tag_id: number;
     }>,
     amount: number = 0,
     page: number = 0,
@@ -181,6 +182,13 @@ export class ProductionDatabaseService {
       i++;
     }
 
+    // Filter by tag id
+    if (filters.tag_id) {
+      conditions.push(`pt.tag_id = $${i}`);
+      values.push(filters.tag_id);
+      i++;
+    }
+
     // add more filters here if needed.
 
     const whereClause =
@@ -214,7 +222,8 @@ export class ProductionDatabaseService {
         p.genre,
         p.planning_id
       FROM productions p
-        LEFT JOIN events e ON e.production_id = p.id 
+        LEFT JOIN events e ON e.production_id = p.id
+        LEFT JOIN production_tag pt on p.id = pt.production_id
           ${whereClause}
       ORDER BY p.id 
         ${paginationClause}

@@ -18,6 +18,8 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { ZodValidationPipe } from "nestjs-zod";
+import { CreateTagSchema, UpdateTagSchema } from "@repo/common";
 
 @Controller("tag")
 export class TagController {
@@ -61,7 +63,9 @@ export class TagController {
   @ApiBody({ type: CreateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Created." })
   @Post()
-  async createTag(@Body() createTag: CreateTagDto): Promise<TagDto> {
+  async createTag(
+    @Body(new ZodValidationPipe(CreateTagSchema)) createTag: CreateTagDto,
+  ): Promise<TagDto> {
     return await this.tagService.createTag(createTag);
   }
 
@@ -71,15 +75,13 @@ export class TagController {
    * @param updateTag The parsed UpdateTagDto object.
    * @returns The newly updated TagDto.
    */
-  @UseGuards(ApiKeyGuard)
-  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Tag." })
   @ApiBody({ type: UpdateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
   @Patch(":id")
   async updateTag(
     @Param("id", ParseIntPipe) id: number,
-    @Body() updateTag: UpdateTagDto,
+    @Body(new ZodValidationPipe(UpdateTagSchema)) updateTag: UpdateTagDto,
   ): Promise<TagDto> {
     return await this.tagService.updateTag(id, updateTag);
   }
