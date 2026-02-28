@@ -65,6 +65,7 @@ Table accounts {
 Table api_keys {
   id int [pk, increment]
   key text [not null, unique]
+  active boolean [not null, default: true]
 }
 
 Table account_api_keys {

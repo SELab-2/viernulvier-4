@@ -79,8 +79,7 @@ export const PublicAccountSchema = AccountSchema.omit({
  * note: you never update an api key and api keys are generated in backend, so no need for Create or Update types.
  */
 export const ApiKeySchema = z.object({
-  id: z.number(),
-  key: z.string(),
+  key: z.string(), // strings are unique.
 });
 
 // Type exports

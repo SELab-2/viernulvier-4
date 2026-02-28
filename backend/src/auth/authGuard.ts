@@ -5,10 +5,13 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { Request } from "express";
+import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
+  constructor(private readonly api: ApiKeyDatabaseService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
 
     // Look for x-api-key header
@@ -18,12 +21,6 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException("Missing API key");
     }
 
-    // TODO change to db.api.service
-    const validKeys = ["abc", "def"];
-    if (!validKeys.includes(apiKey)) {
-      throw new UnauthorizedException("Invalid API key");
-    }
-
-    return true; // allow access
+    return await this.api.verifyApiKey({ key: apiKey });
   }
 }
