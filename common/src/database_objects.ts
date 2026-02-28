@@ -18,6 +18,17 @@ export const ProductionSchema = z.object({
 export const CreateProductionSchema = ProductionSchema.omit({ id: true });
 export const UpdateProductionSchema = ProductionSchema.partial();
 
+export const FilterProductionSchema = z.object({
+  titel: z.string().nullable(),
+  id: z.number().nullable(),
+  tag_ids: z.number().array().nullable(),
+  hall: z.string().nullable(),
+  date: z.iso.date().nullable(),
+  date_between: z.iso.date().nullable(),
+  date_before: z.iso.date().nullable(),
+  date_after: z.iso.date().nullable(),
+});
+
 /**
  * Schemas for events.
  */
@@ -61,6 +72,7 @@ export const UpdateTagSchema = TagSchema.partial();
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
 export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
+export type FilterProduction = z.infer<typeof FilterProductionSchema>;
 
 export type Event = z.infer<typeof EventSchema>;
 export type CreateEvent = z.infer<typeof CreateEventSchema>;
