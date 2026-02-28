@@ -4,7 +4,6 @@ import { z } from "zod";
  * Schemas for productions.
  */
 
-// TODO add _EN and _NL fields in db for titel, ondertitel and descs?
 export const ProductionSchema = z.object({
   id: z.number(),
   titel: z.string(),
