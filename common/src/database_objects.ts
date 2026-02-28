@@ -67,12 +67,15 @@ export const AccountSchema = z.object({
   superAdmin: z.boolean(),
 });
 
-export const CreateAccountSchema = AccountSchema.omit({ id: true });
+export const CreateAccountSchema = AccountSchema.omit({
+  id: true,
+  superAdmin: true,
+});
 export const UpdateAccountSchema = AccountSchema.partial();
 export const PublicAccountSchema = AccountSchema.omit({
   password: true,
   superAdmin: true,
-}); // don't leak these.
+}); // don't leak these. (note: still contains your id so you can still get your api key through that.)
 
 /**
  * Schemas for api-keys.
@@ -80,6 +83,7 @@ export const PublicAccountSchema = AccountSchema.omit({
  */
 export const ApiKeySchema = z.object({
   key: z.string(), // strings are unique.
+  id: z.number().nullable(), // id is here for the join-table operations.
 });
 
 // Type exports
