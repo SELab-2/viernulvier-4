@@ -27,7 +27,7 @@ export const EventSchema = z.object({
   endtime: z.iso.datetime().nullable(),
   hall: z.string(),
   production_id: z.number(),
-  price: z.number(),
+  price: z.number().nullable(),
 });
 
 export const CreateEventSchema = EventSchema.omit({ id: true });
