@@ -9,6 +9,7 @@ export class ApiKeyDatabaseService {
 
   /**
    * Verify that an api is in the database.
+   * this function should only be used in a guard context.
    * @param apiKey the apiKey we are testing
    * @returns T/F depending on if the apiKey is active and in the db.
    */
@@ -24,10 +25,28 @@ export class ApiKeyDatabaseService {
   }
 
   /**
+   * Verify that an api is in the database and use superuser key.
+   * this function should only be used in a guard context.
+   * @param apiKey the apiKey we are testing
+   * @returns T/F depending on if the apiKey is active and in the db.
+   */
+  async verifySuperApiKey(apiKey: ApiKeyDto): Promise<boolean> {
+    const query = `
+        SELECT 1
+        FROM api_keys
+        WHERE key = $1 AND active = TRUE AND super_key = TRUE
+        LIMIT 1
+    `;
+    const result = await this.db.query(query, [apiKey.key]);
+    return result.length !== 0;
+  }
+
+  /**
    * Generates, inserts the api key into the database and returns an api key.
+   * This function should only be allowed to be used by a "superuser"
    * @returns the newly generated apiKey.
    */
-  async generateKey(): Promise<ApiKeyDto> {
+  async generateApiKey(): Promise<ApiKeyDto> {
     // Generate secure random key
     const key = crypto.randomBytes(32).toString("hex");
 
@@ -45,10 +64,11 @@ export class ApiKeyDatabaseService {
   /**
    * Remove an apiKey from the db.
    * note: we NEVER remove an api key from the database, we simply mark it as inactive.
+   * This function should only be allowed to be used by a "superuser"
    * @param apiKey the apiKey we want to delete
    * @returns T/F depending on if the apiKey was deleted.
    */
-  async retireKey(apiKey: ApiKeyDto): Promise<boolean> {
+  async retireApiKey(apiKey: ApiKeyDto): Promise<boolean> {
     const query = `
       UPDATE api_keys
       SET active = FALSE
