@@ -539,3 +539,89 @@ describe("ProductionController (e2e)", () => {
   });
 });
 
+// PRODUCTION - BLOG relationship endpoints
+
+describe("ProductionBlogController (e2e)", () => {
+  let app: INestApplication;
+  let productionDb: ProductionDatabaseService;
+  let blogDb: BlogDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    blogDb = app.get<BlogDatabaseService>(BlogDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /production/:productionId/blog
+  describe("GET /production/:productionId/blog", () => {
+    it("should return 200 with blogs linked to the production", () => {
+      return request(app.getHttpServer())
+        .get("/production/1/blog")
+        .expect(200)
+        .expect([mockBlog]);
+    });
+
+    it("should call productionDb.getBlogsOfProduction with the correct id", async () => {
+      await request(app.getHttpServer()).get("/production/1/blog");
+      expect(productionDb.getBlogsOfProduction).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when productionId is not a number", () => {
+      return request(app.getHttpServer())
+        .get("/production/abc/blog")
+        .expect(400);
+    });
+  });
+
+  // PUT /production/:productionId/blog/:blogId
+  describe("PUT /production/:productionId/blog/:blogId", () => {
+    it("should return 200 with the linked blog", () => {
+      return request(app.getHttpServer())
+        .put("/production/1/blog/1")
+        .expect(200)
+        .expect(mockBlog);
+    });
+
+    it("should call productionDb.linkBlogWithProductionID with correct ids", async () => {
+      await request(app.getHttpServer()).put("/production/1/blog/2");
+      expect(productionDb.linkBlogWithProductionID).toHaveBeenCalledWith(2, 1);
+    });
+
+    it("should return 400 when productionId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/production/abc/blog/1")
+        .expect(400);
+    });
+
+    it("should return 400 when blogId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/production/1/blog/abc")
+        .expect(400);
+    });
+  });
+
+  // DELETE /production/:productionId/blog/:blogId
+  describe("DELETE /production/:productionId/blog/:blogId", () => {
+    it("should return 200 with the production after unlinking", () => {
+      return request(app.getHttpServer())
+        .delete("/production/1/blog/1")
+        .expect(200)
+        .expect(mockProduction);
+    });
+
+    it("should call productionDb.deleteBlogFromProduction with correct ids", async () => {
+      await request(app.getHttpServer()).delete("/production/1/blog/2");
+      expect(productionDb.deleteBlogFromProduction).toHaveBeenCalledWith(1, 2);
+    });
+
+    it("should return 400 when productionId is not a number", () => {
+      return request(app.getHttpServer())
+        .delete("/production/abc/blog/1")
+        .expect(400);
+    });
+  });
+});
