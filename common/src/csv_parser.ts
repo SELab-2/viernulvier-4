@@ -54,8 +54,8 @@ export class CSVParser {
     // Check for invalid date formats and handle them accordingly
     const invalidDates = ["0000-00-00 00:00:00", "1970-01-01 00:00:00", ""];
     const starttimeDate = new Date(row.Starttime);
-    if (row.EndTime && !invalidDates.includes(row.EndTime)) {
-      const endTimeDate = new Date(row.EndTime);
+    if (row.Endtime && !invalidDates.includes(row.Endtime)) {
+      const endTimeDate = new Date(row.Endtime);
       if (!isNaN(endTimeDate.getTime()) && endTimeDate > starttimeDate)
         endTime = endTimeDate.toISOString();
     }
@@ -79,7 +79,7 @@ export class CSVParser {
       //TODO: remove this and add as tag instead
       genre: row.Genre,
       //TODO: change to string when bug is fixed
-      planning_id: row.PlanningID ? Number(row.PlanningID) : null,
+      planning_id: row["Planning ID"] ? Number(row["Planning ID"]) : null,
     };
   }
 
