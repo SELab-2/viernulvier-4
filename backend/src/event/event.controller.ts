@@ -13,19 +13,10 @@ import {
 } from "@nestjs/common";
 import EventService from "./event.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import {
-  CreateEventSchema,
-  EventSchema,
-  UpdateEventSchema,
-} from "@repo/common";
+import { CreateEventSchema, EventSchema, UpdateEventSchema, } from "@repo/common";
 import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
-import {
-  ApiBody,
-  ApiOkResponse,
-  ApiOperation,
-  ApiSecurity,
-} from "@nestjs/swagger";
-import { BasicAuthGuard } from "../database/auth/auth";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
+import { ApiKeyGuard } from "../database/auth/auth";
 
 @Controller("event")
 export class EventController {
@@ -35,8 +26,8 @@ export class EventController {
    * Responds to GET /events
    * @returns All EventDto objects.
    */
-  @UseGuards(BasicAuthGuard)
-  @ApiSecurity("basic")
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Returns all Event objects." })
   @ApiOkResponse({
     type: EventDto,

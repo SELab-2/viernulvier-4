@@ -16,7 +16,11 @@ async function bootstrap() {
     .setTitle("VierNulVier Archive API")
     .setDescription("Documentation for the VierNulVier Archive API.")
     .setVersion("0.1")
-    .addSecurity("basic", { type: "http", scheme: "basic" })
+    .addSecurity("apiKey", {
+      type: "apiKey",
+      name: "x-api-key", // header name
+      in: "header", // could also be "query" if you want
+    })
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("docs", app, documentFactory, {
