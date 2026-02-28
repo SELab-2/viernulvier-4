@@ -625,3 +625,88 @@ describe("ProductionBlogController (e2e)", () => {
     });
   });
 });
+
+// PRODUCTION - TAG relationship endpoints
+
+describe("ProductionTagController (e2e)", () => {
+  let app: INestApplication;
+  let productionDb: ProductionDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /production/:productionId/tag
+  describe("GET /production/:productionId/tag", () => {
+    it("should return 200 with tags linked to the production", () => {
+      return request(app.getHttpServer())
+        .get("/production/1/tag")
+        .expect(200)
+        .expect([mockTag]);
+    });
+
+    it("should call productionDb.getTagsOfProduction", async () => {
+      await request(app.getHttpServer()).get("/production/1/tag");
+      expect(productionDb.getTagsOfProduction).toHaveBeenCalled();
+    });
+
+    it("should return 400 when productionId is not a number", () => {
+      return request(app.getHttpServer())
+        .get("/production/abc/tag")
+        .expect(400);
+    });
+  });
+
+  // PUT /production/:productionId/tag/:tagId
+  describe("PUT /production/:productionId/tag/:tagId", () => {
+    it("should return 200 with the production after adding tag", () => {
+      return request(app.getHttpServer())
+        .put("/production/1/tag/1")
+        .expect(200)
+        .expect(mockProduction);
+    });
+
+    it("should call productionDb.addTagToProduction with correct ids", async () => {
+      await request(app.getHttpServer()).put("/production/1/tag/2");
+      expect(productionDb.addTagToProduction).toHaveBeenCalledWith(2, 1);
+    });
+
+    it("should return 400 when productionId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/production/abc/tag/1")
+        .expect(400);
+    });
+
+    it("should return 400 when tagId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/production/1/tag/abc")
+        .expect(400);
+    });
+  });
+
+  // DELETE /production/:productionId/tag/:tagId
+  describe("DELETE /production/:productionId/tag/:tagId", () => {
+    it("should return 200 with the production after removing tag", () => {
+      return request(app.getHttpServer())
+        .delete("/production/1/tag/1")
+        .expect(200)
+        .expect(mockProduction);
+    });
+
+    it("should call productionDb.removeTagFromProduction with correct ids", async () => {
+      await request(app.getHttpServer()).delete("/production/1/tag/2");
+      expect(productionDb.removeTagFromProduction).toHaveBeenCalledWith(2, 1);
+    });
+
+    it("should return 400 when productionId is not a number", () => {
+      return request(app.getHttpServer())
+        .delete("/production/abc/tag/1")
+        .expect(400);
+    });
+  });
+});
