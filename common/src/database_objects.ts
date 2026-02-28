@@ -63,11 +63,25 @@ export const UpdateTagSchema = TagSchema.partial();
 export const AccountSchema = z.object({
   id: z.number(),
   username: z.string(),
-  super_admin: z.boolean(),
+  password: z.string(),
+  superAdmin: z.boolean(),
 });
 
 export const CreateAccountSchema = AccountSchema.omit({ id: true });
 export const UpdateAccountSchema = AccountSchema.partial();
+export const PublicAccountSchema = AccountSchema.omit({
+  password: true,
+  superAdmin: true,
+}); // don't leak these.
+
+/**
+ * Schemas for api-keys.
+ * note: you never update an api key and api keys are generated in backend, so no need for Create or Update types.
+ */
+export const ApiKeySchema = z.object({
+  id: z.number(),
+  key: z.string(),
+});
 
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
@@ -89,3 +103,6 @@ export type UpdateTag = z.infer<typeof UpdateTagSchema>;
 export type Account = z.infer<typeof AccountSchema>;
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
+export type PublicAccount = z.infer<typeof PublicAccountSchema>;
+
+export type ApiKey = z.infer<typeof ApiKeySchema>;

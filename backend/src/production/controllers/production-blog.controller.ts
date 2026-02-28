@@ -1,8 +1,21 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Put, UseGuards, } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Put,
+  UseGuards,
+} from "@nestjs/common";
 import { ProductionService } from "../production.service";
-import { ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { BlogDto, ProductionDto } from "../../dto/dto";
-import { ApiKeyGuard } from "../../auth/auth";
+import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
  * Handles the Relationships between Productions and Blogs.

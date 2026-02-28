@@ -2,7 +2,7 @@ import { Controller, Delete, Get, Param, ParseIntPipe, Put, UseGuards, } from "@
 import { ProductionService } from "../production.service";
 import { ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
 import { ProductionDto, TagDto } from "../../dto/dto";
-import { ApiKeyGuard } from "../../auth/auth";
+import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
  * Handles the Relationships between Productions and Tags.

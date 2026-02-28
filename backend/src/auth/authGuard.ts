@@ -18,8 +18,8 @@ export class ApiKeyGuard implements CanActivate {
       throw new UnauthorizedException("Missing API key");
     }
 
-    // Replace with your own validation logic
-    const validKeys = ["abc", "def"]; // Example: allow multiple keys
+    // TODO change to db.api.service
+    const validKeys = ["abc", "def"];
     if (!validKeys.includes(apiKey)) {
       throw new UnauthorizedException("Invalid API key");
     }

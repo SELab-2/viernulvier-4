@@ -17,7 +17,7 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
-import { ApiKeyGuard } from "../auth/auth";
+import { ApiKeyGuard } from "../auth/authGuard";
 
 @Controller("tag")
 export class TagController {

@@ -16,7 +16,7 @@ import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import { CreateProductionSchema, ProductionSchema, UpdateProductionSchema, } from "@repo/common";
 import { CreateProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
-import { ApiKeyGuard } from "../../auth/auth";
+import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
  * Handles CORE functionality for Productions.

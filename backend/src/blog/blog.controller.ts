@@ -20,7 +20,7 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
-import { ApiKeyGuard } from "../auth/auth";
+import { ApiKeyGuard } from "../auth/authGuard";
 
 @Controller("blog")
 export class BlogController {
