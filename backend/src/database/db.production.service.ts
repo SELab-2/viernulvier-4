@@ -3,10 +3,12 @@ import { DbService } from "./db.service";
 import {
   BlogDto,
   CreateProductionDto,
+  FilterProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
+import { FilterProductionSchema } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -18,7 +20,9 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: ProductionDto[] = await this.getProductions({ id: id });
+    const productions: ProductionDto[] = await this.getProductions(
+      FilterProductionSchema.parse({ id: id }),
+    );
     if (productions.length === 0)
       throw new BadRequestException(
         `No ProductionDto exists for provided ID(${id})`,
@@ -67,32 +71,12 @@ export class ProductionDatabaseService {
    * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
    * @returns All productions for the given filters.
    */
-  async getProductions(
-    filters: Partial<{
-      genre: string;
-      hall: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      titel: string;
-      id: number;
-      tag_id: number;
-    }>,
-  ): Promise<ProductionDto[]> {
+  async getProductions(filters: FilterProductionDto): Promise<ProductionDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
 
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
+    // * NOTE: Removed Filtering by genre because genres are supposed to become tags.
 
     // Filter by location
     if (filters.hall) {
@@ -144,10 +128,18 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by tag id
-    if (filters.tag_id) {
-      conditions.push(`pt.tag_id = $${i}`);
-      values.push(filters.tag_id);
+    // Filter by tag id (Production should have all tags we're filtering for.)
+    if (filters.tag_ids && filters.tag_ids.length > 0) {
+      conditions.push(`
+        p.id IN (
+          SELECT production_id 
+          FROM production_tag 
+          WHERE tag_id = ANY($${i}::int[])
+          GROUP BY production_id 
+          HAVING COUNT(DISTINCT tag_id) = ${filters.tag_ids.length}
+        )
+      `);
+      values.push(filters.tag_ids);
       i++;
     }
 
@@ -156,8 +148,6 @@ export class ProductionDatabaseService {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    // p is defined, ignore error
-    // need DISTINCT as multiple event for each prod.
     const query = `
       SELECT DISTINCT
         p.id,
@@ -169,7 +159,6 @@ export class ProductionDatabaseService {
         p.planning_id
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
-        LEFT JOIN production_tag pt on p.id = pt.production_id
           ${whereClause}
       ORDER BY p.id
     `;

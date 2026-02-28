@@ -5,6 +5,7 @@ import {
   CreateProductionSchema,
   CreateTagSchema,
   EventSchema,
+  FilterProductionSchema,
   ProductionSchema,
   TagSchema,
   UpdateBlogSchema,
@@ -19,6 +20,7 @@ import { createZodDto } from "nestjs-zod";
 export class ProductionDto extends createZodDto(ProductionSchema) {}
 export class CreateProductionDto extends createZodDto(CreateProductionSchema) {}
 export class UpdateProductionDto extends createZodDto(UpdateProductionSchema) {}
+export class FilterProductionDto extends createZodDto(FilterProductionSchema) {}
 
 // Event Wrappers
 export class EventDto extends createZodDto(EventSchema) {}

@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
@@ -16,13 +17,20 @@ import {
   ProductionSchema,
   UpdateProductionSchema,
   CreateProductionSchema,
+  FilterProductionSchema,
 } from "@repo/common";
 import {
   ProductionDto,
   UpdateProductionDto,
   CreateProductionDto,
+  FilterProductionDto,
 } from "../../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+} from "@nestjs/swagger";
 
 /**
  * Handles CORE functionality for Productions.
@@ -36,14 +44,18 @@ export class ProductionController {
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
+  @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
   @ApiOkResponse({
     type: ProductionDto,
     isArray: true,
     description: "All Productions returned.",
   })
   @Get()
-  async getAllProductions(): Promise<ProductionDto[]> {
-    return await this.productionService.getAllProductions();
+  @UsePipes(new ZodValidationPipe(FilterProductionSchema))
+  async getAllProductions(
+    @Query() filters: FilterProductionDto,
+  ): Promise<ProductionDto[]> {
+    return await this.productionService.getAllProductions(filters);
   }
 
   /**

@@ -19,14 +19,21 @@ export const CreateProductionSchema = ProductionSchema.omit({ id: true });
 export const UpdateProductionSchema = ProductionSchema.partial();
 
 export const FilterProductionSchema = z.object({
-  titel: z.string().nullable(),
-  id: z.number().nullable(),
-  tag_ids: z.number().array().nullable(),
-  hall: z.string().nullable(),
-  date: z.iso.date().nullable(),
-  date_between: z.iso.date().nullable(),
-  date_before: z.iso.date().nullable(),
-  date_after: z.iso.date().nullable(),
+  titel: z.string().optional(),
+  id: z.coerce.number().optional(),
+  tag_ids: z
+    .union([z.coerce.number(), z.array(z.coerce.number())])
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      if (Array.isArray(val)) return val;
+      return [val];
+    }),
+  hall: z.string().optional(),
+  date: z.iso.date().optional(),
+  date_between: z.iso.date().optional(),
+  date_before: z.iso.date().optional(),
+  date_after: z.iso.date().optional(),
 });
 
 /**
