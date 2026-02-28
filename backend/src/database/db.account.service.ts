@@ -3,6 +3,7 @@ import { DbService } from "./db.service";
 import { ApiKeyDto, CreateAccountDto, PublicAccountDto, UpdateAccountDto, } from "../dto/dto";
 import * as bcrypt from "bcrypt";
 
+// note all function should require guarding(except login) and all POST,DELETE,... super_guard
 @Injectable()
 export class AccountDatabaseService {
   constructor(private db: DbService) {}
@@ -58,39 +59,46 @@ export class AccountDatabaseService {
 
   /**
    * Login to your account.
-   * @param account is the account params you need to login (username, passw).
-   * @returns your account if login was successful.
+   * @param account is the account params you need to log in (username, passw).
+   * @returns your account and apiKey if login was successful
    */
-  async loginAccount(account: CreateAccountDto): Promise<PublicAccountDto> {
+  async loginAccount(
+    account: CreateAccountDto,
+  ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
+    // 1. Fetch account by username
     const query = `
       SELECT id, username, password, super_admin
       FROM accounts
       WHERE username = $1
       LIMIT 1
     `;
-
     const result = await this.db.query(query, [account.username]);
 
     if (result.length === 0) {
-      throw new BadRequestException("invalid username or password");
+      throw new Error("Invalid username or password");
     }
 
     const dbAccount = result[0];
 
-    const isPasswordValid = await bcrypt.compare(
-      account.password,
-      dbAccount.password,
-    );
-
-    if (!isPasswordValid) {
-      throw new BadRequestException("invalid username or password");
+    // 2. Verify password using bcrypt
+    const isValid = await bcrypt.compare(account.password, dbAccount.password);
+    if (!isValid) {
+      throw new Error("Invalid username or password");
     }
 
-    // Return safe account info without password
-    return {
+    // 3. Fetch the active API key for this account
+    const apiKey = await this.getApiKeyFromAccount({
+      id: dbAccount.id,
+      username: dbAccount.username,
+    });
+
+    // 4. Return safe account info + apiKey
+    const publicAccount: PublicAccountDto = {
       id: dbAccount.id,
       username: dbAccount.username,
     };
+
+    return { account: publicAccount, apiKey };
   }
 
   /**
