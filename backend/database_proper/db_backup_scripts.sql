@@ -87,24 +87,6 @@ CREATE TABLE production_tag
             ON DELETE CASCADE
 );
 
-CREATE TABLE accounts
-(
-    id            SERIAL PRIMARY KEY,
-    username      VARCHAR(50) UNIQUE NOT NULL,
-    password_hash TEXT               NOT NULL,
-    super_admin   BOOLEAN DEFAULT FALSE
-);
-
-CREATE TABLE api_keys
-(
-    id         SERIAL PRIMARY KEY,
-    account_id INT REFERENCES accounts (id) ON DELETE CASCADE,
-    key_id     VARCHAR(32) UNIQUE NOT NULL,
-    key_hash   TEXT               NOT NULL,
-    name       TEXT,
-    revoked    BOOLEAN DEFAULT FALSE
-);
-
 -- small example data:
 
 INSERT INTO productions (titel, ondertitel, description1, description2, genre, planning_id, blog_titel, blog_text)

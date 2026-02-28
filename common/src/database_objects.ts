@@ -66,11 +66,6 @@ export const AccountSchema = z.object({
   super_admin: z.boolean(),
 });
 
-export const ApiKeySchema = z.object({
-  id: z.string(),
-  key: z.string(),
-});
-
 export const CreateAccountSchema = AccountSchema.omit({ id: true });
 export const UpdateAccountSchema = AccountSchema.partial();
 

@@ -1,7 +1,22 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { TagService } from "./tag.service";
 import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/auth";
 
 @Controller("tag")
