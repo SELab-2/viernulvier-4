@@ -2,6 +2,7 @@ import fs from "fs";
 import csvParser from "csv-parser";
 import { ZodSchema } from "zod";
 import { CreateEventDto } from "../../backend/src/dto/dto";
+import { id } from "zod/locales";
 
 export class CSVParser {
   /**
@@ -22,6 +23,7 @@ export class CSVParser {
       fs.createReadStream(filePath)
         .pipe(
           csvParser({
+            strict: true, // Enable strict mode to catch parsing errors
             mapHeaders: ({ header }) => header.trim(), // Trim whitespace from headers
             mapValues: ({ value }) => value.trim(), // Trim whitespace from values
           }),
@@ -58,16 +60,27 @@ export class CSVParser {
         endTime = endTimeDate.toISOString();
     }
 
-    const productionId = Number(row.Production);
-    if (isNaN(productionId))
-      throw new Error(`Invalid production_id: ${row.Production}`);
-
     return {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       hall: row.Hall,
-      production_id: productionId,
+      production_id: Number(row.Production),
       price: row.Price ? Number(row.Price) : null,
     };
   }
+
+  static transformProductionRow(row: Record<string, string>) {
+    return {
+      id: Number(row.ID),
+      titel: row.Titel,
+      ondertitel: row.Ondertitel,
+      description1: row.Description1,
+      description2: row.Description2 || null,
+      //TODO: remove this and add as tag instead
+      genre: row.Genre,
+      //TODO: change to string when bug is fixed
+      planning_id: row.PlanningID ? Number(row.PlanningID) : null,
+    };
+  }
+
 }
