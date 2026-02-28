@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { ApiKeyDto } from "../dto/dto";
+import { ApiKeyDto, VerifyApiKeyDto } from "../dto/dto";
 import crypto from "crypto";
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ApiKeyDatabaseService {
    * @param apiKey the apiKey we are testing
    * @returns T/F depending on if the apiKey is active and in the db.
    */
-  async verifyApiKey(apiKey: ApiKeyDto): Promise<boolean> {
+  async verifyApiKey(apiKey: VerifyApiKeyDto): Promise<boolean> {
     const query = `
         SELECT 1
         FROM api_keys
@@ -30,7 +30,7 @@ export class ApiKeyDatabaseService {
    * @param apiKey the apiKey we are testing
    * @returns T/F depending on if the apiKey is active and in the db.
    */
-  async verifySuperApiKey(apiKey: ApiKeyDto): Promise<boolean> {
+  async verifySuperApiKey(apiKey: VerifyApiKeyDto): Promise<boolean> {
     const query = `
         SELECT 1
         FROM api_keys

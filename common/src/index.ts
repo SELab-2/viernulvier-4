@@ -32,6 +32,8 @@ import {
   UpdateProductionSchema,
   UpdateTag,
   UpdateTagSchema,
+  VerifyApiKey,
+  VerifyApiKeySchema,
 } from "./database_objects";
 
 // Een voorbeeld van een globaal schema...
@@ -57,6 +59,7 @@ export {
   PublicAccountSchema,
   UpdateAccountSchema,
   ApiKeySchema,
+  VerifyApiKeySchema,
 };
 export type {
   Production,
@@ -75,5 +78,6 @@ export type {
   PublicAccount,
   CreateAccount,
   ApiKey,
+  VerifyApiKey,
 };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

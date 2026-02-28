@@ -84,6 +84,7 @@ export const ApiKeySchema = z.object({
   key: z.string(), // strings are unique.
   id: z.number().nullable(), // id is here for the join-table operations.
 });
+export const VerifyApiKeySchema = ApiKeySchema.omit({ id: true });
 
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
@@ -107,3 +108,4 @@ export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
 export type PublicAccount = z.infer<typeof PublicAccountSchema>;
 
 export type ApiKey = z.infer<typeof ApiKeySchema>;
+export type VerifyApiKey = z.infer<typeof VerifyApiKeySchema>;
