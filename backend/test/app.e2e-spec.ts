@@ -710,3 +710,217 @@ describe("ProductionTagController (e2e)", () => {
     });
   });
 });
+
+// EVENT endpoints
+
+describe("EventController (e2e)", () => {
+  let app: INestApplication;
+  let eventDb: EventDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    eventDb = app.get<EventDatabaseService>(EventDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /event
+  describe("GET /event", () => {
+    it("should return 200 with an array of events", () => {
+      return request(app.getHttpServer())
+        .get("/event")
+        .expect(200)
+        .expect([mockEvent]);
+    });
+
+    it("should return 200 with empty array when no events exist", async () => {
+      jest.spyOn(eventDb, "getEvents").mockResolvedValueOnce([]);
+      return request(app.getHttpServer()).get("/event").expect(200).expect([]);
+    });
+  });
+
+  // GET /event/:id
+  describe("GET /event/:id", () => {
+    it("should return 200 with the correct event", () => {
+      return request(app.getHttpServer())
+        .get("/event/1")
+        .expect(200)
+        .expect(mockEvent);
+    });
+
+    it("should call eventDb.getEventById with the correct id", async () => {
+      await request(app.getHttpServer()).get("/event/1");
+      expect(eventDb.getEventById).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).get("/event/abc").expect(400);
+    });
+  });
+
+  // POST /event
+  describe("POST /event", () => {
+    const createPayload = {
+      starttime: "2025-06-01T19:00:00.000Z",
+      endtime: "2025-06-01T22:00:00.000Z",
+      price: 20.0,
+      hall: "Hall B",
+      production_id: 1,
+    };
+
+    it("should return 201 with the created event", () => {
+      return request(app.getHttpServer())
+        .post("/event")
+        .send(createPayload)
+        .expect(201)
+        .expect(mockEvent);
+    });
+
+    it("should call eventDb.createEvent with the payload", async () => {
+      await request(app.getHttpServer()).post("/event").send(createPayload);
+      expect(eventDb.createEvent).toHaveBeenCalledWith(createPayload);
+    });
+
+    it("should return 400 when required fields are missing", () => {
+      return request(app.getHttpServer())
+        .post("/event")
+        .send({ hall: "Hall B" })
+        .expect(400);
+    });
+  });
+
+  // PUT /event/:id
+  describe("PUT /event/:id", () => {
+    it("should return 200 with the replaced event when ids match", () => {
+      return request(app.getHttpServer())
+        .put("/event/1")
+        .send(mockEvent)
+        .expect(200)
+        .expect(mockEvent);
+    });
+
+    it("should return 400 when URL id and body id do not match", () => {
+      return request(app.getHttpServer())
+        .put("/event/2")
+        .send(mockEvent) // id: 1 in body
+        .expect(400);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/event/abc")
+        .send(mockEvent)
+        .expect(400);
+    });
+  });
+
+  // PATCH /event/:id
+  describe("PATCH /event/:id", () => {
+    it("should return 200 with the modified event", () => {
+      return request(app.getHttpServer())
+        .patch("/event/1")
+        .send({ hall: "Hall C" })
+        .expect(200)
+        .expect(mockEvent);
+    });
+
+    it("should call eventDb.updateEvent after merging data", async () => {
+      await request(app.getHttpServer())
+        .patch("/event/1")
+        .send({ hall: "Hall C" });
+      expect(eventDb.updateEvent).toHaveBeenCalled();
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer())
+        .patch("/event/abc")
+        .send({ hall: "Hall C" })
+        .expect(400);
+    });
+  });
+
+  // DELETE /event/:id
+  describe("DELETE /event/:id", () => {
+    it("should return 200 when event is deleted", () => {
+      return request(app.getHttpServer()).delete("/event/1").expect(200);
+    });
+
+    it("should call eventDb.deleteEvent with the correct id", async () => {
+      await request(app.getHttpServer()).delete("/event/1");
+      expect(eventDb.deleteEvent).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).delete("/event/abc").expect(400);
+    });
+  });
+
+  // GET /event/:id/blog
+  describe("GET /event/:id/blog", () => {
+    it("should return 200 with blogs linked to the event", () => {
+      return request(app.getHttpServer())
+        .get("/event/1/blog")
+        .expect(200)
+        .expect([mockBlog]);
+    });
+
+    it("should call eventDb.getBlogsOfEvent with the correct id", async () => {
+      await request(app.getHttpServer()).get("/event/1/blog");
+      expect(eventDb.getBlogsOfEvent).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer()).get("/event/abc/blog").expect(400);
+    });
+  });
+
+  // PUT /event/:id/blog/:id2
+  describe("PUT /event/:id/blog/:id2", () => {
+    it("should return 200 with the linked blog", () => {
+      return request(app.getHttpServer())
+        .put("/event/1/blog/1")
+        .expect(200)
+        .expect(mockBlog);
+    });
+
+    it("should call eventDb.linkBlogWithEventID with correct ids", async () => {
+      await request(app.getHttpServer()).put("/event/1/blog/2");
+      expect(eventDb.linkBlogWithEventID).toHaveBeenCalledWith(2, 1);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/event/abc/blog/1")
+        .expect(400);
+    });
+
+    it("should return 400 when blogId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/event/1/blog/abc")
+        .expect(400);
+    });
+  });
+
+  // DELETE /event/:id/blog/:id2
+  describe("DELETE /event/:id/blog/:id2", () => {
+    it("should return 200 with the event after unlinking", () => {
+      return request(app.getHttpServer())
+        .delete("/event/1/blog/1")
+        .expect(200)
+        .expect(mockEvent);
+    });
+
+    it("should call eventDb.deleteBlogFromEvent with correct ids", async () => {
+      await request(app.getHttpServer()).delete("/event/1/blog/2");
+      expect(eventDb.deleteBlogFromEvent).toHaveBeenCalledWith(1, 2);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .delete("/event/abc/blog/1")
+        .expect(400);
+    });
+  });
+});
