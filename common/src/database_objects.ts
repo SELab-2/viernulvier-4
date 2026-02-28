@@ -103,7 +103,6 @@ export type Tag = z.infer<typeof TagSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
 export type UpdateTag = z.infer<typeof UpdateTagSchema>;
 
-export type Account = z.infer<typeof AccountSchema>;
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
 export type PublicAccount = z.infer<typeof PublicAccountSchema>;
