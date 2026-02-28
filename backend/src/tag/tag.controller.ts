@@ -1,16 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  ParseIntPipe,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, } from "@nestjs/common";
 import { TagService } from "./tag.service";
-import { CreateTagDto, UpdateTagDto, TagDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
+import { ApiKeyGuard } from "../auth/auth";
 
 @Controller("tag")
 export class TagController {
@@ -48,6 +40,8 @@ export class TagController {
    * @param createTag The new TagDto data we want to add
    * @returns The newly created TagDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates a new Tag." })
   @ApiBody({ type: CreateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Created." })
@@ -62,6 +56,8 @@ export class TagController {
    * @param updateTag The parsed UpdateTagDto object.
    * @returns The newly updated TagDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Tag." })
   @ApiBody({ type: UpdateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
@@ -78,6 +74,8 @@ export class TagController {
    * @param id The ID in the URL.
    * @returns Nothing.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes a Tag." })
   @ApiOkResponse({ description: "Tag Deleted." })
   @Delete(":id")

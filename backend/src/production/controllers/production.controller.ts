@@ -8,21 +8,15 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
-import {
-  ProductionSchema,
-  UpdateProductionSchema,
-  CreateProductionSchema,
-} from "@repo/common";
-import {
-  ProductionDto,
-  UpdateProductionDto,
-  CreateProductionDto,
-} from "../../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { CreateProductionSchema, ProductionSchema, UpdateProductionSchema, } from "@repo/common";
+import { CreateProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
+import { ApiKeyGuard } from "../../auth/auth";
 
 /**
  * Handles CORE functionality for Productions.
@@ -66,6 +60,8 @@ export class ProductionController {
    * @param production The parsed ProductionDto object.
    * @returns The newly updated ProductionDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces a Production." })
   @ApiBody({ type: ProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production Replaced." })
@@ -86,6 +82,8 @@ export class ProductionController {
    * @param patchData The parsed UpdateProductionDto object.
    * @returns The newly updated ProductionDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Production." })
   @ApiBody({ type: UpdateProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production Modified." })
@@ -106,6 +104,8 @@ export class ProductionController {
    * @param productionId The ID in the URL.
    * @returns Nothing.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes a Production." })
   @ApiOkResponse({ description: "Production Deleted." })
   @Delete(":productionId")
@@ -120,6 +120,8 @@ export class ProductionController {
    * @param newProduction The new ProductionDto data we want to add
    * @returns The newly created ProductionDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates a new Production." })
   @ApiBody({ type: CreateProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production Created." })

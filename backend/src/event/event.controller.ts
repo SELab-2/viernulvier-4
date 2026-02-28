@@ -13,10 +13,19 @@ import {
 } from "@nestjs/common";
 import EventService from "./event.service";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { CreateEventSchema, EventSchema, UpdateEventSchema, } from "@repo/common";
+import {
+  CreateEventSchema,
+  EventSchema,
+  UpdateEventSchema,
+} from "@repo/common";
 import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
-import { ApiKeyGuard } from "../database/auth/auth";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
+import { ApiKeyGuard } from "../auth/auth";
 
 @Controller("event")
 export class EventController {
@@ -26,8 +35,6 @@ export class EventController {
    * Responds to GET /events
    * @returns All EventDto objects.
    */
-  @UseGuards(ApiKeyGuard)
-  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Returns all Event objects." })
   @ApiOkResponse({
     type: EventDto,
@@ -58,6 +65,8 @@ export class EventController {
    * @param event The parsed EventDto object.
    * @returns The updated EventDto object.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing Event." })
   @ApiBody({ type: EventDto })
   @ApiOkResponse({ type: EventDto, description: "Event replaced." })
@@ -75,6 +84,8 @@ export class EventController {
    * @param patchData The partial EventDto object that is used to modify.
    * @returns The updated EventDto object.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Event." })
   @ApiBody({ type: UpdateEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event modified." })
@@ -91,6 +102,8 @@ export class EventController {
    * @param id ID in the URL of the request.
    * @returns Nothing.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes an Event." })
   @ApiOkResponse({ description: "Event deleted." })
   @Delete(":id")
@@ -103,6 +116,8 @@ export class EventController {
    * @param newEvent The new EventDto data we want to add
    * @returns The newly created EventDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates an Event." })
   @ApiBody({ type: CreateEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event created." })
@@ -138,6 +153,8 @@ export class EventController {
    * @param blogId ID of the Blog.
    * @returns The newly linked Blog object.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Link a blog to an existing Event." })
   @ApiOkResponse({ type: BlogDto, description: "Linked Blog to Event." })
   @Put(":id/blog/:id2")
@@ -154,6 +171,8 @@ export class EventController {
    * @param blogId ID of the Blog.
    * @returns The Event we just unlinked the Blog from.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Unlink a blog from an existing Event." })
   @ApiOkResponse({ type: EventDto, description: "Unlinked Blog from Event." })
   @Delete(":id/blog/:id2")
