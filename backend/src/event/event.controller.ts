@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import EventService from "./event.service";
@@ -18,7 +19,13 @@ import {
   UpdateEventSchema,
 } from "@repo/common";
 import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
+import { BasicAuthGuard } from "../database/auth/auth";
 
 @Controller("event")
 export class EventController {
@@ -28,6 +35,8 @@ export class EventController {
    * Responds to GET /events
    * @returns All EventDto objects.
    */
+  @UseGuards(BasicAuthGuard)
+  @ApiSecurity("basic")
   @ApiOperation({ summary: "Returns all Event objects." })
   @ApiOkResponse({
     type: EventDto,

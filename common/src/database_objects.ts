@@ -63,8 +63,12 @@ export const UpdateTagSchema = TagSchema.partial();
 export const AccountSchema = z.object({
   id: z.number(),
   username: z.string(),
+  super_admin: z.boolean(),
+});
+
+export const ApiKeySchema = z.object({
+  id: z.string(),
   key: z.string(),
-  super_admin: z.boolean(), // TODO fix this
 });
 
 export const CreateAccountSchema = AccountSchema.omit({ id: true });
