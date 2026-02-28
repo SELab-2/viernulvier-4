@@ -1,8 +1,8 @@
 import fs from "fs";
 import csvParser from "csv-parser";
-import { ZodSchema } from "zod";
-import { CreateEventDto } from "../../backend/src/dto/dto";
-import { id } from "zod/locales";
+import { ZodType } from "zod";
+import { CreateEventDto, ProductionDto } from "../../backend/src/dto/dto";
+import { CreateEventSchema, ProductionSchema } from "./database_objects";
 
 export class CSVParser {
   /**
@@ -14,7 +14,7 @@ export class CSVParser {
    */
   static async parseCSVWithSchema<T>(
     filePath: string,
-    schema: ZodSchema<T>,
+    schema: ZodType<T>,
     transform: (row: Record<string, string>) => T,
   ): Promise<T[]> {
     return new Promise((resolve, reject) => {
@@ -81,6 +81,22 @@ export class CSVParser {
       //TODO: change to string when bug is fixed
       planning_id: row.PlanningID ? Number(row.PlanningID) : null,
     };
+  }
+
+  static parseEventsCSV(filePath: string): Promise<CreateEventDto[]> {
+    return this.parseCSVWithSchema<CreateEventDto>(
+      filePath,
+      CreateEventSchema,
+      this.transformEventRow,
+    );
+  }
+
+  static parseProductionsCSV(filePath: string): Promise<ProductionDto[]> {
+    return this.parseCSVWithSchema<ProductionDto>(
+      filePath,
+      ProductionSchema,
+      this.transformProductionRow,
+    );
   }
 
 }
