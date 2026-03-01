@@ -51,7 +51,7 @@ describe("EventController", () => {
 
   describe("getAllEvents", () => {
     it("should return an array of events", async () => {
-      const result = await controller.getAllEvents({});
+      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual(mockEvents);
       expect(service.getAllEvents).toHaveBeenCalled();
     });
