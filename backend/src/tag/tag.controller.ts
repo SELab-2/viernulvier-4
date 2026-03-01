@@ -11,6 +11,8 @@ import {
 import { TagService } from "./tag.service";
 import { CreateTagDto, UpdateTagDto, TagDto } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { ZodValidationPipe } from "nestjs-zod";
+import { CreateTagSchema, UpdateTagSchema } from "@repo/common";
 
 @Controller("tag")
 export class TagController {
@@ -52,7 +54,9 @@ export class TagController {
   @ApiBody({ type: CreateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Created." })
   @Post()
-  async createTag(@Body() createTag: CreateTagDto): Promise<TagDto> {
+  async createTag(
+    @Body(new ZodValidationPipe(CreateTagSchema)) createTag: CreateTagDto,
+  ): Promise<TagDto> {
     return await this.tagService.createTag(createTag);
   }
 
@@ -68,7 +72,7 @@ export class TagController {
   @Patch(":id")
   async updateTag(
     @Param("id", ParseIntPipe) id: number,
-    @Body() updateTag: UpdateTagDto,
+    @Body(new ZodValidationPipe(UpdateTagSchema)) updateTag: UpdateTagDto,
   ): Promise<TagDto> {
     return await this.tagService.updateTag(id, updateTag);
   }
