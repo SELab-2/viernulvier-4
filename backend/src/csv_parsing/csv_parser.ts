@@ -104,10 +104,7 @@ export class CSVParser {
       throw new Error(`Invalid production id: ${row.ID}`);
     }
 
-    const planningId = row["Planning ID"] ? Number(row["Planning ID"]) : null;
-    if (row["Planning ID"] && isNaN(planningId as number)) {
-      throw new Error(`Invalid planning ID: ${row["Planning ID"]}`);
-    }
+    const planningId = row["Planning ID"] || null;
 
     return {
       id,

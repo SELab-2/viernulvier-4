@@ -157,7 +157,7 @@ describe("CSVParser.transformProductionRow", () => {
       description1: "Main description",
       description2: null,
       genre: "Drama",
-      planning_id: 42,
+      planning_id: "42",
     });
   });
 
@@ -173,21 +173,6 @@ describe("CSVParser.transformProductionRow", () => {
     };
     expect(() => CSVParser.transformProductionRow(row)).toThrow(
       /Invalid production id/,
-    );
-  });
-
-  it("should throw if planning ID is invalid", () => {
-    const row = {
-      ID: "1",
-      Titel: "Title",
-      Ondertitel: "Sub",
-      Description1: "desc",
-      Description2: "",
-      Genre: "Comedy",
-      "Planning ID": "notanumber",
-    };
-    expect(() => CSVParser.transformProductionRow(row)).toThrow(
-      /Invalid planning ID/,
     );
   });
 });
