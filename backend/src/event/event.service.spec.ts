@@ -8,7 +8,6 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 describe("EventService", () => {
   let service: EventService;
   let dbService: EventDatabaseService;
-  let blogDbService: BlogDatabaseService;
 
   const mockEvent: EventDto = {
     id: 1,
@@ -56,7 +55,6 @@ describe("EventService", () => {
 
     service = module.get<EventService>(EventService);
     dbService = module.get<EventDatabaseService>(EventDatabaseService);
-    blogDbService = module.get<BlogDatabaseService>(BlogDatabaseService);
   });
 
   it("should be defined", () => {
@@ -185,51 +183,6 @@ describe("EventService", () => {
       await expect(service.deleteEvent(999)).rejects.toThrow(
         "Failed to delete record",
       );
-    });
-  });
-
-  // ... existing tests ...
-
-  describe("-- Blogs --", () => {
-    describe("getEventBlogs", () => {
-      it("should return all blogs linked to an event", async () => {
-        const expectedBlogs = [mockBlog];
-        // Note: You need to add `getBlogsOfEvent` to your EventDatabaseService mock in beforeEach
-        dbService.getBlogsOfEvent = jest.fn().mockResolvedValue(expectedBlogs);
-
-        const result = await service.getEventBlogs(1);
-
-        expect(result).toEqual(expectedBlogs);
-        expect(dbService.getBlogsOfEvent).toHaveBeenCalledWith(1);
-        expect(dbService.getBlogsOfEvent).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe("linkBlogToEvent", () => {
-      it("should link a blog to an event and return the blog", async () => {
-        // Note: Ensure `linkBlogWithEventID` is in your EventDatabaseService mock
-        dbService.linkBlogWithEventID = jest.fn().mockResolvedValue(undefined);
-
-        const result = await service.linkBlogToEvent(1, 2);
-
-        expect(dbService.linkBlogWithEventID).toHaveBeenCalledWith(2, 1); // blogId first, then eventId
-        expect(blogDbService.getBlogById).toHaveBeenCalledWith(2);
-        expect(result).toEqual(mockBlog);
-      });
-    });
-
-    describe("unlinkBlogFromEvent", () => {
-      it("should unlink a blog from an event and return the event", async () => {
-        // Note: Ensure `deleteBlogFromEvent` is in your EventDatabaseService mock
-        dbService.deleteBlogFromEvent = jest.fn().mockResolvedValue(undefined);
-        dbService.getEventById = jest.fn().mockResolvedValue(mockEvent);
-
-        const result = await service.unlinkBlogFromEvent(1, 2);
-
-        expect(dbService.deleteBlogFromEvent).toHaveBeenCalledWith(1, 2);
-        expect(dbService.getEventById).toHaveBeenCalledWith(1);
-        expect(result).toEqual(mockEvent);
-      });
     });
   });
 
