@@ -19,32 +19,51 @@ export class CSVParser {
   ): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const results: T[] = [];
+      let settled = false; // prevent multiple resolve/reject calls
 
-      fs.createReadStream(filePath)
-        .pipe(
-          csvParser({
-            strict: true, // Enable strict mode to catch parsing errors
-            mapHeaders: ({ header }) => header.trim(), // Trim whitespace from headers
-            mapValues: ({ value }) => value.trim(), // Trim whitespace from values
-          }),
-        )
-        .on("data", (row: Record<string, string>) => {
-          try {
-            // apply the transformation function to the row and validate it against the schema
-            const transformedRow: T = transform(row);
-            // try to parse the transformed row with the schema, if it fails, catch the error and reject the promise
-            const validationResult: T = schema.parse(transformedRow);
-            results.push(validationResult);
-          } catch (error) {
-            reject(`Error parsing row: ${JSON.stringify(row)} - ${error}`);
-          }
-        })
-        .on("end", () => {
-          resolve(results);
-        })
-        .on("error", (error) => {
-          reject(`Error reading CSV file: ${error}`);
-        });
+      const stream = fs.createReadStream(filePath).pipe(
+        csvParser({
+          strict: true, // Enable strict mode to catch parsing errors
+          mapHeaders: ({ header }) => header.trim(), // Trim whitespace from headers
+          mapValues: ({ value }) => value.trim(), // Trim whitespace from values
+        }),
+      );
+
+      const cleanupAndReject = (error: unknown) => {
+        if (settled) return;
+        settled = true;
+
+        stream.destroy(); // stop reading immediately
+        reject(error instanceof Error ? error : new Error(String(error)));
+      };
+
+      stream.on("data", (row: Record<string, string>) => {
+        try {
+          // apply the transformation function to the row and validate it against the schema
+          const transformedRow: T = transform(row);
+          // try to parse the transformed row with the schema, if it fails, catch the error and reject the promise
+          const validationResult: T = schema.parse(transformedRow);
+          results.push(validationResult);
+        } catch (error) {
+          cleanupAndReject(
+            new Error(
+              `Error parsing row: ${JSON.stringify(row)} - ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            ),
+          );
+        }
+      });
+
+      stream.on("end", () => {
+        if (settled) return;
+        settled = true;
+        resolve(results);
+      });
+
+      stream.on("error", (error) => {
+        cleanupAndReject(new Error(`Error reading CSV file: ${error.message}`));
+      });
     });
   }
 
@@ -54,17 +73,25 @@ export class CSVParser {
     // Check for invalid date formats and handle them accordingly
     const invalidDates = ["0000-00-00 00:00:00", "1970-01-01 00:00:00", ""];
     const starttimeDate = new Date(row.Starttime);
+    if (isNaN(starttimeDate.getTime())) {
+      throw new Error(`Invalid starttime: ${row.Starttime}`);
+    }
     if (row.Endtime && !invalidDates.includes(row.Endtime)) {
       const endTimeDate = new Date(row.Endtime);
       if (!isNaN(endTimeDate.getTime()) && endTimeDate > starttimeDate)
         endTime = endTimeDate.toISOString();
     }
 
+    const productionId = Number(row.Production);
+    if (isNaN(productionId)) {
+      throw new Error(`Invalid production id: ${row.Production}`);
+    }
+
     return {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       hall: row.Hall,
-      production_id: Number(row.Production),
+      production_id: productionId,
       price: row.Price ? Number(row.Price) : null,
     };
   }
@@ -98,5 +125,4 @@ export class CSVParser {
       this.transformProductionRow,
     );
   }
-
 }
