@@ -5,7 +5,7 @@ Table productions {
   description1 text
   description2 text
   genre text
-  planning_id int
+  planning_id text
 }
 
 Table events {
