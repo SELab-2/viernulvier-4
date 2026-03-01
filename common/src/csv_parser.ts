@@ -12,7 +12,7 @@ export class CSVParser {
    * @param transform - Function to transform each row of the CSV into the desired format
    * @returns A promise that resolves to an array of parsed and validated objects
    */
-  static async parseCSVWithSchema<T>(
+  static parseCSVWithSchema<T>(
     filePath: string,
     schema: ZodType<T>,
     transform: (row: Record<string, string>) => T,
