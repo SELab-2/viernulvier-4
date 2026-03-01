@@ -155,10 +155,11 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by titel
+    // Filter by titel (case-insensitive)
+    // Will look anywhere in the title field for what was searched.
     if (filters.titel) {
-      conditions.push(`p.titel = $${i}`);
-      values.push(filters.titel);
+      conditions.push(`p.titel ILIKE $${i}`);
+      values.push(`%${filters.titel}%`);
       i++;
     }
 
