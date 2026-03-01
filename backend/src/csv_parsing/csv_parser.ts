@@ -97,7 +97,7 @@ export class CSVParser {
     };
   }
 
-  static transformProductionRow(row: Record<string, string>) {
+  static transformProductionRow(row: Record<string, string>): ProductionDto {
     // validate and convert numeric fields manually to provide clearer errors
     const id = Number(row.ID);
     if (isNaN(id)) {
@@ -122,7 +122,7 @@ export class CSVParser {
    * Parse events from a CSV file and return them as an array of CreateEventDto objects
    * @param filePath - Path to the CSV file containing events
    * @return A promise that resolves to an array of CreateEventDto objects
-   * @throws An error if the file cannot be read or if any row fails validation
+   * @throws An error if the file cannot be read
    */
   static parseEventsCSV(filePath: string): Promise<CreateEventDto[]> {
     return this.parseCSVWithSchema<CreateEventDto>(
