@@ -114,7 +114,7 @@ async function buildApp(): Promise<INestApplication> {
     .compile();
 
   const app = moduleFixture.createNestApplication();
-  // app.useLogger(false);  remove these comments if we don't want the own generated error being shown in the terminal
+  app.useLogger(false);
   await app.init();
   return app;
 }
