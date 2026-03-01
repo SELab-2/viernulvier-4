@@ -7,6 +7,7 @@ import {
   CreateProductionDto,
 } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { FilterProductionSchema } from "@repo/common";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -52,19 +53,23 @@ describe("ProductionController", () => {
 
   describe("getAllProductions", () => {
     it("should return an array of productions", async () => {
-      const result = await controller.getAllProductions();
+      const result = await controller.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual(mockProductions);
       expect(service.getAllProductions).toHaveBeenCalled();
     });
 
     it("should call service.getAllProductions", async () => {
-      await controller.getAllProductions();
+      await controller.getAllProductions(FilterProductionSchema.parse({}));
       expect(service.getAllProductions).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no productions exist", async () => {
       jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      const result = await controller.getAllProductions();
+      const result = await controller.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual([]);
     });
   });

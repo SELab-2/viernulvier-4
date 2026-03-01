@@ -3,6 +3,7 @@ import { EventController } from "./event.controller";
 import EventService from "./event.service";
 import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { FilterEventSchema } from "@repo/common";
 
 describe("EventController", () => {
   let controller: EventController;
@@ -56,13 +57,13 @@ describe("EventController", () => {
     });
 
     it("should call service.getAllEvents", async () => {
-      await controller.getAllEvents();
+      await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(service.getAllEvents).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no events exist", async () => {
       jest.spyOn(service, "getAllEvents").mockResolvedValueOnce([]);
-      const result = await controller.getAllEvents();
+      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual([]);
     });
   });
