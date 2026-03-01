@@ -114,7 +114,6 @@ export class CSVParser {
       description2: row.Description2 || null,
       //TODO: remove this and add as tag instead
       genre: row.Genre,
-      //TODO: change to string when bug is fixed
       planning_id: planningId,
     };
   }
