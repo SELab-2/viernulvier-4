@@ -68,12 +68,16 @@ describe("EventService", () => {
     it("should return all events from database", async () => {
       const result = await service.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual(mockEvents);
-      expect(dbService.getEvents).toHaveBeenCalledWith({});
+      expect(dbService.getEvents).toHaveBeenCalledWith(
+        FilterEventSchema.parse({}),
+      );
     });
 
     it("should call dbService.getEvents with empty filter", async () => {
       await service.getAllEvents(FilterEventSchema.parse({}));
-      expect(dbService.getEvents).toHaveBeenCalledWith({});
+      expect(dbService.getEvents).toHaveBeenCalledWith(
+        FilterEventSchema.parse({}),
+      );
       expect(dbService.getEvents).toHaveBeenCalledTimes(1);
     });
 

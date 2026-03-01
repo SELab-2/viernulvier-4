@@ -87,12 +87,16 @@ describe("ProductionService", () => {
         FilterProductionSchema.parse({}),
       );
       expect(result).toEqual(mockProductions);
-      expect(dbService.getProductions).toHaveBeenCalledWith({});
+      expect(dbService.getProductions).toHaveBeenCalledWith(
+        FilterProductionSchema.parse({}),
+      );
     });
 
     it("should call dbService.getProductions with empty filter", async () => {
       await service.getAllProductions(FilterProductionSchema.parse({}));
-      expect(dbService.getProductions).toHaveBeenCalledWith({});
+      expect(dbService.getProductions).toHaveBeenCalledWith(
+        FilterProductionSchema.parse({}),
+      );
       expect(dbService.getProductions).toHaveBeenCalledTimes(1);
     });
 
