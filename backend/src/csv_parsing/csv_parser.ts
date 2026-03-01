@@ -122,6 +122,12 @@ export class CSVParser {
     };
   }
 
+  /**
+   * Parse events from a CSV file and return them as an array of CreateEventDto objects
+   * @param filePath - Path to the CSV file containing events
+   * @return A promise that resolves to an array of CreateEventDto objects
+   * @throws An error if the file cannot be read or if any row fails validation
+   */
   static parseEventsCSV(filePath: string): Promise<CreateEventDto[]> {
     return this.parseCSVWithSchema<CreateEventDto>(
       filePath,
@@ -130,6 +136,11 @@ export class CSVParser {
     );
   }
 
+  /**
+   * Parse productions from a CSV file and return them as an array of ProductionDto objects
+   * @param filePath - Path to the CSV file containing productions
+   * @return A promise that resolves to an array of ProductionDto objects
+   */
   static parseProductionsCSV(filePath: string): Promise<ProductionDto[]> {
     return this.parseCSVWithSchema<ProductionDto>(
       filePath,
