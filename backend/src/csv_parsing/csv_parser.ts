@@ -1,9 +1,12 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { ZodType } from "zod";
-import { CreateEventDto, ProductionDto } from "../../backend/src/dto/dto";
-import { CreateEventSchema, ProductionSchema } from "./database_objects";
-import { EventService } from "../../backend/src/event/event.service";
+import { CreateEventDto, ProductionDto } from "../dto/dto";
+import {
+  CreateEventSchema,
+  ProductionSchema,
+} from "@repo/common/src/database_objects";
+import { EventService } from "../event/event.service";
 
 export class CSVParser {
   /**
