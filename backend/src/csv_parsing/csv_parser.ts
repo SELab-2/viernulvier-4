@@ -98,8 +98,19 @@ export class CSVParser {
   }
 
   static transformProductionRow(row: Record<string, string>) {
+    // validate and convert numeric fields manually to provide clearer errors
+    const id = Number(row.ID);
+    if (isNaN(id)) {
+      throw new Error(`Invalid production id: ${row.ID}`);
+    }
+
+    const planningId = row["Planning ID"] ? Number(row["Planning ID"]) : null;
+    if (row["Planning ID"] && isNaN(planningId as number)) {
+      throw new Error(`Invalid planning ID: ${row["Planning ID"]}`);
+    }
+
     return {
-      id: Number(row.ID),
+      id,
       titel: row.Titel,
       ondertitel: row.Ondertitel,
       description1: row.Description1,
@@ -107,7 +118,7 @@ export class CSVParser {
       //TODO: remove this and add as tag instead
       genre: row.Genre,
       //TODO: change to string when bug is fixed
-      planning_id: row["Planning ID"] ? Number(row["Planning ID"]) : null,
+      planning_id: planningId,
     };
   }
 
