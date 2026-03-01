@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import {
+  BlogDto,
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  UpdateEventDto,
+} from "../dto/dto";
 
 @Injectable()
 export class EventDatabaseService {
@@ -46,31 +52,10 @@ export class EventDatabaseService {
    * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
    * @returns All events for the given filters.
    */
-  async getEvents(
-    filters: Partial<{
-      genre: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      hall: string;
-      id: number;
-      production_id: number;
-    }>,
-  ): Promise<EventDto[]> {
+  async getEvents(filters: FilterEventDto): Promise<EventDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
-
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.

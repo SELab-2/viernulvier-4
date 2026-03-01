@@ -51,6 +51,16 @@ export const EventSchema = z.object({
 export const CreateEventSchema = EventSchema.omit({ id: true });
 export const UpdateEventSchema = EventSchema.partial();
 
+export const FilterEventSchema = z.object({
+  date: z.iso.date().optional(),
+  date_between: z.iso.date().optional(),
+  date_before: z.iso.date().optional(),
+  date_after: z.iso.date().optional(),
+  hall: z.string().optional(),
+  id: z.coerce.number().optional(),
+  production_id: z.coerce.number().optional(),
+});
+
 /**
  * Schemas for blogs.
  */
@@ -84,6 +94,7 @@ export type FilterProduction = z.infer<typeof FilterProductionSchema>;
 export type Event = z.infer<typeof EventSchema>;
 export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
+export type FilterEvent = z.infer<typeof FilterEventSchema>;
 
 export type Blog = z.infer<typeof BlogSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;

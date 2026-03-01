@@ -5,6 +5,7 @@ import {
   CreateProductionSchema,
   CreateTagSchema,
   EventSchema,
+  FilterEventSchema,
   FilterProductionSchema,
   ProductionSchema,
   TagSchema,
@@ -26,6 +27,7 @@ export class FilterProductionDto extends createZodDto(FilterProductionSchema) {}
 export class EventDto extends createZodDto(EventSchema) {}
 export class CreateEventDto extends createZodDto(CreateEventSchema) {}
 export class UpdateEventDto extends createZodDto(UpdateEventSchema) {}
+export class FilterEventDto extends createZodDto(FilterEventSchema) {}
 
 // Blog Wrappers
 export class BlogDto extends createZodDto(BlogSchema) {}

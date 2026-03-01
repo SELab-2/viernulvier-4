@@ -3,6 +3,7 @@ import type {
   BlogDto,
   CreateEventDto,
   EventDto,
+  FilterEventDto,
   UpdateEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
@@ -19,8 +20,8 @@ export class EventService {
    * Fetches all EventDto objects from the DBService
    * @returns All EventDto objects.
    */
-  async getAllEvents(): Promise<EventDto[]> {
-    return await this.eventDBService.getEvents({});
+  async getAllEvents(filters: FilterEventDto): Promise<EventDto[]> {
+    return await this.eventDBService.getEvents(filters);
   }
 
   /**
