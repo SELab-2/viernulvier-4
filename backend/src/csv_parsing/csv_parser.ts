@@ -42,6 +42,7 @@ export class CSVParser {
       };
 
       stream.on("data", (row: Record<string, string>) => {
+        if (settled) return; // ignore data if already settled
         try {
           // apply the transformation function to the row and validate it against the schema
           const transformedRow: T = transform(row);
@@ -49,12 +50,8 @@ export class CSVParser {
           const validationResult: T = schema.parse(transformedRow);
           results.push(validationResult);
         } catch (error) {
-          cleanupAndReject(
-            new Error(
-              `Error parsing row: ${JSON.stringify(row)} - ${
-                error instanceof Error ? error.message : String(error)
-              }`,
-            ),
+          console.warn(
+            `Skipping invalid row: ${JSON.stringify(row)} - ${error}`,
           );
         }
       });
