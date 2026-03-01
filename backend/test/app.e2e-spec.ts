@@ -42,7 +42,7 @@ const mockProduction = {
   description1: "First description",
   description2: "Second description",
   genre: "Drama",
-  planning_id: 1,
+  planning_id: "1",
 };
 
 const mockEvent = {
@@ -449,7 +449,7 @@ describe("ProductionController (e2e)", () => {
       description1: "Desc 1",
       description2: "Desc 2",
       genre: "Drama",
-      planning_id: 2,
+      planning_id: "2",
     };
 
     it("should return 201 with the created production", () => {
