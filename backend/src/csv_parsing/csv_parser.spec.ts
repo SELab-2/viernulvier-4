@@ -3,7 +3,6 @@ import { Readable } from "stream";
 import { z } from "zod";
 import { CSVParser } from "./csv_parser";
 
-
 jest.mock("fs");
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
@@ -30,8 +29,14 @@ function createMockStream(rows: any[], error?: Error) {
 }
 
 describe("CSVParser.parseCSVWithSchema", () => {
+  beforeEach(() => {
+    // silence warnings emitted during parsing; tests will assert on them if needed
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it("should parse valid rows", async () => {
@@ -174,5 +179,133 @@ describe("CSVParser.transformProductionRow", () => {
     expect(() => CSVParser.transformProductionRow(row)).toThrow(
       /Invalid production id/,
     );
+  });
+});
+
+// additional tests for the convenience wrappers and insertion logic
+
+describe("CSVParser.parseEventsCSV", () => {
+  beforeEach(() => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it("should parse and transform event rows, skipping invalid ones", async () => {
+    // include one valid and one invalid row
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          Starttime: "2025-05-01 14:00:00",
+          Endtime: "2025-05-01 15:00:00",
+          Hall: "Side Hall",
+          Production: "10",
+          Price: "20",
+        },
+        {
+          // bad start time will be skipped by transform
+          Starttime: "not-a-date",
+          Endtime: "",
+          Hall: "Side Hall",
+          Production: "10",
+          Price: "20",
+        },
+      ]) as any,
+    );
+
+    const events = await CSVParser.parseEventsCSV("events.csv");
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual({
+      starttime: new Date("2025-05-01 14:00:00").toISOString(),
+      endtime: new Date("2025-05-01 15:00:00").toISOString(),
+      hall: "Side Hall",
+      production_id: 10,
+      price: 20,
+    });
+
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining("Skipping invalid row"),
+    );
+  });
+});
+
+describe("CSVParser.parseProductionsCSV", () => {
+  afterEach(() => jest.clearAllMocks());
+
+  it("should parse production rows and validate against schema", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          ID: "2",
+          Titel: "Macbeth",
+          Ondertitel: "",
+          Description1: "desc",
+          Description2: "more",
+          Genre: "Tragedy",
+          "Planning ID": "5",
+        },
+      ]) as any,
+    );
+
+    const productions = await CSVParser.parseProductionsCSV("prods.csv");
+    expect(productions).toEqual([
+      {
+        id: 2,
+        titel: "Macbeth",
+        ondertitel: "",
+        description1: "desc",
+        description2: "more",
+        genre: "Tragedy",
+        planning_id: "5",
+      },
+    ]);
+  });
+});
+
+describe("CSVParser.insertEventsFromCSV", () => {
+  const fakeService = { createEvent: jest.fn() } as any;
+
+  afterEach(() => jest.clearAllMocks());
+
+  it("should call eventService.createEvent for each parsed event", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          Starttime: "2025-06-01 10:00:00",
+          Endtime: "2025-06-01 11:00:00",
+          Hall: "Hall A",
+          Production: "1",
+          Price: "15",
+        },
+      ]) as any,
+    );
+
+    fakeService.createEvent.mockResolvedValue({ id: 123 });
+    const created = await CSVParser.insertEventsFromCSV(
+      "file.csv",
+      fakeService,
+    );
+    expect(fakeService.createEvent).toHaveBeenCalledTimes(1);
+    expect(created).toEqual([{ id: 123 }]);
+  });
+
+  it("should propagate errors with contextual information", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          Starttime: "2025-06-01 10:00:00",
+          Endtime: "",
+          Hall: "Hall B",
+          Production: "2",
+          Price: "0",
+        },
+      ]) as any,
+    );
+
+    fakeService.createEvent.mockRejectedValue(new Error("DB fail"));
+
+    await expect(
+      CSVParser.insertEventsFromCSV("file.csv", fakeService),
+    ).rejects.toThrow(/Failed to insert event/);
   });
 });
