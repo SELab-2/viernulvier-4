@@ -15,7 +15,7 @@ describe("ProductionTagController", () => {
     description1: "An amazing production",
     description2: "With great actors",
     genre: "Drama",
-    planning_id: 1,
+    planning_id: "1",
   };
 
   const mockTags: TagDto[] = [

@@ -23,7 +23,7 @@ describe("ProductionService", () => {
     description1: "An amazing production",
     description2: "With great actors",
     genre: "Drama",
-    planning_id: 1,
+    planning_id: "1",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];
@@ -439,7 +439,7 @@ describe("ProductionService", () => {
         description1: "Awesome description",
         description2: "Even more awesome",
         genre: "Comedy",
-        planning_id: 2,
+        planning_id: "2",
       };
 
       const createdProduction: ProductionDto = { id: 2, ...newProduction };
@@ -461,7 +461,7 @@ describe("ProductionService", () => {
         description1: "Awesome description",
         description2: "Even more awesome",
         genre: "Comedy",
-        planning_id: 2,
+        planning_id: "2",
       };
 
       jest
