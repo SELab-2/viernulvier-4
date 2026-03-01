@@ -3,6 +3,7 @@ import csvParser from "csv-parser";
 import { ZodType } from "zod";
 import { CreateEventDto, ProductionDto } from "../../backend/src/dto/dto";
 import { CreateEventSchema, ProductionSchema } from "./database_objects";
+import { EventService } from "../../backend/src/event/event.service";
 
 export class CSVParser {
   /**
@@ -125,4 +126,35 @@ export class CSVParser {
       this.transformProductionRow,
     );
   }
+
+  /**
+   * Parse events from a CSV file and insert them into the database.
+   * @param filePath - Path to the CSV file containing events
+   * @param eventService - Instance of EventService to insert events into the database
+   * @returns A promise that resolves to an array of created EventDto objects
+   */
+  static async insertEventsFromCSV(
+    filePath: string,
+    eventService: EventService,
+  ) {
+    const events = await this.parseEventsCSV(filePath);
+    const createdEvents = [];
+
+    for (const event of events) {
+      try {
+        const createdEvent = await eventService.createEvent(event);
+        createdEvents.push(createdEvent);
+      } catch (error) {
+        throw new Error(
+          `Failed to insert event: ${JSON.stringify(event)} - ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return createdEvents;
+  }
+
+  //TODO: add inserting function for productions once new insert endpoint is added to backend
 }
