@@ -12,7 +12,7 @@ export const ProductionSchema = z.object({
   description1: z.string(),
   description2: z.string().nullable(),
   genre: z.string(),
-  planning_id: z.number().nullable(),
+  planning_id: z.string().nullable(),
 });
 
 export const CreateProductionSchema = ProductionSchema.omit({ id: true });

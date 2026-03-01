@@ -6,7 +6,7 @@ CREATE TABLE productions
     description2 TEXT,
     genre        TEXT,
     id           SERIAL PRIMARY KEY,
-    planning_id  INT
+    planning_id  TEXT
 );
 
 CREATE TABLE events
