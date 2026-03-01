@@ -41,6 +41,7 @@ export class ProductionController {
 
   /**
    * Responds to GET /productions
+   * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })

@@ -18,6 +18,7 @@ export class EventService {
 
   /**
    * Fetches all EventDto objects from the DBService
+   * @param filters The Filters to be applied to the query.
    * @returns All EventDto objects.
    */
   async getAllEvents(filters: FilterEventDto): Promise<EventDto[]> {

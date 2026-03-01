@@ -34,6 +34,7 @@ export class EventController {
 
   /**
    * Responds to GET /events
+   * @param filters The filters that should be applied to the query.
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })

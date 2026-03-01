@@ -49,7 +49,6 @@ export class EventDatabaseService {
    * @param filters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
    * @returns All events for the given filters.
    */
   async getEvents(filters: FilterEventDto): Promise<EventDto[]> {

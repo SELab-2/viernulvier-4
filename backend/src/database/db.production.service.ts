@@ -68,7 +68,6 @@ export class ProductionDatabaseService {
    * @param filters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
    * @returns All productions for the given filters.
    */
   async getProductions(filters: FilterProductionDto): Promise<ProductionDto[]> {
