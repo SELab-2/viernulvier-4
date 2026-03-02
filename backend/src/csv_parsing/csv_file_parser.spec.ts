@@ -165,6 +165,7 @@ describe("CSVFileParser.transformProductionRow", () => {
       description2: null,
       genre: "Drama",
       planning_id: "42",
+      tags: ["drama"],
     });
   });
 
@@ -249,18 +250,24 @@ describe("CSVFileParser.parseProductionsCSV", () => {
       ]) as any,
     );
 
-    const productions = await CSVFileParser.parseProductionsCSV("prods.csv");
-    expect(productions).toEqual([
-      {
-        id: 2,
-        titel: "Macbeth",
-        ondertitel: "",
-        description1: "desc",
-        description2: "more",
-        genre: "Tragedy",
-        planning_id: "5",
-      },
-    ]);
+    const result = await CSVFileParser.parseProductionsCSV("prods.csv");
+    // since we only provided one row without any comma-separated genres,
+    // we expect a single production, no tags, and no links
+    expect(result).toEqual({
+      productions: [
+        {
+          id: 2,
+          titel: "Macbeth",
+          ondertitel: "",
+          description1: "desc",
+          description2: "more",
+          genre: "Tragedy",
+          planning_id: "5",
+        },
+      ],
+      tags: ["tragedy"],
+      productionTagLinks: [{ productionId: 2, tagName: "tragedy" }],
+    });
   });
 });
 
