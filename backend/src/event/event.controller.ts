@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UsePipes,
 } from "@nestjs/common";
 import EventService from "./event.service";
@@ -15,9 +16,15 @@ import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import {
   CreateEventSchema,
   EventSchema,
+  FilterEventSchema,
   UpdateEventSchema,
 } from "@repo/common";
-import { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import { 
+  CreateEventDto, 
+  EventDto, 
+  FilterEventDto, 
+  UpdateEventDto 
+} from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
 @Controller("event")
@@ -26,6 +33,7 @@ export class EventController {
 
   /**
    * Responds to GET /events
+   * @param filters The filters that should be applied to the query.
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
@@ -35,8 +43,9 @@ export class EventController {
     description: "All Events returned.",
   })
   @Get()
-  async getAllEvents(): Promise<EventDto[]> {
-    return await this.eventService.getAllEvents();
+  @UsePipes(new ZodValidationPipe(FilterEventSchema))
+  async getAllEvents(@Query() filters: FilterEventDto): Promise<EventDto[]> {
+    return await this.eventService.getAllEvents(filters);
   }
 
   /**

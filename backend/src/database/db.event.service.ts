@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  UpdateEventDto,
+} from "../dto/dto";
+import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -13,7 +19,9 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(id: number): Promise<EventDto> {
-    const events: EventDto[] = await this.getEvents({ id: id });
+    const events: EventDto[] = await this.getEvents(
+      FilterEventSchema.parse({ id: id }),
+    );
     if (events.length === 0)
       throw new BadRequestException(
         `No EventDto exists for provided ID(${id})`,
@@ -25,36 +33,16 @@ export class EventDatabaseService {
   /**
    * Generic get function for events.
    * @param filters gives the freedom to define the filters of the search you want.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
    * @returns All events for the given filters.
    */
-  async getEvents(
-    filters: Partial<{
-      genre: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      hall: string;
-      id: number;
-      production_id: number;
-    }>,
-  ): Promise<EventDto[]> {
+  async getEvents(filters: FilterEventDto): Promise<EventDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
-
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.
@@ -113,6 +101,20 @@ export class EventDatabaseService {
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
+    // pagination
+    let paginationClause = "";
+    if (filters.limit > 0) {
+      const offset = filters.page * filters.limit;
+
+      paginationClause = `
+      LIMIT $${i}
+      OFFSET $${i + 1}
+    `;
+
+      values.push(filters.limit);
+      values.push(offset);
+    }
+
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
@@ -120,7 +122,8 @@ export class EventDatabaseService {
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
-      ORDER BY e.starttime
+      ORDER BY e.starttime 
+        ${paginationClause}
         `;
 
     return this.db.query<EventDto>(query, values);

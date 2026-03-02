@@ -4,7 +4,6 @@ Table productions {
   ondertitel text
   description1 text
   description2 text
-  genre text
   planning_id text
 }
 
@@ -29,15 +28,6 @@ Table production_blogs {
 
   indexes {
     (production_id, blog_id) [pk]
-  }
-}
-
-Table event_blogs {
-  event_id int [not null]
-  blog_id int [not null]
-
-  indexes {
-    (event_id, blog_id) [pk]
   }
 }
 
