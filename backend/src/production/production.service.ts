@@ -96,17 +96,6 @@ export class ProductionService {
     return await this.productionDBService.createProduction(newProduction);
   }
 
-  /**
-   * Insert a Production into the database, ignoring any existing ones with the same id.
-   * @param production The Production we want to add.
-   * @returns The inserted Production.
-   */
-  async insertProduction(
-    production: ProductionDto,
-  ): Promise<ProductionDto> {
-    return await this.productionDBService.insertProduction(production);
-  }
-
   // -- Blogs -- //
 
   /**
