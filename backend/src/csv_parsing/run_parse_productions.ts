@@ -21,9 +21,12 @@ async function main() {
   }
 
   try {
-    const productions = await CSVFileParser.parseProductionsCSV(file);
+    const { productions, tags, productionTagLinks } =
+      await CSVFileParser.parseProductionsCSV(file);
     console.log(`Parsed ${productions.length} productions from ${file}`);
     console.log(JSON.stringify(productions.slice(0, maxPrint), null, 2));
+    console.log(`Found ${tags.length} unique tags`);
+    console.log(tags);
   } catch (err) {
     console.error("Parsing failed:", err instanceof Error ? err.message : err);
     process.exit(3);
