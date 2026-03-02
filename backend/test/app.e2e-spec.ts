@@ -41,7 +41,6 @@ const mockProduction = {
   ondertitel: "A subtitle",
   description1: "First description",
   description2: "Second description",
-  genre: "Drama",
   planning_id: "1",
 };
 
@@ -398,7 +397,9 @@ describe("ProductionController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
   });
 
   afterEach(async () => {
@@ -449,7 +450,6 @@ describe("ProductionController (e2e)", () => {
       ondertitel: "Subtitle",
       description1: "Desc 1",
       description2: "Desc 2",
-      genre: "Drama",
       planning_id: "2",
     };
 
@@ -462,7 +462,9 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should call productionDb.createProduction with the payload", async () => {
-      await request(app.getHttpServer()).post("/production").send(createPayload);
+      await request(app.getHttpServer())
+        .post("/production")
+        .send(createPayload);
       expect(productionDb.createProduction).toHaveBeenCalledWith(createPayload);
     });
 
@@ -477,12 +479,12 @@ describe("ProductionController (e2e)", () => {
   // POST /production/insert
   describe("POST /production/insert", () => {
     it("should return 201 with the inserted production", () => {
-      // Note: NestJS @Post() defaults to 201 Created. 
+      // Note: NestJS @Post() defaults to 201 Created.
       // If you added @HttpCode(200) to your controller, change this to .expect(200)
       return request(app.getHttpServer())
-        .post("/production/insert") 
+        .post("/production/insert")
         .send(mockProduction)
-        .expect(201) 
+        .expect(201)
         .expect(mockProduction); // Assuming your mock is set up to return the payload
     });
 
@@ -490,9 +492,11 @@ describe("ProductionController (e2e)", () => {
       await request(app.getHttpServer())
         .post("/production/insert")
         .send(mockProduction);
-      
+
       // Verify the right DB method was triggered
-      expect(productionDb.insertProduction).toHaveBeenCalledWith(mockProduction);
+      expect(productionDb.insertProduction).toHaveBeenCalledWith(
+        mockProduction,
+      );
     });
 
     it("should return 400 when the required 'id' is missing", () => {
@@ -589,7 +593,9 @@ describe("ProductionBlogController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
     blogDb = app.get<BlogDatabaseService>(BlogDatabaseService);
   });
 
@@ -675,7 +681,9 @@ describe("ProductionTagController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
   });
 
   afterEach(async () => {

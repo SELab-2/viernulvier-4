@@ -3,10 +3,10 @@ import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import type {
   BlogDto,
-  ProductionDto,
-  UpdateProductionDto,
   CreateProductionDto,
+  ProductionDto,
   TagDto,
+  UpdateProductionDto,
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
@@ -23,7 +23,6 @@ describe("ProductionService", () => {
     ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    genre: "Drama",
     planning_id: "1",
   };
 
@@ -447,7 +446,6 @@ describe("ProductionService", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -469,7 +467,6 @@ describe("ProductionService", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -487,12 +484,11 @@ describe("ProductionService", () => {
     it("should insert a production successfully", async () => {
       // 1. Notice we use ProductionDto now and include the ID
       const productionToInsert: ProductionDto = {
-        id: 999, 
+        id: 999,
         titel: "New Show",
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -505,7 +501,9 @@ describe("ProductionService", () => {
       const result = await service.insertProduction(productionToInsert);
 
       // 4. Verify the correct method was called with the full DTO
-      expect(dbService.insertProduction).toHaveBeenCalledWith(productionToInsert);
+      expect(dbService.insertProduction).toHaveBeenCalledWith(
+        productionToInsert,
+      );
       expect(result).toEqual(productionToInsert);
     });
 
@@ -516,7 +514,6 @@ describe("ProductionService", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -524,9 +521,9 @@ describe("ProductionService", () => {
         .spyOn(dbService, "insertProduction")
         .mockRejectedValueOnce(new Error("Failed to insert production"));
 
-      await expect(service.insertProduction(productionToInsert)).rejects.toThrow(
-        "Failed to insert production",
-      );
+      await expect(
+        service.insertProduction(productionToInsert),
+      ).rejects.toThrow("Failed to insert production");
     });
   });
 });

@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionBlogController } from "./production-blog.controller";
 import { ProductionService } from "../production.service";
 import { BlogDto, ProductionDto } from "../../dto/dto";
-import { NotFoundException, BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 
 describe("ProductionBlogController", () => {
   let controller: ProductionBlogController;
@@ -14,7 +14,6 @@ describe("ProductionBlogController", () => {
     ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    genre: "Drama",
     planning_id: "1",
   };
 
