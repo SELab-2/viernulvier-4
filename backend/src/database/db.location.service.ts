@@ -25,7 +25,7 @@ export class LocationDatabaseService {
 
   /**
    * Get locations with pagination
-   * @param amount number of locations per page (if amount=0, it will default to grabbing all blogs)
+   * @param amount number of locations per page (if amount=0, it will default to grabbing all locations)
    * @param page page index (starts at 0)
    * @returns locations
    */
