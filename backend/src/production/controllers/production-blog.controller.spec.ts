@@ -2,7 +2,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionBlogController } from "./production-blog.controller";
 import { ProductionService } from "../production.service";
 import { BlogDto, ProductionDto } from "../../dto/dto";
-import { NotFoundException, BadRequestException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 
 describe("ProductionBlogController", () => {
   let controller: ProductionBlogController;
@@ -37,7 +38,16 @@ describe("ProductionBlogController", () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<ProductionBlogController>(ProductionBlogController);
     service = module.get<ProductionService>(ProductionService);
