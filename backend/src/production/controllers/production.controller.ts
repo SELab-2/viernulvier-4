@@ -147,8 +147,10 @@ export class ProductionController {
   /**
    * Responds to a POST to "/production/insert".
    * @param production The new ProductionDto data we want to add/insert forcibly.
-   * @returns 
+   * @returns
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Inserts a Production." })
   @ApiBody({ type: ProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production inserted." })
@@ -157,6 +159,6 @@ export class ProductionController {
   async insertProduction(
     @Body() production: ProductionDto,
   ): Promise<ProductionDto> {
-    return await this.productionService.insertProduction(production); 
+    return await this.productionService.insertProduction(production);
   }
 }
