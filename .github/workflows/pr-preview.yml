@@ -31,14 +31,16 @@ jobs:
       # STAP 3: Install Private Key (RSA)
       - name: Add private key
         shell: bash
-        env:
-          PRIVATE_KEY: ${{ secrets.DEPLOYMENT_PRIVATE_KEY }}
         run: |
+          if [ -z "${{ secrets.DEPLOYMENT_PRIVATE_KEY }}" ]; then
+            echo "Error: DEPLOYMENT_PRIVATE_KEY is not set."
+            exit 1
+          fi
           mkdir -p ~/.ssh
-          echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "${{ secrets.DEPLOYMENT_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           # Add server identification
-          ssh-keyscan -p 22 sel2-4.ugent.be >> ~/.ssh/known_hosts
+          ssh-keyscan -H sel2-4.ugent.be >> ~/.ssh/known_hosts
 
       # STAP 4: Deploy To Server
       - name: Deploy site to staging area
