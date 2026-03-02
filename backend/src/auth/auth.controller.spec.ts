@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { CreateAccountDto, UpdateAccountDto } from "../dto/dto";
+import { SuperApiKeyGuard } from "./authGuard"; // <-- Make sure to import your guard!
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -24,7 +25,11 @@ describe("AuthController", () => {
           useValue: mockAuthService,
         },
       ],
-    }).compile();
+    })
+      // Overriding the guard here so it doesn't look for ApiKeyDatabaseService
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
@@ -33,6 +38,8 @@ describe("AuthController", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
+  // ... (All your tests below remain exactly the same as before) ...
 
   describe("loginAccount", () => {
     it("should log in an account and return public account and api key", async () => {
