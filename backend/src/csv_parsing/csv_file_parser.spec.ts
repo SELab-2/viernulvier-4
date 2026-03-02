@@ -85,6 +85,7 @@ describe("CSVFileParser.transformEventRow", () => {
       Endtime: "2024-01-01 12:00:00",
       Hall: "Main Hall",
       Production: "5",
+      Genre: "drama",
       Price: "25",
     };
 
@@ -151,6 +152,7 @@ describe("CSVFileParser.transformProductionRow", () => {
       Ondertitel: "A tragedy",
       Description1: "Main description",
       Description2: "",
+      Genre: "drama",
       "Planning ID": "42",
     };
 
@@ -241,6 +243,7 @@ describe("CSVFileParser.parseProductionsCSV", () => {
           Ondertitel: "",
           Description1: "desc",
           Description2: "more",
+          Genre: "tragedy",
           "Planning ID": "5",
         },
       ]) as any,
@@ -396,7 +399,6 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         ondertitel: "",
         description1: "d1",
         description2: null,
-        genre: "drama, comedy",
         planning_id: "100",
         inserted: true,
       },
@@ -406,7 +408,6 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         ondertitel: "",
         description1: "d2",
         description2: null,
-        genre: "drama",
         planning_id: "101",
         inserted: true,
       },
