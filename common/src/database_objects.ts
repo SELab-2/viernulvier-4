@@ -68,7 +68,6 @@ export const FilterEventSchema = z.object({
   date_between: z.iso.date().optional(),
   date_before: z.iso.date().optional(),
   date_after: z.iso.date().optional(),
-  hall: z.string().optional(),
   id: z.coerce.number().optional(),
   production_id: z.coerce.number().optional(),
   page: z.coerce.number().min(0).default(0),
