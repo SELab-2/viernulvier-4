@@ -1,7 +1,7 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateEventDto, ProductionDto, TagDto } from "../dto/dto";
+import { CreateEventDto, EventDto, ProductionDto, TagDto } from "../dto/dto";
 import {
   CreateEventSchema,
   ProductionSchema,
@@ -198,7 +198,7 @@ export class CSVFileParser {
   static async insertEventsFromCSV(
     filePath: string,
     eventService: EventService,
-  ) {
+  ): Promise<EventDto[]> {
     const events = await this.parseEventsCSV(filePath);
     const createdEvents = [];
 
@@ -218,12 +218,20 @@ export class CSVFileParser {
     return createdEvents;
   }
 
+  /**
+   * Parse productions from a CSV file and insert them into the database, along with their associated tags.
+   * @param filePath - Path to the CSV file containing productions
+   * @param productionService - Instance of ProductionService to insert productions into the database and link tags
+   * @param tagService - Instance of TagService to insert tags into the database
+   * @returns A promise that resolves when all productions and tags have been inserted and linked
+   */
   static async insertProductionsFromCSV(
     filePath: string,
     productionService: ProductionService,
     tagService: TagService,
-  ){
+  ): Promise<ProductionDto[]> {
     const { productions, tags, productionTagLinks } = await this.parseProductionsCSV(filePath);
+    const createdProductions: ProductionDto[] = [];
 
     // insert productions
     for (const production of productions) {
@@ -239,6 +247,8 @@ export class CSVFileParser {
         productionService.addTagToProduction(link.productionId, tagObject.id);
       }
     }
+
+    return createdProductions;
 
   }
 
