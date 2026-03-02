@@ -10,7 +10,6 @@ export const ProductionSchema = z.object({
   ondertitel: z.string(),
   description1: z.string(),
   description2: z.string().nullable(),
-  genre: z.string(),
   planning_id: z.string().nullable(),
 });
 

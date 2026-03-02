@@ -4,7 +4,6 @@ Table productions {
   ondertitel text
   description1 text
   description2 text
-  genre text
   planning_id text
 }
 
