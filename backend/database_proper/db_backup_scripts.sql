@@ -48,24 +48,6 @@ CREATE TABLE production_blogs
             ON DELETE CASCADE
 );
 
-CREATE TABLE event_blogs
-(
-    event_id INT NOT NULL,
-    blog_id  INT NOT NULL,
-
-    PRIMARY KEY (event_id, blog_id),
-
-    CONSTRAINT fk_event
-        FOREIGN KEY (event_id)
-            REFERENCES events (id)
-            ON DELETE CASCADE,
-
-    CONSTRAINT fk_blog
-        FOREIGN KEY (blog_id)
-            REFERENCES blogs (id)
-            ON DELETE CASCADE
-);
-
 CREATE TABLE tags
 (
     id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
