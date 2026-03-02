@@ -279,6 +279,61 @@ export class ProductionDatabaseService {
   }
 
   /**
+   * UNSAFE version of createProduction. Will override if a Production
+   * already exists with the same ID.
+   * @param production The production object that we want to insert.
+   * @returns That same production object but returned from the Database.
+   */
+  async insertProduction(production: ProductionDto): Promise<ProductionDto> {
+    const query = `
+      INSERT INTO productions (
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        genre,
+        planning_id
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      ON CONFLICT (id)
+      DO UPDATE SET
+        titel = EXCLUDED.titel,
+        ondertitel = EXCLUDED.ondertitel,
+        description1 = EXCLUDED.description1,
+        description2 = EXCLUDED.description2,
+        genre = EXCLUDED.genre,
+        planning_id = EXCLUDED.planning_id
+      RETURNING
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        genre,
+        planning_id
+    `;
+
+    const values = [
+      production.id,
+      production.titel,
+      production.ondertitel ?? null,
+      production.description1 ?? null,
+      production.description2 ?? null,
+      production.genre,
+      production.planning_id ?? null,
+    ];
+
+    const result = await this.db.query<ProductionDto>(query, values);
+
+    if (!result.length) {
+      throw new Error("Failed to insert Production.");
+    }
+
+    return result[0];
+  }
+
+  /**
    * Update function for productions. Updates the production in the database.
    * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.

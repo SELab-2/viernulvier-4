@@ -141,6 +141,22 @@ export class ProductionController {
   async createProduction(
     @Body() newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
-    return this.productionService.createProduction(newProduction);
+    return await this.productionService.createProduction(newProduction);
+  }
+
+  /**
+   * Responds to a POST to "/production/insert".
+   * @param production The new ProductionDto data we want to add/insert forcibly.
+   * @returns 
+   */
+  @ApiOperation({ summary: "Inserts a Production." })
+  @ApiBody({ type: ProductionDto })
+  @ApiOkResponse({ type: ProductionDto, description: "Production inserted." })
+  @Post("insert")
+  @UsePipes(new ZodValidationPipe(ProductionSchema))
+  async insertProduction(
+    @Body() production: ProductionDto,
+  ): Promise<ProductionDto> {
+    return await this.productionService.insertProduction(production); 
   }
 }
