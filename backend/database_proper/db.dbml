@@ -32,15 +32,6 @@ Table production_blogs {
   }
 }
 
-Table event_blogs {
-  event_id int [not null]
-  blog_id int [not null]
-
-  indexes {
-    (event_id, blog_id) [pk]
-  }
-}
-
 Table tags {
   id int [pk, increment]
   tag text [not null, unique]

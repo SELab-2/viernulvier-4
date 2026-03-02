@@ -10,6 +10,7 @@ import type {
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
+import { FilterProductionSchema } from "@repo/common";
 
 describe("ProductionService", () => {
   let service: ProductionService;
@@ -52,10 +53,10 @@ describe("ProductionService", () => {
             updateProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
             createProduction: jest.fn(),
+            insertProduction: jest.fn(),
             getBlogsOfProduction: jest.fn(),
             linkBlogWithProductionID: jest.fn(),
             deleteBlogFromProduction: jest.fn(),
-            // New mock methods
             addTagToProduction: jest.fn(),
             removeTagFromProduction: jest.fn(),
           },
@@ -82,20 +83,28 @@ describe("ProductionService", () => {
 
   describe("getAllProductions", () => {
     it("should return all productions from database", async () => {
-      const result = await service.getAllProductions();
+      const result = await service.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual(mockProductions);
-      expect(dbService.getProductions).toHaveBeenCalledWith({});
+      expect(dbService.getProductions).toHaveBeenCalledWith(
+        FilterProductionSchema.parse({}),
+      );
     });
 
     it("should call dbService.getProductions with empty filter", async () => {
-      await service.getAllProductions();
-      expect(dbService.getProductions).toHaveBeenCalledWith({});
+      await service.getAllProductions(FilterProductionSchema.parse({}));
+      expect(dbService.getProductions).toHaveBeenCalledWith(
+        FilterProductionSchema.parse({}),
+      );
       expect(dbService.getProductions).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no productions exist", async () => {
       jest.spyOn(dbService, "getProductions").mockResolvedValueOnce([]);
-      const result = await service.getAllProductions();
+      const result = await service.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual([]);
     });
 
@@ -103,9 +112,9 @@ describe("ProductionService", () => {
       jest
         .spyOn(dbService, "getProductions")
         .mockRejectedValueOnce(new Error("Database error"));
-      await expect(service.getAllProductions()).rejects.toThrow(
-        "Database error",
-      );
+      await expect(
+        service.getAllProductions(FilterProductionSchema.parse({})),
+      ).rejects.toThrow("Database error");
     });
   });
 
@@ -470,6 +479,53 @@ describe("ProductionService", () => {
 
       await expect(service.createProduction(newProduction)).rejects.toThrow(
         "Failed to create production",
+      );
+    });
+  });
+
+  describe("insertProduction", () => {
+    it("should insert a production successfully", async () => {
+      // 1. Notice we use ProductionDto now and include the ID
+      const productionToInsert: ProductionDto = {
+        id: 999, 
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: "2",
+      };
+
+      // 2. Spy on insertProduction instead of createProduction
+      jest
+        .spyOn(dbService, "insertProduction")
+        .mockResolvedValueOnce(productionToInsert);
+
+      // 3. Call the insert service method
+      const result = await service.insertProduction(productionToInsert);
+
+      // 4. Verify the correct method was called with the full DTO
+      expect(dbService.insertProduction).toHaveBeenCalledWith(productionToInsert);
+      expect(result).toEqual(productionToInsert);
+    });
+
+    it("should handle database errors when insertion fails", async () => {
+      const productionToInsert: ProductionDto = {
+        id: 999,
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: "2",
+      };
+
+      jest
+        .spyOn(dbService, "insertProduction")
+        .mockRejectedValueOnce(new Error("Failed to insert production"));
+
+      await expect(service.insertProduction(productionToInsert)).rejects.toThrow(
+        "Failed to insert production",
       );
     });
   });

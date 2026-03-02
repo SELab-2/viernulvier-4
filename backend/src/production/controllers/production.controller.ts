@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
@@ -16,13 +17,20 @@ import {
   ProductionSchema,
   UpdateProductionSchema,
   CreateProductionSchema,
+  FilterProductionSchema,
 } from "@repo/common";
 import {
   ProductionDto,
   UpdateProductionDto,
   CreateProductionDto,
+  FilterProductionDto,
 } from "../../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+} from "@nestjs/swagger";
 
 /**
  * Handles CORE functionality for Productions.
@@ -33,17 +41,22 @@ export class ProductionController {
 
   /**
    * Responds to GET /productions
+   * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
+  @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
   @ApiOkResponse({
     type: ProductionDto,
     isArray: true,
     description: "All Productions returned.",
   })
   @Get()
-  async getAllProductions(): Promise<ProductionDto[]> {
-    return await this.productionService.getAllProductions();
+  @UsePipes(new ZodValidationPipe(FilterProductionSchema))
+  async getAllProductions(
+    @Query() filters: FilterProductionDto,
+  ): Promise<ProductionDto[]> {
+    return await this.productionService.getAllProductions(filters);
   }
 
   /**
@@ -128,6 +141,22 @@ export class ProductionController {
   async createProduction(
     @Body() newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
-    return this.productionService.createProduction(newProduction);
+    return await this.productionService.createProduction(newProduction);
+  }
+
+  /**
+   * Responds to a POST to "/production/insert".
+   * @param production The new ProductionDto data we want to add/insert forcibly.
+   * @returns 
+   */
+  @ApiOperation({ summary: "Inserts a Production." })
+  @ApiBody({ type: ProductionDto })
+  @ApiOkResponse({ type: ProductionDto, description: "Production inserted." })
+  @Post("insert")
+  @UsePipes(new ZodValidationPipe(ProductionSchema))
+  async insertProduction(
+    @Body() production: ProductionDto,
+  ): Promise<ProductionDto> {
+    return await this.productionService.insertProduction(production); 
   }
 }

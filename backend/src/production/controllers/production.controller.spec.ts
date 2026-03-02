@@ -1,8 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "../production.service";
-import { ProductionDto, UpdateProductionDto, CreateProductionDto } from "../../dto/dto";
+import {
+  ProductionDto,
+  UpdateProductionDto,
+  CreateProductionDto,
+} from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { FilterProductionSchema } from "@repo/common";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -33,6 +38,7 @@ describe("ProductionController", () => {
             modifyProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
             createProduction: jest.fn(),
+            insertProduction: jest.fn(),
           },
         },
       ],
@@ -48,19 +54,23 @@ describe("ProductionController", () => {
 
   describe("getAllProductions", () => {
     it("should return an array of productions", async () => {
-      const result = await controller.getAllProductions();
+      const result = await controller.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual(mockProductions);
       expect(service.getAllProductions).toHaveBeenCalled();
     });
 
     it("should call service.getAllProductions", async () => {
-      await controller.getAllProductions();
+      await controller.getAllProductions(FilterProductionSchema.parse({}));
       expect(service.getAllProductions).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no productions exist", async () => {
       jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      const result = await controller.getAllProductions();
+      const result = await controller.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual([]);
     });
   });
@@ -88,8 +98,14 @@ describe("ProductionController", () => {
     });
 
     it("should throw a NotFoundException if the production does not exist", async () => {
-      jest.spyOn(service, "getProductionById").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
-      await expect(controller.getProductionById(999)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(service, "getProductionById")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
+      await expect(controller.getProductionById(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -101,8 +117,14 @@ describe("ProductionController", () => {
     });
 
     it("should throw a NotFoundException if trying to replace a non-existent production", async () => {
-      jest.spyOn(service, "replaceProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
-      await expect(controller.replaceProduction(999, mockProduction)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(service, "replaceProduction")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
+      await expect(
+        controller.replaceProduction(999, mockProduction),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -110,9 +132,11 @@ describe("ProductionController", () => {
     it("should modify and return the production", async () => {
       const patchData: UpdateProductionDto = { titel: "A New titel" };
       const patchedProduction = { ...mockProduction, titel: "A New titel" };
-      
-      jest.spyOn(service, "modifyProduction").mockResolvedValueOnce(patchedProduction);
-      
+
+      jest
+        .spyOn(service, "modifyProduction")
+        .mockResolvedValueOnce(patchedProduction);
+
       const result = await controller.modifyProduction(1, patchData);
       expect(service.modifyProduction).toHaveBeenCalledWith(1, patchData);
       expect(result).toEqual(patchedProduction);
@@ -120,8 +144,14 @@ describe("ProductionController", () => {
 
     it("should throw a NotFoundException if trying to modify a non-existent production", async () => {
       const patchData: UpdateProductionDto = { titel: "A New titel" };
-      jest.spyOn(service, "modifyProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
-      await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(service, "modifyProduction")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
+      await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -133,8 +163,14 @@ describe("ProductionController", () => {
     });
 
     it("should throw a NotFoundException if trying to delete a non-existent production", async () => {
-      jest.spyOn(service, "deleteProduction").mockRejectedValueOnce(new NotFoundException("ProductionDto not found"));
-      await expect(controller.deleteProduction(999)).rejects.toThrow(NotFoundException);
+      jest
+        .spyOn(service, "deleteProduction")
+        .mockRejectedValueOnce(
+          new NotFoundException("ProductionDto not found"),
+        );
+      await expect(controller.deleteProduction(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -176,7 +212,56 @@ describe("ProductionController", () => {
         .mockRejectedValueOnce(new Error("Failed to create production"));
 
       await expect(controller.createProduction(newProduction)).rejects.toThrow(
-        "Failed to create production"
+        "Failed to create production",
+      );
+    });
+  });
+
+  describe("insertProduction", () => {
+    it("should insert a production successfully", async () => {
+      // 1. Define the full ProductionDto (including the ID)
+      const productionToInsert: ProductionDto = {
+        id: 999, // Since this is an insert of existing data, it has an ID
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: "2",
+      };
+
+      // 2. Spy on the service's insertProduction method
+      jest
+        .spyOn(service, "insertProduction")
+        .mockResolvedValueOnce(productionToInsert);
+
+      // 3. Call the controller method
+      const result = await controller.insertProduction(productionToInsert);
+
+      // 4. Verify the controller passed the right data to the service
+      expect(service.insertProduction).toHaveBeenCalledWith(productionToInsert);
+      expect(result).toEqual(productionToInsert);
+    });
+
+    it("should handle service errors when insertion fails", async () => {
+      const productionToInsert: ProductionDto = {
+        id: 999,
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        genre: "Comedy",
+        planning_id: "2",
+      };
+
+      // Mock the service throwing an error
+      jest
+        .spyOn(service, "insertProduction")
+        .mockRejectedValueOnce(new Error("Failed to insert production"));
+
+      // Verify the controller propagates the error
+      await expect(controller.insertProduction(productionToInsert)).rejects.toThrow(
+        "Failed to insert production",
       );
     });
   });

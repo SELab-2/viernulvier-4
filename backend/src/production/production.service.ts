@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import {
   BlogDto,
   CreateProductionDto,
+  FilterProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
@@ -18,10 +19,13 @@ export class ProductionService {
 
   /**
    * Fetches all ProductionDto objects from the DBService
+   * @param filters The filters to be applied to the query.
    * @returns All ProductionDto objects
    */
-  async getAllProductions(): Promise<ProductionDto[]> {
-    return await this.productionDBService.getProductions({});
+  async getAllProductions(
+    filters: FilterProductionDto,
+  ): Promise<ProductionDto[]> {
+    return await this.productionDBService.getProductions(filters);
   }
 
   /**
@@ -90,6 +94,17 @@ export class ProductionService {
     newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionDBService.createProduction(newProduction);
+  }
+
+  /**
+   * Insert a Production into the database, ignoring any existing ones with the same id.
+   * @param production The Production we want to add.
+   * @returns The inserted Production.
+   */
+  async insertProduction(
+    production: ProductionDto,
+  ): Promise<ProductionDto> {
+    return await this.productionDBService.insertProduction(production);
   }
 
   // -- Blogs -- //

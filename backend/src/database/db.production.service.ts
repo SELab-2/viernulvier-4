@@ -3,10 +3,12 @@ import { DbService } from "./db.service";
 import {
   BlogDto,
   CreateProductionDto,
+  FilterProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
+import { FilterProductionSchema } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -18,7 +20,9 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: ProductionDto[] = await this.getProductions({ id: id });
+    const productions: ProductionDto[] = await this.getProductions(
+      FilterProductionSchema.parse({ id: id }),
+    );
     if (productions.length === 0)
       throw new BadRequestException(
         `No ProductionDto exists for provided ID(${id})`,
@@ -30,69 +34,90 @@ export class ProductionDatabaseService {
   /**
    * Get all tags listed under a given production.
    * @param production the production we want all tags of.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * @returns a list of tags connected to the given production.
    */
-  async getTagsOfProduction(production: ProductionDto): Promise<TagDto[]> {
-    const query = `
-    SELECT t.*
-    FROM tags t
-    JOIN production_tag pt ON t.id = pt.tag_id
-    WHERE pt.production_id = $1
-  `;
+  async getTagsOfProduction(
+    production: ProductionDto,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<TagDto[]> {
+    if (amount === 0) {
+      const query = `
+      SELECT t.*
+      FROM tags t
+      JOIN production_tag pt ON t.id = pt.tag_id
+      WHERE pt.production_id = $1
+      `;
 
-    return await this.db.query(query, [production.id]);
+      return await this.db.query(query, [production.id]);
+    }
+
+    const offset = page * amount;
+
+    const query = `
+      SELECT t.*
+      FROM tags t
+      JOIN production_tag pt ON t.id = pt.tag_id
+      WHERE pt.production_id = $1
+      LIMIT $2 OFFSET $3
+      `;
+
+    return await this.db.query(query, [production.id, amount, offset]);
   }
 
   /**
    * Get all blogs listed under a given production.
    * @param id the id of the production we want all blogs of.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * @returns a list of blogs connected to the given production.
    */
-  async getBlogsOfProduction(id: number): Promise<BlogDto[]> {
-    const query = `
-    SELECT b.*
-    FROM blogs b
-    JOIN production_blogs pb ON b.id = pb.blog_id
-    WHERE pb.production_id = $1
-  `;
+  async getBlogsOfProduction(
+    id: number,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<BlogDto[]> {
+    if (amount === 0) {
+      const query = `
+      SELECT b.*
+      FROM blogs b
+      JOIN production_blogs pb ON b.id = pb.blog_id
+      WHERE pb.production_id = $1
+      `;
 
-    return await this.db.query(query, [id]);
+      return await this.db.query(query, [id]);
+    }
+
+    const offset = page * amount;
+
+    const query = `
+      SELECT b.*
+      FROM blogs b
+      JOIN production_blogs pb ON b.id = pb.blog_id
+      WHERE pb.production_id = $1
+      LIMIT $2 OFFSET $3
+      `;
+
+    return await this.db.query(query, [id, amount, offset]);
   }
 
   /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
    * @returns All productions for the given filters.
    */
-  async getProductions(
-    filters: Partial<{
-      genre: string;
-      hall: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      titel: string;
-      id: number;
-      tag_id: number;
-    }>,
-  ): Promise<ProductionDto[]> {
+  async getProductions(filters: FilterProductionDto): Promise<ProductionDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
 
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
+    // * NOTE: Removed Filtering by genre because genres are supposed to become tags.
 
     // Filter by location
     if (filters.hall) {
@@ -130,10 +155,11 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by titel
+    // Filter by titel (case-insensitive)
+    // Will look anywhere in the title field for what was searched.
     if (filters.titel) {
-      conditions.push(`p.titel = $${i}`);
-      values.push(filters.titel);
+      conditions.push(`p.titel ILIKE $${i}`);
+      values.push(`%${filters.titel}%`);
       i++;
     }
 
@@ -144,10 +170,18 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by tag id
-    if (filters.tag_id) {
-      conditions.push(`pt.tag_id = $${i}`);
-      values.push(filters.tag_id);
+    // Filter by tag id (Production should have all tags we're filtering for.)
+    if (filters.tag_ids && filters.tag_ids.length > 0) {
+      conditions.push(`
+        p.id IN (
+          SELECT production_id 
+          FROM production_tag 
+          WHERE tag_id = ANY($${i}::int[])
+          GROUP BY production_id 
+          HAVING COUNT(DISTINCT tag_id) = ${filters.tag_ids.length}
+        )
+      `);
+      values.push(filters.tag_ids);
       i++;
     }
 
@@ -155,6 +189,22 @@ export class ProductionDatabaseService {
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    // pagination
+    let paginationClause = "";
+    if (filters.limit > 0) {
+      const offset = filters.page * filters.limit;
+
+      paginationClause = `
+      LIMIT $${i}
+      OFFSET $${i + 1}
+    `;
+
+      values.push(filters.limit);
+      values.push(offset);
+
+      i += 2;
+    }
 
     // p is defined, ignore error
     // need DISTINCT as multiple event for each prod.
@@ -169,9 +219,9 @@ export class ProductionDatabaseService {
         p.planning_id
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
-        LEFT JOIN production_tag pt on p.id = pt.production_id
           ${whereClause}
-      ORDER BY p.id
+      ORDER BY p.id 
+        ${paginationClause}
     `;
 
     return this.db.query<ProductionDto>(query, values);
@@ -223,6 +273,61 @@ export class ProductionDatabaseService {
 
     if (!result.length) {
       throw new Error("Failed to create production");
+    }
+
+    return result[0];
+  }
+
+  /**
+   * UNSAFE version of createProduction. Will override if a Production
+   * already exists with the same ID.
+   * @param production The production object that we want to insert.
+   * @returns That same production object but returned from the Database.
+   */
+  async insertProduction(production: ProductionDto): Promise<ProductionDto> {
+    const query = `
+      INSERT INTO productions (
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        genre,
+        planning_id
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      ON CONFLICT (id)
+      DO UPDATE SET
+        titel = EXCLUDED.titel,
+        ondertitel = EXCLUDED.ondertitel,
+        description1 = EXCLUDED.description1,
+        description2 = EXCLUDED.description2,
+        genre = EXCLUDED.genre,
+        planning_id = EXCLUDED.planning_id
+      RETURNING
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        genre,
+        planning_id
+    `;
+
+    const values = [
+      production.id,
+      production.titel,
+      production.ondertitel ?? null,
+      production.description1 ?? null,
+      production.description2 ?? null,
+      production.genre,
+      production.planning_id ?? null,
+    ];
+
+    const result = await this.db.query<ProductionDto>(query, values);
+
+    if (!result.length) {
+      throw new Error("Failed to insert Production.");
     }
 
     return result[0];
