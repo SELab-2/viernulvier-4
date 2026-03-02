@@ -4,7 +4,6 @@ CREATE TABLE productions
     ondertitel   TEXT,
     description1 TEXT,
     description2 TEXT,
-    genre        TEXT,
     id           SERIAL PRIMARY KEY,
     planning_id  TEXT
 );

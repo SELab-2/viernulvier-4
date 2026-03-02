@@ -41,7 +41,6 @@ const mockProduction = {
   ondertitel: "A subtitle",
   description1: "First description",
   description2: "Second description",
-  genre: "Drama",
   planning_id: "1",
 };
 
@@ -450,7 +449,6 @@ describe("ProductionController (e2e)", () => {
       ondertitel: "Subtitle",
       description1: "Desc 1",
       description2: "Desc 2",
-      genre: "Drama",
       planning_id: "2",
     };
 
