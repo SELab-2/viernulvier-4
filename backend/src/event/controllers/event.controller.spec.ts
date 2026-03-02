@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
-import EventService from "./event.service";
-import type { CreateEventDto, EventDto } from "../dto/dto";
+import EventService from "../event.service";
+import type { CreateEventDto, EventDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { FilterEventSchema } from "@repo/common";
 
