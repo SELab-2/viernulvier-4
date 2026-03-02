@@ -1,7 +1,12 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { AccountDatabaseService } from "../database/db.account.service";
 import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
-import { ApiKeyDto, CreateAccountDto, PublicAccountDto } from "../dto/dto";
+import {
+  ApiKeyDto,
+  CreateAccountDto,
+  PublicAccountDto,
+  UpdateAccountDto,
+} from "../dto/dto";
 
 @Injectable()
 export class AuthService {
@@ -10,18 +15,59 @@ export class AuthService {
     private readonly apiKeyDbService: ApiKeyDatabaseService,
   ) {}
 
+  /**
+   * Returns a list of all Accounts in the Database.
+   * @returns A list of all Accounts.
+   */
+  async getAccounts(): Promise<PublicAccountDto[]> {
+    return await this.accountDbService.getAccounts();
+  }
+
+  /**
+   * Logs an existing Account in.
+   * @param account The Account the user is trying to log into.
+   * @returns An object containing the Account and ApiKey.
+   */
   async loginAccount(
     account: CreateAccountDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     return await this.accountDbService.loginAccount(account);
   }
 
-  async createAccount(account: CreateAccountDto): Promise<boolean> {
-    const valid: boolean = await this.accountDbService.createAccount(account);
-    if (!valid) throw new Error("Could not create account.");
+  /**
+   * Create a new account in the Database and link a new ApiKey to it.
+   * @param createAccount The account we want to create.
+   * @returns The newly created Account.
+   */
+  async createAccount(
+    createAccount: CreateAccountDto,
+  ): Promise<PublicAccountDto> {
+    const account: PublicAccountDto =
+      await this.accountDbService.createAccount(createAccount);
 
-    const accounts: PublicAccountDto = await this.accountDbService.get()
     const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey();
-    await this.accountDbService.linkAccountToKey()
+    await this.accountDbService.linkAccountToKey(account.id, apiKey.id);
+
+    return account;
+  }
+
+  /**
+   * Updates an existing Account.
+   * @param updateAccount The Account with it's new info we want to update.
+   * @returns The Updated account.
+   */
+  async updateAccount(
+    updateAccount: UpdateAccountDto,
+  ): Promise<PublicAccountDto> {
+    return await this.accountDbService.updateAccount(updateAccount);
+  }
+
+  /**
+   * Deletes an existing account from the Database.
+   * @param accountId The ID of the account we want to delete.
+   * @returns T/F whether the account was deleted or not.
+   */
+  async deleteAccount(accountId: number): Promise<boolean> {
+    return await this.accountDbService.deleteAccount(accountId);
   }
 }
