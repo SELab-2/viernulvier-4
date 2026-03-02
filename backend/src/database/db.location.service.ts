@@ -51,7 +51,7 @@ export class LocationDatabaseService {
       return result;
     }
 
-    let query = `
+    const query = `
     SELECT *
     FROM locations
     ORDER BY id
