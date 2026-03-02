@@ -72,7 +72,7 @@ export class AccountDatabaseService {
       WHERE username = $1
       LIMIT 1
     `;
-    const result = await this.db.query(query, [account.username]);
+    const result = await this.db.query(query, [account.username]); // no type for safety.
 
     if (result.length === 0) {
       throw new Error("Invalid username or password");

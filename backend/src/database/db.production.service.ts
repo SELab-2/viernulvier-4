@@ -1,6 +1,14 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
+import {
+  BlogDto,
+  CreateProductionDto,
+  FilterProductionDto,
+  ProductionDto,
+  TagDto,
+  UpdateProductionDto,
+} from "../dto/dto";
+import { FilterProductionSchema } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -12,7 +20,9 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: ProductionDto[] = await this.getProductions({ id: id });
+    const productions: ProductionDto[] = await this.getProductions(
+      FilterProductionSchema.parse({ id: id }),
+    );
     if (productions.length === 0)
       throw new BadRequestException(
         `No ProductionDto exists for provided ID(${id})`,
@@ -100,37 +110,14 @@ export class ProductionDatabaseService {
    * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
    * @returns All productions for the given filters.
    */
-  async getProductions(
-    filters: Partial<{
-      genre: string;
-      hall: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      titel: string;
-      id: number;
-      tag_id: number;
-    }>,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<ProductionDto[]> {
+  async getProductions(filters: FilterProductionDto): Promise<ProductionDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
 
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
+    // * NOTE: Removed Filtering by genre because genres are supposed to become tags.
 
     // Filter by location
     if (filters.hall) {
@@ -168,10 +155,11 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by titel
+    // Filter by titel (case-insensitive)
+    // Will look anywhere in the title field for what was searched.
     if (filters.titel) {
-      conditions.push(`p.titel = $${i}`);
-      values.push(filters.titel);
+      conditions.push(`p.titel ILIKE $${i}`);
+      values.push(`%${filters.titel}%`);
       i++;
     }
 
@@ -182,10 +170,18 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by tag id
-    if (filters.tag_id) {
-      conditions.push(`pt.tag_id = $${i}`);
-      values.push(filters.tag_id);
+    // Filter by tag id (Production should have all tags we're filtering for.)
+    if (filters.tag_ids && filters.tag_ids.length > 0) {
+      conditions.push(`
+        p.id IN (
+          SELECT production_id 
+          FROM production_tag 
+          WHERE tag_id = ANY($${i}::int[])
+          GROUP BY production_id 
+          HAVING COUNT(DISTINCT tag_id) = ${filters.tag_ids.length}
+        )
+      `);
+      values.push(filters.tag_ids);
       i++;
     }
 
@@ -196,15 +192,15 @@ export class ProductionDatabaseService {
 
     // pagination
     let paginationClause = "";
-    if (amount > 0) {
-      const offset = page * amount;
+    if (filters.limit > 0) {
+      const offset = filters.page * filters.limit;
 
       paginationClause = `
       LIMIT $${i}
       OFFSET $${i + 1}
     `;
 
-      values.push(amount);
+      values.push(filters.limit);
       values.push(offset);
 
       i += 2;
@@ -223,7 +219,6 @@ export class ProductionDatabaseService {
         p.planning_id
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
-        LEFT JOIN production_tag pt on p.id = pt.production_id
           ${whereClause}
       ORDER BY p.id 
         ${paginationClause}

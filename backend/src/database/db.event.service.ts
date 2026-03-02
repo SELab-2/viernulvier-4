@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  UpdateEventDto,
+} from "../dto/dto";
+import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -13,30 +19,15 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(id: number): Promise<EventDto> {
-    const events: EventDto[] = await this.getEvents({ id: id });
+    const events: EventDto[] = await this.getEvents(
+      FilterEventSchema.parse({ id: id }),
+    );
     if (events.length === 0)
       throw new BadRequestException(
         `No EventDto exists for provided ID(${id})`,
       );
 
     return events[0]; // There should be an EventDto in here if the length is not 0.
-  }
-
-  // TODO to be removed:
-  /**
-   * Get all blogs listed under a given event.
-   * @param id the id of an event you want the blogs of.
-   * @returns a list of blogs connected to the given event.
-   */
-  async getBlogsOfEvent(id: number): Promise<BlogDto[]> {
-    const query = `
-    SELECT b.*
-    FROM blogs b
-    JOIN event_blogs eb ON b.id = eb.blog_id
-    WHERE eb.event_id = $1
-  `;
-
-    return await this.db.query(query, [id]);
   }
 
   /**
@@ -46,37 +37,12 @@ export class EventDatabaseService {
    * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
-   * example: amount = 10 and page = 0 returns the first 10 events, page = 1 returns events 11-20,...
    * @returns All events for the given filters.
    */
-  async getEvents(
-    filters: Partial<{
-      genre: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      hall: string;
-      id: number;
-      production_id: number;
-    }>,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<EventDto[]> {
+  async getEvents(filters: FilterEventDto): Promise<EventDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
-
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.
@@ -137,18 +103,16 @@ export class EventDatabaseService {
 
     // pagination
     let paginationClause = "";
-    if (amount > 0) {
-      const offset = page * amount;
+    if (filters.limit > 0) {
+      const offset = filters.page * filters.limit;
 
       paginationClause = `
       LIMIT $${i}
       OFFSET $${i + 1}
     `;
 
-      values.push(amount);
+      values.push(filters.limit);
       values.push(offset);
-
-      i += 2;
     }
 
     // p is defined, ignore error
@@ -286,61 +250,5 @@ export class EventDatabaseService {
     const query = `DELETE FROM events WHERE production_id = $1`;
 
     await this.db.query(query, [production_id]);
-  }
-
-  // TODO to be removed:
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given event_id
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithEventID(event_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING event_blogs
-      WHERE blogs.id = event_blogs.blog_id
-        AND event_blogs.event_id = $1
-    `;
-
-    await this.db.query(query, [event_id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes a single blog-LINK associated with a given event_id
-   * note: it does not delete the blog itself only from being linked to the given event.
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogFromEvent(event_id: number, blog_id: number): Promise<void> {
-    const query = `
-      DELETE FROM event_blogs
-      WHERE event_blogs.blog_id = $1
-        AND event_blogs.event_id = $2
-    `;
-
-    await this.db.query(query, [blog_id, event_id]);
-  }
-
-  // TODO to be removed:
-  /**
-   * Link an existing blog to an event.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async linkBlogWithEventID(blog_id: number, event_id: number): Promise<void> {
-    const query = `
-      INSERT INTO event_blogs (event_id, blog_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    await this.db.query(query, [event_id, blog_id]);
   }
 }
