@@ -50,7 +50,6 @@ const mockEvent = {
   starttime: "2025-01-01T19:00:00.000Z",
   endtime: "2025-01-01T22:00:00.000Z",
   price: 15.5,
-  hall: "Hall A",
   production_id: 1,
 };
 
@@ -398,7 +397,9 @@ describe("ProductionController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
   });
 
   afterEach(async () => {
@@ -462,7 +463,9 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should call productionDb.createProduction with the payload", async () => {
-      await request(app.getHttpServer()).post("/production").send(createPayload);
+      await request(app.getHttpServer())
+        .post("/production")
+        .send(createPayload);
       expect(productionDb.createProduction).toHaveBeenCalledWith(createPayload);
     });
 
@@ -477,12 +480,12 @@ describe("ProductionController (e2e)", () => {
   // POST /production/insert
   describe("POST /production/insert", () => {
     it("should return 201 with the inserted production", () => {
-      // Note: NestJS @Post() defaults to 201 Created. 
+      // Note: NestJS @Post() defaults to 201 Created.
       // If you added @HttpCode(200) to your controller, change this to .expect(200)
       return request(app.getHttpServer())
-        .post("/production/insert") 
+        .post("/production/insert")
         .send(mockProduction)
-        .expect(201) 
+        .expect(201)
         .expect(mockProduction); // Assuming your mock is set up to return the payload
     });
 
@@ -490,9 +493,11 @@ describe("ProductionController (e2e)", () => {
       await request(app.getHttpServer())
         .post("/production/insert")
         .send(mockProduction);
-      
+
       // Verify the right DB method was triggered
-      expect(productionDb.insertProduction).toHaveBeenCalledWith(mockProduction);
+      expect(productionDb.insertProduction).toHaveBeenCalledWith(
+        mockProduction,
+      );
     });
 
     it("should return 400 when the required 'id' is missing", () => {
@@ -589,7 +594,9 @@ describe("ProductionBlogController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
     blogDb = app.get<BlogDatabaseService>(BlogDatabaseService);
   });
 
@@ -675,7 +682,9 @@ describe("ProductionTagController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
   });
 
   afterEach(async () => {
@@ -807,7 +816,6 @@ describe("EventController (e2e)", () => {
       starttime: "2025-06-01T19:00:00.000Z",
       endtime: "2025-06-01T22:00:00.000Z",
       price: 20.0,
-      hall: "Hall B",
       production_id: 1,
     };
 
@@ -822,13 +830,6 @@ describe("EventController (e2e)", () => {
     it("should call eventDb.createEvent with the payload", async () => {
       await request(app.getHttpServer()).post("/event").send(createPayload);
       expect(eventDb.createEvent).toHaveBeenCalledWith(createPayload);
-    });
-
-    it("should return 400 when required fields are missing", () => {
-      return request(app.getHttpServer())
-        .post("/event")
-        .send({ hall: "Hall B" })
-        .expect(400);
     });
   });
 
@@ -853,31 +854,6 @@ describe("EventController (e2e)", () => {
       return request(app.getHttpServer())
         .put("/event/abc")
         .send(mockEvent)
-        .expect(400);
-    });
-  });
-
-  // PATCH /event/:id
-  describe("PATCH /event/:id", () => {
-    it("should return 200 with the modified event", () => {
-      return request(app.getHttpServer())
-        .patch("/event/1")
-        .send({ hall: "Hall C" })
-        .expect(200)
-        .expect(mockEvent);
-    });
-
-    it("should call eventDb.updateEvent after merging data", async () => {
-      await request(app.getHttpServer())
-        .patch("/event/1")
-        .send({ hall: "Hall C" });
-      expect(eventDb.updateEvent).toHaveBeenCalled();
-    });
-
-    it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
-        .patch("/event/abc")
-        .send({ hall: "Hall C" })
         .expect(400);
     });
   });

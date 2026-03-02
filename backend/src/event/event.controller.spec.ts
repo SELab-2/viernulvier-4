@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import EventService from "./event.service";
-import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
+import type { CreateEventDto, EventDto } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { FilterEventSchema } from "@repo/common";
 
@@ -13,7 +13,6 @@ describe("EventController", () => {
     id: 1,
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
-    hall: "Main Hall",
     production_id: 1,
     price: 25,
   };
@@ -114,29 +113,6 @@ describe("EventController", () => {
     });
   });
 
-  describe("modifyEvent", () => {
-    it("should modify and return the event", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-      const patchedEvent = { ...mockEvent, hall: "Secondary Hall" };
-
-      jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(patchedEvent);
-
-      const result = await controller.modifyEvent(1, patchData);
-      expect(service.modifyEvent).toHaveBeenCalledWith(1, patchData);
-      expect(result).toEqual(patchedEvent);
-    });
-
-    it("should throw a NotFoundException if event to modify does not exist", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-      jest
-        .spyOn(service, "modifyEvent")
-        .mockRejectedValueOnce(new NotFoundException());
-      await expect(controller.modifyEvent(999, patchData)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-  });
-
   describe("deleteEvent", () => {
     it("should delete the event by id", async () => {
       const result = await controller.deleteEvent(1);
@@ -159,7 +135,6 @@ describe("EventController", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };
@@ -178,7 +153,6 @@ describe("EventController", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };

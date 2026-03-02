@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, FilterEventDto, LocationDto, UpdateEventDto, } from "../dto/dto";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  LocationDto,
+  UpdateEventDto,
+} from "../dto/dto";
 import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
