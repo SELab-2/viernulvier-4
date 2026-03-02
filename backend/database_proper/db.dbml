@@ -46,6 +46,11 @@ Table production_tag {
   }
 }
 
+Table locations {
+  id int [not null]
+  location text [not null, unique]
+}
+
 Ref: events.production_id > productions.id [delete: cascade]
 
 Ref: production_blogs.production_id > productions.id [delete: cascade]
