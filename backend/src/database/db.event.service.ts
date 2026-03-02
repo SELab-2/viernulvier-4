@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
-  BlogDto,
   CreateEventDto,
   EventDto,
   FilterEventDto,
@@ -29,23 +28,6 @@ export class EventDatabaseService {
       );
 
     return events[0]; // There should be an EventDto in here if the length is not 0.
-  }
-
-  // TODO to be removed:
-  /**
-   * Get all blogs listed under a given event.
-   * @param id the id of an event you want the blogs of.
-   * @returns a list of blogs connected to the given event.
-   */
-  async getBlogsOfEvent(id: number): Promise<BlogDto[]> {
-    const query = `
-    SELECT b.*
-    FROM blogs b
-    JOIN event_blogs eb ON b.id = eb.blog_id
-    WHERE eb.event_id = $1
-  `;
-
-    return await this.db.query(query, [id]);
   }
 
   /**
@@ -131,8 +113,6 @@ export class EventDatabaseService {
 
       values.push(filters.limit);
       values.push(offset);
-
-      i += 2;
     }
 
     // p is defined, ignore error
@@ -270,61 +250,5 @@ export class EventDatabaseService {
     const query = `DELETE FROM events WHERE production_id = $1`;
 
     await this.db.query(query, [production_id]);
-  }
-
-  // TODO to be removed:
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given event_id
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithEventID(event_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING event_blogs
-      WHERE blogs.id = event_blogs.blog_id
-        AND event_blogs.event_id = $1
-    `;
-
-    await this.db.query(query, [event_id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes a single blog-LINK associated with a given event_id
-   * note: it does not delete the blog itself only from being linked to the given event.
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogFromEvent(event_id: number, blog_id: number): Promise<void> {
-    const query = `
-      DELETE FROM event_blogs
-      WHERE event_blogs.blog_id = $1
-        AND event_blogs.event_id = $2
-    `;
-
-    await this.db.query(query, [blog_id, event_id]);
-  }
-
-  // TODO to be removed:
-  /**
-   * Link an existing blog to an event.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param event_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async linkBlogWithEventID(blog_id: number, event_id: number): Promise<void> {
-    const query = `
-      INSERT INTO event_blogs (event_id, blog_id)
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-    `;
-
-    await this.db.query(query, [event_id, blog_id]);
   }
 }

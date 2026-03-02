@@ -19,12 +19,11 @@ import {
   FilterEventSchema,
   UpdateEventSchema,
 } from "@repo/common";
-import {
-  BlogDto,
-  CreateEventDto,
-  EventDto,
-  FilterEventDto,
-  UpdateEventDto,
+import { 
+  CreateEventDto, 
+  EventDto, 
+  FilterEventDto, 
+  UpdateEventDto 
 } from "../dto/dto";
 import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 
@@ -120,57 +119,5 @@ export class EventController {
   @UsePipes(new ZodValidationPipe(CreateEventSchema))
   async createEvent(@Body() newEvent: CreateEventDto): Promise<EventDto> {
     return this.eventService.createEvent(newEvent);
-  }
-
-  // -- BLOGS -- //
-
-  /**
-   * Responds to a GET to "/:id/blog".
-   * @param id The id of the Event.
-   * @returns A list of all Blog objects linked to this Event.
-   */
-  @ApiOperation({ summary: "Get Blogs linked to a specific Event." })
-  @ApiOkResponse({
-    type: BlogDto,
-    isArray: true,
-    description: "Returned all linked Blogs.",
-  })
-  @Get(":id/blog")
-  async getEventBlogs(
-    @Param("id", ParseIntPipe) id: number,
-  ): Promise<BlogDto[]> {
-    return await this.eventService.getEventBlogs(id);
-  }
-
-  /**
-   * Responds to a PUT to "/:id/blog/:id2"
-   * @param eventId ID of the Event.
-   * @param blogId ID of the Blog.
-   * @returns The newly linked Blog object.
-   */
-  @ApiOperation({ summary: "Link a blog to an existing Event." })
-  @ApiOkResponse({ type: BlogDto, description: "Linked Blog to Event." })
-  @Put(":id/blog/:id2")
-  async linkBlogToEvent(
-    @Param("id", ParseIntPipe) eventId: number,
-    @Param("id2", ParseIntPipe) blogId: number,
-  ): Promise<BlogDto> {
-    return await this.eventService.linkBlogToEvent(eventId, blogId);
-  }
-
-  /**
-   * Responds to a DELETE to "/:id/blog/:id2"
-   * @param eventId ID of the Event.
-   * @param blogId ID of the Blog.
-   * @returns The Event we just unlinked the Blog from.
-   */
-  @ApiOperation({ summary: "Unlink a blog from an existing Event." })
-  @ApiOkResponse({ type: EventDto, description: "Unlinked Blog from Event." })
-  @Delete(":id/blog/:id2")
-  async unlinkBlogFromEvent(
-    @Param("id", ParseIntPipe) eventId: number,
-    @Param("id2", ParseIntPipe) blogId: number,
-  ): Promise<EventDto> {
-    return await this.eventService.unlinkBlogFromEvent(eventId, blogId);
   }
 }
