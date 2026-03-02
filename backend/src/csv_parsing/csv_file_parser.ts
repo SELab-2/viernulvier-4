@@ -8,6 +8,15 @@ import {
 } from "@repo/common/src/database_objects";
 import { EventService } from "../event/event.service";
 
+/**
+ * Type used to structure production import
+ */
+type ParsedProductionImport = {
+  productions: ProductionDto[];
+  tags: string[];
+  productionTagLinks: { productionId: number; tagName: string }[];
+};
+
 export class CSVFileParser {
   /**
    * Parse a CSV file and return the data as an array of objects
