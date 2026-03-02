@@ -39,7 +39,7 @@ export class AccountDatabaseService {
    * @param account is of the type CreateAccount and has password and username defined.
    * @returns T/F if the account was creates successfully.
    */
-  async createAccount(account: CreateAccountDto): Promise<boolean> {
+  async createAccount(account: CreateAccountDto): Promise<PublicAccountDto> {
     const hashedPassword = await bcrypt.hash(account.password, 10); // salt rounds = 10
 
     const query = `
@@ -48,13 +48,13 @@ export class AccountDatabaseService {
       RETURNING id, username
     `;
 
-    const result = await this.db.query(query, [
+    const result = await this.db.query<PublicAccountDto>(query, [
       account.username,
       hashedPassword,
     ]);
 
     // note that we do not return the account, simply if it was successful.
-    return result.length > 0;
+    return result[0];
   }
 
   /**
@@ -177,7 +177,7 @@ export class AccountDatabaseService {
    */
   async linkAccountToKey(account_id: number, api_id: number): Promise<void> {
     const query = `INSERT INTO account_api_keys (account_id, api_key_id) VALUES ($1, $2)`;
-    await this.db.query(query, [account_id, api_id]);
+    await this.db.query<PublicAccountDto>(query, [account_id, api_id]);
   }
 
   /**
