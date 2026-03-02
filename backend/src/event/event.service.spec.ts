@@ -4,6 +4,7 @@ import { EventDatabaseService } from "../database/db.event.service";
 import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
+import { FilterEventSchema } from "@repo/common";
 
 describe("EventService", () => {
   let service: EventService;
@@ -63,20 +64,24 @@ describe("EventService", () => {
 
   describe("getAllEvents", () => {
     it("should return all events from database", async () => {
-      const result = await service.getAllEvents();
+      const result = await service.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual(mockEvents);
-      expect(dbService.getEvents).toHaveBeenCalledWith({});
+      expect(dbService.getEvents).toHaveBeenCalledWith(
+        FilterEventSchema.parse({}),
+      );
     });
 
     it("should call dbService.getEvents with empty filter", async () => {
-      await service.getAllEvents();
-      expect(dbService.getEvents).toHaveBeenCalledWith({});
+      await service.getAllEvents(FilterEventSchema.parse({}));
+      expect(dbService.getEvents).toHaveBeenCalledWith(
+        FilterEventSchema.parse({}),
+      );
       expect(dbService.getEvents).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no events exist", async () => {
       jest.spyOn(dbService, "getEvents").mockResolvedValueOnce([]);
-      const result = await service.getAllEvents();
+      const result = await service.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual([]);
     });
 
@@ -84,7 +89,9 @@ describe("EventService", () => {
       jest
         .spyOn(dbService, "getEvents")
         .mockRejectedValueOnce(new Error("Database error"));
-      await expect(service.getAllEvents()).rejects.toThrow("Database error");
+      await expect(
+        service.getAllEvents(FilterEventSchema.parse({})),
+      ).rejects.toThrow("Database error");
     });
   });
 

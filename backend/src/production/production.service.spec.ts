@@ -10,6 +10,7 @@ import type {
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
+import { FilterProductionSchema } from "@repo/common";
 
 describe("ProductionService", () => {
   let service: ProductionService;
@@ -82,20 +83,28 @@ describe("ProductionService", () => {
 
   describe("getAllProductions", () => {
     it("should return all productions from database", async () => {
-      const result = await service.getAllProductions();
+      const result = await service.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual(mockProductions);
-      expect(dbService.getProductions).toHaveBeenCalledWith({});
+      expect(dbService.getProductions).toHaveBeenCalledWith(
+        FilterProductionSchema.parse({}),
+      );
     });
 
     it("should call dbService.getProductions with empty filter", async () => {
-      await service.getAllProductions();
-      expect(dbService.getProductions).toHaveBeenCalledWith({});
+      await service.getAllProductions(FilterProductionSchema.parse({}));
+      expect(dbService.getProductions).toHaveBeenCalledWith(
+        FilterProductionSchema.parse({}),
+      );
       expect(dbService.getProductions).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no productions exist", async () => {
       jest.spyOn(dbService, "getProductions").mockResolvedValueOnce([]);
-      const result = await service.getAllProductions();
+      const result = await service.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual([]);
     });
 
@@ -103,9 +112,9 @@ describe("ProductionService", () => {
       jest
         .spyOn(dbService, "getProductions")
         .mockRejectedValueOnce(new Error("Database error"));
-      await expect(service.getAllProductions()).rejects.toThrow(
-        "Database error",
-      );
+      await expect(
+        service.getAllProductions(FilterProductionSchema.parse({})),
+      ).rejects.toThrow("Database error");
     });
   });
 
