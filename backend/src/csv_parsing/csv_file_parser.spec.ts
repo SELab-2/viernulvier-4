@@ -318,3 +318,132 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
     ).rejects.toThrow(/Failed to insert event/);
   });
 });
+
+// tests for productions insertion
+
+describe("CSVFileParser.insertProductionsFromCSV", () => {
+  const fakeProdService: any = {
+    insertProduction: jest.fn(),
+    addTagToProduction: jest.fn(),
+  };
+  const fakeTagService: any = {
+    createTag: jest.fn(),
+  };
+
+  beforeEach(() => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  it("should insert productions and link tags correctly", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          ID: "1",
+          Titel: "First",
+          Ondertitel: "",
+          Description1: "d1",
+          Description2: "",
+          Genre: "drama, comedy",
+          "Planning ID": "100",
+        },
+        {
+          ID: "2",
+          Titel: "Second",
+          Ondertitel: "",
+          Description1: "d2",
+          Description2: "",
+          Genre: "drama",
+          "Planning ID": "101",
+        },
+      ]) as any,
+    );
+
+    // simulate insertion returning the same object plus an auto-generated id property
+    fakeProdService.insertProduction.mockImplementation(async (prod: any) => ({
+      ...prod,
+      inserted: true,
+    }));
+
+    fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
+      id: `${tag}-id`,
+      tag,
+    }));
+
+    const created = await CSVFileParser.insertProductionsFromCSV(
+      "prods.csv",
+      fakeProdService,
+      fakeTagService,
+    );
+
+    expect(fakeProdService.insertProduction).toHaveBeenCalledTimes(2);
+    expect(fakeTagService.createTag).toHaveBeenCalledTimes(2); // drama + comedy
+
+    // ensure tags linked the right number of times
+    expect(fakeProdService.addTagToProduction).toHaveBeenCalledWith(
+      1,
+      "drama-id",
+    );
+    expect(fakeProdService.addTagToProduction).toHaveBeenCalledWith(
+      1,
+      "comedy-id",
+    );
+    expect(fakeProdService.addTagToProduction).toHaveBeenCalledWith(
+      2,
+      "drama-id",
+    );
+
+    // return value should match array returned by service
+    expect(created).toEqual([
+      {
+        id: 1,
+        titel: "First",
+        ondertitel: "",
+        description1: "d1",
+        description2: null,
+        genre: "drama, comedy",
+        planning_id: "100",
+        inserted: true,
+      },
+      {
+        id: 2,
+        titel: "Second",
+        ondertitel: "",
+        description1: "d2",
+        description2: null,
+        genre: "drama",
+        planning_id: "101",
+        inserted: true,
+      },
+    ]);
+  });
+
+  it("should propagate errors from production insertion", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          ID: "3",
+          Titel: "Bad",
+          Ondertitel: "",
+          Description1: "x",
+          Description2: "",
+          Genre: "history",
+          "Planning ID": "102",
+        },
+      ]) as any,
+    );
+
+    fakeProdService.insertProduction.mockRejectedValue(
+      new Error("insert failed"),
+    );
+
+    await expect(
+      CSVFileParser.insertProductionsFromCSV(
+        "prods.csv",
+        fakeProdService,
+        fakeTagService,
+      ),
+    ).rejects.toThrow(/insert failed/);
+  });
+});
