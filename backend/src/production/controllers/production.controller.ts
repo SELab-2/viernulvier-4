@@ -144,6 +144,11 @@ export class ProductionController {
     return await this.productionService.createProduction(newProduction);
   }
 
+  /**
+   * Responds to a POST to "/production/insert".
+   * @param production The new ProductionDto data we want to add/insert forcibly.
+   * @returns 
+   */
   @ApiOperation({ summary: "Inserts a Production." })
   @ApiBody({ type: ProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production inserted." })
