@@ -1,22 +1,7 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, } from "@nestjs/common";
 import { TagService } from "./tag.service";
 import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
-import {
-  ApiBody,
-  ApiOkResponse,
-  ApiOperation,
-  ApiSecurity,
-} from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import { CreateTagSchema, UpdateTagSchema } from "@repo/common";
@@ -75,6 +60,8 @@ export class TagController {
    * @param updateTag The parsed UpdateTagDto object.
    * @returns The newly updated TagDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Tag." })
   @ApiBody({ type: UpdateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
