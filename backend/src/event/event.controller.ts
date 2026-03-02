@@ -20,17 +20,14 @@ import {
   FilterEventSchema,
   UpdateEventSchema,
 } from "@repo/common";
-import {
-  ApiSecurity,
-} from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
-  UpdateEventDto
+  UpdateEventDto,
 } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity } from "@nestjs/swagger";
 
 @Controller("event")
 export class EventController {
