@@ -1,0 +1,52 @@
+name: Pull Request Build and Deploy
+
+on:
+  pull_request:
+    # Works for both branches
+    branches: [ main, develop ]
+
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # STAP 1: Node setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # STEP 2: Build & Test
+      - name: Install and Test
+        run: |
+          npm i
+          npm run test
+
+      # STAP 3: Install Private Key (RSA)
+      - name: Add private key
+        shell: bash
+        env:
+          PRIVATE_KEY: ${{ secrets.DEPLOYMENT_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # Add server identification
+          ssh-keyscan -p 22 sel2-4.ugent.be >> ~/.ssh/known_hosts
+
+      # STAP 4: Deploy To Server
+      - name: Deploy site to staging area
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # We exclude node_modules because the server doesn't need it or rebuilds it locally
+          # The files end in /home/selab2/project/previews/[PR_NUMBER]
+          rsync -avz --exclude 'node_modules' --exclude '.git' \
+            -e 'ssh -p 22' \
+            . selab2@sel2-4.ugent.be:/home/selab2/project/previews/$PR_NUMBER/
