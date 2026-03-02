@@ -131,8 +131,6 @@ export class CSVFileParser {
       ondertitel: row.Ondertitel,
       description1: row.Description1,
       description2: row.Description2 || null,
-      //TODO: remove this and add as tag instead
-      genre: row.Genre,
       planning_id: planningId,
       tags: [...new Set(tags)], // remove duplicate tags
     };

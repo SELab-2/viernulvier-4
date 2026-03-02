@@ -1,11 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "../production.service";
-import {
-  ProductionDto,
-  UpdateProductionDto,
-  CreateProductionDto,
-} from "../../dto/dto";
+import { CreateProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { FilterProductionSchema } from "@repo/common";
 
@@ -19,7 +15,6 @@ describe("ProductionController", () => {
     ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    genre: "Drama",
     planning_id: "1",
   };
 
@@ -181,7 +176,6 @@ describe("ProductionController", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -203,7 +197,6 @@ describe("ProductionController", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -226,7 +219,6 @@ describe("ProductionController", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -250,7 +242,6 @@ describe("ProductionController", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -260,9 +251,9 @@ describe("ProductionController", () => {
         .mockRejectedValueOnce(new Error("Failed to insert production"));
 
       // Verify the controller propagates the error
-      await expect(controller.insertProduction(productionToInsert)).rejects.toThrow(
-        "Failed to insert production",
-      );
+      await expect(
+        controller.insertProduction(productionToInsert),
+      ).rejects.toThrow("Failed to insert production");
     });
   });
 });

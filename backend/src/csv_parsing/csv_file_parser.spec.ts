@@ -151,7 +151,6 @@ describe("CSVFileParser.transformProductionRow", () => {
       Ondertitel: "A tragedy",
       Description1: "Main description",
       Description2: "",
-      Genre: "Drama",
       "Planning ID": "42",
     };
 
@@ -163,7 +162,6 @@ describe("CSVFileParser.transformProductionRow", () => {
       ondertitel: "A tragedy",
       description1: "Main description",
       description2: null,
-      genre: "Drama",
       planning_id: "42",
       tags: ["drama"],
     });
@@ -176,7 +174,6 @@ describe("CSVFileParser.transformProductionRow", () => {
       Ondertitel: "Sub",
       Description1: "desc",
       Description2: "",
-      Genre: "Comedy",
       "Planning ID": "123",
     };
     expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
@@ -244,12 +241,10 @@ describe("CSVFileParser.parseProductionsCSV", () => {
           Ondertitel: "",
           Description1: "desc",
           Description2: "more",
-          Genre: "Tragedy",
           "Planning ID": "5",
         },
       ]) as any,
     );
-
     const result = await CSVFileParser.parseProductionsCSV("prods.csv");
     // since we only provided one row without any comma-separated genres,
     // we expect a single production, no tags, and no links
@@ -261,7 +256,6 @@ describe("CSVFileParser.parseProductionsCSV", () => {
           ondertitel: "",
           description1: "desc",
           description2: "more",
-          genre: "Tragedy",
           planning_id: "5",
         },
       ],
