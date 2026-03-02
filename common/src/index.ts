@@ -6,6 +6,8 @@ import {
   CreateBlogSchema,
   CreateEvent,
   CreateEventSchema,
+  CreateLocation,
+  CreateLocationSchema,
   CreateProduction,
   CreateProductionSchema,
   CreateTag,
@@ -16,6 +18,8 @@ import {
   FilterEventSchema,
   FilterProduction,
   FilterProductionSchema,
+  Location,
+  LocationSchema,
   Production,
   ProductionSchema,
   Tag,
@@ -24,6 +28,8 @@ import {
   UpdateBlogSchema,
   UpdateEvent,
   UpdateEventSchema,
+  UpdateLocation,
+  UpdateLocationSchema,
   UpdateProduction,
   UpdateProductionSchema,
   UpdateTag,
@@ -51,6 +57,9 @@ export {
   TagSchema,
   CreateTagSchema,
   UpdateTagSchema,
+  LocationSchema,
+  CreateLocationSchema,
+  UpdateLocationSchema,
 };
 export type {
   Production,
@@ -67,5 +76,8 @@ export type {
   Blog,
   CreateBlog,
   UpdateBlog,
+  Location,
+  CreateLocation,
+  UpdateLocation,
 };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;
