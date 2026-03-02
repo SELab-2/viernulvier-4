@@ -1,12 +1,14 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateEventDto, ProductionDto } from "../dto/dto";
+import { CreateEventDto, ProductionDto, TagDto } from "../dto/dto";
 import {
   CreateEventSchema,
   ProductionSchema,
 } from "@repo/common/src/database_objects";
 import { EventService } from "../event/event.service";
+import { ProductionService } from "../production/production.service";
+import { TagService } from "../tag/tag.service";
 
 /**
  * Type used to structure production import
@@ -214,6 +216,30 @@ export class CSVFileParser {
     }
 
     return createdEvents;
+  }
+
+  static async insertProductionsFromCSV(
+    filePath: string,
+    productionService: ProductionService,
+    tagService: TagService,
+  ){
+    const { productions, tags, productionTagLinks } = await this.parseProductionsCSV(filePath);
+
+    // insert productions
+    for (const production of productions) {
+      continue; // TODO: use insert function
+    }
+
+    
+    for (const tag of tags) {
+      // insert tags, ignoring duplicates
+      const tagObject: TagDto = await tagService.createTag({ tag: tag });
+      // link tags to productions
+      for (const link of productionTagLinks.filter((l) => l.tagName === tag)) {
+        productionService.addTagToProduction(link.productionId, tagObject.id);
+      }
+    }
+
   }
 
   //TODO: add inserting function for productions once new insert endpoint is added to backend
