@@ -8,6 +8,7 @@ import {
 } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
+import { FilterProductionSchema } from "@repo/common";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -20,7 +21,7 @@ describe("ProductionController", () => {
     description1: "An amazing production",
     description2: "With great actors",
     genre: "Drama",
-    planning_id: 1,
+    planning_id: "1",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];
@@ -62,19 +63,23 @@ describe("ProductionController", () => {
 
   describe("getAllProductions", () => {
     it("should return an array of productions", async () => {
-      const result = await controller.getAllProductions();
+      const result = await controller.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual(mockProductions);
       expect(service.getAllProductions).toHaveBeenCalled();
     });
 
     it("should call service.getAllProductions", async () => {
-      await controller.getAllProductions();
+      await controller.getAllProductions(FilterProductionSchema.parse({}));
       expect(service.getAllProductions).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no productions exist", async () => {
       jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      const result = await controller.getAllProductions();
+      const result = await controller.getAllProductions(
+        FilterProductionSchema.parse({}),
+      );
       expect(result).toEqual([]);
     });
   });
@@ -186,7 +191,7 @@ describe("ProductionController", () => {
         description1: "Awesome description",
         description2: "Even more awesome",
         genre: "Comedy",
-        planning_id: 2,
+        planning_id: "2",
       };
 
       const createdProduction: ProductionDto = { id: 2, ...newProduction };
@@ -208,7 +213,7 @@ describe("ProductionController", () => {
         description1: "Awesome description",
         description2: "Even more awesome",
         genre: "Comedy",
-        planning_id: 2,
+        planning_id: "2",
       };
 
       jest

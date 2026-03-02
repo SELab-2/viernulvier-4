@@ -8,14 +8,20 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
-import { CreateProductionSchema, ProductionSchema, UpdateProductionSchema, } from "@repo/common";
-import { CreateProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
+import {
+  CreateProductionSchema,
+  FilterProductionSchema,
+  ProductionSchema,
+  UpdateProductionSchema,
+} from "@repo/common";
+import { CreateProductionDto, FilterProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity, } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
@@ -27,17 +33,22 @@ export class ProductionController {
 
   /**
    * Responds to GET /productions
+   * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
+  @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
   @ApiOkResponse({
     type: ProductionDto,
     isArray: true,
     description: "All Productions returned.",
   })
   @Get()
-  async getAllProductions(): Promise<ProductionDto[]> {
-    return await this.productionService.getAllProductions();
+  @UsePipes(new ZodValidationPipe(FilterProductionSchema))
+  async getAllProductions(
+    @Query() filters: FilterProductionDto,
+  ): Promise<ProductionDto[]> {
+    return await this.productionService.getAllProductions(filters);
   }
 
   /**

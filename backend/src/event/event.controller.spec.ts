@@ -4,6 +4,7 @@ import EventService from "./event.service";
 import type { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
+import { FilterEventSchema } from "@repo/common";
 
 describe("EventController", () => {
   let controller: EventController;
@@ -33,9 +34,6 @@ describe("EventController", () => {
             modifyEvent: jest.fn().mockResolvedValue(mockEvent),
             deleteEvent: jest.fn().mockResolvedValue(undefined),
             createEvent: jest.fn(),
-            getEventBlogs: jest.fn(),
-            linkBlogToEvent: jest.fn(),
-            unlinkBlogFromEvent: jest.fn(),
           },
         },
       ],
@@ -60,19 +58,19 @@ describe("EventController", () => {
 
   describe("getAllEvents", () => {
     it("should return an array of events", async () => {
-      const result = await controller.getAllEvents();
+      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual(mockEvents);
       expect(service.getAllEvents).toHaveBeenCalled();
     });
 
     it("should call service.getAllEvents", async () => {
-      await controller.getAllEvents();
+      await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(service.getAllEvents).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no events exist", async () => {
       jest.spyOn(service, "getAllEvents").mockResolvedValueOnce([]);
-      const result = await controller.getAllEvents();
+      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual([]);
     });
   });
@@ -163,53 +161,6 @@ describe("EventController", () => {
       await expect(controller.deleteEvent(999)).rejects.toThrow(
         NotFoundException,
       );
-    });
-  });
-
-  // ... existing tests ...
-
-  describe("-- Blogs --", () => {
-    const mockBlog = {
-      id: 1,
-      title: "Event Update",
-      content: "This is a blog about the event.",
-    };
-
-    describe("getEventBlogs", () => {
-      it("should return an array of blogs linked to the event", async () => {
-        const expectedBlogs = [mockBlog];
-        service.getEventBlogs = jest.fn().mockResolvedValue(expectedBlogs);
-
-        const result = await controller.getEventBlogs(1);
-
-        expect(result).toEqual(expectedBlogs);
-        expect(service.getEventBlogs).toHaveBeenCalledWith(1);
-        expect(service.getEventBlogs).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe("linkBlogToEvent", () => {
-      it("should link a blog to an event and return the blog", async () => {
-        service.linkBlogToEvent = jest.fn().mockResolvedValue(mockBlog);
-
-        const result = await controller.linkBlogToEvent(1, 2);
-
-        expect(result).toEqual(mockBlog);
-        expect(service.linkBlogToEvent).toHaveBeenCalledWith(1, 2);
-        expect(service.linkBlogToEvent).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe("unlinkBlogFromEvent", () => {
-      it("should unlink a blog from an event and return the unlinked event", async () => {
-        service.unlinkBlogFromEvent = jest.fn().mockResolvedValue(mockEvent);
-
-        const result = await controller.unlinkBlogFromEvent(1, 2);
-
-        expect(result).toEqual(mockEvent);
-        expect(service.unlinkBlogFromEvent).toHaveBeenCalledWith(1, 2);
-        expect(service.unlinkBlogFromEvent).toHaveBeenCalledTimes(1);
-      });
     });
   });
 

@@ -6,7 +6,7 @@ CREATE TABLE productions
     description2 TEXT,
     genre        TEXT,
     id           SERIAL PRIMARY KEY,
-    planning_id  INT
+    planning_id  TEXT
 );
 
 CREATE TABLE events
@@ -40,24 +40,6 @@ CREATE TABLE production_blogs
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
-            ON DELETE CASCADE,
-
-    CONSTRAINT fk_blog
-        FOREIGN KEY (blog_id)
-            REFERENCES blogs (id)
-            ON DELETE CASCADE
-);
-
-CREATE TABLE event_blogs
-(
-    event_id INT NOT NULL,
-    blog_id  INT NOT NULL,
-
-    PRIMARY KEY (event_id, blog_id),
-
-    CONSTRAINT fk_event
-        FOREIGN KEY (event_id)
-            REFERENCES events (id)
             ON DELETE CASCADE,
 
     CONSTRAINT fk_blog
