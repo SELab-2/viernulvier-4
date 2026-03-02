@@ -27,7 +27,12 @@ import {
   FilterEventDto,
   UpdateEventDto,
 } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
 
 @Controller("event")
 export class EventController {
