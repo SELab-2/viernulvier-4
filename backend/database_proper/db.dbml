@@ -51,13 +51,18 @@ Table locations {
   location text [not null, unique]
 }
 
+Table event_locations {
+  event_id int [not null]
+  location_id int [not null]
+}
+
 Ref: events.production_id > productions.id [delete: cascade]
 
 Ref: production_blogs.production_id > productions.id [delete: cascade]
 Ref: production_blogs.blog_id > blogs.id [delete: cascade]
 
-Ref: event_blogs.event_id > events.id [delete: cascade]
-Ref: event_blogs.blog_id > blogs.id [delete: cascade]
+Ref: event_locations.event_id > events.id [delete: cascade]
+Ref: event_locations.location_id > locations.id [delete: cascade]
 
 Ref: production_tag.production_id > productions.id [delete: cascade]
 Ref: production_tag.tag_id > tags.id [delete: cascade]

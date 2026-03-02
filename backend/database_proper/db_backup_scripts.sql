@@ -75,3 +75,12 @@ CREATE TABLE locations
     location TEXT UNIQUE NOT NULL,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE event_locations
+(
+    event_id    INT NOT NULL,
+    location_id INT NOT NULL,
+    PRIMARY KEY (event_id, location_id),
+    FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE CASCADE
+);
