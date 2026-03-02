@@ -141,6 +141,17 @@ export class ProductionController {
   async createProduction(
     @Body() newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
-    return this.productionService.createProduction(newProduction);
+    return await this.productionService.createProduction(newProduction);
+  }
+
+  @ApiOperation({ summary: "Inserts a Production." })
+  @ApiBody({ type: ProductionDto })
+  @ApiOkResponse({ type: ProductionDto, description: "Production inserted." })
+  @Post("insert")
+  @UsePipes(new ZodValidationPipe(ProductionSchema))
+  async insertProduction(
+    @Body() production: ProductionDto,
+  ): Promise<ProductionDto> {
+    return await this.productionService.insertProduction(production); 
   }
 }
