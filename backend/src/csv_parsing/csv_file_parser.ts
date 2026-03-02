@@ -235,7 +235,8 @@ export class CSVFileParser {
 
     // insert productions
     for (const production of productions) {
-      continue; // TODO: use insert function
+      const created = await productionService.insertProduction(production);
+      createdProductions.push(created);
     }
 
     
