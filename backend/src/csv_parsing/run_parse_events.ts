@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import process from "process";
-import { CSVParser } from "./csv_parser";
+import { CSVFileParser } from "./csv_file_parser";
 
 async function main() {
   const argv = process.argv.slice(2);
@@ -21,7 +21,7 @@ async function main() {
   }
 
   try {
-    const events = await CSVParser.parseEventsCSV(file);
+    const events = await CSVFileParser.parseEventsCSV(file);
     console.log(`Parsed ${events.length} events from ${file}`);
     console.log(JSON.stringify(events.slice(0, maxPrint), null, 2));
   } catch (err) {

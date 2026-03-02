@@ -8,7 +8,7 @@ import {
 } from "@repo/common/src/database_objects";
 import { EventService } from "../event/event.service";
 
-export class CSVParser {
+export class CSVFileParser {
   /**
    * Parse a CSV file and return the data as an array of objects
    * @param filePath - Path to the CSV file

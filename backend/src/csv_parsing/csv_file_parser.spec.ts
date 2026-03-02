@@ -1,7 +1,7 @@
 import fs from "fs";
 import { Readable } from "stream";
 import { z } from "zod";
-import { CSVParser } from "./csv_parser";
+import { CSVFileParser } from "./csv_file_parser";
 
 jest.mock("fs");
 
@@ -28,7 +28,7 @@ function createMockStream(rows: any[], error?: Error) {
   };
 }
 
-describe("CSVParser.parseCSVWithSchema", () => {
+describe("CSVFileParser.parseCSVWithSchema", () => {
   beforeEach(() => {
     // silence warnings emitted during parsing; tests will assert on them if needed
     jest.spyOn(console, "warn").mockImplementation(() => {});
@@ -52,7 +52,7 @@ describe("CSVParser.parseCSVWithSchema", () => {
       age: z.number(),
     });
 
-    const result = await CSVParser.parseCSVWithSchema(
+    const result = await CSVFileParser.parseCSVWithSchema(
       "dummy.csv",
       schema,
       (row) => ({
@@ -73,12 +73,12 @@ describe("CSVParser.parseCSVWithSchema", () => {
     );
 
     await expect(
-      CSVParser.parseCSVWithSchema("dummy.csv", z.any(), (row) => row),
+      CSVFileParser.parseCSVWithSchema("dummy.csv", z.any(), (row) => row),
     ).rejects.toThrow("Stream failure");
   });
 });
 
-describe("CSVParser.transformEventRow", () => {
+describe("CSVFileParser.transformEventRow", () => {
   it("should transform a valid row correctly", () => {
     const row = {
       Starttime: "2024-01-01 10:00:00",
@@ -88,7 +88,7 @@ describe("CSVParser.transformEventRow", () => {
       Price: "25",
     };
 
-    const result = CSVParser.transformEventRow(row);
+    const result = CSVFileParser.transformEventRow(row);
 
     expect(result).toEqual({
       starttime: new Date("2024-01-01 10:00:00").toISOString(),
@@ -108,7 +108,7 @@ describe("CSVParser.transformEventRow", () => {
       Price: "",
     };
 
-    const result = CSVParser.transformEventRow(row);
+    const result = CSVFileParser.transformEventRow(row);
 
     expect(result.endtime).toBeNull();
     expect(result.price).toBeNull();
@@ -123,7 +123,9 @@ describe("CSVParser.transformEventRow", () => {
       Price: "10",
     };
 
-    expect(() => CSVParser.transformEventRow(row)).toThrow("Invalid starttime");
+    expect(() => CSVFileParser.transformEventRow(row)).toThrow(
+      "Invalid starttime",
+    );
   });
 
   it("should throw if production id is invalid", () => {
@@ -135,13 +137,13 @@ describe("CSVParser.transformEventRow", () => {
       Price: "10",
     };
 
-    expect(() => CSVParser.transformEventRow(row)).toThrow(
+    expect(() => CSVFileParser.transformEventRow(row)).toThrow(
       "Invalid production id",
     );
   });
 });
 
-describe("CSVParser.transformProductionRow", () => {
+describe("CSVFileParser.transformProductionRow", () => {
   it("should transform production row correctly", () => {
     const row = {
       ID: "1",
@@ -153,7 +155,7 @@ describe("CSVParser.transformProductionRow", () => {
       "Planning ID": "42",
     };
 
-    const result = CSVParser.transformProductionRow(row);
+    const result = CSVFileParser.transformProductionRow(row);
 
     expect(result).toEqual({
       id: 1,
@@ -176,7 +178,7 @@ describe("CSVParser.transformProductionRow", () => {
       Genre: "Comedy",
       "Planning ID": "123",
     };
-    expect(() => CSVParser.transformProductionRow(row)).toThrow(
+    expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
       /Invalid production id/,
     );
   });
@@ -184,7 +186,7 @@ describe("CSVParser.transformProductionRow", () => {
 
 // additional tests for the convenience wrappers and insertion logic
 
-describe("CSVParser.parseEventsCSV", () => {
+describe("CSVFileParser.parseEventsCSV", () => {
   beforeEach(() => {
     jest.spyOn(console, "warn").mockImplementation(() => {});
   });
@@ -213,7 +215,7 @@ describe("CSVParser.parseEventsCSV", () => {
       ]) as any,
     );
 
-    const events = await CSVParser.parseEventsCSV("events.csv");
+    const events = await CSVFileParser.parseEventsCSV("events.csv");
     expect(events).toHaveLength(1);
     expect(events[0]).toEqual({
       starttime: new Date("2025-05-01 14:00:00").toISOString(),
@@ -229,7 +231,7 @@ describe("CSVParser.parseEventsCSV", () => {
   });
 });
 
-describe("CSVParser.parseProductionsCSV", () => {
+describe("CSVFileParser.parseProductionsCSV", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("should parse production rows and validate against schema", async () => {
@@ -247,7 +249,7 @@ describe("CSVParser.parseProductionsCSV", () => {
       ]) as any,
     );
 
-    const productions = await CSVParser.parseProductionsCSV("prods.csv");
+    const productions = await CSVFileParser.parseProductionsCSV("prods.csv");
     expect(productions).toEqual([
       {
         id: 2,
@@ -262,7 +264,7 @@ describe("CSVParser.parseProductionsCSV", () => {
   });
 });
 
-describe("CSVParser.insertEventsFromCSV", () => {
+describe("CSVFileParser.insertEventsFromCSV", () => {
   const fakeService = { createEvent: jest.fn() } as any;
 
   afterEach(() => jest.clearAllMocks());
@@ -281,7 +283,7 @@ describe("CSVParser.insertEventsFromCSV", () => {
     );
 
     fakeService.createEvent.mockResolvedValue({ id: 123 });
-    const created = await CSVParser.insertEventsFromCSV(
+    const created = await CSVFileParser.insertEventsFromCSV(
       "file.csv",
       fakeService,
     );
@@ -305,7 +307,7 @@ describe("CSVParser.insertEventsFromCSV", () => {
     fakeService.createEvent.mockRejectedValue(new Error("DB fail"));
 
     await expect(
-      CSVParser.insertEventsFromCSV("file.csv", fakeService),
+      CSVFileParser.insertEventsFromCSV("file.csv", fakeService),
     ).rejects.toThrow(/Failed to insert event/);
   });
 });
