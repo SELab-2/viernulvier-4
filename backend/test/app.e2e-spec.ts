@@ -41,7 +41,6 @@ const mockProduction = {
   ondertitel: "A subtitle",
   description1: "First description",
   description2: "Second description",
-  genre: "Drama",
   planning_id: "1",
 };
 
@@ -79,6 +78,7 @@ const mockProductionDbService = () => ({
   getProductions: jest.fn().mockResolvedValue([mockProduction]),
   getProductionById: jest.fn().mockResolvedValue(mockProduction),
   createProduction: jest.fn().mockResolvedValue(mockProduction),
+  insertProduction: jest.fn().mockResolvedValue(mockProduction),
   updateProduction: jest.fn().mockResolvedValue(mockProduction),
   deleteProduction: jest.fn().mockResolvedValue(undefined),
   getBlogsOfProduction: jest.fn().mockResolvedValue([mockBlog]),
@@ -397,7 +397,9 @@ describe("ProductionController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
   });
 
   afterEach(async () => {
@@ -448,7 +450,6 @@ describe("ProductionController (e2e)", () => {
       ondertitel: "Subtitle",
       description1: "Desc 1",
       description2: "Desc 2",
-      genre: "Drama",
       planning_id: "2",
     };
 
@@ -461,7 +462,9 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should call productionDb.createProduction with the payload", async () => {
-      await request(app.getHttpServer()).post("/production").send(createPayload);
+      await request(app.getHttpServer())
+        .post("/production")
+        .send(createPayload);
       expect(productionDb.createProduction).toHaveBeenCalledWith(createPayload);
     });
 
@@ -470,6 +473,47 @@ describe("ProductionController (e2e)", () => {
         .post("/production")
         .send({ titel: "Incomplete" })
         .expect(400);
+    });
+  });
+
+  // POST /production/insert
+  describe("POST /production/insert", () => {
+    it("should return 201 with the inserted production", () => {
+      // Note: NestJS @Post() defaults to 201 Created.
+      // If you added @HttpCode(200) to your controller, change this to .expect(200)
+      return request(app.getHttpServer())
+        .post("/production/insert")
+        .send(mockProduction)
+        .expect(201)
+        .expect(mockProduction); // Assuming your mock is set up to return the payload
+    });
+
+    it("should call productionDb.insertProduction with the payload", async () => {
+      await request(app.getHttpServer())
+        .post("/production/insert")
+        .send(mockProduction);
+
+      // Verify the right DB method was triggered
+      expect(productionDb.insertProduction).toHaveBeenCalledWith(
+        mockProduction,
+      );
+    });
+
+    it("should return 400 when the required 'id' is missing", () => {
+      // Destructure to easily create a payload without the ID
+      const { id, ...payloadWithoutId } = mockProduction;
+
+      return request(app.getHttpServer())
+        .post("/production/insert")
+        .send(payloadWithoutId)
+        .expect(400); // Zod should block this
+    });
+
+    it("should return 400 when other required fields are missing", () => {
+      return request(app.getHttpServer())
+        .post("/production/insert")
+        .send({ id: 999, titel: "Incomplete" }) // Has ID, but missing genre, etc.
+        .expect(400); // Zod should also block this
     });
   });
 
@@ -549,7 +593,9 @@ describe("ProductionBlogController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
     blogDb = app.get<BlogDatabaseService>(BlogDatabaseService);
   });
 
@@ -635,7 +681,9 @@ describe("ProductionTagController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    productionDb = app.get<ProductionDatabaseService>(ProductionDatabaseService);
+    productionDb = app.get<ProductionDatabaseService>(
+      ProductionDatabaseService,
+    );
   });
 
   afterEach(async () => {

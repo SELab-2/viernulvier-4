@@ -1,5 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import type { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import type {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  UpdateEventDto,
+} from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
 
 @Injectable()
@@ -8,10 +13,11 @@ export class EventService {
 
   /**
    * Fetches all EventDto objects from the DBService
+   * @param filters The Filters to be applied to the query.
    * @returns All EventDto objects.
    */
-  async getAllEvents(): Promise<EventDto[]> {
-    return await this.eventDBService.getEvents({});
+  async getAllEvents(filters: FilterEventDto): Promise<EventDto[]> {
+    return await this.eventDBService.getEvents(filters);
   }
 
   /**
