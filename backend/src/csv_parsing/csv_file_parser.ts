@@ -1,6 +1,6 @@
 import fs from "fs";
 import csvParser from "csv-parser";
-import { ZodType } from "zod";
+import { string, ZodType } from "zod";
 import { CreateEventDto, ProductionDto } from "../dto/dto";
 import {
   CreateEventSchema,
@@ -151,16 +151,40 @@ export class CSVFileParser {
   }
 
   /**
-   * Parse productions from a CSV file and return them as an array of ProductionDto objects
+   * Parse productions from a CSV file and return structured import data
    * @param filePath - Path to the CSV file containing productions
-   * @return A promise that resolves to an array of ProductionDto objects
+   * @return A promise that resolves to an object containing productions, unique tags, and production-tag links
    */
-  static parseProductionsCSV(filePath: string): Promise<ProductionDto[]> {
-    return this.parseCSVWithSchema<ProductionDto>(
+  static async parseProductionsCSV(
+    filePath: string,
+  ): Promise<ParsedProductionImport> {
+    const productions: ProductionDto[] = [];
+    const tagsSet: Set<string> = new Set();
+    const productionTagLinks: { productionId: number; tagName: string }[] = [];
+
+    const parsed = await this.parseCSVWithSchema<
+      ProductionDto & { tags: string[] }
+    >(
       filePath,
-      ProductionSchema,
+      ProductionSchema.extend({ tags: string().array() }),
       this.transformProductionRow,
     );
+
+    for (const production of parsed) {
+      const { tags, ...prodData } = production;
+      productions.push(prodData);
+
+      for (const tag of tags) {
+        tagsSet.add(tag);
+        productionTagLinks.push({ productionId: production.id, tagName: tag });
+      }
+    }
+
+    return {
+      productions: productions,
+      tags: Array.from(tagsSet),
+      productionTagLinks,
+    };
   }
 
   /**
