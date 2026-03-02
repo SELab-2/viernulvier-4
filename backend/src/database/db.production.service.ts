@@ -279,15 +279,12 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * Forcibly insert a production with an already existing ID into the Database.
-   * Will either create a new production or override an existing one.
+   * UNSAFE version of createProduction. Will override if a Production
+   * already exists with the same ID.
    * @param production The production object that we want to insert.
    * @returns That same production object but returned from the Database.
    */
-  async insertProduction(
-    production: ProductionDto
-  ): Promise<ProductionDto> {
-
+  async insertProduction(production: ProductionDto): Promise<ProductionDto> {
     const query = `
       INSERT INTO productions (
         id,
