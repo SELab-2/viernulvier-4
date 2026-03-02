@@ -106,7 +106,9 @@ export class CSVFileParser {
     };
   }
 
-  static transformProductionRow(row: Record<string, string>): ProductionDto {
+  static transformProductionRow(
+    row: Record<string, string>,
+  ): ProductionDto & { tags: string[] } {
     // validate and convert numeric fields manually to provide clearer errors
     const id = Number(row.ID);
     if (isNaN(id)) {
@@ -114,6 +116,12 @@ export class CSVFileParser {
     }
 
     const planningId = row["Planning ID"] || null;
+
+    // adds possibility to add tags as a comma separated list in the Genre column, trims whitespace and converts to lowercase for consistency
+    const tags = (row.Genre || "")
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
 
     return {
       id,
@@ -124,6 +132,7 @@ export class CSVFileParser {
       //TODO: remove this and add as tag instead
       genre: row.Genre,
       planning_id: planningId,
+      tags: [...new Set(tags)], // remove duplicate tags
     };
   }
 
