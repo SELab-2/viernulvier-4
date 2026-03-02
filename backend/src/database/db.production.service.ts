@@ -30,38 +30,80 @@ export class ProductionDatabaseService {
   /**
    * Get all tags listed under a given production.
    * @param production the production we want all tags of.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * @returns a list of tags connected to the given production.
    */
-  async getTagsOfProduction(production: ProductionDto): Promise<TagDto[]> {
-    const query = `
-    SELECT t.*
-    FROM tags t
-    JOIN production_tag pt ON t.id = pt.tag_id
-    WHERE pt.production_id = $1
-  `;
+  async getTagsOfProduction(
+    production: ProductionDto,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<TagDto[]> {
+    if (amount === 0) {
+      const query = `
+      SELECT t.*
+      FROM tags t
+      JOIN production_tag pt ON t.id = pt.tag_id
+      WHERE pt.production_id = $1
+      `;
 
-    return await this.db.query(query, [production.id]);
+      return await this.db.query(query, [production.id]);
+    }
+
+    const offset = page * amount;
+
+    const query = `
+      SELECT t.*
+      FROM tags t
+      JOIN production_tag pt ON t.id = pt.tag_id
+      WHERE pt.production_id = $1
+      LIMIT $2 OFFSET $3
+      `;
+
+    return await this.db.query(query, [production.id, amount, offset]);
   }
 
   /**
    * Get all blogs listed under a given production.
    * @param id the id of the production we want all blogs of.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * @returns a list of blogs connected to the given production.
    */
-  async getBlogsOfProduction(id: number): Promise<BlogDto[]> {
-    const query = `
-    SELECT b.*
-    FROM blogs b
-    JOIN production_blogs pb ON b.id = pb.blog_id
-    WHERE pb.production_id = $1
-  `;
+  async getBlogsOfProduction(
+    id: number,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<BlogDto[]> {
+    if (amount === 0) {
+      const query = `
+      SELECT b.*
+      FROM blogs b
+      JOIN production_blogs pb ON b.id = pb.blog_id
+      WHERE pb.production_id = $1
+      `;
 
-    return await this.db.query(query, [id]);
+      return await this.db.query(query, [id]);
+    }
+
+    const offset = page * amount;
+
+    const query = `
+      SELECT b.*
+      FROM blogs b
+      JOIN production_blogs pb ON b.id = pb.blog_id
+      WHERE pb.production_id = $1
+      LIMIT $2 OFFSET $3
+      `;
+
+    return await this.db.query(query, [id, amount, offset]);
   }
 
   /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * i.e: getProductions({genre: genre}) will give a list of all productions with the given genre.
@@ -82,6 +124,8 @@ export class ProductionDatabaseService {
       id: number;
       tag_id: number;
     }>,
+    amount: number = 0,
+    page: number = 0,
   ): Promise<ProductionDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -156,6 +200,22 @@ export class ProductionDatabaseService {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
+    // pagination
+    let paginationClause = "";
+    if (amount > 0) {
+      const offset = page * amount;
+
+      paginationClause = `
+      LIMIT $${i}
+      OFFSET $${i + 1}
+    `;
+
+      values.push(amount);
+      values.push(offset);
+
+      i += 2;
+    }
+
     // p is defined, ignore error
     // need DISTINCT as multiple event for each prod.
     const query = `
@@ -171,7 +231,8 @@ export class ProductionDatabaseService {
         LEFT JOIN events e ON e.production_id = p.id
         LEFT JOIN production_tag pt on p.id = pt.production_id
           ${whereClause}
-      ORDER BY p.id
+      ORDER BY p.id 
+        ${paginationClause}
     `;
 
     return this.db.query<ProductionDto>(query, values);

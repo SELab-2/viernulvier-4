@@ -19,7 +19,7 @@ export class DbService {
   /**
    * This function sends a query to the database.
    * @param query This is the to be executed query
-   * @param params These are the possible parameters used in the query annotated by "$1",... as is convention in sql.
+   * @param params These are the possible parameters used in the query annotated by "$1",... as is convention in SQL.
    * @return a generic type that is a scheme of the database.
    * */
   async query<T extends QueryResultRow = any>(
