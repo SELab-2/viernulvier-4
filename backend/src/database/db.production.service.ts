@@ -117,8 +117,6 @@ export class ProductionDatabaseService {
     const values: any[] = [];
     let i = 1;
 
-    // * NOTE: Removed Filtering by genre because genres are supposed to become tags.
-
     // Filter by location
     if (filters.hall) {
       conditions.push(`e.hall = $${i}`);
@@ -215,7 +213,6 @@ export class ProductionDatabaseService {
         p.ondertitel,
         p.description1,
         p.description2,
-        p.genre,
         p.planning_id
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
@@ -236,7 +233,7 @@ export class ProductionDatabaseService {
   async createProduction(
     production: CreateProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.titel || !production.genre) {
+    if (!production.titel) {
       throw new BadRequestException("Missing required fields");
     }
 
@@ -246,7 +243,6 @@ export class ProductionDatabaseService {
         ondertitel,
         description1,
         description2,
-        genre,
         planning_id
     )
     VALUES ($1,$2,$3,$4,$5,$6)
@@ -256,7 +252,6 @@ export class ProductionDatabaseService {
         ondertitel,
         description1,
         description2,
-        genre,
         planning_id
   `;
 
@@ -265,7 +260,6 @@ export class ProductionDatabaseService {
       production.ondertitel ?? null,
       production.description1 ?? null,
       production.description2 ?? null,
-      production.genre,
       production.planning_id ?? null,
     ];
 
@@ -273,6 +267,57 @@ export class ProductionDatabaseService {
 
     if (!result.length) {
       throw new Error("Failed to create production");
+    }
+
+    return result[0];
+  }
+
+  /**
+   * UNSAFE version of createProduction. Will override if a Production
+   * already exists with the same ID.
+   * @param production The production object that we want to insert.
+   * @returns That same production object but returned from the Database.
+   */
+  async insertProduction(production: ProductionDto): Promise<ProductionDto> {
+    const query = `
+      INSERT INTO productions (
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        planning_id
+      )
+      VALUES ($1,$2,$3,$4,$5,$6)
+      ON CONFLICT (id)
+      DO UPDATE SET
+        titel = EXCLUDED.titel,
+        ondertitel = EXCLUDED.ondertitel,
+        description1 = EXCLUDED.description1,
+        description2 = EXCLUDED.description2,
+        planning_id = EXCLUDED.planning_id
+      RETURNING
+        id,
+        titel,
+        ondertitel,
+        description1,
+        description2,
+        planning_id
+    `;
+
+    const values = [
+      production.id,
+      production.titel,
+      production.ondertitel ?? null,
+      production.description1 ?? null,
+      production.description2 ?? null,
+      production.planning_id ?? null,
+    ];
+
+    const result = await this.db.query<ProductionDto>(query, values);
+
+    if (!result.length) {
+      throw new Error("Failed to insert Production.");
     }
 
     return result[0];
@@ -313,11 +358,6 @@ export class ProductionDatabaseService {
     if (production.description2 !== undefined) {
       fields.push(`description2 = $${index++}`);
       values.push(production.description2);
-    }
-
-    if (production.genre !== undefined) {
-      fields.push(`genre = $${index++}`);
-      values.push(production.genre);
     }
 
     if (production.planning_id !== undefined) {

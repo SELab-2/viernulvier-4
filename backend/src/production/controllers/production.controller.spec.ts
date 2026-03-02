@@ -20,7 +20,6 @@ describe("ProductionController", () => {
     ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    genre: "Drama",
     planning_id: "1",
   };
 
@@ -39,6 +38,7 @@ describe("ProductionController", () => {
             modifyProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
             createProduction: jest.fn(),
+            insertProduction: jest.fn(),
           },
         },
       ],
@@ -190,7 +190,6 @@ describe("ProductionController", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -212,7 +211,6 @@ describe("ProductionController", () => {
         ondertitel: "Exciting",
         description1: "Awesome description",
         description2: "Even more awesome",
-        genre: "Comedy",
         planning_id: "2",
       };
 
@@ -223,6 +221,53 @@ describe("ProductionController", () => {
       await expect(controller.createProduction(newProduction)).rejects.toThrow(
         "Failed to create production",
       );
+    });
+  });
+
+  describe("insertProduction", () => {
+    it("should insert a production successfully", async () => {
+      // 1. Define the full ProductionDto (including the ID)
+      const productionToInsert: ProductionDto = {
+        id: 999, // Since this is an insert of existing data, it has an ID
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        planning_id: "2",
+      };
+
+      // 2. Spy on the service's insertProduction method
+      jest
+        .spyOn(service, "insertProduction")
+        .mockResolvedValueOnce(productionToInsert);
+
+      // 3. Call the controller method
+      const result = await controller.insertProduction(productionToInsert);
+
+      // 4. Verify the controller passed the right data to the service
+      expect(service.insertProduction).toHaveBeenCalledWith(productionToInsert);
+      expect(result).toEqual(productionToInsert);
+    });
+
+    it("should handle service errors when insertion fails", async () => {
+      const productionToInsert: ProductionDto = {
+        id: 999,
+        titel: "New Show",
+        ondertitel: "Exciting",
+        description1: "Awesome description",
+        description2: "Even more awesome",
+        planning_id: "2",
+      };
+
+      // Mock the service throwing an error
+      jest
+        .spyOn(service, "insertProduction")
+        .mockRejectedValueOnce(new Error("Failed to insert production"));
+
+      // Verify the controller propagates the error
+      await expect(
+        controller.insertProduction(productionToInsert),
+      ).rejects.toThrow("Failed to insert production");
     });
   });
 });
