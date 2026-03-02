@@ -117,7 +117,7 @@ export class AuthController {
   @ApiOkResponse({ description: "Account deleted." })
   @Delete(":accountId")
   async deleteAccount(
-    @Param("id", ParseIntPipe) accountId: number,
+    @Param("accountId", ParseIntPipe) accountId: number,
   ): Promise<boolean> {
     return await this.authService.deleteAccount(accountId);
   }
