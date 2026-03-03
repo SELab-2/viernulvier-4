@@ -1,5 +1,7 @@
 import {
+  ApiKeySchema,
   BlogSchema,
+  CreateAccountSchema,
   CreateBlogSchema,
   CreateEventSchema,
   CreateLocationSchema,
@@ -10,12 +12,15 @@ import {
   FilterProductionSchema,
   LocationSchema,
   ProductionSchema,
+  PublicAccountSchema,
   TagSchema,
+  UpdateAccountSchema,
   UpdateBlogSchema,
   UpdateEventSchema,
   UpdateLocationSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
+  VerifyApiKeySchema,
 } from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
@@ -46,3 +51,12 @@ export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
 export class LocationDto extends createZodDto(LocationSchema) {}
 export class CreateLocationDto extends createZodDto(CreateLocationSchema) {}
 export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
+
+// Account Wrapper
+export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
+export class UpdateAccountDto extends createZodDto(UpdateAccountSchema) {}
+export class PublicAccountDto extends createZodDto(PublicAccountSchema) {}
+
+// API keys Wrapper
+export class ApiKeyDto extends createZodDto(ApiKeySchema) {}
+export class VerifyApiKeyDto extends createZodDto(VerifyApiKeySchema) {}

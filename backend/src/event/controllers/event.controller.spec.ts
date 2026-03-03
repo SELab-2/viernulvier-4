@@ -3,6 +3,7 @@ import { EventController } from "./event.controller";
 import EventService from "../event.service";
 import type { CreateEventDto, EventDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterEventSchema } from "@repo/common";
 
 describe("EventController", () => {
@@ -35,7 +36,16 @@ describe("EventController", () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<EventController>(EventController);
     service = module.get<EventService>(EventService);

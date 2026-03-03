@@ -1,7 +1,11 @@
 import { z } from "zod";
 import {
+  ApiKey,
+  ApiKeySchema,
   Blog,
   BlogSchema,
+  CreateAccount,
+  CreateAccountSchema,
   CreateBlog,
   CreateBlogSchema,
   CreateEvent,
@@ -22,8 +26,12 @@ import {
   LocationSchema,
   Production,
   ProductionSchema,
+  PublicAccount,
+  PublicAccountSchema,
   Tag,
   TagSchema,
+  UpdateAccount,
+  UpdateAccountSchema,
   UpdateBlog,
   UpdateBlogSchema,
   UpdateEvent,
@@ -34,6 +42,8 @@ import {
   UpdateProductionSchema,
   UpdateTag,
   UpdateTagSchema,
+  VerifyApiKey,
+  VerifyApiKeySchema,
 } from "./database_objects";
 
 // Een voorbeeld van een globaal schema...
@@ -60,6 +70,11 @@ export {
   LocationSchema,
   CreateLocationSchema,
   UpdateLocationSchema,
+  CreateAccountSchema,
+  PublicAccountSchema,
+  UpdateAccountSchema,
+  ApiKeySchema,
+  VerifyApiKeySchema,
 };
 export type {
   Production,
@@ -79,5 +94,10 @@ export type {
   Location,
   CreateLocation,
   UpdateLocation,
+  UpdateAccount,
+  PublicAccount,
+  CreateAccount,
+  ApiKey,
+  VerifyApiKey,
 };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

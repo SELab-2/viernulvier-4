@@ -7,6 +7,7 @@ import { ConfigModule } from "@nestjs/config";
 import { TagModule } from "./tag/tag.module";
 import { BlogModule } from "./blog/blog.module";
 import { LocationModule } from "./location/location.module";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { LocationModule } from "./location/location.module";
     TagModule,
     BlogModule,
     LocationModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
