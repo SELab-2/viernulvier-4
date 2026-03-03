@@ -86,6 +86,7 @@ describe("CSVFileParser.transformEventRow", () => {
       Production: "5",
       Genre: "drama",
       Price: "25",
+      Hall: "Main Hall",
     };
 
     const result = CSVFileParser.transformEventRow(row);
@@ -95,6 +96,7 @@ describe("CSVFileParser.transformEventRow", () => {
       endtime: new Date("2024-01-01 12:00:00").toISOString(),
       production_id: 5,
       price: 25,
+      location: "Main Hall",
     });
   });
 
@@ -104,12 +106,14 @@ describe("CSVFileParser.transformEventRow", () => {
       Endtime: "0000-00-00 00:00:00",
       Production: "5",
       Price: "",
+      Hall: "",
     };
 
     const result = CSVFileParser.transformEventRow(row);
 
     expect(result.endtime).toBeNull();
     expect(result.price).toBeNull();
+    expect(result.location).toBe("");
   });
 
   it("should throw if starttime is invalid", () => {
@@ -189,7 +193,7 @@ describe("CSVFileParser.parseEventsCSV", () => {
   afterEach(() => jest.clearAllMocks());
 
   it("should parse and transform event rows, skipping invalid ones", async () => {
-    // include one valid and one invalid row
+    // include one valid and one invalid row; valid row contains a hall
     mockedFs.createReadStream.mockReturnValue(
       createMockStream([
         {
@@ -197,6 +201,7 @@ describe("CSVFileParser.parseEventsCSV", () => {
           Endtime: "2025-05-01 15:00:00",
           Production: "10",
           Price: "20",
+          Hall: "Front Stage",
         },
         {
           // bad start time will be skipped by transform
@@ -204,17 +209,21 @@ describe("CSVFileParser.parseEventsCSV", () => {
           Endtime: "",
           Production: "10",
           Price: "20",
+          Hall: "Backstage",
         },
       ]) as any,
     );
 
-    const events = await CSVFileParser.parseEventsCSV("events.csv");
-    expect(events).toHaveLength(1);
-    expect(events[0]).toEqual({
-      starttime: new Date("2025-05-01 14:00:00").toISOString(),
-      endtime: new Date("2025-05-01 15:00:00").toISOString(),
-      production_id: 10,
-      price: 20,
+    const items = await CSVFileParser.parseEventsCSV("events.csv");
+    expect(items).toHaveLength(1);
+    expect(items[0]).toEqual({
+      event: {
+        starttime: new Date("2025-05-01 14:00:00").toISOString(),
+        endtime: new Date("2025-05-01 15:00:00").toISOString(),
+        production_id: 10,
+        price: 20,
+      },
+      location: "Front Stage",
     });
 
     expect(console.warn).toHaveBeenCalledWith(
@@ -261,11 +270,18 @@ describe("CSVFileParser.parseProductionsCSV", () => {
 });
 
 describe("CSVFileParser.insertEventsFromCSV", () => {
-  const fakeService = { createEvent: jest.fn() } as any;
+  const fakeEventService = {
+    createEvent: jest.fn(),
+    linkEventToLocation: jest.fn(),
+  } as any;
+  const fakeLocationService = {
+    createLocation: jest.fn(),
+    getLocations: jest.fn().mockResolvedValue([]),
+  } as any;
 
   afterEach(() => jest.clearAllMocks());
 
-  it("should call eventService.createEvent for each parsed event", async () => {
+  it("should call eventService.createEvent for each parsed event when no hall is provided", async () => {
     mockedFs.createReadStream.mockReturnValue(
       createMockStream([
         {
@@ -273,16 +289,19 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
           Endtime: "2025-06-01 11:00:00",
           Production: "1",
           Price: "15",
+          Hall: "", // explicit empty hall
         },
       ]) as any,
     );
 
-    fakeService.createEvent.mockResolvedValue({ id: 123 });
+    fakeEventService.createEvent.mockResolvedValue({ id: 123 });
     const created = await CSVFileParser.insertEventsFromCSV(
       "file.csv",
-      fakeService,
+      fakeEventService,
+      fakeLocationService,
     );
-    expect(fakeService.createEvent).toHaveBeenCalledTimes(1);
+    expect(fakeEventService.createEvent).toHaveBeenCalledTimes(1);
+    expect(fakeEventService.linkEventToLocation).not.toHaveBeenCalled();
     expect(created).toEqual([{ id: 123 }]);
   });
 
@@ -294,15 +313,91 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
           Endtime: "",
           Production: "2",
           Price: "0",
+          Hall: "Hadrian",
         },
       ]) as any,
     );
 
-    fakeService.createEvent.mockRejectedValue(new Error("DB fail"));
+    fakeEventService.createEvent.mockRejectedValue(new Error("DB fail"));
 
     await expect(
-      CSVFileParser.insertEventsFromCSV("file.csv", fakeService),
+      CSVFileParser.insertEventsFromCSV(
+        "file.csv",
+        fakeEventService,
+        fakeLocationService,
+      ),
     ).rejects.toThrow(/Failed to insert event/);
+  });
+
+  it("should create a location and link it when hall field is present", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          Starttime: "2025-06-02 09:00:00",
+          Endtime: "2025-06-02 10:00:00",
+          Production: "3",
+          Price: "5",
+          Hall: "Large Room",
+        },
+      ]) as any,
+    );
+
+    fakeLocationService.createLocation.mockResolvedValue({
+      id: 77,
+      location: "Large Room",
+    });
+    fakeEventService.createEvent.mockResolvedValue({ id: 321 });
+
+    const created = await CSVFileParser.insertEventsFromCSV(
+      "file.csv",
+      fakeEventService,
+      fakeLocationService,
+    );
+
+    expect(fakeLocationService.createLocation).toHaveBeenCalledWith({
+      location: "Large Room",
+    });
+    expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(321, 77);
+    expect(created).toEqual([{ id: 321 }]);
+  });
+
+  it("should reuse an existing location when multiple events share the same hall", async () => {
+    mockedFs.createReadStream.mockReturnValue(
+      createMockStream([
+        {
+          Starttime: "2025-06-03 09:00:00",
+          Endtime: "2025-06-03 10:00:00",
+          Production: "4",
+          Price: "5",
+          Hall: "Shared Hall",
+        },
+        {
+          Starttime: "2025-06-04 09:00:00",
+          Endtime: "2025-06-04 10:00:00",
+          Production: "5",
+          Price: "10",
+          Hall: "Shared Hall",
+        },
+      ]) as any,
+    );
+
+    // pretend the location already exists in the system
+    fakeLocationService.getLocations.mockResolvedValue([
+      { id: 99, location: "Shared Hall" },
+    ]);
+    fakeEventService.createEvent.mockResolvedValue({ id: 400 });
+
+    const created = await CSVFileParser.insertEventsFromCSV(
+      "file.csv",
+      fakeEventService,
+      fakeLocationService,
+    );
+
+    expect(fakeLocationService.createLocation).not.toHaveBeenCalled();
+    // link called for each event but with same location id
+    expect(fakeEventService.linkEventToLocation).toHaveBeenCalledTimes(2);
+    expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(400, 99);
+    expect(created).toHaveLength(2);
   });
 });
 
