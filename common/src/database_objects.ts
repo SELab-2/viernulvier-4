@@ -148,6 +148,7 @@ export type UpdateTag = z.infer<typeof UpdateTagSchema>;
 export type Location = z.infer<typeof LocationSchema>;
 export type CreateLocation = z.infer<typeof CreateLocationSchema>;
 export type UpdateLocation = z.infer<typeof UpdateLocationSchema>;
+
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
 export type PublicAccount = z.infer<typeof PublicAccountSchema>;
