@@ -21,7 +21,7 @@ import {
 } from "@nestjs/swagger";
 import { ZodValidationPipe } from "nestjs-zod";
 import { CreateLocationSchema, UpdateLocationSchema } from "@repo/common";
-import { ApiKeyGuard } from "src/auth/authGuard";
+import { ApiKeyGuard } from "../auth/authGuard";
 
 @Controller("location")
 export class LocationController {
