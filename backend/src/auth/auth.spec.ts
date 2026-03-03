@@ -39,6 +39,26 @@ describe("AuthGuards tests", () => {
     it("DELETE /events/:id should fail without API key", async () => {
       await request(app.getHttpServer()).delete("/event/1").expect(401);
     });
+
+    it("GET /events/:eventId/locations", async () => {
+      await request(app.getHttpServer()).get("/event/1/location").expect(200);
+    });
+  });
+
+  describe("Event - Location endpoints authentication", () => {
+    it("GET /events/:eventId/locations should work without API key", async () => {
+      await request(app.getHttpServer()).get("/event/1/location").expect(200);
+    });
+
+    it("PUT /events/:eventId/locations/:locationId should fail without API key.", async () => {
+      await request(app.getHttpServer()).put("/event/1/location/1").expect(401);
+    });
+
+    it("DELETE /events/:eventId/locations should fail without API key.", async () => {
+      await request(app.getHttpServer())
+        .delete("/event/1/location")
+        .expect(401);
+    });
   });
 
   describe("Production endpoints authentication", () => {
@@ -159,6 +179,28 @@ describe("AuthGuards tests", () => {
 
     it("PUT /blogs/:id should fail without API key", async () => {
       await request(app.getHttpServer()).put("/blog/1").expect(401);
+    });
+  });
+
+  describe("Location endpoints authentication", () => {
+    it("GET /locations should work without API key", async () => {
+      await request(app.getHttpServer()).get("/location").expect(200);
+    });
+
+    it("GET /locations/:locationId should work without API key", async () => {
+      await request(app.getHttpServer()).get("/location/1").expect(200);
+    });
+
+    it("POST /locations should fail without API key", async () => {
+      await request(app.getHttpServer()).post("/location").expect(401);
+    });
+
+    it("PATCH /locations should fail without API key", async () => {
+      await request(app.getHttpServer()).patch("/location").expect(401);
+    });
+
+    it("DELETE /locations/:locationId should fail without API key", async () => {
+      await request(app.getHttpServer()).delete("/location/1").expect(401);
     });
   });
 });
