@@ -28,7 +28,7 @@ jobs:
       - name: Create env file
         run: |
           echo "DB_USER_DEV=selab2" >> backend/.env
-          echo "DB_HOST_DEV=127.0.0.1" >> backend/.env
+          echo "DB_HOST_DEV=" >> backend/.env
           echo "DB_NAME_DEV=viernulvier" >> backend/.env
           echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> backend/.env
           echo "DB_PORT_DEV=5432" >> backend/.env
@@ -37,10 +37,11 @@ jobs:
       - name: Install and Test
         run: |
           npm i
+          ls -la /var/run/postgresql/ || echo "No socket found"
           npm run test
         env:
           DB_USER_DEV: selab2
-          DB_HOST_DEV: 127.0.0.1
+          DB_HOST_DEV: ""
           DB_NAME_DEV: viernulvier
           DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
           DB_PORT_DEV: 5432
