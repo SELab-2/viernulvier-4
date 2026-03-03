@@ -50,8 +50,10 @@ jobs:
         run: |
           PR_PATH="/home/selab2/project/previews/${{ github.event.pull_request.number }}"
           mkdir -p $PR_PATH
-          # Gebruik rsync om de bestanden lokaal te kopiëren zonder rotzooi
-          rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
+          # Copy only the built frontend dist folder
+          rsync -av --delete frontend/dist/ $PR_PATH/frontend/dist/
+          # Optional: copy backend and other necessary files
+          rsync -av --delete --exclude 'node_modules' --exclude '.git' backend/ $PR_PATH/backend/
 
       # STEP 4: Post preview link as comment
       - name: Post preview link
