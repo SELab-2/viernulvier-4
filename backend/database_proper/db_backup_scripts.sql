@@ -68,6 +68,22 @@ CREATE TABLE production_tag
             ON DELETE CASCADE
 );
 
+CREATE TABLE locations
+(
+    id       INT         NOT NULL,
+    location TEXT UNIQUE NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE event_locations
+(
+    event_id    INT NOT NULL,
+    location_id INT NOT NULL,
+    PRIMARY KEY (event_id, location_id),
+    FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE CASCADE
+);
+
 CREATE TABLE accounts
 (
     id          SERIAL PRIMARY KEY,
@@ -78,8 +94,10 @@ CREATE TABLE accounts
 
 CREATE TABLE api_keys
 (
-    id  SERIAL PRIMARY KEY,
-    key VARCHAR(255) NOT NULL UNIQUE -- up to 256 length api keys supported, less always possible (we use 128 length)
+    id        SERIAL PRIMARY KEY,
+    key       VARCHAR(255) NOT NULL UNIQUE, -- up to 256 length api keys supported, less always possible (we use 128 length)
+    active    BOOLEAN      NOT NULL DEFAULT TRUE,
+    super_key BOOLEAN      NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE account_api_keys

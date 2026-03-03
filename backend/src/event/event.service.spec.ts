@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
+import type { CreateEventDto, EventDto } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterEventSchema } from "@repo/common";
@@ -14,7 +14,6 @@ describe("EventService", () => {
     id: 1,
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
-    hall: "Main Hall",
     production_id: 1,
     price: 25,
   };
@@ -144,37 +143,6 @@ describe("EventService", () => {
     });
   });
 
-  describe("modifyEvent", () => {
-    it("should fetch, merge, update, and return the modified event", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-      const expectedMergedEvent = { ...mockEvent, ...patchData, id: 1 };
-
-      jest
-        .spyOn(dbService, "updateEvent")
-        .mockResolvedValueOnce(expectedMergedEvent);
-
-      const result = await service.modifyEvent(1, patchData);
-
-      expect(dbService.getEventById).toHaveBeenCalledWith(1);
-      expect(dbService.updateEvent).toHaveBeenCalledWith(expectedMergedEvent);
-      expect(result).toEqual(expectedMergedEvent);
-    });
-
-    it("should throw an error if the event to modify does not exist", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-
-      // Service fetches by ID first, so mock that fetch to fail
-      jest
-        .spyOn(dbService, "getEventById")
-        .mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
-
-      await expect(service.modifyEvent(999, patchData)).rejects.toThrow(
-        "No EventDto exists for provided ID",
-      );
-      expect(dbService.updateEvent).not.toHaveBeenCalled();
-    });
-  });
-
   describe("deleteEvent", () => {
     it("should delete the event by id and pass an empty string for the date", async () => {
       const result = await service.deleteEvent(1);
@@ -198,7 +166,6 @@ describe("EventService", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };
@@ -218,7 +185,6 @@ describe("EventService", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };

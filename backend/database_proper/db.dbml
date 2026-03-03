@@ -45,6 +45,16 @@ Table production_tag {
   }
 }
 
+Table locations {
+  id int [not null]
+  location text [not null, unique]
+}
+
+Table event_locations {
+  event_id int [not null]
+  location_id int [not null]
+}
+
 Table accounts {
   id int [pk, increment]
   username text [not null, unique]
@@ -56,6 +66,7 @@ Table api_keys {
   id int [pk, increment]
   key text [not null, unique]
   active boolean [not null, default: true]
+  super_key boolean [not null, default: false]
 }
 
 Table account_api_keys {
@@ -72,8 +83,8 @@ Ref: events.production_id > productions.id [delete: cascade]
 Ref: production_blogs.production_id > productions.id [delete: cascade]
 Ref: production_blogs.blog_id > blogs.id [delete: cascade]
 
-Ref: event_blogs.event_id > events.id [delete: cascade]
-Ref: event_blogs.blog_id > blogs.id [delete: cascade]
+Ref: event_locations.event_id > events.id [delete: cascade]
+Ref: event_locations.location_id > locations.id [delete: cascade]
 
 Ref: production_tag.production_id > productions.id [delete: cascade]
 Ref: production_tag.tag_id > tags.id [delete: cascade]

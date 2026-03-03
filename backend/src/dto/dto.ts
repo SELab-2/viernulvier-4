@@ -4,17 +4,20 @@ import {
   CreateAccountSchema,
   CreateBlogSchema,
   CreateEventSchema,
+  CreateLocationSchema,
   CreateProductionSchema,
   CreateTagSchema,
   EventSchema,
   FilterEventSchema,
   FilterProductionSchema,
+  LocationSchema,
   ProductionSchema,
   PublicAccountSchema,
   TagSchema,
   UpdateAccountSchema,
   UpdateBlogSchema,
   UpdateEventSchema,
+  UpdateLocationSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
@@ -43,6 +46,11 @@ export class UpdateBlogDto extends createZodDto(UpdateBlogSchema) {}
 export class TagDto extends createZodDto(TagSchema) {}
 export class CreateTagDto extends createZodDto(CreateTagSchema) {}
 export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
+
+// Location Wrappers
+export class LocationDto extends createZodDto(LocationSchema) {}
+export class CreateLocationDto extends createZodDto(CreateLocationSchema) {}
+export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}

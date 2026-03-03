@@ -43,7 +43,6 @@ export const EventSchema = z.object({
   id: z.number(),
   starttime: z.iso.datetime(),
   endtime: z.iso.datetime().nullable(),
-  hall: z.string(),
   production_id: z.number(),
   price: z.number(),
 });
@@ -51,12 +50,22 @@ export const EventSchema = z.object({
 export const CreateEventSchema = EventSchema.omit({ id: true });
 export const UpdateEventSchema = EventSchema.partial();
 
+/**
+ * Schemas for locations.
+ */
+export const LocationSchema = z.object({
+  id: z.number(),
+  location: z.string(),
+});
+
+export const CreateLocationSchema = LocationSchema.omit({ id: true });
+export const UpdateLocationSchema = LocationSchema.partial();
+
 export const FilterEventSchema = z.object({
   date: z.iso.date().optional(),
   date_between: z.iso.date().optional(),
   date_before: z.iso.date().optional(),
   date_after: z.iso.date().optional(),
-  hall: z.string().optional(),
   id: z.coerce.number().optional(),
   production_id: z.coerce.number().optional(),
   page: z.coerce.number().min(0).default(0),
@@ -135,6 +144,10 @@ export type UpdateBlog = z.infer<typeof UpdateBlogSchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
 export type UpdateTag = z.infer<typeof UpdateTagSchema>;
+
+export type Location = z.infer<typeof LocationSchema>;
+export type CreateLocation = z.infer<typeof CreateLocationSchema>;
+export type UpdateLocation = z.infer<typeof UpdateLocationSchema>;
 
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
