@@ -60,7 +60,6 @@ export class EventLocationController {
   /**
    * Responds to a DELETE to "/event/:eventId/location".
    * @param eventId The ID of the Event.
-   * @param locationId The ID of the Location.
    * @returns Nothing
    */
   @UseGuards(ApiKeyGuard)
