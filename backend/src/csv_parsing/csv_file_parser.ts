@@ -241,7 +241,8 @@ export class CSVFileParser {
           const createdLoc = await locationService.createLocation({
             location: loc,
           });
-          locationMap.set(loc, createdLoc.id);
+          locId = createdLoc.id;
+          locationMap.set(loc, locId);
         }
       }
       
