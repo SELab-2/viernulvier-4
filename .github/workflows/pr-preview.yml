@@ -2,14 +2,12 @@ name: Pull Request Build and Deploy
 
 on:
   pull_request:
-    # Works for both branches
     branches: [ main, develop ]
-
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
@@ -28,27 +26,10 @@ jobs:
           npm i
           npm run test
 
-      # STAP 3: Install Private Key (RSA)
-      - name: Add private key
-        shell: bash
+      # STAP 3: Deploy (Lokaal op de server)
+      - name: Deploy preview
         run: |
-          if [ -z "${{ secrets.DEPLOYMENT_PRIVATE_KEY }}" ]; then
-            echo "Error: DEPLOYMENT_PRIVATE_KEY is not set."
-            exit 1
-          fi
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOYMENT_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          # Add server identification
-          ssh-keyscan -H sel2-4.ugent.be >> ~/.ssh/known_hosts
-
-      # STAP 4: Deploy To Server
-      - name: Deploy site to staging area
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          # We exclude node_modules because the server doesn't need it or rebuilds it locally
-          # The files end in /home/selab2/project/previews/[PR_NUMBER]
-          rsync -avz --exclude 'node_modules' --exclude '.git' \
-            -e 'ssh -p 22' \
-            . selab2@sel2-4.ugent.be:/home/selab2/project/previews/$PR_NUMBER/
+          PR_PATH="/home/selab2/project/previews/${{ github.event.pull_request.number }}"
+          mkdir -p $PR_PATH
+          # Gebruik rsync om de bestanden lokaal te kopiëren zonder rotzooi
+          rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
