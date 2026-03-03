@@ -1,8 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "../production.service";
-import { CreateProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
+import {
+  CreateProductionDto,
+  ProductionDto,
+  UpdateProductionDto,
+} from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterProductionSchema } from "@repo/common";
 
 describe("ProductionController", () => {
@@ -37,7 +42,16 @@ describe("ProductionController", () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<ProductionController>(ProductionController);
     service = module.get<ProductionService>(ProductionService);

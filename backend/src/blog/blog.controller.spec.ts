@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { BlogController } from "./blog.controller";
 import { BlogService } from "./blog.service";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
 
 describe("BlogController", () => {
   let controller: BlogController;
@@ -34,7 +35,16 @@ describe("BlogController", () => {
           useValue: mockBlogService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<BlogController>(BlogController);
     blogService = module.get<BlogService>(BlogService);

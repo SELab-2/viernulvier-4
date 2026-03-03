@@ -67,3 +67,25 @@ CREATE TABLE production_tag
             REFERENCES tags (id)
             ON DELETE CASCADE
 );
+
+CREATE TABLE accounts
+(
+    id          SERIAL PRIMARY KEY,
+    username    VARCHAR(255) NOT NULL UNIQUE,
+    password    VARCHAR(255) NOT NULL,
+    super_admin BOOLEAN      NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE api_keys
+(
+    id  SERIAL PRIMARY KEY,
+    key VARCHAR(255) NOT NULL UNIQUE -- up to 256 length api keys supported, less always possible (we use 128 length)
+);
+
+CREATE TABLE account_api_keys
+(
+    account_id INT     NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    api_key_id INT     NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
+    active     boolean not null default true,
+    PRIMARY KEY (account_id, api_key_id)
+);

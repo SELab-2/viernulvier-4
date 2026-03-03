@@ -15,7 +15,8 @@ const config: Config = {
     "main\\.ts$",
     ".*\\.module\\.ts$",
     "app.controller.ts",
-    "app.service.ts"
+    "app.service.ts",
+    "/src/database/",
   ],
 
   // Fail tests if global coverage under 70%
