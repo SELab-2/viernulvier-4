@@ -229,7 +229,8 @@ export class CSVFileParser {
       locationMap.set(loc.location, loc.id);
     }
 
-    for (const { event, location } of parsed) {
+  for (const { event, location } of parsed) {
+    try {
       let locId: number | null = null;
       const loc = location.trim();
 
@@ -241,18 +242,32 @@ export class CSVFileParser {
           const createdLoc = await locationService.createLocation({
             location: loc,
           });
+
+          if (!createdLoc) {
+            throw new Error("Location creation failed");
+          }
+
           locId = createdLoc.id;
           locationMap.set(loc, locId);
         }
       }
-      
+
       //create the event and link it to the location if applicable
       const createdEvent = await eventService.createEvent(event);
-      createdEvents.push(createdEvent);
+
       if (locId !== null) {
         await eventService.linkEventToLocation(createdEvent.id, locId);
       }
+
+      createdEvents.push(createdEvent);
+    } catch (error) {
+      throw new Error(
+        `Failed to insert event: ${JSON.stringify(event)} - ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
     }
+  }
 
     return createdEvents;
   }
