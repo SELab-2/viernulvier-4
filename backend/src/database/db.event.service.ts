@@ -51,6 +51,7 @@ export class EventDatabaseService {
       FROM event_locations
       WHERE event_id = $1
     )
+    RETURNING event_id
   `;
 
     const result = await this.db.query(query, [event_id, location_id]);
