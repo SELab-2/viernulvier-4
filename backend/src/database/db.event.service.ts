@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import { CreateEventDto, EventDto, FilterEventDto, LocationDto, UpdateEventDto, } from "../dto/dto";
+import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -13,7 +14,9 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(id: number): Promise<EventDto> {
-    const events: EventDto[] = await this.getEvents({ id: id });
+    const events: EventDto[] = await this.getEvents(
+      FilterEventSchema.parse({ id: id }),
+    );
     if (events.length === 0)
       throw new BadRequestException(
         `No EventDto exists for provided ID(${id})`,
@@ -27,34 +30,12 @@ export class EventDatabaseService {
    * @param filters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
-   * i.e: getEvents({p_id: id}) will give a list of all events with the given p_id.
    * @returns All events for the given filters.
    */
-  async getEvents(
-    filters: Partial<{
-      genre: string;
-      date: string;
-      // Return events where the provided date lies between starttime and endtime
-      date_between: string;
-      // Return events where starttime is before the provided date
-      date_before: string;
-      // Return events where endtime is after the provided date
-      date_after: string;
-      hall: string;
-      id: number;
-      production_id: number;
-    }>,
-  ): Promise<EventDto[]> {
+  async getEvents(filters: FilterEventDto): Promise<EventDto[]> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
-
-    // Filter by production genre
-    if (filters.genre) {
-      conditions.push(`p.genre = $${i}`);
-      values.push(filters.genre);
-      i++;
-    }
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.
@@ -86,13 +67,6 @@ export class EventDatabaseService {
       i++;
     }
 
-    // Filter by hall
-    if (filters.hall) {
-      conditions.push(`e.hall = $${i}`);
-      values.push(filters.hall);
-      i++;
-    }
-
     // Filer by id
     if (filters.id) {
       conditions.push(`e.id = $${i}`);
@@ -113,14 +87,29 @@ export class EventDatabaseService {
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
+    // pagination
+    let paginationClause = "";
+    if (filters.limit > 0) {
+      const offset = filters.page * filters.limit;
+
+      paginationClause = `
+      LIMIT $${i}
+      OFFSET $${i + 1}
+    `;
+
+      values.push(filters.limit);
+      values.push(offset);
+    }
+
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.hall, e.production_id, e.price
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.price
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
-      ORDER BY e.starttime
+      ORDER BY e.starttime 
+        ${paginationClause}
         `;
 
     return this.db.query<EventDto>(query, values);
@@ -133,20 +122,19 @@ export class EventDatabaseService {
    */
   async createEvent(event: CreateEventDto): Promise<EventDto> {
     // Validate input, throw error if not all
-    if (!event.starttime || !event.hall || !event.production_id) {
+    if (!event.starttime || !event.production_id) {
       throw new BadRequestException("Missing required fields");
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, hall, production_id, price)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, starttime, endtime, hall, production_id, price
+      INSERT INTO events (starttime, endtime, production_id, price)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, starttime, endtime, production_id, price
     `;
 
     const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
-      event.hall,
       event.production_id,
       event.price,
     ]);
@@ -187,11 +175,6 @@ export class EventDatabaseService {
     if (event.price !== undefined) {
       fields.push(`price = $${index++}`);
       values.push(event.price);
-    }
-
-    if (event.hall !== undefined) {
-      fields.push(`hall = $${index++}`);
-      values.push(event.hall);
     }
 
     if (event.production_id !== undefined) {
@@ -247,5 +230,67 @@ export class EventDatabaseService {
     const query = `DELETE FROM events WHERE production_id = $1`;
 
     await this.db.query(query, [production_id]);
+  }
+
+  /**
+   * get the location linked with an event
+   * @param id the ID of the event we want the location of.
+   * @returns the LocationDto of the event.
+   */
+  async getLocationOfEvent(id: number): Promise<LocationDto> {
+    const query = `
+    SELECT l.id, l.location
+    FROM locations l
+    INNER JOIN event_locations el ON el.location_id = l.id
+    WHERE el.event_id = $1
+    LIMIT 1
+  `;
+
+    const result = await this.db.query(query, [id]);
+
+    if (result.length === 0) {
+      throw new Error("Could not find location");
+    }
+
+    return result[0];
+  }
+
+  /**
+   * link a location to an event
+   * @param event_id the ID of the event you want to link
+   * @param location_id the ID of the location you want to link
+   * @returns T/F whether if the linking was successful.
+   */
+  async linkEventToLocation(
+    event_id: number,
+    location_id: number,
+  ): Promise<boolean> {
+    // note an event can only have 1 location linked to it.
+
+    const query = `
+    INSERT INTO event_locations (event_id, location_id)
+    SELECT $1, $2
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM event_locations
+      WHERE event_id = $1
+    )
+    RETURNING event_id
+  `;
+
+    const result = await this.db.query(query, [event_id, location_id]);
+
+    return result.length !== 0;
+  }
+
+  /**
+   * delete the location from an event.
+   * @param event_id the ID of the event you want to remove the location of.
+   * @returns nothing (silent handling.)
+   */
+  async deleteLocationFromEvent(event_id: number): Promise<void> {
+    const query = `DELETE FROM event_locations WHERE event_id = $1`;
+
+    await this.db.query(query, [event_id]);
   }
 }

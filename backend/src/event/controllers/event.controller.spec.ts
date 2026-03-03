@@ -1,8 +1,10 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
-import EventService from "./event.service";
-import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
+import EventService from "../event.service";
+import type { CreateEventDto, EventDto, UpdateEventDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
+import { FilterEventSchema } from "@repo/common";
 
 describe("EventController", () => {
   let controller: EventController;
@@ -12,7 +14,6 @@ describe("EventController", () => {
     id: 1,
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
-    hall: "Main Hall",
     production_id: 1,
     price: 25,
   };
@@ -35,7 +36,16 @@ describe("EventController", () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<EventController>(EventController);
     service = module.get<EventService>(EventService);
@@ -47,24 +57,23 @@ describe("EventController", () => {
 
   describe("getAllEvents", () => {
     it("should return an array of events", async () => {
-      const result = await controller.getAllEvents();
+      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual(mockEvents);
       expect(service.getAllEvents).toHaveBeenCalled();
     });
 
     it("should call service.getAllEvents", async () => {
-      await controller.getAllEvents();
+      await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(service.getAllEvents).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no events exist", async () => {
       jest.spyOn(service, "getAllEvents").mockResolvedValueOnce([]);
-      const result = await controller.getAllEvents();
+      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
       expect(result).toEqual([]);
     });
   });
 
-  // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return a single event by id", async () => {
       const result = await controller.getEventById(1);
@@ -114,22 +123,25 @@ describe("EventController", () => {
   });
 
   describe("modifyEvent", () => {
-    it("should modify and return the event", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-      const patchedEvent = { ...mockEvent, hall: "Secondary Hall" };
-
-      jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(patchedEvent);
+    it("should partially update and return the event", async () => {
+      const patchData: UpdateEventDto = { price: 50 };
+      const expectedEvent: EventDto = { ...mockEvent, price: 50 };
+      
+      jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(expectedEvent);
 
       const result = await controller.modifyEvent(1, patchData);
+      
       expect(service.modifyEvent).toHaveBeenCalledWith(1, patchData);
-      expect(result).toEqual(patchedEvent);
+      expect(result).toEqual(expectedEvent);
     });
 
     it("should throw a NotFoundException if event to modify does not exist", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
+      const patchData: UpdateEventDto = { price: 50 };
+      
       jest
         .spyOn(service, "modifyEvent")
         .mockRejectedValueOnce(new NotFoundException());
+        
       await expect(controller.modifyEvent(999, patchData)).rejects.toThrow(
         NotFoundException,
       );
@@ -158,7 +170,6 @@ describe("EventController", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };
@@ -177,7 +188,6 @@ describe("EventController", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };

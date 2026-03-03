@@ -26,27 +26,62 @@ export class TagDatabaseService {
   /**
    * Get all productions listed under a given tag.
    * @param tag the tag we want to get the productions connected to.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * @returns a list of productions that fall under the given tag.
    */
-  async getProductionsByTag(tag: TagDto): Promise<ProductionDto[]> {
-    const query = `
+  async getProductionsByTag(
+    tag: TagDto,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<ProductionDto[]> {
+    // non pagination first
+    if (amount === 0) {
+      const query = `
     SELECT p.*
     FROM productions p
     JOIN production_tag pt ON p.id = pt.production_id
     WHERE pt.tag_id = $1
   `;
+      return await this.db.query(query, [tag.id]);
+    }
+    const offset = page * amount;
 
-    return await this.db.query(query, [tag.id]);
+    const query = `
+    SELECT p.*
+    FROM productions p
+    JOIN production_tag pt ON p.id = pt.production_id
+    WHERE pt.tag_id = $1
+    LIMIT $2 OFFSET $3
+  `;
+
+    return await this.db.query(query, [tag.id, amount, offset]);
   }
 
   /**
    * Get all tags.
+   * @param amount is the amount of events per page (returned)
+   * @param page is the page you want (indexed from 0)
    * @returns The tags if there are any.
    */
-  async getTags(): Promise<TagDto[]> {
-    const query = `SELECT * FROM tags`;
+  async getTags(amount: number = 0, page: number = 0): Promise<TagDto[]> {
+    // non-pagination first
+    if (amount === 0) {
+      const query = `SELECT * FROM tags`;
 
-    const result = await this.db.query<TagDto>(query);
+      const result = await this.db.query<TagDto>(query);
+
+      if (result.length === 0) {
+        throw new Error("no tags found");
+      }
+      return result;
+    }
+
+    const offset = page * amount;
+
+    const query = `SELECT * FROM tags LIMIT $1 OFFSET $2`;
+
+    const result = await this.db.query<TagDto>(query, [amount, offset]);
 
     if (result.length === 0) {
       throw new Error("no tags found");
@@ -87,7 +122,7 @@ export class TagDatabaseService {
    * Update function for tags. Updates the tag in the database.
    * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
    * The id field in the tag MUST be defined.
-   * @returns the updated blog if successful.
+   * @returns the updated tag if successful.
    */
   async updateTag(tag: UpdateTagDto): Promise<TagDto> {
     if (!tag.id) {
@@ -140,6 +175,4 @@ export class TagDatabaseService {
   }
 
   // insert extra functions here if desired
-
-  // TODO DISTINCT query
 }

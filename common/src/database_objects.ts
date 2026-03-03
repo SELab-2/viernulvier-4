@@ -4,19 +4,37 @@ import { z } from "zod";
  * Schemas for productions.
  */
 
-// TODO add _EN and _NL fields in db for titel, ondertitel and descs?
 export const ProductionSchema = z.object({
   id: z.number(),
   titel: z.string(),
   ondertitel: z.string(),
   description1: z.string(),
   description2: z.string().nullable(),
-  genre: z.string(),
   planning_id: z.string().nullable(),
 });
 
 export const CreateProductionSchema = ProductionSchema.omit({ id: true });
 export const UpdateProductionSchema = ProductionSchema.partial();
+
+export const FilterProductionSchema = z.object({
+  titel: z.string().optional(),
+  id: z.coerce.number().optional(),
+  tag_ids: z
+    .union([z.coerce.number(), z.array(z.coerce.number())])
+    .optional()
+    .transform((val) => {
+      if (val === undefined) return undefined;
+      if (Array.isArray(val)) return val;
+      return [val];
+    }),
+  hall: z.string().optional(),
+  date: z.iso.date().optional(),
+  date_between: z.iso.date().optional(),
+  date_before: z.iso.date().optional(),
+  date_after: z.iso.date().optional(),
+  page: z.coerce.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(20),
+});
 
 /**
  * Schemas for events.
@@ -25,13 +43,34 @@ export const EventSchema = z.object({
   id: z.number(),
   starttime: z.iso.datetime(),
   endtime: z.iso.datetime().nullable(),
-  hall: z.string(),
   production_id: z.number(),
   price: z.number(),
 });
 
 export const CreateEventSchema = EventSchema.omit({ id: true });
 export const UpdateEventSchema = EventSchema.partial();
+
+/**
+ * Schemas for locations.
+ */
+export const LocationSchema = z.object({
+  id: z.number(),
+  location: z.string(),
+});
+
+export const CreateLocationSchema = LocationSchema.omit({ id: true });
+export const UpdateLocationSchema = LocationSchema.partial();
+
+export const FilterEventSchema = z.object({
+  date: z.iso.date().optional(),
+  date_between: z.iso.date().optional(),
+  date_before: z.iso.date().optional(),
+  date_after: z.iso.date().optional(),
+  id: z.coerce.number().optional(),
+  production_id: z.coerce.number().optional(),
+  page: z.coerce.number().min(0).default(0),
+  limit: z.coerce.number().min(1).max(100).default(20),
+});
 
 /**
  * Schemas for blogs.
@@ -57,14 +96,46 @@ export const TagSchema = z.object({
 export const CreateTagSchema = TagSchema.omit({ id: true });
 export const UpdateTagSchema = TagSchema.partial();
 
+/**
+ * Schemas for accounts.
+ */
+export const AccountSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  password: z.string(),
+  superAdmin: z.boolean(),
+});
+
+export const CreateAccountSchema = AccountSchema.omit({
+  id: true,
+  superAdmin: true,
+});
+export const UpdateAccountSchema = AccountSchema.partial();
+export const PublicAccountSchema = AccountSchema.omit({
+  password: true,
+  superAdmin: true,
+}); // don't leak these. (note: still contains your id so you can still get your api key through that.)
+
+/**
+ * Schemas for api-keys.
+ * note: you never update an api key and api keys are generated in backend, so no need for Create or Update types.
+ */
+export const ApiKeySchema = z.object({
+  key: z.string(), // strings are unique.
+  id: z.number(), // id is here for the join-table operations.
+});
+export const VerifyApiKeySchema = ApiKeySchema.omit({ id: true });
+
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
 export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
+export type FilterProduction = z.infer<typeof FilterProductionSchema>;
 
 export type Event = z.infer<typeof EventSchema>;
 export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
+export type FilterEvent = z.infer<typeof FilterEventSchema>;
 
 export type Blog = z.infer<typeof BlogSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;
@@ -73,3 +144,14 @@ export type UpdateBlog = z.infer<typeof UpdateBlogSchema>;
 export type Tag = z.infer<typeof TagSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
 export type UpdateTag = z.infer<typeof UpdateTagSchema>;
+
+export type Location = z.infer<typeof LocationSchema>;
+export type CreateLocation = z.infer<typeof CreateLocationSchema>;
+export type UpdateLocation = z.infer<typeof UpdateLocationSchema>;
+
+export type CreateAccount = z.infer<typeof CreateAccountSchema>;
+export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
+export type PublicAccount = z.infer<typeof PublicAccountSchema>;
+
+export type ApiKey = z.infer<typeof ApiKeySchema>;
+export type VerifyApiKey = z.infer<typeof VerifyApiKeySchema>;
