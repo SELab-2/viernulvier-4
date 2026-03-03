@@ -71,7 +71,6 @@ jobs:
           
           # Start new preview on dynamic port
           PORT=$PORT pm2 start .output/server/index.mjs --name preview-$PR
-          
           pm2 save
 
       # STEP 4: Post preview link as comment
