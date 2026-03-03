@@ -45,10 +45,20 @@ jobs:
           DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
           DB_PORT_DEV: 2002
 
-      # STAP 3: Deploy (Lokaal op de server)
+      # STEP 3: Deploy (locally on server)
       - name: Deploy preview
         run: |
           PR_PATH="/home/selab2/project/previews/${{ github.event.pull_request.number }}"
           mkdir -p $PR_PATH
           # Gebruik rsync om de bestanden lokaal te kopiëren zonder rotzooi
           rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
+
+      # STEP 4: Post preview link as comment
+      - name: Post preview link
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            🚀 **Preview Build succesfully deployed!**
+            You can view the preview of this pull request at:
+            http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/frontend/dist/
+          comment_tag: preview_link
