@@ -32,9 +32,6 @@ jobs:
           write_env ".env"
           write_env "backend/.env"
 
-      - name: Install PM2
-        run: npm install -g pm2
-
       # STEP 2: Build & Test
       - name: Install and Test
         run: |
