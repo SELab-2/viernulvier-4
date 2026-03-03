@@ -524,7 +524,7 @@ describe("ProductionController (e2e)", () => {
         .send(mockProduction);
 
       // Verify the right DB method was triggered
-      expect(productionDb.insertProduction).toHaveBeenCalledWith(
+      expect(productionDb.upsertProduction).toHaveBeenCalledWith(
         mockProduction,
       );
     });

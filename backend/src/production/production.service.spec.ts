@@ -501,7 +501,7 @@ describe("ProductionService", () => {
       const result = await service.insertProduction(productionToInsert);
 
       // 4. Verify the correct method was called with the full DTO
-      expect(dbService.insertProduction).toHaveBeenCalledWith(
+      expect(dbService.upsertProduction).toHaveBeenCalledWith(
         productionToInsert,
       );
       expect(result).toEqual(productionToInsert);

@@ -21,12 +21,12 @@ import { ApiKeyGuard } from "../../auth/authGuard";
  * Handles the Relationships between Productions and Blogs.
  */
 @ApiTags("Production - Blog")
-@Controller("production/:productionId/blog")
+@Controller("productions/:productionId/blogs")
 export class ProductionBlogController {
   constructor(private readonly productionService: ProductionService) {}
 
   /**
-   * Responds to a GET to "/production/:productionId/blog".
+   * Responds to a GET to "/productions/:productionId/blogs".
    * @param productionId The id of the Production.
    * @returns A list of all Blog objects linked to this Production.
    */
@@ -44,7 +44,7 @@ export class ProductionBlogController {
   }
 
   /**
-   * Responds to a PUT to "/production/:productionId/blog/:blogId"
+   * Responds to a PUT to "/productions/:productionId/blogs/:blogId"
    * @param productionId ID of the Production.
    * @param blogId ID of the Blog.
    * @returns The newly linked Blog object.
@@ -65,7 +65,7 @@ export class ProductionBlogController {
   }
 
   /**
-   * Responds to a DELETE to "/production/:productionId/blog/:blogId"
+   * Responds to a DELETE to "/productions/:productionId/blogs/:blogId"
    * @param productionId ID of the Production.
    * @param blogId ID of the Blog.
    * @returns The Production we just unlinked the Blog from.
