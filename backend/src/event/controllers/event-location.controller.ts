@@ -5,10 +5,17 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 import EventService from "../event.service";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { LocationDto } from "../../dto/dto";
+import { ApiKeyGuard } from "../../auth/authGuard";
 
 @ApiTags("Event - Location")
 @Controller("event/:eventId/location")
@@ -36,6 +43,8 @@ export class EventLocationController {
    * @param eventId The ID of the Event.
    * @param locationId The ID of the Location.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Adds a Location to an Event." })
   @ApiOkResponse({
     description: "Successfully added Location to Event.",
@@ -54,6 +63,8 @@ export class EventLocationController {
    * @param locationId The ID of the Location.
    * @returns Nothing
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Removes a Location from an Event." })
   @ApiOkResponse({
     description: "Successfully removed Location from Event.",

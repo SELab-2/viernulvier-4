@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import { LocationService } from "./location.service";
@@ -16,9 +17,11 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
 } from "@nestjs/swagger";
 import { ZodValidationPipe } from "nestjs-zod";
 import { CreateLocationSchema, UpdateLocationSchema } from "@repo/common";
+import { ApiKeyGuard } from "src/auth/authGuard";
 
 @Controller("location")
 export class LocationController {
@@ -61,7 +64,8 @@ export class LocationController {
    * @param createLocation The Location we want to create.
    * @returns The newly created Location.
    */
-  // TODO: Protect with Guard.
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates a new Location." })
   @ApiBody({ type: CreateLocationDto })
   @ApiCreatedResponse({
@@ -81,7 +85,8 @@ export class LocationController {
    * @param updateLocation The Location we want to update.
    * @returns The newly updated Location.
    */
-  // TODO: Protect with Guard.
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Updates an existing Location." })
   @ApiBody({ type: UpdateLocationDto })
   @ApiOkResponse({
@@ -100,7 +105,8 @@ export class LocationController {
    * Responds to a DELETE to "/location/:locationId"
    * @param locationId The ID of the Location we want to delete.
    */
-  // TODO: Protect with Guard.
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes an existing Location." })
   @ApiOkResponse({ description: "Deleted Location." })
   @Delete(":locationId")
