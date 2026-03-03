@@ -8,24 +8,31 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
   Query,
   UsePipes,
 } from "@nestjs/common";
-import EventService from "./event.service";
-import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
+import EventService from "../event.service";
+import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateEventSchema,
   EventSchema,
   FilterEventSchema,
   UpdateEventSchema,
 } from "@repo/common";
-import { 
-  CreateEventDto, 
-  EventDto, 
-  FilterEventDto, 
-  UpdateEventDto 
-} from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import { ApiKeyGuard } from "../../auth/authGuard";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  UpdateEventDto,
+} from "../../dto/dto";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
 
 @Controller("event")
 export class EventController {
@@ -67,6 +74,8 @@ export class EventController {
    * @param event The parsed EventDto object.
    * @returns The updated EventDto object.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing Event." })
   @ApiBody({ type: EventDto })
   @ApiOkResponse({ type: EventDto, description: "Event replaced." })
@@ -84,6 +93,8 @@ export class EventController {
    * @param patchData The partial EventDto object that is used to modify.
    * @returns The updated EventDto object.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Event." })
   @ApiBody({ type: UpdateEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event modified." })
@@ -100,6 +111,8 @@ export class EventController {
    * @param id ID in the URL of the request.
    * @returns Nothing.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes an Event." })
   @ApiOkResponse({ description: "Event deleted." })
   @Delete(":id")
@@ -112,6 +125,8 @@ export class EventController {
    * @param newEvent The new EventDto data we want to add
    * @returns The newly created EventDto.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates an Event." })
   @ApiBody({ type: CreateEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event created." })
