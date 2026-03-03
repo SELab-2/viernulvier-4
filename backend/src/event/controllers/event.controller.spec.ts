@@ -1,9 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
-import EventService from "./event.service";
-import type { CreateEventDto, EventDto, UpdateEventDto } from "../dto/dto";
+import EventService from "../event.service";
+import type { CreateEventDto, EventDto, UpdateEventDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
-import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterEventSchema } from "@repo/common";
 
 describe("EventController", () => {
@@ -74,7 +74,6 @@ describe("EventController", () => {
     });
   });
 
-  // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return a single event by id", async () => {
       const result = await controller.getEventById(1);
@@ -118,6 +117,32 @@ describe("EventController", () => {
         .spyOn(service, "replaceEvent")
         .mockRejectedValueOnce(new NotFoundException());
       await expect(controller.replaceEvent(999, mockEvent)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe("modifyEvent", () => {
+    it("should partially update and return the event", async () => {
+      const patchData: UpdateEventDto = { price: 50 };
+      const expectedEvent: EventDto = { ...mockEvent, price: 50 };
+      
+      jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(expectedEvent);
+
+      const result = await controller.modifyEvent(1, patchData);
+      
+      expect(service.modifyEvent).toHaveBeenCalledWith(1, patchData);
+      expect(result).toEqual(expectedEvent);
+    });
+
+    it("should throw a NotFoundException if event to modify does not exist", async () => {
+      const patchData: UpdateEventDto = { price: 50 };
+      
+      jest
+        .spyOn(service, "modifyEvent")
+        .mockRejectedValueOnce(new NotFoundException());
+        
+      await expect(controller.modifyEvent(999, patchData)).rejects.toThrow(
         NotFoundException,
       );
     });

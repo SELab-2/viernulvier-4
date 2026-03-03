@@ -17,9 +17,9 @@ import { AccountDatabaseService } from "./db.account.service";
     EventDatabaseService,
     BlogDatabaseService,
     TagDatabaseService,
+    LocationDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
-    LocationDatabaseService,
   ],
   controllers: [],
   exports: [

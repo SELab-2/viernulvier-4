@@ -20,8 +20,19 @@ import {
   ProductionSchema,
   UpdateProductionSchema,
 } from "@repo/common";
-import { CreateProductionDto, FilterProductionDto, ProductionDto, UpdateProductionDto, } from "../../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity, } from "@nestjs/swagger";
+import {
+  CreateProductionDto,
+  FilterProductionDto,
+  ProductionDto,
+  UpdateProductionDto,
+} from "../../dto/dto";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiSecurity,
+} from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
@@ -147,7 +158,7 @@ export class ProductionController {
   /**
    * Responds to a POST to "/production/insert".
    * @param production The new ProductionDto data we want to add/insert forcibly.
-   * @returns
+   * @returns The inserted Production.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")

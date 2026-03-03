@@ -12,21 +12,21 @@ import {
   Query,
   UsePipes,
 } from "@nestjs/common";
-import EventService from "./event.service";
-import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
+import EventService from "../event.service";
+import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateEventSchema,
   EventSchema,
   FilterEventSchema,
   UpdateEventSchema,
 } from "@repo/common";
-import { ApiKeyGuard } from "../auth/authGuard";
+import { ApiKeyGuard } from "../../auth/authGuard";
 import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
   UpdateEventDto,
-} from "../dto/dto";
+} from "../../dto/dto";
 import {
   ApiBody,
   ApiOkResponse,

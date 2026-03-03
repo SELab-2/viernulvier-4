@@ -1,6 +1,19 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Put, UseGuards, } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Put,
+  UseGuards,
+} from "@nestjs/common";
 import { ProductionService } from "../production.service";
-import { ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ProductionDto, TagDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
