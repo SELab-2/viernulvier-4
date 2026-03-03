@@ -20,31 +20,30 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Check DB Port
+      - name: Create env files
         run: |
-          echo "Checking if PostgreSQL is listening on port 5432..."
-          nc -zv 127.0.0.1 5432 || echo "Port 5432 is CLOSED"
-
-      - name: Create env file
-        run: |
-          echo "DB_USER_DEV=selab2" >> backend/.env
-          echo "DB_HOST_DEV=" >> backend/.env
-          echo "DB_NAME_DEV=viernulvier" >> backend/.env
-          echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> backend/.env
-          echo "DB_PORT_DEV=5432" >> backend/.env
+          write_env() {
+            echo "DB_USER_DEV=selab2" >> $1
+            echo "DB_HOST_DEV=sel2-4.ugent.be" >> $1
+            echo "DB_NAME_DEV=selab2_dev" >> $1
+            echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> $1
+            echo "DB_PORT_DEV=2002" >> $1
+          }
+          write_env ".env"
+          write_env "backend/.env"
 
       # STEP 2: Build & Test
       - name: Install and Test
         run: |
           npm i
           ls -la /var/run/postgresql/ || echo "No socket found"
-          npm run test
+          npm run test --filter=backend
         env:
           DB_USER_DEV: selab2
-          DB_HOST_DEV: ""
-          DB_NAME_DEV: viernulvier
+          DB_HOST_DEV: sel2-4.ugent.be
+          DB_NAME_DEV: selab2_dev
           DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
-          DB_PORT_DEV: 5432
+          DB_PORT_DEV: 2002
 
       # STAP 3: Deploy (Lokaal op de server)
       - name: Deploy preview
