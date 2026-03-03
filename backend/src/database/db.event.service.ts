@@ -9,68 +9,6 @@ export class EventDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * get the location linked with an event
-   * @param id the ID of the event we want the location of.
-   * @returns the LocationDto of the event.
-   */
-  async getLocationOfEvent(id: number): Promise<LocationDto> {
-    const query = `
-    SELECT l.id, l.location
-    FROM locations l
-    INNER JOIN event_locations el ON el.location_id = l.id
-    WHERE el.event_id = $1
-    LIMIT 1
-  `;
-
-    const result = await this.db.query(query, [id]);
-
-    if (result.length === 0) {
-      throw new Error("Could not find location");
-    }
-
-    return result[0];
-  }
-
-  /**
-   * link a location to an event
-   * @param event_id the ID of the event you want to link
-   * @param location_id the ID of the location you want to link
-   * @returns T/F whether if the linking was successful.
-   */
-  async linkEventToLocation(
-    event_id: number,
-    location_id: number,
-  ): Promise<boolean> {
-    // note an event can only have 1 location linked to it.
-
-    const query = `
-    INSERT INTO event_locations (event_id, location_id)
-    SELECT $1, $2
-    WHERE NOT EXISTS (
-      SELECT 1
-      FROM event_locations
-      WHERE event_id = $1
-    )
-    RETURNING event_id
-  `;
-
-    const result = await this.db.query(query, [event_id, location_id]);
-
-    return result.length !== 0;
-  }
-
-  /**
-   * delete the location from an event.
-   * @param event_id the ID of the event you want to remove the location of.
-   * @returns nothing (silent handling.)
-   */
-  async deleteLocationFromEvent(event_id: number): Promise<void> {
-    const query = `DELETE FROM event_locations WHERE event_id = $1`;
-
-    await this.db.query(query, [event_id]);
-  }
-
-  /**
    * Get a single EventDto by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The EventDto if there is one.
@@ -292,5 +230,67 @@ export class EventDatabaseService {
     const query = `DELETE FROM events WHERE production_id = $1`;
 
     await this.db.query(query, [production_id]);
+  }
+
+  /**
+   * get the location linked with an event
+   * @param id the ID of the event we want the location of.
+   * @returns the LocationDto of the event.
+   */
+  async getLocationOfEvent(id: number): Promise<LocationDto> {
+    const query = `
+    SELECT l.id, l.location
+    FROM locations l
+    INNER JOIN event_locations el ON el.location_id = l.id
+    WHERE el.event_id = $1
+    LIMIT 1
+  `;
+
+    const result = await this.db.query(query, [id]);
+
+    if (result.length === 0) {
+      throw new Error("Could not find location");
+    }
+
+    return result[0];
+  }
+
+  /**
+   * link a location to an event
+   * @param event_id the ID of the event you want to link
+   * @param location_id the ID of the location you want to link
+   * @returns T/F whether if the linking was successful.
+   */
+  async linkEventToLocation(
+    event_id: number,
+    location_id: number,
+  ): Promise<boolean> {
+    // note an event can only have 1 location linked to it.
+
+    const query = `
+    INSERT INTO event_locations (event_id, location_id)
+    SELECT $1, $2
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM event_locations
+      WHERE event_id = $1
+    )
+    RETURNING event_id
+  `;
+
+    const result = await this.db.query(query, [event_id, location_id]);
+
+    return result.length !== 0;
+  }
+
+  /**
+   * delete the location from an event.
+   * @param event_id the ID of the event you want to remove the location of.
+   * @returns nothing (silent handling.)
+   */
+  async deleteLocationFromEvent(event_id: number): Promise<void> {
+    const query = `DELETE FROM event_locations WHERE event_id = $1`;
+
+    await this.db.query(query, [event_id]);
   }
 }
