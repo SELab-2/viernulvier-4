@@ -122,7 +122,7 @@ export class TagDatabaseService {
    * Update function for tags. Updates the tag in the database.
    * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
    * The id field in the tag MUST be defined.
-   * @returns the updated blog if successful.
+   * @returns the updated tag if successful.
    */
   async updateTag(tag: UpdateTagDto): Promise<TagDto> {
     if (!tag.id) {

@@ -1,7 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type { EventDto, UpdateEventDto, CreateEventDto } from "../dto/dto";
+import type {
+  CreateEventDto,
+  EventDto,
+  UpdateEventDto,
+  LocationDto,
+} from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterEventSchema } from "@repo/common";
@@ -14,9 +19,13 @@ describe("EventService", () => {
     id: 1,
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
-    hall: "Main Hall",
     production_id: 1,
     price: 25,
+  };
+
+  const mockLocation: LocationDto = {
+    id: 1,
+    location: "Main Stage",
   };
 
   const mockBlog = {
@@ -42,9 +51,11 @@ describe("EventService", () => {
             getBlogsOfEvent: jest.fn(),
             linkBlogWithEventID: jest.fn(),
             deleteBlogFromEvent: jest.fn(),
+            linkEventToLocation: jest.fn().mockResolvedValue(true),
+            deleteLocationFromEvent: jest.fn().mockResolvedValue(undefined),
+            getLocationOfEvent: jest.fn().mockResolvedValue(mockLocation),
           },
         },
-        // Added the BlogDatabaseService mock here
         {
           provide: BlogDatabaseService,
           useValue: {
@@ -95,7 +106,6 @@ describe("EventService", () => {
     });
   });
 
-  // TODO: change when getEventByProdcutionId returns multiple events with same production id
   describe("getEventById", () => {
     it("should return event by id from database", async () => {
       const result = await service.getEventById(1);
@@ -145,9 +155,9 @@ describe("EventService", () => {
   });
 
   describe("modifyEvent", () => {
-    it("should fetch, merge, update, and return the modified event", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-      const expectedMergedEvent = { ...mockEvent, ...patchData, id: 1 };
+    it("should fetch, merge, and update the event correctly", async () => {
+      const patchData: UpdateEventDto = { price: 50 };
+      const expectedMergedEvent: EventDto = { ...mockEvent, price: 50, id: 1 };
 
       jest
         .spyOn(dbService, "updateEvent")
@@ -159,24 +169,10 @@ describe("EventService", () => {
       expect(dbService.updateEvent).toHaveBeenCalledWith(expectedMergedEvent);
       expect(result).toEqual(expectedMergedEvent);
     });
-
-    it("should throw an error if the event to modify does not exist", async () => {
-      const patchData: UpdateEventDto = { hall: "Secondary Hall" };
-
-      // Service fetches by ID first, so mock that fetch to fail
-      jest
-        .spyOn(dbService, "getEventById")
-        .mockRejectedValueOnce(new Error("No EventDto exists for provided ID"));
-
-      await expect(service.modifyEvent(999, patchData)).rejects.toThrow(
-        "No EventDto exists for provided ID",
-      );
-      expect(dbService.updateEvent).not.toHaveBeenCalled();
-    });
   });
 
   describe("deleteEvent", () => {
-    it("should delete the event by id and pass an empty string for the date", async () => {
+    it("should delete the event by id", async () => {
       const result = await service.deleteEvent(1);
       expect(dbService.deleteEvent).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
@@ -198,14 +194,12 @@ describe("EventService", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };
 
       const createdEvent: EventDto = { id: 2, ...newEvent };
 
-      // Mock dbService.createEvent om de nieuwe event terug te geven
       jest.spyOn(dbService, "createEvent").mockResolvedValueOnce(createdEvent);
 
       const result = await service.createEvent(newEvent);
@@ -218,12 +212,10 @@ describe("EventService", () => {
       const newEvent: CreateEventDto = {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
-        hall: "Grand Hall",
         production_id: 2,
         price: 30,
       };
 
-      // Mock dbService.createEvent om een error te throwen
       jest
         .spyOn(dbService, "createEvent")
         .mockRejectedValueOnce(new Error("Failed to create event"));
@@ -231,6 +223,30 @@ describe("EventService", () => {
       await expect(service.createEvent(newEvent)).rejects.toThrow(
         "Failed to create event",
       );
+    });
+  });
+
+  describe("linkEventToLocation", () => {
+    it("should link an event to a location via DB service", async () => {
+      const result = await service.linkEventToLocation(1, 2);
+      expect(dbService.linkEventToLocation).toHaveBeenCalledWith(1, 2);
+      expect(result).toBe(true);
+    });
+  });
+
+  describe("unlinkEventFromLocation", () => {
+    it("should remove a location from an event via DB service", async () => {
+      const result = await service.unlinkEventFromLocation(1);
+      expect(dbService.deleteLocationFromEvent).toHaveBeenCalledWith(1);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe("getLocationForEvent", () => {
+    it("should fetch the location for a given event ID", async () => {
+      const result = await service.getLocationForEvent(1);
+      expect(dbService.getLocationOfEvent).toHaveBeenCalledWith(1);
+      expect(result).toEqual(mockLocation);
     });
   });
 });

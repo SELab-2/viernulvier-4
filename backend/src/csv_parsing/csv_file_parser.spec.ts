@@ -83,7 +83,6 @@ describe("CSVFileParser.transformEventRow", () => {
     const row = {
       Starttime: "2024-01-01 10:00:00",
       Endtime: "2024-01-01 12:00:00",
-      Hall: "Main Hall",
       Production: "5",
       Genre: "drama",
       Price: "25",
@@ -94,7 +93,6 @@ describe("CSVFileParser.transformEventRow", () => {
     expect(result).toEqual({
       starttime: new Date("2024-01-01 10:00:00").toISOString(),
       endtime: new Date("2024-01-01 12:00:00").toISOString(),
-      hall: "Main Hall",
       production_id: 5,
       price: 25,
     });
@@ -104,7 +102,6 @@ describe("CSVFileParser.transformEventRow", () => {
     const row = {
       Starttime: "2024-01-01 10:00:00",
       Endtime: "0000-00-00 00:00:00",
-      Hall: "Main Hall",
       Production: "5",
       Price: "",
     };
@@ -119,7 +116,6 @@ describe("CSVFileParser.transformEventRow", () => {
     const row = {
       Starttime: "invalid-date",
       Endtime: "",
-      Hall: "Main Hall",
       Production: "5",
       Price: "10",
     };
@@ -133,7 +129,6 @@ describe("CSVFileParser.transformEventRow", () => {
     const row = {
       Starttime: "2024-01-01 10:00:00",
       Endtime: "",
-      Hall: "Main Hall",
       Production: "abc",
       Price: "10",
     };
@@ -200,7 +195,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
         {
           Starttime: "2025-05-01 14:00:00",
           Endtime: "2025-05-01 15:00:00",
-          Hall: "Side Hall",
           Production: "10",
           Price: "20",
         },
@@ -208,7 +202,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
           // bad start time will be skipped by transform
           Starttime: "not-a-date",
           Endtime: "",
-          Hall: "Side Hall",
           Production: "10",
           Price: "20",
         },
@@ -220,7 +213,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
     expect(events[0]).toEqual({
       starttime: new Date("2025-05-01 14:00:00").toISOString(),
       endtime: new Date("2025-05-01 15:00:00").toISOString(),
-      hall: "Side Hall",
       production_id: 10,
       price: 20,
     });
@@ -279,7 +271,6 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
         {
           Starttime: "2025-06-01 10:00:00",
           Endtime: "2025-06-01 11:00:00",
-          Hall: "Hall A",
           Production: "1",
           Price: "15",
         },
@@ -301,7 +292,6 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
         {
           Starttime: "2025-06-01 10:00:00",
           Endtime: "",
-          Hall: "Hall B",
           Production: "2",
           Price: "0",
         },
