@@ -203,4 +203,27 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer()).delete("/location/1").expect(401);
     });
   });
+
+  describe("Auth endpoints authentication", () => {
+    it("POST /auth/login should pass without API Key.", async () => {
+      // * Note: This will return badrequest because we are passing no body.
+      await request(app.getHttpServer()).post("/auth/login").expect(400);
+    });
+
+    it("GET /auth should fail without API key.", async () => {
+      await request(app.getHttpServer()).get("/auth").expect(401);
+    });
+
+    it("POST /auth should fail without API key.", async () => {
+      await request(app.getHttpServer()).post("/auth").expect(401);
+    });
+
+    it("PATCH /auth should fail without API key.", async () => {
+      await request(app.getHttpServer()).patch("/auth").expect(401);
+    });
+
+    it("DELETE /auth/:accountId should fail without API key.", async () => {
+      await request(app.getHttpServer()).delete("/auth/1").expect(401);
+    });
+  });
 });
