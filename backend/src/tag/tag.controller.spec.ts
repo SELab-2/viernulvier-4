@@ -1,8 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { TagController } from "./tag.controller";
 import { TagService } from "./tag.service";
-import { TagDto, CreateTagDto, UpdateTagDto } from "../dto/dto";
+import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
 
 describe("TagController", () => {
   let controller: TagController;
@@ -31,7 +32,16 @@ describe("TagController", () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<TagController>(TagController);
     service = module.get<TagService>(TagService);

@@ -10,6 +10,7 @@ import { ProductionDatabaseService } from "../src/database/db.production.service
 import { TagDatabaseService } from "../src/database/db.tag.service";
 
 import request from "supertest";
+import { ApiKeyGuard } from "../src/auth/authGuard";
 
 // Mock data
 
@@ -102,6 +103,10 @@ async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [BlogModule, EventModule, ProductionModule, TagModule],
   })
+    .overrideGuard(ApiKeyGuard)
+    .useValue({
+      canActivate: jest.fn(() => true),
+    })
     .overrideProvider(BlogDatabaseService)
     .useFactory({ factory: mockBlogDbService })
     .overrideProvider(EventDatabaseService)

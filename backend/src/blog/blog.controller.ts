@@ -8,12 +8,19 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
+import { ApiKeyGuard } from "../auth/authGuard";
 
 @Controller("blog")
 export class BlogController {
@@ -51,6 +58,8 @@ export class BlogController {
    * @param createBlog The Blog object that should be created, excluding the id.
    * @returns The newly created Blog object.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates a new blog." })
   @ApiBody({ type: CreateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Created a new Blog." })
@@ -67,6 +76,8 @@ export class BlogController {
    * @param blog The Blog we want to replace it with.
    * @returns The replaced Blog.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing blog." })
   @ApiBody({ type: BlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Replaced Blog." })
@@ -84,6 +95,8 @@ export class BlogController {
    * @param blog The Partial Blog object with fields filled that we want to modify.
    * @returns The modified Blog.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing blog." })
   @ApiBody({ type: UpdateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Modified Blog." })
@@ -100,6 +113,8 @@ export class BlogController {
    * @param id The ID of the Blog we want to delete.
    * @returns Nothing.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Delete an existing blog." })
   @ApiOkResponse({ description: "Deleted Blog." })
   @Delete(":id")

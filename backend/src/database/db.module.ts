@@ -5,6 +5,8 @@ import { EventDatabaseService } from "./db.event.service";
 import { BlogDatabaseService } from "./db.blog.service";
 import { TagDatabaseService } from "./db.tag.service";
 import { LocationDatabaseService } from "./db.location.service";
+import { ApiKeyDatabaseService } from "./db.apiKey.service";
+import { AccountDatabaseService } from "./db.account.service";
 
 @Module({
   imports: [],
@@ -15,6 +17,8 @@ import { LocationDatabaseService } from "./db.location.service";
     EventDatabaseService,
     BlogDatabaseService,
     TagDatabaseService,
+    ApiKeyDatabaseService,
+    AccountDatabaseService,
     LocationDatabaseService,
   ],
   controllers: [],
@@ -26,6 +30,8 @@ import { LocationDatabaseService } from "./db.location.service";
     BlogDatabaseService,
     TagDatabaseService,
     LocationDatabaseService,
+    ApiKeyDatabaseService,
+    AccountDatabaseService,
   ],
 })
 export class DbModule {}
