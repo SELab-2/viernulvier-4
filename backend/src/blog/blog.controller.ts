@@ -22,12 +22,12 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 
-@Controller("blog")
+@Controller("blogs")
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   /**
-   * Responds to a GET to "/blog"
+   * Responds to a GET to "/blogs"
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
@@ -42,19 +42,21 @@ export class BlogController {
   }
 
   /**
-   * Responds to a GET to "/blog/:id"
-   * @param id The ID of the Blog that will be fetched.
+   * Responds to a GET to "/blogs/:blogId"
+   * @param blogId The ID of the Blog that will be fetched.
    * @returns The Blog corresponding to ID if there was one.
    */
   @ApiOperation({ summary: "Returns a single blog." })
   @ApiOkResponse({ type: BlogDto, description: "Found Blog." })
-  @Get(":id")
-  async getBlogById(@Param("id", ParseIntPipe) id: number): Promise<BlogDto> {
-    return await this.blogService.getBlogById(id);
+  @Get(":blogId")
+  async getBlogById(
+    @Param("blogId", ParseIntPipe) blogId: number,
+  ): Promise<BlogDto> {
+    return await this.blogService.getBlogById(blogId);
   }
 
   /**
-   * Responds to a POST to "/blog"
+   * Responds to a POST to "/blogs"
    * @param createBlog The Blog object that should be created, excluding the id.
    * @returns The newly created Blog object.
    */
@@ -71,8 +73,8 @@ export class BlogController {
   }
 
   /**
-   * Responds to a PUT to "/blog/:id"
-   * @param id The ID of the Blog we want to replace.
+   * Responds to a PUT to "/blogs/:blogId"
+   * @param blogId The ID of the Blog we want to replace.
    * @param blog The Blog we want to replace it with.
    * @returns The replaced Blog.
    */
@@ -81,17 +83,17 @@ export class BlogController {
   @ApiOperation({ summary: "Replaces an existing blog." })
   @ApiBody({ type: BlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Replaced Blog." })
-  @Put(":id")
+  @Put(":blogId")
   async replaceBlog(
-    @Param("id", ParseIntPipe) id: number,
+    @Param("blogId", ParseIntPipe) blogId: number,
     @Body(new ZodValidationPipe(BlogSchema)) blog: BlogDto,
   ): Promise<BlogDto> {
-    return await this.blogService.replaceBlog(id, blog);
+    return await this.blogService.replaceBlog(blogId, blog);
   }
 
   /**
-   * Responds to a PATCH to "/blog/:id"
-   * @param id The ID of the Blog we want to modify.
+   * Responds to a PATCH to "/blogs/:blogId"
+   * @param blogId The ID of the Blog we want to modify.
    * @param blog The Partial Blog object with fields filled that we want to modify.
    * @returns The modified Blog.
    */
@@ -100,25 +102,27 @@ export class BlogController {
   @ApiOperation({ summary: "Modifies an existing blog." })
   @ApiBody({ type: UpdateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Modified Blog." })
-  @Patch(":id")
+  @Patch(":blogId")
   async modifyBlog(
-    @Param("id", ParseIntPipe) id: number,
+    @Param("blogId", ParseIntPipe) blogId: number,
     @Body(new ZodValidationPipe(UpdateBlogSchema)) blog: UpdateBlogDto,
   ): Promise<BlogDto> {
-    return await this.blogService.modifyBlog(id, blog);
+    return await this.blogService.modifyBlog(blogId, blog);
   }
 
   /**
-   * Responds to a DELETE to "/blog/:id"
-   * @param id The ID of the Blog we want to delete.
+   * Responds to a DELETE to "/blogs/:blogId"
+   * @param blogId The ID of the Blog we want to delete.
    * @returns Nothing.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Delete an existing blog." })
   @ApiOkResponse({ description: "Deleted Blog." })
-  @Delete(":id")
-  async deleteBlog(@Param("id", ParseIntPipe) id: number): Promise<void> {
-    return await this.blogService.deleteBlog(id);
+  @Delete(":blogId")
+  async deleteBlog(
+    @Param("blogId", ParseIntPipe) blogId: number,
+  ): Promise<void> {
+    return await this.blogService.deleteBlog(blogId);
   }
 }
