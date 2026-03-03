@@ -410,6 +410,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
   };
   const fakeTagService: any = {
     createTag: jest.fn(),
+    getAllTags: jest.fn().mockResolvedValue([]),
   };
 
   beforeEach(() => {

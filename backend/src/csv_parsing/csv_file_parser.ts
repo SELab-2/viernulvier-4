@@ -294,13 +294,26 @@ export class CSVFileParser {
       createdProductions.push(created);
     }
 
-    for (const tag of tags) {
-      // insert tags, ignoring duplicates
-      const tagObject: TagDto = await tagService.createTag({ tag: tag });
-      // link tags to productions
-      for (const link of productionTagLinks.filter((l) => l.tagName === tag)) {
-        productionService.addTagToProduction(link.productionId, tagObject.id);
+    // prepopulate a map with existing locations so we don't create duplicates
+    const tagMap: Map<string, number> = new Map();
+    const existingTags = await tagService.getAllTags();
+    for (const tag of existingTags) {
+      tagMap.set(tag.tag, tag.id);
+    }
+
+    for (const tagName of tags) {
+      if (!tagMap.has(tagName)) {
+        // insert tags, ignoring duplicates
+        const tagObject: TagDto = await tagService.createTag({ tag: tagName });
+        tagMap.set(tagName, tagObject.id);
       }
+    }
+
+    // link tags to productions
+    for (const link of productionTagLinks) {
+      const tagId = tagMap.get(link.tagName);
+      if (!tagId) continue;
+      await productionService.addTagToProduction(link.productionId, tagId);
     }
 
     return createdProductions;
