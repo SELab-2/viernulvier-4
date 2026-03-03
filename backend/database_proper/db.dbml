@@ -66,6 +66,7 @@ Table api_keys {
   id int [pk, increment]
   key text [not null, unique]
   active boolean [not null, default: true]
+  super_key boolean [not null, default: false]
 }
 
 Table account_api_keys {
