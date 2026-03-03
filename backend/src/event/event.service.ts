@@ -3,6 +3,7 @@ import type {
   CreateEventDto,
   EventDto,
   FilterEventDto,
+  LocationDto,
   UpdateEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
@@ -78,6 +79,36 @@ export class EventService {
    */
   async createEvent(newEvent: CreateEventDto): Promise<EventDto> {
     return await this.eventDBService.createEvent(newEvent);
+  }
+
+  /**
+   * Links an existing Location to an Event.
+   * @param eventId The ID of the Event.
+   * @param locationId The ID of the Location.
+   * @returns T/F whether the link went through.
+   */
+  async linkEventToLocation(
+    eventId: number,
+    locationId: number,
+  ): Promise<boolean> {
+    return await this.eventDBService.linkEventToLocation(eventId, locationId);
+  }
+
+  /**
+   * Removes a Location from the Event.
+   * @param eventId The ID of the Event.
+   */
+  async unlinkEventFromLocation(eventId: number): Promise<void> {
+    await this.eventDBService.deleteLocationFromEvent(eventId);
+  }
+
+  /**
+   * Returns the Location Linked to the event with ID.
+   * @param eventId The ID of the Event.
+   * @returns The Location.
+   */
+  async getLocationForEvent(eventId: number): Promise<LocationDto> {
+    return await this.eventDBService.getLocationOfEvent(eventId);
   }
 }
 

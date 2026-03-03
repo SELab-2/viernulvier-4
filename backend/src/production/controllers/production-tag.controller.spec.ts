@@ -3,6 +3,7 @@ import { ProductionTagController } from "./production-tag.controller";
 import { ProductionService } from "../production.service";
 import { ProductionDto, TagDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 
 describe("ProductionTagController", () => {
   let controller: ProductionTagController;
@@ -41,7 +42,16 @@ describe("ProductionTagController", () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .overrideGuard(SuperApiKeyGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<ProductionTagController>(ProductionTagController);
     service = module.get<ProductionService>(ProductionService);

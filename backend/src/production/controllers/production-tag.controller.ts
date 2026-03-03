@@ -5,10 +5,17 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  UseGuards,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
-import { ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ProductionDto, TagDto } from "../../dto/dto";
+import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
  * Handles the Relationships between Productions and Tags.
@@ -40,6 +47,8 @@ export class ProductionTagController {
    * @param tagId The ID of the Tag.
    * @returns The altered Production.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Adds a Tag to a Production." })
   @ApiOkResponse({
     type: ProductionDto,
@@ -59,6 +68,8 @@ export class ProductionTagController {
    * @param tagId The ID of the Tag.
    * @returns The altered Production.
    */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Removes a Tag from a Production." })
   @ApiOkResponse({
     type: ProductionDto,
