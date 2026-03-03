@@ -1,12 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreateEventDto,
-  EventDto,
-  FilterEventDto,
-  LocationDto,
-  UpdateEventDto,
-} from "../dto/dto";
+import { CreateEventDto, EventDto, FilterEventDto, LocationDto, UpdateEventDto, } from "../dto/dto";
 import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
@@ -21,7 +15,7 @@ export class EventDatabaseService {
    */
   async getLocationOfEvent(id: number): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.name
+    SELECT l.id, l.location
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
