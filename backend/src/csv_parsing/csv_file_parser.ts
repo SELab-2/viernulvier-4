@@ -79,7 +79,7 @@ export class CSVFileParser {
     });
   }
 
-  static transformEventRow(row: Record<string, string>): CreateEventDto {
+  static transformEventRow(row: Record<string, string>): CreateEventDto & { location: string } {
     let endTime: string | null = null;
 
     // Check for invalid date formats and handle them accordingly
@@ -99,11 +99,14 @@ export class CSVFileParser {
       throw new Error(`Invalid production id: ${row.Production}`);
     }
 
+    const location = (row.Hall || "").trim();
+
     return {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       production_id: productionId,
       price: row.Price ? Number(row.Price) : null,
+      location: location,
     };
   }
 
