@@ -8,6 +8,8 @@ import { BlogDatabaseService } from "../src/database/db.blog.service";
 import { EventDatabaseService } from "../src/database/db.event.service";
 import { ProductionDatabaseService } from "../src/database/db.production.service";
 import { TagDatabaseService } from "../src/database/db.tag.service";
+import { LocationModule } from "../src/location/location.module";
+import { LocationDatabaseService } from "../src/database/db.location.service";
 
 import request from "supertest";
 import { ApiKeyGuard } from "../src/auth/authGuard";
@@ -53,7 +55,20 @@ const mockEvent = {
   production_id: 1,
 };
 
+const mockLocation = {
+  id: 1,
+  location: "Main Stage",
+};
+
 // Mock DB service factories
+
+const mockLocationDbService = () => ({
+  getLocations: jest.fn().mockResolvedValue([mockLocation]),
+  getLocationById: jest.fn().mockResolvedValue(mockLocation),
+  createLocation: jest.fn().mockResolvedValue(mockLocation),
+  updateLocation: jest.fn().mockResolvedValue(mockLocation),
+  deleteLocation: jest.fn().mockResolvedValue(undefined),
+});
 
 const mockBlogDbService = () => ({
   getBlogs: jest.fn().mockResolvedValue([mockBlog, mockBlog2]),
@@ -72,6 +87,9 @@ const mockEventDbService = () => ({
   getBlogsOfEvent: jest.fn().mockResolvedValue([mockBlog]),
   linkBlogWithEventID: jest.fn().mockResolvedValue(undefined),
   deleteBlogFromEvent: jest.fn().mockResolvedValue(undefined),
+  getLocationOfEvent: jest.fn().mockResolvedValue(mockLocation),
+  linkEventToLocation: jest.fn().mockResolvedValue(true),
+  deleteLocationFromEvent: jest.fn().mockResolvedValue(undefined),
 });
 
 const mockProductionDbService = () => ({
@@ -101,12 +119,17 @@ const mockTagDbService = () => ({
 
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [BlogModule, EventModule, ProductionModule, TagModule],
+    // Add LocationModule here:
+    imports: [
+      BlogModule,
+      EventModule,
+      ProductionModule,
+      TagModule,
+      LocationModule,
+    ],
   })
     .overrideGuard(ApiKeyGuard)
-    .useValue({
-      canActivate: jest.fn(() => true),
-    })
+    .useValue({ canActivate: jest.fn(() => true) })
     .overrideProvider(BlogDatabaseService)
     .useFactory({ factory: mockBlogDbService })
     .overrideProvider(EventDatabaseService)
@@ -115,6 +138,9 @@ async function buildApp(): Promise<INestApplication> {
     .useFactory({ factory: mockProductionDbService })
     .overrideProvider(TagDatabaseService)
     .useFactory({ factory: mockTagDbService })
+    // Add this override:
+    .overrideProvider(LocationDatabaseService)
+    .useFactory({ factory: mockLocationDbService })
     .compile();
 
   const app = moduleFixture.createNestApplication();
@@ -861,6 +887,32 @@ describe("EventController (e2e)", () => {
     });
   });
 
+  // PATCH /event/:id
+  describe("PATCH /event/:id", () => {
+    it("should return 200 with the modified event", () => {
+      return request(app.getHttpServer())
+        .patch("/event/1")
+        .send({ price: 25.5 })
+        .expect(200)
+        .expect(mockEvent);
+    });
+
+    it("should call eventDb.updateEvent", async () => {
+      await request(app.getHttpServer())
+        .patch("/event/1")
+        .send({ price: 25.5 });
+      // Assuming your service calls updateEvent for modifications
+      expect(eventDb.updateEvent).toHaveBeenCalled();
+    });
+
+    it("should return 400 when id is not a number", () => {
+      return request(app.getHttpServer())
+        .patch("/event/abc")
+        .send({ price: 25.5 })
+        .expect(400);
+    });
+  });
+
   // DELETE /event/:id
   describe("DELETE /event/:id", () => {
     it("should return 200 when event is deleted", () => {
@@ -874,6 +926,165 @@ describe("EventController (e2e)", () => {
 
     it("should return 400 when id is not a number", () => {
       return request(app.getHttpServer()).delete("/event/abc").expect(400);
+    });
+  });
+
+  // LOCATION endpoints
+
+  describe("LocationController (e2e)", () => {
+    let app: INestApplication;
+    let locationDb: LocationDatabaseService;
+
+    beforeEach(async () => {
+      app = await buildApp();
+      locationDb = app.get<LocationDatabaseService>(LocationDatabaseService);
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
+
+    // GET /location
+    describe("GET /location", () => {
+      it("should return 200 with an array of locations", () => {
+        return request(app.getHttpServer())
+          .get("/location")
+          .expect(200)
+          .expect([mockLocation]);
+      });
+    });
+
+    // GET /location/:locationId
+    describe("GET /location/:locationId", () => {
+      it("should return 200 with the correct location", () => {
+        return request(app.getHttpServer())
+          .get("/location/1")
+          .expect(200)
+          .expect(mockLocation);
+      });
+
+      it("should return 400 when locationId is not a number", () => {
+        return request(app.getHttpServer()).get("/location/abc").expect(400);
+      });
+    });
+
+    // POST /location
+    describe("POST /location", () => {
+      it("should return 201 with the created location", () => {
+        const createPayload = { location: "Side Stage" };
+        return request(app.getHttpServer())
+          .post("/location")
+          .send(createPayload)
+          .expect(201)
+          .expect(mockLocation);
+      });
+    });
+
+    // PATCH /location
+    // Note: Your controller uses @Patch() without an ID param, expecting it in the DTO
+    describe("PATCH /location", () => {
+      it("should return 200 with the updated location", () => {
+        const updatePayload = { id: 1, location: "Updated Stage" };
+        return request(app.getHttpServer())
+          .patch("/location")
+          .send(updatePayload)
+          .expect(200)
+          .expect(mockLocation);
+      });
+    });
+
+    // DELETE /location/:locationId
+    describe("DELETE /location/:locationId", () => {
+      it("should return 200 after deleting location", () => {
+        return request(app.getHttpServer()).delete("/location/1").expect(200);
+      });
+
+      it("should return 400 when locationId is not a number", () => {
+        return request(app.getHttpServer()).delete("/location/abc").expect(400);
+      });
+    });
+  });
+
+  // EVENT - LOCATION relationship endpoints
+
+  describe("EventLocationController (e2e)", () => {
+    let app: INestApplication;
+    let eventDb: EventDatabaseService;
+
+    beforeEach(async () => {
+      app = await buildApp();
+      eventDb = app.get<EventDatabaseService>(EventDatabaseService);
+    });
+
+    afterEach(async () => {
+      await app.close();
+    });
+
+    // GET /event/:eventId/location
+    describe("GET /event/:eventId/location", () => {
+      it("should return 200 with the location of the event", () => {
+        return request(app.getHttpServer())
+          .get("/event/1/location")
+          .expect(200)
+          .expect(mockLocation);
+      });
+
+      it("should call eventDb.getLocationOfEvent with the correct id", async () => {
+        await request(app.getHttpServer()).get("/event/1/location");
+        expect(eventDb.getLocationOfEvent).toHaveBeenCalledWith(1);
+      });
+
+      it("should return 400 when eventId is not a number", () => {
+        return request(app.getHttpServer())
+          .get("/event/abc/location")
+          .expect(400);
+      });
+    });
+
+    // PUT /event/:eventId/location/:locationId
+    describe("PUT /event/:eventId/location/:locationId", () => {
+      it("should return 200 after successfully linking", () => {
+        return request(app.getHttpServer())
+          .put("/event/1/location/2")
+          .expect(200);
+      });
+
+      it("should call eventDb.linkEventToLocation with correct ids", async () => {
+        await request(app.getHttpServer()).put("/event/1/location/2");
+        expect(eventDb.linkEventToLocation).toHaveBeenCalledWith(1, 2);
+      });
+
+      it("should return 400 when eventId is not a number", () => {
+        return request(app.getHttpServer())
+          .put("/event/abc/location/1")
+          .expect(400);
+      });
+
+      it("should return 400 when locationId is not a number", () => {
+        return request(app.getHttpServer())
+          .put("/event/1/location/abc")
+          .expect(400);
+      });
+    });
+
+    // DELETE /event/:eventId/location
+    describe("DELETE /event/:eventId/location", () => {
+      it("should return 200 after unlinking", () => {
+        return request(app.getHttpServer())
+          .delete("/event/1/location")
+          .expect(200);
+      });
+
+      it("should call eventDb.deleteLocationFromEvent with the eventId", async () => {
+        await request(app.getHttpServer()).delete("/event/1/location");
+        expect(eventDb.deleteLocationFromEvent).toHaveBeenCalledWith(1);
+      });
+
+      it("should return 400 when eventId is not a number", () => {
+        return request(app.getHttpServer())
+          .delete("/event/abc/location")
+          .expect(400);
+      });
     });
   });
 });
