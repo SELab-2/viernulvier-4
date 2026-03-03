@@ -21,12 +21,12 @@ import { ApiKeyGuard } from "../auth/authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import { CreateTagSchema, UpdateTagSchema } from "@repo/common";
 
-@Controller("tag")
+@Controller("tags")
 export class TagController {
   constructor(private readonly tagService: TagService) {}
 
   /**
-   * Responds to GET /tag
+   * Responds to GET /tags
    * @returns All TagDto objects
    */
   @ApiOperation({ summary: "Returns all Tag objects." })
@@ -41,19 +41,21 @@ export class TagController {
   }
 
   /**
-   * Responds to GET /tag/:id
-   * @param id ID in the URL of the request.
+   * Responds to GET /tags/:tagId
+   * @param tagId ID in the URL of the request.
    * @returns The TagDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Tag with id in the URL." })
   @ApiOkResponse({ type: TagDto, description: "Tag Found." })
-  @Get(":id")
-  async getTagById(@Param("id", ParseIntPipe) id: number): Promise<TagDto> {
-    return await this.tagService.getTagById(id);
+  @Get(":tagId")
+  async getTagById(
+    @Param("tagId", ParseIntPipe) tagId: number,
+  ): Promise<TagDto> {
+    return await this.tagService.getTagById(tagId);
   }
 
   /**
-   * Responds to a POST to "/tag".
+   * Responds to a POST to "/tags".
    * @param createTag The new TagDto data we want to add
    * @returns The newly created TagDto.
    */
@@ -70,8 +72,8 @@ export class TagController {
   }
 
   /**
-   * Responds to a PATCH to "/tag/:id".
-   * @param id The ID in the URL.
+   * Responds to a PATCH to "/tags/:tagId".
+   * @param tagId The ID in the URL.
    * @param updateTag The parsed UpdateTagDto object.
    * @returns The newly updated TagDto.
    */
@@ -80,27 +82,27 @@ export class TagController {
   @ApiOperation({ summary: "Modifies an existing Tag." })
   @ApiBody({ type: UpdateTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
-  @Patch(":id")
+  @Patch(":tagId")
   async updateTag(
-    @Param("id", ParseIntPipe) id: number,
+    @Param("tagId", ParseIntPipe) tagId: number,
     @Body(new ZodValidationPipe(UpdateTagSchema)) updateTag: UpdateTagDto,
   ): Promise<TagDto> {
-    return await this.tagService.updateTag(id, updateTag);
+    return await this.tagService.updateTag(tagId, updateTag);
   }
 
   /**
-   * Responds to a DELETE to "/tag/:id".
-   * @param id The ID in the URL.
+   * Responds to a DELETE to "/tags/:tagId".
+   * @param tagId The ID in the URL.
    * @returns Nothing.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes a Tag." })
   @ApiOkResponse({ description: "Tag Deleted." })
-  @Delete(":id")
+  @Delete(":tagId")
   async deleteTag(
-    @Param("id", ParseIntPipe) id: number,
+    @Param("tagId", ParseIntPipe) tagId: number,
   ): Promise<{ message: string }> {
-    return await this.tagService.deleteTag(id);
+    return await this.tagService.deleteTag(tagId);
   }
 }
