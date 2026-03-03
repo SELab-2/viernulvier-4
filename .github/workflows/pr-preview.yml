@@ -20,6 +20,19 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Check DB Port
+        run: |
+          echo "Checking if PostgreSQL is listening on port 5432..."
+          nc -zv 127.0.0.1 5432 || echo "Port 5432 is CLOSED"
+
+      - name: Create env file
+        run: |
+          echo "DB_USER_DEV=selab2" >> backend/.env
+          echo "DB_HOST_DEV=127.0.0.1" >> backend/.env
+          echo "DB_NAME_DEV=viernulvier" >> backend/.env
+          echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> backend/.env
+          echo "DB_PORT_DEV=5432" >> backend/.env
+
       # STEP 2: Build & Test
       - name: Install and Test
         run: |
