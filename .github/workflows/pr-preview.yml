@@ -25,6 +25,12 @@ jobs:
         run: |
           npm i
           npm run test
+        env:
+          DB_USER_DEV: selab2
+          DB_HOST_DEV: 127.0.0.1
+          DB_NAME_DEV: viernulvier
+          DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
+          DB_PORT_DEV: 5432
 
       # STAP 3: Deploy (Lokaal op de server)
       - name: Deploy preview
