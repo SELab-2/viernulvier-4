@@ -9,6 +9,7 @@ import {
 import { EventService } from "../event/event.service";
 import { ProductionService } from "../production/production.service";
 import { TagService } from "../tag/tag.service";
+import { LocationService } from "../location/location.service";
 
 /**
  * Type used to structure production import
@@ -17,6 +18,14 @@ type ParsedProductionImport = {
   productions: ProductionDto[];
   tags: string[];
   productionTagLinks: { productionId: number; tagName: string }[];
+};
+
+/**
+ * Internal helper used when parsing events.
+ */
+type ParsedEventRow = {
+  event: CreateEventDto;
+  location: string;
 };
 
 export class CSVFileParser {
@@ -79,7 +88,9 @@ export class CSVFileParser {
     });
   }
 
-  static transformEventRow(row: Record<string, string>): CreateEventDto & { location: string } {
+  static transformEventRow(
+    row: Record<string, string>,
+  ): CreateEventDto & { location: string } {
     let endTime: string | null = null;
 
     // Check for invalid date formats and handle them accordingly
@@ -139,17 +150,25 @@ export class CSVFileParser {
   }
 
   /**
-   * Parse events from a CSV file and return them as an array of CreateEventDto objects
+   * Parse events from a CSV file and return them along with a raw location
+   * string.
    * @param filePath - Path to the CSV file containing events
-   * @return A promise that resolves to an array of CreateEventDto objects
-   * @throws An error if the file cannot be read
+   * @return A promise that resolves to an array of objects containing the
+   *         event DTO and the value of the `Hall` column (may be empty).
    */
-  static parseEventsCSV(filePath: string): Promise<CreateEventDto[]> {
-    return this.parseCSVWithSchema<CreateEventDto>(
+  static async parseEventsCSV(filePath: string): Promise<ParsedEventRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreateEventDto & { location: string }
+    >(
       filePath,
-      CreateEventSchema,
+      CreateEventSchema.extend({ location: string() }),
       this.transformEventRow,
     );
+
+    return parsed.map((r) => {
+      const { location, ...eventData } = r;
+      return { event: eventData, location: location };
+    });
   }
 
   /**
@@ -198,20 +217,39 @@ export class CSVFileParser {
   static async insertEventsFromCSV(
     filePath: string,
     eventService: EventService,
+    locationService: LocationService,
   ): Promise<EventDto[]> {
-    const events = await this.parseEventsCSV(filePath);
-    const createdEvents = [];
+    const parsed = await this.parseEventsCSV(filePath);
+    const createdEvents: EventDto[] = [];
 
-    for (const event of events) {
-      try {
-        const createdEvent = await eventService.createEvent(event);
-        createdEvents.push(createdEvent);
-      } catch (error) {
-        throw new Error(
-          `Failed to insert event: ${JSON.stringify(event)} - ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
+    // prepopulate a map with existing locations so we don't create duplicates
+    const locationMap: Map<string, number> = new Map();
+    const existingLoc = await locationService.getLocations();
+    for (const loc of existingLoc) {
+      locationMap.set(loc.location, loc.id);
+    }
+
+    for (const { event, location } of parsed) {
+      let locId: number | null = null;
+      const loc = location.trim();
+
+      // if there's a location, either find it in the map or create it and add to the map
+      if (loc) {
+        if (locationMap.has(loc)) {
+          locId = locationMap.get(loc)!;
+        } else {
+          const createdLoc = await locationService.createLocation({
+            location: loc,
+          });
+          locationMap.set(loc, createdLoc.id);
+        }
+      }
+      
+      //create the event and link it to the location if applicable
+      const createdEvent = await eventService.createEvent(event);
+      createdEvents.push(createdEvent);
+      if (locId !== null) {
+        await eventService.linkEventToLocation(createdEvent.id, locId);
       }
     }
 
@@ -230,7 +268,8 @@ export class CSVFileParser {
     productionService: ProductionService,
     tagService: TagService,
   ): Promise<ProductionDto[]> {
-    const { productions, tags, productionTagLinks } = await this.parseProductionsCSV(filePath);
+    const { productions, tags, productionTagLinks } =
+      await this.parseProductionsCSV(filePath);
     const createdProductions: ProductionDto[] = [];
 
     // insert productions
@@ -239,7 +278,6 @@ export class CSVFileParser {
       createdProductions.push(created);
     }
 
-    
     for (const tag of tags) {
       // insert tags, ignoring duplicates
       const tagObject: TagDto = await tagService.createTag({ tag: tag });
@@ -250,7 +288,6 @@ export class CSVFileParser {
     }
 
     return createdProductions;
-
   }
 
   //TODO: add inserting function for productions once new insert endpoint is added to backend
