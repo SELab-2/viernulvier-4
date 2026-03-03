@@ -94,8 +94,10 @@ CREATE TABLE accounts
 
 CREATE TABLE api_keys
 (
-    id  SERIAL PRIMARY KEY,
-    key VARCHAR(255) NOT NULL UNIQUE -- up to 256 length api keys supported, less always possible (we use 128 length)
+    id        SERIAL PRIMARY KEY,
+    key       VARCHAR(255) NOT NULL UNIQUE, -- up to 256 length api keys supported, less always possible (we use 128 length)
+    active    BOOLEAN      NOT NULL DEFAULT TRUE,
+    super_key BOOLEAN      NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE account_api_keys
