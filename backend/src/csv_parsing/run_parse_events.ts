@@ -21,9 +21,26 @@ async function main() {
   }
 
   try {
-    const events = await CSVFileParser.parseEventsCSV(file);
-    console.log(`Parsed ${events.length} events from ${file}`);
-    console.log(JSON.stringify(events.slice(0, maxPrint), null, 2));
+    const parsed = await CSVFileParser.parseEventsCSV(file);
+
+    // Extract unique locations
+    const locationsSet = new Set<string>();
+    parsed.forEach((item) => {
+      if (item.location.trim()) {
+        locationsSet.add(item.location);
+      }
+    });
+    const uniqueLocations = Array.from(locationsSet);
+
+    console.log(`Parsed ${parsed.length} events from ${file}`);
+
+    console.log("\nEvents (first " + Math.min(maxPrint, parsed.length) + "):");
+    console.log(JSON.stringify(parsed.slice(0, maxPrint), null, 2));
+    console.log(`Found ${uniqueLocations.length} unique locations`);
+    if (uniqueLocations.length > 0) {
+      console.log("\nLocations:");
+      console.log(JSON.stringify(uniqueLocations, null, 2));
+    }
   } catch (err) {
     console.error("Parsing failed:", err instanceof Error ? err.message : err);
     process.exit(3);
