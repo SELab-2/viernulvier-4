@@ -91,7 +91,6 @@ export class CSVFileParser {
     return {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
-      hall: row.Hall,
       production_id: productionId,
       price: row.Price ? Number(row.Price) : null,
     };
