@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
+import { ResourceGoneException } from "../../common/exceptions";
 import {
   CreateProductionSchema,
   FilterProductionSchema,
@@ -73,7 +74,11 @@ export class ProductionController {
   async getProductionById(
     @Param("productionId", ParseIntPipe) productionId: number,
   ): Promise<ProductionDto> {
-    return await this.productionService.getProductionById(productionId);
+    const production = await this.productionService.getProductionById(productionId);
+    if (!production) {
+      throw new ResourceGoneException(`Production ${productionId} not found.`);
+    }
+    return production;
   }
 
   /**
@@ -92,10 +97,14 @@ export class ProductionController {
     @Param("productionId", ParseIntPipe) productionId: number,
     @Body(new ZodValidationPipe(ProductionSchema)) production: ProductionDto,
   ): Promise<ProductionDto> {
-    return await this.productionService.replaceProduction(
+    const updated = await this.productionService.replaceProduction(
       productionId,
       production,
     );
+    if (!updated) {
+      throw new ResourceGoneException(`Cannot replace: Production ${productionId} does not exist`);
+    }
+    return updated;
   }
 
   /**
@@ -115,10 +124,14 @@ export class ProductionController {
     @Body(new ZodValidationPipe(UpdateProductionSchema))
     patchData: UpdateProductionDto,
   ): Promise<ProductionDto> {
-    return await this.productionService.modifyProduction(
+    const updated = await this.productionService.modifyProduction(
       productionId,
       patchData,
     );
+    if (!updated) {
+      throw new ResourceGoneException(`Cannot modify: Production ${productionId} does not exist`);
+    }
+    return updated;
   }
 
   /**
@@ -134,6 +147,10 @@ export class ProductionController {
   async deleteProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
   ): Promise<void> {
+    const production = await this.productionService.getProductionById(productionId);
+    if (!production) {
+      throw new ResourceGoneException(`Cannot delete: Production ${productionId} does not exist`);
+    }
     return await this.productionService.deleteProduction(productionId);
   }
 
