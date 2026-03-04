@@ -1,19 +1,20 @@
+// no touchy!
 module.exports = {
   apps: [
     {
       name: "frontend",
       script: ".output/server/index.mjs",
-      cwd: "/home/selab2/project/frontend", // adjust to your project root
+      cwd: "/home/selab2/project/frontend",
       env: {
         PORT: 3001,
-        NUXT_API_BASE: "/api",
+        NUXT_API_BASE: "/api/docs",
         NUXT_BASE: "/archive/",
       },
     },
     {
       name: "backend",
       script: "dist/main.js",
-      cwd: "/home/selab2/project/backend", // adjust to your backend directory
+      cwd: "/home/selab2/project/backend",
       env: {
         PORT: 3000,
         NODE_ENV: "production",
