@@ -5,10 +5,13 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // server -> no touchy
-  if (process.env.NODE_ENV === "production") {
+  // server -> no touchy ----------------------- //
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction) {
     app.setGlobalPrefix("api");
   }
+  const swaggerPath = isProduction ? "api/docs" : "docs";
+  //------------------------------------//
 
   app.enableCors({
     origin: "http://localhost:3001", // Frontend DEV
@@ -28,7 +31,7 @@ async function bootstrap() {
     })
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("docs", app, documentFactory, {
+  SwaggerModule.setup(swaggerPath, app, documentFactory, {
     customCssUrl:
       "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.0/swagger-ui.min.css",
     customJs: [
