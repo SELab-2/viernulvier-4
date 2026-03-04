@@ -23,12 +23,12 @@ import { ZodValidationPipe } from "nestjs-zod";
 import { CreateLocationSchema, UpdateLocationSchema } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 
-@Controller("location")
+@Controller("locations")
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   /**
-   * Responds to a GET to "/location"
+   * Responds to a GET to "/locations"
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
@@ -43,7 +43,7 @@ export class LocationController {
   }
 
   /**
-   * Responds to a GET to "/location/:locationId"
+   * Responds to a GET to "/locations/:locationId"
    * @param locationId The ID of the Location we want to find.
    * @returns The Location with that ID.
    */
@@ -60,7 +60,7 @@ export class LocationController {
   }
 
   /**
-   * Responds to a POST to "/location"
+   * Responds to a POST to "/locations"
    * @param createLocation The Location we want to create.
    * @returns The newly created Location.
    */
@@ -81,7 +81,7 @@ export class LocationController {
   }
 
   /**
-   * Responds to a PATCH to "/location"
+   * Responds to a PATCH to "/locations"
    * @param updateLocation The Location we want to update.
    * @returns The newly updated Location.
    */
@@ -102,7 +102,7 @@ export class LocationController {
   }
 
   /**
-   * Responds to a DELETE to "/location/:locationId"
+   * Responds to a DELETE to "/locations/:locationId"
    * @param locationId The ID of the Location we want to delete.
    */
   @UseGuards(ApiKeyGuard)

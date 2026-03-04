@@ -278,7 +278,7 @@ export class ProductionDatabaseService {
    * @param production The production object that we want to insert.
    * @returns That same production object but returned from the Database.
    */
-  async insertProduction(production: ProductionDto): Promise<ProductionDto> {
+  async upsertProduction(production: ProductionDto): Promise<ProductionDto> {
     const query = `
       INSERT INTO productions (
         id,

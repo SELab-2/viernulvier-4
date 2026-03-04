@@ -17,13 +17,13 @@ import {
 import { LocationDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
-@ApiTags("Event - Location")
-@Controller("event/:eventId/location")
+@ApiTags("Events - Locations")
+@Controller("events/:eventId/locations")
 export class EventLocationController {
   constructor(private readonly eventService: EventService) {}
 
   /**
-   * Responds to GET /event/:eventId/location
+   * Responds to GET /events/:eventId/locations
    * @param eventId ID in the URL of the request.
    * @returns The Location corresponding to this event.
    */
@@ -39,7 +39,7 @@ export class EventLocationController {
   }
 
   /**
-   * Responds to PUT to "/event/:eventId/location/:locationId".
+   * Responds to PUT to "/events/:eventId/locations/:locationId".
    * @param eventId The ID of the Event.
    * @param locationId The ID of the Location.
    */
@@ -58,7 +58,7 @@ export class EventLocationController {
   }
 
   /**
-   * Responds to a DELETE to "/event/:eventId/location".
+   * Responds to a DELETE to "/events/:eventId/locations".
    * @param eventId The ID of the Event.
    * @returns Nothing
    */

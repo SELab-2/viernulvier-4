@@ -50,7 +50,9 @@ export class ProductionService {
     if (id !== production.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    return await this.productionDBService.updateProduction(production);
+    // * NOTE: Using Upsert here will make sure that
+    // * if the production does not yet exist it is created instead.
+    return await this.productionDBService.upsertProduction(production);
   }
 
   /**
@@ -94,17 +96,6 @@ export class ProductionService {
     newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionDBService.createProduction(newProduction);
-  }
-
-  /**
-   * Insert a Production into the database, ignoring any existing ones with the same id.
-   * @param production The Production we want to add.
-   * @returns The inserted Production.
-   */
-  async insertProduction(
-    production: ProductionDto,
-  ): Promise<ProductionDto> {
-    return await this.productionDBService.insertProduction(production);
   }
 
   // -- Blogs -- //

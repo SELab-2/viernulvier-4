@@ -38,7 +38,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 /**
  * Handles CORE functionality for Productions.
  */
-@Controller("production")
+@Controller("productions")
 export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
@@ -77,7 +77,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a PUT to "/production/:productionId".
+   * Responds to a PUT to "/productions/:productionId".
    * @param productionId The ID in the URL.
    * @param production The parsed ProductionDto object.
    * @returns The newly updated ProductionDto.
@@ -99,7 +99,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a PATCH to "/production/:productionId".
+   * Responds to a PATCH to "/productions/:productionId".
    * @param productionId The ID in the URL.
    * @param patchData The parsed UpdateProductionDto object.
    * @returns The newly updated ProductionDto.
@@ -122,7 +122,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a DELETE to "/production/:productionId".
+   * Responds to a DELETE to "/productions/:productionId".
    * @param productionId The ID in the URL.
    * @returns Nothing.
    */
@@ -138,7 +138,7 @@ export class ProductionController {
   }
 
   /**
-   * Responds to a POST to "/production".
+   * Responds to a POST to "/productions".
    * @param newProduction The new ProductionDto data we want to add
    * @returns The newly created ProductionDto.
    */
@@ -153,23 +153,5 @@ export class ProductionController {
     @Body() newProduction: CreateProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionService.createProduction(newProduction);
-  }
-
-  /**
-   * Responds to a POST to "/production/insert".
-   * @param production The new ProductionDto data we want to add/insert forcibly.
-   * @returns The inserted Production.
-   */
-  @UseGuards(ApiKeyGuard)
-  @ApiSecurity("apiKey")
-  @ApiOperation({ summary: "Inserts a Production." })
-  @ApiBody({ type: ProductionDto })
-  @ApiOkResponse({ type: ProductionDto, description: "Production inserted." })
-  @Post("insert")
-  @UsePipes(new ZodValidationPipe(ProductionSchema))
-  async insertProduction(
-    @Body() production: ProductionDto,
-  ): Promise<ProductionDto> {
-    return await this.productionService.insertProduction(production);
   }
 }

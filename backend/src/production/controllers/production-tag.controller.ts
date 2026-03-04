@@ -21,12 +21,12 @@ import { ApiKeyGuard } from "../../auth/authGuard";
  * Handles the Relationships between Productions and Tags.
  */
 @ApiTags("Production - Tag")
-@Controller("production/:productionId/tag")
+@Controller("productions/:productionId/tags")
 export class ProductionTagController {
   constructor(private readonly productionService: ProductionService) {}
 
   /**
-   * Responds to GET /production/:productionId/tag
+   * Responds to GET /productions/:productionId/tags
    * @param productionId ID in the URL of the request.
    * @returns The list of Tag objects for the Production
    */
@@ -42,7 +42,7 @@ export class ProductionTagController {
   }
 
   /**
-   * Responds to PUT to "/production/:productionId/tag/:tagId".
+   * Responds to PUT to "/productions/:productionId/tags/:tagId".
    * @param productionId The ID of the Production.
    * @param tagId The ID of the Tag.
    * @returns The altered Production.
@@ -63,7 +63,7 @@ export class ProductionTagController {
   }
 
   /**
-   * Responds to a DELETE to "/production/:productionId/tag/:tagId".
+   * Responds to a DELETE to "/productions/:productionId/tags/:tagId".
    * @param productionId The ID of the Production.
    * @param tagId The ID of the Tag.
    * @returns The altered Production.

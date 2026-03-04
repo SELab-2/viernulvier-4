@@ -52,7 +52,7 @@ describe("ProductionService", () => {
             updateProduction: jest.fn().mockResolvedValue(mockProduction),
             deleteProduction: jest.fn().mockResolvedValue(undefined),
             createProduction: jest.fn(),
-            insertProduction: jest.fn(),
+            upsertProduction: jest.fn().mockResolvedValue(mockProduction),
             getBlogsOfProduction: jest.fn(),
             linkBlogWithProductionID: jest.fn(),
             deleteBlogFromProduction: jest.fn(),
@@ -155,7 +155,7 @@ describe("ProductionService", () => {
   describe("replaceProduction", () => {
     it("should successfully replace and return the production", async () => {
       const result = await service.replaceProduction(1, mockProduction);
-      expect(dbService.updateProduction).toHaveBeenCalledWith(mockProduction);
+      expect(dbService.upsertProduction).toHaveBeenCalledWith(mockProduction);
       expect(result).toEqual(mockProduction);
     });
 
@@ -477,53 +477,6 @@ describe("ProductionService", () => {
       await expect(service.createProduction(newProduction)).rejects.toThrow(
         "Failed to create production",
       );
-    });
-  });
-
-  describe("insertProduction", () => {
-    it("should insert a production successfully", async () => {
-      // 1. Notice we use ProductionDto now and include the ID
-      const productionToInsert: ProductionDto = {
-        id: 999,
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
-      };
-
-      // 2. Spy on insertProduction instead of createProduction
-      jest
-        .spyOn(dbService, "insertProduction")
-        .mockResolvedValueOnce(productionToInsert);
-
-      // 3. Call the insert service method
-      const result = await service.insertProduction(productionToInsert);
-
-      // 4. Verify the correct method was called with the full DTO
-      expect(dbService.insertProduction).toHaveBeenCalledWith(
-        productionToInsert,
-      );
-      expect(result).toEqual(productionToInsert);
-    });
-
-    it("should handle database errors when insertion fails", async () => {
-      const productionToInsert: ProductionDto = {
-        id: 999,
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
-      };
-
-      jest
-        .spyOn(dbService, "insertProduction")
-        .mockRejectedValueOnce(new Error("Failed to insert production"));
-
-      await expect(
-        service.insertProduction(productionToInsert),
-      ).rejects.toThrow("Failed to insert production");
     });
   });
 });
