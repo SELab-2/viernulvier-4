@@ -49,6 +49,7 @@ jobs:
       - name: Deploy preview
         run: |
           PR=${{ github.event.pull_request.number }}
+          export NUXT_BASE="/previews/$PR/"
           PR_PATH="/home/selab2/project/previews/$PR"
           PORT="30$PR"
           
@@ -77,5 +78,5 @@ jobs:
           message: |
             🚀 **Preview Build succesfully deployed!**
             You can view the preview of this pull request at:
-            http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/frontend/
+            http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
           comment_tag: preview_link
