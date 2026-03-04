@@ -20,6 +20,7 @@ import {
 import { ApiKeyGuard } from "../auth/authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import { CreateTagSchema, UpdateTagSchema } from "@repo/common";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Controller("tags")
 export class TagController {
@@ -51,7 +52,11 @@ export class TagController {
   async getTagById(
     @Param("tagId", ParseIntPipe) tagId: number,
   ): Promise<TagDto> {
-    return await this.tagService.getTagById(tagId);
+    const tag = await this.tagService.getTagById(tagId);
+    if (!tag) {
+      throw new ResourceGoneException(`Tag ${tagId} not found.`);
+    }
+    return tag;
   }
 
   /**
@@ -87,7 +92,11 @@ export class TagController {
     @Param("tagId", ParseIntPipe) tagId: number,
     @Body(new ZodValidationPipe(UpdateTagSchema)) updateTag: UpdateTagDto,
   ): Promise<TagDto> {
-    return await this.tagService.updateTag(tagId, updateTag);
+    const updated = await this.tagService.updateTag(tagId, updateTag);
+    if (!updated) {
+      throw new ResourceGoneException(`Cannot update: Tag ${tagId} does not exist`);
+    }
+    return updated;
   }
 
   /**
@@ -103,6 +112,10 @@ export class TagController {
   async deleteTag(
     @Param("tagId", ParseIntPipe) tagId: number,
   ): Promise<{ message: string }> {
+    const tag = await this.tagService.getTagById(tagId);
+    if (!tag) {
+      throw new ResourceGoneException(`Cannot delete: Tag ${tagId} does not exist`);
+    }
     return await this.tagService.deleteTag(tagId);
   }
 }
