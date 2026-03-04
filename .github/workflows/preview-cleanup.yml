@@ -1,5 +1,5 @@
 name: Pull Request Preview Cleanup
-
+# stops the pr preview when we close the pr.
 on:
   pull_request:
     types: [ closed ]  # Trigger only when PR is closed
