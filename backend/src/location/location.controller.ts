@@ -22,6 +22,7 @@ import {
 import { ZodValidationPipe } from "nestjs-zod";
 import { CreateLocationSchema, UpdateLocationSchema } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Controller("locations")
 export class LocationController {
@@ -56,7 +57,11 @@ export class LocationController {
   async getLocationById(
     @Param("locationId", ParseIntPipe) locationId: number,
   ): Promise<LocationDto> {
-    return await this.locationService.getLocationById(locationId);
+    const location = await this.locationService.getLocationById(locationId);
+    if (!location) {
+      throw new ResourceGoneException(`Location ${locationId} not found.`);
+    }
+    return location;
   }
 
   /**
@@ -98,7 +103,11 @@ export class LocationController {
   async updateLocation(
     @Body() updateLocation: UpdateLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationService.updateLocation(updateLocation);
+    const updated = await this.locationService.updateLocation(updateLocation);
+    if (!updated) {
+      throw new ResourceGoneException(`Cannot update: Location ${updateLocation.id} does not exist`);
+    }
+    return updated;
   }
 
   /**
@@ -113,6 +122,10 @@ export class LocationController {
   async deleteLocation(
     @Param("locationId", ParseIntPipe) locationId: number,
   ): Promise<void> {
+    const location = await this.locationService.getLocationById(locationId);
+    if (!location) {
+      throw new ResourceGoneException(`Cannot delete: Location ${locationId} does not exist`);
+    }
     await this.locationService.deleteLocation(locationId);
   }
 }
