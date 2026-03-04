@@ -16,6 +16,7 @@ module.exports = {
       cwd: "/home/selab2/project/backend", // adjust to your backend directory
       env: {
         PORT: 3000,
+        NODE_ENV: "production",
       },
     },
   ],
