@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import EventService from "../event.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
+import { ResourceGoneException } from "../../common/exceptions";
 import {
   CreateEventSchema,
   EventSchema,
@@ -66,7 +67,11 @@ export class EventController {
   async getEventById(
     @Param("eventId", ParseIntPipe) eventId: number,
   ): Promise<EventDto> {
-    return await this.eventService.getEventById(eventId);
+    const event = await this.eventService.getEventById(eventId);
+    if (!event) {
+      throw new ResourceGoneException(`Event ${eventId} not found.`);
+    }
+    return event;
   }
 
   /**
@@ -85,7 +90,11 @@ export class EventController {
     @Param("eventId", ParseIntPipe) eventId: number,
     @Body(new ZodValidationPipe(EventSchema)) event: EventDto,
   ): Promise<EventDto> {
-    return await this.eventService.replaceEvent(eventId, event);
+    const updated = await this.eventService.replaceEvent(eventId, event);
+    if (!updated) {
+      throw new ResourceGoneException(`Cannot replace: Event ${eventId} does not exist`);
+    }
+    return updated;
   }
 
   /**
@@ -104,7 +113,11 @@ export class EventController {
     @Param("eventId", ParseIntPipe) eventId: number,
     @Body(new ZodValidationPipe(UpdateEventSchema)) patchData: UpdateEventDto,
   ): Promise<EventDto> {
-    return await this.eventService.modifyEvent(eventId, patchData);
+    const updated = await this.eventService.modifyEvent(eventId, patchData);
+    if (!updated) {
+      throw new ResourceGoneException(`Cannot modify: Event ${eventId} does not exist`);
+    }
+    return updated;
   }
 
   /**
@@ -120,6 +133,10 @@ export class EventController {
   async deleteEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
   ): Promise<void> {
+    const event = await this.eventService.getEventById(eventId);
+    if (!event) {
+      throw new ResourceGoneException(`Cannot delete: Event ${eventId} does not exist`);
+    }
     return await this.eventService.deleteEvent(eventId);
   }
 
