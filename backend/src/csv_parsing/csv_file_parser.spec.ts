@@ -405,7 +405,7 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
 
 describe("CSVFileParser.insertProductionsFromCSV", () => {
   const fakeProdService: any = {
-    insertProduction: jest.fn(),
+    replaceProduction: jest.fn(),
     addTagToProduction: jest.fn(),
   };
   const fakeTagService: any = {
@@ -444,9 +444,10 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
     );
 
     // simulate insertion returning the same object plus an auto-generated id property
-    fakeProdService.insertProduction.mockImplementation(async (prod: any) => ({
+    fakeProdService.replaceProduction.mockImplementation(async (id: number, prod: any) => ({
       ...prod,
-      inserted: true,
+      id,
+      replaced: true,
     }));
 
     fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
@@ -460,7 +461,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       fakeTagService,
     );
 
-    expect(fakeProdService.insertProduction).toHaveBeenCalledTimes(2);
+    expect(fakeProdService.replaceProduction).toHaveBeenCalledTimes(2);
     expect(fakeTagService.createTag).toHaveBeenCalledTimes(2); // drama + comedy
 
     // ensure tags linked the right number of times
@@ -486,7 +487,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         description1: "d1",
         description2: null,
         planning_id: "100",
-        inserted: true,
+        replaced: true,
       },
       {
         id: 2,
@@ -495,7 +496,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         description1: "d2",
         description2: null,
         planning_id: "101",
-        inserted: true,
+        replaced: true,
       },
     ]);
   });
@@ -515,7 +516,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       ]) as any,
     );
 
-    fakeProdService.insertProduction.mockRejectedValue(
+    fakeProdService.replaceProduction.mockRejectedValue(
       new Error("insert failed"),
     );
 

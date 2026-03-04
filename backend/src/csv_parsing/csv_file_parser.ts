@@ -290,7 +290,7 @@ export class CSVFileParser {
 
     // insert productions
     for (const production of productions) {
-      const created = await productionService.insertProduction(production);
+      const created = await productionService.replaceProduction(production.id, production);
       createdProductions.push(created);
     }
 
