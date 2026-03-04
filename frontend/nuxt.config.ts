@@ -3,6 +3,9 @@ export default defineNuxtConfig({
   ssr: false, // Disable Server-Side Rendering since we'll have a separate backend.
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
+  devServer: {
+    port: 3001,
+  },
   runtimeConfig: {
     public: {
       apiBase: "http://localhost:3000",
