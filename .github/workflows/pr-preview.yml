@@ -52,7 +52,7 @@ jobs:
           export NUXT_BASE="/previews/$PR/"
           PR_PATH="/home/selab2/project/previews/$PR"
           PORT="30$PR"
-          NUXT_API_BASE="http://sel2-4.ugent.be/api/docs"
+          NUXT_API_BASE="http://sel2-4.ugent.be/api/"
           
           mkdir -p $PR_PATH
           
