@@ -63,6 +63,16 @@ jobs:
           # Install & build frontend
           npm install
           npm run build
+
+          cd $PR_PATH
+
+          python3 -m pip install mkdocs-material
+
+          python3 -m mkdocs build
+
+          mv site frontend/.output/public/docs
+
+          cd $PR_PATH/frontend
           
           # Stop old preview if running
           pm2 delete preview-$PR || true
@@ -77,6 +87,7 @@ jobs:
         with:
           message: |
             🚀 **Preview Build succesfully deployed!**
-            You can view the preview of this pull request at:
-            http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+
+            📱 **Website Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+            📚 **Docs Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
           comment_tag: preview_link
