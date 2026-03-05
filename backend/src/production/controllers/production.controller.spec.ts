@@ -167,7 +167,7 @@ describe("ProductionController", () => {
 
     it("should throw a ResourceGoneException (410) if trying to delete a non-existent production", async () => {
       jest
-        .spyOn(service, "deleteProduction")
+        .spyOn(service, "getProductionById")
         .mockResolvedValueOnce(null as any);
       await expect(controller.deleteProduction(999)).rejects.toThrow(
         ResourceGoneException,
