@@ -12,6 +12,8 @@ import {
   CreateEventSchema,
   CreateLocation,
   CreateLocationSchema,
+  CreatePrice,
+  CreatePriceSchema,
   CreateProduction,
   CreateProductionSchema,
   CreateTag,
@@ -24,6 +26,8 @@ import {
   FilterProductionSchema,
   Location,
   LocationSchema,
+  Price,
+  PriceSchema,
   Production,
   ProductionSchema,
   PublicAccount,
@@ -38,6 +42,8 @@ import {
   UpdateEventSchema,
   UpdateLocation,
   UpdateLocationSchema,
+  UpdatePrice,
+  UpdatePriceSchema,
   UpdateProduction,
   UpdateProductionSchema,
   UpdateTag,
@@ -75,6 +81,9 @@ export {
   UpdateAccountSchema,
   ApiKeySchema,
   VerifyApiKeySchema,
+  PriceSchema,
+  CreatePriceSchema,
+  UpdatePriceSchema,
 };
 export type {
   Production,
@@ -99,5 +108,8 @@ export type {
   CreateAccount,
   ApiKey,
   VerifyApiKey,
+  Price,
+  CreatePrice,
+  UpdatePrice,
 };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;
