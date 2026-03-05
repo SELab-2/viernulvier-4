@@ -245,7 +245,7 @@ export class ProductionDatabaseService {
         description2,
         planning_id
     )
-    VALUES ($1,$2,$3,$4,$5,$6)
+    VALUES ($1,$2,$3,$4,$5)
     RETURNING
         id,
         titel,

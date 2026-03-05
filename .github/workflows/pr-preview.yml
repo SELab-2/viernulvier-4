@@ -62,6 +62,7 @@ jobs:
           
           # Install & build frontend
           npm install
+          NUXT_API_BASE="https://sel2-4.ugent.be/api" \
           npm run build
           
           # Stop old preview if running
