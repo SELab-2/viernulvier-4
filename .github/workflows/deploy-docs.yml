@@ -1,0 +1,50 @@
+name: Deploy Documentation # This will officially update the main documentation.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest # This doesn't use that much time to build so should not be a problem.
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Install Dependencies
+        run: pip install mkdocs-material mike
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Deploy with Mike
+        run: |
+          # Get the current branch name (either 'main' or 'develop')
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          
+          if [ "$BRANCH_NAME" == "main" ]; then
+            # Deploy main, tag it as 'latest', and make it the default landing page
+            mike deploy main latest --push --update-aliases
+            mike set-default latest --push
+          else
+            # Deploy develop as its own version
+            mike deploy develop --push
+          fi
