@@ -13,7 +13,7 @@ import {
 import { BlogService } from "./blog.service";
 import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { ResourceGoneException } from "src/common/exceptions";
+import { ResourceGoneException } from "../common/exceptions";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
 import {
   ApiBody,

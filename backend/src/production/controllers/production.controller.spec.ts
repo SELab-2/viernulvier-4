@@ -8,7 +8,7 @@ import {
 } from "../../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterProductionSchema } from "@repo/common";
-import { ResourceGoneException } from "src/common/exceptions";
+import { ResourceGoneException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
