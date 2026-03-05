@@ -13,7 +13,6 @@ CREATE TABLE events
     id            SERIAL PRIMARY KEY,
     starttime     DATE NOT NULL,
     endtime       DATE NOT NULL,
-    price         NUMERIC(5, 2),
     hall          TEXT,
     production_id INT  NOT NULL,
     CONSTRAINT fk_production
@@ -106,4 +105,18 @@ CREATE TABLE account_api_keys
     api_key_id INT     NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
     active     boolean not null default true,
     PRIMARY KEY (account_id, api_key_id)
+);
+
+CREATE TABLE prices
+(
+    id    SERIAL PRIMARY KEY,
+    name  VARCHAR(255)   NOT NULL,
+    price NUMERIC(10, 2) NOT NULL
+);
+
+CREATE TABLE event_prices
+(
+    event_id INT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+    price_id INT NOT NULL REFERENCES prices (id) ON DELETE CASCADE,
+    PRIMARY KEY (event_id, price_id)
 );
