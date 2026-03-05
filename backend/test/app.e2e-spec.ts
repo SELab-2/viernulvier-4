@@ -51,7 +51,6 @@ const mockEvent = {
   id: 1,
   starttime: "2025-01-01T19:00:00.000Z",
   endtime: "2025-01-01T22:00:00.000Z",
-  price: 15.5,
   production_id: 1,
 };
 
@@ -568,7 +567,9 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).delete("/productions/abc").expect(400);
+      return request(app.getHttpServer())
+        .delete("/productions/abc")
+        .expect(400);
     });
   });
 });
@@ -803,7 +804,6 @@ describe("EventController (e2e)", () => {
     const createPayload = {
       starttime: "2025-06-01T19:00:00.000Z",
       endtime: "2025-06-01T22:00:00.000Z",
-      price: 20.0,
       production_id: 1,
     };
 
@@ -851,7 +851,7 @@ describe("EventController (e2e)", () => {
     it("should return 200 with the modified event", () => {
       return request(app.getHttpServer())
         .patch("/events/1")
-        .send({ price: 25.5 })
+        .send({ production_id: 2 })
         .expect(200)
         .expect(mockEvent);
     });
@@ -859,7 +859,7 @@ describe("EventController (e2e)", () => {
     it("should call eventDb.updateEvent", async () => {
       await request(app.getHttpServer())
         .patch("/events/1")
-        .send({ price: 25.5 });
+        .send({ production_id: 2 });
       // Assuming your service calls updateEvent for modifications
       expect(eventDb.updateEvent).toHaveBeenCalled();
     });
@@ -867,7 +867,7 @@ describe("EventController (e2e)", () => {
     it("should return 400 when id is not a number", () => {
       return request(app.getHttpServer())
         .patch("/events/abc")
-        .send({ price: 25.5 })
+        .send({ production_id: 2 })
         .expect(400);
     });
   });
@@ -959,7 +959,9 @@ describe("EventController (e2e)", () => {
       });
 
       it("should return 400 when locationId is not a number", () => {
-        return request(app.getHttpServer()).delete("/locations/abc").expect(400);
+        return request(app.getHttpServer())
+          .delete("/locations/abc")
+          .expect(400);
       });
     });
   });
