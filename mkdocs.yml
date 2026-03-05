@@ -3,3 +3,4 @@ site_name: My Docs
 extra:
   version:
     provider: mike
+theme: readthedocs
