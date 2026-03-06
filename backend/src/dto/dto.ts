@@ -5,12 +5,14 @@ import {
   CreateBlogSchema,
   CreateEventSchema,
   CreateLocationSchema,
+  CreatePriceSchema,
   CreateProductionSchema,
   CreateTagSchema,
   EventSchema,
   FilterEventSchema,
   FilterProductionSchema,
   LocationSchema,
+  PriceSchema,
   ProductionSchema,
   PublicAccountSchema,
   TagSchema,
@@ -18,6 +20,7 @@ import {
   UpdateBlogSchema,
   UpdateEventSchema,
   UpdateLocationSchema,
+  UpdatePriceSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
@@ -51,6 +54,11 @@ export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
 export class LocationDto extends createZodDto(LocationSchema) {}
 export class CreateLocationDto extends createZodDto(CreateLocationSchema) {}
 export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
+
+// Price Wrappers
+export class PriceDto extends createZodDto(PriceSchema) {}
+export class CreatePriceDto extends createZodDto(CreatePriceSchema) {}
+export class UpdatePriceDto extends createZodDto(UpdatePriceSchema) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
