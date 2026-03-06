@@ -41,10 +41,6 @@ export class PriceDatabaseService {
 
       const result = await this.db.query<PriceDto>(query);
 
-      if (result.length === 0) {
-        throw new Error("no prices found");
-      }
-
       return result;
     }
 
@@ -56,10 +52,6 @@ export class PriceDatabaseService {
     `;
 
     const result = await this.db.query<PriceDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no prices found");
-    }
 
     return result;
   }

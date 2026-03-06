@@ -44,10 +44,6 @@ export class LocationDatabaseService {
 
       const result = await this.db.query<LocationDto>(query);
 
-      if (result.length === 0) {
-        throw new Error("no locations found");
-      }
-
       return result;
     }
 
@@ -59,10 +55,6 @@ export class LocationDatabaseService {
     `;
 
     const result = await this.db.query<LocationDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no locations found");
-    }
 
     return result;
   }
