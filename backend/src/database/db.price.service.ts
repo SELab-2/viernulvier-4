@@ -29,7 +29,7 @@ export class PriceDatabaseService {
    * @param page page index (starts at 0)
    * @return prices
    */
-  async getPrices(amount: number, page: number): Promise<PriceDto[]> {
+  async getPrices(amount: number = 0, page: number = 0): Promise<PriceDto[]> {
     const offset = page * amount;
 
     if (amount === 0) {
