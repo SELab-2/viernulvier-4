@@ -112,7 +112,9 @@ export class PriceController {
   @ApiOperation({ summary: "Deletes an existing Price object." })
   @ApiOkResponse({ description: "Deleted Price." })
   @Delete(":priceId")
-  async deletePrice(@Param("priceId") priceId: number): Promise<void> {
+  async deletePrice(
+    @Param("priceId", ParseIntPipe) priceId: number,
+  ): Promise<void> {
     return await this.priceService.deletePrice(priceId);
   }
 }
