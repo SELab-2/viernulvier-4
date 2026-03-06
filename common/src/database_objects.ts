@@ -76,7 +76,7 @@ export const FilterEventSchema = z.object({
  */
 export const PriceSchema = z.object({
   id: z.number(),
-  price: z.string(),
+  price: z.float32(),
   name: z.string(),
 });
 export const CreatePriceSchema = PriceSchema.omit({ id: true });
