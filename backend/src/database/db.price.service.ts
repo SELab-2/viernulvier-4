@@ -17,9 +17,6 @@ export class PriceDatabaseService {
 
     const result = await this.db.query<PriceDto>(query, [id]);
 
-    if (result.length === 0) {
-      throw new Error("Price not found");
-    }
     return result[0];
   }
 

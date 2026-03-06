@@ -17,9 +17,6 @@ export class LocationDatabaseService {
 
     const result = await this.db.query<LocationDto>(query, [id]);
 
-    if (result.length === 0) {
-      throw new Error("Location not found");
-    }
     return result[0];
   }
 
