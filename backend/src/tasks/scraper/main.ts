@@ -1,4 +1,3 @@
-import { Production } from "@repo/common";
 import { scrapeMany } from "./scraper";
 import { parseProductions, vnvProduction } from "./vnv.parser";
 import { DbConnection } from "./db.connection";
@@ -16,86 +15,7 @@ async function scrape(
   );
 
   const vnvProductions: vnvProduction[] = await parseProductions(productions);
-  console.dir(vnvProductions, { depth: null });
-
   return vnvProductions;
-}
-
-async function insertProduction(
-  connection: DbConnection,
-  production: vnvProduction,
-): Promise<boolean> {
-  const result: Production[] = await connection.query<Production>(
-    `
-      SELECT * from productions WHERE legacy_id = $1
-    `,
-    [production.legacy_id],
-  );
-
-  // If we have found a matching production we can insert safely.
-  let query: string;
-  let values;
-  if (result.length > 0) {
-    query = `
-      UPDATE productions
-      SET 
-        titel = $1,
-        description1 = $2,
-        description2 = $3,
-        artist = $4,
-        tagline = $5,
-        credits = $6,
-        performer_mode = $7,
-        attendance_type = $8
-      WHERE legacy_id = $9
-      RETURNING *;
-    `;
-    values = [
-      production.title,
-      production.description,
-      production.description_2,
-      production.artist,
-      production.tagline,
-      production.info,
-      production.performer_type,
-      production.attendance_mode,
-      production.legacy_id,
-    ];
-  } else {
-    query = `INSERT INTO productions (
-      titel,
-      description1,
-      description2,
-      artist,
-      tagline,
-      credits,
-      legacy_id,
-      performer_mode,
-      attendance_type
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-    RETURNING *;
-    `;
-    values = [
-      production.title,
-      production.description,
-      production.description_2,
-      production.artist,
-      production.tagline,
-      production.info,
-      production.legacy_id,
-      production.performer_type,
-      production.attendance_mode,
-    ];
-  }
-
-  const output: Production[] = await connection.query<Production>(
-    query,
-    values,
-  );
-
-  console.log(`Inserted legacy_id: ${production.legacy_id}`);
-  return output.length > 0;
 }
 
 /**
@@ -104,12 +24,19 @@ async function insertProduction(
 async function main() {
   const dbConnection: DbConnection = new DbConnection();
 
+  // Scrape all the data we need.
   const productions: vnvProduction[] = await scrape(
     "2026-03-04T09:36:21+00:00",
   );
 
-  const valid: boolean = await insertProduction(dbConnection, productions[0]);
-  if (!valid) throw new Error("Failed to insert Production.");
+  // Firstly we will insert all the new productions.
+  for (const production of productions) {
+    const valid: boolean = await dbConnection.insert(production);
+    if (!valid)
+      console.error(
+        `Failed to insert Production with legacy_id=${production.legacy_id}.`,
+      );
+  }
 }
 
 void main();

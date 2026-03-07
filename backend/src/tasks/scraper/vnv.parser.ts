@@ -1,4 +1,15 @@
 import { scrapeOne } from "./scraper";
+import sanitizeHtml from "sanitize-html";
+
+// TODO: Do we really want to parse the html they put there? Maybe it's useful.
+export function stripHtml(rawHtml: string | null | undefined): string {
+  if (!rawHtml) return "";
+
+  return sanitizeHtml(rawHtml, {
+    allowedTags: [],
+    allowedAttributes: {},
+  }).trim();
+}
 
 /**
  * Localization of any string that needs it.
