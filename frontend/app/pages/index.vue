@@ -1,37 +1,16 @@
-<script setup lang="ts">
-import { HelloWorldSchema } from '@repo/common';
+<script lang="ts" setup>
+const config = useRuntimeConfig();
 
-async function fetchHelloWorld() {
-  const { data, status, error, refresh } = await useFetch("/", { baseURL: config.public.apiBase });
-  
-  if (error.value || !data.value) {
-    return {text: null, error: error.value};
-  }
-
-  const hw = HelloWorldSchema.parse(data.value);
-  return {
-    text: hw.text,
-    error: error,
-  };
-}
-
-const config = useRuntimeConfig()
-const { text, error } = await fetchHelloWorld();
+const { error } = await useFetch("/", { baseURL: config.public.apiBase });
+const connected = !error.value;
 </script>
 
 <template>
   <div>
-    <div v-if="text">
-      {{ text }}
-    </div>
-
-    <div v-else-if="error" style="color: red; border: 1px solid red; padding: 10px;">
-      <p><strong>Error Detected:</strong></p>
+    <div v-if="connected">API connection established</div>
+    <div v-else style="color: red; border: 1px solid red; padding: 10px">
+      <p><strong>Could not connect to API</strong></p>
       <pre>{{ error }}</pre>
-    </div>
-
-    <div v-else>
-      Loading...
     </div>
   </div>
 </template>
