@@ -109,7 +109,7 @@ describe("ProductionController", () => {
     it("should throw a ResourceGoneException (410) if the production does not exist", async () => {
       jest
         .spyOn(service, "getProductionById")
-        .mockResolvedValueOnce(null as any);
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(controller.getProductionById(999)).rejects.toThrow(
         ResourceGoneException,
       );
@@ -126,7 +126,7 @@ describe("ProductionController", () => {
     it("should throw a ResourceGoneException (410) if trying to replace a non-existent production", async () => {
       jest
         .spyOn(service, "replaceProduction")
-        .mockResolvedValueOnce(null as any);
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(
         controller.replaceProduction(999, mockProduction),
       ).rejects.toThrow(ResourceGoneException);
@@ -151,7 +151,7 @@ describe("ProductionController", () => {
       const patchData: UpdateProductionDto = { titel: "A New titel" };
       jest
         .spyOn(service, "modifyProduction")
-        .mockResolvedValueOnce(null as any);
+        .mockRejectedValueOnce(new ResourceGoneException("Production not found"));
       await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(
         ResourceGoneException,
       );
@@ -167,8 +167,8 @@ describe("ProductionController", () => {
 
     it("should throw a ResourceGoneException (410) if trying to delete a non-existent production", async () => {
       jest
-        .spyOn(service, "getProductionById")
-        .mockResolvedValueOnce(null as any);
+        .spyOn(service, "deleteProduction")
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(controller.deleteProduction(999)).rejects.toThrow(
         ResourceGoneException,
       );

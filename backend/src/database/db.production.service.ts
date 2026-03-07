@@ -9,7 +9,7 @@ import {
   UpdateProductionDto,
 } from "../dto/dto";
 import { FilterProductionSchema } from "@repo/common";
-import { ResourceGoneException } from "src/common/exceptions";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class ProductionDatabaseService {
