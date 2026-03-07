@@ -7,6 +7,7 @@ import { TagDatabaseService } from "./db.tag.service";
 import { LocationDatabaseService } from "./db.location.service";
 import { ApiKeyDatabaseService } from "./db.apiKey.service";
 import { AccountDatabaseService } from "./db.account.service";
+import { PriceDatabaseService } from "./db.price.service";
 
 @Module({
   imports: [],
@@ -18,6 +19,7 @@ import { AccountDatabaseService } from "./db.account.service";
     BlogDatabaseService,
     TagDatabaseService,
     LocationDatabaseService,
+    PriceDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
   ],
@@ -30,6 +32,7 @@ import { AccountDatabaseService } from "./db.account.service";
     BlogDatabaseService,
     TagDatabaseService,
     LocationDatabaseService,
+    PriceDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
   ],

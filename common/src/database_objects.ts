@@ -101,7 +101,7 @@ export const FilterEventSchema = z.object({
  */
 export const PriceSchema = z.object({
   id: z.number(),
-  price: z.string(),
+  price: z.float32(),
   name: z.string(),
 });
 export const CreatePriceSchema = PriceSchema.omit({ id: true });
@@ -173,6 +173,14 @@ export const ApiKeySchema = z.object({
 });
 export const VerifyApiKeySchema = ApiKeySchema.omit({ id: true });
 
+/**
+ * Shared filters.
+ */
+export const PaginationFilterSchema = z.object({
+  page: z.coerce.number().min(0).default(0),
+  limit: z.coerce.number().min(0).max(100).default(20),
+});
+
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
@@ -206,3 +214,5 @@ export type PublicAccount = z.infer<typeof PublicAccountSchema>;
 
 export type ApiKey = z.infer<typeof ApiKeySchema>;
 export type VerifyApiKey = z.infer<typeof VerifyApiKeySchema>;
+
+export type PaginationFilter = z.infer<typeof PaginationFilterSchema>;

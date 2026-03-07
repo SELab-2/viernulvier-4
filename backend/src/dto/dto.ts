@@ -5,12 +5,14 @@ import {
   CreateBlogSchema,
   CreateEventSchema,
   CreateLocationSchema,
+  CreatePriceSchema,
   CreateProductionSchema,
   CreateTagSchema,
   EventSchema,
   FilterEventSchema,
   FilterProductionSchema,
   LocationSchema,
+  PriceSchema,
   ProductionSchema,
   PublicAccountSchema,
   TagSchema,
@@ -18,10 +20,12 @@ import {
   UpdateBlogSchema,
   UpdateEventSchema,
   UpdateLocationSchema,
+  UpdatePriceSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
 } from "@repo/common";
+import { PaginationFilterSchema } from "@repo/common/src/database_objects";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
 
@@ -52,6 +56,11 @@ export class LocationDto extends createZodDto(LocationSchema) {}
 export class CreateLocationDto extends createZodDto(CreateLocationSchema) {}
 export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
 
+// Price Wrappers
+export class PriceDto extends createZodDto(PriceSchema) {}
+export class CreatePriceDto extends createZodDto(CreatePriceSchema) {}
+export class UpdatePriceDto extends createZodDto(UpdatePriceSchema) {}
+
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
 export class UpdateAccountDto extends createZodDto(UpdateAccountSchema) {}
@@ -60,3 +69,6 @@ export class PublicAccountDto extends createZodDto(PublicAccountSchema) {}
 // API keys Wrapper
 export class ApiKeyDto extends createZodDto(ApiKeySchema) {}
 export class VerifyApiKeyDto extends createZodDto(VerifyApiKeySchema) {}
+
+// Generic Pagination Filter Wrapper
+export class PaginationFilterDto extends createZodDto(PaginationFilterSchema) {}

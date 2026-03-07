@@ -1,6 +1,13 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, FilterEventDto, LocationDto, UpdateEventDto, } from "../dto/dto";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  LocationDto,
+  PriceDto,
+  UpdateEventDto,
+} from "../dto/dto";
 import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
 @Injectable()
@@ -287,5 +294,82 @@ export class EventDatabaseService {
     const query = `DELETE FROM event_locations WHERE event_id = $1`;
 
     await this.db.query(query, [event_id]);
+  }
+
+  /**
+   * get all the prices linked with an event
+   * @param id the ID of the event we want all the prices of.
+   * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
+   * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
+   * @returns a list of PriceDto objects linked to the given event.
+   */
+  async getPricesOfEvent(
+    id: number,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<PriceDto[]> {
+    if (amount === 0) {
+      const query = `
+      SELECT p.*
+      FROM prices p
+      JOIN event_prices ep ON ep.price_id = p.id
+      WHERE ep.event_id = $1
+      `;
+
+      return await this.db.query(query, [id]);
+    }
+
+    const offset = page * amount;
+
+    const query = `
+    SELECT p.*
+    FROM prices p
+    INNER JOIN event_prices ep ON ep.price_id = p.id
+    WHERE ep.event_id = $1
+    LIMIT $2 OFFSET $3
+    `;
+
+    return await this.db.query(query, [id, amount, offset]);
+  }
+
+  /**
+   * link a price to an event
+   * @param event_id the ID of the event you want to link
+   * @param price_id the ID of the price you want to link
+   * @returns T/F whether if the linking was successful.
+   */
+  async addPriceToEvent(
+    event_id: number,
+    price_id: number
+  ): Promise<boolean> {
+    const query = `
+    INSERT INTO event_prices (event_id, price_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+    RETURNING event_id
+    `;
+
+    const result = await this.db.query(query, [event_id, price_id]);
+
+    return result.length !== 0;
+  }
+
+  /**
+   * Removes a previously linked Price from an existing Event in the Database.
+   * @param event_id the ID of the event you want to remove a price of.
+   * @param price_id the ID of the price you want to remove.
+   * @returns nothing (silent handling.)
+   */
+  async removePriceFromEvent(
+    event_id: number,
+    price_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM event_prices
+      WHERE event_prices.event_id = $1 
+        AND event_prices.price_id = $2
+    `;
+
+    await this.db.query(query, [event_id, price_id]);
   }
 }

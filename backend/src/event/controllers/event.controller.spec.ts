@@ -15,7 +15,6 @@ describe("EventController", () => {
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
     production_id: 1,
-    price: 25,
   };
 
   const mockEvents: EventDto[] = [mockEvent];
@@ -124,24 +123,31 @@ describe("EventController", () => {
 
   describe("modifyEvent", () => {
     it("should partially update and return the event", async () => {
-      const patchData: UpdateEventDto = { price: 50 };
-      const expectedEvent: EventDto = { ...mockEvent, price: 50 };
-      
+      const patchData: UpdateEventDto = {
+        starttime: "2026-03-06T23:08:45.328Z",
+      };
+      const expectedEvent: EventDto = {
+        ...mockEvent,
+        starttime: "2026-03-06T23:08:45.328Z",
+      };
+
       jest.spyOn(service, "modifyEvent").mockResolvedValueOnce(expectedEvent);
 
       const result = await controller.modifyEvent(1, patchData);
-      
+
       expect(service.modifyEvent).toHaveBeenCalledWith(1, patchData);
       expect(result).toEqual(expectedEvent);
     });
 
     it("should throw a NotFoundException if event to modify does not exist", async () => {
-      const patchData: UpdateEventDto = { price: 50 };
-      
+      const patchData: UpdateEventDto = {
+        starttime: "2026-03-06T23:08:45.328Z",
+      };
+
       jest
         .spyOn(service, "modifyEvent")
         .mockRejectedValueOnce(new NotFoundException());
-        
+
       await expect(controller.modifyEvent(999, patchData)).rejects.toThrow(
         NotFoundException,
       );
@@ -171,7 +177,6 @@ describe("EventController", () => {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
         production_id: 2,
-        price: 30,
       };
 
       const createdEvent: EventDto = { id: 2, ...newEvent };
@@ -189,7 +194,6 @@ describe("EventController", () => {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
         production_id: 2,
-        price: 30,
       };
 
       jest
