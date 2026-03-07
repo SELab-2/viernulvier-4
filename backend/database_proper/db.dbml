@@ -27,6 +27,8 @@ Table blogs {
   id int [pk, increment]
   titel JSONB [not null]
   description JSONB [not null]
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
 }
 
 Table production_blogs {

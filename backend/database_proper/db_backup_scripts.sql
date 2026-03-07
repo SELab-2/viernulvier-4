@@ -53,9 +53,17 @@ EXECUTE FUNCTION update_updated_at();
 CREATE TABLE blogs
 (
     id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    titel       JSONB NOT NULL,
-    description JSONB NOT NULL
+    titel       JSONB     NOT NULL,
+    description JSONB     NOT NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TRIGGER set_updated_at_blogs
+    BEFORE UPDATE
+    ON blogs
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE production_blogs
 (

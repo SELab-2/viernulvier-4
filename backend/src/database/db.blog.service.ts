@@ -18,7 +18,7 @@ export class BlogDatabaseService {
     id: number,
     lang: Language = DEFAULT_LANGUAGE,
   ): Promise<BlogDto> {
-    const query = `SELECT id, titel->>'${lang}', description->>'${lang}' FROM blogs WHERE id = $1`;
+    const query = `SELECT id, titel->>'${lang}' AS titel, description->>'${lang}' AS description, created_at, updated_at FROM blogs WHERE id = $1`;
 
     const result = await this.db.query<BlogDto>(query, [id]);
 
@@ -45,8 +45,10 @@ export class BlogDatabaseService {
     if (amount === 0) {
       const query = `
       SELECT id, 
-             titel->>'${lang}', 
-             description->>'${lang}'
+             titel->>'${lang}' AS titel, 
+             description->>'${lang}' AS description,
+             created_at,
+             updated_at
       FROM blogs
       ORDER BY id
       `;
@@ -62,8 +64,10 @@ export class BlogDatabaseService {
 
     let query = `
     SELECT id,
-           titel->>'${lang}',
-           description->>'${lang}'
+           titel->>'${lang}' AS titel,
+           description->>'${lang}' AS description,
+           created_at,
+           updated_at
     FROM blogs
     ORDER BY id
     LIMIT $1 OFFSET $2
@@ -98,7 +102,9 @@ export class BlogDatabaseService {
       RETURNING
         id,
         titel->>'${lang}' AS titel,
-        description->>'${lang}' AS description;
+        description->>'${lang}' AS description,
+        created_at,
+        updated_at;
     `;
 
     const values = [
@@ -159,7 +165,9 @@ export class BlogDatabaseService {
     RETURNING
       id,
       titel->>'${lang}' AS titel,
-      description->>'${lang}' AS description;
+      description->>'${lang}' AS description,
+      created_at,
+      updated_at;
   `;
 
     const result = await this.db.query<BlogDto>(query, values);

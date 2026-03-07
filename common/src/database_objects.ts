@@ -109,9 +109,15 @@ export const BlogSchema = z.object({
   id: z.number(),
   titel: z.string(),
   description: z.string(),
+  created_at: z.iso.date().optional(),
+  updated_at: z.iso.date().optional(),
 });
 
-export const CreateBlogSchema = BlogSchema.omit({ id: true });
+export const CreateBlogSchema = BlogSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateBlogSchema = BlogSchema.partial();
 
 /**

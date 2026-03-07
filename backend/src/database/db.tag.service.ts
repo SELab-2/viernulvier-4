@@ -98,7 +98,7 @@ export class TagDatabaseService {
   ): Promise<TagDto[]> {
     // non-pagination first
     if (amount === 0) {
-      const query = `SELECT id, tag->>'${lang}' FROM tags`;
+      const query = `SELECT id, tag->>'${lang}' AS tag FROM tags`;
 
       const result = await this.db.query<TagDto>(query);
 
@@ -110,7 +110,7 @@ export class TagDatabaseService {
 
     const offset = page * amount;
 
-    const query = `SELECT id, tag->>'${lang}' FROM tags LIMIT $1 OFFSET $2`;
+    const query = `SELECT id, tag->>'${lang}' AS tag FROM tags LIMIT $1 OFFSET $2`;
 
     const result = await this.db.query<TagDto>(query, [amount, offset]);
 
@@ -139,7 +139,7 @@ export class TagDatabaseService {
       VALUES ($1)
       RETURNING
         id,
-        tag->>'${lang}' AS name;
+        tag->>'${lang}' AS tag;
     `;
 
     const values = [JSON.stringify({ [lang]: tag.tag })];

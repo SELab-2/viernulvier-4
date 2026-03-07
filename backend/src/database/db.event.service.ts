@@ -234,7 +234,7 @@ export class EventDatabaseService {
     lang: Language = DEFAULT_LANGUAGE,
   ): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location->>'${lang}'
+    SELECT l.id, l.location->>'${lang} AS loc'
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
