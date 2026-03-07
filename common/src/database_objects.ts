@@ -103,8 +103,14 @@ export const PriceSchema = z.object({
   id: z.number(),
   price: z.float32(),
   name: z.string(),
+  created_at: z.iso.date(),
+  updated_at: z.iso.date(),
 });
-export const CreatePriceSchema = PriceSchema.omit({ id: true });
+export const CreatePriceSchema = PriceSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdatePriceSchema = PriceSchema.partial();
 
 /**
