@@ -145,7 +145,7 @@ export interface vnvEvent {
   intermission_at: string;
   doors_at: string;
   location: vnvLocation;
-  prices: vnvPrice[]; // TODO: Replace this with vnvPrice.
+  prices: vnvPrice[];
 }
 
 /**

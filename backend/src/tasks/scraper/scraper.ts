@@ -46,7 +46,7 @@ async function fetchFromVnv(target: string): Promise<apiResponse> {
  */
 export async function scrapeMany(
   url: string,
-  updatedAfter: string = "1970-01-01T00:00:00+00:00",
+  updatedAfter: string,
 ): Promise<object[]> {
   console.log(
     `Scraping objects from ${url} with last update time after ${updatedAfter}.`,
