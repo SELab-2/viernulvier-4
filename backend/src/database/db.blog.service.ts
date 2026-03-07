@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -9,16 +10,16 @@ export class BlogDatabaseService {
 
   /**
    * Get a single Blog by their ID.
-   * @param id The ID we're trying to fetch.
+   * @param blogId The ID we're trying to fetch.
    * @returns The Blog if there is one.
    */
-  async getBlogById(id: number): Promise<BlogDto> {
+  async getBlogById(blogId: number): Promise<BlogDto> {
     const query = `SELECT * FROM blogs WHERE id = $1`;
 
-    const result = await this.db.query<BlogDto>(query, [id]);
+    const result = await this.db.query<BlogDto>(query, [blogId]);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(`Blog with ID ${blogId} not found`);
     }
     return result[0];
   }
@@ -39,13 +40,7 @@ export class BlogDatabaseService {
       ORDER BY id
       `;
 
-      const result = await this.db.query<BlogDto>(query);
-
-      if (result.length === 0) {
-        throw new Error("no blogs found");
-      }
-
-      return result;
+      return await this.db.query<BlogDto>(query);
     }
 
     let query = `
@@ -55,13 +50,7 @@ export class BlogDatabaseService {
     LIMIT $1 OFFSET $2
     `;
 
-    const result = await this.db.query<BlogDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no blogs found");
-    }
-
-    return result;
+    return await this.db.query<BlogDto>(query, [amount, offset]);
   }
 
   /**
@@ -102,7 +91,7 @@ export class BlogDatabaseService {
    */
   async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
     if (!blog.id) {
-      throw new Error("Blog id is required for update");
+      throw new BadRequestException("Blog id is required for update");
     }
 
     const fields: string[] = [];
@@ -120,7 +109,7 @@ export class BlogDatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     // Add id as final parameter
@@ -137,7 +126,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(`Cannot update: Blog ${blog.id} not found`);
     }
 
     return result[0];
@@ -149,10 +138,12 @@ export class BlogDatabaseService {
    * (silent handling)
    * @returns nothing.
    */
-  async deleteBlog(id: number): Promise<void> {
-    const query = `DELETE FROM blogs WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+  async deleteBlog(blogId: number): Promise<void> {
+    const query = `DELETE FROM blogs WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(`Cannot delete: Blog ${blogId} not found`);
+    }
   }
 
   // insert extra functions here if desired.

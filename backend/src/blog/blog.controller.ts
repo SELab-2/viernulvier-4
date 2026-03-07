@@ -13,7 +13,6 @@ import {
 import { BlogService } from "./blog.service";
 import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { ResourceGoneException } from "../common/exceptions";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
 import {
   ApiBody,
@@ -53,11 +52,7 @@ export class BlogController {
   async getBlogById(
     @Param("blogId", ParseIntPipe) blogId: number,
   ): Promise<BlogDto> {
-    const blog = await this.blogService.getBlogById(blogId);
-    if (!blog) {
-      throw new ResourceGoneException(`Blog ${blogId} not found.`);
-    }
-    return blog;
+    return await this.blogService.getBlogById(blogId);
   }
 
   /**
@@ -93,11 +88,7 @@ export class BlogController {
     @Param("blogId", ParseIntPipe) blogId: number,
     @Body(new ZodValidationPipe(BlogSchema)) blog: BlogDto,
   ): Promise<BlogDto> {
-    const updated = await this.blogService.replaceBlog(blogId, blog);
-    if (!updated) {
-      throw new ResourceGoneException(`Cannot replace: Blog ${blogId} does not exist`);
-    }
-    return updated;
+    return await this.blogService.replaceBlog(blogId, blog);
   }
 
   /**
@@ -116,11 +107,7 @@ export class BlogController {
     @Param("blogId", ParseIntPipe) blogId: number,
     @Body(new ZodValidationPipe(UpdateBlogSchema)) blog: UpdateBlogDto,
   ): Promise<BlogDto> {
-    const updated = await this.blogService.modifyBlog(blogId, blog);
-    if (!updated) {
-      throw new ResourceGoneException(`Cannot modify: Blog ${blogId} does not exist`);
-    }
-    return updated;
+    return await this.blogService.modifyBlog(blogId, blog);
   }
 
   /**
@@ -136,10 +123,6 @@ export class BlogController {
   async deleteBlog(
     @Param("blogId", ParseIntPipe) blogId: number,
   ): Promise<void> {
-    const blog = await this.blogService.getBlogById(blogId);
-    if (!blog) {
-      throw new ResourceGoneException(`Cannot delete: Blog ${blogId} does not exist`);
-    }
     return await this.blogService.deleteBlog(blogId);
   }
 }
