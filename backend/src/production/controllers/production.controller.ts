@@ -14,7 +14,6 @@ import {
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
-import { ResourceGoneException } from "../../common/exceptions";
 import {
   CreateProductionSchema,
   FilterProductionSchema,
