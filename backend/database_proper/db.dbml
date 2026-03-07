@@ -25,8 +25,8 @@ Table events {
 
 Table blogs {
   id int [pk, increment]
-  titel text [not null]
-  description text [not null]
+  titel JSONB [not null]
+  description JSONB [not null]
 }
 
 Table production_blogs {

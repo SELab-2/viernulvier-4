@@ -44,16 +44,19 @@ export class ProductionDatabaseService {
    * @param production the production we want all tags of.
    * @param amount is the amount of events per page (returned)
    * @param page is the page you want (indexed from 0)
+   * @param lang is the used language
    * @returns a list of tags connected to the given production.
    */
   async getTagsOfProduction(
     production: ProductionDto,
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<TagDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT t.*
+      SELECT t.id,
+             t.tag->>'${lang}'
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -65,7 +68,8 @@ export class ProductionDatabaseService {
     const offset = page * amount;
 
     const query = `
-      SELECT t.*
+      SELECT t.id,
+             t.tag->>'${lang}'
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -80,16 +84,20 @@ export class ProductionDatabaseService {
    * @param id the id of the production we want all blogs of.
    * @param amount is the amount of events per page (returned)
    * @param page is the page you want (indexed from 0)
+   * @param lang is the used language
    * @returns a list of blogs connected to the given production.
    */
   async getBlogsOfProduction(
     id: number,
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<BlogDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT b.*
+      SELECT b.id, 
+             b.titel->>'${lang}', 
+             b.description->>'${lang}'
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -101,7 +109,9 @@ export class ProductionDatabaseService {
     const offset = page * amount;
 
     const query = `
-      SELECT b.*
+      SELECT b.id,
+             b.titel->>'${lang}',
+             b.description->>'${lang}'
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1

@@ -53,8 +53,8 @@ EXECUTE FUNCTION update_updated_at();
 CREATE TABLE blogs
 (
     id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    titel       TEXT NOT NULL,
-    description TEXT NOT NULL
+    titel       JSONB NOT NULL,
+    description JSONB NOT NULL
 );
 
 CREATE TABLE production_blogs
