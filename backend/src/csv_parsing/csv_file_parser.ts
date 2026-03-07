@@ -142,6 +142,11 @@ export class CSVFileParser {
       description2: row.Description2 || null,
       planning_id: planningId,
       tags: [...new Set(tags)], // remove duplicate tags
+      artist: null, // TODO
+      tagline: null, // TODO
+      credits: null, // TODO
+      created_at: null, // TODO
+      updated_at: null, // TODO
     };
   }
 

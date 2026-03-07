@@ -127,9 +127,9 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id)
-      VALUES ($1, $2, $3)
-      RETURNING id, starttime, endtime, production_id
+      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at
     `;
 
     const result = await this.db.query<EventDto>(query, [
@@ -176,6 +176,16 @@ export class EventDatabaseService {
       values.push(event.production_id);
     }
 
+    if (event.doors_at !== undefined) {
+      fields.push(`doors_at = $${index++}`);
+      values.push(event.doors_at);
+    }
+
+    if (event.intermission_at !== undefined) {
+      fields.push(`intermission_at = $${index++}`);
+      values.push(event.intermission_at);
+    }
+
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
@@ -211,19 +221,6 @@ export class EventDatabaseService {
     const query = `DELETE FROM events WHERE id = $1`;
 
     await this.db.query(query, [id]);
-  }
-
-  /**
-   * Delete function for deleting all events from the database given a certain p_id.
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteEventsWithPID(production_id: number): Promise<void> {
-    // note: here we delete using the production id so possibly multiple events are affected!
-    const query = `DELETE FROM events WHERE production_id = $1`;
-
-    await this.db.query(query, [production_id]);
   }
 
   /**

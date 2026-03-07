@@ -14,11 +14,15 @@ export const ProductionSchema = z.object({
   artist: z.string().nullable(),
   tagline: z.string().nullable(),
   credits: z.string().nullable(),
-  created_at: z.iso.date(),
-  updated_at: z.iso.date(),
+  created_at: z.iso.date().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
+  updated_at: z.iso.date().nullable(),
 });
 
-export const CreateProductionSchema = ProductionSchema.omit({ id: true });
+export const CreateProductionSchema = ProductionSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateProductionSchema = ProductionSchema.partial();
 
 export const FilterProductionSchema = z.object({
@@ -50,10 +54,18 @@ export const EventSchema = z.object({
   id: z.number(),
   starttime: z.iso.datetime(),
   endtime: z.iso.datetime().nullable(),
+  doors_at: z.iso.datetime().nullable(),
+  intermission_at: z.iso.datetime().nullable(),
+  created_at: z.iso.datetime().nullable(), //TODO remove after updating csv.
+  updated_at: z.iso.datetime().nullable(),
   production_id: z.number(),
 });
 
-export const CreateEventSchema = EventSchema.omit({ id: true });
+export const CreateEventSchema = EventSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateEventSchema = EventSchema.partial();
 
 /**

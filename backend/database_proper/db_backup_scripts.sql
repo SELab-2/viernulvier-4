@@ -30,16 +30,25 @@ EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE events
 (
-    id            SERIAL PRIMARY KEY,
-    starttime     DATE NOT NULL,
-    endtime       DATE NOT NULL,
-    hall          TEXT,
-    production_id INT  NOT NULL,
+    id              SERIAL PRIMARY KEY,
+    starttime       DATE NOT NULL,
+    endtime         DATE NOT NULL,
+    doors_at        DATE,
+    intermission_at DATE,
+    created_at      DATE NOT NULL DEFAULT now(),
+    updated_at      DATE NOT NULL DEFAULT now(),
+    production_id   INT  NOT NULL,
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
             ON DELETE CASCADE
 );
+
+CREATE TRIGGER set_updated_at_events
+    BEFORE UPDATE
+    ON events
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE blogs
 (

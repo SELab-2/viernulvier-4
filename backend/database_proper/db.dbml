@@ -16,8 +16,10 @@ Table events {
   id int [pk, increment]
   starttime date [not null]
   endtime date [not null]
-  price numeric(5,2)
-  hall text
+  doors_at timestamp
+  intermission_at timestamp
+  created_at timestamp
+  updated_at timestamp
   production_id int [not null]
 }
 
