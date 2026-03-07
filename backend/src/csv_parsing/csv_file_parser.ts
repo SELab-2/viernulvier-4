@@ -217,6 +217,7 @@ export class CSVFileParser {
    * Parse events from a CSV file and insert them into the database.
    * @param filePath - Path to the CSV file containing events
    * @param eventService - Instance of EventService to insert events into the database
+   * @param locationService - Instance of LocationService to insert locations into the database
    * @returns A promise that resolves to an array of created EventDto objects
    */
   static async insertEventsFromCSV(
