@@ -9,6 +9,7 @@ import {
   UpdateProductionDto,
 } from "../dto/dto";
 import { FilterProductionSchema } from "@repo/common";
+import { ResourceGoneException } from "src/common/exceptions";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -24,7 +25,7 @@ export class ProductionDatabaseService {
       FilterProductionSchema.parse({ id: id }),
     );
     if (productions.length === 0)
-      throw new BadRequestException(
+      throw new ResourceGoneException(
         `No ProductionDto exists for provided ID(${id})`,
       );
 
@@ -333,7 +334,7 @@ export class ProductionDatabaseService {
     production: UpdateProductionDto,
   ): Promise<ProductionDto> {
     if (!production.id) {
-      throw new Error("Production id is required for update");
+      throw new BadRequestException("Production id is required for update");
     }
 
     const fields: string[] = [];
@@ -366,7 +367,7 @@ export class ProductionDatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     // Add id as the last parameter
@@ -383,7 +384,7 @@ export class ProductionDatabaseService {
     const result = await this.db.query<ProductionDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Production not found");
+      throw new ResourceGoneException("Production not found");
     }
 
     return result[0];
@@ -437,9 +438,12 @@ export class ProductionDatabaseService {
       DELETE FROM production_blogs
       WHERE production_blogs.blog_id = $1
         AND production_blogs.production_id = $2
+        RETURNING *;
     `;
-
-    await this.db.query(query, [blog_id, production_id]);
+    const result = await this.db.query(query, [blog_id, production_id]);
+    if (result.length == 0) {
+      throw new ResourceGoneException("Cannot delete: Blog-Production link not found");
+    }
   }
 
   /**
@@ -495,8 +499,11 @@ export class ProductionDatabaseService {
       DELETE FROM production_tag
       WHERE production_tag.tag_id = $1
         AND production_tag.production_id = $2
+      RETURNING *;
     `;
-
-    await this.db.query(query, [tag_id, production_id]);
+    const result = await this.db.query(query, [tag_id, production_id]);
+    if (result.length == 0) {
+      throw new ResourceGoneException("Cannot delete: Tag-Production link not found");
+    }
   }
 }

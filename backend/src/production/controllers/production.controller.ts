@@ -74,11 +74,7 @@ export class ProductionController {
   async getProductionById(
     @Param("productionId", ParseIntPipe) productionId: number,
   ): Promise<ProductionDto> {
-    const production = await this.productionService.getProductionById(productionId);
-    if (!production) {
-      throw new ResourceGoneException(`Production ${productionId} not found.`);
-    }
-    return production;
+    return await this.productionService.getProductionById(productionId);
   }
 
   /**
@@ -97,14 +93,10 @@ export class ProductionController {
     @Param("productionId", ParseIntPipe) productionId: number,
     @Body(new ZodValidationPipe(ProductionSchema)) production: ProductionDto,
   ): Promise<ProductionDto> {
-    const updated = await this.productionService.replaceProduction(
+    return await this.productionService.replaceProduction(
       productionId,
       production,
     );
-    if (!updated) {
-      throw new ResourceGoneException(`Cannot replace: Production ${productionId} does not exist`);
-    }
-    return updated;
   }
 
   /**
@@ -124,14 +116,10 @@ export class ProductionController {
     @Body(new ZodValidationPipe(UpdateProductionSchema))
     patchData: UpdateProductionDto,
   ): Promise<ProductionDto> {
-    const updated = await this.productionService.modifyProduction(
+    return await this.productionService.modifyProduction(
       productionId,
       patchData,
     );
-    if (!updated) {
-      throw new ResourceGoneException(`Cannot modify: Production ${productionId} does not exist`);
-    }
-    return updated;
   }
 
   /**
@@ -147,10 +135,6 @@ export class ProductionController {
   async deleteProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
   ): Promise<void> {
-    const production = await this.productionService.getProductionById(productionId);
-    if (!production) {
-      throw new ResourceGoneException(`Cannot delete: Production ${productionId} does not exist`);
-    }
     return await this.productionService.deleteProduction(productionId);
   }
 
