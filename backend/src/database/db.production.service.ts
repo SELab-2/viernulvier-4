@@ -190,6 +190,20 @@ export class ProductionDatabaseService {
       i++;
     }
 
+    // Filter by performance_mode
+    if (filters.artist) {
+      conditions.push(`p.performer_mode = $${i}`);
+      values.push(`%${filters.performer_mode}%`);
+      i++;
+    }
+
+    // Filter by attendance_type
+    if (filters.artist) {
+      conditions.push(`p.attendance_type = $${i}`);
+      values.push(`%${filters.attendance_type}%`);
+      i++;
+    }
+
     // Filter by id
     if (filters.id) {
       conditions.push(`p.id = $${i}`);
@@ -239,16 +253,16 @@ export class ProductionDatabaseService {
       SELECT DISTINCT
         p.id,
         p.titel->>'${lang}' AS titel,
-        p.ondertitel->>'${lang}' AS ondertitel,
         p.description1->>'${lang}' AS desc1,
         p.description2->>'${lang}' AS desc2,
-        p.planning_id,
         p.artist->>'${lang}' AS artist,
         p.tagline->>'${lang}' AS tagline,
         p.credits->>'${lang}' AS credits,
         p.created_at,
         p.updated_at,
-        p.legacy_id
+        p.legacy_id,
+        p.performer_mode,
+        p.attendance_type
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
           ${whereClause}
@@ -275,43 +289,43 @@ export class ProductionDatabaseService {
     }
 
     const query = `
-  INSERT INTO productions (
-      titel,
-      ondertitel,
-      description1,
-      description2,
-      planning_id,
-      artist,
-      tagline,
-      credits,
-      legacy_id
-  )
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-  RETURNING
-      id,
-      titel->>'${lang}' AS titel,
-      ondertitel->>'${lang}' AS ondertitel,
-      description1->>'${lang}' AS desc1,
-      description2->>'${lang}' AS desc2,
-      planning_id,
-      artist->>'${lang}' AS artist,
-      tagline->>'${lang}' AS tagline,
-      credits->>'${lang}' AS credits,
-      created_at,
-      updated_at,
-      legacy_id;
+      INSERT INTO productions (
+          titel,
+          description1,
+          description2,
+          artist,
+          tagline,
+          credits,
+          legacy_id,
+          performer_mode,
+          attendance_type
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      RETURNING
+          id,
+          titel->>'${lang}' AS titel,
+          description1->>'${lang}' AS desc1,
+          description2->>'${lang}' AS desc2,
+          artist->>'${lang}' AS artist,
+          tagline->>'${lang}' AS tagline,
+          credits->>'${lang}' AS credits,
+          created_at,
+          updated_at,
+          legacy_id,
+          performer_mode,
+          attendance_type;
       `;
 
     const values = [
       production.titel ? { [lang]: production.titel } : null,
-      production.ondertitel ? { [lang]: production.ondertitel } : null,
       production.description1 ? { [lang]: production.description1 } : null,
       production.description2 ? { [lang]: production.description2 } : null,
-      production.planning_id ?? null,
       production.artist ? { [lang]: production.artist } : null,
       production.tagline ? { [lang]: production.tagline } : null,
       production.credits ? { [lang]: production.credits } : null,
       production.legacy_id,
+      production.performer_mode,
+      production.attendance_type,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -337,52 +351,52 @@ export class ProductionDatabaseService {
     const query = `
       INSERT INTO productions (
         titel,
-        ondertitel,
         description1,
         description2,
-        planning_id,
         artist,
         tagline,
         credits,
-        legacy_id
+        legacy_id,
+        performer_mode,
+        attendance_type
       )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       ON CONFLICT (id)
       DO UPDATE SET
         titel = EXCLUDED.titel,
-        ondertitel = EXCLUDED.ondertitel,
         description1 = EXCLUDED.description1,
         description2 = EXCLUDED.description2,
-        planning_id = EXCLUDED.planning_id,
         artist = EXCLUDED.artist,
         tagline = EXCLUDED.tagline,
         credits = EXCLUDED.credits,
-        legacy_id = EXCLUDED.legacy_id
+        legacy_id = EXCLUDED.legacy_id,
+        performer_mode = EXCLUDED.performer_mode,
+        attendance_type = EXCLUDED.attendance_type
         RETURNING
           id,
           titel->>'${lang}' AS titel,
-          ondertitel->>'${lang}' AS ondertitel,
           description1->>'${lang}' AS desc1,
           description2->>'${lang}' AS desc2,
-          planning_id,
           artist->>'${lang}' AS artist,
           tagline->>'${lang}' AS tagline,
           credits->>'${lang}' AS credits,
           created_at,
           updated_at,
-          legacy_id
+          legacy_id,
+          performer_mode,
+          attendance_type
       `;
 
     const values = [
       production.titel ? { [lang]: production.titel } : null,
-      production.ondertitel ? { [lang]: production.ondertitel } : null,
       production.description1 ? { [lang]: production.description1 } : null,
       production.description2 ? { [lang]: production.description2 } : null,
-      production.planning_id ?? null,
       production.artist ? { [lang]: production.artist } : null,
       production.tagline ? { [lang]: production.tagline } : null,
       production.credits ? { [lang]: production.credits } : null,
       production.legacy_id ?? null,
+      production.performer_mode ?? null,
+      production.attendance_type ?? null,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -421,13 +435,6 @@ export class ProductionDatabaseService {
       values.push(JSON.stringify({ [lang]: production.titel }));
     }
 
-    if (production.ondertitel !== undefined) {
-      fields.push(
-        `ondertitel = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
-      );
-      values.push(JSON.stringify({ [lang]: production.ondertitel }));
-    }
-
     if (production.description1 !== undefined) {
       fields.push(
         `description1 = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
@@ -440,11 +447,6 @@ export class ProductionDatabaseService {
         `description2 = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
       );
       values.push(JSON.stringify({ [lang]: production.description2 }));
-    }
-
-    if (production.planning_id !== undefined) {
-      fields.push(`planning_id = $${index++}`);
-      values.push(production.planning_id);
     }
 
     if (production.artist !== undefined) {
@@ -473,6 +475,16 @@ export class ProductionDatabaseService {
       values.push(production.legacy_id);
     }
 
+    if (production.performer_mode !== undefined) {
+      fields.push(`performer_mode = $${index++}`);
+      values.push(production.performer_mode);
+    }
+
+    if (production.attendance_type !== undefined) {
+      fields.push(`attendance_type = $${index++}`);
+      values.push(production.attendance_type);
+    }
+
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
@@ -485,16 +497,16 @@ export class ProductionDatabaseService {
       RETURNING
         id,
         titel->>'${lang}' AS titel,
-        ondertitel->>'${lang}' AS ondertitel,
         description1->>'${lang}' AS desc1,
         description2->>'${lang}' AS desc2,
-        planning_id,
         artist->>'${lang}' AS artist,
         tagline->>'${lang}' AS tagline,
         credits->>'${lang}' AS credits,
         created_at,
         updated_at,
-        legacy_id;
+        legacy_id,
+        performer_mode,
+        attendance_type;
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);

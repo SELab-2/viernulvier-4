@@ -7,13 +7,13 @@ import { z } from "zod";
 export const ProductionSchema = z.object({
   id: z.number(),
   titel: z.string(),
-  ondertitel: z.string(),
   description1: z.string(),
   description2: z.string().nullable(),
-  planning_id: z.string().nullable(),
   artist: z.string().nullable(),
   tagline: z.string().nullable(),
   credits: z.string().nullable(),
+  performer_mode: z.string().nullable(),
+  attendance_type: z.string().nullable(),
   created_at: z.iso.date().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
   updated_at: z.iso.date().nullable(), // TODO here too.
   legacy_id: z.string().nullable(),
@@ -46,6 +46,8 @@ export const FilterProductionSchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(20),
   language: z.string().optional(),
   artist: z.string().optional(),
+  performer_mode: z.string().optional(),
+  attendance_type: z.string().optional(),
 });
 
 /**
