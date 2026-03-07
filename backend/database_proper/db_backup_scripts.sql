@@ -10,7 +10,8 @@ CREATE TABLE productions
     tagline      JSONB,
     credits      JSONB,
     created_at   TIMESTAMP DEFAULT now(),
-    updated_at   TIMESTAMP DEFAULT now()
+    updated_at   TIMESTAMP DEFAULT now(),
+    legacy_id    TEXT
 );
 
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -38,6 +39,7 @@ CREATE TABLE events
     created_at      DATE NOT NULL DEFAULT now(),
     updated_at      DATE NOT NULL DEFAULT now(),
     production_id   INT  NOT NULL,
+    legacy_id       TEXT,
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
@@ -56,7 +58,8 @@ CREATE TABLE blogs
     titel       JSONB     NOT NULL,
     description JSONB     NOT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT now()
+    updated_at  TIMESTAMP NOT NULL DEFAULT now(),
+    legacy_id   TEXT
 );
 
 CREATE TRIGGER set_updated_at_blogs
@@ -88,7 +91,8 @@ CREATE TABLE tags
     id         INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     tag        JSONB     NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now()
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
+    legacy_id  TEXT
 );
 
 CREATE TRIGGER set_updated_at_tags
@@ -118,6 +122,7 @@ CREATE TABLE locations
     location   JSONB UNIQUE NOT NULL,
     created_at TIMESTAMP    NOT NULL DEFAULT now(),
     updated_at TIMESTAMP    NOT NULL DEFAULT now(),
+    legacy_id  TEXT,
     PRIMARY KEY (id)
 );
 
@@ -167,7 +172,8 @@ CREATE TABLE prices
     name       JSONB          NOT NULL,
     price      NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP      NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP      NOT NULL DEFAULT now()
+    updated_at TIMESTAMP      NOT NULL DEFAULT now(),
+    legacy_id  TEXT
 );
 
 CREATE TABLE event_prices

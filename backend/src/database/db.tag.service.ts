@@ -23,7 +23,8 @@ export class TagDatabaseService {
         id,
         tag->>'${lang}' AS name,
         created_at,
-        updated_at
+        updated_at,
+        legacy_id
       FROM tags
       WHERE id = $1
     `;
@@ -61,7 +62,8 @@ export class TagDatabaseService {
     p.tagline->>'${lang}' AS tagline,
     p.credits->>'${lang}' AS credits,
     p.created_at,
-    p.updated_at
+    p.updated_at,
+    p.legacy_id
   `;
 
     if (amount === 0) {
@@ -100,7 +102,7 @@ export class TagDatabaseService {
   ): Promise<TagDto[]> {
     // non-pagination first
     if (amount === 0) {
-      const query = `SELECT id, tag->>'${lang}' AS tag, created_at, updated_at FROM tags`;
+      const query = `SELECT id, tag->>'${lang}' AS tag, created_at, updated_at, legacy_id FROM tags`;
 
       const result = await this.db.query<TagDto>(query);
 
@@ -137,13 +139,14 @@ export class TagDatabaseService {
     }
 
     const query = `
-      INSERT INTO tags (tag)
+      INSERT INTO tags (tag, legacy_id)
       VALUES ($1)
       RETURNING
         id,
         tag->>'${lang}' AS tag,
         created_at,
-        updated_at
+        updated_at,
+        legacy_id
       ;
     `;
 
@@ -196,7 +199,8 @@ export class TagDatabaseService {
         id,
         tag->>'${lang}' AS tag
         created_at,
-        updated_at
+        updated_at,
+        legacy_id
       ;
     `;
 

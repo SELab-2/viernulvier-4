@@ -16,6 +16,7 @@ export const ProductionSchema = z.object({
   credits: z.string().nullable(),
   created_at: z.iso.date().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
   updated_at: z.iso.date().nullable(), // TODO here too.
+  legacy_id: z.string().nullable(),
 });
 
 export const CreateProductionSchema = ProductionSchema.omit({
@@ -59,6 +60,7 @@ export const EventSchema = z.object({
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   production_id: z.number(),
+  legacy_id: z.string().nullable(),
 });
 
 export const CreateEventSchema = EventSchema.omit({
@@ -76,6 +78,7 @@ export const LocationSchema = z.object({
   location: z.string(),
   created_at: z.iso.date(),
   updated_at: z.iso.date(),
+  legacy_id: z.string().nullable(),
 });
 
 export const CreateLocationSchema = LocationSchema.omit({
@@ -105,6 +108,7 @@ export const PriceSchema = z.object({
   name: z.string(),
   created_at: z.iso.date(),
   updated_at: z.iso.date(),
+  legacy_id: z.string().nullable(),
 });
 export const CreatePriceSchema = PriceSchema.omit({
   id: true,
@@ -123,6 +127,7 @@ export const BlogSchema = z.object({
   description: z.string(),
   created_at: z.iso.date(),
   updated_at: z.iso.date(),
+  legacy_id: z.string().nullable(),
 });
 
 export const CreateBlogSchema = BlogSchema.omit({
@@ -140,6 +145,7 @@ export const TagSchema = z.object({
   tag: z.string(),
   created_at: z.iso.date(),
   updated_at: z.iso.date(),
+  legacy_id: z.string().nullable(),
 });
 
 export const CreateTagSchema = TagSchema.omit({

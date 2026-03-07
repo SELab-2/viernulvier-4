@@ -8,11 +8,7 @@ import {
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
-import {
-  DEFAULT_LANGUAGE,
-  FilterProductionSchema,
-  Language,
-} from "@repo/common";
+import { DEFAULT_LANGUAGE, FilterProductionSchema, Language, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -69,7 +65,10 @@ export class ProductionDatabaseService {
 
     const query = `
       SELECT t.id,
-             t.tag->>'${lang}'
+             t.tag->>'${lang}',
+             t.created_at,
+             t.updated_at,
+             t.legacy_id
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -97,7 +96,10 @@ export class ProductionDatabaseService {
       const query = `
       SELECT b.id, 
              b.titel->>'${lang}', 
-             b.description->>'${lang}'
+             b.description->>'${lang}',
+             b.created_at,
+             b.updated_at,
+             b.legacy_id
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -111,7 +113,10 @@ export class ProductionDatabaseService {
     const query = `
       SELECT b.id,
              b.titel->>'${lang}',
-             b.description->>'${lang}'
+             b.description->>'${lang}',
+             b.created_at,
+             b.updated_at,
+             b.legacy_id
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -242,7 +247,8 @@ export class ProductionDatabaseService {
         p.tagline->>'${lang}' AS tagline,
         p.credits->>'${lang}' AS credits,
         p.created_at,
-        p.updated_at
+        p.updated_at,
+        p.legacy_id
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
           ${whereClause}
@@ -277,9 +283,10 @@ export class ProductionDatabaseService {
       planning_id,
       artist,
       tagline,
-      credits
+      credits,
+      legacy_id
   )
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
   RETURNING
       id,
       titel->>'${lang}' AS titel,
@@ -291,7 +298,8 @@ export class ProductionDatabaseService {
       tagline->>'${lang}' AS tagline,
       credits->>'${lang}' AS credits,
       created_at,
-      updated_at
+      updated_at,
+      legacy_id;
       `;
 
     const values = [
@@ -303,6 +311,7 @@ export class ProductionDatabaseService {
       production.artist ? { [lang]: production.artist } : null,
       production.tagline ? { [lang]: production.tagline } : null,
       production.credits ? { [lang]: production.credits } : null,
+      production.legacy_id,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -334,9 +343,10 @@ export class ProductionDatabaseService {
         planning_id,
         artist,
         tagline,
-        credits
+        credits,
+        legacy_id
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       ON CONFLICT (id)
       DO UPDATE SET
         titel = EXCLUDED.titel,
@@ -346,7 +356,8 @@ export class ProductionDatabaseService {
         planning_id = EXCLUDED.planning_id,
         artist = EXCLUDED.artist,
         tagline = EXCLUDED.tagline,
-        credits = EXCLUDED.credits
+        credits = EXCLUDED.credits,
+        legacy_id = EXCLUDED.legacy_id
         RETURNING
           id,
           titel->>'${lang}' AS titel,
@@ -358,7 +369,8 @@ export class ProductionDatabaseService {
           tagline->>'${lang}' AS tagline,
           credits->>'${lang}' AS credits,
           created_at,
-          updated_at
+          updated_at,
+          legacy_id
       `;
 
     const values = [
@@ -370,6 +382,7 @@ export class ProductionDatabaseService {
       production.artist ? { [lang]: production.artist } : null,
       production.tagline ? { [lang]: production.tagline } : null,
       production.credits ? { [lang]: production.credits } : null,
+      production.legacy_id ?? null,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -455,6 +468,11 @@ export class ProductionDatabaseService {
       values.push(JSON.stringify({ [lang]: production.credits }));
     }
 
+    if (production.legacy_id !== undefined) {
+      fields.push(`legacy_id = $${index++}`);
+      values.push(production.legacy_id);
+    }
+
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
@@ -466,16 +484,17 @@ export class ProductionDatabaseService {
       WHERE id = $${index}
       RETURNING
         id,
-        titel,
-        ondertitel,
-        description1,
-        description2,
+        titel->>'${lang}' AS titel,
+        ondertitel->>'${lang}' AS ondertitel,
+        description1->>'${lang}' AS desc1,
+        description2->>'${lang}' AS desc2,
         planning_id,
         artist->>'${lang}' AS artist,
         tagline->>'${lang}' AS tagline,
         credits->>'${lang}' AS credits,
         created_at,
-        updated_at;
+        updated_at,
+        legacy_id;
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);

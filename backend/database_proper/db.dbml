@@ -10,6 +10,7 @@ Table productions {
   credits jsonb
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
+  legacy_id text
 }
 
 Table events {
@@ -21,6 +22,7 @@ Table events {
   created_at timestamp
   updated_at timestamp
   production_id int [not null]
+  legacy_id text
 }
 
 Table blogs {
@@ -29,6 +31,7 @@ Table blogs {
   description JSONB [not null]
   created_at TIMESTAMP
   updated_at TIMESTAMP
+  legacy_id text
 }
 
 Table production_blogs {
@@ -45,6 +48,7 @@ Table tags {
   tag jsonb [not null, unique]
   created_at TIMESTAMP
   updated_at TIMESTAMP
+  legacy_id text
 }
 
 Table production_tag {
@@ -61,6 +65,7 @@ Table locations {
   location JSONB [not null, unique]
   created_at TIMESTAMP
   updated_at TIMESTAMP
+  legacy_id text
 }
 
 Table event_locations {
@@ -97,6 +102,7 @@ Table prices {
   price numeric(10,2) [not null]
   created_at TIMESTAMP
   updated_at TIMESTAMP
+  legacy_id text
 }
 
 Table event_prices {

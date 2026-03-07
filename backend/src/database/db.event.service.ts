@@ -1,6 +1,13 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  LocationDto,
+  PriceDto,
+  UpdateEventDto,
+} from "../dto/dto";
 import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
 @Injectable()
@@ -104,7 +111,7 @@ export class EventDatabaseService {
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.legacy_id
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
@@ -127,9 +134,9 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at)
+      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at, legacy_id)
       VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at
+      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at, legacy_id
     `;
 
     const result = await this.db.query<EventDto>(query, [
@@ -234,7 +241,7 @@ export class EventDatabaseService {
     lang: Language = DEFAULT_LANGUAGE,
   ): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location->>'${lang} AS loc'
+    SELECT l.id, l.location->>'${lang} AS loc', l.legacy_id, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
@@ -305,7 +312,12 @@ export class EventDatabaseService {
   ): Promise<PriceDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT p.*
+      SELECT p.id,
+             p.created_at,
+             p.updated_at,
+             p.price,
+             p.name->>'${lang}' AS name,
+             p.legacy_id
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
       WHERE ep.event_id = $1
@@ -321,7 +333,8 @@ export class EventDatabaseService {
            p.price,
            p.name->>'${lang}',
            p.created_at,
-           p.updated_at
+           p.updated_at,
+           p.legacy_id
     FROM prices p
     INNER JOIN event_prices ep ON ep.price_id = p.id
     WHERE ep.event_id = $1

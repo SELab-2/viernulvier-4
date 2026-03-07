@@ -18,8 +18,13 @@ export class PriceDatabaseService {
     id: number,
     lang: Language = DEFAULT_LANGUAGE,
   ): Promise<PriceDto> {
-    const query = `SELECT id, price, name->>'${lang}' AS name, created_at, updated_at FROM prices WHERE id = $1`;
-
+    const query = `SELECT id, 
+       price, 
+       name->>'${lang}' AS name, 
+       created_at, 
+       updated_at, 
+       legacy_id 
+      FROM prices WHERE id = $1`;
     const result = await this.db.query<PriceDto>(query, [id]);
 
     return result[0];
@@ -45,7 +50,8 @@ export class PriceDatabaseService {
              price,
              name->>'${lang}' AS name,
              created_at,
-             updated_at
+             updated_at,
+             legacy_id
       FROM prices
       ORDER BY id
       `;
@@ -58,7 +64,8 @@ export class PriceDatabaseService {
            price,
            name->>'${lang}' AS name,
            created_at,
-           updated_at
+           updated_at,
+           legacy_id
     FROM prices
     ORDER BY id 
     LIMIT $1 OFFSET $2
@@ -82,14 +89,15 @@ export class PriceDatabaseService {
     }
 
     const query = `
-      INSERT INTO prices (name, price)
+      INSERT INTO prices (name, price, legacy_id)
       VALUES ($1, $2)
       RETURNING
         id,
         name->>'${lang}' AS name,
         price,
         created_at,
-        updated_at;
+        updated_at,
+        legacy_id;
     `;
 
     const values = [JSON.stringify({ [lang]: price.name }), price.price];
@@ -147,7 +155,8 @@ export class PriceDatabaseService {
         name->>'${lang}' AS name,
         price,
         created_at,
-        updated_at;
+        updated_at,
+        legacy_id;
     `;
 
     const result = await this.db.query<PriceDto>(query, values);
