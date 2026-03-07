@@ -59,6 +59,8 @@ Table production_tag {
 Table locations {
   id int [not null]
   location JSONB [not null, unique]
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
 }
 
 Table event_locations {

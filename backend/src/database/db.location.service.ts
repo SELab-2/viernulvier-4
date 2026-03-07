@@ -18,7 +18,7 @@ export class LocationDatabaseService {
     id: number,
     lang: Language = DEFAULT_LANGUAGE,
   ): Promise<LocationDto> {
-    const query = `SELECT id, location->>'${lang}' FROM locations WHERE id = $1`;
+    const query = `SELECT id, location->>'${lang}' AS loc, created_at, updated_at FROM locations WHERE id = $1`;
 
     const result = await this.db.query<LocationDto>(query, [id]);
 
@@ -45,7 +45,9 @@ export class LocationDatabaseService {
     if (amount === 0) {
       const query = `
       SELECT id,
-             location->>'${lang}'
+             location->>'${lang}' AS loc,
+             created_at,
+             updated_at
       FROM locations
       ORDER BY id
       `;
@@ -61,7 +63,9 @@ export class LocationDatabaseService {
 
     const query = `
     SELECT id,
-           location->>'${lang}'
+           location->>'${lang}' AS loc,
+           created_at,
+           updated_at
     FROM locations
     ORDER BY id
     LIMIT $1 OFFSET $2
@@ -95,7 +99,10 @@ export class LocationDatabaseService {
       VALUES ($1)
       RETURNING
         id,
-        location->>'${lang}' AS location;
+        location->>'${lang}' AS location,
+        created_at,
+        updated_at
+      ;
     `;
 
     const values = [JSON.stringify({ [lang]: location.location })];
@@ -147,7 +154,10 @@ export class LocationDatabaseService {
       WHERE id = $${index}
     RETURNING
       id,
-      location->>'${lang}' AS location;
+      location->>'${lang}' AS location
+      created_at,
+      updated_at
+    ;
   `;
 
     const result = await this.db.query<LocationDto>(query, values);

@@ -85,18 +85,17 @@ CREATE TABLE production_blogs
 
 CREATE TABLE tags
 (
-    id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tag JSONB NOT NULL UNIQUE,
+    id         INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tag        JSONB     NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TRIGGER set_updated_at_tags
-    BEFORE UPDATE ON tags
+    BEFORE UPDATE
+    ON tags
     FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
-ALTER TABLE
-
 
 CREATE TABLE production_tag
 (
@@ -115,10 +114,19 @@ CREATE TABLE production_tag
 
 CREATE TABLE locations
 (
-    id       INT          NOT NULL,
-    location JSONB UNIQUE NOT NULL,
+    id         INT          NOT NULL,
+    location   JSONB UNIQUE NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP    NOT NULL DEFAULT now(),
     PRIMARY KEY (id)
 );
+
+CREATE TRIGGER set_updated_at_locations
+    BEFORE UPDATE
+    ON locations
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
 
 CREATE TABLE event_locations
 (

@@ -74,9 +74,15 @@ export const UpdateEventSchema = EventSchema.partial();
 export const LocationSchema = z.object({
   id: z.number(),
   location: z.string(),
+  created_at: z.iso.date(),
+  updated_at: z.iso.date(),
 });
 
-export const CreateLocationSchema = LocationSchema.omit({ id: true });
+export const CreateLocationSchema = LocationSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateLocationSchema = LocationSchema.partial();
 
 export const FilterEventSchema = z.object({
@@ -130,7 +136,11 @@ export const TagSchema = z.object({
   updated_at: z.iso.date(),
 });
 
-export const CreateTagSchema = TagSchema.omit({ id: true });
+export const CreateTagSchema = TagSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateTagSchema = TagSchema.partial();
 
 /**
