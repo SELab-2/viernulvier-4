@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import { DEFAULT_LANGUAGE, Language } from "@repo/common";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -10,10 +11,14 @@ export class LocationDatabaseService {
   /**
    * Get a single location by their ID.
    * @param id The ID we're trying to fetch.
+   * @param lang is the used language
    * @returns The Location if there is one.
    */
-  async getLocationById(id: number): Promise<LocationDto> {
-    const query = `SELECT * FROM locations WHERE id = $1`;
+  async getLocationById(
+    id: number,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<LocationDto> {
+    const query = `SELECT id, location->>'${lang}' FROM locations WHERE id = $1`;
 
     const result = await this.db.query<LocationDto>(query, [id]);
 
@@ -27,17 +32,20 @@ export class LocationDatabaseService {
    * Get locations with pagination
    * @param amount number of locations per page (if amount=0, it will default to grabbing all locations)
    * @param page page index (starts at 0)
+   * @param lang is the used language
    * @returns locations
    */
   async getLocations(
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<LocationDto[]> {
     const offset = page * amount;
 
     if (amount === 0) {
       const query = `
-      SELECT *
+      SELECT id,
+             location->>'${lang}'
       FROM locations
       ORDER BY id
       `;
@@ -52,7 +60,8 @@ export class LocationDatabaseService {
     }
 
     const query = `
-    SELECT *
+    SELECT id,
+           location->>'${lang}'
     FROM locations
     ORDER BY id
     LIMIT $1 OFFSET $2
@@ -70,22 +79,26 @@ export class LocationDatabaseService {
   /**
    * Create location function, creates a location in the database.
    * @param location must be of the type "CreateLocation" which has all fields defined besides the primary key id.
+   * @param lang is the used language
    * @returns the added location if it was successful.
    */
-  async createLocation(location: CreateLocationDto): Promise<LocationDto> {
+  async createLocation(
+    location: CreateLocationDto,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<LocationDto> {
     if (!location.location) {
       throw new BadRequestException("Missing required fields");
     }
 
     const query = `
-    INSERT INTO locations (
-      location
-    )
-    VALUES ($1)
-    RETURNING id, location;
-  `;
+      INSERT INTO locations (location)
+      VALUES ($1)
+      RETURNING
+        id,
+        location->>'${lang}' AS location;
+    `;
 
-    const values = [location.location];
+    const values = [JSON.stringify({ [lang]: location.location })];
 
     const result = await this.db.query<LocationDto>(query, values);
 
@@ -99,10 +112,14 @@ export class LocationDatabaseService {
   /**
    * Update function for locations. Updates the location in the database.
    * @param location must be of the type "UpdateLocation", gives the freedom to define only what needs to be updated.
+   * @param lang is the used language
    * The id field in the location MUST be defined.
    * @returns the updated location if successful.
    */
-  async updateLocation(location: UpdateLocationDto): Promise<LocationDto> {
+  async updateLocation(
+    location: UpdateLocationDto,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<LocationDto> {
     if (!location.id) {
       throw new Error("Location id is required for update");
     }
@@ -112,23 +129,25 @@ export class LocationDatabaseService {
     let index = 1;
 
     if (location.location !== undefined) {
-      fields.push(`location = $${index++}`);
-      values.push(location.location);
+      fields.push(
+        `location = COALESCE(location, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: location.location }));
     }
 
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
 
-    // Add id as final parameter
     values.push(location.id);
 
-    // ignore "RETURNING" error, query is correct.
     const query = `
-    UPDATE locations
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING id, location;
+      UPDATE locations
+      SET ${fields.join(", ")}
+      WHERE id = $${index}
+    RETURNING
+      id,
+      location->>'${lang}' AS location;
   `;
 
     const result = await this.db.query<LocationDto>(query, values);

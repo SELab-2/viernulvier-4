@@ -98,8 +98,8 @@ CREATE TABLE production_tag
 
 CREATE TABLE locations
 (
-    id       INT         NOT NULL,
-    location TEXT UNIQUE NOT NULL,
+    id       INT          NOT NULL,
+    location JSONB UNIQUE NOT NULL,
     PRIMARY KEY (id)
 );
 

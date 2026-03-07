@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateEventDto, EventDto, FilterEventDto, LocationDto, UpdateEventDto, } from "../dto/dto";
-import { FilterEventSchema } from "@repo/common";
+import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -226,11 +226,15 @@ export class EventDatabaseService {
   /**
    * get the location linked with an event
    * @param id the ID of the event we want the location of.
+   * @param lang is the used language
    * @returns the LocationDto of the event.
    */
-  async getLocationOfEvent(id: number): Promise<LocationDto> {
+  async getLocationOfEvent(
+    id: number,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location
+    SELECT l.id, l.location->>'${lang}'
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
