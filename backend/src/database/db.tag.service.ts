@@ -21,7 +21,9 @@ export class TagDatabaseService {
     const query = `
       SELECT
         id,
-        tag->>'${lang}' AS name
+        tag->>'${lang}' AS name,
+        created_at,
+        updated_at
       FROM tags
       WHERE id = $1
     `;
@@ -98,7 +100,7 @@ export class TagDatabaseService {
   ): Promise<TagDto[]> {
     // non-pagination first
     if (amount === 0) {
-      const query = `SELECT id, tag->>'${lang}' AS tag FROM tags`;
+      const query = `SELECT id, tag->>'${lang}' AS tag, created_at, updated_at FROM tags`;
 
       const result = await this.db.query<TagDto>(query);
 
@@ -139,7 +141,10 @@ export class TagDatabaseService {
       VALUES ($1)
       RETURNING
         id,
-        tag->>'${lang}' AS tag;
+        tag->>'${lang}' AS tag,
+        created_at,
+        updated_at
+      ;
     `;
 
     const values = [JSON.stringify({ [lang]: tag.tag })];
@@ -189,7 +194,10 @@ export class TagDatabaseService {
       WHERE id = $${index}
       RETURNING
         id,
-        tag->>'${lang}' AS tag;
+        tag->>'${lang}' AS tag
+        created_at,
+        updated_at
+      ;
     `;
 
     const result = await this.db.query<TagDto>(query, values);

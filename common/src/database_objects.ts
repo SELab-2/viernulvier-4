@@ -56,8 +56,8 @@ export const EventSchema = z.object({
   endtime: z.iso.datetime().nullable(),
   doors_at: z.iso.datetime().nullable(),
   intermission_at: z.iso.datetime().nullable(),
-  created_at: z.iso.datetime().nullable(), //TODO remove after updating csv.
-  updated_at: z.iso.datetime().nullable(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
   production_id: z.number(),
 });
 
@@ -109,8 +109,8 @@ export const BlogSchema = z.object({
   id: z.number(),
   titel: z.string(),
   description: z.string(),
-  created_at: z.iso.date().optional(),
-  updated_at: z.iso.date().optional(),
+  created_at: z.iso.date(),
+  updated_at: z.iso.date(),
 });
 
 export const CreateBlogSchema = BlogSchema.omit({
@@ -126,6 +126,8 @@ export const UpdateBlogSchema = BlogSchema.partial();
 export const TagSchema = z.object({
   id: z.number(),
   tag: z.string(),
+  created_at: z.iso.date(),
+  updated_at: z.iso.date(),
 });
 
 export const CreateTagSchema = TagSchema.omit({ id: true });

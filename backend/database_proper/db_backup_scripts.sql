@@ -86,8 +86,17 @@ CREATE TABLE production_blogs
 CREATE TABLE tags
 (
     id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tag JSONB NOT NULL UNIQUE
+    tag JSONB NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TRIGGER set_updated_at_tags
+    BEFORE UPDATE ON tags
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+ALTER TABLE
+
 
 CREATE TABLE production_tag
 (
