@@ -22,8 +22,7 @@ export class BlogDatabaseService {
        titel->>'${lang}' AS titel, 
        description->>'${lang}' AS description, 
        created_at, 
-       updated_at, 
-       legacy_id 
+       updated_at
     FROM blogs WHERE id = $1`;
 
     const result = await this.db.query<BlogDto>(query, [id]);
@@ -54,8 +53,7 @@ export class BlogDatabaseService {
              titel->>'${lang}' AS titel, 
              description->>'${lang}' AS description,
              created_at,
-             updated_at,
-             legacy_id
+             updated_at
       FROM blogs
       ORDER BY id
       `;
@@ -74,8 +72,7 @@ export class BlogDatabaseService {
            titel->>'${lang}' AS titel,
            description->>'${lang}' AS description,
            created_at,
-           updated_at,
-           legacy_id
+           updated_at
     FROM blogs
     ORDER BY id
     LIMIT $1 OFFSET $2
@@ -105,15 +102,14 @@ export class BlogDatabaseService {
     }
 
     const query = `
-      INSERT INTO blogs (titel, description, legacy_id)
+      INSERT INTO blogs (titel, description)
       VALUES ($1, $2)
       RETURNING
         id,
         titel->>'${lang}' AS titel,
         description->>'${lang}' AS description,
         created_at,
-        updated_at,
-        legacy_id;
+        updated_at;
     `;
 
     const values = [
@@ -176,8 +172,7 @@ export class BlogDatabaseService {
       titel->>'${lang}' AS titel,
       description->>'${lang}' AS description,
       created_at,
-      updated_at,
-      legacy_id;
+      updated_at;
   `;
 
     const result = await this.db.query<BlogDto>(query, values);

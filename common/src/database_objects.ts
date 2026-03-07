@@ -129,7 +129,6 @@ export const BlogSchema = z.object({
   description: z.string(),
   created_at: z.iso.date(),
   updated_at: z.iso.date(),
-  legacy_id: z.string().nullable(),
 });
 
 export const CreateBlogSchema = BlogSchema.omit({

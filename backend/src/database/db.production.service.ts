@@ -52,7 +52,10 @@ export class ProductionDatabaseService {
     if (amount === 0) {
       const query = `
       SELECT t.id,
-             t.tag->>'${lang}'
+             t.tag->>'${lang}',
+             t.legacy_id,
+             t.created_at,
+             t.updated_at
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -98,8 +101,7 @@ export class ProductionDatabaseService {
              b.titel->>'${lang}', 
              b.description->>'${lang}',
              b.created_at,
-             b.updated_at,
-             b.legacy_id
+             b.updated_at
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1

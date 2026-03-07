@@ -58,8 +58,7 @@ CREATE TABLE blogs
     titel       JSONB     NOT NULL,
     description JSONB     NOT NULL,
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at  TIMESTAMP NOT NULL DEFAULT now(),
-    legacy_id   TEXT
+    updated_at  TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TRIGGER set_updated_at_blogs

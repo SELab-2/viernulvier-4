@@ -31,7 +31,6 @@ Table blogs {
   description JSONB [not null]
   created_at TIMESTAMP
   updated_at TIMESTAMP
-  legacy_id text
 }
 
 Table production_blogs {
