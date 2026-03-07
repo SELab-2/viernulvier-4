@@ -15,7 +15,7 @@ export const ProductionSchema = z.object({
   tagline: z.string().nullable(),
   credits: z.string().nullable(),
   created_at: z.iso.date().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
-  updated_at: z.iso.date().nullable(),
+  updated_at: z.iso.date().nullable(), // TODO here too.
 });
 
 export const CreateProductionSchema = ProductionSchema.omit({

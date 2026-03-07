@@ -1,13 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreateEventDto,
-  EventDto,
-  FilterEventDto,
-  LocationDto,
-  PriceDto,
-  UpdateEventDto,
-} from "../dto/dto";
+import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
 import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
 @Injectable()
@@ -301,12 +294,14 @@ export class EventDatabaseService {
    * @param id the ID of the event we want all the prices of.
    * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
    * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
+   * @param lang is the used language
    * @returns a list of PriceDto objects linked to the given event.
    */
   async getPricesOfEvent(
     id: number,
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<PriceDto[]> {
     if (amount === 0) {
       const query = `
@@ -322,7 +317,11 @@ export class EventDatabaseService {
     const offset = page * amount;
 
     const query = `
-    SELECT p.*
+    SELECT p.id,
+           p.price,
+           p.name->>'${lang}',
+           p.created_at,
+           p.updated_at
     FROM prices p
     INNER JOIN event_prices ep ON ep.price_id = p.id
     WHERE ep.event_id = $1
@@ -338,10 +337,7 @@ export class EventDatabaseService {
    * @param price_id the ID of the price you want to link
    * @returns T/F whether if the linking was successful.
    */
-  async addPriceToEvent(
-    event_id: number,
-    price_id: number
-  ): Promise<boolean> {
+  async addPriceToEvent(event_id: number, price_id: number): Promise<boolean> {
     const query = `
     INSERT INTO event_prices (event_id, price_id)
     VALUES ($1, $2)
