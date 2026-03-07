@@ -13,7 +13,7 @@ export class PriceDatabaseService {
    * @returns The Price if there is one.
    */
   async getPriceById(id: number): Promise<PriceDto> {
-    const query = `SELECT * price FROM prices WHERE id = $1`;
+    const query = `SELECT * FROM prices WHERE id = $1`;
 
     const result = await this.db.query<PriceDto>(query, [id]);
 

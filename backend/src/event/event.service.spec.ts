@@ -6,6 +6,7 @@ import type {
   EventDto,
   UpdateEventDto,
   LocationDto,
+  PriceDto,
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
@@ -20,7 +21,6 @@ describe("EventService", () => {
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
     production_id: 1,
-    price: 25,
   };
 
   const mockLocation: LocationDto = {
@@ -33,6 +33,10 @@ describe("EventService", () => {
     title: "Event Update",
     content: "This is a blog about the event.",
   };
+
+  const mockPrices: PriceDto[] = [
+    { id: 1, price: 15.5, name: "Early Bird" } as PriceDto,
+  ];
 
   const mockEvents: EventDto[] = [mockEvent];
 
@@ -54,6 +58,11 @@ describe("EventService", () => {
             linkEventToLocation: jest.fn().mockResolvedValue(true),
             deleteLocationFromEvent: jest.fn().mockResolvedValue(undefined),
             getLocationOfEvent: jest.fn().mockResolvedValue(mockLocation),
+
+            // <-- Added Price DB mock methods
+            getPricesOfEvent: jest.fn().mockResolvedValue(mockPrices),
+            addPriceToEvent: jest.fn().mockResolvedValue(true),
+            removePriceFromEvent: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -156,8 +165,14 @@ describe("EventService", () => {
 
   describe("modifyEvent", () => {
     it("should fetch, merge, and update the event correctly", async () => {
-      const patchData: UpdateEventDto = { price: 50 };
-      const expectedMergedEvent: EventDto = { ...mockEvent, price: 50, id: 1 };
+      const patchData: UpdateEventDto = {
+        starttime: "2026-03-06T23:08:45.328Z",
+      };
+      const expectedMergedEvent: EventDto = {
+        ...mockEvent,
+        starttime: "2026-03-06T23:08:45.328Z",
+        id: 1,
+      };
 
       jest
         .spyOn(dbService, "updateEvent")
@@ -195,7 +210,6 @@ describe("EventService", () => {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
         production_id: 2,
-        price: 30,
       };
 
       const createdEvent: EventDto = { id: 2, ...newEvent };
@@ -213,7 +227,6 @@ describe("EventService", () => {
         starttime: "2024-02-10T18:00:00Z",
         endtime: "2024-02-10T20:00:00Z",
         production_id: 2,
-        price: 30,
       };
 
       jest
@@ -247,6 +260,59 @@ describe("EventService", () => {
       const result = await service.getLocationForEvent(1);
       expect(dbService.getLocationOfEvent).toHaveBeenCalledWith(1);
       expect(result).toEqual(mockLocation);
+    });
+  });
+
+  describe("getPricesForEvent", () => {
+    it("should return all Price objects linked to an event", async () => {
+      const eventId = 1;
+      const result = await service.getPricesForEvent(eventId);
+
+      expect(dbService.getPricesOfEvent).toHaveBeenCalledWith(eventId);
+      expect(dbService.getPricesOfEvent).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockPrices);
+    });
+  });
+
+  describe("addPriceToEvent", () => {
+    it("should add an existing Price to an Event and return true", async () => {
+      const eventId = 1;
+      const priceId = 100;
+
+      const result = await service.addPriceToEvent(eventId, priceId);
+
+      expect(dbService.addPriceToEvent).toHaveBeenCalledWith(eventId, priceId);
+      expect(dbService.addPriceToEvent).toHaveBeenCalledTimes(1);
+      expect(result).toBe(true);
+    });
+
+    it("should return false if DB service fails to add price to event", async () => {
+      const eventId = 1;
+      const priceId = 999;
+
+      // Override the mock to return false for this specific test
+      jest.spyOn(dbService, "addPriceToEvent").mockResolvedValueOnce(false);
+
+      const result = await service.addPriceToEvent(eventId, priceId);
+
+      expect(dbService.addPriceToEvent).toHaveBeenCalledWith(eventId, priceId);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("removePriceFromEvent", () => {
+    it("should remove an existing Price from an Event via DB service", async () => {
+      const eventId = 1;
+      const priceId = 100;
+
+      const result = await service.removePriceFromEvent(eventId, priceId);
+
+      expect(dbService.removePriceFromEvent).toHaveBeenCalledWith(
+        eventId,
+        priceId,
+      );
+      expect(dbService.removePriceFromEvent).toHaveBeenCalledTimes(1);
+      expect(result).toBeUndefined();
     });
   });
 });

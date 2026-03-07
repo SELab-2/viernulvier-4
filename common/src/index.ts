@@ -50,6 +50,8 @@ import {
   UpdateTagSchema,
   VerifyApiKey,
   VerifyApiKeySchema,
+  PaginationFilterSchema,
+  PaginationFilter,
 } from "./database_objects";
 
 // Een voorbeeld van een globaal schema...
@@ -84,6 +86,7 @@ export {
   PriceSchema,
   CreatePriceSchema,
   UpdatePriceSchema,
+  PaginationFilterSchema,
 };
 export type {
   Production,
@@ -111,5 +114,6 @@ export type {
   Price,
   CreatePrice,
   UpdatePrice,
+  PaginationFilter,
 };
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

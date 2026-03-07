@@ -345,6 +345,7 @@ export class EventDatabaseService {
     INSERT INTO event_prices (event_id, price_id)
     VALUES ($1, $2)
     ON CONFLICT DO NOTHING
+    RETURNING event_id
     `;
 
     const result = await this.db.query(query, [event_id, price_id]);
