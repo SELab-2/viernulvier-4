@@ -2,10 +2,7 @@ import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
 import { CreateEventDto, EventDto, ProductionDto, TagDto } from "../dto/dto";
-import {
-  CreateEventSchema,
-  ProductionSchema,
-} from "@repo/common/src/database_objects";
+import { CreateEventSchema, ProductionSchema, } from "@repo/common/src/database_objects";
 import { EventService } from "../event/event.service";
 import { ProductionService } from "../production/production.service";
 import { TagService } from "../tag/tag.service";
@@ -116,8 +113,10 @@ export class CSVFileParser {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       production_id: productionId,
-      price: row.Price ? Number(row.Price) : null,
       location: location,
+      doors_at: null, // TODO
+      intermission_at: null, // TODO
+      legacy_id: null,
     };
   }
 
@@ -141,11 +140,17 @@ export class CSVFileParser {
     return {
       id,
       titel: row.Titel,
-      ondertitel: row.Ondertitel,
       description1: row.Description1,
       description2: row.Description2 || null,
-      planning_id: planningId,
       tags: [...new Set(tags)], // remove duplicate tags
+      artist: null, // TODO
+      tagline: null, // TODO
+      credits: null, // TODO
+      created_at: null, // TODO
+      updated_at: null, // TODO
+      attendance_type: null, // TODO
+      performer_mode: null, // TODO
+      legacy_id: null,
     };
   }
 
@@ -212,6 +217,7 @@ export class CSVFileParser {
    * Parse events from a CSV file and insert them into the database.
    * @param filePath - Path to the CSV file containing events
    * @param eventService - Instance of EventService to insert events into the database
+   * @param locationService - Instance of LocationService to insert locations into the database
    * @returns A promise that resolves to an array of created EventDto objects
    */
   static async insertEventsFromCSV(
@@ -229,45 +235,46 @@ export class CSVFileParser {
       locationMap.set(loc.location, loc.id);
     }
 
-  for (const { event, location } of parsed) {
-    try {
-      let locId: number | null = null;
-      const loc = location.trim();
+    for (const { event, location } of parsed) {
+      try {
+        let locId: number | null = null;
+        const loc = location.trim();
 
-      // if there's a location, either find it in the map or create it and add to the map
-      if (loc) {
-        if (locationMap.has(loc)) {
-          locId = locationMap.get(loc)!;
-        } else {
-          const createdLoc = await locationService.createLocation({
-            location: loc,
-          });
+        // if there's a location, either find it in the map or create it and add to the map
+        if (loc) {
+          if (locationMap.has(loc)) {
+            locId = locationMap.get(loc)!;
+          } else {
+            const createdLoc = await locationService.createLocation({
+              location: loc,
+              legacy_id: null,
+            });
 
-          if (!createdLoc) {
-            throw new Error("Location creation failed");
+            if (!createdLoc) {
+              throw new Error("Location creation failed");
+            }
+
+            locId = createdLoc.id;
+            locationMap.set(loc, locId);
           }
-
-          locId = createdLoc.id;
-          locationMap.set(loc, locId);
         }
+
+        //create the event and link it to the location if applicable
+        const createdEvent = await eventService.createEvent(event);
+
+        if (locId !== null) {
+          await eventService.linkEventToLocation(createdEvent.id, locId);
+        }
+
+        createdEvents.push(createdEvent);
+      } catch (error) {
+        throw new Error(
+          `Failed to insert event: ${JSON.stringify(event)} - ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
       }
-
-      //create the event and link it to the location if applicable
-      const createdEvent = await eventService.createEvent(event);
-
-      if (locId !== null) {
-        await eventService.linkEventToLocation(createdEvent.id, locId);
-      }
-
-      createdEvents.push(createdEvent);
-    } catch (error) {
-      throw new Error(
-        `Failed to insert event: ${JSON.stringify(event)} - ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
     }
-  }
 
     return createdEvents;
   }
@@ -290,7 +297,10 @@ export class CSVFileParser {
 
     // insert productions
     for (const production of productions) {
-      const created = await productionService.replaceProduction(production.id, production);
+      const created = await productionService.replaceProduction(
+        production.id,
+        production,
+      );
       createdProductions.push(created);
     }
 
@@ -304,7 +314,10 @@ export class CSVFileParser {
     for (const tagName of tags) {
       if (!tagMap.has(tagName)) {
         // insert tags, ignoring duplicates
-        const tagObject: TagDto = await tagService.createTag({ tag: tagName });
+        const tagObject: TagDto = await tagService.createTag({
+          tag: tagName,
+          legacy_id: null,
+        });
         tagMap.set(tagName, tagObject.id);
       }
     }

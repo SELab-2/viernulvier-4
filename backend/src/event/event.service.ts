@@ -4,6 +4,7 @@ import type {
   EventDto,
   FilterEventDto,
   LocationDto,
+  PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
@@ -82,6 +83,10 @@ export class EventService {
   }
 
   /**
+   * Location specific functionality.
+   */
+
+  /**
    * Links an existing Location to an Event.
    * @param eventId The ID of the Event.
    * @param locationId The ID of the Location.
@@ -109,6 +114,39 @@ export class EventService {
    */
   async getLocationForEvent(eventId: number): Promise<LocationDto> {
     return await this.eventDBService.getLocationOfEvent(eventId);
+  }
+
+  /**
+   * Price specific functionality.
+   */
+
+  /**
+   * Returns all the Price objects linked to this Event.
+   * @param eventId The ID of the Event.
+   * @returns The Prices.
+   */
+  async getPricesForEvent(eventId: number): Promise<PriceDto[]> {
+    return await this.eventDBService.getPricesOfEvent(eventId);
+  }
+
+  /**
+   * Adds an existing Price to an Event.
+   * @param eventId The ID of the Event.
+   * @param priceId The ID of the Price.
+   * @returns T/F whether it worked or not.
+   */
+  async addPriceToEvent(eventId: number, priceId: number): Promise<boolean> {
+    return await this.eventDBService.addPriceToEvent(eventId, priceId);
+  }
+
+  /**
+   * Removes an existing Price from an Event.
+   * @param eventId The ID of the Event.
+   * @param priceId The ID of the Price.
+   * @returns Nothing.
+   */
+  async removePriceFromEvent(eventId: number, priceId: number): Promise<void> {
+    return await this.eventDBService.removePriceFromEvent(eventId, priceId);
   }
 }
 
