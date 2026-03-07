@@ -1,12 +1,32 @@
 CREATE TABLE productions
 (
-    titel        TEXT,
-    ondertitel   TEXT,
-    description1 TEXT,
-    description2 TEXT,
     id           SERIAL PRIMARY KEY,
-    planning_id  TEXT
+    titel        JSONB,
+    ondertitel   JSONB,
+    description1 JSONB,
+    description2 JSONB,
+    planning_id  TEXT,
+    artist       JSONB,
+    tagline      JSONB,
+    credits      JSONB,
+    created_at   TIMESTAMP DEFAULT now(),
+    updated_at   TIMESTAMP DEFAULT now()
 );
+
+CREATE OR REPLACE FUNCTION update_updated_at()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+    BEFORE UPDATE
+    ON productions
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE events
 (

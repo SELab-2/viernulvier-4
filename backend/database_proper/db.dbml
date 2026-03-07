@@ -1,10 +1,15 @@
 Table productions {
   id int [pk, increment]
-  titel text
-  ondertitel text
-  description1 text
-  description2 text
+  titel jsonb
+  ondertitel jsonb
+  description1 jsonb
+  description2 jsonb
   planning_id text
+  artist jsonb
+  tagline jsonb
+  credits jsonb
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
 }
 
 Table events {

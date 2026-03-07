@@ -11,6 +11,11 @@ export const ProductionSchema = z.object({
   description1: z.string(),
   description2: z.string().nullable(),
   planning_id: z.string().nullable(),
+  artist: z.string().nullable(),
+  tagline: z.string().nullable(),
+  credits: z.string().nullable(),
+  created_at: z.iso.date(),
+  updated_at: z.iso.date(),
 });
 
 export const CreateProductionSchema = ProductionSchema.omit({ id: true });
@@ -34,6 +39,8 @@ export const FilterProductionSchema = z.object({
   date_after: z.iso.date().optional(),
   page: z.coerce.number().min(0).default(0),
   limit: z.coerce.number().min(1).max(100).default(20),
+  language: z.string().optional(),
+  artist: z.string().optional(),
 });
 
 /**

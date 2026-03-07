@@ -8,7 +8,7 @@ import {
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
-import { FilterProductionSchema } from "@repo/common";
+import { DEFAULT_LANGUAGE, FilterProductionSchema, Language, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -17,11 +17,15 @@ export class ProductionDatabaseService {
   /**
    * Get a single Production by their ID.
    * @param id The ID we are looking for.
+   * @param lang is the language you wish to fetch.
    * @returns The production if there is one.
    */
-  async getProductionById(id: number): Promise<ProductionDto> {
+  async getProductionById(
+    id: number,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<ProductionDto> {
     const productions: ProductionDto[] = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
+      FilterProductionSchema.parse({ id: id, language: lang }),
     );
     if (productions.length === 0)
       throw new BadRequestException(
@@ -106,8 +110,6 @@ export class ProductionDatabaseService {
   /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
@@ -116,6 +118,7 @@ export class ProductionDatabaseService {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
+    const lang = filters.language ?? DEFAULT_LANGUAGE; // shouldn't need fallback but justin case
 
     // Filter by location
     if (filters.hall) {
@@ -156,8 +159,15 @@ export class ProductionDatabaseService {
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
     if (filters.titel) {
-      conditions.push(`p.titel ILIKE $${i}`);
+      conditions.push(`p.titel->>'${lang}' ILIKE $${i}`);
       values.push(`%${filters.titel}%`);
+      i++;
+    }
+
+    // Filter by artist
+    if (filters.artist) {
+      conditions.push(`p.artist->>'${lang}' ILIKE $${i}`);
+      values.push(`%${filters.artist}%`);
       i++;
     }
 
@@ -209,11 +219,16 @@ export class ProductionDatabaseService {
     const query = `
       SELECT DISTINCT
         p.id,
-        p.titel,
-        p.ondertitel,
-        p.description1,
-        p.description2,
-        p.planning_id
+        p.titel->>'${lang}' AS titel,
+        p.ondertitel->>'${lang}' AS ondertitel,
+        p.description1->>'${lang}' AS desc1,
+        p.description2->>'${lang}' AS desc2,
+        p.planning_id,
+        p.artist->>'${lang}' AS artist,
+        p.tagline->>'${lang}' AS tagline,
+        p.credits->>'${lang}' AS credits,
+        p.created_at,
+        p.updated_at
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
           ${whereClause}
@@ -245,7 +260,7 @@ export class ProductionDatabaseService {
         description2,
         planning_id
     )
-    VALUES ($1,$2,$3,$4,$5,$6)
+    VALUES ($1,$2,$3,$4,$5)
     RETURNING
         id,
         titel,
