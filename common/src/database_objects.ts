@@ -44,7 +44,6 @@ export const EventSchema = z.object({
   starttime: z.iso.datetime(),
   endtime: z.iso.datetime().nullable(),
   production_id: z.number(),
-  price: z.number().nullable(),
 });
 
 export const CreateEventSchema = EventSchema.omit({ id: true });
@@ -71,6 +70,17 @@ export const FilterEventSchema = z.object({
   page: z.coerce.number().min(0).default(0),
   limit: z.coerce.number().min(1).max(100).default(20),
 });
+
+/**
+ * Schemas for blogs.
+ */
+export const PriceSchema = z.object({
+  id: z.number(),
+  price: z.string(),
+  name: z.string(),
+});
+export const CreatePriceSchema = PriceSchema.omit({ id: true });
+export const UpdatePriceSchema = PriceSchema.partial();
 
 /**
  * Schemas for blogs.
@@ -136,6 +146,10 @@ export type Event = z.infer<typeof EventSchema>;
 export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
 export type FilterEvent = z.infer<typeof FilterEventSchema>;
+
+export type Price = z.infer<typeof PriceSchema>;
+export type CreatePrice = z.infer<typeof CreatePriceSchema>;
+export type UpdatePrice = z.infer<typeof UpdatePriceSchema>;
 
 export type Blog = z.infer<typeof BlogSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;

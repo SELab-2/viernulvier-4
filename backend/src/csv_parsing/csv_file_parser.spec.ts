@@ -85,7 +85,6 @@ describe("CSVFileParser.transformEventRow", () => {
       Endtime: "2024-01-01 12:00:00",
       Production: "5",
       Genre: "drama",
-      Price: "25",
       Hall: "Main Hall",
     };
 
@@ -95,7 +94,6 @@ describe("CSVFileParser.transformEventRow", () => {
       starttime: new Date("2024-01-01 10:00:00").toISOString(),
       endtime: new Date("2024-01-01 12:00:00").toISOString(),
       production_id: 5,
-      price: 25,
       location: "Main Hall",
     });
   });
@@ -105,14 +103,12 @@ describe("CSVFileParser.transformEventRow", () => {
       Starttime: "2024-01-01 10:00:00",
       Endtime: "0000-00-00 00:00:00",
       Production: "5",
-      Price: "",
       Hall: "",
     };
 
     const result = CSVFileParser.transformEventRow(row);
 
     expect(result.endtime).toBeNull();
-    expect(result.price).toBeNull();
     expect(result.location).toBe("");
   });
 
@@ -121,7 +117,6 @@ describe("CSVFileParser.transformEventRow", () => {
       Starttime: "invalid-date",
       Endtime: "",
       Production: "5",
-      Price: "10",
     };
 
     expect(() => CSVFileParser.transformEventRow(row)).toThrow(
@@ -134,7 +129,6 @@ describe("CSVFileParser.transformEventRow", () => {
       Starttime: "2024-01-01 10:00:00",
       Endtime: "",
       Production: "abc",
-      Price: "10",
     };
 
     expect(() => CSVFileParser.transformEventRow(row)).toThrow(
@@ -200,7 +194,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
           Starttime: "2025-05-01 14:00:00",
           Endtime: "2025-05-01 15:00:00",
           Production: "10",
-          Price: "20",
           Hall: "Front Stage",
         },
         {
@@ -208,7 +201,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
           Starttime: "not-a-date",
           Endtime: "",
           Production: "10",
-          Price: "20",
           Hall: "Backstage",
         },
       ]) as any,
@@ -221,7 +213,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
         starttime: new Date("2025-05-01 14:00:00").toISOString(),
         endtime: new Date("2025-05-01 15:00:00").toISOString(),
         production_id: 10,
-        price: 20,
       },
       location: "Front Stage",
     });
@@ -288,7 +279,6 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
           Starttime: "2025-06-01 10:00:00",
           Endtime: "2025-06-01 11:00:00",
           Production: "1",
-          Price: "15",
           Hall: "", // explicit empty hall
         },
       ]) as any,
@@ -312,7 +302,6 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
           Starttime: "2025-06-01 10:00:00",
           Endtime: "",
           Production: "2",
-          Price: "0",
           Hall: "Hadrian",
         },
       ]) as any,
@@ -336,7 +325,6 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
           Starttime: "2025-06-02 09:00:00",
           Endtime: "2025-06-02 10:00:00",
           Production: "3",
-          Price: "5",
           Hall: "Large Room",
         },
       ]) as any,
@@ -368,14 +356,12 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
           Starttime: "2025-06-03 09:00:00",
           Endtime: "2025-06-03 10:00:00",
           Production: "4",
-          Price: "5",
           Hall: "Shared Hall",
         },
         {
           Starttime: "2025-06-04 09:00:00",
           Endtime: "2025-06-04 10:00:00",
           Production: "5",
-          Price: "10",
           Hall: "Shared Hall",
         },
       ]) as any,
@@ -444,11 +430,13 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
     );
 
     // simulate insertion returning the same object plus an auto-generated id property
-    fakeProdService.replaceProduction.mockImplementation(async (id: number, prod: any) => ({
-      ...prod,
-      id,
-      replaced: true,
-    }));
+    fakeProdService.replaceProduction.mockImplementation(
+      async (id: number, prod: any) => ({
+        ...prod,
+        id,
+        replaced: true,
+      }),
+    );
 
     fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
       id: `${tag}-id`,

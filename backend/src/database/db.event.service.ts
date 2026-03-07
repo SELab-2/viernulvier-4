@@ -104,7 +104,7 @@ export class EventDatabaseService {
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id, e.price
+      SELECT e.id, e.starttime, e.endtime, e.production_id
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
@@ -127,16 +127,15 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id, price)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, starttime, endtime, production_id, price
+      INSERT INTO events (starttime, endtime, production_id)
+      VALUES ($1, $2, $3)
+      RETURNING id, starttime, endtime, production_id
     `;
 
     const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
       event.production_id,
-      event.price,
     ]);
 
     // Validate output
@@ -170,11 +169,6 @@ export class EventDatabaseService {
     if (event.endtime !== undefined) {
       fields.push(`endtime = $${index++}`);
       values.push(event.endtime);
-    }
-
-    if (event.price !== undefined) {
-      fields.push(`price = $${index++}`);
-      values.push(event.price);
     }
 
     if (event.production_id !== undefined) {
