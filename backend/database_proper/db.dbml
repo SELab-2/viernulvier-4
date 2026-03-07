@@ -40,7 +40,7 @@ Table production_blogs {
 
 Table tags {
   id int [pk, increment]
-  tag text [not null, unique]
+  tag jsonb [not null, unique]
 }
 
 Table production_tag {

@@ -114,6 +114,8 @@ export class CSVFileParser {
       endtime: endTime,
       production_id: productionId,
       location: location,
+      doors_at: null, // TODO
+      intermission_at: null, // TODO
     };
   }
 
