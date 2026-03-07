@@ -1,5 +1,8 @@
 import { scrapeOne } from "./scraper";
 
+/**
+ * Localization of any string that needs it.
+ */
 export interface vnvLocal {
   en?: string;
   nl?: string;
@@ -37,7 +40,9 @@ function extractIdFromUri(uri: string): string | null {
  * Production
  */
 
-// The Production Interface we want to simplify to.
+/**
+ * Parsed interface for a Production.
+ */
 export interface vnvProduction {
   legacy_id: string;
   created_at: string;
@@ -80,15 +85,15 @@ async function parseVnvProduction(
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
     performer_type: (object.performer_type as string) || "N/A",
     attendance_mode: (object.attendance_mode as string) || "N/A",
-    title: (object.title as vnvLocal) || { en: "N/A", nl: "N/a" },
-    artist: (object.artist as vnvLocal) || { en: "N/A", nl: "N/a" },
-    tagline: (object.tagline as vnvLocal) || { en: "N/A", nl: "N/a" },
-    description: (object.description as vnvLocal) || { en: "N/A", nl: "N/a" },
+    title: (object.title as vnvLocal) || { en: "N/A", nl: "N/A" },
+    artist: (object.artist as vnvLocal) || { en: "N/A", nl: "N/A" },
+    tagline: (object.tagline as vnvLocal) || { en: "N/A", nl: "N/A" },
+    description: (object.description as vnvLocal) || { en: "N/A", nl: "N/A" },
     description_2: (object.description_2 as vnvLocal) || {
       en: "N/A",
-      nl: "N/a",
+      nl: "N/A",
     },
-    info: (object.info as vnvLocal) || { en: "N/A", nl: "N/a" },
+    info: (object.info as vnvLocal) || { en: "N/A", nl: "N/A" },
     events: events,
     genres: genres,
   };
@@ -100,18 +105,27 @@ async function parseVnvProduction(
  * Genre
  */
 
+/**
+ * Parsed interface for a Genre.
+ */
 export interface vnvGenre {
   legacy_id: string;
   created_at: string;
   updated_at: string;
   name: vnvLocal;
 }
+
+/**
+ * Parse a single genre from an object.
+ * @param object The raw Genre object.
+ * @returns The parsed vnvGenre.
+ */
 function parseVnvGenre(object: Record<string, any>): vnvGenre {
   return {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
-    name: (object.name as vnvLocal) || { en: "N/A", nl: "N/a" },
+    name: (object.name as vnvLocal) || { en: "N/A", nl: "N/A" },
   };
 }
 
@@ -119,6 +133,9 @@ function parseVnvGenre(object: Record<string, any>): vnvGenre {
  * Event
  */
 
+/**
+ * Parsed interface for an Event.
+ */
 export interface vnvEvent {
   legacy_id: string;
   created_at: string;
@@ -127,10 +144,22 @@ export interface vnvEvent {
   ends_at: string;
   intermission_at: string;
   doors_at: string;
-  hall: object; // TODO: Replace this with vnvHall.
-  prices: object[]; // TODO: Replace this with vnvPrice.
+  location: vnvLocation;
+  prices: vnvPrice[]; // TODO: Replace this with vnvPrice.
 }
+
+/**
+ * Parses a single vnvEvent from an object.
+ * @param object The raw Event object fetched from VNV website.
+ * @returns The parsed vnvEvent.
+ */
 function parseVnvEvent(object: Record<string, any>): vnvEvent {
+  const prices: vnvPrice[] = [];
+  for (const priceObject of object.prices) {
+    const price: vnvPrice = parseVnvPrice(priceObject as object);
+    prices.push(price);
+  }
+
   const event: vnvEvent = {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
@@ -140,9 +169,80 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
     intermission_at:
       (object.intermission_at as string) || "1970-01-01T00:00:00+00:00",
     doors_at: (object.doors_at as string) || "1970-01-01T00:00:00+00:00",
-    hall: (object.hall as object) || {},
-    prices: (object.prices as object[]) || [],
+    location: parseVnvLocation(object.hall as object),
+    prices: prices,
   };
 
   return event;
+}
+
+/**
+ * Location
+ */
+
+/**
+ * Parsed interface for a Location.
+ */
+export interface vnvLocation {
+  legacy_id: string;
+  created_at: string;
+  updated_at: string;
+  name: vnvLocal;
+}
+
+/**
+ * Parses a single raw Location object from VNV website.
+ * @param object The raw Location object.
+ * @returns The parsed vnvLocation.
+ */
+function parseVnvLocation(object: Record<string, any>): vnvLocation {
+  return {
+    legacy_id: extractIdFromUri(object["@id"] as string) || "",
+    created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
+    updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
+    name: (object.name as vnvLocal) || { en: "N/A", nl: "N/A" },
+  };
+}
+
+/**
+ * Prices
+ */
+
+/**
+ * Helper interface to ignore warnings.
+ */
+interface nestedPrice {
+  description?: string;
+}
+
+/**
+ * Parsed interface for a Price.
+ */
+export interface vnvPrice {
+  legacy_id: string;
+  created_at: string;
+  updated_at: string;
+  amount: number | null;
+  name: vnvLocal;
+}
+
+/**
+ * Parses a single raw Price object fetched from VNV website.
+ * @param object The raw Price object.
+ * @returns The parsed vnvPrice.
+ */
+function parseVnvPrice(object: Record<string, any>): vnvPrice {
+  const name: vnvLocal = ((object.price as nestedPrice)
+    .description as vnvLocal) || {
+    en: "N/A",
+    nl: "N/A",
+  };
+
+  return {
+    legacy_id: extractIdFromUri(object["@id"] as string) || "",
+    created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
+    updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
+    amount: (object.amount as number) || null,
+    name: name,
+  };
 }
