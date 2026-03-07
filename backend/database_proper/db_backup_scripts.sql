@@ -163,9 +163,11 @@ CREATE TABLE account_api_keys
 
 CREATE TABLE prices
 (
-    id    SERIAL PRIMARY KEY,
-    name  VARCHAR(255)   NOT NULL,
-    price NUMERIC(10, 2) NOT NULL
+    id         SERIAL PRIMARY KEY,
+    name       JSONB          NOT NULL,
+    price      NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP      NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP      NOT NULL DEFAULT now()
 );
 
 CREATE TABLE event_prices

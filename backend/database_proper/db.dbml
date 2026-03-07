@@ -93,8 +93,10 @@ Table account_api_keys {
 
 Table prices {
   id int [pk, increment]
-  name varchar(255) [not null]
+  name JSONB [not null]
   price numeric(10,2) [not null]
+  created_at TIMESTAMP
+  updated_at TIMESTAMP
 }
 
 Table event_prices {
