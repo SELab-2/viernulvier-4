@@ -13,7 +13,18 @@ interface viewState {
   next: string | null;
 }
 
-async function scrapeUrl(
+export interface vnvLocal {
+  en?: string;
+  nl?: string;
+}
+
+/**
+ * Scrapes data starting from the provided URL.
+ * @param url The URL we want to start from, this is not including the base part of the url.
+ * @param updatedAfter Optional Date that defines which data we want.
+ * @returns A list of all the scraped objects. Generically typed.
+ */
+export async function scrapeUrl(
   url: string,
   updatedAfter: string = "1970-01-01T00:00:00+00:00",
 ): Promise<object[]> {
@@ -61,8 +72,6 @@ async function scrapeUrl(
     }
   }
 
-  console.log(output.length);
+  console.log(`Scraped ${output.length} objects.`);
   return output;
 }
-
-scrapeUrl("/api/v1/productions?page=1").then();
