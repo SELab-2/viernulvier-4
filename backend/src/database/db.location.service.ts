@@ -88,7 +88,7 @@ export class LocationDatabaseService {
 
     const query = `
       INSERT INTO locations (location, legacy_id)
-      VALUES ($1)
+      VALUES ($1, $2)
       RETURNING
         id,
         location->>'${lang}' AS location,

@@ -128,7 +128,7 @@ export class EventDatabaseService {
 
     const query = `
       INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at, legacy_id)
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at, legacy_id
     `;
 

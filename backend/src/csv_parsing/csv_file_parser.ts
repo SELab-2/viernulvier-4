@@ -148,8 +148,8 @@ export class CSVFileParser {
       credits: null, // TODO
       created_at: null, // TODO
       updated_at: null, // TODO
-      attendance_type: null, // TODO
-      performer_mode: null, // TODO
+      attendance_mode: null, // TODO
+      performer_type: null, // TODO
       legacy_id: null,
     };
   }

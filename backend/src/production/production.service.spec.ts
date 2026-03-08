@@ -1,13 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type {
-  BlogDto,
-  CreateProductionDto,
-  ProductionDto,
-  TagDto,
-  UpdateProductionDto,
-} from "../dto/dto";
+import type { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterProductionSchema } from "@repo/common";
@@ -20,10 +14,16 @@ describe("ProductionService", () => {
   const mockProduction: ProductionDto = {
     id: 1,
     titel: "The Great Show",
-    ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    planning_id: "1",
+    performer_type: "happy",
+    attendance_mode: "I",
+    legacy_id: "am",
+    tagline: "fixing",
+    artist: "the",
+    credits: "tests :-)",
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];
@@ -32,10 +32,16 @@ describe("ProductionService", () => {
     {
       id: 1,
       tag: "Drama",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
+      legacy_id: "str",
     },
     {
       id: 2,
       tag: "Classical",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
+      legacy_id: "str",
     },
   ];
 
@@ -233,6 +239,8 @@ describe("ProductionService", () => {
       id: 1,
       titel: "Behind the Scenes",
       description: "Looking at the set of The Great Show.",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
     };
 
     describe("getProductionBlogs", () => {
@@ -442,14 +450,23 @@ describe("ProductionService", () => {
   describe("createProduction", () => {
     it("should create a production successfully", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
+        titel: "The Great Show",
+        description1: "An amazing production",
+        description2: "With great actors",
+        performer_type: "happy",
+        attendance_mode: "I",
+        legacy_id: "am",
+        tagline: "fixing",
+        artist: "the",
+        credits: "tests :-)",
       };
 
-      const createdProduction: ProductionDto = { id: 2, ...newProduction };
+      const createdProduction: ProductionDto = {
+        id: 2,
+        ...newProduction,
+        created_at: "2025-06-01T22:00:00.000Z",
+        updated_at: "2025-06-01T22:00:00.000Z",
+      };
 
       jest
         .spyOn(dbService, "createProduction")
@@ -463,11 +480,15 @@ describe("ProductionService", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
+        titel: "The Great Show",
+        description1: "An amazing production",
+        description2: "With great actors",
+        performer_type: "happy",
+        attendance_mode: "I",
+        legacy_id: "am",
+        tagline: "fixing",
+        artist: "the",
+        credits: "tests :-)",
       };
 
       jest

@@ -192,17 +192,17 @@ export class ProductionDatabaseService {
       i++;
     }
 
-    // Filter by performance_mode
-    if (filters.artist) {
-      conditions.push(`p.performer_mode = $${i}`);
-      values.push(`%${filters.performer_mode}%`);
+    // Filter by performance_type
+    if (filters.performer_type) {
+      conditions.push(`p.performer_type = $${i}`);
+      values.push(`%${filters.performer_type}%`);
       i++;
     }
 
-    // Filter by attendance_type
-    if (filters.artist) {
-      conditions.push(`p.attendance_type = $${i}`);
-      values.push(`%${filters.attendance_type}%`);
+    // Filter by attendance_mode
+    if (filters.attendance_mode) {
+      conditions.push(`p.attendance_mode = $${i}`);
+      values.push(`%${filters.attendance_mode}%`);
       i++;
     }
 
@@ -478,12 +478,12 @@ export class ProductionDatabaseService {
     }
 
     if (production.performer_type !== undefined) {
-      fields.push(`performer_mode = $${index++}`);
+      fields.push(`performer_type = $${index++}`);
       values.push(production.performer_type);
     }
 
     if (production.attendance_mode !== undefined) {
-      fields.push(`attendance_type = $${index++}`);
+      fields.push(`attendance_mode = $${index++}`);
       values.push(production.attendance_mode);
     }
 

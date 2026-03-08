@@ -15,6 +15,11 @@ describe("EventController", () => {
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
     production_id: 1,
+    doors_at: "2024-01-15T19:00:00Z",
+    intermission_at: "2024-01-15T19:00:00Z",
+    created_at: "2024-01-15T19:00:00Z",
+    updated_at: "2024-01-15T19:00:00Z",
+    legacy_id: "str",
   };
 
   const mockEvents: EventDto[] = [mockEvent];
@@ -174,12 +179,20 @@ describe("EventController", () => {
   describe("createEvent", () => {
     it("should create an event successfully", async () => {
       const newEvent: CreateEventDto = {
-        starttime: "2024-02-10T18:00:00Z",
-        endtime: "2024-02-10T20:00:00Z",
-        production_id: 2,
+        starttime: "2024-01-15T19:00:00Z",
+        endtime: "2024-01-15T21:00:00Z",
+        production_id: 1,
+        doors_at: "2024-01-15T19:00:00Z",
+        intermission_at: "2024-01-15T19:00:00Z",
+        legacy_id: "str",
       };
 
-      const createdEvent: EventDto = { id: 2, ...newEvent };
+      const createdEvent: EventDto = {
+        id: 2,
+        ...newEvent,
+        created_at: "2024-01-15T19:00:00Z",
+        updated_at: "2024-01-15T19:00:00Z",
+      };
 
       jest.spyOn(service, "createEvent").mockResolvedValueOnce(createdEvent);
 
@@ -191,9 +204,12 @@ describe("EventController", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newEvent: CreateEventDto = {
-        starttime: "2024-02-10T18:00:00Z",
-        endtime: "2024-02-10T20:00:00Z",
-        production_id: 2,
+        starttime: "2024-01-15T19:00:00Z",
+        endtime: "2024-01-15T21:00:00Z",
+        production_id: 1,
+        doors_at: "2024-01-15T19:00:00Z",
+        intermission_at: "2024-01-15T19:00:00Z",
+        legacy_id: "str",
       };
 
       jest
