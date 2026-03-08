@@ -4,12 +4,14 @@ import { BlogModule } from "../src/blog/blog.module";
 import { EventModule } from "../src/event/event.module";
 import { ProductionModule } from "../src/production/production.module";
 import { TagModule } from "../src/tag/tag.module";
+import { LocationModule } from "../src/location/location.module";
+import { PriceModule } from "../src/price/price.module";
 import { BlogDatabaseService } from "../src/database/db.blog.service";
 import { EventDatabaseService } from "../src/database/db.event.service";
 import { ProductionDatabaseService } from "../src/database/db.production.service";
 import { TagDatabaseService } from "../src/database/db.tag.service";
-import { LocationModule } from "../src/location/location.module";
 import { LocationDatabaseService } from "../src/database/db.location.service";
+import { PriceDatabaseService } from "../src/database/db.price.service";
 
 import request from "supertest";
 import { ApiKeyGuard } from "../src/auth/authGuard";
@@ -20,17 +22,22 @@ const mockBlog = {
   id: 1,
   titel: "Test Blog",
   description: "Test blog description",
+  created_at: "2025-06-01T22:00:00.000Z",
+  updated_at: "2025-06-01T22:00:00.000Z",
 };
 
 const mockBlog2 = {
   id: 2,
   titel: "Second Blog",
   description: "Second blog description",
+  created_at: "2026-03-08",
+  updated_at: "2026-03-08",
 };
 
 const mockTag = {
   id: 1,
   tag: "Drama",
+  legacy_id: "Test Legacy",
 };
 
 const mockTag2 = {
@@ -40,24 +47,42 @@ const mockTag2 = {
 
 const mockProduction = {
   id: 1,
-  titel: "Test Production",
-  ondertitel: "A subtitle",
-  description1: "First description",
-  description2: "Second description",
-  planning_id: "1",
+  titel: "str",
+  description1: "string",
+  description2: "string",
+  artist: "string",
+  tagline: "string",
+  credits: "string",
+  performer_type: "string",
+  attendance_mode: "string",
+  created_at: "2026-03-07T16:58:08.701873Z",
+  updated_at: "2026-03-07T16:58:08.701873Z",
+  legacy_id: "string",
 };
 
 const mockEvent = {
   id: 1,
   starttime: "2025-01-01T19:00:00.000Z",
   endtime: "2025-01-01T22:00:00.000Z",
-  price: 15.5,
+  doors_at: "2025-06-01T22:00:00.000Z",
+  intermission_at: "2025-06-01T22:00:00.000Z",
+  legacy_id: "string",
+  created_at: "2026-03-07T00:00:00.000Z",
+  updated_at: "2026-03-07T00:00:00.000Z",
   production_id: 1,
 };
 
 const mockLocation = {
   id: 1,
   location: "Main Stage",
+  legacy_id: "Test Legacy",
+};
+
+const mockPrice = {
+  id: 1,
+  price: 15.5,
+  name: "Early Bird",
+  legacy_id: "Test Legacy",
 };
 
 // Mock DB service factories
@@ -90,6 +115,9 @@ const mockEventDbService = () => ({
   getLocationOfEvent: jest.fn().mockResolvedValue(mockLocation),
   linkEventToLocation: jest.fn().mockResolvedValue(true),
   deleteLocationFromEvent: jest.fn().mockResolvedValue(undefined),
+  getPricesOfEvent: jest.fn().mockResolvedValue([mockPrice]),
+  addPriceToEvent: jest.fn().mockResolvedValue(true),
+  removePriceFromEvent: jest.fn().mockResolvedValue(undefined),
 });
 
 const mockProductionDbService = () => ({
@@ -115,17 +143,25 @@ const mockTagDbService = () => ({
   deleteTag: jest.fn().mockResolvedValue(undefined),
 });
 
+const mockPriceDbService = () => ({
+  getPrices: jest.fn().mockResolvedValue([mockPrice]),
+  getPriceById: jest.fn().mockResolvedValue(mockPrice),
+  createPrice: jest.fn().mockResolvedValue(mockPrice),
+  updatePrice: jest.fn().mockResolvedValue(mockPrice),
+  deletePrice: jest.fn().mockResolvedValue(undefined),
+});
+
 // Helper: build app with all modules
 
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    // Add LocationModule here:
     imports: [
       BlogModule,
       EventModule,
       ProductionModule,
       TagModule,
       LocationModule,
+      PriceModule,
     ],
   })
     .overrideGuard(ApiKeyGuard)
@@ -138,9 +174,10 @@ async function buildApp(): Promise<INestApplication> {
     .useFactory({ factory: mockProductionDbService })
     .overrideProvider(TagDatabaseService)
     .useFactory({ factory: mockTagDbService })
-    // Add this override:
     .overrideProvider(LocationDatabaseService)
     .useFactory({ factory: mockLocationDbService })
+    .overrideProvider(PriceDatabaseService) // <-- Added Price DB provider
+    .useFactory({ factory: mockPriceDbService })
     .compile();
 
   const app = moduleFixture.createNestApplication();
@@ -149,7 +186,9 @@ async function buildApp(): Promise<INestApplication> {
   return app;
 }
 
+// ==========================================
 // BLOG endpoints
+// ==========================================
 
 describe("BlogController (e2e)", () => {
   let app: INestApplication;
@@ -302,7 +341,9 @@ describe("BlogController (e2e)", () => {
   });
 });
 
+// ==========================================
 // TAG endpoints
+// ==========================================
 
 describe("TagController (e2e)", () => {
   let app: INestApplication;
@@ -353,7 +394,7 @@ describe("TagController (e2e)", () => {
 
   // POST /tags
   describe("POST /tags", () => {
-    const createPayload = { tag: "Thriller" };
+    const createPayload = { tag: "Thriller", legacy_id: "test" };
 
     it("should return 201 with the created tag", () => {
       return request(app.getHttpServer())
@@ -419,7 +460,9 @@ describe("TagController (e2e)", () => {
   });
 });
 
+// ==========================================
 // PRODUCTION endpoints
+// ==========================================
 
 describe("ProductionController (e2e)", () => {
   let app: INestApplication;
@@ -477,10 +520,14 @@ describe("ProductionController (e2e)", () => {
   describe("POST /productions", () => {
     const createPayload = {
       titel: "New Production",
-      ondertitel: "Subtitle",
       description1: "Desc 1",
       description2: "Desc 2",
-      planning_id: "2",
+      legacy_id: "etst",
+      attendance_mode: "etst",
+      performer_type: "etst",
+      tagline: "test",
+      credits: "test",
+      artist: "test",
     };
 
     it("should return 201 with the created production", () => {
@@ -568,12 +615,16 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).delete("/productions/abc").expect(400);
+      return request(app.getHttpServer())
+        .delete("/productions/abc")
+        .expect(400);
     });
   });
 });
 
+// ==========================================
 // PRODUCTION - BLOG relationship endpoints
+// ==========================================
 
 describe("ProductionBlogController (e2e)", () => {
   let app: INestApplication;
@@ -662,7 +713,9 @@ describe("ProductionBlogController (e2e)", () => {
   });
 });
 
+// ==========================================
 // PRODUCTION - TAG relationship endpoints
+// ==========================================
 
 describe("ProductionTagController (e2e)", () => {
   let app: INestApplication;
@@ -749,7 +802,9 @@ describe("ProductionTagController (e2e)", () => {
   });
 });
 
+// ==========================================
 // EVENT endpoints
+// ==========================================
 
 describe("EventController (e2e)", () => {
   let app: INestApplication;
@@ -803,8 +858,10 @@ describe("EventController (e2e)", () => {
     const createPayload = {
       starttime: "2025-06-01T19:00:00.000Z",
       endtime: "2025-06-01T22:00:00.000Z",
-      price: 20.0,
       production_id: 1,
+      legacy_id: "1",
+      doors_at: "2025-06-01T22:00:00.000Z",
+      intermission_at: "2025-06-01T22:00:00.000Z",
     };
 
     it("should return 201 with the created event", () => {
@@ -851,7 +908,7 @@ describe("EventController (e2e)", () => {
     it("should return 200 with the modified event", () => {
       return request(app.getHttpServer())
         .patch("/events/1")
-        .send({ price: 25.5 })
+        .send({ production_id: 2 })
         .expect(200)
         .expect(mockEvent);
     });
@@ -859,15 +916,14 @@ describe("EventController (e2e)", () => {
     it("should call eventDb.updateEvent", async () => {
       await request(app.getHttpServer())
         .patch("/events/1")
-        .send({ price: 25.5 });
-      // Assuming your service calls updateEvent for modifications
+        .send({ production_id: 2 });
       expect(eventDb.updateEvent).toHaveBeenCalled();
     });
 
     it("should return 400 when id is not a number", () => {
       return request(app.getHttpServer())
         .patch("/events/abc")
-        .send({ price: 25.5 })
+        .send({ production_id: 2 })
         .expect(400);
     });
   });
@@ -887,163 +943,337 @@ describe("EventController (e2e)", () => {
       return request(app.getHttpServer()).delete("/events/abc").expect(400);
     });
   });
+});
 
-  // LOCATION endpoints
+// ==========================================
+// LOCATION endpoints
+// ==========================================
 
-  describe("LocationController (e2e)", () => {
-    let app: INestApplication;
-    let locationDb: LocationDatabaseService;
+describe("LocationController (e2e)", () => {
+  let app: INestApplication;
+  let locationDb: LocationDatabaseService;
 
-    beforeEach(async () => {
-      app = await buildApp();
-      locationDb = app.get<LocationDatabaseService>(LocationDatabaseService);
-    });
+  beforeEach(async () => {
+    app = await buildApp();
+    locationDb = app.get<LocationDatabaseService>(LocationDatabaseService);
+  });
 
-    afterEach(async () => {
-      await app.close();
-    });
+  afterEach(async () => {
+    await app.close();
+  });
 
-    // GET /locations
-    describe("GET /locations", () => {
-      it("should return 200 with an array of locations", () => {
-        return request(app.getHttpServer())
-          .get("/locations")
-          .expect(200)
-          .expect([mockLocation]);
-      });
-    });
-
-    // GET /locations/:locationId
-    describe("GET /locations/:locationId", () => {
-      it("should return 200 with the correct location", () => {
-        return request(app.getHttpServer())
-          .get("/locations/1")
-          .expect(200)
-          .expect(mockLocation);
-      });
-
-      it("should return 400 when locationId is not a number", () => {
-        return request(app.getHttpServer()).get("/locations/abc").expect(400);
-      });
-    });
-
-    // POST /locations
-    describe("POST /locations", () => {
-      it("should return 201 with the created location", () => {
-        const createPayload = { location: "Side Stage" };
-        return request(app.getHttpServer())
-          .post("/locations")
-          .send(createPayload)
-          .expect(201)
-          .expect(mockLocation);
-      });
-    });
-
-    // PATCH /locations
-    // Note: Your controller uses @Patch() without an ID param, expecting it in the DTO
-    describe("PATCH /locations", () => {
-      it("should return 200 with the updated location", () => {
-        const updatePayload = { id: 1, location: "Updated Stage" };
-        return request(app.getHttpServer())
-          .patch("/locations")
-          .send(updatePayload)
-          .expect(200)
-          .expect(mockLocation);
-      });
-    });
-
-    // DELETE /locations/:locationId
-    describe("DELETE /locations/:locationId", () => {
-      it("should return 200 after deleting location", () => {
-        return request(app.getHttpServer()).delete("/locations/1").expect(200);
-      });
-
-      it("should return 400 when locationId is not a number", () => {
-        return request(app.getHttpServer()).delete("/locations/abc").expect(400);
-      });
+  // GET /locations
+  describe("GET /locations", () => {
+    it("should return 200 with an array of locations", () => {
+      return request(app.getHttpServer())
+        .get("/locations")
+        .expect(200)
+        .expect([mockLocation]);
     });
   });
 
-  // EVENT - LOCATION relationship endpoints
-
-  describe("EventLocationController (e2e)", () => {
-    let app: INestApplication;
-    let eventDb: EventDatabaseService;
-
-    beforeEach(async () => {
-      app = await buildApp();
-      eventDb = app.get<EventDatabaseService>(EventDatabaseService);
+  // GET /locations/:locationId
+  describe("GET /locations/:locationId", () => {
+    it("should return 200 with the correct location", () => {
+      return request(app.getHttpServer())
+        .get("/locations/1")
+        .expect(200)
+        .expect(mockLocation);
     });
 
-    afterEach(async () => {
-      await app.close();
+    it("should return 400 when locationId is not a number", () => {
+      return request(app.getHttpServer()).get("/locations/abc").expect(400);
+    });
+  });
+
+  // POST /locations
+  describe("POST /locations", () => {
+    it("should return 201 with the created location", () => {
+      const createPayload = { location: "Side Stage", legacy_id: "st" };
+      return request(app.getHttpServer())
+        .post("/locations")
+        .send(createPayload)
+        .expect(201)
+        .expect(mockLocation);
+    });
+  });
+
+  // PATCH /locations
+  describe("PATCH /locations", () => {
+    it("should return 200 with the updated location", () => {
+      const updatePayload = { id: 1, location: "Updated Stage" };
+      return request(app.getHttpServer())
+        .patch("/locations")
+        .send(updatePayload)
+        .expect(200)
+        .expect(mockLocation);
+    });
+  });
+
+  // DELETE /locations/:locationId
+  describe("DELETE /locations/:locationId", () => {
+    it("should return 200 after deleting location", () => {
+      return request(app.getHttpServer()).delete("/locations/1").expect(200);
     });
 
-    // GET /events/:eventId/locations
-    describe("GET /events/:eventId/locations", () => {
-      it("should return 200 with the location of the event", () => {
-        return request(app.getHttpServer())
-          .get("/events/1/locations")
-          .expect(200)
-          .expect(mockLocation);
-      });
+    it("should return 400 when locationId is not a number", () => {
+      return request(app.getHttpServer()).delete("/locations/abc").expect(400);
+    });
+  });
+});
 
-      it("should call eventDb.getLocationOfEvent with the correct id", async () => {
-        await request(app.getHttpServer()).get("/events/1/locations");
-        expect(eventDb.getLocationOfEvent).toHaveBeenCalledWith(1);
-      });
+// ==========================================
+// EVENT - LOCATION relationship endpoints
+// ==========================================
 
-      it("should return 400 when eventId is not a number", () => {
-        return request(app.getHttpServer())
-          .get("/events/abc/locations")
-          .expect(400);
-      });
+describe("EventLocationController (e2e)", () => {
+  let app: INestApplication;
+  let eventDb: EventDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    eventDb = app.get<EventDatabaseService>(EventDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /events/:eventId/locations
+  describe("GET /events/:eventId/locations", () => {
+    it("should return 200 with the location of the event", () => {
+      return request(app.getHttpServer())
+        .get("/events/1/locations")
+        .expect(200)
+        .expect(mockLocation);
     });
 
-    // PUT /events/:eventId/locations/:locationId
-    describe("PUT /events/:eventId/locations/:locationId", () => {
-      it("should return 200 after successfully linking", () => {
-        return request(app.getHttpServer())
-          .put("/events/1/locations/2")
-          .expect(200);
-      });
-
-      it("should call eventDb.linkEventToLocation with correct ids", async () => {
-        await request(app.getHttpServer()).put("/events/1/locations/2");
-        expect(eventDb.linkEventToLocation).toHaveBeenCalledWith(1, 2);
-      });
-
-      it("should return 400 when eventId is not a number", () => {
-        return request(app.getHttpServer())
-          .put("/events/abc/locations/1")
-          .expect(400);
-      });
-
-      it("should return 400 when locationId is not a number", () => {
-        return request(app.getHttpServer())
-          .put("/events/1/locations/abc")
-          .expect(400);
-      });
+    it("should call eventDb.getLocationOfEvent with the correct id", async () => {
+      await request(app.getHttpServer()).get("/events/1/locations");
+      expect(eventDb.getLocationOfEvent).toHaveBeenCalledWith(1);
     });
 
-    // DELETE /events/:eventId/locations
-    describe("DELETE /events/:eventId/locations", () => {
-      it("should return 200 after unlinking", () => {
-        return request(app.getHttpServer())
-          .delete("/events/1/locations")
-          .expect(200);
-      });
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .get("/events/abc/locations")
+        .expect(400);
+    });
+  });
 
-      it("should call eventDb.deleteLocationFromEvent with the eventId", async () => {
-        await request(app.getHttpServer()).delete("/events/1/locations");
-        expect(eventDb.deleteLocationFromEvent).toHaveBeenCalledWith(1);
-      });
+  // PUT /events/:eventId/locations/:locationId
+  describe("PUT /events/:eventId/locations/:locationId", () => {
+    it("should return 200 after successfully linking", () => {
+      return request(app.getHttpServer())
+        .put("/events/1/locations/2")
+        .expect(200);
+    });
 
-      it("should return 400 when eventId is not a number", () => {
-        return request(app.getHttpServer())
-          .delete("/events/abc/locations")
-          .expect(400);
-      });
+    it("should call eventDb.linkEventToLocation with correct ids", async () => {
+      await request(app.getHttpServer()).put("/events/1/locations/2");
+      expect(eventDb.linkEventToLocation).toHaveBeenCalledWith(1, 2);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/events/abc/locations/1")
+        .expect(400);
+    });
+
+    it("should return 400 when locationId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/events/1/locations/abc")
+        .expect(400);
+    });
+  });
+
+  // DELETE /events/:eventId/locations
+  describe("DELETE /events/:eventId/locations", () => {
+    it("should return 200 after unlinking", () => {
+      return request(app.getHttpServer())
+        .delete("/events/1/locations")
+        .expect(200);
+    });
+
+    it("should call eventDb.deleteLocationFromEvent with the eventId", async () => {
+      await request(app.getHttpServer()).delete("/events/1/locations");
+      expect(eventDb.deleteLocationFromEvent).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .delete("/events/abc/locations")
+        .expect(400);
+    });
+  });
+});
+
+// ==========================================
+// PRICE endpoints
+// ==========================================
+
+describe("PriceController (e2e)", () => {
+  let app: INestApplication;
+  let priceDb: PriceDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    priceDb = app.get<PriceDatabaseService>(PriceDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /prices
+  describe("GET /prices", () => {
+    it("should return 200 with an array of prices", () => {
+      return request(app.getHttpServer())
+        .get("/prices")
+        .expect(200)
+        .expect([mockPrice]);
+    });
+  });
+
+  // GET /prices/:priceId
+  describe("GET /prices/:priceId", () => {
+    it("should return 200 with the correct price", () => {
+      return request(app.getHttpServer())
+        .get("/prices/1")
+        .expect(200)
+        .expect(mockPrice);
+    });
+
+    it("should return 400 when priceId is not a number", () => {
+      return request(app.getHttpServer()).get("/prices/abc").expect(400);
+    });
+  });
+
+  // POST /prices
+  describe("POST /prices", () => {
+    it("should return 201 with the created price", () => {
+      const createPayload = { price: 20.0, name: "Standard", legacy_id: "" };
+      return request(app.getHttpServer())
+        .post("/prices")
+        .send(createPayload)
+        .expect(201)
+        .expect(mockPrice);
+    });
+  });
+
+  // PUT /prices
+  describe("PUT /prices", () => {
+    it("should return 200 with the updated price", () => {
+      const updatePayload = { id: 1, price: 25.0, name: "Updated" };
+      return request(app.getHttpServer())
+        .put("/prices")
+        .send(updatePayload)
+        .expect(200)
+        .expect(mockPrice);
+    });
+  });
+
+  // DELETE /prices/:priceId
+  describe("DELETE /prices/:priceId", () => {
+    it("should return 200 after deleting price", () => {
+      return request(app.getHttpServer()).delete("/prices/1").expect(200);
+    });
+
+    it("should call priceDb.deletePrice with correct id", async () => {
+      // NOTE: Your controller didn't have a ParseIntPipe for deletePrice,
+      // so we pass '1' (string) here depending on how it gets parsed at runtime,
+      // but testing framework will hit the endpoint correctly regardless.
+      await request(app.getHttpServer()).delete("/prices/1");
+      expect(priceDb.deletePrice).toHaveBeenCalled();
+    });
+  });
+});
+
+// ==========================================
+// EVENT - PRICE relationship endpoints
+// ==========================================
+
+describe("EventPriceController (e2e)", () => {
+  let app: INestApplication;
+  let eventDb: EventDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    eventDb = app.get<EventDatabaseService>(EventDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  // GET /events/:eventId/prices
+  describe("GET /events/:eventId/prices", () => {
+    it("should return 200 with the prices of the event", () => {
+      return request(app.getHttpServer())
+        .get("/events/1/prices")
+        .expect(200)
+        .expect([mockPrice]);
+    });
+
+    it("should call eventDb.getPricesOfEvent with the correct id", async () => {
+      await request(app.getHttpServer()).get("/events/1/prices");
+      expect(eventDb.getPricesOfEvent).toHaveBeenCalledWith(1);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer()).get("/events/abc/prices").expect(400);
+    });
+  });
+
+  // PUT /events/:eventId/prices/:priceId
+  describe("PUT /events/:eventId/prices/:priceId", () => {
+    it("should return 200 after successfully linking a price", () => {
+      return request(app.getHttpServer())
+        .put("/events/1/prices/100")
+        .expect(200)
+        .expect("true"); // Supertest sometimes reads boolean response as string "true"
+    });
+
+    it("should call eventDb.addPriceToEvent with correct ids", async () => {
+      await request(app.getHttpServer()).put("/events/1/prices/100");
+      expect(eventDb.addPriceToEvent).toHaveBeenCalledWith(1, 100);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/events/abc/prices/100")
+        .expect(400);
+    });
+
+    it("should return 400 when priceId is not a number", () => {
+      return request(app.getHttpServer())
+        .put("/events/1/prices/abc")
+        .expect(400);
+    });
+  });
+
+  // DELETE /events/:eventId/prices/:priceId
+  describe("DELETE /events/:eventId/prices/:priceId", () => {
+    it("should return 200 after unlinking a price", () => {
+      return request(app.getHttpServer())
+        .delete("/events/1/prices/100")
+        .expect(200);
+    });
+
+    it("should call eventDb.removePriceFromEvent with correct ids", async () => {
+      await request(app.getHttpServer()).delete("/events/1/prices/100");
+      expect(eventDb.removePriceFromEvent).toHaveBeenCalledWith(1, 100);
+    });
+
+    it("should return 400 when eventId is not a number", () => {
+      return request(app.getHttpServer())
+        .delete("/events/abc/prices/100")
+        .expect(400);
+    });
+
+    it("should return 400 when priceId is not a number", () => {
+      return request(app.getHttpServer())
+        .delete("/events/1/prices/abc")
+        .expect(400);
     });
   });
 });

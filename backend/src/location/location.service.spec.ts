@@ -11,6 +11,9 @@ describe("LocationService", () => {
   const mockLocation: LocationDto = {
     id: 1,
     location: "Citadel Park",
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
+    legacy_id: "str",
   };
 
   const mockLocationArray: LocationDto[] = [mockLocation];

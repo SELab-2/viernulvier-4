@@ -63,6 +63,22 @@ describe("AuthGuards tests", () => {
     });
   });
 
+  describe("Event - Price endpoints authentication", () => {
+    it("GET /events/:eventId/prices should work without API key", async () => {
+      await request(app.getHttpServer()).get("/events/1/prices").expect(200);
+    });
+
+    it("PUT /events/:eventId/prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer()).put("/events/1/prices/2").expect(401);
+    });
+
+    it("DELETE /events/:eventId/prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer())
+        .delete("/events/1/prices/2")
+        .expect(401);
+    });
+  });
+
   describe("Production endpoints authentication", () => {
     it("GET /productions should work without API key", async () => {
       await request(app.getHttpServer()).get("/productions").expect(200);
@@ -205,6 +221,28 @@ describe("AuthGuards tests", () => {
 
     it("DELETE /locations/:locationId should fail without API key", async () => {
       await request(app.getHttpServer()).delete("/locations/1").expect(401);
+    });
+  });
+
+  describe("Price endpoints authentication", () => {
+    it("GET /prices should work without API key.", async () => {
+      await request(app.getHttpServer()).get("/prices").expect(200);
+    });
+
+    it("GET /prices/:priceId should work without API key.", async () => {
+      await request(app.getHttpServer()).get("/prices/2").expect(200);
+    });
+
+    it("POST /prices should fail without API key.", async () => {
+      await request(app.getHttpServer()).post("/prices").expect(401);
+    });
+
+    it("PUT /prices should fail without API key.", async () => {
+      await request(app.getHttpServer()).put("/prices").expect(401);
+    });
+
+    it("DELETE /prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer()).delete("/prices/2").expect(401);
     });
   });
 

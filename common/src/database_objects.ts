@@ -7,13 +7,23 @@ import { z } from "zod";
 export const ProductionSchema = z.object({
   id: z.number(),
   titel: z.string(),
-  ondertitel: z.string(),
   description1: z.string(),
   description2: z.string().nullable(),
-  planning_id: z.string().nullable(),
+  artist: z.string().nullable(),
+  tagline: z.string().nullable(),
+  credits: z.string().nullable(),
+  performer_type: z.string().nullable(),
+  attendance_mode: z.string().nullable(),
+  created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
+  updated_at: z.iso.datetime().nullable(), // TODO here too.
+  legacy_id: z.string().nullable(),
 });
 
-export const CreateProductionSchema = ProductionSchema.omit({ id: true });
+export const CreateProductionSchema = ProductionSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateProductionSchema = ProductionSchema.partial();
 
 export const FilterProductionSchema = z.object({
@@ -34,6 +44,10 @@ export const FilterProductionSchema = z.object({
   date_after: z.iso.date().optional(),
   page: z.coerce.number().min(0).default(0),
   limit: z.coerce.number().min(1).max(100).default(20),
+  language: z.string().optional(),
+  artist: z.string().optional(),
+  performer_type: z.string().optional(),
+  attendance_mode: z.string().optional(),
 });
 
 /**
@@ -43,11 +57,19 @@ export const EventSchema = z.object({
   id: z.number(),
   starttime: z.iso.datetime(),
   endtime: z.iso.datetime().nullable(),
+  doors_at: z.iso.datetime().nullable(),
+  intermission_at: z.iso.datetime().nullable(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
   production_id: z.number(),
-  price: z.number().nullable(),
+  legacy_id: z.string().nullable(),
 });
 
-export const CreateEventSchema = EventSchema.omit({ id: true });
+export const CreateEventSchema = EventSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateEventSchema = EventSchema.partial();
 
 /**
@@ -56,9 +78,16 @@ export const UpdateEventSchema = EventSchema.partial();
 export const LocationSchema = z.object({
   id: z.number(),
   location: z.string(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
+  legacy_id: z.string().nullable(),
 });
 
-export const CreateLocationSchema = LocationSchema.omit({ id: true });
+export const CreateLocationSchema = LocationSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateLocationSchema = LocationSchema.partial();
 
 export const FilterEventSchema = z.object({
@@ -75,14 +104,38 @@ export const FilterEventSchema = z.object({
 /**
  * Schemas for blogs.
  */
+export const PriceSchema = z.object({
+  id: z.number(),
+  price: z.float32(),
+  name: z.string(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
+  legacy_id: z.string().nullable(),
+});
+export const CreatePriceSchema = PriceSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
+export const UpdatePriceSchema = PriceSchema.partial();
+
+/**
+ * Schemas for blogs.
+ */
 // note: to get the blog from a prod or the other way around, use the api service with the id.
 export const BlogSchema = z.object({
   id: z.number(),
   titel: z.string(),
   description: z.string(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
 });
 
-export const CreateBlogSchema = BlogSchema.omit({ id: true });
+export const CreateBlogSchema = BlogSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateBlogSchema = BlogSchema.partial();
 
 /**
@@ -91,9 +144,16 @@ export const UpdateBlogSchema = BlogSchema.partial();
 export const TagSchema = z.object({
   id: z.number(),
   tag: z.string(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
+  legacy_id: z.string().nullable(),
 });
 
-export const CreateTagSchema = TagSchema.omit({ id: true });
+export const CreateTagSchema = TagSchema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 export const UpdateTagSchema = TagSchema.partial();
 
 /**
@@ -126,6 +186,14 @@ export const ApiKeySchema = z.object({
 });
 export const VerifyApiKeySchema = ApiKeySchema.omit({ id: true });
 
+/**
+ * Shared filters.
+ */
+export const PaginationFilterSchema = z.object({
+  page: z.coerce.number().min(0).default(0),
+  limit: z.coerce.number().min(0).max(100).default(20),
+});
+
 // Type exports
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
@@ -136,6 +204,10 @@ export type Event = z.infer<typeof EventSchema>;
 export type CreateEvent = z.infer<typeof CreateEventSchema>;
 export type UpdateEvent = z.infer<typeof UpdateEventSchema>;
 export type FilterEvent = z.infer<typeof FilterEventSchema>;
+
+export type Price = z.infer<typeof PriceSchema>;
+export type CreatePrice = z.infer<typeof CreatePriceSchema>;
+export type UpdatePrice = z.infer<typeof UpdatePriceSchema>;
 
 export type Blog = z.infer<typeof BlogSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;
@@ -155,3 +227,5 @@ export type PublicAccount = z.infer<typeof PublicAccountSchema>;
 
 export type ApiKey = z.infer<typeof ApiKeySchema>;
 export type VerifyApiKey = z.infer<typeof VerifyApiKeySchema>;
+
+export type PaginationFilter = z.infer<typeof PaginationFilterSchema>;
