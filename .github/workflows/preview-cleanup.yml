@@ -1,0 +1,23 @@
+name: Pull Request Preview Cleanup
+# stops the pr preview when we close the pr.
+on:
+  pull_request:
+    types: [ closed ]  # Trigger only when PR is closed
+
+jobs:
+  cleanup:
+    runs-on: self-hosted
+
+    steps:
+      - name: Stop PR preview
+        run: |
+          PR=${{ github.event.pull_request.number }}
+          PORT="30$PR"
+          PREVIEW_NAME="preview-$PR"
+          PREVIEW_PATH="/home/selab2/project/previews/$PR"
+
+          echo "Stopping PM2 preview: $PREVIEW_NAME on port $PORT"
+          pm2 delete $PREVIEW_NAME || echo "No PM2 process found"
+
+          echo "Removing preview folder: $PREVIEW_PATH"
+          rm -rf $PREVIEW_PATH || echo "No folder found"
