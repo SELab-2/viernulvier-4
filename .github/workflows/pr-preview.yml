@@ -20,6 +20,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Create env files
         run: |
           write_env() {
@@ -57,11 +62,22 @@ jobs:
           
           # Sync files
           rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
+
+          # Upload the docs
+          cd $PR_PATH
+          python3 -m pip install mkdocs-material
+          python3 -m mkdocs build
+
+          mkdir -p frontend/public
+          rm -rf frontend/public/docs
+          mv site frontend/public/docs
           
+          # Now build Nuxt
           cd $PR_PATH/frontend
           
           # Install & build frontend
           npm install
+          NUXT_API_BASE="https://sel2-4.ugent.be/api" \
           npm run build
           
           # Stop old preview if running
@@ -77,6 +93,7 @@ jobs:
         with:
           message: |
             🚀 **Preview Build succesfully deployed!**
-            You can view the preview of this pull request at:
-            http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+
+            📱 **Website Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+            📚 **Docs Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
           comment_tag: preview_link
