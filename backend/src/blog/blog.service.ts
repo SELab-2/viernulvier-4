@@ -38,7 +38,7 @@ export class BlogService {
    * @param blog The Blog object we want to replace the existing Blog with.
    * @returns The newly replaced Blog.
    */
-  async replaceBlog(id: number, blog: BlogDto): Promise<BlogDto> {
+  async replaceBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
     if (blog.id !== id)
       throw new BadRequestException(
         "Blog ID and URL ID do not match. Cannot replace Blog.",

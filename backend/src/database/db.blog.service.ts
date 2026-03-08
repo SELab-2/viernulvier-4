@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { DEFAULT_LANGUAGE, Language } from "@repo/common";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -10,10 +11,19 @@ export class BlogDatabaseService {
   /**
    * Get a single Blog by their ID.
    * @param id The ID we're trying to fetch.
+   * @param lang is the used language
    * @returns The Blog if there is one.
    */
-  async getBlogById(id: number): Promise<BlogDto> {
-    const query = `SELECT * FROM blogs WHERE id = $1`;
+  async getBlogById(
+    id: number,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<BlogDto> {
+    const query = `SELECT id, 
+       titel->>'${lang}' AS titel, 
+       description->>'${lang}' AS description, 
+       created_at, 
+       updated_at
+    FROM blogs WHERE id = $1`;
 
     const result = await this.db.query<BlogDto>(query, [id]);
 
@@ -27,14 +37,23 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
    * @param page page index (starts at 0)
+   * @param lang is the used language
    * @returns blogs
    */
-  async getBlogs(amount: number = 0, page: number = 0): Promise<BlogDto[]> {
+  async getBlogs(
+    amount: number = 0,
+    page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<BlogDto[]> {
     const offset = page * amount;
 
     if (amount === 0) {
       const query = `
-      SELECT *
+      SELECT id, 
+             titel->>'${lang}' AS titel, 
+             description->>'${lang}' AS description,
+             created_at,
+             updated_at
       FROM blogs
       ORDER BY id
       `;
@@ -49,7 +68,11 @@ export class BlogDatabaseService {
     }
 
     let query = `
-    SELECT *
+    SELECT id,
+           titel->>'${lang}' AS titel,
+           description->>'${lang}' AS description,
+           created_at,
+           updated_at
     FROM blogs
     ORDER BY id
     LIMIT $1 OFFSET $2
@@ -67,23 +90,32 @@ export class BlogDatabaseService {
   /**
    * Create blog function, creates a blog in the database.
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
+   * @param lang is the used language
    * @returns the added blog if it was successful.
    */
-  async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
+  async createBlog(
+    blog: CreateBlogDto,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<BlogDto> {
     if (!blog.titel || !blog.description) {
       throw new BadRequestException("Missing required fields");
     }
 
     const query = `
-    INSERT INTO blogs (
-      titel,
-      description
-    )
-    VALUES ($1, $2)
-    RETURNING id, titel, description;
-  `;
+      INSERT INTO blogs (titel, description)
+      VALUES ($1, $2)
+      RETURNING
+        id,
+        titel->>'${lang}' AS titel,
+        description->>'${lang}' AS description,
+        created_at,
+        updated_at;
+    `;
 
-    const values = [blog.titel, blog.description];
+    const values = [
+      JSON.stringify({ [lang]: blog.titel }),
+      JSON.stringify({ [lang]: blog.description }),
+    ];
 
     const result = await this.db.query<BlogDto>(query, values);
 
@@ -97,10 +129,14 @@ export class BlogDatabaseService {
   /**
    * Update function for blogs. Updates the blog in the database.
    * @param blog must be of the type "UpdateBlog", gives the freedom to define only what needs to be updated.
+   * @param lang is the used language
    * The id field in the blog MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
+  async updateBlog(
+    blog: UpdateBlogDto,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<BlogDto> {
     if (!blog.id) {
       throw new Error("Blog id is required for update");
     }
@@ -110,28 +146,33 @@ export class BlogDatabaseService {
     let index = 1;
 
     if (blog.titel !== undefined) {
-      fields.push(`titel = $${index++}`);
-      values.push(blog.titel);
+      fields.push(`titel = COALESCE(titel, '{}'::jsonb) || $${index++}::jsonb`);
+      values.push(JSON.stringify({ [lang]: blog.titel }));
     }
 
     if (blog.description !== undefined) {
-      fields.push(`description = $${index++}`);
-      values.push(blog.description);
+      fields.push(
+        `description = COALESCE(description, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: blog.description }));
     }
 
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
 
-    // Add id as final parameter
     values.push(blog.id);
 
-    // ignore "RETURNING" error, query is correct.
     const query = `
-    UPDATE blogs
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING id, titel, description;
+      UPDATE blogs
+      SET ${fields.join(", ")}
+      WHERE id = $${index}
+    RETURNING
+      id,
+      titel->>'${lang}' AS titel,
+      description->>'${lang}' AS description,
+      created_at,
+      updated_at;
   `;
 
     const result = await this.db.query<BlogDto>(query, values);

@@ -8,6 +8,7 @@ import { TagModule } from "./tag/tag.module";
 import { BlogModule } from "./blog/blog.module";
 import { LocationModule } from "./location/location.module";
 import { AuthModule } from "./auth/auth.module";
+import { PriceModule } from "./price/price.module";
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from "./auth/auth.module";
     TagModule,
     BlogModule,
     LocationModule,
+    PriceModule,
     AuthModule,
   ],
   controllers: [AppController],
