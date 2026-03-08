@@ -137,6 +137,8 @@ export class CSVFileParser {
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
 
+    const tagLine = row.Tagline || row.Ondertitel || null;
+
     return {
       id,
       titel: row.Titel,
@@ -144,7 +146,7 @@ export class CSVFileParser {
       description2: row.Description2 || null,
       tags: [...new Set(tags)], // remove duplicate tags
       artist: null, // TODO
-      tagline: null, // TODO
+      tagline: tagLine,
       credits: null, // TODO
       created_at: null, // TODO
       updated_at: null, // TODO
