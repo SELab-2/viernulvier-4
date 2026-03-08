@@ -1,17 +1,19 @@
 CREATE TABLE productions
 (
-    id           SERIAL PRIMARY KEY,
-    titel        JSONB,
-    ondertitel   JSONB,
-    description1 JSONB,
-    description2 JSONB,
-    planning_id  TEXT,
-    artist       JSONB,
-    tagline      JSONB,
-    credits      JSONB,
-    created_at   TIMESTAMP DEFAULT now(),
-    updated_at   TIMESTAMP DEFAULT now(),
-    legacy_id    TEXT
+    id              SERIAL PRIMARY KEY,
+    titel           JSONB,
+    ondertitel      JSONB,
+    description1    JSONB,
+    description2    JSONB,
+    planning_id     TEXT,
+    artist          JSONB,
+    tagline         JSONB,
+    credits         JSONB,
+    created_at      TIMESTAMP DEFAULT now(),
+    updated_at      TIMESTAMP DEFAULT now(),
+    legacy_id       TEXT,
+    attendance_mode TEXT,
+    performer_type  TEXT
 );
 
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -32,13 +34,13 @@ EXECUTE FUNCTION update_updated_at();
 CREATE TABLE events
 (
     id              SERIAL PRIMARY KEY,
-    starttime       DATE NOT NULL,
-    endtime         DATE NOT NULL,
-    doors_at        DATE,
-    intermission_at DATE,
-    created_at      DATE NOT NULL DEFAULT now(),
-    updated_at      DATE NOT NULL DEFAULT now(),
-    production_id   INT  NOT NULL,
+    starttime       TIMESTAMP NOT NULL,
+    endtime         TIMESTAMP NOT NULL,
+    doors_at        TIMESTAMP,
+    intermission_at TIMESTAMP,
+    created_at      TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMP NOT NULL DEFAULT now(),
+    production_id   INT       NOT NULL,
     legacy_id       TEXT,
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)

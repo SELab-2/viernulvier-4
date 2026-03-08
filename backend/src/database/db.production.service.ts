@@ -263,8 +263,8 @@ export class ProductionDatabaseService {
         p.created_at,
         p.updated_at,
         p.legacy_id,
-        p.performer_mode,
-        p.attendance_type
+        p.performer_type,
+        p.attendance_mode
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
           ${whereClause}
@@ -299,8 +299,8 @@ export class ProductionDatabaseService {
           tagline,
           credits,
           legacy_id,
-          performer_mode,
-          attendance_type
+          performer_type,
+          attendance_mode
       )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING
@@ -314,8 +314,8 @@ export class ProductionDatabaseService {
           created_at,
           updated_at,
           legacy_id,
-          performer_mode,
-          attendance_type;
+          performer_type,
+          attendance_mode;
       `;
 
     const values = [
@@ -326,8 +326,8 @@ export class ProductionDatabaseService {
       production.tagline ? { [lang]: production.tagline } : null,
       production.credits ? { [lang]: production.credits } : null,
       production.legacy_id,
-      production.performer_mode,
-      production.attendance_type,
+      production.performer_type,
+      production.attendance_mode,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -359,8 +359,8 @@ export class ProductionDatabaseService {
         tagline,
         credits,
         legacy_id,
-        performer_mode,
-        attendance_type
+        performer_type,
+        attendance_mode
       )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       ON CONFLICT (id)
@@ -372,8 +372,8 @@ export class ProductionDatabaseService {
         tagline = EXCLUDED.tagline,
         credits = EXCLUDED.credits,
         legacy_id = EXCLUDED.legacy_id,
-        performer_mode = EXCLUDED.performer_mode,
-        attendance_type = EXCLUDED.attendance_type
+        performer_type = EXCLUDED.performer_type,
+        attendance_mode = EXCLUDED.attendance_mode
         RETURNING
           id,
           titel->>'${lang}' AS titel,
@@ -385,8 +385,8 @@ export class ProductionDatabaseService {
           created_at,
           updated_at,
           legacy_id,
-          performer_mode,
-          attendance_type
+          performer_type,
+          attendance_mode
       `;
 
     const values = [
@@ -397,8 +397,8 @@ export class ProductionDatabaseService {
       production.tagline ? { [lang]: production.tagline } : null,
       production.credits ? { [lang]: production.credits } : null,
       production.legacy_id ?? null,
-      production.performer_mode ?? null,
-      production.attendance_type ?? null,
+      production.performer_type ?? null,
+      production.attendance_mode ?? null,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -477,14 +477,14 @@ export class ProductionDatabaseService {
       values.push(production.legacy_id);
     }
 
-    if (production.performer_mode !== undefined) {
+    if (production.performer_type !== undefined) {
       fields.push(`performer_mode = $${index++}`);
-      values.push(production.performer_mode);
+      values.push(production.performer_type);
     }
 
-    if (production.attendance_type !== undefined) {
+    if (production.attendance_mode !== undefined) {
       fields.push(`attendance_type = $${index++}`);
-      values.push(production.attendance_type);
+      values.push(production.attendance_mode);
     }
 
     if (fields.length === 0) {
@@ -507,8 +507,8 @@ export class ProductionDatabaseService {
         created_at,
         updated_at,
         legacy_id,
-        performer_mode,
-        attendance_type;
+        performer_type,
+        attendance_mode;
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);

@@ -1,13 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreateEventDto,
-  EventDto,
-  FilterEventDto,
-  LocationDto,
-  PriceDto,
-  UpdateEventDto,
-} from "../dto/dto";
+import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
 import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
 @Injectable()
@@ -111,7 +104,7 @@ export class EventDatabaseService {
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id, e.legacy_id
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.legacy_id, e.created_at, e.updated_at
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}

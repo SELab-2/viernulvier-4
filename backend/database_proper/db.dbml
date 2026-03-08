@@ -11,12 +11,14 @@ Table productions {
   created_at timestamp [default: `now()`]
   updated_at timestamp [default: `now()`]
   legacy_id text
+  performer_type text
+  attendance_mode text
 }
 
 Table events {
   id int [pk, increment]
-  starttime date [not null]
-  endtime date [not null]
+  starttime timestamp [not null]
+  endtime timestamp [not null]
   doors_at timestamp
   intermission_at timestamp
   created_at timestamp

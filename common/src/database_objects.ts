@@ -12,8 +12,8 @@ export const ProductionSchema = z.object({
   artist: z.string().nullable(),
   tagline: z.string().nullable(),
   credits: z.string().nullable(),
-  performer_mode: z.string().nullable(),
-  attendance_type: z.string().nullable(),
+  performer_type: z.string().nullable(),
+  attendance_mode: z.string().nullable(),
   created_at: z.iso.date().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
   updated_at: z.iso.date().nullable(), // TODO here too.
   legacy_id: z.string().nullable(),
