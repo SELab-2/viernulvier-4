@@ -1,4 +1,5 @@
 import type { PublicAccount, ApiKey } from "@repo/common";
+import { ROUTES } from "../utils/routes";
 
 export interface LoginResponse {
   account: PublicAccount;
@@ -76,7 +77,7 @@ export function useAuth() {
       sessionStorage.removeItem("apiKey");
       sessionStorage.removeItem("account");
     }
-    navigateTo("/login");  // TODO dit moet wel nog de admin subdomain login zijn.
+    navigateTo(ROUTES.login.base);
   }
 
   const isLoggedIn = computed(() => !!apiKey.value);
