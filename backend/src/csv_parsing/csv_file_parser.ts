@@ -146,7 +146,7 @@ export class CSVFileParser {
 
     const tagLine = row.Tagline || row.Ondertitel || null;
 
-    const legacyId = `csv-${id}`;
+    const legacy_id = `csv-${id}`;
 
     return {
       titel: row.Titel,
@@ -157,7 +157,7 @@ export class CSVFileParser {
       credits: null, // TODO
       attendance_mode: null, // TODO
       performer_type: null, // TODO
-      legacy_id: legacyId,
+      legacy_id: legacy_id,
       tags: [...new Set(tags)], // remove duplicate tags
     };
   }

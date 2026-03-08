@@ -2,6 +2,7 @@ import fs from "fs";
 import { Readable } from "stream";
 import { z } from "zod";
 import { CSVFileParser } from "./csv_file_parser";
+import { create } from "domain";
 
 jest.mock("fs");
 
@@ -154,7 +155,6 @@ describe("CSVFileParser.transformProductionRow", () => {
     const result = CSVFileParser.transformProductionRow(row);
 
     expect(result).toEqual({
-      id: 1,
       titel: "Hamlet",
       description1: "Main description",
       description2: null,
@@ -164,9 +164,7 @@ describe("CSVFileParser.transformProductionRow", () => {
       credits: null,
       performer_type: null,
       attendance_mode: null,
-      created_at: null,
-      updated_at: null,
-      legacy_id: null,
+      legacy_id: "csv-1",
     });
   });
 
@@ -255,7 +253,6 @@ describe("CSVFileParser.parseProductionsCSV", () => {
     expect(result).toEqual({
       productions: [
         {
-          id: 2,
           titel: "Macbeth",
           tagline: null,
           description1: "desc",
@@ -264,13 +261,11 @@ describe("CSVFileParser.parseProductionsCSV", () => {
           credits: null,
           performer_type: null,
           attendance_mode: null,
-          legacy_id: null,
-          created_at: null,
-          updated_at: null,
+          legacy_id: "csv-2",
         },
       ],
       tags: ["tragedy"],
-      productionTagLinks: [{ productionId: 2, tagName: "tragedy" }],
+      productionTagLinks: [{ legacyId: "csv-2", tagName: "tragedy" }],
     });
   });
 });
@@ -409,6 +404,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
   const fakeProdService: any = {
     replaceProduction: jest.fn(),
     addTagToProduction: jest.fn(),
+    createProduction: jest.fn(),
   };
   const fakeTagService: any = {
     createTag: jest.fn(),
@@ -444,13 +440,10 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
     );
 
     // simulate insertion returning the same object plus an auto-generated id property
-    fakeProdService.replaceProduction.mockImplementation(
-      async (id: number, prod: any) => ({
-        ...prod,
-        id,
-        replaced: true,
-      }),
-    );
+    fakeProdService.createProduction.mockImplementation(async (prod: any) => ({
+      ...prod,
+      id: Number(prod.legacy_id?.replace("csv-", "")),
+    }));
 
     fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
       id: `${tag}-id`,
@@ -463,7 +456,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       fakeTagService,
     );
 
-    expect(fakeProdService.replaceProduction).toHaveBeenCalledTimes(2);
+    expect(fakeProdService.createProduction).toHaveBeenCalledTimes(2);
     expect(fakeTagService.createTag).toHaveBeenCalledTimes(2); // drama + comedy
 
     // ensure tags linked the right number of times
@@ -488,14 +481,11 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         tagline: null,
         description1: "d1",
         description2: null,
-        replaced: true,
         artist: null,
         credits: null,
         performer_type: null,
         attendance_mode: null,
-        legacy_id: null,
-        created_at: null,
-        updated_at: null,
+        legacy_id: "csv-1",
       },
       {
         id: 2,
@@ -503,14 +493,11 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         tagline: null,
         description1: "d2",
         description2: null,
-        replaced: true,
         artist: null,
         credits: null,
         performer_type: null,
         attendance_mode: null,
-        legacy_id: null,
-        created_at: null,
-        updated_at: null,
+        legacy_id: "csv-2",
       },
     ]);
   });
@@ -529,8 +516,8 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       ]) as any,
     );
 
-    fakeProdService.replaceProduction.mockRejectedValue(
-      new Error("insert failed"),
+    fakeProdService.createProduction.mockRejectedValue(
+      new Error("creation failed"),
     );
 
     await expect(
@@ -539,6 +526,6 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         fakeProdService,
         fakeTagService,
       ),
-    ).rejects.toThrow(/insert failed/);
+    ).rejects.toThrow(/creation failed/);
   });
 });
