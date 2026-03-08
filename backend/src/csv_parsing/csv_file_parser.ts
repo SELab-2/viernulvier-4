@@ -1,8 +1,17 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateEventDto, EventDto, ProductionDto, TagDto } from "../dto/dto";
-import { CreateEventSchema, ProductionSchema, } from "@repo/common/src/database_objects";
+import {
+  CreateEventDto,
+  CreateProductionDto,
+  EventDto,
+  ProductionDto,
+  TagDto,
+} from "../dto/dto";
+import {
+  CreateEventSchema,
+  CreateProductionSchema,
+} from "@repo/common/src/database_objects";
 import { EventService } from "../event/event.service";
 import { ProductionService } from "../production/production.service";
 import { TagService } from "../tag/tag.service";
@@ -12,9 +21,9 @@ import { LocationService } from "../location/location.service";
  * Type used to structure production import
  */
 type ParsedProductionImport = {
-  productions: ProductionDto[];
+  productions: CreateProductionDto[];
   tags: string[];
-  productionTagLinks: { productionId: number; tagName: string }[];
+  productionTagLinks: { legacyId: string; tagName: string }[];
 };
 
 /**
@@ -122,14 +131,12 @@ export class CSVFileParser {
 
   static transformProductionRow(
     row: Record<string, string>,
-  ): ProductionDto & { tags: string[] } {
+  ): CreateProductionDto & { tags: string[] } {
     // validate and convert numeric fields manually to provide clearer errors
     const id = Number(row.ID);
     if (isNaN(id)) {
       throw new Error(`Invalid production id: ${row.ID}`);
     }
-
-    const planningId = row["Planning ID"] || null;
 
     // adds possibility to add tags as a comma separated list in the Genre column, trims whitespace and converts to lowercase for consistency
     const tags = (row.Genre || "")
@@ -139,20 +146,19 @@ export class CSVFileParser {
 
     const tagLine = row.Tagline || row.Ondertitel || null;
 
+    const legacyId = `csv-${id}`;
+
     return {
-      id,
       titel: row.Titel,
       description1: row.Description1,
       description2: row.Description2 || null,
-      tags: [...new Set(tags)], // remove duplicate tags
       artist: null, // TODO
       tagline: tagLine,
       credits: null, // TODO
-      created_at: null, // TODO
-      updated_at: null, // TODO
       attendance_mode: null, // TODO
       performer_type: null, // TODO
-      legacy_id: null,
+      legacy_id: legacyId,
+      tags: [...new Set(tags)], // remove duplicate tags
     };
   }
 
@@ -186,15 +192,15 @@ export class CSVFileParser {
   static async parseProductionsCSV(
     filePath: string,
   ): Promise<ParsedProductionImport> {
-    const productions: ProductionDto[] = [];
+    const productions: CreateProductionDto[] = [];
     const tagsSet: Set<string> = new Set();
-    const productionTagLinks: { productionId: number; tagName: string }[] = [];
+    const productionTagLinks: { legacyId: string; tagName: string }[] = [];
 
     const parsed = await this.parseCSVWithSchema<
-      ProductionDto & { tags: string[] }
+      CreateProductionDto & { tags: string[] }
     >(
       filePath,
-      ProductionSchema.extend({ tags: string().array() }),
+      CreateProductionSchema.extend({ tags: string().array() }),
       this.transformProductionRow,
     );
 
@@ -204,7 +210,10 @@ export class CSVFileParser {
 
       for (const tag of tags) {
         tagsSet.add(tag);
-        productionTagLinks.push({ productionId: production.id, tagName: tag });
+        productionTagLinks.push({
+          legacyId: prodData.legacy_id!,
+          tagName: tag,
+        });
       }
     }
 
@@ -297,13 +306,16 @@ export class CSVFileParser {
       await this.parseProductionsCSV(filePath);
     const createdProductions: ProductionDto[] = [];
 
+    const legacyToDbId = new Map<string, number>();
+
     // insert productions
     for (const production of productions) {
-      const created = await productionService.replaceProduction(
-        production.id,
-        production,
-      );
+      const created = await productionService.createProduction(production);
       createdProductions.push(created);
+
+      if (production.legacy_id) {
+        legacyToDbId.set(production.legacy_id, created.id);
+      }
     }
 
     // prepopulate a map with existing locations so we don't create duplicates
@@ -327,8 +339,9 @@ export class CSVFileParser {
     // link tags to productions
     for (const link of productionTagLinks) {
       const tagId = tagMap.get(link.tagName);
-      if (!tagId) continue;
-      await productionService.addTagToProduction(link.productionId, tagId);
+      const prodId = legacyToDbId.get(link.legacyId);
+      if (!prodId || !tagId) continue;
+      await productionService.addTagToProduction(prodId, tagId);
     }
 
     return createdProductions;
