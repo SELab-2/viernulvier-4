@@ -49,17 +49,7 @@ This runs the built backend and frontend in production mode.
 
 ## Testing
 
-To run tests across all packages:
-
-```bash
-npm run test
-```
-
-For coverage:
-
-```bash
-npm run test:coverage
-```
+For detailed testing instructions, including unit tests, e2e tests, and coverage reports, refer to the [Backend Testing](../testing/backend.md) for the backend and [Frontend Testing](../testing/frontend.md) for the frontend.
 
 ## Additional Notes
 
