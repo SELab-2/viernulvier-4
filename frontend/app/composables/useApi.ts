@@ -1,5 +1,3 @@
-import { useAuth } from "./useAuth";
-
 export interface ApiOptions<TBody = unknown> {
   body?: TBody;
   headers?: Record<string, string>;
