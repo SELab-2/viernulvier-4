@@ -8,7 +8,7 @@ From the repository root:
 
 ```bash
 cd backend
-npm install
+npm install         # or `npm i`
 ```
 
 ## Development

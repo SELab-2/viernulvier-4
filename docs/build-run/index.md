@@ -12,7 +12,7 @@ This project is a monorepo managed with Turbo, containing backend (Typescript + 
 From the repository root:
 
 ```bash
-npm install
+npm install         # or `npm i`
 ```
 
 This installs dependencies for all workspaces (backend, frontend, common).
