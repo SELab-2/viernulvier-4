@@ -1,0 +1,33 @@
+export const API_ROUTES = {
+  auth: {
+    login: "/auth/login",
+    base: "/auth",
+    byId: (accountId: number) => `/auth/${accountId}`,
+  },
+  productions: {
+    base: "/productions",
+    byId: (productionId: number) => `/productions/${productionId}`,
+    tags: (productionId: number) => `/productions/${productionId}/tags`,
+    tagById: (productionId: number, tagId: number) => `/productions/${productionId}/tags/${tagId}`,
+    blogs: (productionId: number) => `/productions/${productionId}/blogs`,
+    blogById: (productionId: number, blogId: number) => `/productions/${productionId}/blogs/${blogId}`,
+  },
+  events: {
+    base: "/events",
+    byId: (eventId: number) => `/events/${eventId}`,
+    locations: (eventId: number) => `/events/${eventId}/locations`,
+    locationById: (eventId: number, locationId: number) => `/events/${eventId}/locations/${locationId}`,
+  },
+  blogs: {
+    base: "/blogs",
+    byId: (blogId: number) => `/blogs/${blogId}`,
+  },
+  tags: {
+    base: "/tags",
+    byId: (tagId: number) => `/tags/${tagId}`,
+  },
+  locations: {
+    base: "/locations",
+    byId: (locationId: number) => `/locations/${locationId}`,
+  },
+} as const;

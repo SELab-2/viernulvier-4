@@ -74,7 +74,6 @@ export function useApi() {
   function handleDefaultError(status: number, message: string): void {
     if (status === 401 || status === 403) {
       console.error(`[useApi] Auth error (${status}): ${message}`);
-      navigateTo("/login");  // TODO dit moet de admin subdomain login zijn
     } else if (status === 404) {
       console.warn(`[useApi] Not found (404): ${message}`);
     } else if (status === 0) {
