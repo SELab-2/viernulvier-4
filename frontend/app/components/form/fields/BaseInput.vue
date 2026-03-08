@@ -1,13 +1,13 @@
 <script setup lang="ts">
-defineProps({
-  label: String,
-  placeholder: String,
-  type: {
-    type: String,
-    default: 'text'
-  },
-  id: String,
-  required: Boolean
+interface Props {
+  label?: string
+  placeholder?: string
+  type?: 'text' | 'number'
+  id?: string
+  required?: boolean
+}
+withDefaults(defineProps<Props>(), {
+  type: 'text'
 })
 
 const model = defineModel<string | number>()
@@ -40,7 +40,6 @@ const model = defineModel<string | number>()
   margin-bottom: 0.25rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151; /* gray-700 */
 }
 .required-star {
   color: inherit;
@@ -49,7 +48,7 @@ const model = defineModel<string | number>()
   width: 100%;
   height: 3rem;
   padding: 0 0.75rem;
-  border: 1px solid #d1d5db; /* gray-300 */
+  border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   background-color: #ffffff;
   font-size: 1rem;
@@ -57,6 +56,6 @@ const model = defineModel<string | number>()
   transition: border-color 0.2s;
 }
 .input-field:focus {
-  border-color: #3b82f6;
+  border-color: #d1d5db;
 }
 </style>
