@@ -81,12 +81,12 @@ export class BlogController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing blog." })
-  @ApiBody({ type: BlogDto })
+  @ApiBody({ type: UpdateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Replaced Blog." })
   @Put(":blogId")
   async replaceBlog(
     @Param("blogId", ParseIntPipe) blogId: number,
-    @Body(new ZodValidationPipe(BlogSchema)) blog: BlogDto,
+    @Body(new ZodValidationPipe(BlogSchema)) blog: UpdateBlogDto,
   ): Promise<BlogDto> {
     return await this.blogService.replaceBlog(blogId, blog);
   }

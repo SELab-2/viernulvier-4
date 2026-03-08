@@ -1,13 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type {
-  CreateEventDto,
-  EventDto,
-  UpdateEventDto,
-  LocationDto,
-  PriceDto,
-} from "../dto/dto";
+import type { CreateEventDto, EventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterEventSchema } from "@repo/common";
@@ -21,11 +15,19 @@ describe("EventService", () => {
     starttime: "2024-01-15T19:00:00Z",
     endtime: "2024-01-15T21:00:00Z",
     production_id: 1,
+    doors_at: "2024-01-15T19:00:00Z",
+    intermission_at: "2024-01-15T19:00:00Z",
+    created_at: "2024-01-15T19:00:00Z",
+    updated_at: "2024-01-15T19:00:00Z",
+    legacy_id: "str",
   };
 
   const mockLocation: LocationDto = {
     id: 1,
-    location: "Main Stage",
+    location: "Citadel Park",
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
+    legacy_id: "str",
   };
 
   const mockBlog = {
@@ -207,12 +209,20 @@ describe("EventService", () => {
   describe("createEvent", () => {
     it("should create an event successfully", async () => {
       const newEvent: CreateEventDto = {
-        starttime: "2024-02-10T18:00:00Z",
-        endtime: "2024-02-10T20:00:00Z",
-        production_id: 2,
+        starttime: "2024-01-15T19:00:00Z",
+        endtime: "2024-01-15T21:00:00Z",
+        production_id: 1,
+        doors_at: "2024-01-15T19:00:00Z",
+        intermission_at: "2024-01-15T19:00:00Z",
+        legacy_id: "str",
       };
 
-      const createdEvent: EventDto = { id: 2, ...newEvent };
+      const createdEvent: EventDto = {
+        id: 2,
+        ...newEvent,
+        created_at: "2024-01-15T19:00:00Z",
+        updated_at: "2024-01-15T19:00:00Z",
+      };
 
       jest.spyOn(dbService, "createEvent").mockResolvedValueOnce(createdEvent);
 
@@ -224,9 +234,12 @@ describe("EventService", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newEvent: CreateEventDto = {
-        starttime: "2024-02-10T18:00:00Z",
-        endtime: "2024-02-10T20:00:00Z",
-        production_id: 2,
+        starttime: "2024-01-15T19:00:00Z",
+        endtime: "2024-01-15T21:00:00Z",
+        production_id: 1,
+        doors_at: "2024-01-15T19:00:00Z",
+        intermission_at: "2024-01-15T19:00:00Z",
+        legacy_id: "str",
       };
 
       jest

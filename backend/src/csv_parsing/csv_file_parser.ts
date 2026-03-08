@@ -114,6 +114,9 @@ export class CSVFileParser {
       endtime: endTime,
       production_id: productionId,
       location: location,
+      doors_at: null, // TODO
+      intermission_at: null, // TODO
+      legacy_id: null,
     };
   }
 
@@ -137,11 +140,17 @@ export class CSVFileParser {
     return {
       id,
       titel: row.Titel,
-      ondertitel: row.Ondertitel,
       description1: row.Description1,
       description2: row.Description2 || null,
-      planning_id: planningId,
       tags: [...new Set(tags)], // remove duplicate tags
+      artist: null, // TODO
+      tagline: null, // TODO
+      credits: null, // TODO
+      created_at: null, // TODO
+      updated_at: null, // TODO
+      attendance_mode: null, // TODO
+      performer_type: null, // TODO
+      legacy_id: null,
     };
   }
 
@@ -208,6 +217,7 @@ export class CSVFileParser {
    * Parse events from a CSV file and insert them into the database.
    * @param filePath - Path to the CSV file containing events
    * @param eventService - Instance of EventService to insert events into the database
+   * @param locationService - Instance of LocationService to insert locations into the database
    * @returns A promise that resolves to an array of created EventDto objects
    */
   static async insertEventsFromCSV(
@@ -237,6 +247,7 @@ export class CSVFileParser {
           } else {
             const createdLoc = await locationService.createLocation({
               location: loc,
+              legacy_id: null,
             });
 
             if (!createdLoc) {
@@ -303,7 +314,10 @@ export class CSVFileParser {
     for (const tagName of tags) {
       if (!tagMap.has(tagName)) {
         // insert tags, ignoring duplicates
-        const tagObject: TagDto = await tagService.createTag({ tag: tagName });
+        const tagObject: TagDto = await tagService.createTag({
+          tag: tagName,
+          legacy_id: null,
+        });
         tagMap.set(tagName, tagObject.id);
       }
     }

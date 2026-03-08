@@ -116,4 +116,10 @@ export type {
   UpdatePrice,
   PaginationFilter,
 };
+
+// languages:
+export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
+export type Language = (typeof SUPPORTED_LANGUAGES)[number];
+export const DEFAULT_LANGUAGE: Language = "nl";
+
 export type HelloWorld = z.infer<typeof HelloWorldSchema>;

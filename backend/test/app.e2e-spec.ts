@@ -22,17 +22,22 @@ const mockBlog = {
   id: 1,
   titel: "Test Blog",
   description: "Test blog description",
+  created_at: "2025-06-01T22:00:00.000Z",
+  updated_at: "2025-06-01T22:00:00.000Z",
 };
 
 const mockBlog2 = {
   id: 2,
   titel: "Second Blog",
   description: "Second blog description",
+  created_at: "2026-03-08",
+  updated_at: "2026-03-08",
 };
 
 const mockTag = {
   id: 1,
   tag: "Drama",
+  legacy_id: "Test Legacy",
 };
 
 const mockTag2 = {
@@ -42,29 +47,42 @@ const mockTag2 = {
 
 const mockProduction = {
   id: 1,
-  titel: "Test Production",
-  ondertitel: "A subtitle",
-  description1: "First description",
-  description2: "Second description",
-  planning_id: "1",
+  titel: "str",
+  description1: "string",
+  description2: "string",
+  artist: "string",
+  tagline: "string",
+  credits: "string",
+  performer_type: "string",
+  attendance_mode: "string",
+  created_at: "2026-03-07T16:58:08.701873Z",
+  updated_at: "2026-03-07T16:58:08.701873Z",
+  legacy_id: "string",
 };
 
 const mockEvent = {
   id: 1,
   starttime: "2025-01-01T19:00:00.000Z",
   endtime: "2025-01-01T22:00:00.000Z",
+  doors_at: "2025-06-01T22:00:00.000Z",
+  intermission_at: "2025-06-01T22:00:00.000Z",
+  legacy_id: "string",
+  created_at: "2026-03-07T00:00:00.000Z",
+  updated_at: "2026-03-07T00:00:00.000Z",
   production_id: 1,
 };
 
 const mockLocation = {
   id: 1,
   location: "Main Stage",
+  legacy_id: "Test Legacy",
 };
 
 const mockPrice = {
   id: 1,
   price: 15.5,
   name: "Early Bird",
+  legacy_id: "Test Legacy",
 };
 
 // Mock DB service factories
@@ -376,7 +394,7 @@ describe("TagController (e2e)", () => {
 
   // POST /tags
   describe("POST /tags", () => {
-    const createPayload = { tag: "Thriller" };
+    const createPayload = { tag: "Thriller", legacy_id: "test" };
 
     it("should return 201 with the created tag", () => {
       return request(app.getHttpServer())
@@ -502,10 +520,14 @@ describe("ProductionController (e2e)", () => {
   describe("POST /productions", () => {
     const createPayload = {
       titel: "New Production",
-      ondertitel: "Subtitle",
       description1: "Desc 1",
       description2: "Desc 2",
-      planning_id: "2",
+      legacy_id: "etst",
+      attendance_mode: "etst",
+      performer_type: "etst",
+      tagline: "test",
+      credits: "test",
+      artist: "test",
     };
 
     it("should return 201 with the created production", () => {
@@ -837,6 +859,9 @@ describe("EventController (e2e)", () => {
       starttime: "2025-06-01T19:00:00.000Z",
       endtime: "2025-06-01T22:00:00.000Z",
       production_id: 1,
+      legacy_id: "1",
+      doors_at: "2025-06-01T22:00:00.000Z",
+      intermission_at: "2025-06-01T22:00:00.000Z",
     };
 
     it("should return 201 with the created event", () => {
@@ -964,7 +989,7 @@ describe("LocationController (e2e)", () => {
   // POST /locations
   describe("POST /locations", () => {
     it("should return 201 with the created location", () => {
-      const createPayload = { location: "Side Stage" };
+      const createPayload = { location: "Side Stage", legacy_id: "st" };
       return request(app.getHttpServer())
         .post("/locations")
         .send(createPayload)
@@ -992,9 +1017,7 @@ describe("LocationController (e2e)", () => {
     });
 
     it("should return 400 when locationId is not a number", () => {
-      return request(app.getHttpServer())
-        .delete("/locations/abc")
-        .expect(400);
+      return request(app.getHttpServer()).delete("/locations/abc").expect(400);
     });
   });
 });
@@ -1128,7 +1151,7 @@ describe("PriceController (e2e)", () => {
   // POST /prices
   describe("POST /prices", () => {
     it("should return 201 with the created price", () => {
-      const createPayload = { price: 20.0, name: "Standard" };
+      const createPayload = { price: 20.0, name: "Standard", legacy_id: "" };
       return request(app.getHttpServer())
         .post("/prices")
         .send(createPayload)
@@ -1197,9 +1220,7 @@ describe("EventPriceController (e2e)", () => {
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer())
-        .get("/events/abc/prices")
-        .expect(400);
+      return request(app.getHttpServer()).get("/events/abc/prices").expect(400);
     });
   });
 

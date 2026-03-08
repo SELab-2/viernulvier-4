@@ -1,14 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreateEventDto,
-  EventDto,
-  FilterEventDto,
-  LocationDto,
-  PriceDto,
-  UpdateEventDto,
-} from "../dto/dto";
-import { FilterEventSchema } from "@repo/common";
+import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
+import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -111,7 +104,7 @@ export class EventDatabaseService {
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.legacy_id, e.created_at, e.updated_at
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
@@ -134,9 +127,9 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id)
-      VALUES ($1, $2, $3)
-      RETURNING id, starttime, endtime, production_id
+      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at, legacy_id)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at, legacy_id
     `;
 
     const result = await this.db.query<EventDto>(query, [
@@ -183,6 +176,16 @@ export class EventDatabaseService {
       values.push(event.production_id);
     }
 
+    if (event.doors_at !== undefined) {
+      fields.push(`doors_at = $${index++}`);
+      values.push(event.doors_at);
+    }
+
+    if (event.intermission_at !== undefined) {
+      fields.push(`intermission_at = $${index++}`);
+      values.push(event.intermission_at);
+    }
+
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
@@ -221,26 +224,17 @@ export class EventDatabaseService {
   }
 
   /**
-   * Delete function for deleting all events from the database given a certain p_id.
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteEventsWithPID(production_id: number): Promise<void> {
-    // note: here we delete using the production id so possibly multiple events are affected!
-    const query = `DELETE FROM events WHERE production_id = $1`;
-
-    await this.db.query(query, [production_id]);
-  }
-
-  /**
    * get the location linked with an event
    * @param id the ID of the event we want the location of.
+   * @param lang is the used language
    * @returns the LocationDto of the event.
    */
-  async getLocationOfEvent(id: number): Promise<LocationDto> {
+  async getLocationOfEvent(
+    id: number,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location
+    SELECT l.id, l.location->>'${lang}' AS loc, l.legacy_id, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
@@ -300,16 +294,23 @@ export class EventDatabaseService {
    * @param id the ID of the event we want all the prices of.
    * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
    * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
+   * @param lang is the used language
    * @returns a list of PriceDto objects linked to the given event.
    */
   async getPricesOfEvent(
     id: number,
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<PriceDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT p.*
+      SELECT p.id,
+             p.created_at,
+             p.updated_at,
+             p.price,
+             p.name->>'${lang}' AS name,
+             p.legacy_id
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
       WHERE ep.event_id = $1
@@ -321,7 +322,12 @@ export class EventDatabaseService {
     const offset = page * amount;
 
     const query = `
-    SELECT p.*
+    SELECT p.id,
+           p.price,
+           p.name->>'${lang}',
+           p.created_at,
+           p.updated_at,
+           p.legacy_id
     FROM prices p
     INNER JOIN event_prices ep ON ep.price_id = p.id
     WHERE ep.event_id = $1
@@ -337,10 +343,7 @@ export class EventDatabaseService {
    * @param price_id the ID of the price you want to link
    * @returns T/F whether if the linking was successful.
    */
-  async addPriceToEvent(
-    event_id: number,
-    price_id: number
-  ): Promise<boolean> {
+  async addPriceToEvent(event_id: number, price_id: number): Promise<boolean> {
     const query = `
     INSERT INTO event_prices (event_id, price_id)
     VALUES ($1, $2)

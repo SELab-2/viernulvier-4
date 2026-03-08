@@ -12,20 +12,32 @@ describe("ProductionTagController", () => {
   const mockProduction: ProductionDto = {
     id: 1,
     titel: "The Great Show",
-    ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    planning_id: "1",
+    performer_type: "fuck",
+    attendance_mode: "this",
+    legacy_id: "shit",
+    tagline: "I",
+    artist: "am",
+    credits: "done",
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
   };
 
   const mockTags: TagDto[] = [
     {
       id: 1,
       tag: "Drama",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
+      legacy_id: "str",
     },
     {
       id: 2,
       tag: "Classical",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
+      legacy_id: "str",
     },
   ];
 
