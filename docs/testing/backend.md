@@ -8,7 +8,7 @@ From the repository root:
 
 ```bash
 cd backend
-npm install           # ensure dependencies are installed
+npm install           # or `npm i`
 npm run test          # runs Jest unit tests
 ```
 

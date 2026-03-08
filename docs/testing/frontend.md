@@ -6,7 +6,7 @@ This section describes how to run and review tests for the Nuxt/Vue frontend.
 
 ```bash
 cd frontend
-npm install
+npm install     # or `npm i`
 npm run test    # vitest configured via `vitest.config.ts`
 ```
 
