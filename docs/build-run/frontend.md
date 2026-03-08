@@ -2,11 +2,6 @@
 
 This section covers building and running the Nuxt.js frontend.
 
-## Prerequisites
-
-- Node.js (version 18+ recommended)
-- npm or yarn
-
 ## Installation
 
 From the repository root:
@@ -21,6 +16,7 @@ npm install
 To run in development mode:
 
 ```bash
+cd frontend
 npm run start:dev
 ```
 
@@ -31,6 +27,7 @@ The app will be available at `http://localhost:3001`.
 To build for production:
 
 ```bash
+cd frontend
 npm run build
 ```
 
@@ -41,17 +38,14 @@ This generates static files in `.output/`.
 After building:
 
 ```bash
+cd frontend
 npm run start:prod
 ```
 
 Or generate static site:
 
 ```bash
+cd frontend
 npm run generate
 npm run preview
 ```
-
-## Additional Commands
-
-- `npm run test` - Run unit tests
-- `npm run test:coverage` - Run tests with coverage
