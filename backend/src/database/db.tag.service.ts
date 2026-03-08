@@ -140,7 +140,7 @@ export class TagDatabaseService {
 
     const query = `
       INSERT INTO tags (tag, legacy_id)
-      VALUES ($1)
+      VALUES ($1, $2)
       RETURNING
         id,
         tag->>'${lang}' AS tag,

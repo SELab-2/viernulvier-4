@@ -90,7 +90,7 @@ export class PriceDatabaseService {
 
     const query = `
       INSERT INTO prices (name, price, legacy_id)
-      VALUES ($1, $2)
+      VALUES ($1, $2, $3)
       RETURNING
         id,
         name->>'${lang}' AS name,

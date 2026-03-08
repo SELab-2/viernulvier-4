@@ -46,8 +46,8 @@ export const FilterProductionSchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(20),
   language: z.string().optional(),
   artist: z.string().optional(),
-  performer_mode: z.string().optional(),
-  attendance_type: z.string().optional(),
+  performer_type: z.string().optional(),
+  attendance_mode: z.string().optional(),
 });
 
 /**
