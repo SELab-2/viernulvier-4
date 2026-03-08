@@ -97,7 +97,7 @@ describe("CSVFileParser.transformEventRow", () => {
       location: "Main Hall",
       doors_at: null,
       intermission_at: null,
-      created_at: null,
+      legacy_id: null
     });
   });
 
@@ -222,8 +222,6 @@ describe("CSVFileParser.parseEventsCSV", () => {
         production_id: 10,
         doors_at: null,
         intermission_at: null,
-        created_at: null,
-        updated_at: null,
         legacy_id: null,
       },
       location: "Front Stage",
@@ -259,9 +257,16 @@ describe("CSVFileParser.parseProductionsCSV", () => {
         {
           id: 2,
           titel: "Macbeth",
-          tagline: "",
+          tagline: null,
           description1: "desc",
           description2: "more",
+          artist: null,
+          credits: null,
+          performer_type: null,
+          attendance_mode: null,
+          legacy_id: null,
+          created_at: null,
+          updated_at: null,
         },
       ],
       tags: ["tragedy"],
@@ -354,6 +359,7 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
 
     expect(fakeLocationService.createLocation).toHaveBeenCalledWith({
       location: "Large Room",
+      legacy_id: null
     });
     expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(321, 77);
     expect(created).toEqual([{ id: 321 }]);
@@ -479,18 +485,32 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       {
         id: 1,
         titel: "First",
-        tagline: "",
+        tagline: null,
         description1: "d1",
         description2: null,
         replaced: true,
+        artist: null,
+        credits: null,
+        performer_type: null,
+        attendance_mode: null,
+        legacy_id: null,
+        created_at: null,
+        updated_at: null,
       },
       {
         id: 2,
         titel: "Second",
-        tagline: "",
+        tagline: null,
         description1: "d2",
         description2: null,
         replaced: true,
+        artist: null,
+        credits: null,
+        performer_type: null,
+        attendance_mode: null,
+        legacy_id: null,
+        created_at: null,
+        updated_at: null,
       },
     ]);
   });
