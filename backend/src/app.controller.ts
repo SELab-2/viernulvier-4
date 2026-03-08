@@ -6,6 +6,11 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @Redirect("/docs", 301)
+  @Redirect()
+  redirectToDocs() {
+    const isProduction = process.env.NODE_ENV === "production";
+    return { url: isProduction ? "/api/docs" : "/docs", statusCode: 301 };
+  }
+
   root(): void {}
 }

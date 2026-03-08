@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { ArrowRight, Calendar, FileText, ImageIcon } from 'lucide-vue-next'
 
@@ -313,6 +314,7 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
         </p>
       </div>
     </footer>
+
   </div>
 </template>
 
