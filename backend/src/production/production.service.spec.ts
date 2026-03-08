@@ -1,13 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type {
-  BlogDto,
-  CreateProductionDto,
-  ProductionDto,
-  TagDto,
-  UpdateProductionDto,
-} from "../dto/dto";
+import type { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterProductionSchema } from "@repo/common";
@@ -22,12 +16,12 @@ describe("ProductionService", () => {
     titel: "The Great Show",
     description1: "An amazing production",
     description2: "With great actors",
-    performer_type: "fuck",
-    attendance_mode: "this",
-    legacy_id: "shit",
-    tagline: "I",
-    artist: "am",
-    credits: "done",
+    performer_type: "happy",
+    attendance_mode: "I",
+    legacy_id: "am",
+    tagline: "fixing",
+    artist: "the",
+    credits: "tests :-)",
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
   };
@@ -459,12 +453,12 @@ describe("ProductionService", () => {
         titel: "The Great Show",
         description1: "An amazing production",
         description2: "With great actors",
-        performer_type: "fuck",
-        attendance_mode: "this",
-        legacy_id: "shit",
-        tagline: "I",
-        artist: "am",
-        credits: "done",
+        performer_type: "happy",
+        attendance_mode: "I",
+        legacy_id: "am",
+        tagline: "fixing",
+        artist: "the",
+        credits: "tests :-)",
       };
 
       const createdProduction: ProductionDto = {
@@ -489,12 +483,12 @@ describe("ProductionService", () => {
         titel: "The Great Show",
         description1: "An amazing production",
         description2: "With great actors",
-        performer_type: "fuck",
-        attendance_mode: "this",
-        legacy_id: "shit",
-        tagline: "I",
-        artist: "am",
-        credits: "done",
+        performer_type: "happy",
+        attendance_mode: "I",
+        legacy_id: "am",
+        tagline: "fixing",
+        artist: "the",
+        credits: "tests :-)",
       };
 
       jest
