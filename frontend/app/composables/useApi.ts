@@ -69,7 +69,6 @@ export function useApi() {
 
   /**
    * Fallback error handler used when no onError is passed to a request.
-   * Redirects to /login on 401/403.
    */
   function handleDefaultError(status: number, message: string): void {
     if (status === 401 || status === 403) {
