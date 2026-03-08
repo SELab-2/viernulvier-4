@@ -8,7 +8,7 @@ import {
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
-import { FilterProductionSchema } from "@repo/common";
+import { DEFAULT_LANGUAGE, FilterProductionSchema, Language, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -17,11 +17,15 @@ export class ProductionDatabaseService {
   /**
    * Get a single Production by their ID.
    * @param id The ID we are looking for.
+   * @param lang is the language you wish to fetch.
    * @returns The production if there is one.
    */
-  async getProductionById(id: number): Promise<ProductionDto> {
+  async getProductionById(
+    id: number,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<ProductionDto> {
     const productions: ProductionDto[] = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
+      FilterProductionSchema.parse({ id: id, language: lang }),
     );
     if (productions.length === 0)
       throw new BadRequestException(
@@ -36,16 +40,22 @@ export class ProductionDatabaseService {
    * @param production the production we want all tags of.
    * @param amount is the amount of events per page (returned)
    * @param page is the page you want (indexed from 0)
+   * @param lang is the used language
    * @returns a list of tags connected to the given production.
    */
   async getTagsOfProduction(
     production: ProductionDto,
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<TagDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT t.*
+      SELECT t.id,
+             t.tag->>'${lang}',
+             t.legacy_id,
+             t.created_at,
+             t.updated_at
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -57,7 +67,11 @@ export class ProductionDatabaseService {
     const offset = page * amount;
 
     const query = `
-      SELECT t.*
+      SELECT t.id,
+             t.tag->>'${lang}',
+             t.created_at,
+             t.updated_at,
+             t.legacy_id
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -72,16 +86,22 @@ export class ProductionDatabaseService {
    * @param id the id of the production we want all blogs of.
    * @param amount is the amount of events per page (returned)
    * @param page is the page you want (indexed from 0)
+   * @param lang is the used language
    * @returns a list of blogs connected to the given production.
    */
   async getBlogsOfProduction(
     id: number,
     amount: number = 0,
     page: number = 0,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<BlogDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT b.*
+      SELECT b.id, 
+             b.titel->>'${lang}', 
+             b.description->>'${lang}',
+             b.created_at,
+             b.updated_at
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -93,7 +113,12 @@ export class ProductionDatabaseService {
     const offset = page * amount;
 
     const query = `
-      SELECT b.*
+      SELECT b.id,
+             b.titel->>'${lang}',
+             b.description->>'${lang}',
+             b.created_at,
+             b.updated_at,
+             b.legacy_id
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -106,8 +131,6 @@ export class ProductionDatabaseService {
   /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
@@ -116,6 +139,7 @@ export class ProductionDatabaseService {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
+    const lang = filters.language ?? DEFAULT_LANGUAGE; // shouldn't need fallback but justin case
 
     // Filter by location
     if (filters.hall) {
@@ -156,8 +180,29 @@ export class ProductionDatabaseService {
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
     if (filters.titel) {
-      conditions.push(`p.titel ILIKE $${i}`);
+      conditions.push(`p.titel->>'${lang}' ILIKE $${i}`);
       values.push(`%${filters.titel}%`);
+      i++;
+    }
+
+    // Filter by artist
+    if (filters.artist) {
+      conditions.push(`p.artist->>'${lang}' ILIKE $${i}`);
+      values.push(`%${filters.artist}%`);
+      i++;
+    }
+
+    // Filter by performance_type
+    if (filters.performer_type) {
+      conditions.push(`p.performer_type = $${i}`);
+      values.push(`%${filters.performer_type}%`);
+      i++;
+    }
+
+    // Filter by attendance_mode
+    if (filters.attendance_mode) {
+      conditions.push(`p.attendance_mode = $${i}`);
+      values.push(`%${filters.attendance_mode}%`);
       i++;
     }
 
@@ -209,11 +254,17 @@ export class ProductionDatabaseService {
     const query = `
       SELECT DISTINCT
         p.id,
-        p.titel,
-        p.ondertitel,
-        p.description1,
-        p.description2,
-        p.planning_id
+        p.titel->>'${lang}' AS titel,
+        p.description1->>'${lang}' AS desc1,
+        p.description2->>'${lang}' AS desc2,
+        p.artist->>'${lang}' AS artist,
+        p.tagline->>'${lang}' AS tagline,
+        p.credits->>'${lang}' AS credits,
+        p.created_at,
+        p.updated_at,
+        p.legacy_id,
+        p.performer_type,
+        p.attendance_mode
       FROM productions p
         LEFT JOIN events e ON e.production_id = p.id
           ${whereClause}
@@ -226,41 +277,57 @@ export class ProductionDatabaseService {
 
   /**
    * Create production function, creates a production in the database.
-   * @param production must be of the type "CreateProduction" which has all fields defined,
+   * @param production must be of the type "CreateProduction" which has all necessary fields defined,
+   * @param lang is the language used. ( see Language type for options.)
    * besides primary key id. (database auto-generates that)
    * @returns the added production if it was successful.
    */
   async createProduction(
     production: CreateProductionDto,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<ProductionDto> {
     if (!production.titel) {
       throw new BadRequestException("Missing required fields");
     }
 
     const query = `
-    INSERT INTO productions (
-        titel,
-        ondertitel,
-        description1,
-        description2,
-        planning_id
-    )
-    VALUES ($1,$2,$3,$4,$5)
-    RETURNING
-        id,
-        titel,
-        ondertitel,
-        description1,
-        description2,
-        planning_id
-  `;
+      INSERT INTO productions (
+          titel,
+          description1,
+          description2,
+          artist,
+          tagline,
+          credits,
+          legacy_id,
+          performer_type,
+          attendance_mode
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      RETURNING
+          id,
+          titel->>'${lang}' AS titel,
+          description1->>'${lang}' AS desc1,
+          description2->>'${lang}' AS desc2,
+          artist->>'${lang}' AS artist,
+          tagline->>'${lang}' AS tagline,
+          credits->>'${lang}' AS credits,
+          created_at,
+          updated_at,
+          legacy_id,
+          performer_type,
+          attendance_mode;
+      `;
 
     const values = [
-      production.titel,
-      production.ondertitel ?? null,
-      production.description1 ?? null,
-      production.description2 ?? null,
-      production.planning_id ?? null,
+      production.titel ? { [lang]: production.titel } : null,
+      production.description1 ? { [lang]: production.description1 } : null,
+      production.description2 ? { [lang]: production.description2 } : null,
+      production.artist ? { [lang]: production.artist } : null,
+      production.tagline ? { [lang]: production.tagline } : null,
+      production.credits ? { [lang]: production.credits } : null,
+      production.legacy_id,
+      production.performer_type,
+      production.attendance_mode,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -276,42 +343,62 @@ export class ProductionDatabaseService {
    * UNSAFE version of createProduction. Will override if a Production
    * already exists with the same ID.
    * @param production The production object that we want to insert.
+   * @param lang is the language used in the production.
    * @returns That same production object but returned from the Database.
    */
-  async upsertProduction(production: ProductionDto): Promise<ProductionDto> {
+  async upsertProduction(
+    production: ProductionDto,
+    lang: Language = DEFAULT_LANGUAGE,
+  ): Promise<ProductionDto> {
     const query = `
       INSERT INTO productions (
-        id,
         titel,
-        ondertitel,
         description1,
         description2,
-        planning_id
+        artist,
+        tagline,
+        credits,
+        legacy_id,
+        performer_type,
+        attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       ON CONFLICT (id)
       DO UPDATE SET
         titel = EXCLUDED.titel,
-        ondertitel = EXCLUDED.ondertitel,
         description1 = EXCLUDED.description1,
         description2 = EXCLUDED.description2,
-        planning_id = EXCLUDED.planning_id
-      RETURNING
-        id,
-        titel,
-        ondertitel,
-        description1,
-        description2,
-        planning_id
-    `;
+        artist = EXCLUDED.artist,
+        tagline = EXCLUDED.tagline,
+        credits = EXCLUDED.credits,
+        legacy_id = EXCLUDED.legacy_id,
+        performer_type = EXCLUDED.performer_type,
+        attendance_mode = EXCLUDED.attendance_mode
+        RETURNING
+          id,
+          titel->>'${lang}' AS titel,
+          description1->>'${lang}' AS desc1,
+          description2->>'${lang}' AS desc2,
+          artist->>'${lang}' AS artist,
+          tagline->>'${lang}' AS tagline,
+          credits->>'${lang}' AS credits,
+          created_at,
+          updated_at,
+          legacy_id,
+          performer_type,
+          attendance_mode
+      `;
 
     const values = [
-      production.id,
-      production.titel,
-      production.ondertitel ?? null,
-      production.description1 ?? null,
-      production.description2 ?? null,
-      production.planning_id ?? null,
+      production.titel ? { [lang]: production.titel } : null,
+      production.description1 ? { [lang]: production.description1 } : null,
+      production.description2 ? { [lang]: production.description2 } : null,
+      production.artist ? { [lang]: production.artist } : null,
+      production.tagline ? { [lang]: production.tagline } : null,
+      production.credits ? { [lang]: production.credits } : null,
+      production.legacy_id ?? null,
+      production.performer_type ?? null,
+      production.attendance_mode ?? null,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -325,12 +412,15 @@ export class ProductionDatabaseService {
 
   /**
    * Update function for productions. Updates the production in the database.
+   * note: this function can be used to update/add all of a certain language to a prod.
    * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
+   * @param lang is the language used.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
   async updateProduction(
     production: UpdateProductionDto,
+    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<ProductionDto> {
     if (!production.id) {
       throw new Error("Production id is required for update");
@@ -341,43 +431,84 @@ export class ProductionDatabaseService {
     let index = 1;
 
     if (production.titel !== undefined) {
-      fields.push(`titel = $${index++}`);
-      values.push(production.titel);
-    }
-
-    if (production.ondertitel !== undefined) {
-      fields.push(`ondertitel = $${index++}`);
-      values.push(production.ondertitel);
+      fields.push(
+        `titel = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: production.titel }));
     }
 
     if (production.description1 !== undefined) {
-      fields.push(`description1 = $${index++}`);
-      values.push(production.description1);
+      fields.push(
+        `description1 = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: production.description1 }));
     }
 
     if (production.description2 !== undefined) {
-      fields.push(`description2 = $${index++}`);
-      values.push(production.description2);
+      fields.push(
+        `description2 = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: production.description2 }));
     }
 
-    if (production.planning_id !== undefined) {
-      fields.push(`planning_id = $${index++}`);
-      values.push(production.planning_id);
+    if (production.artist !== undefined) {
+      fields.push(
+        `artist = COALESCE(artist, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: production.artist }));
+    }
+
+    if (production.tagline !== undefined) {
+      fields.push(
+        `tagline = COALESCE(tagline, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: production.tagline }));
+    }
+
+    if (production.credits !== undefined) {
+      fields.push(
+        `credits = COALESCE(credits, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify({ [lang]: production.credits }));
+    }
+
+    if (production.legacy_id !== undefined) {
+      fields.push(`legacy_id = $${index++}`);
+      values.push(production.legacy_id);
+    }
+
+    if (production.performer_type !== undefined) {
+      fields.push(`performer_type = $${index++}`);
+      values.push(production.performer_type);
+    }
+
+    if (production.attendance_mode !== undefined) {
+      fields.push(`attendance_mode = $${index++}`);
+      values.push(production.attendance_mode);
     }
 
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
 
-    // Add id as the last parameter
     values.push(production.id);
-
-    // ignore error on "RETURNING", query is correct.
     const query = `
-    UPDATE productions
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING *;
+      UPDATE productions
+      SET ${fields.join(", ")}
+      WHERE id = $${index}
+      RETURNING
+        id,
+        titel->>'${lang}' AS titel,
+        description1->>'${lang}' AS desc1,
+        description2->>'${lang}' AS desc2,
+        artist->>'${lang}' AS artist,
+        tagline->>'${lang}' AS tagline,
+        credits->>'${lang}' AS credits,
+        created_at,
+        updated_at,
+        legacy_id,
+        performer_type,
+        attendance_mode;
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -400,24 +531,6 @@ export class ProductionDatabaseService {
     const query = `DELETE FROM productions WHERE id = $1 RETURNING *`;
 
     await this.db.query<ProductionDto>(query, [id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given production_id
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING production_blogs
-      WHERE blogs.id = production_blogs.blog_id
-        AND production_blogs.production_id = $1
-    `;
-
-    await this.db.query(query, [production_id]);
   }
 
   /**
