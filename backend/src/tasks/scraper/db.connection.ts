@@ -1,6 +1,12 @@
 import { Pool, QueryResultRow } from "pg";
-import { vnvEvent, vnvGenre, vnvProduction } from "./vnv.parser";
-import { Production, Tag } from "@repo/common";
+import {
+  vnvEvent,
+  vnvGenre,
+  vnvLocation,
+  vnvPrice,
+  vnvProduction,
+} from "./vnv.parser";
+import { Production, Tag, Event, Price } from "@repo/common";
 
 export class DbConnection {
   private pool: Pool;
@@ -86,8 +92,8 @@ export class DbConnection {
           artist = $4,
           tagline = $5,
           credits = $6,
-          performer_mode = $7,
-          attendance_type = $8
+          performer_type = $7,
+          attendance_mode = $8
         WHERE legacy_id = $9
         RETURNING *;
       `;
@@ -111,8 +117,8 @@ export class DbConnection {
         tagline,
         credits,
         legacy_id,
-        performer_mode,
-        attendance_type
+        performer_type,
+        attendance_mode
       )
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *;
@@ -210,7 +216,15 @@ export class DbConnection {
   ): Promise<boolean> {
     for (const vnvEvent of events) {
       const event: Event = await this.insertEvent(vnvEvent, productionId);
-      console.log(event);
+      const locationId: number = await this.insertLocation(vnvEvent.location);
+      const linkedLoc: boolean = await this.linkLocation(event.id, locationId);
+      if (!linkedLoc) console.log("Location was already linked.");
+
+      for (const vnvPrice of vnvEvent.prices) {
+        const priceId: number = await this.insertPrice(vnvPrice);
+        const linkedPrice: boolean = await this.linkPrice(event.id, priceId);
+        if (!linkedPrice) console.log("Price was already linked.");
+      }
     }
     return true;
   }
@@ -237,7 +251,7 @@ export class DbConnection {
           doors_at = $3,
           intermission_at = $4,
           production_id = $5
-        WHERE legacy_id = $2
+        WHERE legacy_id = $6
         RETURNING *;
       `;
       values = [
@@ -274,5 +288,114 @@ export class DbConnection {
 
     console.log(`Inserted Event with legacy_id: ${event.legacy_id}`);
     return output[0];
+  }
+
+  private async insertLocation(location: vnvLocation): Promise<number> {
+    const result: Location[] = await this.query<Location>(
+      `
+        SELECT * from locations WHERE legacy_id = $1
+      `,
+      [location.legacy_id],
+    );
+
+    let query: string;
+    let values;
+    if (result.length > 0) {
+      query = `
+        UPDATE locations
+        SET 
+          location = $1
+        WHERE legacy_id = $2
+        RETURNING *;
+      `;
+      values = [location.name, location.legacy_id];
+    } else {
+      query = `INSERT INTO locations (
+        location,
+        legacy_id
+      )
+      VALUES ($1,$2)
+      RETURNING *;
+      `;
+      values = [location.name, location.legacy_id];
+    }
+
+    const output: Tag[] = await this.query<Tag>(query, values);
+
+    console.log(`Inserted Location with legacy_id: ${location.legacy_id}`);
+    return output[0].id;
+  }
+
+  private async linkLocation(
+    eventId: number,
+    locationId: number,
+  ): Promise<boolean> {
+    console.log(
+      `Linking Location with ID=${locationId} to Event with ID=${eventId}.`,
+    );
+
+    const query = `
+      INSERT INTO event_locations (event_id, location_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      RETURNING *;
+    `;
+
+    const output = await this.query(query, [eventId, locationId]);
+    return output.length >= 1;
+  }
+
+  private async insertPrice(price: vnvPrice): Promise<number> {
+    const result: Price[] = await this.query<Price>(
+      `
+        SELECT * from prices WHERE legacy_id = $1
+      `,
+      [price.legacy_id],
+    );
+
+    let query: string;
+    let values;
+    if (result.length > 0) {
+      query = `
+        UPDATE prices
+        SET 
+          name = $1,
+          price = $2
+        WHERE legacy_id = $3
+        RETURNING *;
+      `;
+      values = [price.name, price.amount, price.legacy_id];
+    } else {
+      query = `INSERT INTO prices (
+        name,
+        price,
+        legacy_id
+      )
+      VALUES ($1,$2,$3)
+      RETURNING *;
+      `;
+      values = [price.name, price.amount, price.legacy_id];
+    }
+
+    const output: Price[] = await this.query<Price>(query, values);
+
+    console.log(`Inserted Price with legacy_id: ${price.legacy_id}`);
+    return output[0].id;
+  }
+
+  private async linkPrice(eventId: number, priceId: number): Promise<boolean> {
+    console.log(
+      `Linking Price with ID=${priceId} to Event with ID=${eventId}.`,
+    );
+
+    const query = `
+      INSERT INTO event_prices (event_id, price_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      RETURNING *;
+    `;
+
+    const output = await this.query(query, [eventId, priceId]);
+    return output.length >= 1;
   }
 }
