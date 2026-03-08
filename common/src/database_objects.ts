@@ -14,8 +14,8 @@ export const ProductionSchema = z.object({
   credits: z.string().nullable(),
   performer_type: z.string().nullable(),
   attendance_mode: z.string().nullable(),
-  created_at: z.iso.date().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
-  updated_at: z.iso.date().nullable(), // TODO here too.
+  created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
+  updated_at: z.iso.datetime().nullable(), // TODO here too.
   legacy_id: z.string().nullable(),
 });
 
@@ -78,8 +78,8 @@ export const UpdateEventSchema = EventSchema.partial();
 export const LocationSchema = z.object({
   id: z.number(),
   location: z.string(),
-  created_at: z.iso.date(),
-  updated_at: z.iso.date(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
   legacy_id: z.string().nullable(),
 });
 
@@ -108,8 +108,8 @@ export const PriceSchema = z.object({
   id: z.number(),
   price: z.float32(),
   name: z.string(),
-  created_at: z.iso.date(),
-  updated_at: z.iso.date(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
   legacy_id: z.string().nullable(),
 });
 export const CreatePriceSchema = PriceSchema.omit({
@@ -127,8 +127,8 @@ export const BlogSchema = z.object({
   id: z.number(),
   titel: z.string(),
   description: z.string(),
-  created_at: z.iso.date(),
-  updated_at: z.iso.date(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
 });
 
 export const CreateBlogSchema = BlogSchema.omit({
@@ -144,8 +144,8 @@ export const UpdateBlogSchema = BlogSchema.partial();
 export const TagSchema = z.object({
   id: z.number(),
   tag: z.string(),
-  created_at: z.iso.date(),
-  updated_at: z.iso.date(),
+  created_at: z.iso.datetime(),
+  updated_at: z.iso.datetime(),
   legacy_id: z.string().nullable(),
 });
 
