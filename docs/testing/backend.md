@@ -2,7 +2,7 @@
 
 This section covers how to run and interpret tests for the backend (NestJS) project.
 
-## Running unit tests
+## Running tests
 
 From the repository root:
 
