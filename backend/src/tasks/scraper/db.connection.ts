@@ -1,5 +1,5 @@
 import { Pool, QueryResultRow } from "pg";
-import { vnvGenre, vnvProduction } from "./vnv.parser";
+import { vnvEvent, vnvGenre, vnvProduction } from "./vnv.parser";
 import { Production, Tag } from "@repo/common";
 
 export class DbConnection {
@@ -42,12 +42,16 @@ export class DbConnection {
 
     for (const vnvGenre of production.genres) {
       const tagId: number = await this.insertTag(vnvGenre);
-      const valid: boolean = await this.linkTag(dbProd.id, tagId);
-      if (!valid)
-        console.log("Could not link Tag because it was already linked.");
+      const newLink: boolean = await this.linkTag(dbProd.id, tagId);
+      if (!newLink) console.log("Tag was already linked.");
     }
 
-    return true;
+    const valid: boolean = await this.insertEvents(
+      production.events,
+      dbProd.id,
+    );
+
+    return valid;
   }
 
   /**
@@ -132,6 +136,12 @@ export class DbConnection {
     return output[0];
   }
 
+  /**
+   * Inserts/Updates a single tag into the database based
+   * on it's legacy_id.
+   * @param genre The vnvGenre that is to be turned into a Tag.
+   * @returns The ID of the Tag.
+   */
   private async insertTag(genre: vnvGenre): Promise<number> {
     const result: Tag[] = await this.query<Tag>(
       `
@@ -168,6 +178,12 @@ export class DbConnection {
     return output[0].id;
   }
 
+  /**
+   * Link a Tag to a Production in the database.
+   * @param productionId The ID of the Production.
+   * @param tagId The ID of the Tag.
+   * @returns T/F Whether the link was created.
+   */
   private async linkTag(productionId: number, tagId: number): Promise<boolean> {
     console.log(
       `Linking Tag with ID=${tagId} to production with ID=${productionId}.`,
@@ -182,5 +198,81 @@ export class DbConnection {
 
     const output = await this.query(query, [productionId, tagId]);
     return output.length >= 1;
+  }
+
+  /**
+   * Events
+   */
+
+  private async insertEvents(
+    events: vnvEvent[],
+    productionId: number,
+  ): Promise<boolean> {
+    for (const vnvEvent of events) {
+      const event: Event = await this.insertEvent(vnvEvent, productionId);
+      console.log(event);
+    }
+    return true;
+  }
+
+  private async insertEvent(
+    event: vnvEvent,
+    productionId: number,
+  ): Promise<Event> {
+    const result: Event[] = await this.query<Event>(
+      `
+        SELECT * from events WHERE legacy_id = $1
+      `,
+      [event.legacy_id],
+    );
+
+    let query: string;
+    let values;
+    if (result.length > 0) {
+      query = `
+        UPDATE events
+        SET 
+          starttime = $1,
+          endtime = $2,
+          doors_at = $3,
+          intermission_at = $4,
+          production_id = $5
+        WHERE legacy_id = $2
+        RETURNING *;
+      `;
+      values = [
+        event.starts_at,
+        event.ends_at,
+        event.doors_at,
+        event.intermission_at,
+        productionId,
+        event.legacy_id,
+      ];
+    } else {
+      query = `INSERT INTO events (
+        starttime,
+        endtime,
+        doors_at,
+        intermission_at,
+        production_id,
+        legacy_id
+      )
+      VALUES ($1,$2,$3,$4,$5,$6)
+      RETURNING *;
+      `;
+      values = [
+        event.starts_at,
+        event.ends_at,
+        event.doors_at,
+        event.intermission_at,
+        productionId,
+        event.legacy_id,
+      ];
+    }
+
+    const output: Event[] = await this.query<Event>(query, values);
+
+    console.log(`Inserted Event with legacy_id: ${event.legacy_id}`);
+    return output[0];
   }
 }
