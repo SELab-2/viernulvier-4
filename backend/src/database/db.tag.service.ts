@@ -1,11 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateTagDto, ProductionDto, TagDto, UpdateTagDto } from "../dto/dto";
-<<<<<<< HEAD
 import { ResourceGoneException } from "../common/exceptions";
-=======
 import { DEFAULT_LANGUAGE, Language } from "@repo/common";
->>>>>>> develop
 
 @Injectable()
 export class TagDatabaseService {
