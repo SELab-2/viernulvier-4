@@ -17,8 +17,8 @@ Table productions {
 
 Table events {
   id int [pk, increment]
-  starttime date [not null]
-  endtime date [not null]
+  starttime timestamp [not null]
+  endtime timestamp [not null]
   doors_at timestamp
   intermission_at timestamp
   created_at timestamp
