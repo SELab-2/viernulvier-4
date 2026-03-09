@@ -4,3 +4,10 @@ extra:
   version:
     provider: mike
 theme: readthedocs
+
+nav:
+  - Home: index.md
+  - Testing:
+      - Overview: testing/index.md
+      - Backend: testing/backend.md
+      - Frontend: testing/frontend.md
