@@ -10,3 +10,7 @@ nav:
       - Overview: build-run/index.md
       - Backend: build-run/backend.md
       - Frontend: build-run/frontend.md
+  - Testing:
+      - Overview: testing/index.md
+      - Backend: testing/backend.md
+      - Frontend: testing/frontend.md
