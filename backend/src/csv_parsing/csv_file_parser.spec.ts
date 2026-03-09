@@ -1,5 +1,8 @@
 import fs from "fs";
 import { Readable } from "stream";
+import { z } from "zod";
+import { CSVFileParser } from "./csv_file_parser";
+import { create } from "domain";
 
 jest.mock("fs");
 
@@ -26,16 +29,6 @@ function createMockStream(rows: any[], error?: Error) {
   };
 }
 
-// TODO remove this when fixing parser.
-describe("csv file parser", () => {
-  it("test just so I can turn off the others without test suite complaining", async () => {
-    expect(true);
-  });
-});
-
-// TODO turn these tests back on when csv parser is fixed
-// sorry had to turn these off as I cannot fix them as would need to fix the parser therefore and I cannot and don't want to do that -Seb
-/**
 describe("CSVFileParser.parseCSVWithSchema", () => {
   beforeEach(() => {
     // silence warnings emitted during parsing; tests will assert on them if needed
@@ -103,6 +96,9 @@ describe("CSVFileParser.transformEventRow", () => {
       endtime: new Date("2024-01-01 12:00:00").toISOString(),
       production_id: 5,
       location: "Main Hall",
+      doors_at: null,
+      intermission_at: null,
+      legacy_id: null
     });
   });
 
@@ -154,19 +150,21 @@ describe("CSVFileParser.transformProductionRow", () => {
       Description1: "Main description",
       Description2: "",
       Genre: "drama",
-      "Planning ID": "42",
     };
 
     const result = CSVFileParser.transformProductionRow(row);
 
     expect(result).toEqual({
-      id: 1,
       titel: "Hamlet",
-      ondertitel: "A tragedy",
       description1: "Main description",
       description2: null,
-      planning_id: "42",
       tags: ["drama"],
+      artist: null,
+      tagline: "A tragedy",
+      credits: null,
+      performer_type: null,
+      attendance_mode: null,
+      legacy_id: "csv-1",
     });
   });
 
@@ -177,7 +175,6 @@ describe("CSVFileParser.transformProductionRow", () => {
       Ondertitel: "Sub",
       Description1: "desc",
       Description2: "",
-      "Planning ID": "123",
     };
     expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
       /Invalid production id/,
@@ -221,6 +218,9 @@ describe("CSVFileParser.parseEventsCSV", () => {
         starttime: new Date("2025-05-01 14:00:00").toISOString(),
         endtime: new Date("2025-05-01 15:00:00").toISOString(),
         production_id: 10,
+        doors_at: null,
+        intermission_at: null,
+        legacy_id: null,
       },
       location: "Front Stage",
     });
@@ -244,7 +244,6 @@ describe("CSVFileParser.parseProductionsCSV", () => {
           Description1: "desc",
           Description2: "more",
           Genre: "tragedy",
-          "Planning ID": "5",
         },
       ]) as any,
     );
@@ -254,16 +253,19 @@ describe("CSVFileParser.parseProductionsCSV", () => {
     expect(result).toEqual({
       productions: [
         {
-          id: 2,
           titel: "Macbeth",
-          ondertitel: "",
+          tagline: null,
           description1: "desc",
           description2: "more",
-          planning_id: "5",
+          artist: null,
+          credits: null,
+          performer_type: null,
+          attendance_mode: null,
+          legacy_id: "csv-2",
         },
       ],
       tags: ["tragedy"],
-      productionTagLinks: [{ productionId: 2, tagName: "tragedy" }],
+      productionTagLinks: [{ legacyId: "csv-2", tagName: "tragedy" }],
     });
   });
 });
@@ -352,6 +354,7 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
 
     expect(fakeLocationService.createLocation).toHaveBeenCalledWith({
       location: "Large Room",
+      legacy_id: null
     });
     expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(321, 77);
     expect(created).toEqual([{ id: 321 }]);
@@ -401,6 +404,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
   const fakeProdService: any = {
     replaceProduction: jest.fn(),
     addTagToProduction: jest.fn(),
+    createProduction: jest.fn(),
   };
   const fakeTagService: any = {
     createTag: jest.fn(),
@@ -423,7 +427,6 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
           Description1: "d1",
           Description2: "",
           Genre: "drama, comedy",
-          "Planning ID": "100",
         },
         {
           ID: "2",
@@ -432,19 +435,15 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
           Description1: "d2",
           Description2: "",
           Genre: "drama",
-          "Planning ID": "101",
         },
       ]) as any,
     );
 
     // simulate insertion returning the same object plus an auto-generated id property
-    fakeProdService.replaceProduction.mockImplementation(
-      async (id: number, prod: any) => ({
-        ...prod,
-        id,
-        replaced: true,
-      }),
-    );
+    fakeProdService.createProduction.mockImplementation(async (prod: any) => ({
+      ...prod,
+      id: Number(prod.legacy_id?.replace("csv-", "")),
+    }));
 
     fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
       id: `${tag}-id`,
@@ -457,7 +456,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       fakeTagService,
     );
 
-    expect(fakeProdService.replaceProduction).toHaveBeenCalledTimes(2);
+    expect(fakeProdService.createProduction).toHaveBeenCalledTimes(2);
     expect(fakeTagService.createTag).toHaveBeenCalledTimes(2); // drama + comedy
 
     // ensure tags linked the right number of times
@@ -479,20 +478,26 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       {
         id: 1,
         titel: "First",
-        ondertitel: "",
+        tagline: null,
         description1: "d1",
         description2: null,
-        planning_id: "100",
-        replaced: true,
+        artist: null,
+        credits: null,
+        performer_type: null,
+        attendance_mode: null,
+        legacy_id: "csv-1",
       },
       {
         id: 2,
         titel: "Second",
-        ondertitel: "",
+        tagline: null,
         description1: "d2",
         description2: null,
-        planning_id: "101",
-        replaced: true,
+        artist: null,
+        credits: null,
+        performer_type: null,
+        attendance_mode: null,
+        legacy_id: "csv-2",
       },
     ]);
   });
@@ -507,13 +512,12 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
           Description1: "x",
           Description2: "",
           Genre: "history",
-          "Planning ID": "102",
         },
       ]) as any,
     );
 
-    fakeProdService.replaceProduction.mockRejectedValue(
-      new Error("insert failed"),
+    fakeProdService.createProduction.mockRejectedValue(
+      new Error("creation failed"),
     );
 
     await expect(
@@ -522,7 +526,6 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
         fakeProdService,
         fakeTagService,
       ),
-    ).rejects.toThrow(/insert failed/);
+    ).rejects.toThrow(/creation failed/);
   });
 });
-*/
