@@ -1,3 +1,9 @@
+/**
+ * All backend API endpoint paths.
+ * Used by the specific composables (e.g. useProductionApi) — never reference these directly in pages or components.
+ *
+ * Base URL is not included here — it's read from runtimeConfig in useApi.
+ */
 export const API_ROUTES = {
   auth: {
     login: "/auth/login",

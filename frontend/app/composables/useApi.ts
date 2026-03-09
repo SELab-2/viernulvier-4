@@ -1,3 +1,11 @@
+/**
+ * Base composable for all HTTP communication with the backend.
+ * Not used directly in pages or components — use the specific composables instead (e.g. useProductionApi).
+ *
+ * Automatically attaches the x-api-key header when the user is logged in.
+ * Reads the base URL from runtimeConfig (NUXT_API_BASE in .env).
+ */
+
 export interface ApiOptions<TBody = unknown> {
   body?: TBody;
   headers?: Record<string, string>;
@@ -16,11 +24,6 @@ export function useApi() {
   const baseUrl = config.public.apiBase as string;
   const { apiKey } = useAuth();
 
-  /**
-   * Base fetch wrapper used by all method helpers.
-   * Attaches the x-api-key header when the user is logged in.
-   * On non-ok responses, calls onError if provided, otherwise falls back to handleDefaultError.
-   */
   async function request<TData, TBody = unknown>(
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     endpoint: string,
@@ -67,6 +70,8 @@ export function useApi() {
 
   /**
    * Fallback error handler used when no onError is passed to a request.
+   * 401/403 are logged as auth errors — redirect to login should be handled
+   * by the caller via onError if needed.
    */
   function handleDefaultError(status: number, message: string): void {
     if (status === 401 || status === 403) {
@@ -80,6 +85,7 @@ export function useApi() {
     }
   }
 
+  /** request — asks for object. */
   function get<TData>(
     endpoint: string,
     options?: Omit<ApiOptions<never>, "body">
@@ -87,6 +93,7 @@ export function useApi() {
     return request<TData>("GET", endpoint, options);
   }
 
+  /** creation — creates an object. */
   function post<TData, TBody = unknown>(
     endpoint: string,
     body: TBody,
@@ -95,6 +102,7 @@ export function useApi() {
     return request<TData, TBody>("POST", endpoint, { ...options, body });
   }
 
+  /** Full replace — sends the entire object. */
   function put<TData, TBody = unknown>(
     endpoint: string,
     body: TBody,
@@ -103,6 +111,7 @@ export function useApi() {
     return request<TData, TBody>("PUT", endpoint, { ...options, body });
   }
 
+  /** Partial update — only sends the fields that need to change. */
   function patch<TData, TBody = unknown>(
     endpoint: string,
     body: TBody,
@@ -111,6 +120,7 @@ export function useApi() {
     return request<TData, TBody>("PATCH", endpoint, { ...options, body });
   }
 
+  /** deletion — removes the object. */
   function del<TData>(
     endpoint: string,
     options?: Omit<ApiOptions<never>, "body">

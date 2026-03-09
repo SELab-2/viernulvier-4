@@ -6,6 +6,13 @@ export interface LoginResponse {
   apiKey: ApiKey | null;
 }
 
+/**
+ * Handles authentication for the admin subdomain.
+ * After login, the account and API key are stored in global Nuxt state
+ * and persisted in sessionStorage (cleared when the tab is closed).
+ *
+ * The API key is consumed by useApi to authenticate requests.
+ */
 export function useAuth() {
   const config = useRuntimeConfig();
   const baseUrl = config.public.apiBase as string;
@@ -27,7 +34,7 @@ export function useAuth() {
   }
 
   /**
-   * Logs in with username and password.
+   * Logs in with username and password via POST /auth/login.
    * On success, stores the account and API key in global state and sessionStorage.
    */
   async function login(
@@ -67,9 +74,7 @@ export function useAuth() {
     }
   }
 
-  /**
-   * Clears auth state and redirects to /login.
-   */
+  /** Clears auth state and redirects to the login page. */
   function logout(): void {
     account.value = null;
     apiKey.value = null;

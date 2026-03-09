@@ -1,18 +1,26 @@
 import type { PublicAccount, CreateAccount, UpdateAccount } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
+/**
+ * Composable for account management endpoints.
+ * All endpoints require a super admin API key.
+ */
 export function useAccountApi() {
   const { get, post, patch, del } = useApi();
 
+  /** GET /auth — returns all accounts. */
   const getAll = () =>
     get<PublicAccount[]>(API_ROUTES.auth.base);
 
+  /** POST /auth — creates a new account. */
   const create = (body: CreateAccount) =>
     post<PublicAccount, CreateAccount>(API_ROUTES.auth.base, body);
 
+  /** PATCH /auth — updates an existing account. The ID must be included in the body. */
   const modify = (body: UpdateAccount) =>
     patch<PublicAccount, UpdateAccount>(API_ROUTES.auth.base, body);
 
+  /** DELETE /auth/:accountId — deletes an account. */
   const remove = (accountId: number) =>
     del(API_ROUTES.auth.byId(accountId));
 
