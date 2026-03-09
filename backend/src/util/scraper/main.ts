@@ -8,10 +8,16 @@ import logger from "../logger/logger";
 async function main() {
   const dbConnection: DbConnection = new DbConnection();
 
-  // TODO: Get the last_scrape_date from the DB.
+  // Fetch the last scraped date.
+  const dates = await dbConnection.query(
+    `
+      SELECT date FROM scraper_dates ORDER BY date DESC LIMIT 1;
+    `,
+  );
+  const date: string = (dates[0] as Record<string, string>).date;
 
   // Scrape all the data we need.
-  const scrapeResults: ScrapeResult = await scrape("2026-03-04T09:36:21+00:00");
+  const scrapeResults: ScrapeResult = await scrape(date);
 
   logger.info("Inserting Scraped Data...");
 
@@ -25,6 +31,13 @@ async function main() {
   // First Productions since we need those ids for Events.
   await dbConnection.insertProductions(scrapeResults.productions);
   await dbConnection.insertEvents(scrapeResults.events);
+
+  // After scraping all data we can update the date in the DB.
+  await dbConnection.query(
+    `
+      INSERT INTO scraper_dates (date) VALUES (NOW());
+    `,
+  );
 
   logger.info("Insertion Finished!");
 }
