@@ -25,6 +25,8 @@ npm run test:coverage
 
 and view the HTML report under `frontend/coverage`.
 
+To exclude a file or directory from the coverage, add it to the `coverage.exclude` list in `frontend/vitest.config.ts`
+
 ## General notes
 
 * The `frontend/package.json` defines several helpful scripts (`dev`, `build`, `preview`, etc.).

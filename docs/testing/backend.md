@@ -32,6 +32,8 @@ cd backend
 npm run test:coverage
 ```
 
+To exclude a file or directory from the coverage, add it to the `coveragePathIgnorePatterns` list in `backend/jest.config.ts`
+
 ## Tips
 
 - Use `npm run test:watch` during development for auto-rerun on file changes.

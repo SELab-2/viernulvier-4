@@ -43,3 +43,10 @@ After running tests with coverage, HTML reports are generated:
 - **Frontend**: `frontend/coverage/lcov-report/index.html`
 
 Open these in a browser to view detailed coverage metrics.
+
+Some code is exlcuded from the coverage due to some files not needing tests (database queries, modules, main, etc.)
+
+To remove a file from coverage, put them in the corresponding files:
+
+- **Backend**: `backend/jest.config.ts`, add path to list `coveragePathIgnorePatterns`
+- **Frontend**: `frontend/vitest.config.ts`, add path to list `coverage.exclude`
