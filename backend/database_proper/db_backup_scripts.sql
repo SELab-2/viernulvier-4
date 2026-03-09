@@ -1,33 +1,73 @@
 CREATE TABLE productions
 (
-    titel        TEXT,
-    ondertitel   TEXT,
-    description1 TEXT,
-    description2 TEXT,
-    id           SERIAL PRIMARY KEY,
-    planning_id  TEXT
+    id              SERIAL PRIMARY KEY,
+    titel           JSONB,
+    ondertitel      JSONB,
+    description1    JSONB,
+    description2    JSONB,
+    planning_id     TEXT,
+    artist          JSONB,
+    tagline         JSONB,
+    credits         JSONB,
+    created_at      TIMESTAMP DEFAULT now(),
+    updated_at      TIMESTAMP DEFAULT now(),
+    legacy_id       TEXT UNIQUE,
+    attendance_mode TEXT,
+    performer_type  TEXT
 );
+
+CREATE OR REPLACE FUNCTION update_updated_at()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+    BEFORE UPDATE
+    ON productions
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE events
 (
-    id            SERIAL PRIMARY KEY,
-    starttime     DATE NOT NULL,
-    endtime       DATE NOT NULL,
-    price         NUMERIC(5, 2),
-    hall          TEXT,
-    production_id INT  NOT NULL,
+    id              SERIAL PRIMARY KEY,
+    starttime       TIMESTAMP NOT NULL,
+    endtime         TIMESTAMP NOT NULL,
+    doors_at        TIMESTAMP,
+    intermission_at TIMESTAMP,
+    created_at      TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMP NOT NULL DEFAULT now(),
+    production_id   INT       NOT NULL,
+    legacy_id       TEXT UNIQUE,
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
             ON DELETE CASCADE
 );
 
+CREATE TRIGGER set_updated_at_events
+    BEFORE UPDATE
+    ON events
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
 CREATE TABLE blogs
 (
     id          INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    titel       TEXT NOT NULL,
-    description TEXT NOT NULL
+    titel       JSONB     NOT NULL,
+    description JSONB     NOT NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TRIGGER set_updated_at_blogs
+    BEFORE UPDATE
+    ON blogs
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE production_blogs
 (
@@ -49,9 +89,18 @@ CREATE TABLE production_blogs
 
 CREATE TABLE tags
 (
-    id  INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tag TEXT NOT NULL UNIQUE
+    id         INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    tag        JSONB     NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
+    legacy_id  TEXT UNIQUE
 );
+
+CREATE TRIGGER set_updated_at_tags
+    BEFORE UPDATE
+    ON tags
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 CREATE TABLE production_tag
 (
@@ -70,10 +119,20 @@ CREATE TABLE production_tag
 
 CREATE TABLE locations
 (
-    id       INT         NOT NULL,
-    location TEXT UNIQUE NOT NULL,
+    id         INT          NOT NULL,
+    location   JSONB UNIQUE NOT NULL,
+    created_at TIMESTAMP    NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP    NOT NULL DEFAULT now(),
+    legacy_id  TEXT UNIQUE,
     PRIMARY KEY (id)
 );
+
+CREATE TRIGGER set_updated_at_locations
+    BEFORE UPDATE
+    ON locations
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
 
 CREATE TABLE event_locations
 (
@@ -106,4 +165,27 @@ CREATE TABLE account_api_keys
     api_key_id INT     NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
     active     boolean not null default true,
     PRIMARY KEY (account_id, api_key_id)
+);
+
+CREATE TABLE prices
+(
+    id         SERIAL PRIMARY KEY,
+    name       JSONB          NOT NULL,
+    price      NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP      NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP      NOT NULL DEFAULT now(),
+    legacy_id  TEXT UNIQUE
+);
+
+CREATE TABLE event_prices
+(
+    event_id INT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+    price_id INT NOT NULL REFERENCES prices (id) ON DELETE CASCADE,
+    PRIMARY KEY (event_id, price_id)
+);
+
+CREATE TABLE scraper_dates
+(
+    if   SERIAL PRIMARY KEY,
+    date TIMESTAMP
 );
