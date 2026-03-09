@@ -6,7 +6,6 @@
     required?: boolean
     rows?: number
   }
-
   withDefaults(defineProps<Props>(), {
     rows: 5
   })

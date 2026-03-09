@@ -18,6 +18,7 @@
     <label v-if="label" :for="id" class="input-label">
       {{ label }} <span v-if="required" class="required-star">*</span>
     </label>
+
     <input
         :id="id"
         :type="type"
