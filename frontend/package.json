@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@nuxtjs/i18n": "^10.2.3",
+    "@nuxtjs/tailwindcss": "^6.14.0",
     "@repo/common": "*",
     "vue": "^3.5.28",
     "vue-router": "^4.6.4"
