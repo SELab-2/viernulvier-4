@@ -1,4 +1,3 @@
-import { scrapeOne } from "./scraper";
 import sanitizeHtml from "sanitize-html";
 
 // TODO: Do we really want to parse the html they put there? Maybe it's useful.
@@ -17,24 +16,6 @@ export function stripHtml(rawHtml: string | null | undefined): string {
 export interface vnvLocal {
   en?: string;
   nl?: string;
-}
-
-/**
- * EntryPoint for the parser. Will parse the fetched production Objects inside
- * and everything else that is nested in there too.
- * @param productions The list of productions that want to be parsed.
- * @returns The productions parsed to easier vnvProduction objects.
- */
-export async function parseProductions(
-  productions: object[],
-): Promise<vnvProduction[]> {
-  const parsedProductions: vnvProduction[] = [];
-  for (const prodObject of productions) {
-    const production: vnvProduction = await parseVnvProduction(prodObject);
-    parsedProductions.push(production);
-  }
-
-  return parsedProductions;
 }
 
 /**
@@ -66,8 +47,17 @@ export interface vnvProduction {
   description: vnvLocal;
   description_2: vnvLocal;
   info: vnvLocal;
-  events: vnvEvent[];
-  genres: vnvGenre[];
+  events: string[]; // Contains the legacy IDs of the Events.
+  genres: string[]; // Contains the legacy IDs of the Genres.
+}
+
+/**
+ * Will parse a list of raw production objects.
+ * @param productions The list of productions that want to be parsed.
+ * @returns The productions parsed to easier vnvProduction objects.
+ */
+export function parseProductions(productions: object[]): vnvProduction[] {
+  return productions.map(parseVnvProduction);
 }
 
 /**
@@ -75,19 +65,15 @@ export interface vnvProduction {
  * @param object The raw object that is meant to resemble a Production.
  * @returns The parsed vnvProduction.
  */
-async function parseVnvProduction(
-  object: Record<string, any>,
-): Promise<vnvProduction> {
-  const events: vnvEvent[] = [];
+function parseVnvProduction(object: Record<string, any>): vnvProduction {
+  const events: string[] = [];
   for (const eventUrl of object.events) {
-    const eventObject: object = await scrapeOne(eventUrl as string);
-    events.push(parseVnvEvent(eventObject));
+    events.push(extractIdFromUri(eventUrl as string) || "");
   }
 
-  const genres: vnvGenre[] = [];
+  const genres: string[] = [];
   for (const genreUrl of object.genres) {
-    const genreObject: object = await scrapeOne(genreUrl as string);
-    genres.push(parseVnvGenre(genreObject));
+    genres.push(extractIdFromUri(genreUrl as string) || "");
   }
 
   const production: vnvProduction = {
@@ -126,6 +112,10 @@ export interface vnvGenre {
   name: vnvLocal;
 }
 
+export function parseGenres(genres: object[]): vnvGenre[] {
+  return genres.map(parseVnvGenre);
+}
+
 /**
  * Parse a single genre from an object.
  * @param object The raw Genre object.
@@ -155,8 +145,17 @@ export interface vnvEvent {
   ends_at: string;
   intermission_at: string;
   doors_at: string;
-  location: vnvLocation;
-  prices: vnvPrice[];
+  location: string; // The legacy ID to the location.
+  prices: string[]; // Legacy IDs for the prices.
+}
+
+/**
+ * Parse a raw list of events into vnvEvent objects.
+ * @param events The raw events.
+ * @returns The list of vnvEvent objects.
+ */
+export function parseEvents(events: object[]): vnvEvent[] {
+  return events.map(parseVnvEvent);
 }
 
 /**
@@ -165,10 +164,9 @@ export interface vnvEvent {
  * @returns The parsed vnvEvent.
  */
 function parseVnvEvent(object: Record<string, any>): vnvEvent {
-  const prices: vnvPrice[] = [];
-  for (const priceObject of object.prices) {
-    const price: vnvPrice = parseVnvPrice(priceObject as object);
-    prices.push(price);
+  const prices: string[] = [];
+  for (const price of object.prices) {
+    prices.push(extractIdFromUri(price as string) || "N/A");
   }
 
   const event: vnvEvent = {
@@ -180,7 +178,7 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
     intermission_at:
       (object.intermission_at as string) || "1970-01-01T00:00:00+00:00",
     doors_at: (object.doors_at as string) || "1970-01-01T00:00:00+00:00",
-    location: parseVnvLocation(object.hall as object),
+    location: extractIdFromUri(object.hall as string) || "N/A",
     prices: prices,
   };
 
@@ -199,6 +197,10 @@ export interface vnvLocation {
   created_at: string;
   updated_at: string;
   name: vnvLocal;
+}
+
+export function parseLocations(locations: object[]): vnvLocation[] {
+  return locations.map(parseVnvLocation);
 }
 
 /**
@@ -235,6 +237,10 @@ export interface vnvPrice {
   updated_at: string;
   amount: number | null;
   name: vnvLocal;
+}
+
+export function parsePrices(prices: object[]): vnvPrice[] {
+  return prices.map(parseVnvPrice);
 }
 
 /**
