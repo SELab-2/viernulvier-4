@@ -24,12 +24,12 @@ import {
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
-} from "@repo/common";
-import {
   LanguageQuerySchema,
   PaginationFilterSchema,
   ProductionViewSchema,
-} from "@repo/common/src/database_objects";
+  TagViewSchema,
+  BlogViewSchema,
+} from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
 
@@ -48,11 +48,13 @@ export class FilterEventDto extends createZodDto(FilterEventSchema) {}
 
 // Blog Wrappers
 export class BlogDto extends createZodDto(BlogSchema) {}
+export class BlogViewDto extends createZodDto(BlogViewSchema) {}
 export class CreateBlogDto extends createZodDto(CreateBlogSchema) {}
 export class UpdateBlogDto extends createZodDto(UpdateBlogSchema) {}
 
 // Tag Wrappers
 export class TagDto extends createZodDto(TagSchema) {}
+export class TagViewDto extends createZodDto(TagViewSchema) {}
 export class CreateTagDto extends createZodDto(CreateTagSchema) {}
 export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
 

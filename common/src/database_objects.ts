@@ -148,13 +148,17 @@ export const UpdatePriceSchema = PriceSchema.partial();
 /**
  * Schemas for blogs.
  */
-// note: to get the blog from a prod or the other way around, use the api service with the id.
+
 export const BlogSchema = z.object({
   id: z.number(),
-  titel: z.string(),
-  description: z.string(),
+  titel: LocalizedStringSchema,
+  description: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
+});
+export const BlogViewSchema = BlogSchema.extend({
+  titel: z.string(),
+  description: z.string(),
 });
 
 export const CreateBlogSchema = BlogSchema.omit({
@@ -169,10 +173,13 @@ export const UpdateBlogSchema = BlogSchema.partial();
  */
 export const TagSchema = z.object({
   id: z.number(),
-  tag: z.string(),
+  tag: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   legacy_id: z.string().nullable(),
+});
+export const TagViewSchema = TagSchema.extend({
+  tag: z.string(),
 });
 
 export const CreateTagSchema = TagSchema.omit({
@@ -240,10 +247,12 @@ export type CreatePrice = z.infer<typeof CreatePriceSchema>;
 export type UpdatePrice = z.infer<typeof UpdatePriceSchema>;
 
 export type Blog = z.infer<typeof BlogSchema>;
+export type BlogView = z.infer<typeof BlogViewSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;
 export type UpdateBlog = z.infer<typeof UpdateBlogSchema>;
 
 export type Tag = z.infer<typeof TagSchema>;
+export type TagView = z.infer<typeof TagViewSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
 export type UpdateTag = z.infer<typeof UpdateTagSchema>;
 

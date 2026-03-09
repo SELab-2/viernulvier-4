@@ -74,11 +74,10 @@ export class ProductionController {
   async getAllProductions(
     @Query() filters: FilterProductionDto,
   ): Promise<ProductionDto[] | ProductionViewDto[]> {
-    const productions: ProductionDto[] =
-      await this.productionService.getAllProductions(filters);
-    const flattened: ProductionDto[] | ProductionViewDto[] =
-      DbService.flattenTranslation(productions, filters.lang);
-    return flattened;
+    return DbService.flattenTranslation<ProductionDto[] | ProductionViewDto[]>(
+      await this.productionService.getAllProductions(filters),
+      filters.lang,
+    );
   }
 
   /**
