@@ -17,12 +17,14 @@ import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateProductionSchema,
   FilterProductionSchema,
+  LanguageQuerySchema,
   ProductionSchema,
   UpdateProductionSchema,
 } from "@repo/common";
 import {
   CreateProductionDto,
   FilterProductionDto,
+  LanguageQueryDto,
   ProductionDto,
   ProductionViewDto,
   UpdateProductionDto,
@@ -47,7 +49,7 @@ export class ProductionController {
   constructor(private readonly productionService: ProductionService) {}
 
   /**
-   * Responds to GET /productions
+   * Responds to GET /productions.
    * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
@@ -81,17 +83,34 @@ export class ProductionController {
   }
 
   /**
-   * Responds to GET /productions/:productionId
+   * Responds to GET /productions/:productionId.
    * @param productionId ID in the URL of the request.
    * @returns The ProductionDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Production with id in the URL." })
-  @ApiOkResponse({ type: ProductionDto, description: "Production Found." })
+  @ApiExtraModels(ProductionViewDto, ProductionDto)
+  @ApiOkResponse({
+    description: "One Production Returned.",
+    schema: {
+      anyOf: [
+        {
+          $ref: getSchemaPath(ProductionViewDto),
+        },
+        {
+          $ref: getSchemaPath(ProductionDto),
+        },
+      ],
+    },
+  })
   @Get(":productionId")
   async getProductionById(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<ProductionDto> {
-    return await this.productionService.getProductionById(productionId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<ProductionDto[] | ProductionViewDto[]> {
+    return DbService.flattenTranslation<ProductionDto[] | ProductionViewDto[]>(
+      await this.productionService.getProductionById(productionId),
+      lang.lang,
+    );
   }
 
   /**

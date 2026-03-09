@@ -5,17 +5,28 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import {
+  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
   ApiTags,
+  getSchemaPath,
 } from "@nestjs/swagger";
-import { ProductionDto, TagDto } from "../../dto/dto";
+import {
+  LanguageQueryDto,
+  ProductionDto,
+  TagDto,
+  TagViewDto,
+} from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { DbService } from "src/database/db.service";
+import { LanguageQuerySchema } from "@repo/common";
+import { ZodValidationPipe } from "nestjs-zod";
 
 /**
  * Handles the Relationships between Productions and Tags.
@@ -33,12 +44,31 @@ export class ProductionTagController {
   @ApiOperation({
     summary: "Returns the Tags of the Production with id in the URL.",
   })
-  @ApiOkResponse({ type: TagDto, isArray: true, description: "Tags Found." })
+  @ApiExtraModels(TagViewDto, TagDto)
+  @ApiOkResponse({
+    description: "Tags Found.",
+    schema: {
+      anyOf: [
+        {
+          type: "array",
+          items: { $ref: getSchemaPath(TagViewDto) },
+        },
+        {
+          type: "array",
+          items: { $ref: getSchemaPath(TagDto) },
+        },
+      ],
+    },
+  })
   @Get()
   async getTagsOfProductionByID(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<TagDto[]> {
-    return await this.productionService.getTagsById(productionId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<TagDto[] | TagViewDto[]> {
+    return DbService.flattenTranslation<TagDto[] | TagViewDto[]>(
+      await this.productionService.getTagsById(productionId),
+      lang.lang,
+    );
   }
 
   /**

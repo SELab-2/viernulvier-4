@@ -5,17 +5,28 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import {
+  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
   ApiTags,
+  getSchemaPath,
 } from "@nestjs/swagger";
-import { BlogDto, ProductionDto } from "../../dto/dto";
+import {
+  BlogDto,
+  BlogViewDto,
+  LanguageQueryDto,
+  ProductionDto,
+} from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { DbService } from "src/database/db.service";
+import { LanguageQuerySchema } from "@repo/common";
+import { ZodValidationPipe } from "nestjs-zod";
 
 /**
  * Handles the Relationships between Productions and Blogs.
@@ -31,16 +42,31 @@ export class ProductionBlogController {
    * @returns A list of all Blog objects linked to this Production.
    */
   @ApiOperation({ summary: "Get all Blogs linked to a Production." })
+  @ApiExtraModels(BlogViewDto, BlogDto)
   @ApiOkResponse({
-    type: BlogDto,
-    isArray: true,
-    description: "Returned all Linked blogs.",
+    description: "Returned all linked Blogs.",
+    schema: {
+      anyOf: [
+        {
+          type: "array",
+          items: { $ref: getSchemaPath(BlogViewDto) },
+        },
+        {
+          type: "array",
+          items: { $ref: getSchemaPath(BlogDto) },
+        },
+      ],
+    },
   })
   @Get()
   async getProductionBlogs(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<BlogDto[]> {
-    return await this.productionService.getProductionBlogs(productionId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto[] | BlogViewDto[]> {
+    return DbService.flattenTranslation<BlogDto[] | BlogViewDto[]>(
+      await this.productionService.getProductionBlogs(productionId),
+      lang.lang,
+    );
   }
 
   /**

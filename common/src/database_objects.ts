@@ -8,9 +8,7 @@ import { z } from "zod";
 export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
 export const LanguageEnum = z.enum(SUPPORTED_LANGUAGES);
 export const LanguageQuerySchema = z.object({
-  lang: LanguageEnum.default("nl").describe(
-    "The language code for the content.",
-  ),
+  lang: LanguageEnum.optional().describe("The language code for the content."),
 });
 export const DEFAULT_LANGUAGE: Language = "nl";
 
