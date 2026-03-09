@@ -1,5 +1,17 @@
 import "dotenv/config";
 import { URLSearchParams } from "url";
+import {
+  parseEvents,
+  parseGenres,
+  parseLocations,
+  parsePrices,
+  parseProductions,
+  vnvEvent,
+  vnvGenre,
+  vnvLocation,
+  vnvPrice,
+  vnvProduction,
+} from "./vnv.parser";
 
 const apiBase: string = "https://www.viernulvier.gent";
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -15,13 +27,61 @@ interface viewState {
   next: string | null;
 }
 
+export interface ScrapeResult {
+  productions: vnvProduction[];
+  events: vnvEvent[];
+  prices: vnvPrice[];
+  genres: vnvGenre[];
+  locations: vnvLocation[];
+}
+
+/**
+ * Scrapes the existing data we need from the VNV API.
+ * @param after_date The Date&Time we want to be fetching things after.
+ */
+export async function scrape(
+  after_date: string = "1970-01-01T00:00:00+00:00",
+): Promise<ScrapeResult> {
+  console.log("Starting Scraper...");
+
+  const [productions, events, event_prices, prices, genres, halls] =
+    await Promise.all([
+      scrapeMany("/api/v1/productions?page=1", after_date),
+      scrapeMany("/api/v1/events?page=1", after_date),
+      scrapeMany("/api/v1/events/prices?page=1", after_date),
+      scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00+00:00"),
+      scrapeMany("/api/v1/genres?page=1", after_date),
+      scrapeMany("/api/v1/locations?page=1", after_date), // <-- Fixed your copy-paste bug here!
+    ]);
+
+  const priceDictionary = new Map<string, object>();
+  for (const price of prices) {
+    const id = (price as Record<string, any>)["@id"] as string;
+    priceDictionary.set(id, price);
+  }
+  for (const event_price of event_prices) {
+    (event_price as Record<string, any>).price = priceDictionary.get(
+      (event_price as Record<string, any>).price as string,
+    );
+  }
+
+  console.log("Finished Scraper!");
+
+  return {
+    productions: parseProductions(productions),
+    events: parseEvents(events),
+    prices: parsePrices(event_prices),
+    genres: parseGenres(genres),
+    locations: parseLocations(halls),
+  };
+}
+
 /**
  * Helper function that will return an apiResponse object.
  * @param target The full URL to fetch.
  * @returns The apiResponse for that URL.
  */
 async function fetchFromVnv(target: string): Promise<apiResponse> {
-  console.log(`Fetching from ${target}.`);
   const apiKey = process.env.CLIENT_API_KEY;
   if (!apiKey) throw new Error("Forgot to set CLIENT_API_KEY in .env?");
 
@@ -44,14 +104,10 @@ async function fetchFromVnv(target: string): Promise<apiResponse> {
  * @param updatedAfter Optional Date that defines which data we want.
  * @returns A list of all the scraped objects. Generically typed.
  */
-export async function scrapeMany(
+async function scrapeMany(
   url: string,
   updatedAfter: string,
 ): Promise<object[]> {
-  console.log(
-    `Scraping objects from ${url} with last update time after ${updatedAfter}.`,
-  );
-
   const apiKey = process.env.CLIENT_API_KEY;
   if (!apiKey) {
     console.error("Make sure to set CLIENT_API_KEY in .env!");
@@ -81,7 +137,7 @@ export async function scrapeMany(
     }
   }
 
-  console.log(`Scraped ${output.length} objects.`);
+  console.log(`Scraped ${output.length} objects from ${url}.`);
   return output;
 }
 
@@ -90,9 +146,8 @@ export async function scrapeMany(
  * @param url The URL we want to scrape from.
  * @returns The object that has been scraped.
  */
-export async function scrapeOne(url: string): Promise<object> {
-  console.log(`Scraping one resource from ${url}.`);
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function scrapeOne(url: string): Promise<object> {
   const apiKey = process.env.CLIENT_API_KEY;
   if (!apiKey) {
     console.error("Make sure to set CLIENT_API_KEY in .env!");

@@ -139,6 +139,7 @@ function parseVnvGenre(object: Record<string, any>): vnvGenre {
  */
 export interface vnvEvent {
   legacy_id: string;
+  production_id: string; // Legacy ID of the parent Production.
   created_at: string;
   updated_at: string;
   starts_at: string;
@@ -171,6 +172,10 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
 
   const event: vnvEvent = {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
+    production_id:
+      extractIdFromUri(
+        (object["production"] as Record<string, any>)["@id"] as string,
+      ) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
     starts_at: (object.starts_at as string) || "1970-01-01T00:00:00+00:00",
