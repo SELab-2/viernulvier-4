@@ -11,14 +11,23 @@ import logger from "../logger/logger";
 
 /**
  * Holds the Connection to the database and important inserting functions.
+ *
+ * We defined this separate from the main connection that the backend uses to
+ * communicate with the database for two main reasons.
+ *  1: The Queries in here are highly specific to this use case and also allows
+ *     insert of multiple languages at once (which the backend connection doesn't).
+ *  2: If this connection to the database crashes for some reason, the one
+ *     used in the backend isn't affected.
+ *
+ * In short: We chose to split the DB connections for backend and scraper to make
+ *           sure there can be no confusions between the two and so they can't
+ *           hinder each other either.
  */
 export class DbConnection {
   /**
    * The Pool to the database, used to execute queries.
    */
   private pool: Pool;
-
-  // to edit database params go to your .env file.
   constructor() {
     this.pool = new Pool({
       user: process.env.DB_USER_DEV,
