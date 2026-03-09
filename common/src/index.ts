@@ -1,4 +1,3 @@
-import { z } from "zod";
 import {
   ApiKey,
   ApiKeySchema,
@@ -52,12 +51,12 @@ import {
   VerifyApiKeySchema,
   PaginationFilterSchema,
   PaginationFilter,
+  Language,
+  LanguageQuerySchema,
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
+  LanguageQuery,
 } from "./database_objects";
-
-// Een voorbeeld van een globaal schema...
-export const HelloWorldSchema = z.object({
-  text: z.string(),
-});
 
 // list of all exports: (this way only need to import this file.)
 export {
@@ -87,6 +86,9 @@ export {
   CreatePriceSchema,
   UpdatePriceSchema,
   PaginationFilterSchema,
+  LanguageQuerySchema,
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
 };
 export type {
   Production,
@@ -115,11 +117,6 @@ export type {
   CreatePrice,
   UpdatePrice,
   PaginationFilter,
+  Language,
+  LanguageQuery,
 };
-
-// languages:
-export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
-export type Language = (typeof SUPPORTED_LANGUAGES)[number];
-export const DEFAULT_LANGUAGE: Language = "nl";
-
-export type HelloWorld = z.infer<typeof HelloWorldSchema>;

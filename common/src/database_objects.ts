@@ -194,7 +194,24 @@ export const PaginationFilterSchema = z.object({
   limit: z.coerce.number().min(0).max(100).default(20),
 });
 
-// Type exports
+/**
+ * Languages
+ */
+
+// If you want to add languages you can do so here.
+export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
+export const LanguageEnum = z.enum(SUPPORTED_LANGUAGES);
+export const LanguageQuerySchema = z.object({
+  lang: LanguageEnum.default("nl").describe(
+    "The language code for the content.",
+  ),
+});
+export const DEFAULT_LANGUAGE: Language = "nl";
+
+/**
+ * Type Exports
+ */
+
 export type Production = z.infer<typeof ProductionSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
 export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
@@ -229,3 +246,6 @@ export type ApiKey = z.infer<typeof ApiKeySchema>;
 export type VerifyApiKey = z.infer<typeof VerifyApiKeySchema>;
 
 export type PaginationFilter = z.infer<typeof PaginationFilterSchema>;
+
+export type Language = z.infer<typeof LanguageEnum>;
+export type LanguageQuery = z.infer<typeof LanguageQuerySchema>;

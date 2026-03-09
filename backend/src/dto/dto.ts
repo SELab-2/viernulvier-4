@@ -25,7 +25,10 @@ import {
   UpdateTagSchema,
   VerifyApiKeySchema,
 } from "@repo/common";
-import { PaginationFilterSchema } from "@repo/common/src/database_objects";
+import {
+  LanguageQuerySchema,
+  PaginationFilterSchema,
+} from "@repo/common/src/database_objects";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
 
@@ -72,3 +75,6 @@ export class VerifyApiKeyDto extends createZodDto(VerifyApiKeySchema) {}
 
 // Generic Pagination Filter Wrapper
 export class PaginationFilterDto extends createZodDto(PaginationFilterSchema) {}
+
+// Language
+export class LanguageQueryDto extends createZodDto(LanguageQuerySchema) {}
