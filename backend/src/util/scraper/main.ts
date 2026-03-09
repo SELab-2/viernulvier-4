@@ -5,7 +5,7 @@ import logger from "../logger/logger";
 /**
  * Main entrypoint of the worker.
  */
-async function main() {
+export async function runScraper() {
   const dbConnection: DbConnection = new DbConnection();
 
   // Fetch the last scraped date.
@@ -41,5 +41,3 @@ async function main() {
 
   logger.info("Insertion Finished!");
 }
-
-void main();
