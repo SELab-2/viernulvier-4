@@ -9,9 +9,6 @@ import {
 import { Production, Tag, Event, Price, Location } from "@repo/common";
 import logger from "../logger/logger";
 
-// TODO: Add last Scrape Date function
-// TODO: Rewrite queries to use ON CONFLICT clause.
-
 /**
  * Holds the Connection to the database and important inserting functions.
  */
@@ -69,69 +66,36 @@ export class DbConnection {
   private async insertProduction(
     vnvProduction: vnvProduction,
   ): Promise<Production> {
-    const result: Production[] = await this.query<Production>(
-      `
-        SELECT * from productions WHERE legacy_id = $1
-      `,
-      [vnvProduction.legacy_id],
-    );
-
-    // If we have found a matching production we can insert safely.
-    let query: string;
-    let values;
-    if (result.length > 0) {
-      query = `
-        UPDATE productions
-        SET 
-          titel = $1,
-          description1 = $2,
-          description2 = $3,
-          artist = $4,
-          tagline = $5,
-          credits = $6,
-          performer_type = $7,
-          attendance_mode = $8
-        WHERE legacy_id = $9
-        RETURNING *;
-      `;
-      values = [
-        vnvProduction.title,
-        vnvProduction.description,
-        vnvProduction.description_2,
-        vnvProduction.artist,
-        vnvProduction.tagline,
-        vnvProduction.info,
-        vnvProduction.performer_type,
-        vnvProduction.attendance_mode,
-        vnvProduction.legacy_id,
-      ];
-    } else {
-      query = `INSERT INTO productions (
-        titel,
-        description1,
-        description2,
-        artist,
-        tagline,
-        credits,
-        legacy_id,
-        performer_type,
-        attendance_mode
+    const query = `
+      INSERT INTO productions (
+        titel, description1, description2, artist, 
+        tagline, credits, legacy_id, performer_type, attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET
+        titel = EXCLUDED.titel,
+        description1 = EXCLUDED.description1,
+        description2 = EXCLUDED.description2,
+        artist = EXCLUDED.artist,
+        tagline = EXCLUDED.tagline,
+        credits = EXCLUDED.credits,
+        performer_type = EXCLUDED.performer_type,
+        attendance_mode = EXCLUDED.attendance_mode
       RETURNING *;
-      `;
-      values = [
-        vnvProduction.title,
-        vnvProduction.description,
-        vnvProduction.description_2,
-        vnvProduction.artist,
-        vnvProduction.tagline,
-        vnvProduction.info,
-        vnvProduction.legacy_id,
-        vnvProduction.performer_type,
-        vnvProduction.attendance_mode,
-      ];
-    }
+    `;
+
+    const values = [
+      vnvProduction.title,
+      vnvProduction.description,
+      vnvProduction.description_2,
+      vnvProduction.artist,
+      vnvProduction.tagline,
+      vnvProduction.info,
+      vnvProduction.legacy_id,
+      vnvProduction.performer_type,
+      vnvProduction.attendance_mode,
+    ];
 
     const output: Production[] = await this.query<Production>(query, values);
     const production: Production = output[0];
@@ -184,37 +148,15 @@ export class DbConnection {
    * @returns The ID of the Tag.
    */
   private async insertTag(genre: vnvGenre): Promise<number> {
-    const result: Tag[] = await this.query<Tag>(
-      `
-        SELECT * from tags WHERE legacy_id = $1
-      `,
-      [genre.legacy_id],
-    );
-
-    let query: string;
-    let values;
-    if (result.length > 0) {
-      query = `
-        UPDATE tags
-        SET 
-          tag = $1
-        WHERE legacy_id = $2
-        RETURNING *;
-      `;
-      values = [genre.name, genre.legacy_id];
-    } else {
-      query = `INSERT INTO tags (
-        tag,
-        legacy_id
-      )
-      VALUES ($1,$2)
+    const query = `
+      INSERT INTO tags (tag, legacy_id)
+      VALUES ($1, $2)
+      ON CONFLICT (legacy_id) 
+      DO UPDATE SET tag = EXCLUDED.tag
       RETURNING *;
-      `;
-      values = [genre.name, genre.legacy_id];
-    }
-
+    `;
+    const values = [genre.name, genre.legacy_id];
     const output: Tag[] = await this.query<Tag>(query, values);
-
     return output[0].id;
   }
 
@@ -257,20 +199,12 @@ export class DbConnection {
    * @returns Nothing.
    */
   private async insertEvent(vnvEvent: vnvEvent) {
-    const result: Event[] = await this.query<Event>(
-      `
-        SELECT * from events WHERE legacy_id = $1;
-      `,
-      [vnvEvent.legacy_id],
-    );
-
     const productions: Production[] = await this.query<Production>(
-      `
-        SELECT * from productions WHERE legacy_id = $1;
-      `,
+      `SELECT * from productions WHERE legacy_id = $1;`,
       [vnvEvent.production_id],
     );
-    if (productions.length == 0) {
+
+    if (productions.length === 0) {
       logger.error(
         `Could not find Production(${vnvEvent.production_id}) to link Event(${vnvEvent.legacy_id}) with. Aborting...`,
       );
@@ -278,49 +212,29 @@ export class DbConnection {
     }
     const productionId: number = productions[0].id;
 
-    let query: string;
-    let values;
-    if (result.length > 0) {
-      query = `
-        UPDATE events
-        SET 
-          starttime = $1,
-          endtime = $2,
-          doors_at = $3,
-          intermission_at = $4,
-          production_id = $5
-        WHERE legacy_id = $6
-        RETURNING *;
-      `;
-      values = [
-        vnvEvent.starts_at,
-        vnvEvent.ends_at,
-        vnvEvent.doors_at,
-        vnvEvent.intermission_at,
-        productionId,
-        vnvEvent.legacy_id,
-      ];
-    } else {
-      query = `INSERT INTO events (
-        starttime,
-        endtime,
-        doors_at,
-        intermission_at,
-        production_id,
-        legacy_id
+    // 2. Upsert the Event
+    const query = `
+      INSERT INTO events (
+        starttime, endtime, doors_at, intermission_at, production_id, legacy_id
       )
-      VALUES ($1,$2,$3,$4,$5,$6)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET
+        starttime = EXCLUDED.starttime,
+        endtime = EXCLUDED.endtime,
+        doors_at = EXCLUDED.doors_at,
+        intermission_at = EXCLUDED.intermission_at,
+        production_id = EXCLUDED.production_id
       RETURNING *;
-      `;
-      values = [
-        vnvEvent.starts_at,
-        vnvEvent.ends_at,
-        vnvEvent.doors_at,
-        vnvEvent.intermission_at,
-        productionId,
-        vnvEvent.legacy_id,
-      ];
-    }
+    `;
+    const values = [
+      vnvEvent.starts_at,
+      vnvEvent.ends_at,
+      vnvEvent.doors_at,
+      vnvEvent.intermission_at,
+      productionId,
+      vnvEvent.legacy_id,
+    ];
 
     const output: Event[] = await this.query<Event>(query, values);
     const event: Event = output[0];
@@ -393,34 +307,14 @@ export class DbConnection {
    * @returns Nothing.
    */
   private async insertLocation(location: vnvLocation) {
-    const result: Location[] = await this.query<Location>(
-      `
-        SELECT * from locations WHERE legacy_id = $1
-      `,
-      [location.legacy_id],
-    );
-
-    let query: string;
-    let values;
-    if (result.length > 0) {
-      query = `
-        UPDATE locations
-        SET 
-          location = $1
-        WHERE legacy_id = $2;
-      `;
-      values = [location.name, location.legacy_id];
-    } else {
-      query = `INSERT INTO locations (
-        location,
-        legacy_id
-      )
-      VALUES ($1,$2);
-      `;
-      values = [location.name, location.legacy_id];
-    }
-
-    await this.query<Tag>(query, values);
+    const query = `
+      INSERT INTO locations (location, legacy_id)
+      VALUES ($1, $2)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET location = EXCLUDED.location
+      RETURNING *;
+    `;
+    await this.query<Location>(query, [location.name, location.legacy_id]);
   }
 
   /**
@@ -464,38 +358,14 @@ export class DbConnection {
    * @returns Nothing.
    */
   private async insertPrice(price: vnvPrice) {
-    const result: Price[] = await this.query<Price>(
-      `
-        SELECT * from prices WHERE legacy_id = $1
-      `,
-      [price.legacy_id],
-    );
-
-    let query: string;
-    let values;
-    if (result.length > 0) {
-      query = `
-        UPDATE prices
-        SET 
-          name = $1,
-          price = $2
-        WHERE legacy_id = $3
-        RETURNING *;
-      `;
-      values = [price.name, price.amount, price.legacy_id];
-    } else {
-      query = `INSERT INTO prices (
-        name,
-        price,
-        legacy_id
-      )
-      VALUES ($1,$2,$3)
+    const query = `
+      INSERT INTO prices (name, price, legacy_id)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price
       RETURNING *;
-      `;
-      values = [price.name, price.amount, price.legacy_id];
-    }
-
-    await this.query<Price>(query, values);
+    `;
+    await this.query<Price>(query, [price.name, price.amount, price.legacy_id]);
   }
 
   /**

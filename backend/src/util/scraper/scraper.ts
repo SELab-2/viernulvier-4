@@ -147,7 +147,7 @@ async function scrapeMany(
       view = jsonResponse.view;
 
       output.push(...jsonResponse.member);
-      await delay(1000);
+      await delay(100);
     } catch (error) {
       logger.error("An error occurred: ", error);
       logger.error("Retrying...");
