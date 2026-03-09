@@ -1,7 +1,11 @@
 import { DbConnection } from "./db.connection";
 
+/**
+ * Will remove all data from the database but the leave the tables.
+ * TODO: Also reset the latest scrape date field.
+ */
 async function resetDatabase() {
-  console.log("Nuking Database.");
+  console.log("Nuking Database...");
   const dbConnection: DbConnection = new DbConnection();
 
   await dbConnection.query(
@@ -13,7 +17,7 @@ async function resetDatabase() {
     [],
   );
 
-  console.log("Successfully nuked the database.");
+  console.log("Successfully nuked the database!");
 }
 
 /**

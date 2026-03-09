@@ -13,20 +13,37 @@ import {
   vnvProduction,
 } from "./vnv.parser";
 
+/**
+ * The Base of the VNV API.
+ */
 const apiBase: string = "https://www.viernulvier.gent";
+
+/**
+ * A delay function we can use to wait a certain amount of time.
+ * Useful when trying to avoid rate limits.
+ * @param ms The amount of milliseconds we want to wait for.
+ * @returns A Promise that does nothing for a set amount of time.
+ */
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Definition of a Response from the API.
+/**
+ * The important parts of an apiResponse.
+ */
 interface apiResponse {
   view: viewState;
   member: object[];
 }
 
-// The state of the View for lists and pages of objects.
+/**
+ * The ViewState during a scrape, tells where the next page is.
+ */
 interface viewState {
   next: string | null;
 }
 
+/**
+ * The results of a successful scrape.
+ */
 export interface ScrapeResult {
   productions: vnvProduction[];
   events: vnvEvent[];

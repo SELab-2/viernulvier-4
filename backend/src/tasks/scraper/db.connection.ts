@@ -11,7 +11,13 @@ import { Production, Tag, Event, Price, Location } from "@repo/common";
 // TODO: Add last Scrape Date function
 // TODO: Rewrite queries to use ON CONFLICT clause.
 
+/**
+ * Holds the Connection to the database and important inserting functions.
+ */
 export class DbConnection {
+  /**
+   * The Pool to the database, used to execute queries.
+   */
   private pool: Pool;
 
   // to edit database params go to your .env file.
@@ -43,6 +49,10 @@ export class DbConnection {
    * Productions.
    */
 
+  /**
+   * Inserts a list of vnvProduction objects.
+   * @param productions The list of vnvProductions.
+   */
   async insertProductions(productions: vnvProduction[]) {
     for (const production of productions) {
       await this.insertProduction(production);
@@ -51,6 +61,7 @@ export class DbConnection {
 
   /**
    * Inserts a Production by it's legacy_id or creates a new one.
+   * Also links it's respective tags.
    * @param vnvProduction The vnvProduction we want to add.
    * @returns T/F Whether the change went through or not.
    */
@@ -140,9 +151,6 @@ export class DbConnection {
         );
     }
 
-    console.log(
-      `Inserted Production with legacy_id: ${vnvProduction.legacy_id}`,
-    );
     return production;
   }
 
@@ -150,6 +158,10 @@ export class DbConnection {
    * Tags
    */
 
+  /**
+   * Inserts a list of vnvGenre objects into Tags.
+   * @param genres The list of vnvGenre objects.
+   */
   async insertTags(genres: vnvGenre[]) {
     for (const genre of genres) {
       await this.insertTag(genre);
@@ -194,7 +206,6 @@ export class DbConnection {
 
     const output: Tag[] = await this.query<Tag>(query, values);
 
-    console.log(`Inserted Tag with legacy_id: ${genre.legacy_id}.`);
     return output[0].id;
   }
 
@@ -205,10 +216,6 @@ export class DbConnection {
    * @returns T/F Whether the link was created.
    */
   private async linkTag(productionId: number, tagId: number): Promise<boolean> {
-    console.log(
-      `Linking Tag with ID=${tagId} to production with ID=${productionId}.`,
-    );
-
     const query = `
       INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
@@ -224,12 +231,22 @@ export class DbConnection {
    * Events
    */
 
+  /**
+   * Inserts a list of vnvEvent objects into the database.
+   * @param events The list of vnvEvent objects.
+   */
   async insertEvents(events: vnvEvent[]) {
     for (const event of events) {
       await this.insertEvent(event);
     }
   }
 
+  /**
+   * Insert a single vnvEvent into the database by it's legacy_id.
+   * Also links the appropriate Price objects and Location object.
+   * @param vnvEvent The particular vnvEvent.
+   * @returns Nothing.
+   */
   private async insertEvent(vnvEvent: vnvEvent) {
     const result: Event[] = await this.query<Event>(
       `
@@ -327,17 +344,27 @@ export class DbConnection {
       console.log(
         `Failed to link Location(${location.id}) to Event(${event.id}).`,
       );
-
-    console.log(`Inserted Event with legacy_id: ${vnvEvent.legacy_id}.`);
-    return event;
   }
 
+  /**
+   * Locations
+   */
+
+  /**
+   * Inserts a list of vnvLocation objects.
+   * @param locations The list of vnvLocation objects.
+   */
   async insertLocations(locations: vnvLocation[]) {
     for (const location of locations) {
       await this.insertLocation(location);
     }
   }
 
+  /**
+   * Inserts a single vnvLocation into the database.
+   * @param location The location we want inserted.
+   * @returns Nothing.
+   */
   private async insertLocation(location: vnvLocation) {
     const result: Location[] = await this.query<Location>(
       `
@@ -353,8 +380,7 @@ export class DbConnection {
         UPDATE locations
         SET 
           location = $1
-        WHERE legacy_id = $2
-        RETURNING *;
+        WHERE legacy_id = $2;
       `;
       values = [location.name, location.legacy_id];
     } else {
@@ -362,26 +388,24 @@ export class DbConnection {
         location,
         legacy_id
       )
-      VALUES ($1,$2)
-      RETURNING *;
+      VALUES ($1,$2);
       `;
       values = [location.name, location.legacy_id];
     }
 
-    const output: Tag[] = await this.query<Tag>(query, values);
-
-    console.log(`Inserted Location with legacy_id: ${location.legacy_id}`);
-    return output[0].id;
+    await this.query<Tag>(query, values);
   }
 
+  /**
+   * Links an Event and a Location by their ids.
+   * @param eventId The Event ID.
+   * @param locationId The Location ID.
+   * @returns T/F Whether it Failed or not.
+   */
   private async linkLocation(
     eventId: number,
     locationId: number,
   ): Promise<boolean> {
-    console.log(
-      `Linking Location with ID=${locationId} to Event with ID=${eventId}.`,
-    );
-
     const query = `
       INSERT INTO event_locations (event_id, location_id)
       VALUES ($1, $2)
@@ -394,15 +418,24 @@ export class DbConnection {
   }
 
   /**
-   * Price insertion.
+   * Price.
    */
 
+  /**
+   * Insert a list of vnvPrice objects.
+   * @param prices The list of vnvPrice objects.
+   */
   async insertPrices(prices: vnvPrice[]) {
     for (const price of prices) {
       await this.insertPrice(price);
     }
   }
 
+  /**
+   * Insert a single vnvPrice into the database.
+   * @param price The vnvPrice object we want inserted.
+   * @returns Nothing.
+   */
   private async insertPrice(price: vnvPrice) {
     const result: Price[] = await this.query<Price>(
       `
@@ -435,17 +468,16 @@ export class DbConnection {
       values = [price.name, price.amount, price.legacy_id];
     }
 
-    const output: Price[] = await this.query<Price>(query, values);
-
-    console.log(`Inserted Price with legacy_id: ${price.legacy_id}`);
-    return output[0].id;
+    await this.query<Price>(query, values);
   }
 
+  /**
+   * Link a Price to an Event.
+   * @param eventId The Event ID.
+   * @param priceId The Price ID.
+   * @returns T/F Whether it Failed or not.
+   */
   private async linkPrice(eventId: number, priceId: number): Promise<boolean> {
-    console.log(
-      `Linking Price with ID=${priceId} to Event with ID=${eventId}.`,
-    );
-
     const query = `
       INSERT INTO event_prices (event_id, price_id)
       VALUES ($1, $2)

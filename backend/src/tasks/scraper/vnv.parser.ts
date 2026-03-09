@@ -112,6 +112,11 @@ export interface vnvGenre {
   name: vnvLocal;
 }
 
+/**
+ * Parses a list of raw Genres into vnvGenre objects.
+ * @param genres The raw Genres.
+ * @returns The vnvGenre objects.
+ */
 export function parseGenres(genres: object[]): vnvGenre[] {
   return genres.map(parseVnvGenre);
 }
@@ -204,6 +209,11 @@ export interface vnvLocation {
   name: vnvLocal;
 }
 
+/**
+ * Parses a raw list of location objects into vnvLocation object.
+ * @param locations The raw location objects.
+ * @returns The vnvLocation objects.
+ */
 export function parseLocations(locations: object[]): vnvLocation[] {
   return locations.map(parseVnvLocation);
 }
@@ -244,6 +254,11 @@ export interface vnvPrice {
   name: vnvLocal;
 }
 
+/**
+ * Parses raw price objects into vnvPrice objects.
+ * @param prices The raw price objects.
+ * @returns The parsed vnvPrice objects.
+ */
 export function parsePrices(prices: object[]): vnvPrice[] {
   return prices.map(parseVnvPrice);
 }
