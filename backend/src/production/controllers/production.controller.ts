@@ -24,16 +24,20 @@ import {
   CreateProductionDto,
   FilterProductionDto,
   ProductionDto,
+  ProductionViewDto,
   UpdateProductionDto,
 } from "../../dto/dto";
 import {
   ApiBody,
+  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiSecurity,
+  getSchemaPath,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { DbService } from "src/database/db.service";
 
 /**
  * Handles CORE functionality for Productions.
@@ -49,17 +53,32 @@ export class ProductionController {
    */
   @ApiOperation({ summary: "Returns all Production objects." })
   @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
+  @ApiExtraModels(ProductionViewDto, ProductionDto)
   @ApiOkResponse({
-    type: ProductionDto,
-    isArray: true,
     description: "All Productions returned.",
+    schema: {
+      anyOf: [
+        {
+          type: "array",
+          items: { $ref: getSchemaPath(ProductionViewDto) },
+        },
+        {
+          type: "array",
+          items: { $ref: getSchemaPath(ProductionDto) },
+        },
+      ],
+    },
   })
   @Get()
   @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
     @Query() filters: FilterProductionDto,
-  ): Promise<ProductionDto[]> {
-    return await this.productionService.getAllProductions(filters);
+  ): Promise<ProductionDto[] | ProductionViewDto[]> {
+    const productions: ProductionDto[] =
+      await this.productionService.getAllProductions(filters);
+    const flattened: ProductionDto[] | ProductionViewDto[] =
+      DbService.flattenTranslation(productions, filters.lang);
+    return flattened;
   }
 
   /**

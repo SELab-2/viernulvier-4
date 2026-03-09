@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
 import { ProductionModule } from "./production/production.module";
 import { EventModule } from "./event/event.module";
 import { ConfigModule } from "@nestjs/config";
@@ -25,6 +24,5 @@ import { PriceModule } from "./price/price.module";
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

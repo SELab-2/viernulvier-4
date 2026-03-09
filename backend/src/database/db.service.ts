@@ -1,5 +1,6 @@
 import { Pool, QueryResultRow } from "pg";
 import { Injectable } from "@nestjs/common";
+import { Language } from "@repo/common";
 
 @Injectable()
 export class DbService {
@@ -28,5 +29,43 @@ export class DbService {
   ): Promise<T[]> {
     const res = await this.pool.query<T>(query, params); // keep await.
     return res.rows;
+  }
+
+  /**
+   * Utility.
+   */
+
+  // TODO: Move this to UtilModule.
+  static flattenTranslation<T>(data: any, lang: Language | undefined): T {
+    if (!data) return data as T;
+    if (!lang) return data as T;
+
+    if (Array.isArray(data)) {
+      return data.map((item) => this.flattenTranslation(item, lang)) as T;
+    }
+
+    const flattened = { ...data } as Record<string, any>;
+
+    for (const key in flattened) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const value = flattened[key];
+
+      if (
+        value !== null &&
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        !(value instanceof Date)
+      ) {
+        if (lang in value) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          flattened[key] = value[lang];
+        } else {
+          // TODO: Make this call the Google Translate API.
+          flattened[key] = null;
+        }
+      }
+    }
+
+    return flattened as T;
   }
 }

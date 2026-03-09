@@ -8,7 +8,11 @@ import {
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
-import { DEFAULT_LANGUAGE, FilterProductionSchema, Language, } from "@repo/common";
+import {
+  DEFAULT_LANGUAGE,
+  FilterProductionSchema,
+  Language,
+} from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -139,7 +143,6 @@ export class ProductionDatabaseService {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
-    const lang = filters.language ?? DEFAULT_LANGUAGE; // shouldn't need fallback but justin case
 
     // Filter by location
     if (filters.hall) {
@@ -180,14 +183,20 @@ export class ProductionDatabaseService {
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
     if (filters.titel) {
-      conditions.push(`p.titel->>'${lang}' ILIKE $${i}`);
+      // TODO: This is smelly.
+      conditions.push(
+        `p.titel->>'en' ILIKE $${i} OR p.titel->>'nl' ILIKE $${i}`,
+      );
       values.push(`%${filters.titel}%`);
       i++;
     }
 
     // Filter by artist
     if (filters.artist) {
-      conditions.push(`p.artist->>'${lang}' ILIKE $${i}`);
+      // TODO: This is smelly.
+      conditions.push(
+        `p.artist->>'en' ILIKE $${i} OR p.artist->>'nl' ILIKE $${i}`,
+      );
       values.push(`%${filters.artist}%`);
       i++;
     }
@@ -254,12 +263,12 @@ export class ProductionDatabaseService {
     const query = `
       SELECT DISTINCT
         p.id,
-        p.titel->>'${lang}' AS titel,
-        p.description1->>'${lang}' AS desc1,
-        p.description2->>'${lang}' AS desc2,
-        p.artist->>'${lang}' AS artist,
-        p.tagline->>'${lang}' AS tagline,
-        p.credits->>'${lang}' AS credits,
+        p.titel,
+        p.description1,
+        p.description2,
+        p.artist,
+        p.tagline,
+        p.credits,
         p.created_at,
         p.updated_at,
         p.legacy_id,
@@ -272,7 +281,12 @@ export class ProductionDatabaseService {
         ${paginationClause}
     `;
 
-    return this.db.query<ProductionDto>(query, values);
+    const results: ProductionDto[] = await this.db.query<ProductionDto>(
+      query,
+      values,
+    );
+
+    return results;
   }
 
   /**

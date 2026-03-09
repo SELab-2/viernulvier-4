@@ -56,11 +56,14 @@ import {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
   LanguageQuery,
+  ProductionView,
+  ProductionViewSchema,
 } from "./database_objects";
 
 // list of all exports: (this way only need to import this file.)
 export {
   ProductionSchema,
+  ProductionViewSchema,
   CreateProductionSchema,
   UpdateProductionSchema,
   FilterProductionSchema,
@@ -92,6 +95,7 @@ export {
 };
 export type {
   Production,
+  ProductionView,
   CreateProduction,
   UpdateProduction,
   FilterProduction,

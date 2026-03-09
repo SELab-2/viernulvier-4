@@ -28,12 +28,14 @@ import {
 import {
   LanguageQuerySchema,
   PaginationFilterSchema,
+  ProductionViewSchema,
 } from "@repo/common/src/database_objects";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
 
 // Production Wrappers
 export class ProductionDto extends createZodDto(ProductionSchema) {}
+export class ProductionViewDto extends createZodDto(ProductionViewSchema) {}
 export class CreateProductionDto extends createZodDto(CreateProductionSchema) {}
 export class UpdateProductionDto extends createZodDto(UpdateProductionSchema) {}
 export class FilterProductionDto extends createZodDto(FilterProductionSchema) {}

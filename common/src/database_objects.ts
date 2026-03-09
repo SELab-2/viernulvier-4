@@ -1,24 +1,50 @@
 import { z } from "zod";
 
 /**
+ * Languages
+ */
+
+// If you want to add languages you can do so here.
+export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
+export const LanguageEnum = z.enum(SUPPORTED_LANGUAGES);
+export const LanguageQuerySchema = z.object({
+  lang: LanguageEnum.default("nl").describe(
+    "The language code for the content.",
+  ),
+});
+export const DEFAULT_LANGUAGE: Language = "nl";
+
+// These allow us to have schemas inside of schemas for localization.
+export const LocalizedStringSchema = z.record(LanguageEnum, z.string());
+export const LocalizedStringNullableSchema = z
+  .record(LanguageEnum, z.string())
+  .nullable();
+
+/**
  * Schemas for productions.
  */
 
 export const ProductionSchema = z.object({
   id: z.number(),
-  titel: z.string(),
-  description1: z.string(),
-  description2: z.string().nullable(),
-  artist: z.string().nullable(),
-  tagline: z.string().nullable(),
-  credits: z.string().nullable(),
+  titel: LocalizedStringSchema,
+  description1: LocalizedStringSchema,
+  description2: LocalizedStringNullableSchema,
+  artist: LocalizedStringNullableSchema,
+  tagline: LocalizedStringNullableSchema,
+  credits: LocalizedStringNullableSchema,
   performer_type: z.string().nullable(),
   attendance_mode: z.string().nullable(),
   created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
   updated_at: z.iso.datetime().nullable(), // TODO here too.
   legacy_id: z.string().nullable(),
 });
-
+export const ProductionViewSchema = ProductionSchema.extend({
+  titel: z.string(),
+  description1: z.string(),
+  description2: z.string(),
+  tagline: z.string().nullable(),
+  credits: z.string().nullable(),
+});
 export const CreateProductionSchema = ProductionSchema.omit({
   id: true,
   created_at: true,
@@ -27,6 +53,7 @@ export const CreateProductionSchema = ProductionSchema.omit({
 export const UpdateProductionSchema = ProductionSchema.partial();
 
 export const FilterProductionSchema = z.object({
+  lang: LanguageEnum.optional(),
   titel: z.string().optional(),
   id: z.coerce.number().optional(),
   tag_ids: z
@@ -44,7 +71,6 @@ export const FilterProductionSchema = z.object({
   date_after: z.iso.date().optional(),
   page: z.coerce.number().min(0).default(0),
   limit: z.coerce.number().min(1).max(100).default(20),
-  language: z.string().optional(),
   artist: z.string().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
@@ -195,24 +221,11 @@ export const PaginationFilterSchema = z.object({
 });
 
 /**
- * Languages
- */
-
-// If you want to add languages you can do so here.
-export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
-export const LanguageEnum = z.enum(SUPPORTED_LANGUAGES);
-export const LanguageQuerySchema = z.object({
-  lang: LanguageEnum.default("nl").describe(
-    "The language code for the content.",
-  ),
-});
-export const DEFAULT_LANGUAGE: Language = "nl";
-
-/**
  * Type Exports
  */
 
 export type Production = z.infer<typeof ProductionSchema>;
+export type ProductionView = z.infer<typeof ProductionViewSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
 export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
 export type FilterProduction = z.infer<typeof FilterProductionSchema>;
