@@ -7,6 +7,7 @@ import {
   vnvProduction,
 } from "./vnv.parser";
 import { Production, Tag, Event, Price, Location } from "@repo/common";
+import logger from "../logger/logger";
 
 // TODO: Add last Scrape Date function
 // TODO: Rewrite queries to use ON CONFLICT clause.
@@ -154,7 +155,7 @@ export class DbConnection {
     for (const tag of tags) {
       const valid: boolean = await this.linkTag(production.id, tag.id);
       if (!valid)
-        console.log(
+        logger.error(
           `Failed to link Tag(${tag.id}) to Production(${production.id}).`,
         );
     }
@@ -270,7 +271,7 @@ export class DbConnection {
       [vnvEvent.production_id],
     );
     if (productions.length == 0) {
-      console.error(
+      logger.error(
         `Could not find Production(${vnvEvent.production_id}) to link Event(${vnvEvent.legacy_id}) with. Aborting...`,
       );
       return;
@@ -343,7 +344,9 @@ export class DbConnection {
     for (const price of prices) {
       const valid: boolean = await this.linkPrice(event.id, price.id);
       if (!valid)
-        console.log(`Failed to link Price(${price.id}) to Event(${event.id}).`);
+        logger.error(
+          `Failed to link Price(${price.id}) to Event(${event.id}).`,
+        );
     }
 
     // We also replace the Event location.
@@ -365,7 +368,7 @@ export class DbConnection {
     const location: Location = locations[0];
     const valid: boolean = await this.linkLocation(event.id, location.id);
     if (!valid)
-      console.log(
+      logger.error(
         `Failed to link Location(${location.id}) to Event(${event.id}).`,
       );
   }

@@ -1,5 +1,6 @@
 import { scrape, ScrapeResult } from "./scraper";
 import { DbConnection } from "./db.connection";
+import logger from "../logger/logger";
 
 /**
  * Main entrypoint of the worker.
@@ -12,7 +13,7 @@ async function main() {
   // Scrape all the data we need.
   const scrapeResults: ScrapeResult = await scrape("2026-03-04T09:36:21+00:00");
 
-  console.log("Inserting Scraped Data...");
+  logger.info("Inserting Scraped Data...");
 
   // We can bundle the adding of tags, locations and prices.
   await Promise.all([
@@ -25,7 +26,7 @@ async function main() {
   await dbConnection.insertProductions(scrapeResults.productions);
   await dbConnection.insertEvents(scrapeResults.events);
 
-  console.log("Insertion Finished!");
+  logger.info("Insertion Finished!");
 }
 
 void main();

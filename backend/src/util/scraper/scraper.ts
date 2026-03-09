@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { URLSearchParams } from "url";
+import logger from "../logger/logger";
 import {
   parseEvents,
   parseGenres,
@@ -59,7 +60,7 @@ export interface ScrapeResult {
 export async function scrape(
   after_date: string = "1970-01-01T00:00:00+00:00",
 ): Promise<ScrapeResult> {
-  console.log("Starting Scraper...");
+  logger.info("Starting Scraper...");
 
   const [productions, events, event_prices, prices, genres, halls] =
     await Promise.all([
@@ -82,7 +83,7 @@ export async function scrape(
     );
   }
 
-  console.log("Finished Scraper!");
+  logger.info("Finished Scraper!");
 
   return {
     productions: parseProductions(productions),
@@ -127,7 +128,7 @@ async function scrapeMany(
 ): Promise<object[]> {
   const apiKey = process.env.CLIENT_API_KEY;
   if (!apiKey) {
-    console.error("Make sure to set CLIENT_API_KEY in .env!");
+    logger.error("Make sure to set CLIENT_API_KEY in .env!");
     return [];
   }
 
@@ -148,13 +149,13 @@ async function scrapeMany(
       output.push(...jsonResponse.member);
       await delay(1000);
     } catch (error) {
-      console.error("An error occurred: ", error);
-      console.log("Retrying...");
+      logger.error("An error occurred: ", error);
+      logger.error("Retrying...");
       await delay(5000); // Wait a bit longer before retrying.
     }
   }
 
-  console.log(`Scraped ${output.length} objects from ${url}.`);
+  logger.info(`Scraped ${output.length} objects from ${url}.`);
   return output;
 }
 
@@ -167,7 +168,7 @@ async function scrapeMany(
 async function scrapeOne(url: string): Promise<object> {
   const apiKey = process.env.CLIENT_API_KEY;
   if (!apiKey) {
-    console.error("Make sure to set CLIENT_API_KEY in .env!");
+    logger.error("Make sure to set CLIENT_API_KEY in .env!");
     return [];
   }
 
@@ -177,7 +178,7 @@ async function scrapeOne(url: string): Promise<object> {
     const jsonResponse: apiResponse = await fetchFromVnv(target);
     return jsonResponse;
   } catch (error) {
-    console.error("An error occurred: ", error);
+    logger.error("An error occurred: ", error);
     return {};
   }
 }
