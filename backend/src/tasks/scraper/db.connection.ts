@@ -135,6 +135,14 @@ export class DbConnection {
     const output: Production[] = await this.query<Production>(query, values);
     const production: Production = output[0];
 
+    // First we unlink all current tags.
+    await this.query(
+      `
+        DELETE FROM production_tag WHERE production_id = $1;
+      `,
+      [production.id],
+    );
+
     // Now we have to link the tags.
     const tags: Tag[] = await this.query<Tag>(
       `
@@ -316,7 +324,15 @@ export class DbConnection {
     const output: Event[] = await this.query<Event>(query, values);
     const event: Event = output[0];
 
-    // Now we also need to link the prices to the event.
+    // We first unlink the existing Prices so we can replace the links.
+    await this.query(
+      `
+        DELETE FROM event_prices WHERE event_id = $1;
+      `,
+      [event.id],
+    );
+
+    // Now we link the correct prices again.
     const prices: Price[] = await this.query<Price>(
       `
         SELECT * FROM prices
@@ -329,6 +345,14 @@ export class DbConnection {
       if (!valid)
         console.log(`Failed to link Price(${price.id}) to Event(${event.id}).`);
     }
+
+    // We also replace the Event location.
+    await this.query(
+      `
+        DELETE FROM event_locations WHERE event_id = $1;
+      `,
+      [event.id],
+    );
 
     // We also need to link the Event location.
     const locations: Location[] = await this.query<Location>(
