@@ -22,6 +22,8 @@ export async function runScraper() {
   logger.info("Inserting Scraped Data...");
 
   // We can bundle the adding of tags, locations and prices.
+  // We need to insert these BEFORE the Productions and Events
+  // because we need them to already be in the database when linking them up.
   await Promise.all([
     dbConnection.insertTags(scrapeResults.genres),
     dbConnection.insertPrices(scrapeResults.prices),
