@@ -34,6 +34,7 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
 
 @Controller("blogs")
 export class BlogController {
@@ -47,11 +48,7 @@ export class BlogController {
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
-  @ApiOkResponse({
-    type: BlogDto,
-    isArray: true,
-    description: "Returned all blogs.",
-  })
+  @ApiOkArrayAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getAllBlogs(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
@@ -68,12 +65,16 @@ export class BlogController {
    * @returns The Blog corresponding to ID if there was one.
    */
   @ApiOperation({ summary: "Returns a single blog." })
-  @ApiOkResponse({ type: BlogDto, description: "Found Blog." })
+  @ApiOkAnyOf(BlogDto, BlogViewDto)
   @Get(":blogId")
   async getBlogById(
     @Param("blogId", ParseIntPipe) blogId: number,
-  ): Promise<BlogDto> {
-    return await this.blogService.getBlogById(blogId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto | BlogViewDto> {
+    return this.ls.flattenByLanguage<BlogDto | BlogViewDto>(
+      await this.blogService.getBlogById(blogId),
+      lang.lang,
+    );
   }
 
   /**
