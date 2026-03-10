@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import EventService from "../event.service";
@@ -14,13 +15,20 @@ import {
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
-import { LocationDto } from "../../dto/dto";
+import { LanguageQueryDto, LocationDto, LocationViewDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { LanguageService } from "src/util/language/language.service";
+import { ApiOkAnyOf } from "src/common/decorators/api.ok";
+import { LanguageQuerySchema } from "@repo/common";
+import { ZodValidationPipe } from "nestjs-zod";
 
 @ApiTags("Events - Locations")
 @Controller("events/:eventId/locations")
 export class EventLocationController {
-  constructor(private readonly eventService: EventService) {}
+  constructor(
+    private readonly eventService: EventService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to GET /events/:eventId/locations
@@ -30,12 +38,16 @@ export class EventLocationController {
   @ApiOperation({
     summary: "Returns the Location of an Event.",
   })
-  @ApiOkResponse({ type: LocationDto, description: "Location Found." })
+  @ApiOkAnyOf(LocationDto, LocationViewDto)
   @Get()
   async getLocationOfEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
-  ): Promise<LocationDto> {
-    return await this.eventService.getLocationForEvent(eventId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<LocationDto | LocationViewDto> {
+    return this.ls.flattenByLanguage(
+      await this.eventService.getLocationForEvent(eventId),
+      lang.lang,
+    );
   }
 
   /**
