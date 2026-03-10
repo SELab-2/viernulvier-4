@@ -10,12 +10,10 @@ import {
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import {
-  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
   ApiTags,
-  getSchemaPath,
 } from "@nestjs/swagger";
 import {
   BlogDto,
@@ -27,6 +25,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
 import { LanguageService } from "../../util/language/language.service";
+import { ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
 
 /**
  * Handles the Relationships between Productions and Blogs.
@@ -45,22 +44,7 @@ export class ProductionBlogController {
    * @returns A list of all Blog objects linked to this Production.
    */
   @ApiOperation({ summary: "Get all Blogs linked to a Production." })
-  @ApiExtraModels(BlogViewDto, BlogDto)
-  @ApiOkResponse({
-    description: "Returned all linked Blogs.",
-    schema: {
-      anyOf: [
-        {
-          type: "array",
-          items: { $ref: getSchemaPath(BlogViewDto) },
-        },
-        {
-          type: "array",
-          items: { $ref: getSchemaPath(BlogDto) },
-        },
-      ],
-    },
-  })
+  @ApiOkArrayAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getProductionBlogs(
     @Param("productionId", ParseIntPipe) productionId: number,

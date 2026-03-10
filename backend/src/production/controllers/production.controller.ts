@@ -31,15 +31,14 @@ import {
 } from "../../dto/dto";
 import {
   ApiBody,
-  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiSecurity,
-  getSchemaPath,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageService } from "../../util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
 
 /**
  * Handles CORE functionality for Productions.
@@ -58,22 +57,7 @@ export class ProductionController {
    */
   @ApiOperation({ summary: "Returns all Production objects." })
   @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
-  @ApiExtraModels(ProductionViewDto, ProductionDto)
-  @ApiOkResponse({
-    description: "All Productions returned.",
-    schema: {
-      anyOf: [
-        {
-          type: "array",
-          items: { $ref: getSchemaPath(ProductionViewDto) },
-        },
-        {
-          type: "array",
-          items: { $ref: getSchemaPath(ProductionDto) },
-        },
-      ],
-    },
-  })
+  @ApiOkArrayAnyOf(ProductionDto, ProductionViewDto)
   @Get()
   @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
@@ -91,20 +75,7 @@ export class ProductionController {
    * @returns The ProductionDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Production with id in the URL." })
-  @ApiExtraModels(ProductionViewDto, ProductionDto)
-  @ApiOkResponse({
-    description: "One Production Returned.",
-    schema: {
-      anyOf: [
-        {
-          $ref: getSchemaPath(ProductionViewDto),
-        },
-        {
-          $ref: getSchemaPath(ProductionDto),
-        },
-      ],
-    },
-  })
+  @ApiOkAnyOf(ProductionDto, ProductionViewDto)
   @Get(":productionId")
   async getProductionById(
     @Param("productionId", ParseIntPipe) productionId: number,

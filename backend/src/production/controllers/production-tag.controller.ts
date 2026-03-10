@@ -10,12 +10,10 @@ import {
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
 import {
-  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
   ApiTags,
-  getSchemaPath,
 } from "@nestjs/swagger";
 import {
   LanguageQueryDto,
@@ -27,6 +25,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
 import { LanguageService } from "../../util/language/language.service";
+import { ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
 
 /**
  * Handles the Relationships between Productions and Tags.
@@ -47,22 +46,7 @@ export class ProductionTagController {
   @ApiOperation({
     summary: "Returns the Tags of the Production with id in the URL.",
   })
-  @ApiExtraModels(TagViewDto, TagDto)
-  @ApiOkResponse({
-    description: "Tags Found.",
-    schema: {
-      anyOf: [
-        {
-          type: "array",
-          items: { $ref: getSchemaPath(TagViewDto) },
-        },
-        {
-          type: "array",
-          items: { $ref: getSchemaPath(TagDto) },
-        },
-      ],
-    },
-  })
+  @ApiOkArrayAnyOf(TagDto, TagViewDto)
   @Get()
   async getTagsOfProductionByID(
     @Param("productionId", ParseIntPipe) productionId: number,
