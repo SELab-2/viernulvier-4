@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
-
+import { ResourceGoneException } from "../common/exceptions";
 @Injectable()
 export class TagDatabaseService {
   // need to give a db service as param when used. -> see db.service.
@@ -27,7 +27,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Tag not found");
+      throw new ResourceGoneException("Tag not found");
     }
     return result[0];
   }
@@ -43,24 +43,14 @@ export class TagDatabaseService {
     if (amount === 0) {
       const query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags`;
 
-      const result = await this.db.query<TagDto>(query);
-
-      if (result.length === 0) {
-        throw new Error("no tags found");
-      }
-      return result;
+      return await this.db.query<TagDto>(query);
     }
 
     const offset = page * amount;
 
     const query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags LIMIT $1 OFFSET $2`;
 
-    const result = await this.db.query<TagDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no tags found");
-    }
-    return result;
+    return await this.db.query<TagDto>(query, [amount, offset]);
   }
 
   /**
@@ -104,7 +94,7 @@ export class TagDatabaseService {
    */
   async updateTag(tag: UpdateTagDto): Promise<TagDto> {
     if (!tag.id) {
-      throw new Error("Tag id is required for update");
+      throw new BadRequestException("Tag id is required for update");
     }
 
     const fields: string[] = [];
@@ -117,7 +107,7 @@ export class TagDatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     values.push(tag.id);
@@ -138,7 +128,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Tag not found");
+      throw new ResourceGoneException("Tag not found");
     }
 
     return result[0];
@@ -151,9 +141,14 @@ export class TagDatabaseService {
    * @returns nothing.
    */
   async deleteTag(id: number): Promise<void> {
-    const query = `DELETE FROM tags WHERE id = $1`;
+    const query = `DELETE FROM tags WHERE id = $1 RETURNING id;`;
 
-    await this.db.query(query, [id]);
+    const result = await this.db.query(query, [id]);
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Cannot Delete: Tag with ID ${id} not found`,
+      );
+    }
   }
 
   // insert extra functions here if desired

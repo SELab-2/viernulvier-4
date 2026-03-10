@@ -1,4 +1,5 @@
 import { Controller, Get, Redirect } from "@nestjs/common";
+import { TeapotException } from "./common/exceptions";
 
 @Controller()
 export class AppController {
@@ -10,4 +11,10 @@ export class AppController {
   }
 
   root(): void {}
+
+  // Easter egg 418
+  @Get("coffee")
+  makeCoffee() {
+    throw new TeapotException();
+  }
 }

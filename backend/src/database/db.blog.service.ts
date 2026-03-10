@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -23,7 +24,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(`Blog with ID ${id} not found`);
     }
     return result[0];
   }
@@ -48,13 +49,7 @@ export class BlogDatabaseService {
       ORDER BY id
       `;
 
-      const result = await this.db.query<BlogDto>(query);
-
-      if (result.length === 0) {
-        throw new Error("no blogs found");
-      }
-
-      return result;
+      return await this.db.query<BlogDto>(query);
     }
 
     const query = `
@@ -68,13 +63,7 @@ export class BlogDatabaseService {
     LIMIT $1 OFFSET $2
     `;
 
-    const result = await this.db.query<BlogDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no blogs found");
-    }
-
-    return result;
+    return await this.db.query<BlogDto>(query, [amount, offset]);
   }
 
   /**
@@ -120,7 +109,7 @@ export class BlogDatabaseService {
    */
   async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
     if (!blog.id) {
-      throw new Error("Blog id is required for update");
+      throw new BadRequestException("Blog id is required for update");
     }
 
     const fields: string[] = [];
@@ -140,7 +129,7 @@ export class BlogDatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     values.push(blog.id);
@@ -160,7 +149,9 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(
+        `Cannot update: Blog ${blog.id} not found`,
+      );
     }
 
     return result[0];
@@ -169,13 +160,16 @@ export class BlogDatabaseService {
   /**
    * Delete function for deleting blogs from the database.
    * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
    * @returns nothing.
    */
-  async deleteBlog(id: number): Promise<void> {
-    const query = `DELETE FROM blogs WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+  async deleteBlog(blogId: number): Promise<void> {
+    const query = `DELETE FROM blogs WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        `Cannot delete: Blog ${blogId} not found`,
+      );
+    }
   }
 
   // insert extra functions here if desired.

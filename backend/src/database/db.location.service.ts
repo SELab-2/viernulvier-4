@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -22,6 +23,9 @@ export class LocationDatabaseService {
 
     const result = await this.db.query<LocationDto>(query, [id]);
 
+    if (result.length === 0) {
+      throw new ResourceGoneException(`Location with ID ${id} not found`);
+    }
     return result[0];
   }
 
@@ -106,7 +110,7 @@ export class LocationDatabaseService {
    */
   async updateLocation(location: UpdateLocationDto): Promise<LocationDto> {
     if (!location.id) {
-      throw new Error("Location id is required for update");
+      throw new BadRequestException("Location id is required for update");
     }
 
     const fields: string[] = [];
@@ -121,7 +125,7 @@ export class LocationDatabaseService {
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     values.push(location.id);
@@ -142,7 +146,9 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Location not found");
+      throw new ResourceGoneException(
+        `Location with ID ${location.id} not found`,
+      );
     }
 
     return result[0];
@@ -155,9 +161,11 @@ export class LocationDatabaseService {
    * @returns nothing.
    */
   async deleteLocation(id: number): Promise<void> {
-    const query = `DELETE FROM locations WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+    const query = `DELETE FROM locations WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [id]);
+    if (result.length === 0) {
+      throw new ResourceGoneException(`Location with ID ${id} not found`);
+    }
   }
 
   // insert extra functions here if desired.
