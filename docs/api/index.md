@@ -1,15 +1,17 @@
-# API Overview
-
-This documentation covers the REST API for the viernulvier-4 project.
+# API Overview & Authentication
 
 **Base URL:** `http://localhost:3000`
 
 ## 🔐 Authentication
-Most modifying endpoints (POST, PUT, PATCH, DELETE) require an **API Key** or a valid **JWT session**.
+Administrative actions require an API Key. Regular login uses a username/password object.
 
 ### [POST] `/auth/login`
 Authenticates a user.
-**Response (200 OK):**
-```json
-{ "access_token": "TOKEN_STRING" }
-```
+**Request Body:**
+{
+    "username": "...",
+    "password": "..."
+}
+
+### [POST] `/auth/verify`
+Verifies an API key. (**Security:** `apiKey` required)

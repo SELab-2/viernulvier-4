@@ -1,11 +1,19 @@
 # Blogs API
 
-## 📝 General Blogs
 ### [GET] `/blogs`
 Returns all blog posts.
 
+### [GET] `/blogs/:blogId`
+Returns a specific blog post.
+
 ### [POST] `/blogs`
-Creates a new blog post. (**Security:** `apiKey` required)
+Creates a blog post. (**Security:** `apiKey` required)
+
+### [PUT] `/blogs/:blogId`
+Replaces a blog post. (**Security:** `apiKey` required)
+
+### [PATCH] `/blogs/:blogId`
+Updates a blog post. (**Security:** `apiKey` required)
 
 ### [DELETE] `/blogs/:blogId`
-Deletes a blog post.
+Deletes a blog post. (**Security:** `apiKey` required)

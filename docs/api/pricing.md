@@ -1,11 +1,16 @@
 # Pricing API
 
-## 💰 Price Master List
 ### [GET] `/prices`
-Retrieves the master price list. Supports pagination.
+Returns the master price list.
+
+### [GET] `/prices/:priceId`
+Returns a specific price.
 
 ### [POST] `/prices`
-Adds a new price category. (**Security:** `apiKey` required)
+Creates a price category. (**Security:** `apiKey` required)
+
+### [PUT] `/prices`
+Updates a price category (ID in body). (**Security:** `apiKey` required)
 
 ### [DELETE] `/prices/:priceId`
-Deletes a price category.
+Deletes a price category. (**Security:** `apiKey` required)
