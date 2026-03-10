@@ -4,3 +4,11 @@ extra:
   version:
     provider: mike
 theme: readthedocs
+
+nav:
+  - Home: index.md
+  - Build & Run:
+      - Backend: build-run/backend.md
+      - Frontend: build-run/frontend.md
+  - API Reference:                # Dit wordt de nieuwe dropdown
+      - Endpoints: api/endpoints.md
