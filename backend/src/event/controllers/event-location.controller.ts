@@ -17,8 +17,8 @@ import {
 } from "@nestjs/swagger";
 import { LanguageQueryDto, LocationDto, LocationViewDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { LanguageService } from "src/util/language/language.service";
-import { ApiOkAnyOf } from "src/common/decorators/api.ok";
+import { LanguageService } from "../../util/language/language.service";
+import { ApiOkAnyOf } from "../../common/decorators/api.ok";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
 

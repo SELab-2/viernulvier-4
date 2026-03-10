@@ -4,7 +4,7 @@ import { EventController } from "./controllers/event.controller";
 import { DbModule } from "../database/db.module";
 import { EventLocationController } from "./controllers/event-location.controller";
 import { EventPriceController } from "./controllers/event-price.controller";
-import { UtilModule } from "src/util/util.module";
+import { UtilModule } from "../util/util.module";
 
 @Module({
   providers: [EventService],

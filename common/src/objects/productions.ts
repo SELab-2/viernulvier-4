@@ -25,6 +25,7 @@ export const ProductionViewSchema = ProductionSchema.extend({
   description2: z.string(),
   tagline: z.string().nullable(),
   credits: z.string().nullable(),
+  artist: z.string().nullable(),
 });
 export const CreateProductionSchema = ProductionSchema.omit({
   id: true,

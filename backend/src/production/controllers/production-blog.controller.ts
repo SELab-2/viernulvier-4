@@ -25,7 +25,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
 import { LanguageService } from "../../util/language/language.service";
-import { ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
+import { ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
 
 /**
  * Handles the Relationships between Productions and Blogs.

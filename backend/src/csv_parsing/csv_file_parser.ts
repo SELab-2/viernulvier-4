@@ -8,10 +8,7 @@ import {
   ProductionDto,
   TagDto,
 } from "../dto/dto";
-import {
-  CreateEventSchema,
-  CreateProductionSchema,
-} from "@repo/common/src/database_objects";
+import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
 import { EventService } from "../event/event.service";
 import { ProductionService } from "../production/production.service";
 import { TagService } from "../tag/tag.service";

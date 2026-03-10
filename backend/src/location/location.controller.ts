@@ -33,8 +33,8 @@ import {
   UpdateLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
-import { LanguageService } from "src/util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
+import { LanguageService } from "../util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
 
 @Controller("locations")
 export class LocationController {

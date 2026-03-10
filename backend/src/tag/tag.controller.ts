@@ -31,8 +31,8 @@ import {
   LanguageQuerySchema,
   UpdateTagSchema,
 } from "@repo/common";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
-import { LanguageService } from "src/util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import { LanguageService } from "../util/language/language.service";
 
 @Controller("tags")
 export class TagController {

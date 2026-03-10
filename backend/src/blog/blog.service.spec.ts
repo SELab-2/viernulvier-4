@@ -20,8 +20,14 @@ describe("BlogService", () => {
   // Sample data for testing
   const mockBlog: BlogDto = {
     id: 1,
-    titel: "Behind the Scenes",
-    description: "Looking at the set of The Great Show.",
+    titel: {
+      en: "Behind the Scenes",
+      nl: "Achter de schermen",
+    },
+    description: {
+      en: "Looking at the set of The Great Show.",
+      nl: "Kijken naar de set van The Great Show",
+    },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
   };
@@ -79,8 +85,14 @@ describe("BlogService", () => {
   describe("createBlog", () => {
     it("should create and return a new blog", async () => {
       const createDto: CreateBlogDto = {
-        titel: "My First Blog",
-        description: "Hello World!",
+        titel: {
+          en: "My First Blog",
+          nl: "Mijn eerste blog",
+        },
+        description: {
+          en: "Hello World!",
+          nl: "Hallo Wereld!",
+        },
       };
       mockBlogDbService.createBlog.mockResolvedValue(mockBlog);
 
@@ -121,8 +133,19 @@ describe("BlogService", () => {
 
   describe("modifyBlog", () => {
     it("should assign the ID to the DTO and update the blog", async () => {
-      const updateDto: UpdateBlogDto = { titel: "Updated titel" };
-      const expectedUpdatedBlog = { ...mockBlog, titel: "Updated titel" };
+      const updateDto: UpdateBlogDto = {
+        titel: {
+          en: "Updated titel",
+          nl: "Bijgewerkte titel",
+        },
+      };
+      const expectedUpdatedBlog = {
+        ...mockBlog,
+        titel: {
+          en: "Updated titel",
+          nl: "Bijgewerkte titel",
+        },
+      };
 
       mockBlogDbService.updateBlog.mockResolvedValue(expectedUpdatedBlog);
 
@@ -132,7 +155,10 @@ describe("BlogService", () => {
       // Validate that the ID was injected into the DTO before calling the DB
       expect(blogDbService.updateBlog).toHaveBeenCalledWith({
         id: 1,
-        titel: "Updated titel",
+        titel: {
+          en: "Updated titel",
+          nl: "Bijgewerkte titel",
+        },
       });
     });
   });

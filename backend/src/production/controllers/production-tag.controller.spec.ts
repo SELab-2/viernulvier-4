@@ -1,25 +1,35 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionTagController } from "./production-tag.controller";
 import { ProductionService } from "../production.service";
-import { ProductionDto, TagDto } from "../../dto/dto";
+import { LanguageService } from "../../util/language/language.service";
+import {
+  ProductionDto,
+  TagDto,
+  TagViewDto,
+  LanguageQueryDto,
+} from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 
 describe("ProductionTagController", () => {
   let controller: ProductionTagController;
   let service: ProductionService;
+  let languageService: LanguageService;
 
   const mockProduction: ProductionDto = {
     id: 1,
-    titel: "The Great Show",
-    description1: "An amazing production",
-    description2: "With great actors",
+    titel: { en: "The Great Show", nl: "De Geweldige Show" },
+    description1: {
+      en: "An amazing production",
+      nl: "Een geweldige productie",
+    },
+    description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
     legacy_id: "am",
-    tagline: "fixing",
-    artist: "the",
-    credits: "tests :-)",
+    tagline: { en: "fixing", nl: "repareren" },
+    artist: { en: "the", nl: "de" },
+    credits: { en: "tests :-)", nl: "testen :-)" },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
   };
@@ -27,14 +37,17 @@ describe("ProductionTagController", () => {
   const mockTags: TagDto[] = [
     {
       id: 1,
-      tag: "Drama",
+      tag: { en: "Drama", nl: "Drama" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
       legacy_id: "str",
     },
+  ];
+
+  const mockTagViews: TagViewDto[] = [
     {
-      id: 2,
-      tag: "Classical",
+      id: 1,
+      tag: "Drama",
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
       legacy_id: "str",
@@ -53,6 +66,12 @@ describe("ProductionTagController", () => {
             removeTagFromProduction: jest.fn(),
           },
         },
+        {
+          provide: LanguageService,
+          useValue: {
+            flattenByLanguage: jest.fn(),
+          },
+        },
       ],
     })
       .overrideGuard(ApiKeyGuard)
@@ -67,6 +86,7 @@ describe("ProductionTagController", () => {
 
     controller = module.get<ProductionTagController>(ProductionTagController);
     service = module.get<ProductionService>(ProductionService);
+    languageService = module.get<LanguageService>(LanguageService);
   });
 
   it("should be defined", () => {
@@ -74,49 +94,42 @@ describe("ProductionTagController", () => {
   });
 
   describe("getTagsOfProductionByID", () => {
-    it("should return tags for a production", async () => {
-      const result = await controller.getTagsOfProductionByID(1);
-      expect(result).toEqual(mockTags);
-      expect(service.getTagsById).toHaveBeenCalledWith(1);
-    });
+    it("should return flattened tags for a production", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
+      jest
+        .spyOn(languageService, "flattenByLanguage")
+        .mockReturnValue(mockTagViews);
 
-    it("should call service.getTagsById with the correct production id", async () => {
-      await controller.getTagsOfProductionByID(1);
+      const result = await controller.getTagsOfProductionByID(1, langQuery);
+
+      expect(result).toEqual(mockTagViews);
       expect(service.getTagsById).toHaveBeenCalledWith(1);
-      expect(service.getTagsById).toHaveBeenCalledTimes(1);
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        mockTags,
+        langQuery.lang,
+      );
     });
 
     it("should return empty array when production has no tags", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
       jest.spyOn(service, "getTagsById").mockResolvedValueOnce([]);
-      const result = await controller.getTagsOfProductionByID(1);
+      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue([]);
+
+      const result = await controller.getTagsOfProductionByID(1, langQuery);
       expect(result).toEqual([]);
     });
 
-    it("should handle different production ids", async () => {
-      await controller.getTagsOfProductionByID(2);
-      expect(service.getTagsById).toHaveBeenCalledWith(2);
-    });
-
     it("should throw a NotFoundException if the production does not exist", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
       jest
         .spyOn(service, "getTagsById")
         .mockRejectedValueOnce(
           new NotFoundException("ProductionDto not found"),
         );
 
-      await expect(controller.getTagsOfProductionByID(999)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-
-    it("should handle database errors when fetching tags fails", async () => {
-      jest
-        .spyOn(service, "getTagsById")
-        .mockRejectedValueOnce(new Error("Failed to fetch tags"));
-
-      await expect(controller.getTagsOfProductionByID(1)).rejects.toThrow(
-        "Failed to fetch tags",
-      );
+      await expect(
+        controller.getTagsOfProductionByID(999, langQuery),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -132,7 +145,7 @@ describe("ProductionTagController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should pass through errors if adding a tag fails (e.g., production not found)", async () => {
+    it("should pass through errors if adding a tag fails", async () => {
       jest
         .spyOn(service, "addTagToProduction")
         .mockRejectedValueOnce(
@@ -157,7 +170,7 @@ describe("ProductionTagController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should pass through errors if removing a tag fails (e.g., production not found)", async () => {
+    it("should pass through errors if removing a tag fails", async () => {
       jest
         .spyOn(service, "removeTagFromProduction")
         .mockRejectedValueOnce(

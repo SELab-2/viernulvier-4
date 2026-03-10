@@ -17,10 +17,10 @@ import {
 } from "@nestjs/swagger";
 import { LanguageQueryDto, PriceDto, PriceViewDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { LanguageService } from "src/util/language/language.service";
+import { LanguageService } from "../../util/language/language.service";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
-import { ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
+import { ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
 
 @ApiTags("Events - Prices")
 @Controller("events/:eventId/prices")

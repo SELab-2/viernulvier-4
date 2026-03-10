@@ -1,17 +1,23 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventPriceController } from "./event-price.controller";
 import EventService from "../event.service";
-import { PriceDto } from "../../dto/dto"; // Assuming this is z.infer<typeof PriceSchema>
+import { LanguageService } from "../../util/language/language.service";
+import { PriceDto, PriceViewDto, LanguageQueryDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 describe("EventPriceController", () => {
   let controller: EventPriceController;
   let eventService: EventService;
+  let languageService: LanguageService;
 
   const mockEventService = {
     getPricesForEvent: jest.fn(),
     addPriceToEvent: jest.fn(),
     removePriceFromEvent: jest.fn(),
+  };
+
+  const mockLanguageService = {
+    flattenByLanguage: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -21,6 +27,10 @@ describe("EventPriceController", () => {
         {
           provide: EventService,
           useValue: mockEventService,
+        },
+        {
+          provide: LanguageService,
+          useValue: mockLanguageService,
         },
       ],
     })
@@ -32,6 +42,7 @@ describe("EventPriceController", () => {
 
     controller = module.get<EventPriceController>(EventPriceController);
     eventService = module.get<EventService>(EventService);
+    languageService = module.get<LanguageService>(LanguageService);
   });
 
   afterEach(() => {
@@ -45,24 +56,52 @@ describe("EventPriceController", () => {
   });
 
   describe("getPricesOfEvent", () => {
-    it("should call getPricesForEvent and return an array of prices", async () => {
+    it("should call getPricesForEvent and return an array of flattened prices", async () => {
       // Arrange
       const eventId = 1;
+      const langQuery: LanguageQueryDto = { lang: "en" };
 
-      // Updated to match the new PriceSchema (id, price, name)
-      const expectedPrices: PriceDto[] = [
-        { id: 1, price: 15.5, name: "Early Bird" } as PriceDto,
-        { id: 2, price: 25.0, name: "Standard Admission" } as PriceDto,
+      // Updated to match the strict LocalizedStringSchema
+      const rawPrices: PriceDto[] = [
+        {
+          id: 1,
+          price: 15.5,
+          name: { en: "Early Bird", nl: "Vroege vogel" },
+          created_at: "2024-01-15T19:00:00Z",
+          updated_at: "2024-01-15T19:00:00Z",
+          legacy_id: null,
+        },
       ];
-      mockEventService.getPricesForEvent.mockResolvedValue(expectedPrices);
+
+      // What the LanguageService should spit out when flattened
+      const flattenedPrices: PriceViewDto[] = [
+        {
+          id: 1,
+          price: 15.5,
+          name: "Early Bird",
+          created_at: "2024-01-15T19:00:00Z",
+          updated_at: "2024-01-15T19:00:00Z",
+          legacy_id: null,
+        },
+      ];
+
+      mockEventService.getPricesForEvent.mockResolvedValue(rawPrices);
+      mockLanguageService.flattenByLanguage.mockReturnValue(flattenedPrices);
 
       // Act
-      const result = await controller.getPricesOfEvent(eventId);
+      const result = await controller.getPricesOfEvent(eventId, langQuery);
 
       // Assert
       expect(eventService.getPricesForEvent).toHaveBeenCalledWith(eventId);
       expect(eventService.getPricesForEvent).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(expectedPrices);
+
+      // Ensure the flattening service was invoked correctly
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        rawPrices,
+        langQuery.lang,
+      );
+
+      expect(result).toEqual(flattenedPrices);
     });
   });
 
