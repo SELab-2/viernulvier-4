@@ -1,7 +1,14 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
-import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  LocationDto,
+  PriceDto,
+  UpdateEventDto,
+} from "../dto/dto";
+import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -226,22 +233,18 @@ export class EventDatabaseService {
   /**
    * get the location linked with an event
    * @param id the ID of the event we want the location of.
-   * @param lang is the used language
    * @returns the LocationDto of the event.
    */
-  async getLocationOfEvent(
-    id: number,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<LocationDto> {
+  async getLocationOfEvent(id: number): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location->>'${lang}' AS loc, l.legacy_id, l.created_at, l.updated_at
+    SELECT l.id, l.location, l.legacy_id, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
     LIMIT 1
   `;
 
-    const result = await this.db.query(query, [id]);
+    const result = await this.db.query<LocationDto>(query, [id]);
 
     if (result.length === 0) {
       throw new Error("Could not find location");
@@ -294,14 +297,12 @@ export class EventDatabaseService {
    * @param id the ID of the event we want all the prices of.
    * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
    * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
-   * @param lang is the used language
    * @returns a list of PriceDto objects linked to the given event.
    */
   async getPricesOfEvent(
     id: number,
     amount: number = 0,
     page: number = 0,
-    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<PriceDto[]> {
     if (amount === 0) {
       const query = `
@@ -309,7 +310,7 @@ export class EventDatabaseService {
              p.created_at,
              p.updated_at,
              p.price,
-             p.name->>'${lang}' AS name,
+             p.name,
              p.legacy_id
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
@@ -324,7 +325,7 @@ export class EventDatabaseService {
     const query = `
     SELECT p.id,
            p.price,
-           p.name->>'${lang}',
+           p.name,
            p.created_at,
            p.updated_at,
            p.legacy_id

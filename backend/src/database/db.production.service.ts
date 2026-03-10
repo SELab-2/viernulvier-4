@@ -177,6 +177,8 @@ export class ProductionDatabaseService {
       i++;
     }
 
+    // Will look anywhere in the artist field for what was searched.
+    // This checks all supported languages.
     if (filters.artist) {
       const artistClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `p.artist->>'${lang}' ILIKE $${i}`,
