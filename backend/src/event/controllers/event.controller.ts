@@ -8,8 +8,8 @@ import {
   Patch,
   Post,
   Put,
-  UseGuards,
   Query,
+  UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import EventService from "../event.service";
@@ -40,6 +40,7 @@ export class EventController {
 
   /**
    * Responds to GET /events
+   * note: pagination is done via the filters param.
    * @param filters The filters that should be applied to the query.
    * @returns All EventDto objects.
    */

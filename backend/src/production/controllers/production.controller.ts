@@ -29,13 +29,7 @@ import {
   ProductionViewDto,
   UpdateProductionDto,
 } from "../../dto/dto";
-import {
-  ApiBody,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-  ApiSecurity,
-} from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity, } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageService } from "../../util/language/language.service";
 import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
@@ -52,6 +46,7 @@ export class ProductionController {
 
   /**
    * Responds to GET /productions.
+   * note: pagination is done here via the filters param.
    * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */

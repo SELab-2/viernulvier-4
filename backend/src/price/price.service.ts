@@ -12,7 +12,7 @@ export class PriceService {
   constructor(private readonly priceDbService: PriceDatabaseService) {}
 
   /**
-   * Fetch a Price object by it's ID.
+   * Fetch a Price object by its ID.
    * @param priceId The ID of the Price we want to fetch.
    * @returns A Price object.
    */

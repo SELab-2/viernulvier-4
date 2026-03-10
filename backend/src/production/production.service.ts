@@ -19,6 +19,7 @@ export class ProductionService {
 
   /**
    * Fetches all ProductionDto objects from the DBService
+   * note: pagination is done here via the filters param.
    * @param filters The filters to be applied to the query.
    * @returns All ProductionDto objects
    */
