@@ -1,19 +1,19 @@
 # Blogs API
 
 ### [GET] `/blogs`
-Returns all blog posts.
+- **Returns:** Array of `BlogDto`
 
 ### [GET] `/blogs/:blogId`
-Returns a specific blog post.
+- **Returns:** `BlogDto`
 
 ### [POST] `/blogs`
-Creates a blog post. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | **Body:** `CreateBlogDto`
 
 ### [PUT] `/blogs/:blogId`
-Replaces a blog post. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | **Body:** `UpdateBlogDto`
 
 ### [PATCH] `/blogs/:blogId`
-Updates a blog post. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | **Body:** `UpdateBlogDto`
 
 ### [DELETE] `/blogs/:blogId`
-Deletes a blog post. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required

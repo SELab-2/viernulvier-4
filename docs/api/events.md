@@ -2,38 +2,41 @@
 
 ## 📅 Events Management
 ### [GET] `/events`
-Returns all events. Supports query filters.
+Returns all events. Supports filters via query.
+- **Returns:** Array of `EventDto`
 
 ### [GET] `/events/:eventId`
-Returns a specific event.
+- **Returns:** `EventDto`
 
 ### [POST] `/events`
-Creates an event. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | **Body:** `CreateEventDto`
 
 ### [PUT] `/events/:eventId`
-Replaces an existing event. (**Security:** `apiKey` required)
+Replaces an event.
+- **Security:** `apiKey` required | **Body:** `EventDto`
 
 ### [PATCH] `/events/:eventId`
-Partially updates an event. (**Security:** `apiKey` required)
+Updates an event.
+- **Security:** `apiKey` required | **Body:** `UpdateEventDto`
 
 ### [DELETE] `/events/:eventId`
-Deletes an event. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required
 
-## 🔗 Event Relationships (Prices & Locations)
+## 🔗 Relationships
 ### [GET] `/events/:eventId/prices`
-Returns prices for this event.
+- **Returns:** Array of `PriceDto`
 
 ### [PUT] `/events/:eventId/prices/:priceId`
-Adds a price to an event. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | Links price to event.
 
 ### [DELETE] `/events/:eventId/prices/:priceId`
-Removes a price from an event. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | Unlinks price from event.
 
 ### [GET] `/events/:eventId/locations`
-Returns the location for this event.
+- **Returns:** `LocationDto`
 
 ### [PUT] `/events/:eventId/locations/:locationId`
-Links a location to an event. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | Links location to event.
 
 ### [DELETE] `/events/:eventId/locations`
-Unlinks the location from an event. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | Unlinks location from event.

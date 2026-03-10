@@ -8,6 +8,7 @@ theme: readthedocs
 nav:
   - Home: index.md
   - Build & Run:
+      - Index: build-run/index.md
       - Backend: build-run/backend.md
       - Frontend: build-run/frontend.md
   - API Reference:
@@ -15,7 +16,8 @@ nav:
       - Events: api/events.md
       - Productions: api/productions.md
       - Blogs: api/blogs.md
-      - Tags & Locations: api/tags-locations.md
+      - Tags: api/tags.md
+      - Locations: api/locations.md
       - Pricing: api/pricing.md
   - Testing:
       - Overview: testing/index.md

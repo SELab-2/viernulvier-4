@@ -1,16 +1,17 @@
 # Pricing API
 
 ### [GET] `/prices`
-Returns the master price list.
+- **Returns:** Array of `PriceDto`
 
 ### [GET] `/prices/:priceId`
-Returns a specific price.
+- **Returns:** `PriceDto`
 
 ### [POST] `/prices`
-Creates a price category. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required | **Body:** `CreatePriceDto`
 
 ### [PUT] `/prices`
-Updates a price category (ID in body). (**Security:** `apiKey` required)
+Updates a price (ID in body).
+- **Security:** `apiKey` required | **Body:** `UpdatePriceDto`
 
 ### [DELETE] `/prices/:priceId`
-Deletes a price category. (**Security:** `apiKey` required)
+- **Security:** `apiKey` required
