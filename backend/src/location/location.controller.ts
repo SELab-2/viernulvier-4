@@ -7,11 +7,18 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import { LocationService } from "./location.service";
-import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import {
+  CreateLocationDto,
+  LanguageQueryDto,
+  LocationDto,
+  LocationViewDto,
+  UpdateLocationDto,
+} from "../dto/dto";
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -20,26 +27,36 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ZodValidationPipe } from "nestjs-zod";
-import { CreateLocationSchema, UpdateLocationSchema } from "@repo/common";
+import {
+  CreateLocationSchema,
+  LanguageQuerySchema,
+  UpdateLocationSchema,
+} from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { LanguageService } from "src/util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "src/common/decorators/api.ok";
 
 @Controller("locations")
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(
+    private readonly locationService: LocationService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/locations"
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
-  @ApiOkResponse({
-    type: LocationDto,
-    isArray: true,
-    description: "Returned a list of all Locations.",
-  })
+  @ApiOkArrayAnyOf(LocationDto, LocationViewDto)
   @Get()
-  async getLocations(): Promise<LocationDto[]> {
-    return await this.locationService.getLocations();
+  async getLocations(
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<LocationDto[] | LocationViewDto[]> {
+    return this.ls.flattenByLanguage<LocationDto[] | LocationViewDto[]>(
+      await this.locationService.getLocations(),
+      lang.lang,
+    );
   }
 
   /**
@@ -48,15 +65,16 @@ export class LocationController {
    * @returns The Location with that ID.
    */
   @ApiOperation({ summary: "Fetches a Location by it's ID." })
-  @ApiOkResponse({
-    type: LocationDto,
-    description: "The Location with provided ID",
-  })
+  @ApiOkAnyOf(LocationDto, LocationViewDto)
   @Get(":locationId")
   async getLocationById(
     @Param("locationId", ParseIntPipe) locationId: number,
-  ): Promise<LocationDto> {
-    return await this.locationService.getLocationById(locationId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<LocationDto | LocationViewDto> {
+    return this.ls.flattenByLanguage<LocationDto | LocationViewDto>(
+      await this.locationService.getLocationById(locationId),
+      lang.lang,
+    );
   }
 
   /**
