@@ -115,6 +115,11 @@ Table event_prices {
   }
 }
 
+Table scraper_dates {
+  id int [not null]
+  date TIMESTAMP
+}
+
 Ref: events.production_id > productions.id [delete: cascade]
 
 Ref: production_blogs.production_id > productions.id [delete: cascade]

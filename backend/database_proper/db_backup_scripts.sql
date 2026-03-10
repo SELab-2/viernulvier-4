@@ -11,7 +11,7 @@ CREATE TABLE productions
     credits         JSONB,
     created_at      TIMESTAMP DEFAULT now(),
     updated_at      TIMESTAMP DEFAULT now(),
-    legacy_id       TEXT,
+    legacy_id       TEXT UNIQUE,
     attendance_mode TEXT,
     performer_type  TEXT
 );
@@ -41,7 +41,7 @@ CREATE TABLE events
     created_at      TIMESTAMP NOT NULL DEFAULT now(),
     updated_at      TIMESTAMP NOT NULL DEFAULT now(),
     production_id   INT       NOT NULL,
-    legacy_id       TEXT,
+    legacy_id       TEXT UNIQUE,
     CONSTRAINT fk_production
         FOREIGN KEY (production_id)
             REFERENCES productions (id)
@@ -93,7 +93,7 @@ CREATE TABLE tags
     tag        JSONB     NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now(),
-    legacy_id  TEXT
+    legacy_id  TEXT UNIQUE
 );
 
 CREATE TRIGGER set_updated_at_tags
@@ -123,7 +123,7 @@ CREATE TABLE locations
     location   JSONB UNIQUE NOT NULL,
     created_at TIMESTAMP    NOT NULL DEFAULT now(),
     updated_at TIMESTAMP    NOT NULL DEFAULT now(),
-    legacy_id  TEXT,
+    legacy_id  TEXT UNIQUE,
     PRIMARY KEY (id)
 );
 
@@ -174,7 +174,7 @@ CREATE TABLE prices
     price      NUMERIC(10, 2) NOT NULL,
     created_at TIMESTAMP      NOT NULL DEFAULT now(),
     updated_at TIMESTAMP      NOT NULL DEFAULT now(),
-    legacy_id  TEXT
+    legacy_id  TEXT UNIQUE
 );
 
 CREATE TABLE event_prices
@@ -182,4 +182,10 @@ CREATE TABLE event_prices
     event_id INT NOT NULL REFERENCES events (id) ON DELETE CASCADE,
     price_id INT NOT NULL REFERENCES prices (id) ON DELETE CASCADE,
     PRIMARY KEY (event_id, price_id)
+);
+
+CREATE TABLE scraper_dates
+(
+    if   SERIAL PRIMARY KEY,
+    date TIMESTAMP DEFAULT '1970-01-01 00:00:00'
 );
