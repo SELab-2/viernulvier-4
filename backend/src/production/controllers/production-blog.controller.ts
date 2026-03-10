@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
@@ -14,8 +15,17 @@ import {
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
-import { BlogDto, ProductionDto } from "../../dto/dto";
+import {
+  BlogDto,
+  BlogViewDto,
+  LanguageQueryDto,
+  ProductionDto,
+} from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { LanguageQuerySchema } from "@repo/common";
+import { ZodValidationPipe } from "nestjs-zod";
+import { LanguageService } from "../../util/language/language.service";
+import { ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
 
 /**
  * Handles the Relationships between Productions and Blogs.
@@ -23,7 +33,10 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 @ApiTags("Production - Blog")
 @Controller("productions/:productionId/blogs")
 export class ProductionBlogController {
-  constructor(private readonly productionService: ProductionService) {}
+  constructor(
+    private readonly productionService: ProductionService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/productions/:productionId/blogs".
@@ -31,16 +44,16 @@ export class ProductionBlogController {
    * @returns A list of all Blog objects linked to this Production.
    */
   @ApiOperation({ summary: "Get all Blogs linked to a Production." })
-  @ApiOkResponse({
-    type: BlogDto,
-    isArray: true,
-    description: "Returned all Linked blogs.",
-  })
+  @ApiOkArrayAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getProductionBlogs(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<BlogDto[]> {
-    return await this.productionService.getProductionBlogs(productionId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto[] | BlogViewDto[]> {
+    return this.ls.flattenByLanguage<BlogDto[] | BlogViewDto[]>(
+      await this.productionService.getProductionBlogs(productionId),
+      lang.lang,
+    );
   }
 
   /**

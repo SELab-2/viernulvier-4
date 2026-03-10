@@ -1,7 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type { CreateEventDto, EventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
+import type {
+  CreateEventDto,
+  EventDto,
+  LocationDto,
+  PriceDto,
+  UpdateEventDto,
+} from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterEventSchema } from "@repo/common";
@@ -22,22 +28,46 @@ describe("EventService", () => {
     legacy_id: "str",
   };
 
+  // Updated Location to use LocalizedStringSchema
   const mockLocation: LocationDto = {
     id: 1,
-    location: "Citadel Park",
+    location: {
+      en: "Citadel Park",
+      nl: "Citadelpark",
+    },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
     legacy_id: "str",
   };
 
+  // Updated Blog to use LocalizedStringSchema (even if it's just mocked for db configuration)
   const mockBlog = {
     id: 1,
-    title: "Event Update",
-    content: "This is a blog about the event.",
+    titel: {
+      en: "Event Update",
+      nl: "Evenement Update",
+    },
+    description: {
+      en: "This is a blog about the event.",
+      nl: "Dit is een blog over het evenement.",
+    },
+    created_at: "2024-01-15T19:00:00Z",
+    updated_at: "2024-01-15T19:00:00Z",
   };
 
+  // Updated Prices to use LocalizedStringSchema and full DTO fields
   const mockPrices: PriceDto[] = [
-    { id: 1, price: 15.5, name: "Early Bird" } as PriceDto,
+    {
+      id: 1,
+      price: 15.5,
+      name: {
+        en: "Early Bird",
+        nl: "Vroege vogel",
+      },
+      created_at: "2024-01-15T19:00:00Z",
+      updated_at: "2024-01-15T19:00:00Z",
+      legacy_id: null,
+    },
   ];
 
   const mockEvents: EventDto[] = [mockEvent];
