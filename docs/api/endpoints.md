@@ -1,16 +1,16 @@
 # API Endpoints Reference
 
-Deze pagina bevat de volledige documentatie van de beschikbare REST endpoints voor de viernulvier-4 backend. De backend is gebouwd met het NestJS framework.
+This page provides the complete documentation for the available REST endpoints of the viernulvier-4 backend. The backend is built using the NestJS framework.
 
 **Base URL (Development):** `http://localhost:3000`
 
 ---
 
 ## 🔐 Authentication
-Beheert gebruikerstoegang en sessies.
+Manage user access and sessions.
 
 ### [POST] `/auth/login`
-Authenticeert een gebruiker en genereert een JWT access token.
+Authenticates a user and generates a JWT access token.
 
 **Request Body:**
 ```json
@@ -22,7 +22,7 @@ Authenticeert een gebruiker en genereert een JWT access token.
 **Response (200 OK):**
 ```json
 {
-    "access_token": ""
+    "access_token": "eyJhbGci0iJIUzI1..."
 }
 ```
 
@@ -30,18 +30,18 @@ Authenticeert een gebruiker en genereert een JWT access token.
 
 ## 🏷️ Tags
 ### [GET] `/tag`
-Haalt een lijst op van alle beschikbare tags.
+Retrieves a list of available tags.
 
 **Response (200 OK):**
 ```json
 [
     {
         "id": 1,
-        "name": "Samenwerking"
+        "name": "theatre"
     },
     {
         "id": 2,
-        "name": "Event"
+        "name": "concert"
     }
 ]
 ```
@@ -50,7 +50,7 @@ Haalt een lijst op van alle beschikbare tags.
 
 ## 📍 Locations
 ### [GET] `/location`
-Geeft alle geregistreerde locaties terug.
+Returns all registered locations.
 
 **Response (200 OK):**
 ```json
@@ -68,7 +68,7 @@ Geeft alle geregistreerde locaties terug.
 ## 🎬 Production
 
 ### [GET] `/production`
-Haalt alle lopende producties op.
+Fetches all ongoing productions.
 
 ### [GET] `/production/blog`
-Haalt blogs op die gekoppeld zijn aan producties.
+Retrieves blogs associated with productions.
