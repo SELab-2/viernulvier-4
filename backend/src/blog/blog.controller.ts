@@ -8,12 +8,24 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { BlogService } from "./blog.service";
-import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
+import {
+  BlogSchema,
+  CreateBlogSchema,
+  LanguageQuerySchema,
+  UpdateBlogSchema,
+} from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  BlogViewDto,
+  CreateBlogDto,
+  LanguageQueryDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 import {
   ApiBody,
   ApiOkResponse,
@@ -21,6 +33,7 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { DbService } from "src/database/db.service";
 
 @Controller("blogs")
 export class BlogController {
@@ -37,8 +50,13 @@ export class BlogController {
     description: "Returned all blogs.",
   })
   @Get()
-  async getAllBlogs(): Promise<BlogDto[]> {
-    return await this.blogService.getAllBlogs();
+  async getAllBlogs(
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto[] | BlogViewDto[]> {
+    return DbService.flattenTranslation<BlogDto[] | BlogViewDto[]>(
+      await this.blogService.getAllBlogs(),
+      lang.lang,
+    );
   }
 
   /**
