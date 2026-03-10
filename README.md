@@ -2,8 +2,8 @@
 
 # viernulvier-4
 
-
 ## Groepsleden
+
 * **Matthieu De Clercq:** Groepsleider, back-end verantwoordelijke
 * **Alex Nollet:** Technische lead, back-end verantwoordelijke
 * **Sebastien Harris:** Systeembeheerder, back-end verantwoordelijke
@@ -14,6 +14,7 @@
 * **Diana Dendauw:** front-end verantwoordelijke
 
 ## Frameworks
+
 * **Back-end:** Typescript + NestJS
 * **Front-end:** Vue + Nuxt 4
 * **Database:** PostrgeSQL
@@ -26,3 +27,8 @@ Belangrijke commandos (allemaal uitgevoerd in de *root* map):
 * `npm run start:dev`: Start lokaal de *backend* op poort **3000** en de *frontend* op poort **3001**.
 * `npm run test`: Run alle testen voor de hele stack.
 * `npm run test:coverage`: Run alle testen voor de hele stack **en** genereer/print coverage statistieken.
+
+## Github pages
+
+Alle belangrijke informatie over de technische stack, hoe je die moet deployen, etc... kan je terugvinden in
+de [github pages link](https://selab-2.github.io/viernulvier-4/)
