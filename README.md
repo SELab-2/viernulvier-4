@@ -28,7 +28,7 @@ Belangrijke commandos (allemaal uitgevoerd in de *root* map):
 * `npm run test`: Run alle testen voor de hele stack.
 * `npm run test:coverage`: Run alle testen voor de hele stack **en** genereer/print coverage statistieken.
 
-## Github pages
+## Documentatie
 
-Alle belangrijke informatie over de technische stack, hoe je die moet deployen, etc... kan je terugvinden in
-de [github pages link](https://selab-2.github.io/viernulvier-4/)
+Alle relevante informatie over de technische stack, deployment en code documentatie is te vinden op
+de [GitHub Pages](https://selab-2.github.io/viernulvier-4/).
