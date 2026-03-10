@@ -176,7 +176,6 @@ export class BlogDatabaseService {
   /**
    * Delete function for deleting blogs from the database.
    * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
    * @returns nothing.
    */
   async deleteBlog(blogId: number): Promise<void> {
