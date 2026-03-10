@@ -28,8 +28,6 @@ function createMockStream(rows: any[], error?: Error) {
   };
 }
 
-// TODO: When tests and parser are fixed, remove .skip().
-
 describe("CSVFileParser.parseCSVWithSchema", () => {
   beforeEach(() => {
     // silence warnings emitted during parsing; tests will assert on them if needed

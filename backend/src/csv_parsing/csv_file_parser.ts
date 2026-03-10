@@ -367,5 +367,4 @@ export class CSVFileParser {
     return createdProductions;
   }
 
-  //TODO: add inserting function for productions once new insert endpoint is added to backend
 }
