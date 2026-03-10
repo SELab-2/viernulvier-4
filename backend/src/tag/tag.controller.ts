@@ -102,7 +102,7 @@ export class TagController {
   @Delete(":tagId")
   async deleteTag(
     @Param("tagId", ParseIntPipe) tagId: number,
-  ): Promise<{ message: string }> {
+  ): Promise< {message: string} > {
     return await this.tagService.deleteTag(tagId);
   }
 }
