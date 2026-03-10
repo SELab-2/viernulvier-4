@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
+import { ResourceGoneException } from "../common/exceptions";
 import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
 import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
 
@@ -13,13 +14,13 @@ export class EventDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The EventDto if there is one.
    */
-  async getEventById(id: number): Promise<EventDto> {
+  async getEventById(eventId: number): Promise<EventDto> {
     const events: EventDto[] = await this.getEvents(
-      FilterEventSchema.parse({ id: id }),
+      FilterEventSchema.parse({ id: eventId }),
     );
     if (events.length === 0)
-      throw new BadRequestException(
-        `No EventDto exists for provided ID(${id})`,
+      throw new ResourceGoneException(
+        `No EventDto exists for provided ID(${eventId})`,
       );
 
     return events[0]; // There should be an EventDto in here if the length is not 0.
@@ -203,7 +204,7 @@ export class EventDatabaseService {
     const result = await this.db.query<EventDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Event not found");
+      throw new ResourceGoneException("Event not found");
     }
 
     return result[0]; // should have the updated event only.
@@ -211,16 +212,18 @@ export class EventDatabaseService {
 
   /**
    * Delete function for deleting events from the database.
-   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blogId must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * (silent handling)
    * @returns nothing.
    */
-  async deleteEvent(id: number): Promise<void> {
+  async deleteEvent(blogId: number): Promise<void> {
     // note we delete on id not p_id as that would affect more events.
     // to delete all events using p_id -> use deleteEventsWithPID()
-    const query = `DELETE FROM events WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+    const query = `DELETE FROM events WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(`Cannot delete: Event ${blogId} not found`);
+    }
   }
 
   /**
@@ -244,7 +247,7 @@ export class EventDatabaseService {
     const result = await this.db.query(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Could not find location");
+      throw new ResourceGoneException("Could not find location");
     }
 
     return result[0];
@@ -284,9 +287,11 @@ export class EventDatabaseService {
    * @returns nothing (silent handling.)
    */
   async deleteLocationFromEvent(event_id: number): Promise<void> {
-    const query = `DELETE FROM event_locations WHERE event_id = $1`;
-
-    await this.db.query(query, [event_id]);
+    const query = `DELETE FROM event_locations WHERE event_id = $1 RETURNING event_id;`;
+    const result = await this.db.query(query, [event_id]);
+    if (result.length === 0) {
+      throw new ResourceGoneException(`Cannot delete location: Event ${event_id} not found or has no location linked`);
+    }
   }
 
   /**
