@@ -44,7 +44,8 @@ in the project root.
 The frontend is built with [Vue](https://vuejs.org/) and [Nuxt](https://nuxt.com/). For implementation details, see
 the [frontend pages](insert here).
 
-Under normal circumstances, the frontend requires no extra setup and should work out of the box after following the
+Under normal circumstances, the frontend requires minimal setup and should work pretty much out of the box after
+following the
 general deployment steps below. See [here](frontend.md) if you do run into issues.
 
 ---

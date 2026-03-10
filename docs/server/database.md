@@ -90,11 +90,21 @@ accounts ──< account_api_keys >── api_keys
 
 ## Extra Information
 
-After setting up the database, note the following — all four are required as backend environment variables:
+As an alternative to restoring from the dump, a backup of the raw SQL setup scripts is also available. These can be used
+to set up a clean empty database from scratch.
 
-- **Username** – your PostgreSQL user
-- **Database name** – the name of the restored database
-- **Password** – the user's password
-- **Port** – default is `5432`
+> **Important:** If you use this method, you will need to manually create an initial admin account and API key before
+> the backend will function.
+
+---
+
+After setting up the database, make note of the following — all four are required as backend environment variables:
+
+| Variable          | Value                           |
+|-------------------|---------------------------------|
+| **Username**      | Your PostgreSQL user            |
+| **Database name** | The name of your database       |
+| **Password**      | Your PostgreSQL user's password |
+| **Port**          | Default is `5432`               |
 
 See the [backend setup page](backend.md) for details on where to configure these.
