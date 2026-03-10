@@ -24,9 +24,9 @@ import {
   ProductionDto,
 } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { DbService } from "src/database/db.service";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
+import { LanguageService } from "../../util/language/language.service";
 
 /**
  * Handles the Relationships between Productions and Blogs.
@@ -34,7 +34,10 @@ import { ZodValidationPipe } from "nestjs-zod";
 @ApiTags("Production - Blog")
 @Controller("productions/:productionId/blogs")
 export class ProductionBlogController {
-  constructor(private readonly productionService: ProductionService) {}
+  constructor(
+    private readonly productionService: ProductionService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/productions/:productionId/blogs".
@@ -63,7 +66,7 @@ export class ProductionBlogController {
     @Param("productionId", ParseIntPipe) productionId: number,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
   ): Promise<BlogDto[] | BlogViewDto[]> {
-    return DbService.flattenTranslation<BlogDto[] | BlogViewDto[]>(
+    return this.ls.flattenByLanguage<BlogDto[] | BlogViewDto[]>(
       await this.productionService.getProductionBlogs(productionId),
       lang.lang,
     );

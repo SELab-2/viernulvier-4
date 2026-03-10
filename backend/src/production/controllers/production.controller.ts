@@ -39,14 +39,17 @@ import {
   getSchemaPath,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { DbService } from "src/database/db.service";
+import { LanguageService } from "../../util/language/language.service";
 
 /**
  * Handles CORE functionality for Productions.
  */
 @Controller("productions")
 export class ProductionController {
-  constructor(private readonly productionService: ProductionService) {}
+  constructor(
+    private readonly productionService: ProductionService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to GET /productions.
@@ -76,7 +79,7 @@ export class ProductionController {
   async getAllProductions(
     @Query() filters: FilterProductionDto,
   ): Promise<ProductionDto[] | ProductionViewDto[]> {
-    return DbService.flattenTranslation<ProductionDto[] | ProductionViewDto[]>(
+    return this.ls.flattenByLanguage<ProductionDto[] | ProductionViewDto[]>(
       await this.productionService.getAllProductions(filters),
       filters.lang,
     );
@@ -106,8 +109,8 @@ export class ProductionController {
   async getProductionById(
     @Param("productionId", ParseIntPipe) productionId: number,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<ProductionDto[] | ProductionViewDto[]> {
-    return DbService.flattenTranslation<ProductionDto[] | ProductionViewDto[]>(
+  ): Promise<ProductionDto | ProductionViewDto> {
+    return this.ls.flattenByLanguage<ProductionDto | ProductionViewDto>(
       await this.productionService.getProductionById(productionId),
       lang.lang,
     );

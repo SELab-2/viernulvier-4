@@ -33,11 +33,14 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
-import { DbService } from "src/database/db.service";
+import { LanguageService } from "../util/language/language.service";
 
 @Controller("blogs")
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(
+    private readonly blogService: BlogService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/blogs"
@@ -53,7 +56,7 @@ export class BlogController {
   async getAllBlogs(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
   ): Promise<BlogDto[] | BlogViewDto[]> {
-    return DbService.flattenTranslation<BlogDto[] | BlogViewDto[]>(
+    return this.ls.flattenByLanguage<BlogDto[] | BlogViewDto[]>(
       await this.blogService.getAllBlogs(),
       lang.lang,
     );

@@ -24,9 +24,9 @@ import {
   TagViewDto,
 } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { DbService } from "src/database/db.service";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
+import { LanguageService } from "../../util/language/language.service";
 
 /**
  * Handles the Relationships between Productions and Tags.
@@ -34,7 +34,10 @@ import { ZodValidationPipe } from "nestjs-zod";
 @ApiTags("Production - Tag")
 @Controller("productions/:productionId/tags")
 export class ProductionTagController {
-  constructor(private readonly productionService: ProductionService) {}
+  constructor(
+    private readonly productionService: ProductionService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to GET /productions/:productionId/tags
@@ -65,7 +68,7 @@ export class ProductionTagController {
     @Param("productionId", ParseIntPipe) productionId: number,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
   ): Promise<TagDto[] | TagViewDto[]> {
-    return DbService.flattenTranslation<TagDto[] | TagViewDto[]>(
+    return this.ls.flattenByLanguage<TagDto[] | TagViewDto[]>(
       await this.productionService.getTagsById(productionId),
       lang.lang,
     );
