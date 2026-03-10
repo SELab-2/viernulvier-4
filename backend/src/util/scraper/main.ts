@@ -16,8 +16,11 @@ export async function runScraper() {
   );
   const date: string = (dates[0] as Record<string, string>).date;
 
+  // Need to format the date so it can be used in the link correctly.
+  const formattedDate: string = new Date(date).toISOString();
+
   // Scrape all the data we need.
-  const scrapeResults: ScrapeResult = await scrape(date);
+  const scrapeResults: ScrapeResult = await scrape(formattedDate);
 
   logger.info("Inserting Scraped Data...");
 
