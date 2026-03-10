@@ -187,5 +187,5 @@ CREATE TABLE event_prices
 CREATE TABLE scraper_dates
 (
     if   SERIAL PRIMARY KEY,
-    date TIMESTAMP
+    date TIMESTAMP DEFAULT '1970-01-01 00:00:00'
 );
