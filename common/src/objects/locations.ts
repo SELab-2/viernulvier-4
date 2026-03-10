@@ -1,11 +1,15 @@
 import { z } from "zod";
+import { LocalizedStringSchema } from "./language";
 
 export const LocationSchema = z.object({
   id: z.number(),
-  location: z.string(),
+  location: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   legacy_id: z.string().nullable(),
+});
+export const LocationViewSchema = LocationSchema.extend({
+  location: z.string(),
 });
 
 export const CreateLocationSchema = LocationSchema.omit({
@@ -16,5 +20,6 @@ export const CreateLocationSchema = LocationSchema.omit({
 export const UpdateLocationSchema = LocationSchema.partial();
 
 export type Location = z.infer<typeof LocationSchema>;
+export type LocationView = z.infer<typeof LocationViewSchema>;
 export type CreateLocation = z.infer<typeof CreateLocationSchema>;
 export type UpdateLocation = z.infer<typeof UpdateLocationSchema>;

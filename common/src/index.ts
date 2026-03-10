@@ -42,17 +42,21 @@ import {
 } from "./objects/language";
 import {
   LocationSchema,
+  LocationViewSchema,
   CreateLocationSchema,
   UpdateLocationSchema,
   Location,
+  LocationView,
   CreateLocation,
   UpdateLocation,
 } from "./objects/locations";
 import {
   PriceSchema,
+  PriceViewSchema,
   CreatePriceSchema,
   UpdatePriceSchema,
   Price,
+  PriceView,
   CreatePrice,
   UpdatePrice,
 } from "./objects/prices";
@@ -99,6 +103,7 @@ export {
   CreateTagSchema,
   UpdateTagSchema,
   LocationSchema,
+  LocationViewSchema,
   CreateLocationSchema,
   UpdateLocationSchema,
   CreateAccountSchema,
@@ -107,6 +112,7 @@ export {
   ApiKeySchema,
   VerifyApiKeySchema,
   PriceSchema,
+  PriceViewSchema,
   CreatePriceSchema,
   UpdatePriceSchema,
   PaginationFilterSchema,
@@ -133,6 +139,7 @@ export type {
   CreateBlog,
   UpdateBlog,
   Location,
+  LocationView,
   CreateLocation,
   UpdateLocation,
   UpdateAccount,
@@ -141,6 +148,7 @@ export type {
   ApiKey,
   VerifyApiKey,
   Price,
+  PriceView,
   CreatePrice,
   UpdatePrice,
   PaginationFilter,

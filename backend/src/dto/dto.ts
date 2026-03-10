@@ -29,6 +29,8 @@ import {
   ProductionViewSchema,
   TagViewSchema,
   BlogViewSchema,
+  LocationViewSchema,
+  PriceViewSchema,
 } from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
@@ -60,11 +62,13 @@ export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
 
 // Location Wrappers
 export class LocationDto extends createZodDto(LocationSchema) {}
+export class LocationViewDto extends createZodDto(LocationViewSchema) {}
 export class CreateLocationDto extends createZodDto(CreateLocationSchema) {}
 export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
 
 // Price Wrappers
 export class PriceDto extends createZodDto(PriceSchema) {}
+export class PriceViewDto extends createZodDto(PriceViewSchema) {}
 export class CreatePriceDto extends createZodDto(CreatePriceSchema) {}
 export class UpdatePriceDto extends createZodDto(UpdatePriceSchema) {}
 
