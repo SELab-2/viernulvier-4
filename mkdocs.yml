@@ -10,5 +10,9 @@ nav:
   - Build & Run:
       - Backend: build-run/backend.md
       - Frontend: build-run/frontend.md
-  - API Reference:                # Dit wordt de nieuwe dropdown
+  - API Reference:
       - Endpoints: api/endpoints.md
+  - Testing:
+      - Overview: testing/index.md
+      - Backend: testing/backend.md
+      - Frontend: testing/frontend.md

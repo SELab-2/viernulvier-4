@@ -1,10 +1,16 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateEventDto, EventDto, ProductionDto, TagDto } from "../dto/dto";
+import {
+  CreateEventDto,
+  CreateProductionDto,
+  EventDto,
+  ProductionDto,
+  TagDto,
+} from "../dto/dto";
 import {
   CreateEventSchema,
-  ProductionSchema,
+  CreateProductionSchema,
 } from "@repo/common/src/database_objects";
 import { EventService } from "../event/event.service";
 import { ProductionService } from "../production/production.service";
@@ -15,9 +21,9 @@ import { LocationService } from "../location/location.service";
  * Type used to structure production import
  */
 type ParsedProductionImport = {
-  productions: ProductionDto[];
+  productions: CreateProductionDto[];
   tags: string[];
-  productionTagLinks: { productionId: number; tagName: string }[];
+  productionTagLinks: { legacyId: string; tagName: string }[];
 };
 
 /**
@@ -116,21 +122,21 @@ export class CSVFileParser {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       production_id: productionId,
-      price: row.Price ? Number(row.Price) : null,
       location: location,
+      doors_at: null, // TODO
+      intermission_at: null, // TODO
+      legacy_id: null,
     };
   }
 
   static transformProductionRow(
     row: Record<string, string>,
-  ): ProductionDto & { tags: string[] } {
+  ): CreateProductionDto & { tags: string[] } {
     // validate and convert numeric fields manually to provide clearer errors
     const id = Number(row.ID);
     if (isNaN(id)) {
       throw new Error(`Invalid production id: ${row.ID}`);
     }
-
-    const planningId = row["Planning ID"] || null;
 
     // adds possibility to add tags as a comma separated list in the Genre column, trims whitespace and converts to lowercase for consistency
     const tags = (row.Genre || "")
@@ -138,13 +144,20 @@ export class CSVFileParser {
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
 
+    const tagLine = row.Tagline || row.Ondertitel || null;
+
+    const legacy_id = `csv-${id}`;
+
     return {
-      id,
       titel: row.Titel,
-      ondertitel: row.Ondertitel,
       description1: row.Description1,
       description2: row.Description2 || null,
-      planning_id: planningId,
+      artist: null, // TODO
+      tagline: tagLine,
+      credits: null, // TODO
+      attendance_mode: null, // TODO
+      performer_type: null, // TODO
+      legacy_id: legacy_id,
       tags: [...new Set(tags)], // remove duplicate tags
     };
   }
@@ -179,15 +192,15 @@ export class CSVFileParser {
   static async parseProductionsCSV(
     filePath: string,
   ): Promise<ParsedProductionImport> {
-    const productions: ProductionDto[] = [];
+    const productions: CreateProductionDto[] = [];
     const tagsSet: Set<string> = new Set();
-    const productionTagLinks: { productionId: number; tagName: string }[] = [];
+    const productionTagLinks: { legacyId: string; tagName: string }[] = [];
 
     const parsed = await this.parseCSVWithSchema<
-      ProductionDto & { tags: string[] }
+      CreateProductionDto & { tags: string[] }
     >(
       filePath,
-      ProductionSchema.extend({ tags: string().array() }),
+      CreateProductionSchema.extend({ tags: string().array() }),
       this.transformProductionRow,
     );
 
@@ -197,7 +210,10 @@ export class CSVFileParser {
 
       for (const tag of tags) {
         tagsSet.add(tag);
-        productionTagLinks.push({ productionId: production.id, tagName: tag });
+        productionTagLinks.push({
+          legacyId: prodData.legacy_id!,
+          tagName: tag,
+        });
       }
     }
 
@@ -212,6 +228,7 @@ export class CSVFileParser {
    * Parse events from a CSV file and insert them into the database.
    * @param filePath - Path to the CSV file containing events
    * @param eventService - Instance of EventService to insert events into the database
+   * @param locationService - Instance of LocationService to insert locations into the database
    * @returns A promise that resolves to an array of created EventDto objects
    */
   static async insertEventsFromCSV(
@@ -229,45 +246,46 @@ export class CSVFileParser {
       locationMap.set(loc.location, loc.id);
     }
 
-  for (const { event, location } of parsed) {
-    try {
-      let locId: number | null = null;
-      const loc = location.trim();
+    for (const { event, location } of parsed) {
+      try {
+        let locId: number | null = null;
+        const loc = location.trim();
 
-      // if there's a location, either find it in the map or create it and add to the map
-      if (loc) {
-        if (locationMap.has(loc)) {
-          locId = locationMap.get(loc)!;
-        } else {
-          const createdLoc = await locationService.createLocation({
-            location: loc,
-          });
+        // if there's a location, either find it in the map or create it and add to the map
+        if (loc) {
+          if (locationMap.has(loc)) {
+            locId = locationMap.get(loc)!;
+          } else {
+            const createdLoc = await locationService.createLocation({
+              location: loc,
+              legacy_id: null,
+            });
 
-          if (!createdLoc) {
-            throw new Error("Location creation failed");
+            if (!createdLoc) {
+              throw new Error("Location creation failed");
+            }
+
+            locId = createdLoc.id;
+            locationMap.set(loc, locId);
           }
-
-          locId = createdLoc.id;
-          locationMap.set(loc, locId);
         }
+
+        //create the event and link it to the location if applicable
+        const createdEvent = await eventService.createEvent(event);
+
+        if (locId !== null) {
+          await eventService.linkEventToLocation(createdEvent.id, locId);
+        }
+
+        createdEvents.push(createdEvent);
+      } catch (error) {
+        throw new Error(
+          `Failed to insert event: ${JSON.stringify(event)} - ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
       }
-
-      //create the event and link it to the location if applicable
-      const createdEvent = await eventService.createEvent(event);
-
-      if (locId !== null) {
-        await eventService.linkEventToLocation(createdEvent.id, locId);
-      }
-
-      createdEvents.push(createdEvent);
-    } catch (error) {
-      throw new Error(
-        `Failed to insert event: ${JSON.stringify(event)} - ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
     }
-  }
 
     return createdEvents;
   }
@@ -288,10 +306,16 @@ export class CSVFileParser {
       await this.parseProductionsCSV(filePath);
     const createdProductions: ProductionDto[] = [];
 
+    const legacyToDbId = new Map<string, number>();
+
     // insert productions
     for (const production of productions) {
-      const created = await productionService.replaceProduction(production.id, production);
+      const created = await productionService.createProduction(production);
       createdProductions.push(created);
+
+      if (production.legacy_id) {
+        legacyToDbId.set(production.legacy_id, created.id);
+      }
     }
 
     // prepopulate a map with existing locations so we don't create duplicates
@@ -304,7 +328,10 @@ export class CSVFileParser {
     for (const tagName of tags) {
       if (!tagMap.has(tagName)) {
         // insert tags, ignoring duplicates
-        const tagObject: TagDto = await tagService.createTag({ tag: tagName });
+        const tagObject: TagDto = await tagService.createTag({
+          tag: tagName,
+          legacy_id: null,
+        });
         tagMap.set(tagName, tagObject.id);
       }
     }
@@ -312,8 +339,9 @@ export class CSVFileParser {
     // link tags to productions
     for (const link of productionTagLinks) {
       const tagId = tagMap.get(link.tagName);
-      if (!tagId) continue;
-      await productionService.addTagToProduction(link.productionId, tagId);
+      const prodId = legacyToDbId.get(link.legacyId);
+      if (!prodId || !tagId) continue;
+      await productionService.addTagToProduction(prodId, tagId);
     }
 
     return createdProductions;

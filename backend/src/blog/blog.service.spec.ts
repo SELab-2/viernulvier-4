@@ -20,8 +20,10 @@ describe("BlogService", () => {
   // Sample data for testing
   const mockBlog: BlogDto = {
     id: 1,
-    titel: "My First Blog",
-    description: "Hello World!",
+    titel: "Behind the Scenes",
+    description: "Looking at the set of The Great Show.",
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
   };
 
   beforeEach(async () => {

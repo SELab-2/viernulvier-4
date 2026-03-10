@@ -6,9 +6,9 @@ import {
   ProductionDto,
   UpdateProductionDto,
 } from "../../dto/dto";
-import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterProductionSchema } from "@repo/common";
+import { ResourceGoneException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -17,12 +17,17 @@ describe("ProductionController", () => {
   const mockProduction: ProductionDto = {
     id: 1,
     titel: "The Great Show",
-    ondertitel: "A masterpiece",
     description1: "An amazing production",
     description2: "With great actors",
-    planning_id: "1",
+    performer_type: "happy",
+    attendance_mode: "I",
+    legacy_id: "am",
+    tagline: "fixing",
+    artist: "the",
+    credits: "tests :-)",
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
   };
-
   const mockProductions: ProductionDto[] = [mockProduction];
 
   beforeEach(async () => {
@@ -106,14 +111,12 @@ describe("ProductionController", () => {
       expect(service.getProductionById).toHaveBeenCalledWith(2);
     });
 
-    it("should throw a NotFoundException if the production does not exist", async () => {
+    it("should throw a ResourceGoneException (410) if the production does not exist", async () => {
       jest
         .spyOn(service, "getProductionById")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(controller.getProductionById(999)).rejects.toThrow(
-        NotFoundException,
+        ResourceGoneException,
       );
     });
   });
@@ -125,15 +128,13 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should throw a NotFoundException if trying to replace a non-existent production", async () => {
+    it("should throw a ResourceGoneException (410) if trying to replace a non-existent production", async () => {
       jest
         .spyOn(service, "replaceProduction")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(
         controller.replaceProduction(999, mockProduction),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(ResourceGoneException);
     });
   });
 
@@ -151,15 +152,13 @@ describe("ProductionController", () => {
       expect(result).toEqual(patchedProduction);
     });
 
-    it("should throw a NotFoundException if trying to modify a non-existent production", async () => {
+    it("should throw a ResourceGoneException (410) if trying to modify a non-existent production", async () => {
       const patchData: UpdateProductionDto = { titel: "A New titel" };
       jest
         .spyOn(service, "modifyProduction")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
+        .mockRejectedValueOnce(new ResourceGoneException("Production not found"));
       await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(
-        NotFoundException,
+        ResourceGoneException,
       );
     });
   });
@@ -171,14 +170,12 @@ describe("ProductionController", () => {
       expect(result).toBeUndefined();
     });
 
-    it("should throw a NotFoundException if trying to delete a non-existent production", async () => {
+    it("should throw a ResourceGoneException (410) if trying to delete a non-existent production", async () => {
       jest
         .spyOn(service, "deleteProduction")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(controller.deleteProduction(999)).rejects.toThrow(
-        NotFoundException,
+        ResourceGoneException,
       );
     });
   });
@@ -186,14 +183,23 @@ describe("ProductionController", () => {
   describe("createProduction", () => {
     it("should create a production successfully", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
+        titel: "The Great Show",
+        description1: "An amazing production",
+        description2: "With great actors",
+        performer_type: "happy",
+        attendance_mode: "I",
+        legacy_id: "am",
+        tagline: "fixing",
+        artist: "the",
+        credits: "tests :-)",
       };
 
-      const createdProduction: ProductionDto = { id: 2, ...newProduction };
+      const createdProduction: ProductionDto = {
+        id: 2,
+        ...newProduction,
+        created_at: "2025-06-01T22:00:00.000Z",
+        updated_at: "2025-06-01T22:00:00.000Z",
+      };
 
       jest
         .spyOn(service, "createProduction")
@@ -207,11 +213,15 @@ describe("ProductionController", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
+        titel: "The Great Show",
+        description1: "An amazing production",
+        description2: "With great actors",
+        performer_type: "happy",
+        attendance_mode: "I",
+        legacy_id: "am",
+        tagline: "fixing",
+        artist: "the",
+        credits: "tests :-)",
       };
 
       jest

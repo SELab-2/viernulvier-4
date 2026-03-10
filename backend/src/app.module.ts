@@ -8,9 +8,13 @@ import { TagModule } from "./tag/tag.module";
 import { BlogModule } from "./blog/blog.module";
 import { LocationModule } from "./location/location.module";
 import { AuthModule } from "./auth/auth.module";
+import { PriceModule } from "./price/price.module";
+import { UtilModule } from "./util/util.module";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: "../.env",
@@ -20,7 +24,9 @@ import { AuthModule } from "./auth/auth.module";
     TagModule,
     BlogModule,
     LocationModule,
+    PriceModule,
     AuthModule,
+    UtilModule,
   ],
   controllers: [AppController],
   providers: [AppService],
