@@ -11,7 +11,12 @@ nav:
       - Backend: build-run/backend.md
       - Frontend: build-run/frontend.md
   - API Reference:
-      - Endpoints: api/endpoints.md
+      - Overview & Auth: api/index.md
+      - Events: api/events.md
+      - Productions: api/productions.md
+      - Blogs: api/blogs.md
+      - Pricing: api/pricing.md
+      - Resources (Tags/Locations): api/resources.md
   - Testing:
       - Overview: testing/index.md
       - Backend: testing/backend.md
