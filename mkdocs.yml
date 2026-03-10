@@ -15,8 +15,8 @@ nav:
       - Events: api/events.md
       - Productions: api/productions.md
       - Blogs: api/blogs.md
+      - Tags & Locations: api/tags-locations.md
       - Pricing: api/pricing.md
-      - Resources (Tags/Locations): api/resources.md
   - Testing:
       - Overview: testing/index.md
       - Backend: testing/backend.md
