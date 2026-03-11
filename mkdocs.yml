@@ -19,3 +19,14 @@ nav:
       - Database: server/database.md
       - Backend: server/backend.md
       - Frontend: server/frontend.md
+  - Nest Modules:
+      - Overview: modules/index.md
+      - Production: modules/production.md
+      - Event: modules/event.md
+      - Tag: modules/tag.md
+      - Blog: modules/blog.md
+      - Location: modules/location.md
+      - Price: modules/price.md
+      - Database: modules/database.md
+      - Auth: modules/auth.md
+      - Util: modules/util.md
