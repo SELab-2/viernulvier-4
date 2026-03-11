@@ -1,9 +1,10 @@
-site_name: My Docs
+site_name: VierNulVier Archive Documentation
 
 extra:
   version:
     provider: mike
-theme: readthedocs
+theme:  
+  name: material
 markdown_extensions:
   - admonition
 nav:
