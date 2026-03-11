@@ -18,3 +18,5 @@ nav:
       - Frontend: testing/frontend.md
   - Scraping:
       - Overview: scraping/index.md
+  - Logging:
+      - Overview: logging/index.md
