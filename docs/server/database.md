@@ -29,8 +29,7 @@ the [DBML viewer plugin](https://marketplace.visualstudio.com/items?itemName=mat
 ### Core Tables
 
 **`productions`** – The central table. Represents a show or performance, with multilingual JSONB fields for title,
-subtitle, descriptions, artist, tagline, and credits. Also holds `performer_type`, `attendance_mode`, and a
-`planning_id` for external planning system references.
+subtitle, descriptions, artist, tagline, and credits. Also holds `performer_type` and `attendance_mode`.
 
 **`events`** – A scheduled instance of a production. Belongs to a production via `production_id` (cascade delete).
 Stores `starttime`, `endtime`, `doors_at`, and `intermission_at`.
