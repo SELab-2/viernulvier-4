@@ -73,6 +73,7 @@ export class DbConnection {
     for (const production of productions) {
       await this.insertProduction(production);
     }
+    logger.info("Inserted Productions!");
   }
 
   /**
@@ -158,6 +159,7 @@ export class DbConnection {
     for (const genre of genres) {
       await this.insertTag(genre);
     }
+    logger.info("Inserted Tags!");
   }
 
   /**
@@ -208,8 +210,17 @@ export class DbConnection {
   async insertEvents(events: vnvEvent[]) {
     logger.info("Inserting Events...");
     for (const event of events) {
-      await this.insertEvent(event);
+      try {
+        await this.insertEvent(event);
+      } catch (error) {
+        // If something errors out that means the VNV API had invalid data.
+        logger.error(
+          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
+          error,
+        );
+      }
     }
+    logger.info("Inserted Events!");
   }
 
   /**
@@ -230,9 +241,7 @@ export class DbConnection {
       );
       return;
     }
-    logger.info("here4");
     const productionId: number = productions[0].id;
-    logger.info("here3");
 
     // 2. Upsert the Event
     const query = `
@@ -258,10 +267,8 @@ export class DbConnection {
       vnvEvent.legacy_id,
     ];
 
-    logger.info("here2");
     const output: Event[] = await this.query<Event>(query, values);
     const event: Event = output[0];
-    logger.info("here");
 
     // We first unlink the existing Prices so we can replace the links.
     await this.query(
@@ -270,7 +277,6 @@ export class DbConnection {
       `,
       [event.id],
     );
-    logger.info("here5");
 
     // Now we link the correct prices again.
     const prices: Price[] = await this.query<Price>(
@@ -287,7 +293,6 @@ export class DbConnection {
           `Failed to link Price(${price.id}) to Event(${event.id}).`,
         );
     }
-    logger.info("here6");
 
     // We also replace the Event location.
     await this.query(
@@ -296,8 +301,6 @@ export class DbConnection {
       `,
       [event.id],
     );
-    logger.info("here7");
-    logger.info(vnvEvent.location);
     // We also need to link the Event location.
     const locations: Location[] = await this.query<Location>(
       `
@@ -312,7 +315,6 @@ export class DbConnection {
       logger.error(
         `Failed to link Location(${location.id}) to Event(${event.id}).`,
       );
-    logger.info("here8");
   }
 
   /**
@@ -328,6 +330,7 @@ export class DbConnection {
     for (const location of locations) {
       await this.insertLocation(location);
     }
+    logger.info("Inserted Locations!");
   }
 
   /**
@@ -380,6 +383,7 @@ export class DbConnection {
     for (const price of prices) {
       await this.insertPrice(price);
     }
+    logger.info("Inserted Prices!");
   }
 
   /**
