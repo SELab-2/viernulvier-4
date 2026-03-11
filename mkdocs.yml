@@ -1,10 +1,10 @@
-site_name: My Docs
+site_name: VierNulVier Archive Documentation
 
 extra:
   version:
     provider: mike
 theme:  
-  name: shadcn
+  name: material
 nav:
   - Home: index.md
   - Build and Run:
