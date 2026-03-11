@@ -3,7 +3,8 @@ site_name: My Docs
 extra:
   version:
     provider: mike
-theme: readthedocs
+theme:  
+  name: shadcn
 nav:
   - Home: index.md
   - Build and Run:
