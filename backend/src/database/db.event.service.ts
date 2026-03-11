@@ -1,7 +1,15 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, FilterEventDto, LocationDto, PriceDto, UpdateEventDto, } from "../dto/dto";
-import { DEFAULT_LANGUAGE, FilterEventSchema, Language } from "@repo/common";
+import { ResourceGoneException } from "../common/exceptions";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  LocationDto,
+  PriceDto,
+  UpdateEventDto,
+} from "../dto/dto";
+import { FilterEventSchema } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -13,13 +21,13 @@ export class EventDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The EventDto if there is one.
    */
-  async getEventById(id: number): Promise<EventDto> {
+  async getEventById(eventId: number): Promise<EventDto> {
     const events: EventDto[] = await this.getEvents(
-      FilterEventSchema.parse({ id: id }),
+      FilterEventSchema.parse({ id: eventId }),
     );
     if (events.length === 0)
-      throw new BadRequestException(
-        `No EventDto exists for provided ID(${id})`,
+      throw new ResourceGoneException(
+        `No EventDto exists for provided ID(${eventId})`,
       );
 
     return events[0]; // There should be an EventDto in here if the length is not 0.
@@ -203,7 +211,7 @@ export class EventDatabaseService {
     const result = await this.db.query<EventDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Event not found");
+      throw new ResourceGoneException("Event not found");
     }
 
     return result[0]; // should have the updated event only.
@@ -211,40 +219,40 @@ export class EventDatabaseService {
 
   /**
    * Delete function for deleting events from the database.
-   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blogId must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * (silent handling)
    * @returns nothing.
    */
-  async deleteEvent(id: number): Promise<void> {
+  async deleteEvent(blogId: number): Promise<void> {
     // note we delete on id not p_id as that would affect more events.
     // to delete all events using p_id -> use deleteEventsWithPID()
-    const query = `DELETE FROM events WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+    const query = `DELETE FROM events WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        `Cannot delete: Event ${blogId} not found`,
+      );
+    }
   }
 
   /**
    * get the location linked with an event
    * @param id the ID of the event we want the location of.
-   * @param lang is the used language
    * @returns the LocationDto of the event.
    */
-  async getLocationOfEvent(
-    id: number,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<LocationDto> {
+  async getLocationOfEvent(id: number): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location->>'${lang}' AS loc, l.legacy_id, l.created_at, l.updated_at
+    SELECT l.id, l.location, l.legacy_id, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
     LIMIT 1
   `;
 
-    const result = await this.db.query(query, [id]);
+    const result = await this.db.query<LocationDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Could not find location");
+      throw new ResourceGoneException("Could not find location");
     }
 
     return result[0];
@@ -284,9 +292,13 @@ export class EventDatabaseService {
    * @returns nothing (silent handling.)
    */
   async deleteLocationFromEvent(event_id: number): Promise<void> {
-    const query = `DELETE FROM event_locations WHERE event_id = $1`;
-
-    await this.db.query(query, [event_id]);
+    const query = `DELETE FROM event_locations WHERE event_id = $1 RETURNING event_id;`;
+    const result = await this.db.query(query, [event_id]);
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Cannot delete location: Event ${event_id} not found or has no location linked`,
+      );
+    }
   }
 
   /**
@@ -294,14 +306,12 @@ export class EventDatabaseService {
    * @param id the ID of the event we want all the prices of.
    * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
    * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
-   * @param lang is the used language
    * @returns a list of PriceDto objects linked to the given event.
    */
   async getPricesOfEvent(
     id: number,
     amount: number = 0,
     page: number = 0,
-    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<PriceDto[]> {
     if (amount === 0) {
       const query = `
@@ -309,7 +319,7 @@ export class EventDatabaseService {
              p.created_at,
              p.updated_at,
              p.price,
-             p.name->>'${lang}' AS name,
+             p.name,
              p.legacy_id
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
@@ -324,7 +334,7 @@ export class EventDatabaseService {
     const query = `
     SELECT p.id,
            p.price,
-           p.name->>'${lang}',
+           p.name,
            p.created_at,
            p.updated_at,
            p.legacy_id

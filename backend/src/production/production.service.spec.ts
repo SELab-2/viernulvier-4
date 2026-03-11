@@ -1,7 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionService } from "./production.service";
 import { ProductionDatabaseService } from "../database/db.production.service";
-import type { BlogDto, CreateProductionDto, ProductionDto, TagDto, UpdateProductionDto, } from "../dto/dto";
+import type {
+  BlogDto,
+  CreateProductionDto,
+  ProductionDto,
+  TagDto,
+  UpdateProductionDto,
+} from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterProductionSchema } from "@repo/common";
@@ -13,15 +19,18 @@ describe("ProductionService", () => {
 
   const mockProduction: ProductionDto = {
     id: 1,
-    titel: "The Great Show",
-    description1: "An amazing production",
-    description2: "With great actors",
+    titel: { en: "The Great Show", nl: "De Geweldige Show" },
+    description1: {
+      en: "An amazing production",
+      nl: "Een geweldige productie",
+    },
+    description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
     legacy_id: "am",
-    tagline: "fixing",
-    artist: "the",
-    credits: "tests :-)",
+    tagline: { en: "fixing", nl: "repareren" },
+    artist: { en: "the", nl: "de" },
+    credits: { en: "tests :-)", nl: "testen :-)" },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
   };
@@ -31,14 +40,14 @@ describe("ProductionService", () => {
   const mockTags: TagDto[] = [
     {
       id: 1,
-      tag: "Drama",
+      tag: { en: "Drama", nl: "Drama" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
       legacy_id: "str",
     },
     {
       id: 2,
-      tag: "Classical",
+      tag: { en: "Classical", nl: "Klassiek" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
       legacy_id: "str",
@@ -177,7 +186,9 @@ describe("ProductionService", () => {
 
   describe("modifyProduction", () => {
     it("should fetch, merge, update, and return the modified production", async () => {
-      const patchData: UpdateProductionDto = { titel: "Patched titel" };
+      const patchData: UpdateProductionDto = {
+        titel: { en: "Patched titel", nl: "Bijgewerkte titel" },
+      };
       const expectedMergedProduction = {
         ...mockProduction,
         ...patchData,
@@ -198,7 +209,9 @@ describe("ProductionService", () => {
     });
 
     it("should throw an error if the production to modify does not exist", async () => {
-      const patchData: UpdateProductionDto = { titel: "Patched titel" };
+      const patchData: UpdateProductionDto = {
+        titel: { en: "Patched titel", nl: "Bijgewerkte titel" },
+      };
 
       // Simulate the database failing to find the record
       jest
@@ -237,8 +250,11 @@ describe("ProductionService", () => {
   describe("-- Blogs --", () => {
     const mockBlog: BlogDto = {
       id: 1,
-      titel: "Behind the Scenes",
-      description: "Looking at the set of The Great Show.",
+      titel: { en: "Behind the Scenes", nl: "Achter de schermen" },
+      description: {
+        en: "Looking at the set of The Great Show.",
+        nl: "Kijken naar de set van De Geweldige Show.",
+      },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
     };
@@ -450,15 +466,18 @@ describe("ProductionService", () => {
   describe("createProduction", () => {
     it("should create a production successfully", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "The Great Show",
-        description1: "An amazing production",
-        description2: "With great actors",
+        titel: { en: "The Great Show", nl: "De Geweldige Show" },
+        description1: {
+          en: "An amazing production",
+          nl: "Een geweldige productie",
+        },
+        description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
         legacy_id: "am",
-        tagline: "fixing",
-        artist: "the",
-        credits: "tests :-)",
+        tagline: { en: "fixing", nl: "repareren" },
+        artist: { en: "the", nl: "de" },
+        credits: { en: "tests :-)", nl: "testen :-)" },
       };
 
       const createdProduction: ProductionDto = {
@@ -480,15 +499,18 @@ describe("ProductionService", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "The Great Show",
-        description1: "An amazing production",
-        description2: "With great actors",
+        titel: { en: "The Great Show", nl: "De Geweldige Show" },
+        description1: {
+          en: "An amazing production",
+          nl: "Een geweldige productie",
+        },
+        description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
         legacy_id: "am",
-        tagline: "fixing",
-        artist: "the",
-        credits: "tests :-)",
+        tagline: { en: "fixing", nl: "repareren" },
+        artist: { en: "the", nl: "de" },
+        credits: { en: "tests :-)", nl: "testen :-)" },
       };
 
       jest

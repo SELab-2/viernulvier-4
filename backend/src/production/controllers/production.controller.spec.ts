@@ -1,20 +1,42 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionController } from "./production.controller";
 import { ProductionService } from "../production.service";
+import { LanguageService } from "../../util/language/language.service";
 import {
   CreateProductionDto,
   ProductionDto,
+  ProductionViewDto,
   UpdateProductionDto,
+  LanguageQueryDto,
 } from "../../dto/dto";
-import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterProductionSchema } from "@repo/common";
+import { ResourceGoneException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
   let service: ProductionService;
+  let languageService: LanguageService;
 
   const mockProduction: ProductionDto = {
+    id: 1,
+    titel: { en: "The Great Show", nl: "De Geweldige Show" },
+    description1: {
+      en: "An amazing production",
+      nl: "Een geweldige productie",
+    },
+    description2: { en: "With great actors", nl: "Met geweldige acteurs" },
+    performer_type: "happy",
+    attendance_mode: "I",
+    legacy_id: "am",
+    tagline: { en: "fixing", nl: "repareren" },
+    artist: { en: "the", nl: "de" },
+    credits: { en: "tests :-)", nl: "testen :-)" },
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
+  };
+
+  const mockProductionView: ProductionViewDto = {
     id: 1,
     titel: "The Great Show",
     description1: "An amazing production",
@@ -28,7 +50,9 @@ describe("ProductionController", () => {
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
   };
+
   const mockProductions: ProductionDto[] = [mockProduction];
+  const mockProductionViews: ProductionViewDto[] = [mockProductionView];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -46,6 +70,12 @@ describe("ProductionController", () => {
             upsertProduction: jest.fn(),
           },
         },
+        {
+          provide: LanguageService,
+          useValue: {
+            flattenByLanguage: jest.fn(),
+          },
+        },
       ],
     })
       .overrideGuard(ApiKeyGuard)
@@ -60,6 +90,7 @@ describe("ProductionController", () => {
 
     controller = module.get<ProductionController>(ProductionController);
     service = module.get<ProductionService>(ProductionService);
+    languageService = module.get<LanguageService>(LanguageService);
   });
 
   it("should be defined", () => {
@@ -67,58 +98,57 @@ describe("ProductionController", () => {
   });
 
   describe("getAllProductions", () => {
-    it("should return an array of productions", async () => {
-      const result = await controller.getAllProductions(
-        FilterProductionSchema.parse({}),
-      );
-      expect(result).toEqual(mockProductions);
-      expect(service.getAllProductions).toHaveBeenCalled();
-    });
+    it("should return an array of flattened productions", async () => {
+      const filters = FilterProductionSchema.parse({ lang: "en" });
 
-    it("should call service.getAllProductions", async () => {
-      await controller.getAllProductions(FilterProductionSchema.parse({}));
-      expect(service.getAllProductions).toHaveBeenCalledTimes(1);
+      jest
+        .spyOn(languageService, "flattenByLanguage")
+        .mockReturnValue(mockProductionViews);
+
+      const result = await controller.getAllProductions(filters);
+
+      expect(service.getAllProductions).toHaveBeenCalledWith(filters);
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        mockProductions,
+        filters.lang,
+      );
+      expect(result).toEqual(mockProductionViews);
     });
 
     it("should return empty array when no productions exist", async () => {
+      const filters = FilterProductionSchema.parse({ lang: "en" });
       jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      const result = await controller.getAllProductions(
-        FilterProductionSchema.parse({}),
-      );
+      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue([]);
+
+      const result = await controller.getAllProductions(filters);
+
       expect(result).toEqual([]);
     });
   });
 
   describe("getById", () => {
-    it("should return a single production by id", async () => {
-      const result = await controller.getProductionById(1);
-      expect(result).toEqual(mockProduction);
+    it("should return a single flattened production by id", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
+      jest
+        .spyOn(languageService, "flattenByLanguage")
+        .mockReturnValue(mockProductionView);
+
+      const result = await controller.getProductionById(1, langQuery);
+
       expect(service.getProductionById).toHaveBeenCalledWith(1);
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        mockProduction,
+        langQuery.lang,
+      );
+      expect(result).toEqual(mockProductionView);
     });
 
-    it("should call service.getProductionById with correct id", async () => {
-      await controller.getProductionById(1);
-      expect(service.getProductionById).toHaveBeenCalledWith(1);
-    });
-
-    it("should handle different production ids", async () => {
-      const production2 = { ...mockProduction, id: 2 };
+    it("should throw a ResourceGoneException (410) if the production does not exist", async () => {
       jest
         .spyOn(service, "getProductionById")
-        .mockResolvedValueOnce(production2);
-      const result = await controller.getProductionById(2);
-      expect(result.id).toBe(2);
-      expect(service.getProductionById).toHaveBeenCalledWith(2);
-    });
-
-    it("should throw a NotFoundException if the production does not exist", async () => {
-      jest
-        .spyOn(service, "getProductionById")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
-      await expect(controller.getProductionById(999)).rejects.toThrow(
-        NotFoundException,
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
+      await expect(controller.getProductionById(999, {})).rejects.toThrow(
+        ResourceGoneException,
       );
     });
   });
@@ -130,22 +160,25 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should throw a NotFoundException if trying to replace a non-existent production", async () => {
+    it("should throw a ResourceGoneException (410) if trying to replace a non-existent production", async () => {
       jest
         .spyOn(service, "replaceProduction")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(
         controller.replaceProduction(999, mockProduction),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(ResourceGoneException);
     });
   });
 
   describe("modifyProduction", () => {
     it("should modify and return the production", async () => {
-      const patchData: UpdateProductionDto = { titel: "A New titel" };
-      const patchedProduction = { ...mockProduction, titel: "A New titel" };
+      const patchData: UpdateProductionDto = {
+        titel: { en: "A New titel", nl: "Nieuwe titel" },
+      };
+      const patchedProduction = {
+        ...mockProduction,
+        titel: { en: "A New titel", nl: "Nieuwe titel" },
+      };
 
       jest
         .spyOn(service, "modifyProduction")
@@ -156,15 +189,17 @@ describe("ProductionController", () => {
       expect(result).toEqual(patchedProduction);
     });
 
-    it("should throw a NotFoundException if trying to modify a non-existent production", async () => {
-      const patchData: UpdateProductionDto = { titel: "A New titel" };
+    it("should throw a ResourceGoneException (410) if trying to modify a non-existent production", async () => {
+      const patchData: UpdateProductionDto = {
+        titel: { en: "A New titel", nl: "Nieuwe titel" },
+      };
       jest
         .spyOn(service, "modifyProduction")
         .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
+          new ResourceGoneException("Production not found"),
         );
       await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(
-        NotFoundException,
+        ResourceGoneException,
       );
     });
   });
@@ -176,14 +211,12 @@ describe("ProductionController", () => {
       expect(result).toBeUndefined();
     });
 
-    it("should throw a NotFoundException if trying to delete a non-existent production", async () => {
+    it("should throw a ResourceGoneException (410) if trying to delete a non-existent production", async () => {
       jest
         .spyOn(service, "deleteProduction")
-        .mockRejectedValueOnce(
-          new NotFoundException("ProductionDto not found"),
-        );
+        .mockRejectedValue(new ResourceGoneException("Production not found"));
       await expect(controller.deleteProduction(999)).rejects.toThrow(
-        NotFoundException,
+        ResourceGoneException,
       );
     });
   });
@@ -191,15 +224,18 @@ describe("ProductionController", () => {
   describe("createProduction", () => {
     it("should create a production successfully", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "The Great Show",
-        description1: "An amazing production",
-        description2: "With great actors",
+        titel: { en: "The Great Show", nl: "De Geweldige Show" },
+        description1: {
+          en: "An amazing production",
+          nl: "Een geweldige productie",
+        },
+        description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
         legacy_id: "am",
-        tagline: "fixing",
-        artist: "the",
-        credits: "tests :-)",
+        tagline: { en: "fixing", nl: "repareren" },
+        artist: { en: "the", nl: "de" },
+        credits: { en: "tests :-)", nl: "testen :-)" },
       };
 
       const createdProduction: ProductionDto = {
@@ -221,15 +257,18 @@ describe("ProductionController", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "The Great Show",
-        description1: "An amazing production",
-        description2: "With great actors",
+        titel: { en: "The Great Show", nl: "De Geweldige Show" },
+        description1: {
+          en: "An amazing production",
+          nl: "Een geweldige productie",
+        },
+        description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
         legacy_id: "am",
-        tagline: "fixing",
-        artist: "the",
-        credits: "tests :-)",
+        tagline: { en: "fixing", nl: "repareren" },
+        artist: { en: "the", nl: "de" },
+        credits: { en: "tests :-)", nl: "testen :-)" },
       };
 
       jest

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
-import { DEFAULT_LANGUAGE, Language } from "@repo/common";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -11,16 +11,12 @@ export class BlogDatabaseService {
   /**
    * Get a single Blog by their ID.
    * @param id The ID we're trying to fetch.
-   * @param lang is the used language
    * @returns The Blog if there is one.
    */
-  async getBlogById(
-    id: number,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<BlogDto> {
+  async getBlogById(id: number): Promise<BlogDto> {
     const query = `SELECT id, 
-       titel->>'${lang}' AS titel, 
-       description->>'${lang}' AS description, 
+       titel, 
+       description, 
        created_at, 
        updated_at
     FROM blogs WHERE id = $1`;
@@ -28,7 +24,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(`Blog with ID ${id} not found`);
     }
     return result[0];
   }
@@ -37,40 +33,29 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
    * @param page page index (starts at 0)
-   * @param lang is the used language
    * @returns blogs
    */
-  async getBlogs(
-    amount: number = 0,
-    page: number = 0,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<BlogDto[]> {
+  async getBlogs(amount: number = 0, page: number = 0): Promise<BlogDto[]> {
     const offset = page * amount;
 
     if (amount === 0) {
       const query = `
       SELECT id, 
-             titel->>'${lang}' AS titel, 
-             description->>'${lang}' AS description,
+             titel, 
+             description,
              created_at,
              updated_at
       FROM blogs
       ORDER BY id
       `;
 
-      const result = await this.db.query<BlogDto>(query);
-
-      if (result.length === 0) {
-        throw new Error("no blogs found");
-      }
-
-      return result;
+      return await this.db.query<BlogDto>(query);
     }
 
-    let query = `
+    const query = `
     SELECT id,
-           titel->>'${lang}' AS titel,
-           description->>'${lang}' AS description,
+           titel,
+           description,
            created_at,
            updated_at
     FROM blogs
@@ -78,25 +63,15 @@ export class BlogDatabaseService {
     LIMIT $1 OFFSET $2
     `;
 
-    const result = await this.db.query<BlogDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no blogs found");
-    }
-
-    return result;
+    return await this.db.query<BlogDto>(query, [amount, offset]);
   }
 
   /**
    * Create blog function, creates a blog in the database.
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
-   * @param lang is the used language
    * @returns the added blog if it was successful.
    */
-  async createBlog(
-    blog: CreateBlogDto,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<BlogDto> {
+  async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
     if (!blog.titel || !blog.description) {
       throw new BadRequestException("Missing required fields");
     }
@@ -106,15 +81,15 @@ export class BlogDatabaseService {
       VALUES ($1, $2)
       RETURNING
         id,
-        titel->>'${lang}' AS titel,
-        description->>'${lang}' AS description,
+        titel,
+        description,
         created_at,
         updated_at;
     `;
 
     const values = [
-      JSON.stringify({ [lang]: blog.titel }),
-      JSON.stringify({ [lang]: blog.description }),
+      JSON.stringify(blog.titel),
+      JSON.stringify(blog.description),
     ];
 
     const result = await this.db.query<BlogDto>(query, values);
@@ -129,16 +104,12 @@ export class BlogDatabaseService {
   /**
    * Update function for blogs. Updates the blog in the database.
    * @param blog must be of the type "UpdateBlog", gives the freedom to define only what needs to be updated.
-   * @param lang is the used language
    * The id field in the blog MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateBlog(
-    blog: UpdateBlogDto,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<BlogDto> {
+  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
     if (!blog.id) {
-      throw new Error("Blog id is required for update");
+      throw new BadRequestException("Blog id is required for update");
     }
 
     const fields: string[] = [];
@@ -147,18 +118,18 @@ export class BlogDatabaseService {
 
     if (blog.titel !== undefined) {
       fields.push(`titel = COALESCE(titel, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify({ [lang]: blog.titel }));
+      values.push(JSON.stringify(blog.titel));
     }
 
     if (blog.description !== undefined) {
       fields.push(
         `description = COALESCE(description, '{}'::jsonb) || $${index++}::jsonb`,
       );
-      values.push(JSON.stringify({ [lang]: blog.description }));
+      values.push(JSON.stringify(blog.description));
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     values.push(blog.id);
@@ -169,8 +140,8 @@ export class BlogDatabaseService {
       WHERE id = $${index}
     RETURNING
       id,
-      titel->>'${lang}' AS titel,
-      description->>'${lang}' AS description,
+      titel,
+      description,
       created_at,
       updated_at;
   `;
@@ -178,7 +149,9 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(
+        `Cannot update: Blog ${blog.id} not found`,
+      );
     }
 
     return result[0];
@@ -187,13 +160,16 @@ export class BlogDatabaseService {
   /**
    * Delete function for deleting blogs from the database.
    * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
    * @returns nothing.
    */
-  async deleteBlog(id: number): Promise<void> {
-    const query = `DELETE FROM blogs WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+  async deleteBlog(blogId: number): Promise<void> {
+    const query = `DELETE FROM blogs WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        `Cannot delete: Blog ${blogId} not found`,
+      );
+    }
   }
 
   // insert extra functions here if desired.

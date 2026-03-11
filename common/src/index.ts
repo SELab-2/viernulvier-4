@@ -1,67 +1,92 @@
-import { z } from "zod";
 import {
-  ApiKey,
-  ApiKeySchema,
-  Blog,
-  BlogSchema,
-  CreateAccount,
   CreateAccountSchema,
-  CreateBlog,
-  CreateBlogSchema,
-  CreateEvent,
-  CreateEventSchema,
-  CreateLocation,
-  CreateLocationSchema,
-  CreatePrice,
-  CreatePriceSchema,
-  CreateProduction,
-  CreateProductionSchema,
-  CreateTag,
-  CreateTagSchema,
-  Event,
-  EventSchema,
-  FilterEvent,
-  FilterEventSchema,
-  FilterProduction,
-  FilterProductionSchema,
-  Location,
-  LocationSchema,
-  Price,
-  PriceSchema,
-  Production,
-  ProductionSchema,
-  PublicAccount,
   PublicAccountSchema,
-  Tag,
-  TagSchema,
-  UpdateAccount,
   UpdateAccountSchema,
-  UpdateBlog,
-  UpdateBlogSchema,
-  UpdateEvent,
-  UpdateEventSchema,
-  UpdateLocation,
-  UpdateLocationSchema,
-  UpdatePrice,
-  UpdatePriceSchema,
-  UpdateProduction,
-  UpdateProductionSchema,
-  UpdateTag,
-  UpdateTagSchema,
-  VerifyApiKey,
+  UpdateAccount,
+  PublicAccount,
+  CreateAccount,
+} from "./objects/accounts";
+import {
+  ApiKeySchema,
   VerifyApiKeySchema,
-  PaginationFilterSchema,
-  PaginationFilter,
-} from "./database_objects";
-
-// Een voorbeeld van een globaal schema...
-export const HelloWorldSchema = z.object({
-  text: z.string(),
-});
+  ApiKey,
+  VerifyApiKey,
+} from "./objects/api.keys";
+import {
+  BlogSchema,
+  BlogViewSchema,
+  UpdateBlogSchema,
+  CreateBlogSchema,
+  Blog,
+  BlogView,
+  CreateBlog,
+  UpdateBlog,
+} from "./objects/blogs";
+import {
+  EventSchema,
+  CreateEventSchema,
+  UpdateEventSchema,
+  FilterEventSchema,
+  Event,
+  CreateEvent,
+  UpdateEvent,
+  FilterEvent,
+} from "./objects/events";
+import { PaginationFilterSchema, PaginationFilter } from "./objects/extra";
+import {
+  LanguageQuerySchema,
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
+  Language,
+  LanguageQuery,
+} from "./objects/language";
+import {
+  LocationSchema,
+  LocationViewSchema,
+  CreateLocationSchema,
+  UpdateLocationSchema,
+  Location,
+  LocationView,
+  CreateLocation,
+  UpdateLocation,
+} from "./objects/locations";
+import {
+  PriceSchema,
+  PriceViewSchema,
+  CreatePriceSchema,
+  UpdatePriceSchema,
+  Price,
+  PriceView,
+  CreatePrice,
+  UpdatePrice,
+} from "./objects/prices";
+import {
+  ProductionSchema,
+  ProductionViewSchema,
+  CreateProductionSchema,
+  UpdateProductionSchema,
+  FilterProductionSchema,
+  Production,
+  ProductionView,
+  CreateProduction,
+  UpdateProduction,
+  FilterProduction,
+} from "./objects/productions";
+import {
+  TagSchema,
+  TagViewSchema,
+  CreateTagSchema,
+  UpdateTagSchema,
+  Tag,
+  TagView,
+  CreateTag,
+  UpdateTag,
+} from "./objects/tags";
 
 // list of all exports: (this way only need to import this file.)
 export {
   ProductionSchema,
+  ProductionViewSchema,
   CreateProductionSchema,
   UpdateProductionSchema,
   FilterProductionSchema,
@@ -70,12 +95,15 @@ export {
   UpdateEventSchema,
   FilterEventSchema,
   BlogSchema,
+  BlogViewSchema,
   UpdateBlogSchema,
   CreateBlogSchema,
   TagSchema,
+  TagViewSchema,
   CreateTagSchema,
   UpdateTagSchema,
   LocationSchema,
+  LocationViewSchema,
   CreateLocationSchema,
   UpdateLocationSchema,
   CreateAccountSchema,
@@ -84,12 +112,17 @@ export {
   ApiKeySchema,
   VerifyApiKeySchema,
   PriceSchema,
+  PriceViewSchema,
   CreatePriceSchema,
   UpdatePriceSchema,
   PaginationFilterSchema,
+  LanguageQuerySchema,
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
 };
 export type {
   Production,
+  ProductionView,
   CreateProduction,
   UpdateProduction,
   FilterProduction,
@@ -98,12 +131,15 @@ export type {
   UpdateEvent,
   FilterEvent,
   Tag,
+  TagView,
   CreateTag,
   UpdateTag,
   Blog,
+  BlogView,
   CreateBlog,
   UpdateBlog,
   Location,
+  LocationView,
   CreateLocation,
   UpdateLocation,
   UpdateAccount,
@@ -112,14 +148,10 @@ export type {
   ApiKey,
   VerifyApiKey,
   Price,
+  PriceView,
   CreatePrice,
   UpdatePrice,
   PaginationFilter,
+  Language,
+  LanguageQuery,
 };
-
-// languages:
-export const SUPPORTED_LANGUAGES = ["en", "nl"] as const;
-export type Language = (typeof SUPPORTED_LANGUAGES)[number];
-export const DEFAULT_LANGUAGE: Language = "nl";
-
-export type HelloWorld = z.infer<typeof HelloWorldSchema>;

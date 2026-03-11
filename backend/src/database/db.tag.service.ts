@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTagDto, ProductionDto, TagDto, UpdateTagDto } from "../dto/dto";
-import { DEFAULT_LANGUAGE, Language } from "@repo/common";
-
+import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
+import { ResourceGoneException } from "../common/exceptions";
 @Injectable()
 export class TagDatabaseService {
   // need to give a db service as param when used. -> see db.service.
@@ -11,17 +10,13 @@ export class TagDatabaseService {
   /**
    * Get a single tag by their ID.
    * @param id The ID we're trying to fetch.
-   * @param lang is the language used.
    * @returns The tag if there is one.
    */
-  async getTagById(
-    id: number,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<TagDto> {
+  async getTagById(id: number): Promise<TagDto> {
     const query = `
       SELECT
         id,
-        tag->>'${lang}' AS name,
+        tag,
         created_at,
         updated_at,
         legacy_id
@@ -32,108 +27,38 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Tag not found");
+      throw new ResourceGoneException("Tag not found");
     }
     return result[0];
   }
 
   /**
-   * Get all productions listed under a given tag.
-   * @param tag the tag we want to get the productions connected to.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
-   * @param lang is the used language
-   * @returns a list of productions that fall under the given tag.
-   */
-  async getProductionsByTag(
-    tag: TagDto,
-    lang: Language = DEFAULT_LANGUAGE,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<ProductionDto[]> {
-    const selectFields = `
-    p.id,
-    p.titel->>'${lang}' AS titel,
-    p.ondertitel->>'${lang}' AS ondertitel,
-    p.description1->>'${lang}' AS desc1,
-    p.description2->>'${lang}' AS desc2,
-    p.planning_id,
-    p.artist->>'${lang}' AS artist,
-    p.tagline->>'${lang}' AS tagline,
-    p.credits->>'${lang}' AS credits,
-    p.created_at,
-    p.updated_at,
-    p.legacy_id
-  `;
-
-    if (amount === 0) {
-      const query = `
-        SELECT ${selectFields}
-        FROM productions p
-               JOIN production_tag pt ON p.id = pt.production_id
-        WHERE pt.tag_id = $1
-      `;
-      return await this.db.query(query, [tag.id]);
-    }
-
-    const offset = page * amount;
-
-    const query = `
-      SELECT ${selectFields}
-      FROM productions p
-             JOIN production_tag pt ON p.id = pt.production_id
-      WHERE pt.tag_id = $1
-      LIMIT $2 OFFSET $3
-    `;
-
-    return await this.db.query(query, [tag.id, amount, offset]);
-  }
-  /**
    * Get all tags.
    * @param amount is the amount of events per page (returned)
    * @param page is the page you want (indexed from 0)
-   * @param lang is the language used
    * @returns The tags if there are any.
    */
-  async getTags(
-    amount: number = 0,
-    page: number = 0,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<TagDto[]> {
+  async getTags(amount: number = 0, page: number = 0): Promise<TagDto[]> {
     // non-pagination first
     if (amount === 0) {
-      const query = `SELECT id, tag->>'${lang}' AS tag, created_at, updated_at, legacy_id FROM tags`;
+      const query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags`;
 
-      const result = await this.db.query<TagDto>(query);
-
-      if (result.length === 0) {
-        throw new Error("no tags found");
-      }
-      return result;
+      return await this.db.query<TagDto>(query);
     }
 
     const offset = page * amount;
 
-    const query = `SELECT id, tag->>'${lang}' AS tag FROM tags LIMIT $1 OFFSET $2`;
+    const query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags LIMIT $1 OFFSET $2`;
 
-    const result = await this.db.query<TagDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no tags found");
-    }
-    return result;
+    return await this.db.query<TagDto>(query, [amount, offset]);
   }
 
   /**
    * Create tag function, creates a tag in the database.
    * @param tag must be of the type "CreateTag" which has all fields defined besides the primary key id.
-   * @param lang is the used language
    * @returns the added tag if it was successful.
    */
-  async createTag(
-    tag: CreateTagDto,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<TagDto> {
+  async createTag(tag: CreateTagDto): Promise<TagDto> {
     if (!tag.tag) {
       throw new BadRequestException("Missing required fields");
     }
@@ -143,14 +68,14 @@ export class TagDatabaseService {
       VALUES ($1, $2)
       RETURNING
         id,
-        tag->>'${lang}' AS tag,
+        tag,
         created_at,
         updated_at,
         legacy_id
       ;
     `;
 
-    const values = [JSON.stringify({ [lang]: tag.tag })];
+    const values = [JSON.stringify(tag.tag)];
 
     const result = await this.db.query<TagDto>(query, values);
 
@@ -164,16 +89,12 @@ export class TagDatabaseService {
   /**
    * Update function for tags. Updates the tag in the database.
    * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
-   * @param lang is the used language
    * The id field in the tag MUST be defined.
    * @returns the updated tag if successful.
    */
-  async updateTag(
-    tag: UpdateTagDto,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<TagDto> {
+  async updateTag(tag: UpdateTagDto): Promise<TagDto> {
     if (!tag.id) {
-      throw new Error("Tag id is required for update");
+      throw new BadRequestException("Tag id is required for update");
     }
 
     const fields: string[] = [];
@@ -182,11 +103,11 @@ export class TagDatabaseService {
 
     if (tag.tag !== undefined) {
       fields.push(`tag = COALESCE(tag, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify({ [lang]: tag.tag }));
+      values.push(JSON.stringify(tag.tag));
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
     values.push(tag.id);
@@ -197,7 +118,7 @@ export class TagDatabaseService {
       WHERE id = $${index}
       RETURNING
         id,
-        tag->>'${lang}' AS tag
+        tag,
         created_at,
         updated_at,
         legacy_id
@@ -207,7 +128,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Tag not found");
+      throw new ResourceGoneException("Tag not found");
     }
 
     return result[0];
@@ -220,9 +141,14 @@ export class TagDatabaseService {
    * @returns nothing.
    */
   async deleteTag(id: number): Promise<void> {
-    const query = `DELETE FROM tags WHERE id = $1`;
+    const query = `DELETE FROM tags WHERE id = $1 RETURNING id;`;
 
-    await this.db.query(query, [id]);
+    const result = await this.db.query(query, [id]);
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Cannot Delete: Tag with ID ${id} not found`,
+      );
+    }
   }
 
   // insert extra functions here if desired
