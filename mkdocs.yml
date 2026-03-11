@@ -4,6 +4,8 @@ extra:
   version:
     provider: mike
 theme: readthedocs
+markdown_extensions:
+  - admonition
 nav:
   - Home: index.md
   - Build and Run:
@@ -14,3 +16,5 @@ nav:
       - Overview: testing/index.md
       - Backend: testing/backend.md
       - Frontend: testing/frontend.md
+  - Scraping:
+      - Overview: scraping/index.md
