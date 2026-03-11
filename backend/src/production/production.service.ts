@@ -3,6 +3,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  PaginatedProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
@@ -25,7 +26,7 @@ export class ProductionService {
    */
   async getAllProductions(
     filters: FilterProductionDto,
-  ): Promise<ProductionDto[]> {
+  ): Promise<PaginatedProductionDto> {
     return await this.productionDBService.getProductions(filters);
   }
 
