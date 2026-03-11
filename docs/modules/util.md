@@ -12,11 +12,11 @@ This module acts as a container for shared, stateless utility services that are 
 
 None.
 
-### Exports
+### Provides
 
-Exports the `AppLogger`.
-
-Also contains the `Scraper` provider. See [Scraper](../scraping/index.md) for more info.
+* The `AppLogger`.
+* The `Scraper` provider. See [Scraper](../scraping/index.md) for more info.
+* The `Language` provider that helps with flattening multi-lingual representations of data.
 
 ## Usage 
 
