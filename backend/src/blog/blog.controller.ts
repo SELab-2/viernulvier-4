@@ -25,6 +25,8 @@ import {
   BlogViewDto,
   CreateBlogDto,
   LanguageQueryDto,
+  PaginatedBlogDto,
+  PaginatedBlogViewDto,
   PaginationFilterDto,
   UpdateBlogDto,
 } from "../dto/dto";
@@ -58,9 +60,10 @@ export class BlogController {
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-  ): Promise<BlogDto[] | BlogViewDto[]> {
-    return this.ls.flattenByLanguage<BlogDto[] | BlogViewDto[]>(
-      await this.blogService.getAllBlogs(paginationFilter),
+  ): Promise<PaginatedBlogDto | PaginatedBlogViewDto> {
+    const result = await this.blogService.getAllBlogs(paginationFilter);
+    return this.ls.flattenByLanguage<PaginatedBlogDto | PaginatedBlogViewDto>(
+      result,
       lang.lang,
     );
   }

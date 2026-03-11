@@ -3,6 +3,7 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 import {
   BlogDto,
   CreateBlogDto,
+  PaginatedBlogDto,
   PaginationFilterDto,
   UpdateBlogDto,
 } from "../dto/dto";
@@ -16,7 +17,9 @@ export class BlogService {
    * @param paginationFilter iq the pagination params.
    * @returns A list of all Blog objects.
    */
-  async getAllBlogs(paginationFilter: PaginationFilterDto): Promise<BlogDto[]> {
+  async getAllBlogs(
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedBlogDto> {
     return await this.blogDbService.getBlogs(
       paginationFilter.limit,
       paginationFilter.page,

@@ -15,6 +15,7 @@ import { AuthService } from "./auth.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
+  PaginatedAccountDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
@@ -70,7 +71,7 @@ export class AuthController {
   async getAccounts(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-  ): Promise<PublicAccountDto[]> {
+  ): Promise<PaginatedAccountDto> {
     return await this.authService.getAccounts(paginationFilter);
   }
 

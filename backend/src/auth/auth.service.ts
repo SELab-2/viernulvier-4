@@ -4,6 +4,7 @@ import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
+  PaginatedAccountDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
@@ -23,7 +24,7 @@ export class AuthService {
    */
   async getAccounts(
     paginationFilter: PaginationFilterDto,
-  ): Promise<PublicAccountDto[]> {
+  ): Promise<PaginatedAccountDto> {
     return await this.accountDbService.getAccounts(
       paginationFilter.limit,
       paginationFilter.page,
