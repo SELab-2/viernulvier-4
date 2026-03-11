@@ -1,0 +1,259 @@
+<svg viewBox="0 0 900 620" xmlns="http://www.w3.org/2000/svg" font-family="'Courier New', monospace">
+    <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0f1117;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#1a1d2e;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="nginxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#009639;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#006627;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="frontendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#3b5bdb;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#1e3a8a;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="backendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#e8590c;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#9c3a0a;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="dbGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#5c3391;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#3b1f63;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="clientGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#1c7ed6;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#0f4c8a;stop-opacity:1"/>
+        </linearGradient>
+        <linearGradient id="scraperGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#868e96;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#495057;stop-opacity:1"/>
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <filter id="softglow">
+            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <marker id="arrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#6c757d"/>
+        </marker>
+        <marker id="arrowGreen" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#40c057"/>
+        </marker>
+        <marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#74c0fc"/>
+        </marker>
+        <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#fd7e14"/>
+        </marker>
+        <marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#cc5de8"/>
+        </marker>
+    </defs>
+
+    <!-- Background -->
+    <rect width="900" height="620" fill="url(#bgGrad)" rx="12"/>
+
+    <!-- Grid lines subtle -->
+    <g opacity="0.04" stroke="#ffffff" stroke-width="1">
+        <line x1="0" y1="100" x2="900" y2="100"/>
+        <line x1="0" y1="200" x2="900" y2="200"/>
+        <line x1="0" y1="300" x2="900" y2="300"/>
+        <line x1="0" y1="400" x2="900" y2="400"/>
+        <line x1="0" y1="500" x2="900" y2="500"/>
+        <line x1="150" y1="0" x2="150" y2="620"/>
+        <line x1="300" y1="0" x2="300" y2="620"/>
+        <line x1="450" y1="0" x2="450" y2="620"/>
+        <line x1="600" y1="0" x2="600" y2="620"/>
+        <line x1="750" y1="0" x2="750" y2="620"/>
+    </g>
+
+    <!-- Title -->
+    <text x="450" y="38" text-anchor="middle" font-size="18" font-weight="bold" fill="#ffffff" letter-spacing="4"
+          opacity="0.9">SYSTEM ARCHITECTURE
+    </text>
+    <line x1="200" y1="48" x2="700" y2="48" stroke="#ffffff" stroke-width="0.5" opacity="0.2"/>
+
+    <!-- ===================== CLIENT ===================== -->
+    <rect x="30" y="250" width="130" height="70" rx="8" fill="url(#clientGrad)" filter="url(#glow)"/>
+    <rect x="30" y="250" width="130" height="70" rx="8" fill="none" stroke="#74c0fc" stroke-width="1.5" opacity="0.6"/>
+    <!-- Browser icon -->
+    <rect x="50" y="263" width="28" height="20" rx="2" fill="none" stroke="#ffffff" stroke-width="1.5" opacity="0.8"/>
+    <line x1="50" y1="269" x2="78" y2="269" stroke="#ffffff" stroke-width="1.5" opacity="0.8"/>
+    <circle cx="53" cy="266" r="1.5" fill="#ff6b6b"/>
+    <circle cx="58" cy="266" r="1.5" fill="#ffd43b"/>
+    <circle cx="63" cy="266" r="1.5" fill="#69db7c"/>
+    <text x="95" y="272" font-size="10" fill="#ffffff" opacity="0.9" font-weight="bold">CLIENT</text>
+    <text x="95" y="285" font-size="8" fill="#a5d8ff" opacity="0.8">Browser</text>
+    <text x="95" y="297" font-size="8" fill="#a5d8ff" opacity="0.8">/ User</text>
+    <text x="56" y="306" font-size="7" fill="#a5d8ff" opacity="0.6">HTTP / HTTPS</text>
+
+    <!-- ===================== NGINX ===================== -->
+    <rect x="245" y="220" width="150" height="130" rx="8" fill="url(#nginxGrad)" filter="url(#glow)"/>
+    <rect x="245" y="220" width="150" height="130" rx="8" fill="none" stroke="#40c057" stroke-width="1.5"
+          opacity="0.6"/>
+    <text x="320" y="245" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff" letter-spacing="2">
+        NGINX
+    </text>
+    <line x1="260" y1="252" x2="380" y2="252" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+    <text x="320" y="268" text-anchor="middle" font-size="8" fill="#b2f2bb" opacity="0.9">Reverse Proxy</text>
+
+    <!-- Routes inside nginx -->
+    <rect x="258" y="275" width="118" height="16" rx="3" fill="#00000033"/>
+    <text x="264" y="286" font-size="7.5" fill="#69db7c">/archive → :3001</text>
+    <rect x="258" y="295" width="118" height="16" rx="3" fill="#00000033"/>
+    <text x="264" y="306" font-size="7.5" fill="#69db7c">/api → :3000 🔒</text>
+    <rect x="258" y="315" width="118" height="16" rx="3" fill="#00000033"/>
+    <text x="264" y="326" font-size="7.5" fill="#69db7c">/admin → :3001 🔒</text>
+    <text x="320" y="343" text-anchor="middle" font-size="7" fill="#8ce99a" opacity="0.7">SSL / Certbot</text>
+
+    <!-- ===================== FRONTEND ===================== -->
+    <rect x="500" y="110" width="150" height="100" rx="8" fill="url(#frontendGrad)" filter="url(#glow)"/>
+    <rect x="500" y="110" width="150" height="100" rx="8" fill="none" stroke="#748ffc" stroke-width="1.5"
+          opacity="0.6"/>
+    <text x="575" y="135" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff" letter-spacing="2">
+        FRONTEND
+    </text>
+    <line x1="515" y1="142" x2="635" y2="142" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+    <text x="575" y="158" text-anchor="middle" font-size="9" fill="#bac8ff">Vue + Nuxt</text>
+    <text x="575" y="173" text-anchor="middle" font-size="8" fill="#91a7ff" opacity="0.8">SSR / Static</text>
+    <text x="575" y="188" text-anchor="middle" font-size="8" fill="#91a7ff" opacity="0.8">port 3001</text>
+    <!-- pm2 badge -->
+    <rect x="515" y="197" width="120" height="5" rx="2" fill="#ffffff11"/>
+    <text x="575" y="202" text-anchor="middle" font-size="7" fill="#748ffc" opacity="0.7">managed by pm2</text>
+
+    <!-- ===================== BACKEND ===================== -->
+    <rect x="500" y="360" width="150" height="110" rx="8" fill="url(#backendGrad)" filter="url(#glow)"/>
+    <rect x="500" y="360" width="150" height="110" rx="8" fill="none" stroke="#fd7e14" stroke-width="1.5"
+          opacity="0.6"/>
+    <text x="575" y="385" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff" letter-spacing="2">
+        BACKEND
+    </text>
+    <line x1="515" y1="392" x2="635" y2="392" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+    <text x="575" y="408" text-anchor="middle" font-size="9" fill="#ffd8a8">NestJS / API</text>
+    <text x="575" y="423" text-anchor="middle" font-size="8" fill="#ffc078" opacity="0.8">REST endpoints</text>
+    <text x="575" y="438" text-anchor="middle" font-size="8" fill="#ffc078" opacity="0.8">Auth / API keys</text>
+    <text x="575" y="453" text-anchor="middle" font-size="8" fill="#ffc078" opacity="0.8">port 3000</text>
+    <text x="575" y="463" text-anchor="middle" font-size="7" fill="#fd7e14" opacity="0.7">managed by pm2</text>
+
+    <!-- ===================== DATABASE ===================== -->
+    <rect x="720" y="360" width="150" height="110" rx="8" fill="url(#dbGrad)" filter="url(#glow)"/>
+    <rect x="720" y="360" width="150" height="110" rx="8" fill="none" stroke="#cc5de8" stroke-width="1.5"
+          opacity="0.6"/>
+    <!-- DB cylinder icon -->
+    <ellipse cx="748" cy="385" rx="12" ry="5" fill="none" stroke="#da77f2" stroke-width="1.2"/>
+    <line x1="736" y1="385" x2="736" y2="397" stroke="#da77f2" stroke-width="1.2"/>
+    <line x1="760" y1="385" x2="760" y2="397" stroke="#da77f2" stroke-width="1.2"/>
+    <ellipse cx="748" cy="397" rx="12" ry="5" fill="#5c3391" stroke="#da77f2" stroke-width="1.2"/>
+    <text x="795" y="390" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff" letter-spacing="1">
+        DATABASE
+    </text>
+    <line x1="730" y1="408" x2="860" y2="408" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+    <text x="795" y="423" text-anchor="middle" font-size="9" fill="#e9d5ff">PostgreSQL</text>
+    <text x="795" y="438" text-anchor="middle" font-size="8" fill="#cc5de8" opacity="0.8">productions / events</text>
+    <text x="795" y="453" text-anchor="middle" font-size="8" fill="#cc5de8" opacity="0.8">accounts / api_keys</text>
+    <text x="795" y="468" text-anchor="middle" font-size="8" fill="#cc5de8" opacity="0.8">port 5432</text>
+
+    <!-- ===================== SCRAPER ===================== -->
+    <rect x="720" y="200" width="150" height="90" rx="8" fill="url(#scraperGrad)" filter="url(#glow)"/>
+    <rect x="720" y="200" width="150" height="90" rx="8" fill="none" stroke="#adb5bd" stroke-width="1.5" opacity="0.5"/>
+    <text x="795" y="225" text-anchor="middle" font-size="12" font-weight="bold" fill="#ffffff" letter-spacing="2">
+        SCRAPER
+    </text>
+    <line x1="730" y1="232" x2="860" y2="232" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+    <text x="795" y="248" text-anchor="middle" font-size="8" fill="#ced4da" opacity="0.9">External API fetch</text>
+    <text x="795" y="262" text-anchor="middle" font-size="8" fill="#ced4da" opacity="0.8">runs at midnight</text>
+    <text x="795" y="277" text-anchor="middle" font-size="7.5" fill="#868e96">ENABLE_SCRAPER=true</text>
+
+    <!-- ===================== ARROWS ===================== -->
+
+    <!-- Client → Nginx (HTTP/HTTPS request) -->
+    <line x1="160" y1="283" x2="242" y2="283" stroke="#40c057" stroke-width="1.8" stroke-dasharray="none"
+          marker-end="url(#arrowGreen)"/>
+    <text x="200" y="275" text-anchor="middle" font-size="7.5" fill="#69db7c">HTTPS</text>
+
+    <!-- Nginx → Frontend (:3001) -->
+    <line x1="395" y1="250" x2="497" y2="185" stroke="#748ffc" stroke-width="1.8" marker-end="url(#arrowBlue)"/>
+    <text x="448" y="207" text-anchor="middle" font-size="7.5" fill="#91a7ff" transform="rotate(-28, 448, 207)">
+        /archive
+    </text>
+
+    <!-- Nginx → Backend (:3000) -->
+    <line x1="395" y1="320" x2="497" y2="395" stroke="#fd7e14" stroke-width="1.8" marker-end="url(#arrowOrange)"/>
+    <text x="448" y="368" text-anchor="middle" font-size="7.5" fill="#ffc078" transform="rotate(28, 448, 368)">/api 🔒
+    </text>
+
+    <!-- Frontend → Backend (API calls) -->
+    <line x1="575" y1="212" x2="575" y2="357" stroke="#74c0fc" stroke-width="1.5" stroke-dasharray="6,3"
+          marker-end="url(#arrowBlue)"/>
+    <text x="590" y="290" font-size="7.5" fill="#74c0fc">API calls</text>
+    <text x="590" y="302" font-size="7.5" fill="#74c0fc">(NUXT_API_BASE)</text>
+
+    <!-- Backend → Database -->
+    <line x1="653" y1="415" x2="717" y2="415" stroke="#cc5de8" stroke-width="1.8" marker-end="url(#arrowPurple)"/>
+    <text x="685" y="408" text-anchor="middle" font-size="7.5" fill="#da77f2">SQL</text>
+
+    <!-- Scraper → Backend -->
+    <line x1="720" y1="265" x2="655" y2="380" stroke="#adb5bd" stroke-width="1.5" stroke-dasharray="5,3"
+          marker-end="url(#arrowGray)"/>
+    <text x="700" y="310" text-anchor="middle" font-size="7.5" fill="#adb5bd">writes data</text>
+
+    <!-- Scraper → external (arrow going right off) -->
+    <line x1="870" y1="245" x2="893" y2="245" stroke="#adb5bd" stroke-width="1.5" stroke-dasharray="4,3"
+          marker-end="url(#arrowGray)"/>
+    <text x="855" y="238" font-size="7" fill="#868e96">ext. API</text>
+
+    <!-- ===================== LAN ZONE BOX ===================== -->
+    <rect x="238" y="370" width="158" height="55" rx="6" fill="none" stroke="#ff6b6b" stroke-width="1"
+          stroke-dasharray="5,3" opacity="0.6"/>
+    <text x="317" y="388" text-anchor="middle" font-size="7.5" fill="#ff6b6b" opacity="0.8">LAN only</text>
+    <text x="317" y="402" text-anchor="middle" font-size="7.5" fill="#ff8787" opacity="0.7">/api · /admin</text>
+    <text x="317" y="416" text-anchor="middle" font-size="7" fill="#ff8787" opacity="0.6">IP-locked by Nginx</text>
+
+    <!-- Arrow Nginx down to LAN zone -->
+    <line x1="320" y1="352" x2="320" y2="368" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"
+          marker-end="url(#arrowGray)"/>
+
+    <!-- ===================== LEGEND ===================== -->
+    <rect x="30" y="430" width="185" height="155" rx="6" fill="#ffffff08" stroke="#ffffff15" stroke-width="1"/>
+    <text x="42" y="450" font-size="9" font-weight="bold" fill="#ffffff" opacity="0.7" letter-spacing="2">LEGEND</text>
+    <line x1="42" y1="455" x2="203" y2="455" stroke="#ffffff" stroke-width="0.5" opacity="0.15"/>
+
+    <line x1="42" y1="470" x2="75" y2="470" stroke="#40c057" stroke-width="2" marker-end="url(#arrowGreen)"/>
+    <text x="82" y="474" font-size="8" fill="#b2f2bb">Public HTTPS request</text>
+
+    <line x1="42" y1="490" x2="75" y2="490" stroke="#748ffc" stroke-width="2" stroke-dasharray="6,3"
+          marker-end="url(#arrowBlue)"/>
+    <text x="82" y="494" font-size="8" fill="#bac8ff">Internal API call</text>
+
+    <line x1="42" y1="510" x2="75" y2="510" stroke="#fd7e14" stroke-width="2" marker-end="url(#arrowOrange)"/>
+    <text x="82" y="514" font-size="8" fill="#ffd8a8">Proxied request</text>
+
+    <line x1="42" y1="530" x2="75" y2="530" stroke="#cc5de8" stroke-width="2" marker-end="url(#arrowPurple)"/>
+    <text x="82" y="534" font-size="8" fill="#e9d5ff">Database query</text>
+
+    <line x1="42" y1="550" x2="75" y2="550" stroke="#adb5bd" stroke-width="1.5" stroke-dasharray="5,3"
+          marker-end="url(#arrowGray)"/>
+    <text x="82" y="554" font-size="8" fill="#ced4da">Scraper data flow</text>
+
+    <rect x="42" y="562" width="12" height="8" rx="2" fill="none" stroke="#ff6b6b" stroke-width="1"
+          stroke-dasharray="3,2" opacity="0.7"/>
+    <text x="62" y="570" font-size="8" fill="#ff8787">IP-restricted zone</text>
+
+    <!-- pm2 label bottom -->
+    <rect x="460" y="535" width="220" height="28" rx="5" fill="#ffffff08" stroke="#ffffff15" stroke-width="1"/>
+    <text x="570" y="547" text-anchor="middle" font-size="8" fill="#ced4da" opacity="0.7">Both services managed by
+    </text>
+    <text x="570" y="559" text-anchor="middle" font-size="9" font-weight="bold" fill="#ffffff" opacity="0.6">pm2 ·
+        ecosystem.config.js
+    </text>
+
+</svg>

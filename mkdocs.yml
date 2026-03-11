@@ -15,3 +15,8 @@ nav:
       - Overview: testing/index.md
       - Backend: testing/backend.md
       - Frontend: testing/frontend.md
+  - Server:
+      - Overview: server/index.md
+      - Database: server/database.md
+      - Backend: server/backend.md
+      - Frontend: server/frontend.md
