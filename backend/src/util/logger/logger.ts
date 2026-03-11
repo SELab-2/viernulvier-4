@@ -23,7 +23,7 @@ const logger: Logger = createLogger({
   transports: [
     new transports.Console(),
     new transports.File({
-      filename: `${process.env.LOGGER_PATH}/scraper-${date.toISOString().replace(/:/g, "-")}.log`,
+      filename: `${process.env.LOGGER_PATH}/backend-${date.toISOString().replace(/:/g, "-")}.log`,
     }),
   ],
 });
