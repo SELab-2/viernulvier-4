@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import {
+  CreateLocationDto,
+  LocationDto,
+  PaginatedLocationDto,
+  UpdateLocationDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
@@ -38,35 +43,33 @@ export class LocationDatabaseService {
   async getLocations(
     amount: number = 0,
     page: number = 0,
-  ): Promise<LocationDto[]> {
-    const offset = page * amount;
-
-    if (amount === 0) {
-      const query = `
-      SELECT id,
-             location,
-             created_at,
-             updated_at,
-             legacy_id
-      FROM locations
-      ORDER BY id
-      `;
-
-      return await this.db.query<LocationDto>(query);
-    }
-
-    const query = `
-    SELECT id,
-           location,
-           created_at,
-           updated_at,
-           legacy_id
+  ): Promise<PaginatedLocationDto> {
+    let query = `
+    SELECT id, location, created_at, updated_at, legacy_id
     FROM locations
     ORDER BY id
-    LIMIT $1 OFFSET $2
-    `;
+  `;
 
-    return await this.db.query<LocationDto>(query, [amount, offset]);
+    const params: any[] = [];
+
+    if (amount > 0) {
+      query += ` LIMIT $1 OFFSET $2`;
+      params.push(amount, page * amount);
+    }
+
+    const [locations, countResult] = await Promise.all([
+      this.db.query<LocationDto>(query, params),
+      this.db.query<{ count: string }>(
+        `SELECT COUNT(*) as count FROM locations`,
+      ),
+    ]);
+
+    return {
+      page,
+      limit: amount,
+      totalItems: parseInt(countResult[0].count),
+      objects: locations,
+    };
   }
 
   /**

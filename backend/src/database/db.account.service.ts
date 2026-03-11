@@ -8,6 +8,12 @@ import * as bcrypt from "bcryptjs"; // note all function should require guarding
 export class AccountDatabaseService {
   constructor(private db: DbService) {}
 
+  /**
+   * Returns all accounts in the database
+   * @param amount is the amount you want
+   * @param page is the page (offset) you want
+   * @returns accounts.
+   */
   async getAccounts(
     amount: number = 0,
     page: number = 0,

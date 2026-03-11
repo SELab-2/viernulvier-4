@@ -46,6 +46,9 @@ export class FilterProductionDto extends createZodDto(FilterProductionSchema) {}
 export class PaginatedProductionDto extends PaginatedResponseDto(
   ProductionSchema,
 ) {}
+export class PaginatedProductionViewDto extends PaginatedResponseDto(
+  ProductionViewSchema,
+) {}
 
 // Event Wrappers
 export class EventDto extends createZodDto(EventSchema) {}
@@ -70,6 +73,7 @@ export class TagViewDto extends createZodDto(TagViewSchema) {}
 export class CreateTagDto extends createZodDto(CreateTagSchema) {}
 export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
 export class PaginatedTagDto extends PaginatedResponseDto(TagSchema) {}
+export class PaginatedTagViewDto extends PaginatedResponseDto(TagViewSchema) {}
 
 // Location Wrappers
 export class LocationDto extends createZodDto(LocationSchema) {}
@@ -79,6 +83,9 @@ export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
 export class PaginatedLocationDto extends PaginatedResponseDto(
   LocationSchema,
 ) {}
+export class PaginatedLocationViewDto extends PaginatedResponseDto(
+  LocationViewSchema,
+) {}
 
 // Price Wrappers
 export class PriceDto extends createZodDto(PriceSchema) {}
@@ -86,6 +93,9 @@ export class PriceViewDto extends createZodDto(PriceViewSchema) {}
 export class CreatePriceDto extends createZodDto(CreatePriceSchema) {}
 export class UpdatePriceDto extends createZodDto(UpdatePriceSchema) {}
 export class PaginatedPriceDto extends PaginatedResponseDto(PriceSchema) {}
+export class PaginatedPriceViewDto extends PaginatedResponseDto(
+  PriceViewSchema,
+) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}

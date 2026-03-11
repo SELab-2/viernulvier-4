@@ -17,6 +17,8 @@ import {
   LanguageQueryDto,
   LocationDto,
   LocationViewDto,
+  PaginatedLocationDto,
+  PaginatedLocationViewDto,
   PaginationFilterDto,
   UpdateLocationDto,
 } from "../dto/dto";
@@ -56,11 +58,10 @@ export class LocationController {
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<LocationDto[] | LocationViewDto[]> {
-    return this.ls.flattenByLanguage<LocationDto[] | LocationViewDto[]>(
-      await this.locationService.getLocations(paginationFilter),
-      lang.lang,
-    );
+  ): Promise<PaginatedLocationDto | PaginatedLocationViewDto> {
+    return this.ls.flattenByLanguage<
+      PaginatedLocationDto | PaginatedLocationViewDto
+    >(await this.locationService.getLocations(paginationFilter), lang.lang);
   }
 
   /**

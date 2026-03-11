@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { TagDatabaseService } from "../database/db.tag.service";
 import {
   CreateTagDto,
+  PaginatedTagDto,
   PaginationFilterDto,
   TagDto,
   UpdateTagDto,
@@ -34,7 +35,9 @@ export class TagService {
    * @param paginationFilter is the pagination params
    * @returns All TagDto objects
    */
-  async getAllTags(paginationFilter: PaginationFilterDto): Promise<TagDto[]> {
+  async getAllTags(
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedTagDto> {
     return await this.dbTagService.getTags(
       paginationFilter.limit,
       paginationFilter.page,

@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
+import { CreateTagDto, PaginatedTagDto, TagDto, UpdateTagDto, } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
+
 @Injectable()
 export class TagDatabaseService {
   // need to give a db service as param when used. -> see db.service.
@@ -38,19 +39,30 @@ export class TagDatabaseService {
    * @param page is the page you want (indexed from 0)
    * @returns The tags if there are any.
    */
-  async getTags(amount: number = 0, page: number = 0): Promise<TagDto[]> {
-    // non-pagination first
-    if (amount === 0) {
-      const query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags`;
+  async getTags(
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<PaginatedTagDto> {
+    let query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags ORDER BY id`;
 
-      return await this.db.query<TagDto>(query);
+    const params: any[] = [];
+
+    if (amount > 0) {
+      query += ` LIMIT $1 OFFSET $2`;
+      params.push(amount, page * amount);
     }
 
-    const offset = page * amount;
+    const [tags, countResult] = await Promise.all([
+      this.db.query<TagDto>(query, params),
+      this.db.query<{ count: string }>(`SELECT COUNT(*) as count FROM tags`),
+    ]);
 
-    const query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags LIMIT $1 OFFSET $2`;
-
-    return await this.db.query<TagDto>(query, [amount, offset]);
+    return {
+      page,
+      limit: amount,
+      totalItems: parseInt(countResult[0].count),
+      objects: tags,
+    };
   }
 
   /**

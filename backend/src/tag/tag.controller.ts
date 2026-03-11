@@ -14,6 +14,8 @@ import { TagService } from "./tag.service";
 import {
   CreateTagDto,
   LanguageQueryDto,
+  PaginatedTagDto,
+  PaginatedTagViewDto,
   PaginationFilterDto,
   TagDto,
   TagViewDto,
@@ -56,8 +58,8 @@ export class TagController {
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-  ): Promise<TagDto[] | TagViewDto[]> {
-    return this.ls.flattenByLanguage<TagDto[] | TagViewDto[]>(
+  ): Promise<PaginatedTagDto | PaginatedTagViewDto> {
+    return this.ls.flattenByLanguage<PaginatedTagDto | PaginatedTagViewDto>(
       await this.tagService.getAllTags(paginationFilter),
       lang.lang,
     );
