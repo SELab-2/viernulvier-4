@@ -1,30 +1,51 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ProductionBlogController } from "./production-blog.controller";
 import { ProductionService } from "../production.service";
-import { BlogDto, ProductionDto } from "../../dto/dto";
+import { LanguageService } from "../../util/language/language.service";
+import {
+  BlogDto,
+  BlogViewDto,
+  ProductionDto,
+  LanguageQueryDto,
+} from "../../dto/dto";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 
 describe("ProductionBlogController", () => {
   let controller: ProductionBlogController;
   let service: ProductionService;
+  let languageService: LanguageService;
 
   const mockProduction: ProductionDto = {
     id: 1,
-    titel: "The Great Show",
-    description1: "An amazing production",
-    description2: "With great actors",
+    titel: { en: "The Great Show", nl: "De Geweldige Show" },
+    description1: {
+      en: "An amazing production",
+      nl: "Een geweldige productie",
+    },
+    description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
     legacy_id: "am",
-    tagline: "fixing",
-    artist: "the",
-    credits: "tests :-)",
+    tagline: { en: "fixing", nl: "repareren" },
+    artist: { en: "the", nl: "de" },
+    credits: { en: "tests :-)", nl: "testen :-)" },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
   };
 
   const mockBlog: BlogDto = {
+    id: 1,
+    titel: { en: "Behind the Scenes", nl: "Achter de schermen" },
+    description: {
+      en: "Looking at the set of The Great Show.",
+      nl: "Kijken naar de set van De Geweldige Show.",
+    },
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
+  };
+
+  const mockBlogView: BlogViewDto = {
     id: 1,
     titel: "Behind the Scenes",
     description: "Looking at the set of The Great Show.",
@@ -44,6 +65,12 @@ describe("ProductionBlogController", () => {
             unlinkBlogFromProduction: jest.fn(),
           },
         },
+        {
+          provide: LanguageService,
+          useValue: {
+            flattenByLanguage: jest.fn(),
+          },
+        },
       ],
     })
       .overrideGuard(ApiKeyGuard)
@@ -58,6 +85,7 @@ describe("ProductionBlogController", () => {
 
     controller = module.get<ProductionBlogController>(ProductionBlogController);
     service = module.get<ProductionService>(ProductionService);
+    languageService = module.get<LanguageService>(LanguageService);
   });
 
   it("should be defined", () => {
@@ -65,26 +93,38 @@ describe("ProductionBlogController", () => {
   });
 
   describe("getProductionBlogs", () => {
-    it("should return an array of blogs linked to the production", async () => {
+    it("should return an array of flattened blogs linked to the production", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
       const expectedBlogs = [mockBlog];
+      const expectedBlogViews = [mockBlogView];
+
       jest
         .spyOn(service, "getProductionBlogs")
         .mockResolvedValueOnce(expectedBlogs);
 
-      const result = await controller.getProductionBlogs(1);
+      jest
+        .spyOn(languageService, "flattenByLanguage")
+        .mockReturnValue(expectedBlogViews);
+
+      const result = await controller.getProductionBlogs(1, langQuery);
 
       expect(service.getProductionBlogs).toHaveBeenCalledWith(1);
-      expect(result).toEqual(expectedBlogs);
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        expectedBlogs,
+        langQuery.lang,
+      );
+      expect(result).toEqual(expectedBlogViews);
     });
 
     it("should throw a NotFoundException if the production is not found", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
       jest
         .spyOn(service, "getProductionBlogs")
         .mockRejectedValueOnce(new NotFoundException());
 
-      await expect(controller.getProductionBlogs(999)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        controller.getProductionBlogs(999, langQuery),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

@@ -2,17 +2,23 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { TagService } from "./tag.service";
 import { TagDatabaseService } from "../database/db.tag.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { CreateTagDto, TagDto } from "../dto/dto";
+import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
 
 describe("TagService", () => {
   let service: TagService;
   let dbService: TagDatabaseService;
 
+  // Updated to match localized TagSchema (removed old production_id)
   const mockTag: TagDto = {
     id: 1,
-    tag: "Action",
-    production_id: 101,
-  } as TagDto;
+    tag: {
+      en: "Action",
+      nl: "Actie",
+    },
+    created_at: "2024-01-15T19:00:00.000Z",
+    updated_at: "2024-01-15T19:00:00.000Z",
+    legacy_id: null,
+  };
 
   const mockTags: TagDto[] = [mockTag];
 
@@ -43,7 +49,10 @@ describe("TagService", () => {
 
   describe("createTag", () => {
     it("should create and return a new tag", async () => {
-      const createDto = { tag: "NewTag", production_id: 101 } as CreateTagDto;
+      const createDto: CreateTagDto = {
+        tag: { en: "NewTag", nl: "NieuweTag" },
+        legacy_id: null,
+      };
       const result = await service.createTag(createDto);
       expect(dbService.createTag).toHaveBeenCalledWith(createDto);
       expect(result).toEqual(mockTag);
@@ -82,15 +91,20 @@ describe("TagService", () => {
 
   describe("updateTag", () => {
     it("should successfully update and return the tag", async () => {
-      const updateDto = { tag: "Updated" };
+      const updateDto: UpdateTagDto = {
+        tag: { en: "Updated", nl: "Bijgewerkt" },
+      };
       const result = await service.updateTag(1, updateDto);
       expect(dbService.updateTag).toHaveBeenCalledWith(updateDto);
       expect(result).toEqual(mockTag);
     });
 
     it("should throw BadRequestException if url id and body id do not match", async () => {
-      const mismatchDto = { id: 2, tag: "Mismatch" };
-      await expect(service.updateTag(1, mismatchDto as TagDto)).rejects.toThrow(
+      const mismatchDto: UpdateTagDto = {
+        id: 2,
+        tag: { en: "Mismatch", nl: "Mismatch" },
+      };
+      await expect(service.updateTag(1, mismatchDto)).rejects.toThrow(
         BadRequestException,
       );
     });

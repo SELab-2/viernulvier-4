@@ -2,6 +2,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { AppModule } from "../app.module";
+import { ScraperService } from "../util/scraper/scraper.service";
+import { AppLogger } from "../util/logger/logger.service";
 
 describe("AuthGuards tests", () => {
   let app: INestApplication;
@@ -9,7 +11,21 @@ describe("AuthGuards tests", () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(AppLogger) // We override these so they don't make a fuss during testing.
+      .useValue({
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+        verbose: jest.fn(),
+      })
+      .overrideProvider(ScraperService)
+      .useValue({
+        onApplicationBootstrap: jest.fn(),
+        handleDailyScrape: jest.fn(),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
