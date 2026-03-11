@@ -64,7 +64,7 @@ function toCsvEvent(event: any, index: number, locationName: string): vnvEvent {
   };
 }
 
-async function injectCsvData() {
+export async function injectCsvData() {
   const dbConnection = new DbConnection();
 
   const productionsFile = "../common/res/productions_output.csv";
@@ -111,7 +111,3 @@ async function injectCsvData() {
   logger.info("CSV injection completed.");
 }
 
-void injectCsvData().catch((error) => {
-  logger.error("CSV injection failed.", error);
-  process.exit(1);
-});
