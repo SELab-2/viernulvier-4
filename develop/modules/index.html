@@ -14,7 +14,7 @@
       <script>
         // Current page data
         var mkdocs_page_name = "Overview";
-        var mkdocs_page_input_path = "logging/index.md";
+        var mkdocs_page_input_path = "modules/index.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -88,20 +88,8 @@
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Logging</span></p>
-              <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#setup-configuration">Setup &amp; Configuration</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#1-the-nestjs-way-dependency-injection">1. The NestJS Way (Dependency Injection)</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#2-direct-import">2. Direct Import</a>
-    </li>
-        </ul>
-    </li>
-    </ul>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../logging/">Overview</a>
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Server</span></p>
@@ -116,36 +104,44 @@
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Nest Modules</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../modules/">Overview</a>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-feature-modules">1. Feature Modules</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-core-modules">2. Core Modules</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#3-sharedutility-modules">3. Shared/Utility Modules</a>
+    </li>
+    </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Feature Modules</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/production/">Production</a>
+                <li class="toctree-l2"><a class="reference internal" href="production/">Production</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/event/">Event</a>
+                <li class="toctree-l2"><a class="reference internal" href="event/">Event</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/tag/">Tag</a>
+                <li class="toctree-l2"><a class="reference internal" href="tag/">Tag</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/blog/">Blog</a>
+                <li class="toctree-l2"><a class="reference internal" href="blog/">Blog</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/location/">Location</a>
+                <li class="toctree-l2"><a class="reference internal" href="location/">Location</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/price/">Price</a>
+                <li class="toctree-l2"><a class="reference internal" href="price/">Price</a>
                 </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Core Modules</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/database/">Database</a>
+                <li class="toctree-l2"><a class="reference internal" href="database/">Database</a>
                 </li>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/auth/">Auth</a>
+                <li class="toctree-l2"><a class="reference internal" href="auth/">Auth</a>
                 </li>
     </ul>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" >Shared Modules</a>
     <ul>
-                <li class="toctree-l2"><a class="reference internal" href="../modules/util/">Util</a>
+                <li class="toctree-l2"><a class="reference internal" href="util/">Util</a>
                 </li>
     </ul>
                   </li>
@@ -164,7 +160,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Logging</li>
+          <li class="breadcrumb-item">Nest Modules</li>
       <li class="breadcrumb-item active">Overview</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -174,44 +170,36 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="logging-overview">Logging Overview</h1>
-<p>This project uses <a href="https://github.com/winstonjs/winston">Winston</a> as its logging solution.</p>
-<h2 id="setup-configuration">Setup &amp; Configuration</h2>
-<p>To enable logging to a specific location, the following environment variable is required:</p>
+                <h1 id="nest-modules-overview">Nest Modules Overview</h1>
+<p>Our backend is built using <a href="https://nestjs.com/">NestJS</a>, as mentioned in <a href="../server/">Server</a> which relies heavily on a modular architecture to keep the codebase organized, scalable, and loosely coupled.</p>
+<p>The following pages cover the specific modules defined throughout our backend. To make navigation easier, they are grouped into their architectural categories.</p>
+<h2 id="1-feature-modules">1. Feature Modules</h2>
+<p>These modules encapsulate specific business domains. They contain the controllers, services, and business logic for these areas.</p>
 <ul>
-<li><code>LOGGER_PATH=[absolute_path_to_your_log_dir]</code></li>
+<li><strong><a href="production/">Production Module</a></strong> - <em>Manages production data and its associated entities.</em></li>
+<li><strong><a href="event/">Event Module</a></strong> - <em>Handles the lifecycle and details of scheduled events.</em></li>
+<li><strong><a href="tag/">Tag Module</a></strong> - <em>Manages categorization tags used across the platform.</em></li>
+<li><strong><a href="blog/">Blog Module</a></strong> - <em>Takes cate of any blogs added to the archive.</em></li>
+<li><strong><a href="location/">Location Module</a></strong> - <em>Handles the different locations events can be at.</em></li>
+<li><strong><a href="price/">Price Module</a></strong> - <em>Handles the different types of prices events can have.</em></li>
 </ul>
-<p>No further manual setup is needed.</p>
-<h2 id="usage">Usage</h2>
-<p>There are two ways to use the logger in this project, depending on your context:</p>
-<h3 id="1-the-nestjs-way-dependency-injection">1. The NestJS Way (Dependency Injection)</h3>
-<p><strong>Use this for:</strong> Services, Controllers, Guards, or anywhere inside the NestJS Dependency Injection (DI) context.</p>
-<p>First, ensure you import the <code>UtilModule</code> into your feature's Module. Then, inject an instance of <code>AppLogger</code> into your class constructor:</p>
-<pre><code class="language-typescript">import { Injectable } from '@nestjs/common';
-import { AppLogger } from 'root/backend/src/util/logger/logger';
-
-@Injectable()
-export class MyService {
-  constructor(private readonly logger: AppLogger) {}
-
-  doSomething() {
-    this.logger.log('Doing something important...');
-  }
-}
-</code></pre>
-<h3 id="2-direct-import">2. Direct Import</h3>
-<p><strong>Use this for:</strong> Files outside the NestJS DI container (e.g., <code>main.ts</code>, custom decorators, or raw utility scripts).</p>
-<p>Import the logger straight from its declaration in <code>root/backend/src/util/logger/logger.ts</code>:</p>
-<pre><code class="language-typescript">import { logger } from 'root/backend/src/util/logger/logger';
-
-logger.info('Bootstrapping application...');
-</code></pre>
+<h2 id="2-core-modules">2. Core Modules</h2>
+<p>These modules handle application-wide infrastructure. They are typically imported only once in the root <code>AppModule</code>.</p>
+<ul>
+<li><strong><a href="database/">Database Module</a></strong> - <em>Configuration and connection pooling.</em></li>
+<li><strong><a href="auth/">Auth Module</a></strong> - <em>Authentication and authorization guards.</em></li>
+</ul>
+<h2 id="3-sharedutility-modules">3. Shared/Utility Modules</h2>
+<p>These are helper modules that provide reusable services across multiple feature modules.</p>
+<ul>
+<li><strong><a href="util/">Util Module</a></strong> - <em>Holds Utility Services that can be used anywhere in the project.</em></li>
+</ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../scraping/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../server/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../server/frontend/" class="btn btn-neutral float-left" title="Frontend"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="production/" class="btn btn-neutral float-right" title="Production">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -234,10 +222,10 @@ logger.info('Bootstrapping application...');
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../scraping/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../server/frontend/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../server/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="production/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
