@@ -14,7 +14,7 @@
       <script>
         // Current page data
         var mkdocs_page_name = "Overview";
-        var mkdocs_page_input_path = "server/index.md";
+        var mkdocs_page_input_path = "logging/index.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -88,35 +88,31 @@
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Logging</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../logging/">Overview</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Server</span></p>
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#database">Database</a>
+    <li class="toctree-l2"><a class="reference internal" href="#setup-configuration">Setup &amp; Configuration</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#api-backend">API / Backend</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#frontend">Frontend</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#general-deployment">General Deployment</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#nginx">Nginx</a>
+    <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#https-ssl">HTTPS / SSL</a>
+    <li class="toctree-l3"><a class="reference internal" href="#1-the-nestjs-way-dependency-injection">1. The NestJS Way (Dependency Injection)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#2-direct-import">2. Direct Import</a>
     </li>
         </ul>
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="database/">Database</a>
+              </ul>
+              <p class="caption"><span class="caption-text">Server</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../server/">Overview</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="backend/">Backend</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../server/database/">Database</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="frontend/">Frontend</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../server/backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../server/frontend/">Frontend</a>
                   </li>
               </ul>
       </div>
@@ -133,7 +129,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Server</li>
+          <li class="breadcrumb-item">Logging</li>
       <li class="breadcrumb-item active">Overview</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -143,79 +139,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="server-overview">Server Overview</h1>
-<p>This project consists of several interconnected components that must be deployed and configured together on a server to
-function correctly:</p>
+                <h1 id="logging-overview">Logging Overview</h1>
+<p>This project uses <a href="https://github.com/winstonjs/winston">Winston</a> as its logging solution.</p>
+<h2 id="setup-configuration">Setup &amp; Configuration</h2>
+<p>To enable logging to a specific location, the following environment variable is required:</p>
 <ul>
-<li><strong>Database</strong> – PostgreSQL</li>
-<li><strong>Backend/API</strong> – NestJS</li>
-<li><strong>Frontend</strong> – Vue + Nuxt</li>
+<li><code>LOGGER_PATH=[absolute_path_to_your_log_dir]</code></li>
 </ul>
-<p>This page provides a brief structural overview and basic setup instructions. See the linked component pages for more
-detailed information.</p>
-<hr />
-<h2 id="database">Database</h2>
-<p>The database runs on <a href="https://www.postgresql.org/download/">PostgreSQL</a>. Install it on your server by
-following <a href="https://www.postgresql.org/download/">this guide</a>, then restore the database from the provided dump:</p>
-<pre><code class="language-bash">pg_restore -U &lt;username&gt; -d &lt;database_name&gt; server/pg.dump
+<p>No further manual setup is needed.</p>
+<h2 id="usage">Usage</h2>
+<p>There are two ways to use the logger in this project, depending on your context:</p>
+<h3 id="1-the-nestjs-way-dependency-injection">1. The NestJS Way (Dependency Injection)</h3>
+<p><strong>Use this for:</strong> Services, Controllers, Guards, or anywhere inside the NestJS Dependency Injection (DI) context.</p>
+<p>First, ensure you import the <code>UtilModule</code> into your feature's Module. Then, inject an instance of <code>AppLogger</code> into your class constructor:</p>
+<pre><code class="language-typescript">import { Injectable } from '@nestjs/common';
+import { AppLogger } from 'root/backend/src/util/logger/logger';
+
+@Injectable()
+export class MyService {
+  constructor(private readonly logger: AppLogger) {}
+
+  doSomething() {
+    this.logger.log('Doing something important...');
+  }
+}
 </code></pre>
-<blockquote>
-<p><strong>Note:</strong> <code>&lt;username&gt;</code> and <code>&lt;database_name&gt;</code> refer to your PostgreSQL installation credentials.</p>
-</blockquote>
-<p>The restored database includes an admin account and API key to get you started. Some additional configuration is still
-required — please review the <a href="database/">database page</a> before proceeding.</p>
-<hr />
-<h2 id="api-backend">API / Backend</h2>
-<p>The backend is built with <a href="https://nestjs.com/">NestJS</a>. For in-depth documentation on its architecture and internals,
-see the <a href="insert here">backend overview page</a>. For a step-by-step deployment guide, see
-the <a href="backend/">backend setup page</a>.</p>
-<p>Before deploying, make sure to configure the required environment variables. An example can be found in <code>.env.example</code>
-in the project root.</p>
-<hr />
-<h2 id="frontend">Frontend</h2>
-<p>The frontend is built with <a href="https://vuejs.org/">Vue</a> and <a href="https://nuxt.com/">Nuxt</a>. For implementation details, see
-the <a href="insert here">frontend pages</a>.</p>
-<p>Under normal circumstances, the frontend requires minimal setup and should work out of the box after following the
-deployment steps below. See the <a href="frontend/">frontend page</a> if you run into issues.</p>
-<hr />
-<h2 id="general-deployment">General Deployment</h2>
-<p>Once the database is configured and the backend environment variables are in order, you're ready to deploy.</p>
-<p><strong>Prerequisites:</strong></p>
-<ul>
-<li><a href="https://nodejs.org/">Node.js / npm</a></li>
-<li><a href="https://pm2.keymetrics.io/">pm2</a> (<code>npm install -g pm2</code>)</li>
-</ul>
-<p>Run the deployment script from the project root:</p>
-<pre><code class="language-bash">bash server/server_deployment.sh
+<h3 id="2-direct-import">2. Direct Import</h3>
+<p><strong>Use this for:</strong> Files outside the NestJS DI container (e.g., <code>main.ts</code>, custom decorators, or raw utility scripts).</p>
+<p>Import the logger straight from its declaration in <code>root/backend/src/util/logger/logger.ts</code>:</p>
+<pre><code class="language-typescript">import { logger } from 'root/backend/src/util/logger/logger';
+
+logger.info('Bootstrapping application...');
 </code></pre>
-<p>This will build and deploy both the backend and frontend. Default ports:</p>
-<ul>
-<li><strong>Backend:</strong> <code>3000</code></li>
-<li><strong>Frontend:</strong> <code>3001</code></li>
-</ul>
-<hr />
-<h2 id="nginx">Nginx</h2>
-<p>Use the provided Nginx config to make the services publicly accessible:</p>
-<pre><code class="language-bash">sudo cp server/nginx_config /etc/nginx/sites-enabled/&lt;your-name&gt;
-</code></pre>
-<p>You can also write your own config if preferred. The provided one includes:</p>
-<ul>
-<li><strong>API</strong> – LAN-only, accessible under <code>/api</code></li>
-<li><strong>Frontend</strong> – served over HTTP and HTTPS under <code>/archive</code></li>
-<li><strong>Admin page</strong> – IP-locked to LAN, accessible under <code>/admin</code></li>
-<li><strong>Root redirect</strong> – <code>/</code> automatically redirects to <code>/archive</code></li>
-</ul>
-<h3 id="https-ssl">HTTPS / SSL</h3>
-<p>To enable HTTPS, obtain a certificate via <a href="https://certbot.eff.org/">Certbot</a>:</p>
-<pre><code class="language-bash">sudo certbot --nginx -d &lt;your-domain&gt;
-</code></pre>
-<p>Certbot can update your Nginx config automatically, or you can add the certificate details manually.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../logging/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="database/" class="btn btn-neutral float-right" title="Database">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../scraping/" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../server/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -238,10 +199,10 @@ deployment steps below. See the <a href="frontend/">frontend page</a> if you run
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../logging/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../scraping/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="database/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../server/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
