@@ -24,8 +24,6 @@ This gives you a starting point that includes an admin account and an API key.
 For an interactive overview, open `server/database/db.dbml` with a DBML viewer (e.g.
 the [DBML viewer plugin](https://marketplace.visualstudio.com/items?itemName=matt-meyers.vscode-dbml) for VS Code).
 
-![Database svg](database.svg)
-
 ### Core Tables
 
 **`productions`** – The central table. Represents a show or performance, with multilingual JSONB fields for title,

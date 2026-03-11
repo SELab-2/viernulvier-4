@@ -12,14 +12,6 @@ detailed information.
 
 ---
 
-## Architecture
-
-Here is a full overview of the system architecture and how the components interact:
-
-![System Architecture](architecture.svg)
-
----
-
 ## Database
 
 The database runs on [PostgreSQL](https://www.postgresql.org/download/). Install it on your server by
