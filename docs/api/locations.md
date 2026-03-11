@@ -1,17 +1,25 @@
 # Locations API
 
 ### [GET] `/locations`
-- **Returns:** Array of `LocationDto`
+Retrieves a list of all registered venues and locations.
+- **Returns:** Array of `Location`
 
 ### [GET] `/locations/:locationId`
-- **Returns:** `LocationDto`
+Retrieves a specific location by its ID.
+- **Returns:** `Location`
 
 ### [POST] `/locations`
-- **Security:** `apiKey` required | **Body:** `CreateLocationDto`
+Creates a new location entry.
+- **Security:** `apiKey` required.
+- **Body:** `CreateLocation`
+- **Returns:** `Location`
 
 ### [PATCH] `/locations`
-Updates an existing location (ID in body).
-- **Security:** `apiKey` required | **Body:** `UpdateLocationDto`
+Updates an existing location. Note: The ID must be provided within the request body.
+- **Security:** `apiKey` required.
+- **Body:** `UpdateLocation`
+- **Returns:** `Location`
 
 ### [DELETE] `/locations/:locationId`
-- **Security:** `apiKey` required
+Permanently deletes a location.
+- **Security:** `apiKey` required.

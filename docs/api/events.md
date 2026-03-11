@@ -2,41 +2,56 @@
 
 ## 📅 Events Management
 ### [GET] `/events`
-Returns all events. Supports filters via query.
-- **Returns:** Array of `EventDto`
+Returns all events. Supports filters via query parameters.
+- **Returns:** Array of `Event`
 
 ### [GET] `/events/:eventId`
-- **Returns:** `EventDto`
+Retrieves a specific event by its ID.
+- **Returns:** `Event`
 
 ### [POST] `/events`
-- **Security:** `apiKey` required | **Body:** `CreateEventDto`
+Creates a new event entry.
+- **Security:** `apiKey` required
+- **Body:** `CreateEvent`
+- **Returns:** `Event`
 
 ### [PUT] `/events/:eventId`
-Replaces an event.
-- **Security:** `apiKey` required | **Body:** `EventDto`
+Replaces an entire event object.
+- **Security:** `apiKey` required.
+- **Body:** `Event`
+- **Returns:** `Event`
 
 ### [PATCH] `/events/:eventId`
-Updates an event.
-- **Security:** `apiKey` required | **Body:** `UpdateEventDto`
+Updates specific fields of an existing event.
+- **Security:** `apiKey` required.
+- **Body:** `UpdateEvent`
+- **Returns:** `Event`
 
 ### [DELETE] `/events/:eventId`
-- **Security:** `apiKey` required
+Permanently deletes an event.
+- **Security:** `apiKey` required.
 
 ## 🔗 Relationships
 ### [GET] `/events/:eventId/prices`
-- **Returns:** Array of `PriceDto`
+Retrieves all prices associated with this event.
+- **Returns:** Array of `Price`
 
 ### [PUT] `/events/:eventId/prices/:priceId`
-- **Security:** `apiKey` required | Links price to event.
+Links a specific price category to an event.
+- **Security:** `apiKey` required
 
 ### [DELETE] `/events/:eventId/prices/:priceId`
-- **Security:** `apiKey` required | Unlinks price from event.
+Unlinks a price category from an event.
+- **Security:** `apiKey` required
 
 ### [GET] `/events/:eventId/locations`
-- **Returns:** `LocationDto`
+Retrieves the location assigned to this event.
+- **Returns:** `Location`
 
 ### [PUT] `/events/:eventId/locations/:locationId`
-- **Security:** `apiKey` required | Links location to event.
+Links a specific location to an event.
+- **Security:** `apiKey` required.
 
 ### [DELETE] `/events/:eventId/locations`
-- **Security:** `apiKey` required | Unlinks location from event.
+Unlinks the location from an event.
+- **Security:** `apiKey` required.

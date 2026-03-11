@@ -1,16 +1,25 @@
 # Tags API
 
 ### [GET] `/tags`
-- **Returns:** Array of `TagDto`
+Retrieves a list of all available tags.
+- **Returns:** Array of `Tag`
 
 ### [GET] `/tags/:tagId`
-- **Returns:** `TagDto`
+Retrieves a specific tag by its ID.
+- **Returns:** `Tag`
 
 ### [POST] `/tags`
-- **Security:** `apiKey` required | **Body:** `CreateTagDto`
+Creates a new tag.
+- **Security:** `apiKey` required.
+- **Body:** `CreateTag`
+- **Returns:** `Tag`
 
 ### [PATCH] `/tags/:tagId`
-- **Security:** `apiKey` required | **Body:** `UpdateTagDto`
+Updates an existing tag's metadata.
+- **Security:** `apiKey` required.
+- **Body:** `UpdateTag`
+- **Returns:** `Tag`
 
 ### [DELETE] `/tags/:tagId`
-- **Security:** `apiKey` required
+Permanently deletes a tag.
+- **Security:** `apiKey` required.

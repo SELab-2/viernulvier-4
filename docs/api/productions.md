@@ -2,35 +2,54 @@
 
 ## 🎬 Productions
 ### [GET] `/productions`
-- **Returns:** Array of `ProductionDto`
+Retrieves all productions. Supports filtering by `tag_ids`.
+- **Returns:** Array of `Production`
+
+### [GET] `/productions/:productionId`
+Retrieves a specific production by its ID.
+- **Returns:** `Production`
 
 ### [POST] `/productions`
-- **Security:** `apiKey` required | **Body:** `CreateProductionDto`
+Creates a new production entry.
+- **Security:** `apiKey` required.
+- **Body:** `CreateProduction`
+- **Returns:** `Production`
 
 ### [PUT] `/productions/:productionId`
-- **Security:** `apiKey` required | **Body:** `ProductionDto`
+Replaces an entire production object.
+- **Security:** `apiKey` required.
+- **Body:** `Production`
 
 ### [PATCH] `/productions/:productionId`
-- **Security:** `apiKey` required | **Body:** `UpdateProductionDto`
+Updates specific fields of an existing production.
+- **Security:** `apiKey` required.
+- **Body:** `UpdateProduction`
 
 ### [DELETE] `/productions/:productionId`
-- **Security:** `apiKey` required
+Permanently deletes a production.
+- **Security:** `apiKey` required.
 
 ## 🏷️ Relationships
 ### [GET] `/productions/:productionId/tags`
-- **Returns:** Array of `TagDto`
+Retrieves all tags linked to this production.
+- **Returns:** Array of `Tag`
 
 ### [PUT] `/productions/:productionId/tags/:tagId`
-- **Security:** `apiKey` required | Links tag.
+Links a tag to a production.
+- **Security:** `apiKey` required.
 
 ### [DELETE] `/productions/:productionId/tags/:tagId`
-- **Security:** `apiKey` required | Unlinks tag.
+Unlinks a tag from a production.
+- **Security:** `apiKey` required.
 
 ### [GET] `/productions/:productionId/blogs`
-- **Returns:** Array of `BlogDto`
+Retrieves all blog posts associated with this production.
+- **Returns:** Array of `Blog`
 
 ### [PUT] `/productions/:productionId/blogs/:blogId`
-- **Security:** `apiKey` required | Links blog.
+Links a blog post to a production.
+- **Security:** `apiKey` required.
 
 ### [DELETE] `/productions/:productionId/blogs/:blogId`
-- **Security:** `apiKey` required | Unlinks blog.
+Unlinks a blog post from a production.
+- **Security:** `apiKey` required.
