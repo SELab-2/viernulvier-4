@@ -127,25 +127,25 @@
 <h2 id="authentication">🔐 Authentication</h2>
 <p>Public login uses a username/password object. Account management requires a <strong>Super API Key</strong>.</p>
 <h3 id="post-authlogin">[POST] <code>/auth/login</code></h3>
-<p>Logs into an existing account.
-- <strong>Request Body:</strong> <code>CreateAccountDto</code>
-- <strong>Returns:</strong> <code>{ account: PublicAccountDto, apiKey: ApiKeyDto | null }</code></p>
+<p>Authenticates a user and starts a session.
+- <strong>Request Body:</strong> <code>CreateAccount</code>
+- <strong>Returns:</strong> <code>{ account: PublicAccount, apiKey: ApiKey | null }</code></p>
 <h3 id="get-auth">[GET] <code>/auth</code></h3>
 <p>Returns a list of all existing accounts.
 - <strong>Security:</strong> <code>SuperApiKey</code> required.
-- <strong>Returns:</strong> Array of <code>PublicAccountDto</code></p>
+- <strong>Returns:</strong> Array of <code>PublicAccount</code></p>
 <h3 id="post-auth">[POST] <code>/auth</code></h3>
 <p>Creates a new account.
 - <strong>Security:</strong> <code>SuperApiKey</code> required.
-- <strong>Body:</strong> <code>CreateAccountDto</code>
-- <strong>Returns:</strong> <code>PublicAccountDto</code></p>
+- <strong>Body:</strong> <code>CreateAccount</code>
+- <strong>Returns:</strong> <code>PublicAccount</code></p>
 <h3 id="patch-auth">[PATCH] <code>/auth</code></h3>
 <p>Updates an existing account.
 - <strong>Security:</strong> <code>SuperApiKey</code> required.
-- <strong>Body:</strong> <code>UpdateAccountDto</code>
-- <strong>Returns:</strong> <code>PublicAccountDto</code></p>
+- <strong>Body:</strong> <code>UpdateAccount</code>
+- <strong>Returns:</strong> <code>PublicAccount</code></p>
 <h3 id="delete-authaccountid">[DELETE] <code>/auth/:accountId</code></h3>
-<p>Deletes an account.
+<p>Permanently deletes an account.
 - <strong>Security:</strong> <code>SuperApiKey</code> required.
 - <strong>Returns:</strong> <code>boolean</code></p>
               
