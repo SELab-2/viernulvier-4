@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { BlogDto, CreateBlogDto, PaginatedBlogDto, UpdateBlogDto, } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
@@ -35,9 +35,14 @@ export class BlogDatabaseService {
    * @param page page index (starts at 0)
    * @returns blogs
    */
-  async getBlogs(amount: number = 0, page: number = 0): Promise<BlogDto[]> {
+  async getBlogs(
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<PaginatedBlogDto> {
     const offset = page * amount;
-
+    const countResult = await this.db.query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM blogs`,
+    );
     if (amount === 0) {
       const query = `
       SELECT id, 
@@ -49,7 +54,12 @@ export class BlogDatabaseService {
       ORDER BY id
       `;
 
-      return await this.db.query<BlogDto>(query);
+      return {
+        limit: amount,
+        page: page,
+        totalItems: parseInt(countResult[0].count),
+        objects: await this.db.query<BlogDto>(query, [amount, offset]),
+      };
     }
 
     const query = `
@@ -63,7 +73,12 @@ export class BlogDatabaseService {
     LIMIT $1 OFFSET $2
     `;
 
-    return await this.db.query<BlogDto>(query, [amount, offset]);
+    return {
+      limit: amount,
+      page: page,
+      totalItems: parseInt(countResult[0].count),
+      objects: await this.db.query<BlogDto>(query, [amount, offset]),
+    };
   }
 
   /**
@@ -159,7 +174,7 @@ export class BlogDatabaseService {
 
   /**
    * Delete function for deleting blogs from the database.
-   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blogId must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * @returns nothing.
    */
   async deleteBlog(blogId: number): Promise<void> {

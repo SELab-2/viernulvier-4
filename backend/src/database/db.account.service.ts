@@ -1,12 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  ApiKeyDto,
-  CreateAccountDto,
-  PublicAccountDto,
-  UpdateAccountDto,
-} from "../dto/dto";
-import * as bcrypt from "bcryptjs";
+import { ApiKeyDto, CreateAccountDto, PaginatedAccountDto, PublicAccountDto, UpdateAccountDto, } from "../dto/dto";
+import * as bcrypt from "bcryptjs"; // note all function should require guarding(except login) and all POST,DELETE,... super_guard
 
 // note all function should require guarding(except login) and all POST,DELETE,... super_guard
 @Injectable()
@@ -14,15 +9,15 @@ export class AccountDatabaseService {
   constructor(private db: DbService) {}
 
   /**
-   * Get accounts with optional pagination
-   * @param amount Number of accounts per page. 0 = no limit
-   * @param page Page index (0-based)
-   * @returns a list of all accounts
+   * Returns all accounts in the database
+   * @param amount is the amount you want
+   * @param page is the page (offset) you want
+   * @returns accounts.
    */
   async getAccounts(
     amount: number = 0,
     page: number = 0,
-  ): Promise<PublicAccountDto[]> {
+  ): Promise<PaginatedAccountDto> {
     let query = `
       SELECT id, username, super_admin
       FROM accounts
@@ -36,7 +31,19 @@ export class AccountDatabaseService {
       params.push(amount, page * amount);
     }
 
-    return await this.db.query<PublicAccountDto>(query, params);
+    const [accounts, countResult] = await Promise.all([
+      this.db.query<PublicAccountDto>(query, params),
+      this.db.query<{ count: string }>(
+        `SELECT COUNT(*) as count FROM accounts`,
+      ),
+    ]);
+
+    return {
+      page,
+      limit: amount,
+      totalItems: parseInt(countResult[0].count),
+      objects: accounts,
+    };
   }
 
   /**

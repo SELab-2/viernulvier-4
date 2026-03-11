@@ -1,7 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { LocationService } from "./location.service";
 import { LocationDatabaseService } from "../database/db.location.service";
-import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import {
+  CreateLocationDto,
+  LocationDto,
+  PaginationFilterDto,
+  UpdateLocationDto,
+} from "../dto/dto";
 
 describe("LocationService", () => {
   let service: LocationService;
@@ -17,6 +22,11 @@ describe("LocationService", () => {
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
     legacy_id: "str",
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   const mockLocationArray: LocationDto[] = [mockLocation];
@@ -51,7 +61,7 @@ describe("LocationService", () => {
 
   describe("getLocations", () => {
     it("should fetch all locations from the database", async () => {
-      const result = await service.getLocations();
+      const result = await service.getLocations(filter);
       expect(result).toEqual(mockLocationArray);
       expect(dbService.getLocations).toHaveBeenCalledTimes(1);
     });

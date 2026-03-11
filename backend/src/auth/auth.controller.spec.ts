@@ -1,7 +1,11 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { CreateAccountDto, UpdateAccountDto } from "../dto/dto";
+import {
+  CreateAccountDto,
+  PaginationFilterDto,
+  UpdateAccountDto,
+} from "../dto/dto";
 import { SuperApiKeyGuard } from "./authGuard"; // <-- Make sure to import your guard!
 
 describe("AuthController", () => {
@@ -14,6 +18,11 @@ describe("AuthController", () => {
     createAccount: jest.fn(),
     updateAccount: jest.fn(),
     deleteAccount: jest.fn(),
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   beforeEach(async () => {
@@ -67,7 +76,7 @@ describe("AuthController", () => {
       ];
       mockAuthService.getAccounts.mockResolvedValue(expectedResult);
 
-      const result = await controller.getAccounts();
+      const result = await controller.getAccounts(filter);
 
       expect(authService.getAccounts).toHaveBeenCalled();
       expect(result).toEqual(expectedResult);

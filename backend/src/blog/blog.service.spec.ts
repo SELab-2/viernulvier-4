@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { BadRequestException } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { BlogDto, CreateBlogDto, PaginationFilterDto, UpdateBlogDto, } from "../dto/dto";
 
 describe("BlogService", () => {
   let service: BlogService;
@@ -30,6 +30,11 @@ describe("BlogService", () => {
     },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   beforeEach(async () => {
@@ -64,7 +69,7 @@ describe("BlogService", () => {
       const expectedBlogs = [mockBlog];
       mockBlogDbService.getBlogs.mockResolvedValue(expectedBlogs);
 
-      const result = await service.getAllBlogs();
+      const result = await service.getAllBlogs(filter);
 
       expect(result).toEqual(expectedBlogs);
       expect(blogDbService.getBlogs).toHaveBeenCalledTimes(1);

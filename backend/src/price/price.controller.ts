@@ -15,6 +15,8 @@ import { PriceService } from "./price.service";
 import {
   CreatePriceDto,
   LanguageQueryDto,
+  PaginatedPriceDto,
+  PaginatedPriceViewDto,
   PaginationFilterDto,
   PriceDto,
   PriceViewDto,
@@ -58,8 +60,8 @@ export class PriceController {
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<PriceDto[] | PriceViewDto[]> {
-    return this.ls.flattenByLanguage<PriceDto[] | PriceViewDto[]>(
+  ): Promise<PaginatedPriceDto | PaginatedPriceViewDto> {
+    return this.ls.flattenByLanguage<PaginatedPriceDto | PaginatedPriceViewDto>(
       await this.priceService.getPrices(paginationFilter),
       lang.lang,
     );
