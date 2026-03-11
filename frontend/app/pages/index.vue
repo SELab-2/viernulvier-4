@@ -71,16 +71,17 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
 <template>
   <div class="min-h-screen bg-white dark:bg-black text-black dark:text-white antialiased">
+
+    <!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
     <section class="relative h-[85vh] min-h-[560px] overflow-hidden bg-black">
-      <!-- mock photo -->
       <img
-        src="https://images.unsplash.com/photo-1765278624799-9c90305b0b7e?w=1400&q=80" 
+        src="https://images.unsplash.com/photo-1765278624799-9c90305b0b7e?w=1400&q=80"
         alt="VIERNULVIER performance"
         class="absolute inset-0 w-full h-full object-cover opacity-50 hero-img"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-      <!-- Language toggle (later in header) -->
+      <!-- Language toggle (tijdelijk hier, later naar header) -->
       <div class="absolute top-6 right-6 z-30">
         <button
           @click="toggleLocale"
@@ -210,8 +211,9 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
     </section>
 
     <!-- ══════════════════════════════ DISCOVER MORE ═══════════════════════════════════ -->
-    <section class="px-6 md:px-12 lg:px-20 py-24 max-w-7xl mx-auto">
-      <div class="mb-12">
+    <section class="py-24">
+      <!-- Section header -->
+      <div class="px-6 md:px-12 lg:px-20 max-w-7xl mx-auto mb-12">
         <p class="text-xs font-mono tracking-[0.25em] uppercase text-black/40 dark:text-white/40 mb-2">
           {{ t('discover.label') }}
         </p>
@@ -220,34 +222,55 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
         </h2>
       </div>
 
-      <div class="grid md:grid-cols-2 gap-6">
-        <NuxtLink
-          to="/blogs"
-          class="group relative overflow-hidden border border-black/10 dark:border-white/10 p-8 md:p-10 hover:border-black dark:hover:border-white transition-colors bg-black/[0.02] dark:bg-white/[0.02]"
-        >
-          <div class="absolute top-0 left-0 w-0 h-0.5 bg-black dark:bg-white group-hover:w-full transition-all duration-500" />
-          <FileText class="w-10 h-10 mb-6 opacity-60 group-hover:opacity-100 transition-opacity" />
-          <h3 class="text-xl md:text-2xl font-display font-black mb-3">{{ t('discover.stories.title') }}</h3>
-          <p class="text-sm text-black/50 dark:text-white/50 leading-relaxed mb-6">{{ t('discover.stories.body') }}</p>
-          <div class="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest group-hover:gap-3 transition-all">
-            {{ t('discover.stories.cta') }}
-            <ArrowRight class="w-3.5 h-3.5" />
+      <!-- Full-bleed image cards -->
+      <div class="grid md:grid-cols-2" style="height: 520px;">
+
+        <!-- Verhalen card -->
+        <NuxtLink to="/blogs" class="group relative overflow-hidden block">
+          <img
+            src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80"
+            alt="Verhalen en Geschiedenis"
+            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
+          <div class="relative h-full flex flex-col justify-end p-10 md:p-12">
+            <p class="text-xs font-mono tracking-[0.25em] uppercase text-white/40 mb-3">01</p>
+            <h3 class="text-3xl md:text-4xl font-display font-black text-white mb-4 leading-tight">
+              {{ t('discover.stories.title') }}
+            </h3>
+            <p class="text-sm text-white/70 leading-relaxed mb-8 max-w-sm">
+              {{ t('discover.stories.body') }}
+            </p>
+            <div class="inline-flex items-center gap-3 text-white font-mono text-xs font-bold uppercase tracking-widest border-b border-white/30 pb-1 w-fit group-hover:border-white transition-colors duration-300">
+              {{ t('discover.stories.cta') }}
+              <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
           </div>
         </NuxtLink>
 
-        <NuxtLink
-          to="/uploads"
-          class="group relative overflow-hidden border border-black/10 dark:border-white/10 p-8 md:p-10 hover:border-black dark:hover:border-white transition-colors bg-black/[0.02] dark:bg-white/[0.02]"
-        >
-          <div class="absolute top-0 left-0 w-0 h-0.5 bg-black dark:bg-white group-hover:w-full transition-all duration-500" />
-          <ImageIcon class="w-10 h-10 mb-6 opacity-60 group-hover:opacity-100 transition-opacity" />
-          <h3 class="text-xl md:text-2xl font-display font-black mb-3">{{ t('discover.posters.title') }}</h3>
-          <p class="text-sm text-black/50 dark:text-white/50 leading-relaxed mb-6">{{ t('discover.posters.body') }}</p>
-          <div class="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest group-hover:gap-3 transition-all">
-            {{ t('discover.posters.cta') }}
-            <ArrowRight class="w-3.5 h-3.5" />
+        <!-- Affiches card -->
+        <NuxtLink to="/uploads" class="group relative overflow-hidden block">
+          <img
+            src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80"
+            alt="Affiches en Drukwerk"
+            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          />
+          <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
+          <div class="relative h-full flex flex-col justify-end p-10 md:p-12">
+            <p class="text-xs font-mono tracking-[0.25em] uppercase text-white/40 mb-3">02</p>
+            <h3 class="text-3xl md:text-4xl font-display font-black text-white mb-4 leading-tight">
+              {{ t('discover.posters.title') }}
+            </h3>
+            <p class="text-sm text-white/70 leading-relaxed mb-8 max-w-sm">
+              {{ t('discover.posters.body') }}
+            </p>
+            <div class="inline-flex items-center gap-3 text-white font-mono text-xs font-bold uppercase tracking-widest border-b border-white/30 pb-1 w-fit group-hover:border-white transition-colors duration-300">
+              {{ t('discover.posters.cta') }}
+              <ArrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </div>
           </div>
         </NuxtLink>
+
       </div>
     </section>
 
