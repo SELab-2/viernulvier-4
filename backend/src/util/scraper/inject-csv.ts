@@ -51,7 +51,7 @@ function toCsvProduction(
 
 function toCsvEvent(event: any, index: number, locationName: string): vnvEvent {
   return {
-    legacy_id: `csv-event-${index}`,
+    legacy_id: `csv-${index}`,
     production_id: `csv-${event.production_id}`,
     created_at: DEFAULT_DATE,
     updated_at: DEFAULT_DATE,
