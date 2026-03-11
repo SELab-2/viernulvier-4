@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>Backend - My Docs</title>
+    <title>Pricing - My Docs</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,8 +13,8 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Backend";
-        var mkdocs_page_input_path = "testing/backend.md";
+        var mkdocs_page_name = "Pricing";
+        var mkdocs_page_input_path = "api/pricing.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -57,39 +57,41 @@
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/">Overview & Auth</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/events/">Events</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/productions/">Productions</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/blogs/">Blogs</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/tags/">Tags</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/locations/">Locations</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../../api/pricing/">Pricing</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Testing</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" href="../">Overview</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../">Overview & Auth</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Backend</a>
+                  <li class="toctree-l1"><a class="reference internal" href="../events/">Events</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../productions/">Productions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../blogs/">Blogs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../tags/">Tags</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../locations/">Locations</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Pricing</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#running-tests">Running tests</a>
+    <li class="toctree-l2"><a class="reference internal" href="#get-prices">[GET] /prices</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#running-endtoend-tests">Running end‑to‑end tests</a>
+    <li class="toctree-l2"><a class="reference internal" href="#get-pricespriceid">[GET] /prices/:priceId</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#coverage-reports">Coverage reports</a>
+    <li class="toctree-l2"><a class="reference internal" href="#post-prices">[POST] /prices</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#tips">Tips</a>
+    <li class="toctree-l2"><a class="reference internal" href="#put-prices">[PUT] /prices</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#delete-pricespriceid">[DELETE] /prices/:priceId</a>
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend</a>
+              </ul>
+              <p class="caption"><span class="caption-text">Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/frontend/">Frontend</a>
                   </li>
               </ul>
       </div>
@@ -106,8 +108,8 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Testing</li>
-      <li class="breadcrumb-item active">Backend</li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">Pricing</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -116,37 +118,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="backend-testing">Backend Testing</h1>
-<p>This section covers how to run and interpret tests for the backend (NestJS) project.</p>
-<h2 id="running-tests">Running tests</h2>
-<p>From the repository root:</p>
-<pre><code class="language-bash">cd backend
-npm install           # or `npm i`
-npm run test          # runs Jest unit tests
-</code></pre>
-<h2 id="running-endtoend-tests">Running end‑to‑end tests</h2>
-<pre><code class="language-bash">cd backend
-npm run test:e2e     # execute integration/e2e tests
-</code></pre>
-<h2 id="coverage-reports">Coverage reports</h2>
-<p>The Jest run generates a coverage report in <code>backend/coverage</code>. Open <code>backend/coverage/lcov-report/index.html</code> in a browser to view.</p>
-<p>The repo also tracks coverage output under <code>coverage/</code> at the project root.</p>
-<p>You can also check the coverage by running:</p>
-<pre><code class="language-bash">cd backend
-npm run test:coverage
-</code></pre>
-<p>To exclude a file or directory from the coverage, add it to the <code>coveragePathIgnorePatterns</code> list in <code>backend/jest.config.ts</code></p>
-<h2 id="tips">Tips</h2>
+                <h1 id="pricing-api">Pricing API</h1>
+<h3 id="get-prices">[GET] <code>/prices</code></h3>
 <ul>
-<li>Use <code>npm run test:watch</code> during development for auto-rerun on file changes.</li>
-<li>Tests are located alongside their implementation (<code>*.spec.ts</code>) in each module.</li>
+<li><strong>Returns:</strong> Array of <code>PriceDto</code></li>
+</ul>
+<h3 id="get-pricespriceid">[GET] <code>/prices/:priceId</code></h3>
+<ul>
+<li><strong>Returns:</strong> <code>PriceDto</code></li>
+</ul>
+<h3 id="post-prices">[POST] <code>/prices</code></h3>
+<ul>
+<li><strong>Security:</strong> <code>apiKey</code> required | <strong>Body:</strong> <code>CreatePriceDto</code></li>
+</ul>
+<h3 id="put-prices">[PUT] <code>/prices</code></h3>
+<p>Updates a price (ID in body).
+- <strong>Security:</strong> <code>apiKey</code> required | <strong>Body:</strong> <code>UpdatePriceDto</code></p>
+<h3 id="delete-pricespriceid">[DELETE] <code>/prices/:priceId</code></h3>
+<ul>
+<li><strong>Security:</strong> <code>apiKey</code> required</li>
 </ul>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="../frontend/" class="btn btn-neutral float-right" title="Frontend">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../locations/" class="btn btn-neutral float-left" title="Locations"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../../testing/" class="btn btn-neutral float-right" title="Overview">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -169,10 +166,10 @@ npm run test:coverage
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../locations/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="../frontend/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="../../testing/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

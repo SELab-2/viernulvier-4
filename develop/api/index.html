@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Overview - My Docs</title>
+    <title>Overview & Auth - My Docs</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -13,8 +13,8 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "Overview";
-        var mkdocs_page_input_path = "testing/index.md";
+        var mkdocs_page_name = "Overview \u0026 Auth";
+        var mkdocs_page_input_path = "api/index.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -57,39 +57,45 @@
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">API Reference</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/">Overview & Auth</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/events/">Events</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/productions/">Productions</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/blogs/">Blogs</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/tags/">Tags</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/locations/">Locations</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../api/pricing/">Pricing</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Testing</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview & Auth</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#running-all-tests">Running All Tests</a>
+    <li class="toctree-l2"><a class="reference internal" href="#authentication">🔐 Authentication</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#post-authlogin">[POST] /auth/login</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#backend-testing">Backend Testing</a>
+    <li class="toctree-l3"><a class="reference internal" href="#get-auth">[GET] /auth</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#frontend-testing">Frontend Testing</a>
+    <li class="toctree-l3"><a class="reference internal" href="#post-auth">[POST] /auth</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#coverage-reports">Coverage Reports</a>
+    <li class="toctree-l3"><a class="reference internal" href="#patch-auth">[PATCH] /auth</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#delete-authaccountid">[DELETE] /auth/:accountId</a>
+    </li>
+        </ul>
     </li>
     </ul>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="backend/">Backend</a>
+                  <li class="toctree-l1"><a class="reference internal" href="events/">Events</a>
                   </li>
-                  <li class="toctree-l1"><a class="reference internal" href="frontend/">Frontend</a>
+                  <li class="toctree-l1"><a class="reference internal" href="productions/">Productions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="blogs/">Blogs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="tags/">Tags</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="locations/">Locations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="pricing/">Pricing</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/frontend/">Frontend</a>
                   </li>
               </ul>
       </div>
@@ -106,8 +112,8 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Testing</li>
-      <li class="breadcrumb-item active">Overview</li>
+          <li class="breadcrumb-item">API Reference</li>
+      <li class="breadcrumb-item active">Overview & Auth</li>
     <li class="wy-breadcrumbs-aside">
     </li>
   </ul>
@@ -116,49 +122,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="testing-overview">Testing Overview</h1>
-<p>This project uses different testing frameworks for each package within the monorepo. This section guides you through running tests across the entire project or focusing on specific packages.</p>
-<h2 id="running-all-tests">Running All Tests</h2>
-<p>From the repository root, run tests across all packages:</p>
-<pre><code class="language-bash">npm run test
-</code></pre>
-<p>For coverage reports across all packages:</p>
-<pre><code class="language-bash">npm run test:coverage
-</code></pre>
-<h2 id="backend-testing">Backend Testing</h2>
-<p>The backend (NestJS) uses <strong>Jest</strong> as the testing framework.</p>
-<ul>
-<li><strong>Unit Tests</strong>: Run <code>npm run test</code> in the <code>backend/</code> folder</li>
-<li><strong>End-to-End Tests</strong>: Run <code>npm run test:e2e</code> to test API integration</li>
-<li><strong>Coverage Reports</strong>: Available in <code>backend/coverage/lcov-report/</code></li>
-</ul>
-<p>For detailed instructions, see <a href="backend/">Backend Testing</a>.</p>
-<h2 id="frontend-testing">Frontend Testing</h2>
-<p>The frontend (Nuxt + Vue) uses <strong>Vitest</strong> for unit testing.</p>
-<ul>
-<li><strong>Unit Tests</strong>: Run <code>npm run test</code> in the <code>frontend/</code> folder</li>
-<li><strong>Coverage Reports</strong>: Available in <code>frontend/coverage/</code></li>
-</ul>
-<p>For detailed instructions, see <a href="frontend/">Frontend Testing</a>.</p>
-<h2 id="coverage-reports">Coverage Reports</h2>
-<p>After running tests with coverage, HTML reports are generated:</p>
-<ul>
-<li><strong>Backend</strong>: <code>backend/coverage/lcov-report/index.html</code></li>
-<li><strong>Frontend</strong>: <code>frontend/coverage/lcov-report/index.html</code></li>
-</ul>
-<p>Open these in a browser to view detailed coverage metrics.</p>
-<p>Some code is exlcuded from the coverage due to some files not needing tests (database queries, modules, main, etc.)</p>
-<p>To remove a file from coverage, put them in the corresponding files:</p>
-<ul>
-<li><strong>Backend</strong>: <code>backend/jest.config.ts</code>, add path to list <code>coveragePathIgnorePatterns</code></li>
-<li><strong>Frontend</strong>: <code>frontend/vitest.config.ts</code>, add path to list <code>coverage.exclude</code></li>
-</ul>
+                <h1 id="api-overview-authentication">API Overview &amp; Authentication</h1>
+<p><strong>Base URL:</strong> <code>http://localhost:3000</code></p>
+<h2 id="authentication">🔐 Authentication</h2>
+<p>Public login uses a username/password object. Account management requires a <strong>Super API Key</strong>.</p>
+<h3 id="post-authlogin">[POST] <code>/auth/login</code></h3>
+<p>Logs into an existing account.
+- <strong>Request Body:</strong> <code>CreateAccountDto</code>
+- <strong>Returns:</strong> <code>{ account: PublicAccountDto, apiKey: ApiKeyDto | null }</code></p>
+<h3 id="get-auth">[GET] <code>/auth</code></h3>
+<p>Returns a list of all existing accounts.
+- <strong>Security:</strong> <code>SuperApiKey</code> required.
+- <strong>Returns:</strong> Array of <code>PublicAccountDto</code></p>
+<h3 id="post-auth">[POST] <code>/auth</code></h3>
+<p>Creates a new account.
+- <strong>Security:</strong> <code>SuperApiKey</code> required.
+- <strong>Body:</strong> <code>CreateAccountDto</code>
+- <strong>Returns:</strong> <code>PublicAccountDto</code></p>
+<h3 id="patch-auth">[PATCH] <code>/auth</code></h3>
+<p>Updates an existing account.
+- <strong>Security:</strong> <code>SuperApiKey</code> required.
+- <strong>Body:</strong> <code>UpdateAccountDto</code>
+- <strong>Returns:</strong> <code>PublicAccountDto</code></p>
+<h3 id="delete-authaccountid">[DELETE] <code>/auth/:accountId</code></h3>
+<p>Deletes an account.
+- <strong>Security:</strong> <code>SuperApiKey</code> required.
+- <strong>Returns:</strong> <code>boolean</code></p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../api/pricing/" class="btn btn-neutral float-left" title="Pricing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="backend/" class="btn btn-neutral float-right" title="Backend">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../build-run/frontend/" class="btn btn-neutral float-left" title="Frontend"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="events/" class="btn btn-neutral float-right" title="Events">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -181,10 +176,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../api/pricing/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../build-run/frontend/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="backend/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="events/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
