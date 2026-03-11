@@ -4,7 +4,6 @@
             <stop offset="0%" style="stop-color:#0d1117"/>
             <stop offset="100%" style="stop-color:#161b27"/>
         </linearGradient>
-        <!-- Table header gradients -->
         <linearGradient id="hdrProd" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" style="stop-color:#1a3a5c"/>
             <stop offset="100%" style="stop-color:#1e4976"/>
@@ -42,11 +41,19 @@
             <stop offset="100%" style="stop-color:#383820"/>
         </linearGradient>
 
+        <!-- Arrow pointing right (toward referenced table) -->
         <marker id="refArrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-            <polygon points="0 0, 8 3, 0 6" fill="#4a9eff" opacity="0.7"/>
+            <polygon points="0 0, 8 3, 0 6" fill="#4a9eff" opacity="0.8"/>
         </marker>
-        <marker id="refArrowGray" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-            <polygon points="0 0, 8 3, 0 6" fill="#6c757d" opacity="0.7"/>
+        <marker id="refArrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#ff8787" opacity="0.8"/>
+        </marker>
+        <!-- Dot at FK source end -->
+        <marker id="dotBlue" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <circle cx="3" cy="3" r="2.5" fill="#4a9eff" opacity="0.7"/>
+        </marker>
+        <marker id="dotRed" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <circle cx="3" cy="3" r="2.5" fill="#ff8787" opacity="0.7"/>
         </marker>
     </defs>
 
@@ -95,19 +102,15 @@
     </text>
     <line x1="300" y1="44" x2="1100" y2="44" stroke="#ffffff" stroke-width="0.5" opacity="0.15"/>
 
-    <!-- ================================================================ -->
-    <!-- MACRO: table helper — drawn manually per table below             -->
-    <!-- ================================================================ -->
-
-    <!-- ===================== PRODUCTIONS (x=30, y=60) ================= -->
+    <!-- ===================== PRODUCTIONS (x=30, y=60) — removed ondertitel & planning_id ================= -->
+    <!-- Height reduced by 40px (2 rows × 20px each) → 312 - 40 = 272 -->
     <g id="tbl-productions">
-        <rect x="30" y="60" width="220" height="312" rx="6" fill="#0d1f33" stroke="#2a6496" stroke-width="1.5"/>
+        <rect x="30" y="60" width="220" height="272" rx="6" fill="#0d1f33" stroke="#2a6496" stroke-width="1.5"/>
         <rect x="30" y="60" width="220" height="28" rx="6" fill="url(#hdrProd)"/>
         <rect x="30" y="82" width="220" height="6" fill="url(#hdrProd)"/>
         <text x="140" y="79" text-anchor="middle" font-size="11" font-weight="bold" fill="#74c0fc" letter-spacing="1">
             productions
         </text>
-        <!-- rows -->
         <line x1="30" y1="88" x2="250" y2="88" stroke="#1e3a5c" stroke-width="1"/>
         <text x="40" y="102" font-size="9" fill="#ffd43b">🔑 id</text>
         <text x="170" y="102" font-size="9" fill="#6c757d">int pk</text>
@@ -115,41 +118,35 @@
         <text x="40" y="122" font-size="9" fill="#e9ecef">titel</text>
         <text x="170" y="122" font-size="9" fill="#6c757d">jsonb</text>
         <line x1="30" y1="128" x2="250" y2="128" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="142" font-size="9" fill="#e9ecef">ondertitel</text>
+        <text x="40" y="142" font-size="9" fill="#e9ecef">description1</text>
         <text x="170" y="142" font-size="9" fill="#6c757d">jsonb</text>
         <line x1="30" y1="148" x2="250" y2="148" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="162" font-size="9" fill="#e9ecef">description1</text>
+        <text x="40" y="162" font-size="9" fill="#e9ecef">description2</text>
         <text x="170" y="162" font-size="9" fill="#6c757d">jsonb</text>
         <line x1="30" y1="168" x2="250" y2="168" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="182" font-size="9" fill="#e9ecef">description2</text>
+        <text x="40" y="182" font-size="9" fill="#e9ecef">artist</text>
         <text x="170" y="182" font-size="9" fill="#6c757d">jsonb</text>
         <line x1="30" y1="188" x2="250" y2="188" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="202" font-size="9" fill="#e9ecef">planning_id</text>
-        <text x="170" y="202" font-size="9" fill="#6c757d">text</text>
+        <text x="40" y="202" font-size="9" fill="#e9ecef">tagline</text>
+        <text x="170" y="202" font-size="9" fill="#6c757d">jsonb</text>
         <line x1="30" y1="208" x2="250" y2="208" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="222" font-size="9" fill="#e9ecef">artist</text>
+        <text x="40" y="222" font-size="9" fill="#e9ecef">credits</text>
         <text x="170" y="222" font-size="9" fill="#6c757d">jsonb</text>
         <line x1="30" y1="228" x2="250" y2="228" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="242" font-size="9" fill="#e9ecef">tagline</text>
-        <text x="170" y="242" font-size="9" fill="#6c757d">jsonb</text>
+        <text x="40" y="242" font-size="9" fill="#adb5bd">created_at</text>
+        <text x="170" y="242" font-size="9" fill="#6c757d">timestamp</text>
         <line x1="30" y1="248" x2="250" y2="248" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="262" font-size="9" fill="#e9ecef">credits</text>
-        <text x="170" y="262" font-size="9" fill="#6c757d">jsonb</text>
+        <text x="40" y="262" font-size="9" fill="#adb5bd">updated_at</text>
+        <text x="170" y="262" font-size="9" fill="#6c757d">timestamp</text>
         <line x1="30" y1="268" x2="250" y2="268" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="282" font-size="9" fill="#adb5bd">created_at</text>
-        <text x="170" y="282" font-size="9" fill="#6c757d">timestamp</text>
+        <text x="40" y="282" font-size="9" fill="#adb5bd">legacy_id</text>
+        <text x="170" y="282" font-size="9" fill="#6c757d">text</text>
         <line x1="30" y1="288" x2="250" y2="288" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="302" font-size="9" fill="#adb5bd">updated_at</text>
-        <text x="170" y="302" font-size="9" fill="#6c757d">timestamp</text>
+        <text x="40" y="302" font-size="9" fill="#e9ecef">performer_type</text>
+        <text x="170" y="302" font-size="9" fill="#6c757d">text</text>
         <line x1="30" y1="308" x2="250" y2="308" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="322" font-size="9" fill="#adb5bd">legacy_id</text>
+        <text x="40" y="322" font-size="9" fill="#e9ecef">attendance_mode</text>
         <text x="170" y="322" font-size="9" fill="#6c757d">text</text>
-        <line x1="30" y1="328" x2="250" y2="328" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="342" font-size="9" fill="#e9ecef">performer_type</text>
-        <text x="170" y="342" font-size="9" fill="#6c757d">text</text>
-        <line x1="30" y1="348" x2="250" y2="348" stroke="#1a2a3a" stroke-width="0.5"/>
-        <text x="40" y="362" font-size="9" fill="#e9ecef">attendance_mode</text>
-        <text x="170" y="362" font-size="9" fill="#6c757d">text</text>
     </g>
 
     <!-- ===================== EVENTS (x=310, y=60) ==================== -->
@@ -182,6 +179,7 @@
         <text x="320" y="222" font-size="9" fill="#adb5bd">updated_at</text>
         <text x="450" y="222" font-size="9" fill="#6c757d">timestamp</text>
         <line x1="310" y1="228" x2="520" y2="228" stroke="#1a2a1a" stroke-width="0.5"/>
+        <!-- production_id FK row — arrow originates from right edge of this row -->
         <text x="320" y="242" font-size="9" fill="#74c0fc">🔗 production_id</text>
         <text x="450" y="242" font-size="9" fill="#ff6b6b">int nn</text>
         <line x1="310" y1="248" x2="520" y2="248" stroke="#1a2a1a" stroke-width="0.5"/>
@@ -216,7 +214,7 @@
 
     <!-- ===================== TAGS (x=840, y=60) ==================== -->
     <g id="tbl-tags">
-        <rect x="840" y="60" width="200" height="192" rx="6" fill="#150a1f" stroke="#5a2080" stroke-width="1.5"/>
+        <rect x="840" y="60" width="200" height="172" rx="6" fill="#150a1f" stroke="#5a2080" stroke-width="1.5"/>
         <rect x="840" y="60" width="200" height="28" rx="6" fill="url(#hdrTag)"/>
         <rect x="840" y="82" width="200" height="6" fill="url(#hdrTag)"/>
         <text x="940" y="79" text-anchor="middle" font-size="11" font-weight="bold" fill="#da77f2" letter-spacing="1">
@@ -237,14 +235,11 @@
         <line x1="840" y1="168" x2="1040" y2="168" stroke="#150a1f" stroke-width="0.5"/>
         <text x="850" y="182" font-size="9" fill="#adb5bd">legacy_id</text>
         <text x="970" y="182" font-size="9" fill="#6c757d">text</text>
-        <line x1="840" y1="188" x2="1040" y2="188" stroke="#150a1f" stroke-width="0.5"/>
-        <text x="850" y="202" font-size="9" fill="#adb5bd">updated_at</text>
-        <text x="970" y="202" font-size="9" fill="#6c757d">timestamp</text>
     </g>
 
     <!-- ===================== LOCATIONS (x=1090, y=60) ==================== -->
     <g id="tbl-locations">
-        <rect x="1090" y="60" width="200" height="192" rx="6" fill="#081520" stroke="#1a5a7a" stroke-width="1.5"/>
+        <rect x="1090" y="60" width="200" height="172" rx="6" fill="#081520" stroke="#1a5a7a" stroke-width="1.5"/>
         <rect x="1090" y="60" width="200" height="28" rx="6" fill="url(#hdrLoc)"/>
         <rect x="1090" y="82" width="200" height="6" fill="url(#hdrLoc)"/>
         <text x="1190" y="79" text-anchor="middle" font-size="11" font-weight="bold" fill="#74c0fc" letter-spacing="1">
@@ -252,7 +247,7 @@
         </text>
         <line x1="1090" y1="88" x2="1290" y2="88" stroke="#081520" stroke-width="1"/>
         <text x="1100" y="102" font-size="9" fill="#ffd43b">🔑 id</text>
-        <text x="1210" y="102" font-size="9" fill="#ff6b6b">int nn</text>
+        <text x="1210" y="102" font-size="9" fill="#ff6b6b">int pk</text>
         <line x1="1090" y1="108" x2="1290" y2="108" stroke="#081520" stroke-width="0.5"/>
         <text x="1100" y="122" font-size="9" fill="#e9ecef">location</text>
         <text x="1210" y="122" font-size="9" fill="#ff6b6b">jsonb nn unique</text>
@@ -265,281 +260,305 @@
         <line x1="1090" y1="168" x2="1290" y2="168" stroke="#081520" stroke-width="0.5"/>
         <text x="1100" y="182" font-size="9" fill="#adb5bd">legacy_id</text>
         <text x="1210" y="182" font-size="9" fill="#6c757d">text</text>
-        <line x1="1090" y1="188" x2="1290" y2="188" stroke="#081520" stroke-width="0.5"/>
-        <text x="1100" y="202" font-size="9" fill="#adb5bd">updated_at</text>
-        <text x="1210" y="202" font-size="9" fill="#6c757d">timestamp</text>
     </g>
 
-    <!-- ===================== PRICES (x=1090, y=310) ==================== -->
+    <!-- ===================== PRICES (x=1090, y=290) ==================== -->
     <g id="tbl-prices">
-        <rect x="1090" y="310" width="200" height="192" rx="6" fill="#0e1508" stroke="#3a5a1a" stroke-width="1.5"/>
-        <rect x="1090" y="310" width="200" height="28" rx="6" fill="url(#hdrPrice)"/>
-        <rect x="1090" y="332" width="200" height="6" fill="url(#hdrPrice)"/>
-        <text x="1190" y="329" text-anchor="middle" font-size="11" font-weight="bold" fill="#a9e34b" letter-spacing="1">
+        <rect x="1090" y="290" width="200" height="172" rx="6" fill="#0e1508" stroke="#3a5a1a" stroke-width="1.5"/>
+        <rect x="1090" y="290" width="200" height="28" rx="6" fill="url(#hdrPrice)"/>
+        <rect x="1090" y="312" width="200" height="6" fill="url(#hdrPrice)"/>
+        <text x="1190" y="309" text-anchor="middle" font-size="11" font-weight="bold" fill="#a9e34b" letter-spacing="1">
             prices
         </text>
-        <line x1="1090" y1="338" x2="1290" y2="338" stroke="#1a2a0a" stroke-width="1"/>
-        <text x="1100" y="352" font-size="9" fill="#ffd43b">🔑 id</text>
-        <text x="1210" y="352" font-size="9" fill="#6c757d">int pk</text>
+        <line x1="1090" y1="318" x2="1290" y2="318" stroke="#1a2a0a" stroke-width="1"/>
+        <text x="1100" y="332" font-size="9" fill="#ffd43b">🔑 id</text>
+        <text x="1210" y="332" font-size="9" fill="#6c757d">int pk</text>
+        <line x1="1090" y1="338" x2="1290" y2="338" stroke="#0e1508" stroke-width="0.5"/>
+        <text x="1100" y="352" font-size="9" fill="#e9ecef">name</text>
+        <text x="1210" y="352" font-size="9" fill="#ff6b6b">jsonb nn</text>
         <line x1="1090" y1="358" x2="1290" y2="358" stroke="#0e1508" stroke-width="0.5"/>
-        <text x="1100" y="372" font-size="9" fill="#e9ecef">name</text>
-        <text x="1210" y="372" font-size="9" fill="#ff6b6b">jsonb nn</text>
+        <text x="1100" y="372" font-size="9" fill="#e9ecef">price</text>
+        <text x="1210" y="372" font-size="9" fill="#ff6b6b">numeric nn</text>
         <line x1="1090" y1="378" x2="1290" y2="378" stroke="#0e1508" stroke-width="0.5"/>
-        <text x="1100" y="392" font-size="9" fill="#e9ecef">price</text>
-        <text x="1210" y="392" font-size="9" fill="#ff6b6b">numeric nn</text>
+        <text x="1100" y="392" font-size="9" fill="#adb5bd">created_at</text>
+        <text x="1210" y="392" font-size="9" fill="#6c757d">timestamp</text>
         <line x1="1090" y1="398" x2="1290" y2="398" stroke="#0e1508" stroke-width="0.5"/>
-        <text x="1100" y="412" font-size="9" fill="#adb5bd">created_at</text>
+        <text x="1100" y="412" font-size="9" fill="#adb5bd">updated_at</text>
         <text x="1210" y="412" font-size="9" fill="#6c757d">timestamp</text>
         <line x1="1090" y1="418" x2="1290" y2="418" stroke="#0e1508" stroke-width="0.5"/>
-        <text x="1100" y="432" font-size="9" fill="#adb5bd">updated_at</text>
-        <text x="1210" y="432" font-size="9" fill="#6c757d">timestamp</text>
-        <line x1="1090" y1="438" x2="1290" y2="438" stroke="#0e1508" stroke-width="0.5"/>
-        <text x="1100" y="452" font-size="9" fill="#adb5bd">legacy_id</text>
-        <text x="1210" y="452" font-size="9" fill="#6c757d">text</text>
-        <line x1="1090" y1="458" x2="1290" y2="458" stroke="#0e1508" stroke-width="0.5"/>
-        <text x="1100" y="472" font-size="9" fill="#adb5bd">updated_at</text>
-        <text x="1210" y="472" font-size="9" fill="#6c757d">timestamp</text>
+        <text x="1100" y="432" font-size="9" fill="#adb5bd">legacy_id</text>
+        <text x="1210" y="432" font-size="9" fill="#6c757d">text</text>
     </g>
 
-    <!-- ===================== ACCOUNTS (x=30, y=560) ==================== -->
+    <!-- ===================== ACCOUNTS (x=30, y=520) ==================== -->
     <g id="tbl-accounts">
-        <rect x="30" y="560" width="200" height="132" rx="6" fill="#1a0808" stroke="#6a1a1a" stroke-width="1.5"/>
-        <rect x="30" y="560" width="200" height="28" rx="6" fill="url(#hdrAuth)"/>
-        <rect x="30" y="582" width="200" height="6" fill="url(#hdrAuth)"/>
-        <text x="130" y="579" text-anchor="middle" font-size="11" font-weight="bold" fill="#ff8787" letter-spacing="1">
+        <rect x="30" y="520" width="200" height="132" rx="6" fill="#1a0808" stroke="#6a1a1a" stroke-width="1.5"/>
+        <rect x="30" y="520" width="200" height="28" rx="6" fill="url(#hdrAuth)"/>
+        <rect x="30" y="542" width="200" height="6" fill="url(#hdrAuth)"/>
+        <text x="130" y="539" text-anchor="middle" font-size="11" font-weight="bold" fill="#ff8787" letter-spacing="1">
             accounts
         </text>
-        <line x1="30" y1="588" x2="230" y2="588" stroke="#2a0808" stroke-width="1"/>
-        <text x="40" y="602" font-size="9" fill="#ffd43b">🔑 id</text>
-        <text x="150" y="602" font-size="9" fill="#6c757d">int pk</text>
+        <line x1="30" y1="548" x2="230" y2="548" stroke="#2a0808" stroke-width="1"/>
+        <text x="40" y="562" font-size="9" fill="#ffd43b">🔑 id</text>
+        <text x="150" y="562" font-size="9" fill="#6c757d">int pk</text>
+        <line x1="30" y1="568" x2="230" y2="568" stroke="#1a0808" stroke-width="0.5"/>
+        <text x="40" y="582" font-size="9" fill="#e9ecef">username</text>
+        <text x="150" y="582" font-size="9" fill="#ff6b6b">text nn unique</text>
+        <line x1="30" y1="588" x2="230" y2="588" stroke="#1a0808" stroke-width="0.5"/>
+        <text x="40" y="602" font-size="9" fill="#e9ecef">password</text>
+        <text x="150" y="602" font-size="9" fill="#ff6b6b">text nn</text>
         <line x1="30" y1="608" x2="230" y2="608" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="40" y="622" font-size="9" fill="#e9ecef">username</text>
-        <text x="150" y="622" font-size="9" fill="#ff6b6b">text nn unique</text>
+        <text x="40" y="622" font-size="9" fill="#e9ecef">super_admin</text>
+        <text x="150" y="622" font-size="9" fill="#ff6b6b">bool nn</text>
         <line x1="30" y1="628" x2="230" y2="628" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="40" y="642" font-size="9" fill="#e9ecef">password</text>
-        <text x="150" y="642" font-size="9" fill="#ff6b6b">text nn</text>
-        <line x1="30" y1="648" x2="230" y2="648" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="40" y="662" font-size="9" fill="#e9ecef">super_admin</text>
-        <text x="150" y="662" font-size="9" fill="#ff6b6b">bool nn</text>
-        <line x1="30" y1="668" x2="230" y2="668" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="40" y="682" font-size="9" fill="#adb5bd">default: false</text>
+        <text x="40" y="642" font-size="9" fill="#adb5bd">default: false</text>
     </g>
 
-    <!-- ===================== API_KEYS (x=280, y=560) ==================== -->
+    <!-- ===================== API_KEYS (x=280, y=520) ==================== -->
     <g id="tbl-apikeys">
-        <rect x="280" y="560" width="200" height="132" rx="6" fill="#1a0808" stroke="#6a1a1a" stroke-width="1.5"/>
-        <rect x="280" y="560" width="200" height="28" rx="6" fill="url(#hdrAuth)"/>
-        <rect x="280" y="582" width="200" height="6" fill="url(#hdrAuth)"/>
-        <text x="380" y="579" text-anchor="middle" font-size="11" font-weight="bold" fill="#ff8787" letter-spacing="1">
+        <rect x="280" y="520" width="200" height="132" rx="6" fill="#1a0808" stroke="#6a1a1a" stroke-width="1.5"/>
+        <rect x="280" y="520" width="200" height="28" rx="6" fill="url(#hdrAuth)"/>
+        <rect x="280" y="542" width="200" height="6" fill="url(#hdrAuth)"/>
+        <text x="380" y="539" text-anchor="middle" font-size="11" font-weight="bold" fill="#ff8787" letter-spacing="1">
             api_keys
         </text>
-        <line x1="280" y1="588" x2="480" y2="588" stroke="#2a0808" stroke-width="1"/>
-        <text x="290" y="602" font-size="9" fill="#ffd43b">🔑 id</text>
-        <text x="400" y="602" font-size="9" fill="#6c757d">int pk</text>
+        <line x1="280" y1="548" x2="480" y2="548" stroke="#2a0808" stroke-width="1"/>
+        <text x="290" y="562" font-size="9" fill="#ffd43b">🔑 id</text>
+        <text x="400" y="562" font-size="9" fill="#6c757d">int pk</text>
+        <line x1="280" y1="568" x2="480" y2="568" stroke="#1a0808" stroke-width="0.5"/>
+        <text x="290" y="582" font-size="9" fill="#e9ecef">key</text>
+        <text x="400" y="582" font-size="9" fill="#ff6b6b">text nn unique</text>
+        <line x1="280" y1="588" x2="480" y2="588" stroke="#1a0808" stroke-width="0.5"/>
+        <text x="290" y="602" font-size="9" fill="#e9ecef">active</text>
+        <text x="400" y="602" font-size="9" fill="#ff6b6b">bool nn</text>
         <line x1="280" y1="608" x2="480" y2="608" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="290" y="622" font-size="9" fill="#e9ecef">key</text>
-        <text x="400" y="622" font-size="9" fill="#ff6b6b">text nn unique</text>
+        <text x="290" y="622" font-size="9" fill="#e9ecef">super_key</text>
+        <text x="400" y="622" font-size="9" fill="#ff6b6b">bool nn</text>
         <line x1="280" y1="628" x2="480" y2="628" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="290" y="642" font-size="9" fill="#e9ecef">active</text>
-        <text x="400" y="642" font-size="9" fill="#ff6b6b">bool nn</text>
-        <line x1="280" y1="648" x2="480" y2="648" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="290" y="662" font-size="9" fill="#e9ecef">super_key</text>
-        <text x="400" y="662" font-size="9" fill="#ff6b6b">bool nn</text>
-        <line x1="280" y1="668" x2="480" y2="668" stroke="#1a0808" stroke-width="0.5"/>
-        <text x="290" y="682" font-size="9" fill="#adb5bd">default: false</text>
+        <text x="290" y="642" font-size="9" fill="#adb5bd">default: false</text>
     </g>
 
-    <!-- ===================== SCRAPER_DATES (x=840, y=560) ==================== -->
+    <!-- ===================== SCRAPER_DATES (x=840, y=520) ==================== -->
     <g id="tbl-scraper">
-        <rect x="840" y="560" width="200" height="92" rx="6" fill="#111008" stroke="#4a4a1a" stroke-width="1.5"/>
-        <rect x="840" y="560" width="200" height="28" rx="6" fill="url(#hdrUtil)"/>
-        <rect x="840" y="582" width="200" height="6" fill="url(#hdrUtil)"/>
-        <text x="940" y="579" text-anchor="middle" font-size="11" font-weight="bold" fill="#e9c46a" letter-spacing="1">
+        <rect x="840" y="520" width="200" height="92" rx="6" fill="#111008" stroke="#4a4a1a" stroke-width="1.5"/>
+        <rect x="840" y="520" width="200" height="28" rx="6" fill="url(#hdrUtil)"/>
+        <rect x="840" y="542" width="200" height="6" fill="url(#hdrUtil)"/>
+        <text x="940" y="539" text-anchor="middle" font-size="11" font-weight="bold" fill="#e9c46a" letter-spacing="1">
             scraper_dates
         </text>
-        <line x1="840" y1="588" x2="1040" y2="588" stroke="#1a1a08" stroke-width="1"/>
-        <text x="850" y="602" font-size="9" fill="#ffd43b">🔑 id</text>
-        <text x="960" y="602" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="840" y1="608" x2="1040" y2="608" stroke="#111008" stroke-width="0.5"/>
-        <text x="850" y="622" font-size="9" fill="#e9ecef">date</text>
-        <text x="960" y="622" font-size="9" fill="#6c757d">timestamp</text>
-        <line x1="840" y1="628" x2="1040" y2="628" stroke="#111008" stroke-width="0.5"/>
-        <text x="850" y="645" font-size="8" fill="#6c757d" font-style="italic">tracks last scraper run</text>
+        <line x1="840" y1="548" x2="1040" y2="548" stroke="#1a1a08" stroke-width="1"/>
+        <text x="850" y="562" font-size="9" fill="#ffd43b">🔑 id</text>
+        <text x="960" y="562" font-size="9" fill="#ff6b6b">int pk</text>
+        <line x1="840" y1="568" x2="1040" y2="568" stroke="#111008" stroke-width="0.5"/>
+        <text x="850" y="582" font-size="9" fill="#e9ecef">date</text>
+        <text x="960" y="582" font-size="9" fill="#6c757d">timestamp</text>
+        <line x1="840" y1="588" x2="1040" y2="588" stroke="#111008" stroke-width="0.5"/>
+        <text x="940" y="605" text-anchor="middle" font-size="8" fill="#6c757d" font-style="italic">tracks last scraper
+            run
+        </text>
     </g>
 
     <!-- ================================================================ -->
     <!-- JUNCTION TABLES                                                   -->
     <!-- ================================================================ -->
 
-    <!-- production_blogs (x=590, y=310) -->
+    <!-- production_blogs (x=590, y=300) -->
     <g id="tbl-prod-blogs">
-        <rect x="590" y="310" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
+        <rect x="590" y="300" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
               stroke-dasharray="5,3"/>
-        <rect x="590" y="310" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
-        <rect x="590" y="332" width="190" height="6" fill="url(#hdrJunc)"/>
-        <text x="685" y="329" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
+        <rect x="590" y="300" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
+        <rect x="590" y="322" width="190" height="6" fill="url(#hdrJunc)"/>
+        <text x="685" y="319" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
             production_blogs
         </text>
-        <line x1="590" y1="338" x2="780" y2="338" stroke="#2a2a2a" stroke-width="1"/>
-        <text x="600" y="352" font-size="9" fill="#74c0fc">🔗 production_id</text>
-        <text x="720" y="352" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="590" y1="358" x2="780" y2="358" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="600" y="372" font-size="9" fill="#74c0fc">🔗 blog_id</text>
-        <text x="720" y="372" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="590" y1="378" x2="780" y2="378" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="685" y="394" text-anchor="middle" font-size="8" fill="#6c757d">pk(production_id, blog_id)</text>
+        <line x1="590" y1="328" x2="780" y2="328" stroke="#2a2a2a" stroke-width="1"/>
+        <text x="600" y="342" font-size="9" fill="#74c0fc">🔗 production_id</text>
+        <text x="720" y="342" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="590" y1="348" x2="780" y2="348" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="600" y="362" font-size="9" fill="#74c0fc">🔗 blog_id</text>
+        <text x="720" y="362" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="590" y1="368" x2="780" y2="368" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="685" y="384" text-anchor="middle" font-size="8" fill="#6c757d">pk(production_id, blog_id)</text>
     </g>
 
-    <!-- production_tag (x=590, y=450) -->
+    <!-- production_tag (x=590, y=430) -->
     <g id="tbl-prod-tag">
-        <rect x="590" y="450" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
+        <rect x="590" y="430" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
               stroke-dasharray="5,3"/>
-        <rect x="590" y="450" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
-        <rect x="590" y="472" width="190" height="6" fill="url(#hdrJunc)"/>
-        <text x="685" y="469" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
+        <rect x="590" y="430" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
+        <rect x="590" y="452" width="190" height="6" fill="url(#hdrJunc)"/>
+        <text x="685" y="449" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
             production_tag
         </text>
-        <line x1="590" y1="478" x2="780" y2="478" stroke="#2a2a2a" stroke-width="1"/>
-        <text x="600" y="492" font-size="9" fill="#74c0fc">🔗 production_id</text>
+        <line x1="590" y1="458" x2="780" y2="458" stroke="#2a2a2a" stroke-width="1"/>
+        <text x="600" y="472" font-size="9" fill="#74c0fc">🔗 production_id</text>
+        <text x="720" y="472" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="590" y1="478" x2="780" y2="478" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="600" y="492" font-size="9" fill="#74c0fc">🔗 tag_id</text>
         <text x="720" y="492" font-size="9" fill="#ff6b6b">int nn</text>
         <line x1="590" y1="498" x2="780" y2="498" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="600" y="512" font-size="9" fill="#74c0fc">🔗 tag_id</text>
-        <text x="720" y="512" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="590" y1="518" x2="780" y2="518" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="685" y="534" text-anchor="middle" font-size="8" fill="#6c757d">pk(production_id, tag_id)</text>
+        <text x="685" y="514" text-anchor="middle" font-size="8" fill="#6c757d">pk(production_id, tag_id)</text>
     </g>
 
-    <!-- event_locations (x=840, y=310) -->
+    <!-- event_locations (x=840, y=290) -->
     <g id="tbl-evt-loc">
-        <rect x="840" y="310" width="190" height="72" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
+        <rect x="840" y="290" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
               stroke-dasharray="5,3"/>
-        <rect x="840" y="310" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
-        <rect x="840" y="332" width="190" height="6" fill="url(#hdrJunc)"/>
-        <text x="935" y="329" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
+        <rect x="840" y="290" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
+        <rect x="840" y="312" width="190" height="6" fill="url(#hdrJunc)"/>
+        <text x="935" y="309" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
             event_locations
         </text>
-        <line x1="840" y1="338" x2="1030" y2="338" stroke="#2a2a2a" stroke-width="1"/>
-        <text x="850" y="352" font-size="9" fill="#74c0fc">🔗 event_id</text>
+        <line x1="840" y1="318" x2="1030" y2="318" stroke="#2a2a2a" stroke-width="1"/>
+        <text x="850" y="332" font-size="9" fill="#74c0fc">🔗 event_id</text>
+        <text x="960" y="332" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="840" y1="338" x2="1030" y2="338" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="850" y="352" font-size="9" fill="#74c0fc">🔗 location_id</text>
         <text x="960" y="352" font-size="9" fill="#ff6b6b">int nn</text>
         <line x1="840" y1="358" x2="1030" y2="358" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="850" y="372" font-size="9" fill="#74c0fc">🔗 location_id</text>
-        <text x="960" y="372" font-size="9" fill="#ff6b6b">int nn</text>
+        <text x="935" y="374" text-anchor="middle" font-size="8" fill="#6c757d">pk(event_id, location_id)</text>
     </g>
 
-    <!-- event_prices (x=840, y=430) -->
+    <!-- event_prices (x=840, y=420) -->
     <g id="tbl-evt-price">
-        <rect x="840" y="430" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
+        <rect x="840" y="420" width="190" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
               stroke-dasharray="5,3"/>
-        <rect x="840" y="430" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
-        <rect x="840" y="452" width="190" height="6" fill="url(#hdrJunc)"/>
-        <text x="935" y="449" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
+        <rect x="840" y="420" width="190" height="28" rx="6" fill="url(#hdrJunc)"/>
+        <rect x="840" y="442" width="190" height="6" fill="url(#hdrJunc)"/>
+        <text x="935" y="439" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
             event_prices
         </text>
-        <line x1="840" y1="458" x2="1030" y2="458" stroke="#2a2a2a" stroke-width="1"/>
-        <text x="850" y="472" font-size="9" fill="#74c0fc">🔗 event_id</text>
-        <text x="960" y="472" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="840" y1="478" x2="1030" y2="478" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="850" y="492" font-size="9" fill="#74c0fc">🔗 price_id</text>
-        <text x="960" y="492" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="840" y1="498" x2="1030" y2="498" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="935" y="514" text-anchor="middle" font-size="8" fill="#6c757d">pk(event_id, price_id)</text>
+        <line x1="840" y1="448" x2="1030" y2="448" stroke="#2a2a2a" stroke-width="1"/>
+        <text x="850" y="462" font-size="9" fill="#74c0fc">🔗 event_id</text>
+        <text x="960" y="462" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="840" y1="468" x2="1030" y2="468" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="850" y="482" font-size="9" fill="#74c0fc">🔗 price_id</text>
+        <text x="960" y="482" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="840" y1="488" x2="1030" y2="488" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="935" y="504" text-anchor="middle" font-size="8" fill="#6c757d">pk(event_id, price_id)</text>
     </g>
 
-    <!-- account_api_keys (x=155, y=740) -->
+    <!-- account_api_keys (x=155, y=700) -->
     <g id="tbl-acct-keys">
-        <rect x="155" y="740" width="200" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
+        <rect x="155" y="700" width="200" height="92" rx="6" fill="#141414" stroke="#444" stroke-width="1.2"
               stroke-dasharray="5,3"/>
-        <rect x="155" y="740" width="200" height="28" rx="6" fill="url(#hdrJunc)"/>
-        <rect x="155" y="762" width="200" height="6" fill="url(#hdrJunc)"/>
-        <text x="255" y="759" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
+        <rect x="155" y="700" width="200" height="28" rx="6" fill="url(#hdrJunc)"/>
+        <rect x="155" y="722" width="200" height="6" fill="url(#hdrJunc)"/>
+        <text x="255" y="719" text-anchor="middle" font-size="10" font-weight="bold" fill="#adb5bd" letter-spacing="1">
             account_api_keys
         </text>
-        <line x1="155" y1="768" x2="355" y2="768" stroke="#2a2a2a" stroke-width="1"/>
-        <text x="165" y="782" font-size="9" fill="#74c0fc">🔗 account_id</text>
-        <text x="295" y="782" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="155" y1="788" x2="355" y2="788" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="165" y="802" font-size="9" fill="#74c0fc">🔗 api_key_id</text>
-        <text x="295" y="802" font-size="9" fill="#ff6b6b">int nn</text>
-        <line x1="155" y1="808" x2="355" y2="808" stroke="#1a1a1a" stroke-width="0.5"/>
-        <text x="255" y="824" text-anchor="middle" font-size="8" fill="#6c757d">pk(account_id, api_key_id)</text>
+        <line x1="155" y1="728" x2="355" y2="728" stroke="#2a2a2a" stroke-width="1"/>
+        <text x="165" y="742" font-size="9" fill="#74c0fc">🔗 account_id</text>
+        <text x="295" y="742" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="155" y1="748" x2="355" y2="748" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="165" y="762" font-size="9" fill="#74c0fc">🔗 api_key_id</text>
+        <text x="295" y="762" font-size="9" fill="#ff6b6b">int nn</text>
+        <line x1="155" y1="768" x2="355" y2="768" stroke="#1a1a1a" stroke-width="0.5"/>
+        <text x="255" y="784" text-anchor="middle" font-size="8" fill="#6c757d">pk(account_id, api_key_id)</text>
     </g>
 
     <!-- ================================================================ -->
     <!-- RELATIONSHIP LINES                                                -->
+    <!-- Arrow = arrowhead at the REFERENCED (PK) end                     -->
+    <!-- Dot    = at the FK (source) end                                   -->
     <!-- ================================================================ -->
 
-    <!-- events.production_id → productions.id -->
-    <path d="M310,242 L280,242 L280,186 L250,186" fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="6,3"
-          marker-end="url(#refArrow)" opacity="0.7"/>
+    <!-- events.production_id → productions.id
+         FK is on right side of events table (x=520, y=242)
+         PK target: right side of productions (x=250, y=102) -->
+    <path d="M520,238 L540,238 L540,55 L140,55 L140,60"
+          fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="6,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.75"/>
 
-    <!-- production_blogs.production_id → productions.id -->
-    <path d="M590,342 L560,342 L560,186 L250,186" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- production_blogs.production_id → productions.id
+         FK left side (x=590, y=342) → productions right edge (x=250, y=166) -->
+    <path d="M590,342 L570,342 L570,166 L250,166"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- production_blogs.blog_id → blogs.id -->
-    <path d="M690,358 L690,310" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- production_blogs.blog_id → blogs.id
+         FK inside junction (x=685, y=362) upward to blogs bottom (x=690, y=232) -->
+    <path d="M685,300 L685,232"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- production_tag.production_id → productions.id -->
-    <path d="M590,482 L560,482 L560,186 L250,186" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- production_tag.production_id → productions.id
+         FK left (x=590, y=472) → productions right (x=250, y=182) -->
+    <path d="M590,472 L570,472 L570,182 L250,182"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- production_tag.tag_id → tags.id -->
-    <path d="M780,502 L840,502 L840,102" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- production_tag.tag_id → tags.id
+         FK right (x=780, y=492) → tags left bottom (x=840, y=102) -->
+    <path d="M780,492 L810,492 L810,102 L840,102"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- event_locations.event_id → events.id -->
-    <path d="M840,342 L810,342 L810,102 L520,102" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- event_locations.event_id → events.id
+         FK left (x=840, y=332) → events right bottom (x=520, y=262) -->
+    <path d="M840,332 L820,332 L820,262 L520,262"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- event_locations.location_id → locations.id -->
-    <path d="M1030,362 L1090,362 L1090,102" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- event_locations.location_id → locations.id
+         FK right (x=1030, y=352) → locations left (x=1090, y=122) -->
+    <path d="M1030,352 L1060,352 L1060,122 L1090,122"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- event_prices.event_id → events.id -->
-    <path d="M840,472 L810,472 L810,102 L520,102" fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.4"/>
+    <!-- event_prices.event_id → events.id
+         FK left (x=840, y=462) → events right (x=520, y=242) -->
+    <path d="M840,462 L825,462 L825,242 L520,242"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.45"/>
 
-    <!-- event_prices.price_id → prices.id -->
-    <path d="M1030,482 L1060,482 L1060,352 L1090,352" fill="none" stroke="#4a9eff" stroke-width="1.2"
-          stroke-dasharray="5,3" marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- event_prices.price_id → prices.id
+         FK right (x=1030, y=482) → prices left (x=1090, y=332) -->
+    <path d="M1030,482 L1060,482 L1060,332 L1090,332"
+          fill="none" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotBlue)" marker-end="url(#refArrow)" opacity="0.55"/>
 
-    <!-- account_api_keys.account_id → accounts.id -->
-    <path d="M155,782 L130,782 L130,602 L230,602" fill="none" stroke="#ff8787" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- account_api_keys.account_id → accounts.id
+         FK top-left (x=200,y=700) upward → accounts bottom (x=130, y=652) -->
+    <path d="M200,700 L200,680 L130,680 L130,652"
+          fill="none" stroke="#ff8787" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotRed)" marker-end="url(#refArrowRed)" opacity="0.6"/>
 
-    <!-- account_api_keys.api_key_id → api_keys.id -->
-    <path d="M355,792 L380,792 L380,620 L480,620" fill="none" stroke="#ff8787" stroke-width="1.2" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.5"/>
+    <!-- account_api_keys.api_key_id → api_keys.id
+         FK top-right (x=310, y=700) upward → api_keys bottom (x=380, y=652) -->
+    <path d="M310,700 L310,680 L380,680 L380,652"
+          fill="none" stroke="#ff8787" stroke-width="1.2" stroke-dasharray="5,3"
+          marker-start="url(#dotRed)" marker-end="url(#refArrowRed)" opacity="0.6"/>
 
     <!-- ================================================================ -->
     <!-- LEGEND                                                            -->
     <!-- ================================================================ -->
-    <rect x="530" y="700" width="280" height="130" rx="6" fill="#ffffff06" stroke="#ffffff12" stroke-width="1"/>
-    <text x="670" y="720" text-anchor="middle" font-size="9" font-weight="bold" fill="#ffffff" opacity="0.6"
+    <rect x="530" y="680" width="290" height="145" rx="6" fill="#ffffff06" stroke="#ffffff12" stroke-width="1"/>
+    <text x="675" y="700" text-anchor="middle" font-size="9" font-weight="bold" fill="#ffffff" opacity="0.6"
           letter-spacing="2">LEGEND
     </text>
-    <line x1="545" y1="726" x2="795" y2="726" stroke="#ffffff" stroke-width="0.5" opacity="0.1"/>
+    <line x1="545" y1="706" x2="805" y2="706" stroke="#ffffff" stroke-width="0.5" opacity="0.1"/>
 
-    <text x="548" y="743" font-size="9" fill="#ffd43b">🔑</text>
-    <text x="565" y="743" font-size="9" fill="#e9ecef">Primary key</text>
-    <text x="548" y="760" font-size="9" fill="#74c0fc">🔗</text>
-    <text x="565" y="760" font-size="9" fill="#e9ecef">Foreign key</text>
-    <text x="548" y="777" font-size="9" fill="#ff6b6b">■</text>
-    <text x="565" y="777" font-size="9" fill="#e9ecef">not null (nn)</text>
-    <text x="548" y="794" font-size="9" fill="#adb5bd">■</text>
-    <text x="565" y="794" font-size="9" fill="#adb5bd">nullable / optional</text>
+    <text x="548" y="723" font-size="9" fill="#ffd43b">🔑</text>
+    <text x="565" y="723" font-size="9" fill="#e9ecef">Primary key</text>
+    <text x="548" y="740" font-size="9" fill="#74c0fc">🔗</text>
+    <text x="565" y="740" font-size="9" fill="#e9ecef">Foreign key</text>
+    <text x="548" y="757" font-size="9" fill="#ff6b6b">■</text>
+    <text x="565" y="757" font-size="9" fill="#e9ecef">not null (nn)</text>
+    <text x="548" y="774" font-size="9" fill="#adb5bd">■</text>
+    <text x="565" y="774" font-size="9" fill="#adb5bd">nullable / optional</text>
 
-    <line x1="700" y1="737" x2="730" y2="737" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="5,3"
-          marker-end="url(#refArrow)" opacity="0.8"/>
-    <text x="738" y="741" font-size="9" fill="#74c0fc">FK reference</text>
-    <rect x="700" y="750" width="30" height="14" rx="3" fill="none" stroke="#444" stroke-width="1"
+    <!-- Arrow legend: dot→line→arrowhead -->
+    <circle cx="705" cy="718" r="2.5" fill="#4a9eff" opacity="0.7"/>
+    <line x1="707" y1="718" x2="732" y2="718" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <polygon points="732,715 740,718 732,721" fill="#4a9eff" opacity="0.8"/>
+    <text x="745" y="722" font-size="9" fill="#74c0fc">FK → PK ref</text>
+
+    <rect x="700" y="730" width="30" height="14" rx="3" fill="none" stroke="#444" stroke-width="1"
           stroke-dasharray="4,2"/>
-    <text x="738" y="761" font-size="9" fill="#adb5bd">Junction table</text>
-    <text x="700" y="780" font-size="8" fill="#6c757d">All FK refs cascade</text>
-    <text x="700" y="793" font-size="8" fill="#6c757d">on delete</text>
+    <text x="738" y="741" font-size="9" fill="#adb5bd">Junction table</text>
 
-    <!-- cascade label -->
-    <text x="700" y="815" font-size="8" fill="#495057" font-style="italic">cascade delete on all refs</text>
-
+    <text x="700" y="760" font-size="8" fill="#6c757d">● dot = FK source</text>
+    <text x="700" y="773" font-size="8" fill="#6c757d">▶ arrow = PK target</text>
+    <text x="548" y="810" font-size="8" fill="#495057" font-style="italic">cascade delete on all FK refs</text>
 </svg>
