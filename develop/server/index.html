@@ -14,7 +14,7 @@
       <script>
         // Current page data
         var mkdocs_page_name = "Overview";
-        var mkdocs_page_input_path = "testing/index.md";
+        var mkdocs_page_input_path = "server/index.md";
         var mkdocs_page_url = null;
       </script>
     
@@ -74,33 +74,39 @@
                   </li>
               </ul>
               <p class="caption"><span class="caption-text">Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../testing/frontend/">Frontend</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Server</span></p>
               <ul class="current">
                   <li class="toctree-l1 current"><a class="reference internal current" href="#">Overview</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#running-all-tests">Running All Tests</a>
+    <li class="toctree-l2"><a class="reference internal" href="#database">Database</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#backend-testing">Backend Testing</a>
+    <li class="toctree-l2"><a class="reference internal" href="#api-backend">API / Backend</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#frontend-testing">Frontend Testing</a>
+    <li class="toctree-l2"><a class="reference internal" href="#frontend">Frontend</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#coverage-reports">Coverage Reports</a>
+    <li class="toctree-l2"><a class="reference internal" href="#general-deployment">General Deployment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#nginx">Nginx</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#https-ssl">HTTPS / SSL</a>
+    </li>
+        </ul>
     </li>
     </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="database/">Database</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="backend/">Backend</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="frontend/">Frontend</a>
-                  </li>
-              </ul>
-              <p class="caption"><span class="caption-text">Server</span></p>
-              <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../server/">Overview</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../server/database/">Database</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../server/backend/">Backend</a>
-                  </li>
-                  <li class="toctree-l1"><a class="reference internal" href="../server/frontend/">Frontend</a>
                   </li>
               </ul>
       </div>
@@ -117,7 +123,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
-          <li class="breadcrumb-item">Testing</li>
+          <li class="breadcrumb-item">Server</li>
       <li class="breadcrumb-item active">Overview</li>
     <li class="wy-breadcrumbs-aside">
     </li>
@@ -127,49 +133,79 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="testing-overview">Testing Overview</h1>
-<p>This project uses different testing frameworks for each package within the monorepo. This section guides you through running tests across the entire project or focusing on specific packages.</p>
-<h2 id="running-all-tests">Running All Tests</h2>
-<p>From the repository root, run tests across all packages:</p>
-<pre><code class="language-bash">npm run test
+                <h1 id="server-overview">Server Overview</h1>
+<p>This project consists of several interconnected components that must be deployed and configured together on a server to
+function correctly:</p>
+<ul>
+<li><strong>Database</strong> – PostgreSQL</li>
+<li><strong>Backend/API</strong> – NestJS</li>
+<li><strong>Frontend</strong> – Vue + Nuxt</li>
+</ul>
+<p>This page provides a brief structural overview and basic setup instructions. See the linked component pages for more
+detailed information.</p>
+<hr />
+<h2 id="database">Database</h2>
+<p>The database runs on <a href="https://www.postgresql.org/download/">PostgreSQL</a>. Install it on your server by
+following <a href="https://www.postgresql.org/download/">this guide</a>, then restore the database from the provided dump:</p>
+<pre><code class="language-bash">pg_restore -U &lt;username&gt; -d &lt;database_name&gt; server/pg.dump
 </code></pre>
-<p>For coverage reports across all packages:</p>
-<pre><code class="language-bash">npm run test:coverage
+<blockquote>
+<p><strong>Note:</strong> <code>&lt;username&gt;</code> and <code>&lt;database_name&gt;</code> refer to your PostgreSQL installation credentials.</p>
+</blockquote>
+<p>The restored database includes an admin account and API key to get you started. Some additional configuration is still
+required — please review the <a href="database/">database page</a> before proceeding.</p>
+<hr />
+<h2 id="api-backend">API / Backend</h2>
+<p>The backend is built with <a href="https://nestjs.com/">NestJS</a>. For in-depth documentation on its architecture and internals,
+see the <a href="insert here">backend overview page</a>. For a step-by-step deployment guide, see
+the <a href="backend/">backend setup page</a>.</p>
+<p>Before deploying, make sure to configure the required environment variables. An example can be found in <code>.env.example</code>
+in the project root.</p>
+<hr />
+<h2 id="frontend">Frontend</h2>
+<p>The frontend is built with <a href="https://vuejs.org/">Vue</a> and <a href="https://nuxt.com/">Nuxt</a>. For implementation details, see
+the <a href="insert here">frontend pages</a>.</p>
+<p>Under normal circumstances, the frontend requires minimal setup and should work out of the box after following the
+deployment steps below. See the <a href="frontend/">frontend page</a> if you run into issues.</p>
+<hr />
+<h2 id="general-deployment">General Deployment</h2>
+<p>Once the database is configured and the backend environment variables are in order, you're ready to deploy.</p>
+<p><strong>Prerequisites:</strong></p>
+<ul>
+<li><a href="https://nodejs.org/">Node.js / npm</a></li>
+<li><a href="https://pm2.keymetrics.io/">pm2</a> (<code>npm install -g pm2</code>)</li>
+</ul>
+<p>Run the deployment script from the project root:</p>
+<pre><code class="language-bash">bash server/server_deployment.sh
 </code></pre>
-<h2 id="backend-testing">Backend Testing</h2>
-<p>The backend (NestJS) uses <strong>Jest</strong> as the testing framework.</p>
+<p>This will build and deploy both the backend and frontend. Default ports:</p>
 <ul>
-<li><strong>Unit Tests</strong>: Run <code>npm run test</code> in the <code>backend/</code> folder</li>
-<li><strong>End-to-End Tests</strong>: Run <code>npm run test:e2e</code> to test API integration</li>
-<li><strong>Coverage Reports</strong>: Available in <code>backend/coverage/lcov-report/</code></li>
+<li><strong>Backend:</strong> <code>3000</code></li>
+<li><strong>Frontend:</strong> <code>3001</code></li>
 </ul>
-<p>For detailed instructions, see <a href="backend/">Backend Testing</a>.</p>
-<h2 id="frontend-testing">Frontend Testing</h2>
-<p>The frontend (Nuxt + Vue) uses <strong>Vitest</strong> for unit testing.</p>
+<hr />
+<h2 id="nginx">Nginx</h2>
+<p>Use the provided Nginx config to make the services publicly accessible:</p>
+<pre><code class="language-bash">sudo cp server/nginx_config /etc/nginx/sites-enabled/&lt;your-name&gt;
+</code></pre>
+<p>You can also write your own config if preferred. The provided one includes:</p>
 <ul>
-<li><strong>Unit Tests</strong>: Run <code>npm run test</code> in the <code>frontend/</code> folder</li>
-<li><strong>Coverage Reports</strong>: Available in <code>frontend/coverage/</code></li>
+<li><strong>API</strong> – LAN-only, accessible under <code>/api</code></li>
+<li><strong>Frontend</strong> – served over HTTP and HTTPS under <code>/archive</code></li>
+<li><strong>Admin page</strong> – IP-locked to LAN, accessible under <code>/admin</code></li>
+<li><strong>Root redirect</strong> – <code>/</code> automatically redirects to <code>/archive</code></li>
 </ul>
-<p>For detailed instructions, see <a href="frontend/">Frontend Testing</a>.</p>
-<h2 id="coverage-reports">Coverage Reports</h2>
-<p>After running tests with coverage, HTML reports are generated:</p>
-<ul>
-<li><strong>Backend</strong>: <code>backend/coverage/lcov-report/index.html</code></li>
-<li><strong>Frontend</strong>: <code>frontend/coverage/lcov-report/index.html</code></li>
-</ul>
-<p>Open these in a browser to view detailed coverage metrics.</p>
-<p>Some code is exlcuded from the coverage due to some files not needing tests (database queries, modules, main, etc.)</p>
-<p>To remove a file from coverage, put them in the corresponding files:</p>
-<ul>
-<li><strong>Backend</strong>: <code>backend/jest.config.ts</code>, add path to list <code>coveragePathIgnorePatterns</code></li>
-<li><strong>Frontend</strong>: <code>frontend/vitest.config.ts</code>, add path to list <code>coverage.exclude</code></li>
-</ul>
+<h3 id="https-ssl">HTTPS / SSL</h3>
+<p>To enable HTTPS, obtain a certificate via <a href="https://certbot.eff.org/">Certbot</a>:</p>
+<pre><code class="language-bash">sudo certbot --nginx -d &lt;your-domain&gt;
+</code></pre>
+<p>Certbot can update your Nginx config automatically, or you can add the certificate details manually.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../api/pricing/" class="btn btn-neutral float-left" title="Pricing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-        <a href="backend/" class="btn btn-neutral float-right" title="Backend">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../testing/frontend/" class="btn btn-neutral float-left" title="Frontend"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="database/" class="btn btn-neutral float-right" title="Database">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
   <hr/>
@@ -192,10 +228,10 @@
   <span class="rst-current-version" data-toggle="rst-current-version">
     
     
-      <span><a href="../api/pricing/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../testing/frontend/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
-      <span><a href="backend/" style="color: #fcfcfc">Next &raquo;</a></span>
+      <span><a href="database/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>

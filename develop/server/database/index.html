@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Database - My Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../css/version-select.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Database";
+        var mkdocs_page_input_path = "server/database.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> My Docs
+        </a>
+        <div class="version">
+          {'provider': 'mike'}
+        </div><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Build & Run</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../build-run/">Index</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../build-run/backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../build-run/frontend/">Frontend</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">API Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/">Overview & Auth</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/events/">Events</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/productions/">Productions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/blogs/">Blogs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/tags/">Tags</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/locations/">Locations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api/pricing/">Pricing</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Testing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/">Overview</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../testing/frontend/">Frontend</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Server</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../">Overview</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Database</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backend/">Backend</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../frontend/">Frontend</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">My Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Server</li>
+      <li class="breadcrumb-item active">Database</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="database">Database</h2>
+<p>The database runs on PostgreSQL and stores all data related to productions, events, blogs, tags, locations, pricing,
+accounts, and API keys. The schema is relational, uses junction tables for many-to-many relationships, and uses JSONB
+fields throughout to support multilingual content.</p>
+<hr />
+<h2 id="getting-started">Getting Started</h2>
+<p>Install PostgreSQL by following <a href="https://www.postgresql.org/download/">this guide</a>, then restore the database from the
+provided dump at <code>server/database/pg.dump</code>:</p>
+<pre><code class="language-bash">pg_restore -U &lt;username&gt; -d &lt;database_name&gt; server/database/pg.dump
+</code></pre>
+<p>This gives you a starting point that includes an admin account and an API key.</p>
+<hr />
+<h2 id="database-layout">Database Layout</h2>
+<p>For an interactive overview, open <code>server/database/db.dbml</code> with a DBML viewer (e.g.
+the <a href="https://marketplace.visualstudio.com/items?itemName=matt-meyers.vscode-dbml">DBML viewer plugin</a> for VS Code).</p>
+<h3 id="core-tables">Core Tables</h3>
+<p><strong><code>productions</code></strong> – The central table. Represents a show or performance, with multilingual JSONB fields for title,
+subtitle, descriptions, artist, tagline, and credits. Also holds <code>performer_type</code> and <code>attendance_mode</code>.</p>
+<p><strong><code>events</code></strong> – A scheduled instance of a production. Belongs to a production via <code>production_id</code> (cascade delete).
+Stores <code>starttime</code>, <code>endtime</code>, <code>doors_at</code>, and <code>intermission_at</code>.</p>
+<p><strong><code>locations</code></strong> – Venue data stored as JSONB for multilingual support. Linked to events via <code>event_locations</code>.</p>
+<p><strong><code>prices</code></strong> – Ticket price tiers with a multilingual <code>name</code> (JSONB) and a numeric <code>price</code>. Linked to events via
+<code>event_prices</code>.</p>
+<p><strong><code>tags</code></strong> – Unique multilingual JSONB tags, linked to productions via <code>production_tag</code>.</p>
+<p><strong><code>blogs</code></strong> – Standalone blog entries with multilingual <code>titel</code> and <code>description</code>. Linked to productions via
+<code>production_blogs</code>.</p>
+<hr />
+<h3 id="junction-tables">Junction Tables</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Joins</th>
+<th>Cascade Delete</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>event_locations</code></td>
+<td><code>events</code> ↔ <code>locations</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>event_prices</code></td>
+<td><code>events</code> ↔ <code>prices</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>production_tag</code></td>
+<td><code>productions</code> ↔ <code>tags</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>production_blogs</code></td>
+<td><code>productions</code> ↔ <code>blogs</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>account_api_keys</code></td>
+<td><code>accounts</code> ↔ <code>api_keys</code></td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>All junction tables use composite primary keys.</p>
+<hr />
+<h3 id="auth-tables">Auth Tables</h3>
+<p><strong><code>accounts</code></strong> – Admin user accounts with a <code>username</code>, hashed <code>password</code>, and <code>super_admin</code> flag.</p>
+<p><strong><code>api_keys</code></strong> – API keys for backend authentication, each with an <code>active</code> flag and a <code>super_key</code> flag for elevated
+permissions. Linked to accounts via <code>account_api_keys</code>.</p>
+<hr />
+<h3 id="utility-tables">Utility Tables</h3>
+<p><strong><code>scraper_dates</code></strong> – Stores timestamps used by the scraper to track the last sync date.</p>
+<hr />
+<h3 id="relationships-overview">Relationships Overview</h3>
+<pre><code>productions ──&lt; events ──&lt; event_locations &gt;── locations
+     │                └──&lt; event_prices    &gt;── prices
+     │
+     ├──&lt; production_tag   &gt;── tags
+     └──&lt; production_blogs &gt;── blogs
+
+accounts ──&lt; account_api_keys &gt;── api_keys
+</code></pre>
+<hr />
+<h2 id="extra-information">Extra Information</h2>
+<p>As an alternative to restoring from the dump, a backup of the raw SQL setup scripts is also available. These can be used
+to set up a clean empty database from scratch.</p>
+<blockquote>
+<p><strong>Important:</strong> If you use this method, you will need to manually create an initial admin account and API key before
+the backend will function.</p>
+</blockquote>
+<hr />
+<p>After setting up the database, make note of the following — all four are required as backend environment variables:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Username</strong></td>
+<td>Your PostgreSQL user</td>
+</tr>
+<tr>
+<td><strong>Database name</strong></td>
+<td>The name of your database</td>
+</tr>
+<tr>
+<td><strong>Password</strong></td>
+<td>Your PostgreSQL user's password</td>
+</tr>
+<tr>
+<td><strong>Port</strong></td>
+<td>Default is <code>5432</code></td>
+</tr>
+</tbody>
+</table>
+<p>See the <a href="../backend/">backend setup page</a> for details on where to configure these.</p>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../" class="btn btn-neutral float-left" title="Overview"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../backend/" class="btn btn-neutral float-right" title="Backend">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../backend/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+      <script src="../../js/version-select.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
