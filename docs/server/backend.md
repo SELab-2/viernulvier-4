@@ -23,6 +23,7 @@ Then open `.env` and fill in the correct values for your setup:
 | `DB_PORT`        | PostgreSQL port — default is `5432`                                                                     |
 | `CLIENT_API_KEY` | API key used for the scraper.                                                                           |
 | `ENABLE_SCRAPER` | Enables the scraper that automatically fetches from the main API at midnight — set to `true` or `false` |
+| `LOGGER_PATH`    | Absolte path to your logging directory                                                                  |
 
 > **Note:** Never commit your `.env` file to version control. It is already listed in `.gitignore`, but double-check
 > before pushing.
@@ -40,13 +41,23 @@ your server:
 ```js
 {
   name: "backend",
-  script: "dist/main.js",
-  cwd: "/absolute/path/to/project/backend",
-  env: {
+    script
+:
+  "dist/main.js",
+    cwd
+:
+  "/absolute/path/to/project/backend",
+    env
+:
+  {
     PORT: 3000,
-    NODE_ENV: "production",
-  },
-},
+      NODE_ENV
+  :
+    "production",
+  }
+,
+}
+,
 ```
 
 > **Note:** `PORT` and `NODE_ENV` can be left as-is unless you have a specific reason to change them.
