@@ -22,11 +22,18 @@ describe("PriceService", () => {
     deletePrice: jest.fn(),
   };
 
+  // Updated to match PriceSchema
   const mockPrice: PriceDto = {
     id: 1,
     price: 20.0,
-    name: "Standard",
-  } as PriceDto;
+    name: {
+      en: "Standard",
+      nl: "Standaard",
+    },
+    created_at: "2024-01-15T19:00:00Z",
+    updated_at: "2024-01-15T19:00:00Z",
+    legacy_id: null,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -68,7 +75,7 @@ describe("PriceService", () => {
       const filter: PaginationFilterDto = {
         limit: 10,
         page: 1,
-      } as PaginationFilterDto;
+      };
       const expectedPrices = [mockPrice];
       mockPriceDatabaseService.getPrices.mockResolvedValue(expectedPrices);
 
@@ -87,8 +94,9 @@ describe("PriceService", () => {
     it("should call createPrice on the db service and return the new price", async () => {
       const createDto: CreatePriceDto = {
         price: 20.0,
-        name: "Standard",
-      } as CreatePriceDto;
+        name: { en: "Standard", nl: "Standaard" },
+        legacy_id: null,
+      };
       mockPriceDatabaseService.createPrice.mockResolvedValue(mockPrice);
 
       const result = await service.createPrice(createDto);
@@ -103,7 +111,7 @@ describe("PriceService", () => {
       const updateDto: UpdatePriceDto = {
         id: 1,
         price: 25.0,
-      } as UpdatePriceDto;
+      };
       const updatedPrice = { ...mockPrice, price: 25.0 };
       mockPriceDatabaseService.updatePrice.mockResolvedValue(updatedPrice);
 

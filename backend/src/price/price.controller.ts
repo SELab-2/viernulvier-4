@@ -14,13 +14,16 @@ import {
 import { PriceService } from "./price.service";
 import {
   CreatePriceDto,
+  LanguageQueryDto,
   PaginationFilterDto,
   PriceDto,
+  PriceViewDto,
   UpdatePriceDto,
 } from "../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreatePriceSchema,
+  LanguageQuerySchema,
   PaginationFilterSchema,
   UpdatePriceSchema,
 } from "@repo/common";
@@ -32,42 +35,53 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { LanguageService } from "../util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
 
 @Controller("prices")
 export class PriceController {
-  constructor(private readonly priceService: PriceService) {}
+  constructor(
+    private readonly priceService: PriceService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/prices".
    * @param paginationFilter The Filter for pagination used.
+   * @param lang The Filter for language.
    * @returns A list of Price objects.
    */
   @ApiOperation({ summary: "Fetches All Prices." })
-  @ApiOkResponse({
-    type: PriceDto,
-    isArray: true,
-    description: "Returned Prices.",
-  })
-  @UsePipes(new ZodValidationPipe(PaginationFilterSchema))
+  @ApiOkArrayAnyOf(PriceDto, PriceViewDto)
   @Get()
   async getPrices(
-    @Query() paginationFilter: PaginationFilterDto,
-  ): Promise<PriceDto[]> {
-    return await this.priceService.getPrices(paginationFilter);
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilter: PaginationFilterDto,
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<PriceDto[] | PriceViewDto[]> {
+    return this.ls.flattenByLanguage<PriceDto[] | PriceViewDto[]>(
+      await this.priceService.getPrices(paginationFilter),
+      lang.lang,
+    );
   }
 
   /**
    * Responds to a GET to "/prices/:priceId"
    * @param priceId The ID of the Price we want to fetch.
+   * @param lang The Language filter used.
    * @returns The specific Price if it exists.
    */
   @ApiOperation({ summary: "Fetches a specific Price." })
-  @ApiOkResponse({ type: PriceDto, description: "Returned Price." })
+  @ApiOkAnyOf(PriceDto, PriceViewDto)
   @Get(":priceId")
   async getPriceById(
     @Param("priceId", ParseIntPipe) priceId: number,
-  ): Promise<PriceDto> {
-    return await this.priceService.getPriceById(priceId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<PriceDto | PriceViewDto> {
+    return this.ls.flattenByLanguage<PriceDto | PriceViewDto>(
+      await this.priceService.getPriceById(priceId),
+      lang.lang,
+    );
   }
 
   /**
