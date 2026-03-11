@@ -138,7 +138,7 @@ export class DbConnection {
     for (const tag of tags) {
       const valid: boolean = await this.linkTag(production.id, tag.id);
       if (!valid)
-        logger.error(
+        logger.warn(
           `Failed to link Tag(${tag.id}) to Production(${production.id}).`,
         );
     }
@@ -214,7 +214,7 @@ export class DbConnection {
         await this.insertEvent(event);
       } catch (error) {
         // If something errors out that means the VNV API had invalid data.
-        logger.error(
+        logger.warn(
           `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
           error,
         );
@@ -236,8 +236,8 @@ export class DbConnection {
     );
 
     if (productions.length === 0) {
-      logger.error(
-        `Could not find Production(${vnvEvent.production_id}) to link Event(${vnvEvent.legacy_id}) with. Aborting...`,
+      logger.warn(
+        `Could not find Production(${vnvEvent.production_id}) to link Event(${vnvEvent.legacy_id}) with.`,
       );
       return;
     }
@@ -289,9 +289,7 @@ export class DbConnection {
     for (const price of prices) {
       const valid: boolean = await this.linkPrice(event.id, price.id);
       if (!valid)
-        logger.error(
-          `Failed to link Price(${price.id}) to Event(${event.id}).`,
-        );
+        logger.warn(`Failed to link Price(${price.id}) to Event(${event.id}).`);
     }
 
     // We also replace the Event location.
@@ -312,7 +310,7 @@ export class DbConnection {
     const location: Location = locations[0];
     const valid: boolean = await this.linkLocation(event.id, location.id);
     if (!valid)
-      logger.error(
+      logger.warn(
         `Failed to link Location(${location.id}) to Event(${event.id}).`,
       );
   }
