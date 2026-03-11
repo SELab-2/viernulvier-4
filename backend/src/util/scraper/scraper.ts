@@ -69,7 +69,7 @@ export async function scrape(
       scrapeMany("/api/v1/events/prices?page=1", after_date),
       scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00+00:00"),
       scrapeMany("/api/v1/genres?page=1", after_date),
-      scrapeMany("/api/v1/locations?page=1", after_date),
+      scrapeMany("/api/v1/halls?page=1", after_date),
     ]);
 
   const priceDictionary = new Map<string, object>();

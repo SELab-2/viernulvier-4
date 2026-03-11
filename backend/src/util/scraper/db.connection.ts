@@ -48,8 +48,16 @@ export class DbConnection {
     query: string,
     params?: any[],
   ): Promise<T[]> {
-    const res = await this.pool.query<T>(query, params); // keep await.
-    return res.rows;
+    try {
+      const res = await this.pool.query<T>(query, params);
+      return res.rows;
+    } catch (error) {
+      logger.error(
+        `Database Query Failed: ${query}\nParams: ${JSON.stringify(params)}`,
+        error,
+      );
+      throw error; // Let the caller know it failed!
+    }
   }
 
   /**
@@ -61,9 +69,11 @@ export class DbConnection {
    * @param productions The list of vnvProductions.
    */
   async insertProductions(productions: vnvProduction[]) {
+    logger.info("Inserting Productions...");
     for (const production of productions) {
       await this.insertProduction(production);
     }
+    logger.info("Inserted Productions!");
   }
 
   /**
@@ -145,9 +155,11 @@ export class DbConnection {
    * @param genres The list of vnvGenre objects.
    */
   async insertTags(genres: vnvGenre[]) {
+    logger.info("Inserting Tags...");
     for (const genre of genres) {
       await this.insertTag(genre);
     }
+    logger.info("Inserted Tags!");
   }
 
   /**
@@ -196,9 +208,19 @@ export class DbConnection {
    * @param events The list of vnvEvent objects.
    */
   async insertEvents(events: vnvEvent[]) {
+    logger.info("Inserting Events...");
     for (const event of events) {
-      await this.insertEvent(event);
+      try {
+        await this.insertEvent(event);
+      } catch (error) {
+        // If something errors out that means the VNV API had invalid data.
+        logger.error(
+          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
+          error,
+        );
+      }
     }
+    logger.info("Inserted Events!");
   }
 
   /**
@@ -279,7 +301,6 @@ export class DbConnection {
       `,
       [event.id],
     );
-
     // We also need to link the Event location.
     const locations: Location[] = await this.query<Location>(
       `
@@ -305,9 +326,11 @@ export class DbConnection {
    * @param locations The list of vnvLocation objects.
    */
   async insertLocations(locations: vnvLocation[]) {
+    logger.info("Inserting Locations...");
     for (const location of locations) {
       await this.insertLocation(location);
     }
+    logger.info("Inserted Locations!");
   }
 
   /**
@@ -356,9 +379,11 @@ export class DbConnection {
    * @param prices The list of vnvPrice objects.
    */
   async insertPrices(prices: vnvPrice[]) {
+    logger.info("Inserting Prices...");
     for (const price of prices) {
       await this.insertPrice(price);
     }
+    logger.info("Inserted Prices!");
   }
 
   /**

@@ -7,10 +7,13 @@ describe("LocationService", () => {
   let service: LocationService;
   let dbService: LocationDatabaseService;
 
-  // Updated Mock data to match LocationSchema
+  // Updated Mock data to match localized LocationSchema
   const mockLocation: LocationDto = {
     id: 1,
-    location: "Citadel Park",
+    location: {
+      en: "Citadel Park",
+      nl: "Citadelpark",
+    },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
     legacy_id: "str",
@@ -64,7 +67,10 @@ describe("LocationService", () => {
 
   describe("createLocation", () => {
     it("should create a location in the database", async () => {
-      const dto = { location: "Citadel Park" } as CreateLocationDto;
+      const dto: CreateLocationDto = {
+        location: { en: "Citadel Park", nl: "Citadelpark" },
+        legacy_id: null,
+      };
       const result = await service.createLocation(dto);
       expect(result).toEqual(mockLocation);
       expect(dbService.createLocation).toHaveBeenCalledWith(dto);
@@ -73,7 +79,10 @@ describe("LocationService", () => {
 
   describe("updateLocation", () => {
     it("should update a location in the database", async () => {
-      const dto = { id: 1, location: "Updated Park" } as UpdateLocationDto;
+      const dto: UpdateLocationDto = {
+        id: 1,
+        location: { en: "Updated Park", nl: "Bijgewerkt park" },
+      };
       const result = await service.updateLocation(dto);
       expect(result).toEqual(mockLocation);
       expect(dbService.updateLocation).toHaveBeenCalledWith(dto);

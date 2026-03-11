@@ -8,10 +8,7 @@ import {
   ProductionDto,
   TagDto,
 } from "../dto/dto";
-import {
-  CreateEventSchema,
-  CreateProductionSchema,
-} from "@repo/common/src/database_objects";
+import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
 import { EventService } from "../event/event.service";
 import { ProductionService } from "../production/production.service";
 import { TagService } from "../tag/tag.service";
@@ -35,6 +32,21 @@ type ParsedEventRow = {
 };
 
 export class CSVFileParser {
+  private static toLocalizedString(value: string): { en: string; nl: string } {
+    const normalized = (value || "").trim();
+    return {
+      en: normalized,
+      nl: normalized,
+    };
+  }
+
+  private static getPreferredLocalizedValue(value: {
+    en: string;
+    nl: string;
+  }): string {
+    return (value.nl || value.en || "").trim();
+  }
+
   /**
    * Parse a CSV file and return the data as an array of objects
    * @param filePath - Path to the CSV file
@@ -149,11 +161,13 @@ export class CSVFileParser {
     const legacy_id = `csv-${id}`;
 
     return {
-      titel: row.Titel,
-      description1: row.Description1,
-      description2: row.Description2 || null,
+      titel: CSVFileParser.toLocalizedString(row.Titel),
+      description1: CSVFileParser.toLocalizedString(row.Description1),
+      description2: row.Description2
+        ? CSVFileParser.toLocalizedString(row.Description2)
+        : null,
       artist: null, // TODO
-      tagline: tagLine,
+      tagline: tagLine ? CSVFileParser.toLocalizedString(tagLine) : null,
       credits: null, // TODO
       attendance_mode: null, // TODO
       performer_type: null, // TODO
@@ -243,7 +257,10 @@ export class CSVFileParser {
     const locationMap: Map<string, number> = new Map();
     const existingLoc = await locationService.getLocations();
     for (const loc of existingLoc) {
-      locationMap.set(loc.location, loc.id);
+      const locationName = this.getPreferredLocalizedValue(loc.location);
+      if (locationName) {
+        locationMap.set(locationName, loc.id);
+      }
     }
 
     for (const { event, location } of parsed) {
@@ -257,7 +274,7 @@ export class CSVFileParser {
             locId = locationMap.get(loc)!;
           } else {
             const createdLoc = await locationService.createLocation({
-              location: loc,
+              location: this.toLocalizedString(loc),
               legacy_id: null,
             });
 
@@ -322,14 +339,17 @@ export class CSVFileParser {
     const tagMap: Map<string, number> = new Map();
     const existingTags = await tagService.getAllTags();
     for (const tag of existingTags) {
-      tagMap.set(tag.tag, tag.id);
+      const normalizedTag = this.getPreferredLocalizedValue(tag.tag);
+      if (normalizedTag) {
+        tagMap.set(normalizedTag, tag.id);
+      }
     }
 
     for (const tagName of tags) {
       if (!tagMap.has(tagName)) {
         // insert tags, ignoring duplicates
         const tagObject: TagDto = await tagService.createTag({
-          tag: tagName,
+          tag: this.toLocalizedString(tagName),
           legacy_id: null,
         });
         tagMap.set(tagName, tagObject.id);
@@ -347,5 +367,4 @@ export class CSVFileParser {
     return createdProductions;
   }
 
-  //TODO: add inserting function for productions once new insert endpoint is added to backend
 }

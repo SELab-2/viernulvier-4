@@ -1,10 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { PriceController } from "./price.controller";
 import { PriceService } from "./price.service";
+import { LanguageService } from "../util/language/language.service";
 import {
   CreatePriceDto,
+  LanguageQueryDto,
   PaginationFilterDto,
   PriceDto,
+  PriceViewDto,
   UpdatePriceDto,
 } from "../dto/dto";
 import { ApiKeyGuard } from "../auth/authGuard";
@@ -12,6 +15,7 @@ import { ApiKeyGuard } from "../auth/authGuard";
 describe("PriceController", () => {
   let controller: PriceController;
   let service: PriceService;
+  let languageService: LanguageService;
 
   // Mock the business logic service
   const mockPriceService = {
@@ -22,11 +26,32 @@ describe("PriceController", () => {
     deletePrice: jest.fn(),
   };
 
+  const mockLanguageService = {
+    flattenByLanguage: jest.fn(),
+  };
+
+  // Updated to match localized PriceSchema
   const mockPrice: PriceDto = {
     id: 1,
     price: 20.0,
+    name: {
+      en: "Standard",
+      nl: "Standaard",
+    },
+    created_at: "2024-01-15T19:00:00Z",
+    updated_at: "2024-01-15T19:00:00Z",
+    legacy_id: null,
+  };
+
+  // What the LanguageService will output
+  const mockPriceView: PriceViewDto = {
+    id: 1,
+    price: 20.0,
     name: "Standard",
-  } as PriceDto;
+    created_at: "2024-01-15T19:00:00Z",
+    updated_at: "2024-01-15T19:00:00Z",
+    legacy_id: null,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,6 +60,10 @@ describe("PriceController", () => {
         {
           provide: PriceService,
           useValue: mockPriceService,
+        },
+        {
+          provide: LanguageService,
+          useValue: mockLanguageService,
         },
       ],
     })
@@ -46,6 +75,7 @@ describe("PriceController", () => {
 
     controller = module.get<PriceController>(PriceController);
     service = module.get<PriceService>(PriceService);
+    languageService = module.get<LanguageService>(LanguageService);
   });
 
   afterEach(() => {
@@ -53,29 +83,42 @@ describe("PriceController", () => {
   });
 
   describe("getPrices", () => {
-    it("should call getPrices on the service with the pagination filter", async () => {
-      const filter: PaginationFilterDto = {
-        limit: 10,
-        page: 1,
-      } as PaginationFilterDto;
-      const expectedPrices = [mockPrice];
-      mockPriceService.getPrices.mockResolvedValue(expectedPrices);
+    it("should call getPrices on the service and return an array of flattened prices", async () => {
+      const filter: PaginationFilterDto = { limit: 10, page: 1 };
+      const langQuery: LanguageQueryDto = { lang: "en" };
 
-      const result = await controller.getPrices(filter);
+      const rawPrices = [mockPrice];
+      const flattenedPrices = [mockPriceView];
+
+      mockPriceService.getPrices.mockResolvedValue(rawPrices);
+      mockLanguageService.flattenByLanguage.mockReturnValue(flattenedPrices);
+
+      const result = await controller.getPrices(filter, langQuery);
 
       expect(service.getPrices).toHaveBeenCalledWith(filter);
-      expect(result).toEqual(expectedPrices);
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        rawPrices,
+        langQuery.lang,
+      );
+      expect(result).toEqual(flattenedPrices);
     });
   });
 
   describe("getPriceById", () => {
-    it("should call getPriceById on the service and return a price", async () => {
-      mockPriceService.getPriceById.mockResolvedValue(mockPrice);
+    it("should call getPriceById on the service and return a flattened price", async () => {
+      const langQuery: LanguageQueryDto = { lang: "en" };
 
-      const result = await controller.getPriceById(1);
+      mockPriceService.getPriceById.mockResolvedValue(mockPrice);
+      mockLanguageService.flattenByLanguage.mockReturnValue(mockPriceView);
+
+      const result = await controller.getPriceById(1, langQuery);
 
       expect(service.getPriceById).toHaveBeenCalledWith(1);
-      expect(result).toEqual(mockPrice);
+      expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
+        mockPrice,
+        langQuery.lang,
+      );
+      expect(result).toEqual(mockPriceView);
     });
   });
 
@@ -83,8 +126,9 @@ describe("PriceController", () => {
     it("should call createPrice on the service and return the created price", async () => {
       const createDto: CreatePriceDto = {
         price: 20.0,
-        name: "Standard",
-      } as CreatePriceDto;
+        name: { en: "Standard", nl: "Standaard" },
+        legacy_id: null,
+      };
       mockPriceService.createPrice.mockResolvedValue(mockPrice);
 
       const result = await controller.createPrice(createDto);
@@ -99,7 +143,7 @@ describe("PriceController", () => {
       const updateDto: UpdatePriceDto = {
         id: 1,
         price: 25.0,
-      } as UpdatePriceDto;
+      };
       const updatedPrice = { ...mockPrice, price: 25.0 };
       mockPriceService.updatePrice.mockResolvedValue(updatedPrice);
 

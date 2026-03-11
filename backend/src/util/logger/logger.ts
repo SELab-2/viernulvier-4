@@ -1,4 +1,7 @@
 import { createLogger, format, transports, Logger } from "winston";
+import * as dotenv from "dotenv";
+import * as path from "path";
+dotenv.config({ path: path.join(process.cwd(), "../.env") });
 
 const { combine, timestamp, printf, colorize, json } = format;
 
@@ -20,7 +23,7 @@ const logger: Logger = createLogger({
   transports: [
     new transports.Console(),
     new transports.File({
-      filename: `logs/scraper-${date.toISOString().replace(/:/g, "-")}.log`,
+      filename: `${process.env.LOGGER_PATH}/backend-${date.toISOString().replace(/:/g, "-")}.log`,
     }),
   ],
 });

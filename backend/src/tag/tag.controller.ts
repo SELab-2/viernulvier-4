@@ -7,10 +7,17 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { TagService } from "./tag.service";
-import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
+import {
+  CreateTagDto,
+  LanguageQueryDto,
+  TagDto,
+  TagViewDto,
+  UpdateTagDto,
+} from "../dto/dto";
 import {
   ApiBody,
   ApiOkResponse,
@@ -19,25 +26,35 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
-import { CreateTagSchema, UpdateTagSchema } from "@repo/common";
+import {
+  CreateTagSchema,
+  LanguageQuerySchema,
+  UpdateTagSchema,
+} from "@repo/common";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import { LanguageService } from "../util/language/language.service";
 
 @Controller("tags")
 export class TagController {
-  constructor(private readonly tagService: TagService) {}
+  constructor(
+    private readonly tagService: TagService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to GET /tags
    * @returns All TagDto objects
    */
   @ApiOperation({ summary: "Returns all Tag objects." })
-  @ApiOkResponse({
-    type: TagDto,
-    isArray: true,
-    description: "All Tags returned.",
-  })
+  @ApiOkArrayAnyOf(TagDto, TagViewDto)
   @Get()
-  async getAllTags(): Promise<TagDto[]> {
-    return await this.tagService.getAllTags();
+  async getAllTags(
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<TagDto[] | TagViewDto[]> {
+    return this.ls.flattenByLanguage<TagDto[] | TagViewDto[]>(
+      await this.tagService.getAllTags(),
+      lang.lang,
+    );
   }
 
   /**
@@ -46,12 +63,16 @@ export class TagController {
    * @returns The TagDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Tag with id in the URL." })
-  @ApiOkResponse({ type: TagDto, description: "Tag Found." })
+  @ApiOkAnyOf(TagDto, TagViewDto)
   @Get(":tagId")
   async getTagById(
     @Param("tagId", ParseIntPipe) tagId: number,
-  ): Promise<TagDto> {
-    return await this.tagService.getTagById(tagId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<TagDto | TagViewDto> {
+    return this.ls.flattenByLanguage<TagDto | TagViewDto>(
+      await this.tagService.getTagById(tagId),
+      lang.lang,
+    );
   }
 
   /**

@@ -5,6 +5,7 @@ import {
   Param,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import EventService from "../event.service";
@@ -14,13 +15,20 @@ import {
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
-import { PriceDto } from "../../dto/dto";
+import { LanguageQueryDto, PriceDto, PriceViewDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { LanguageService } from "../../util/language/language.service";
+import { LanguageQuerySchema } from "@repo/common";
+import { ZodValidationPipe } from "nestjs-zod";
+import { ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
 
 @ApiTags("Events - Prices")
 @Controller("events/:eventId/prices")
 export class EventPriceController {
-  constructor(private readonly eventService: EventService) {}
+  constructor(
+    private readonly eventService: EventService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to GET /events/:eventId/prices
@@ -30,16 +38,16 @@ export class EventPriceController {
   @ApiOperation({
     summary: "Returns the Prices of an Event.",
   })
-  @ApiOkResponse({
-    type: PriceDto,
-    isArray: true,
-    description: "Prices Found.",
-  })
+  @ApiOkArrayAnyOf(PriceDto, PriceViewDto)
   @Get()
   async getPricesOfEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
-  ): Promise<PriceDto[]> {
-    return await this.eventService.getPricesForEvent(eventId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<PriceDto[] | PriceViewDto[]> {
+    return this.ls.flattenByLanguage<PriceDto[] | PriceViewDto[]>(
+      await this.eventService.getPricesForEvent(eventId),
+      lang.lang,
+    );
   }
 
   /**
