@@ -6,28 +6,28 @@
 Public login uses a username/password object. Account management requires a **Super API Key**.
 
 ### [POST] `/auth/login`
-Logs into an existing account.
-- **Request Body:** `CreateAccountDto`
-- **Returns:** `{ account: PublicAccountDto, apiKey: ApiKeyDto | null }`
+Authenticates a user and starts a session.
+- **Request Body:** `CreateAccount`
+- **Returns:** `{ account: PublicAccount, apiKey: ApiKey | null }`
 
 ### [GET] `/auth`
 Returns a list of all existing accounts.
 - **Security:** `SuperApiKey` required.
-- **Returns:** Array of `PublicAccountDto`
+- **Returns:** Array of `PublicAccount`
 
 ### [POST] `/auth`
 Creates a new account.
 - **Security:** `SuperApiKey` required.
-- **Body:** `CreateAccountDto`
-- **Returns:** `PublicAccountDto`
+- **Body:** `CreateAccount`
+- **Returns:** `PublicAccount`
 
 ### [PATCH] `/auth`
 Updates an existing account.
 - **Security:** `SuperApiKey` required.
-- **Body:** `UpdateAccountDto`
-- **Returns:** `PublicAccountDto`
+- **Body:** `UpdateAccount`
+- **Returns:** `PublicAccount`
 
 ### [DELETE] `/auth/:accountId`
-Deletes an account.
+Permanently deletes an account.
 - **Security:** `SuperApiKey` required.
 - **Returns:** `boolean`
