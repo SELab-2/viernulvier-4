@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { DEFAULT_LANGUAGE, Language } from "@repo/common";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -12,15 +11,11 @@ export class LocationDatabaseService {
   /**
    * Get a single location by their ID.
    * @param id The ID we're trying to fetch.
-   * @param lang is the used language
    * @returns The Location if there is one.
    */
-  async getLocationById(
-    id: number,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<LocationDto> {
+  async getLocationById(id: number): Promise<LocationDto> {
     const query = `SELECT id, 
-       location->>'${lang}' AS loc, 
+       location, 
        created_at, 
        updated_at, 
        legacy_id 
@@ -38,20 +33,18 @@ export class LocationDatabaseService {
    * Get locations with pagination
    * @param amount number of locations per page (if amount=0, it will default to grabbing all locations)
    * @param page page index (starts at 0)
-   * @param lang is the used language
    * @returns locations
    */
   async getLocations(
     amount: number = 0,
     page: number = 0,
-    lang: Language = DEFAULT_LANGUAGE,
   ): Promise<LocationDto[]> {
     const offset = page * amount;
 
     if (amount === 0) {
       const query = `
       SELECT id,
-             location->>'${lang}' AS loc,
+             location,
              created_at,
              updated_at,
              legacy_id
@@ -64,7 +57,7 @@ export class LocationDatabaseService {
 
     const query = `
     SELECT id,
-           location->>'${lang}' AS loc,
+           location,
            created_at,
            updated_at,
            legacy_id
@@ -79,13 +72,9 @@ export class LocationDatabaseService {
   /**
    * Create location function, creates a location in the database.
    * @param location must be of the type "CreateLocation" which has all fields defined besides the primary key id.
-   * @param lang is the used language
    * @returns the added location if it was successful.
    */
-  async createLocation(
-    location: CreateLocationDto,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<LocationDto> {
+  async createLocation(location: CreateLocationDto): Promise<LocationDto> {
     if (!location.location) {
       throw new BadRequestException("Missing required fields");
     }
@@ -95,14 +84,14 @@ export class LocationDatabaseService {
       VALUES ($1, $2)
       RETURNING
         id,
-        location->>'${lang}' AS location,
+        location,
         created_at,
         updated_at,
         legacy_id
       ;
     `;
 
-    const values = [JSON.stringify({ [lang]: location.location })];
+    const values = [JSON.stringify(location.location)];
 
     const result = await this.db.query<LocationDto>(query, values);
 
@@ -116,14 +105,10 @@ export class LocationDatabaseService {
   /**
    * Update function for locations. Updates the location in the database.
    * @param location must be of the type "UpdateLocation", gives the freedom to define only what needs to be updated.
-   * @param lang is the used language
    * The id field in the location MUST be defined.
    * @returns the updated location if successful.
    */
-  async updateLocation(
-    location: UpdateLocationDto,
-    lang: Language = DEFAULT_LANGUAGE,
-  ): Promise<LocationDto> {
+  async updateLocation(location: UpdateLocationDto): Promise<LocationDto> {
     if (!location.id) {
       throw new BadRequestException("Location id is required for update");
     }
@@ -136,7 +121,7 @@ export class LocationDatabaseService {
       fields.push(
         `location = COALESCE(location, '{}'::jsonb) || $${index++}::jsonb`,
       );
-      values.push(JSON.stringify({ [lang]: location.location }));
+      values.push(JSON.stringify(location.location));
     }
 
     if (fields.length === 0) {
@@ -151,7 +136,7 @@ export class LocationDatabaseService {
       WHERE id = $${index}
     RETURNING
       id,
-      location->>'${lang}' AS location
+      location,
       created_at,
       updated_at,
       legacy_id
@@ -161,7 +146,9 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Location with ID ${location.id} not found`);
+      throw new ResourceGoneException(
+        `Location with ID ${location.id} not found`,
+      );
     }
 
     return result[0];

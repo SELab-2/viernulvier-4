@@ -2,7 +2,6 @@ import fs from "fs";
 import { Readable } from "stream";
 import { z } from "zod";
 import { CSVFileParser } from "./csv_file_parser";
-import { create } from "domain";
 
 jest.mock("fs");
 
@@ -98,7 +97,7 @@ describe("CSVFileParser.transformEventRow", () => {
       location: "Main Hall",
       doors_at: null,
       intermission_at: null,
-      legacy_id: null
+      legacy_id: null,
     });
   });
 
@@ -155,12 +154,12 @@ describe("CSVFileParser.transformProductionRow", () => {
     const result = CSVFileParser.transformProductionRow(row);
 
     expect(result).toEqual({
-      titel: "Hamlet",
-      description1: "Main description",
+      titel: { en: "Hamlet", nl: "Hamlet" },
+      description1: { en: "Main description", nl: "Main description" },
       description2: null,
       tags: ["drama"],
       artist: null,
-      tagline: "A tragedy",
+      tagline: { en: "A tragedy", nl: "A tragedy" },
       credits: null,
       performer_type: null,
       attendance_mode: null,
@@ -253,10 +252,10 @@ describe("CSVFileParser.parseProductionsCSV", () => {
     expect(result).toEqual({
       productions: [
         {
-          titel: "Macbeth",
+          titel: { en: "Macbeth", nl: "Macbeth" },
           tagline: null,
-          description1: "desc",
-          description2: "more",
+          description1: { en: "desc", nl: "desc" },
+          description2: { en: "more", nl: "more" },
           artist: null,
           credits: null,
           performer_type: null,
@@ -342,7 +341,7 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
 
     fakeLocationService.createLocation.mockResolvedValue({
       id: 77,
-      location: "Large Room",
+      location: { en: "Large Room", nl: "Large Room" },
     });
     fakeEventService.createEvent.mockResolvedValue({ id: 321 });
 
@@ -353,8 +352,8 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
     );
 
     expect(fakeLocationService.createLocation).toHaveBeenCalledWith({
-      location: "Large Room",
-      legacy_id: null
+      location: { en: "Large Room", nl: "Large Room" },
+      legacy_id: null,
     });
     expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(321, 77);
     expect(created).toEqual([{ id: 321 }]);
@@ -380,7 +379,7 @@ describe("CSVFileParser.insertEventsFromCSV", () => {
 
     // pretend the location already exists in the system
     fakeLocationService.getLocations.mockResolvedValue([
-      { id: 99, location: "Shared Hall" },
+      { id: 99, location: { en: "Shared Hall", nl: "Shared Hall" } },
     ]);
     fakeEventService.createEvent.mockResolvedValue({ id: 400 });
 
@@ -446,7 +445,7 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
     }));
 
     fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
-      id: `${tag}-id`,
+      id: `${tag.nl}-id`,
       tag,
     }));
 
@@ -477,9 +476,9 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
     expect(created).toEqual([
       {
         id: 1,
-        titel: "First",
+        titel: { en: "First", nl: "First" },
         tagline: null,
-        description1: "d1",
+        description1: { en: "d1", nl: "d1" },
         description2: null,
         artist: null,
         credits: null,
@@ -489,9 +488,9 @@ describe("CSVFileParser.insertProductionsFromCSV", () => {
       },
       {
         id: 2,
-        titel: "Second",
+        titel: { en: "Second", nl: "Second" },
         tagline: null,
-        description1: "d2",
+        description1: { en: "d2", nl: "d2" },
         description2: null,
         artist: null,
         credits: null,

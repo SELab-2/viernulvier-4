@@ -17,13 +17,16 @@ import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateProductionSchema,
   FilterProductionSchema,
+  LanguageQuerySchema,
   ProductionSchema,
   UpdateProductionSchema,
 } from "@repo/common";
 import {
   CreateProductionDto,
   FilterProductionDto,
+  LanguageQueryDto,
   ProductionDto,
+  ProductionViewDto,
   UpdateProductionDto,
 } from "../../dto/dto";
 import {
@@ -34,46 +37,54 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { LanguageService } from "../../util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
 
 /**
  * Handles CORE functionality for Productions.
  */
 @Controller("productions")
 export class ProductionController {
-  constructor(private readonly productionService: ProductionService) {}
+  constructor(
+    private readonly productionService: ProductionService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
-   * Responds to GET /productions
+   * Responds to GET /productions.
    * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
   @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
-  @ApiOkResponse({
-    type: ProductionDto,
-    isArray: true,
-    description: "All Productions returned.",
-  })
+  @ApiOkArrayAnyOf(ProductionDto, ProductionViewDto)
   @Get()
   @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
     @Query() filters: FilterProductionDto,
-  ): Promise<ProductionDto[]> {
-    return await this.productionService.getAllProductions(filters);
+  ): Promise<ProductionDto[] | ProductionViewDto[]> {
+    return this.ls.flattenByLanguage<ProductionDto[] | ProductionViewDto[]>(
+      await this.productionService.getAllProductions(filters),
+      filters.lang,
+    );
   }
 
   /**
-   * Responds to GET /productions/:productionId
+   * Responds to GET /productions/:productionId.
    * @param productionId ID in the URL of the request.
    * @returns The ProductionDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Production with id in the URL." })
-  @ApiOkResponse({ type: ProductionDto, description: "Production Found." })
+  @ApiOkAnyOf(ProductionDto, ProductionViewDto)
   @Get(":productionId")
   async getProductionById(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<ProductionDto> {
-    return await this.productionService.getProductionById(productionId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<ProductionDto | ProductionViewDto> {
+    return this.ls.flattenByLanguage<ProductionDto | ProductionViewDto>(
+      await this.productionService.getProductionById(productionId),
+      lang.lang,
+    );
   }
 
   /**

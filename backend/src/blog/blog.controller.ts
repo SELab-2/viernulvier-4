@@ -8,12 +8,24 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { BlogService } from "./blog.service";
-import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
+import {
+  BlogSchema,
+  CreateBlogSchema,
+  LanguageQuerySchema,
+  UpdateBlogSchema,
+} from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  BlogViewDto,
+  CreateBlogDto,
+  LanguageQueryDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 import {
   ApiBody,
   ApiOkResponse,
@@ -21,24 +33,30 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { LanguageService } from "../util/language/language.service";
+import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
 
 @Controller("blogs")
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(
+    private readonly blogService: BlogService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/blogs"
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
-  @ApiOkResponse({
-    type: BlogDto,
-    isArray: true,
-    description: "Returned all blogs.",
-  })
+  @ApiOkArrayAnyOf(BlogDto, BlogViewDto)
   @Get()
-  async getAllBlogs(): Promise<BlogDto[]> {
-    return await this.blogService.getAllBlogs();
+  async getAllBlogs(
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto[] | BlogViewDto[]> {
+    return this.ls.flattenByLanguage<BlogDto[] | BlogViewDto[]>(
+      await this.blogService.getAllBlogs(),
+      lang.lang,
+    );
   }
 
   /**
@@ -47,12 +65,16 @@ export class BlogController {
    * @returns The Blog corresponding to ID if there was one.
    */
   @ApiOperation({ summary: "Returns a single blog." })
-  @ApiOkResponse({ type: BlogDto, description: "Found Blog." })
+  @ApiOkAnyOf(BlogDto, BlogViewDto)
   @Get(":blogId")
   async getBlogById(
     @Param("blogId", ParseIntPipe) blogId: number,
-  ): Promise<BlogDto> {
-    return await this.blogService.getBlogById(blogId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto | BlogViewDto> {
+    return this.ls.flattenByLanguage<BlogDto | BlogViewDto>(
+      await this.blogService.getBlogById(blogId),
+      lang.lang,
+    );
   }
 
   /**
