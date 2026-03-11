@@ -1,13 +1,13 @@
 # Core Entities
 
-Core entities represent the primary business logic of the viernulvier system. They define the structural relationship between artistic content (Productions), their scheduled occurrences (Events), and related editorial content (Blogs).
+Core entities represent the primary business logic of the VIERNULVIER archive system. They define the structural relationship between artistic content (Productions), their scheduled occurrences (Events), and related editorial content (Blogs).
 
 ---
 
 ## 🎬 Production
 A **Production** acts as the "master template" for a show, performance, or project. It contains all the artistic metadata that remains constant, regardless of when or where it is performed. 
 
-*Example: The play "Hamlet" is a Production; it has a title, a director, and a description.*
+*Example: The play "Hamlet" is a Production; it has a title, an artist, and a description.*
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
