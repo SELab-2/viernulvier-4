@@ -19,6 +19,10 @@ nav:
       - Tags: api/tags.md
       - Locations: api/locations.md
       - Pricing: api/pricing.md
+  - Data Schemas:
+      - Overview: schemas/index.md
+      - Core Entities: schemas/entities.md
+      - Metadata: schemas/metadata.md
   - Testing:
       - Overview: testing/index.md
       - Backend: testing/backend.md
