@@ -10,7 +10,9 @@ This site contains the complete documentation for the VierNulVier project.
 * **[Server](./server/index.md):** Understand the architecture and how VierNulVier Archive works under the hood.
 
 ## Requirements
+
 To use VierNulVier, you will need:
+
 * A working Node installation.
 
 ## Made By
