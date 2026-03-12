@@ -1,4 +1,8 @@
-![Logo](../assets/logo_black.svg)
+![Logo](assets/logo_black.svg)
+
+
+---
+
 
 # Welcome to VierNulVier Archive
 
