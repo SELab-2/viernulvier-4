@@ -6,6 +6,7 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
+  PaginatedEventDto,
   PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
@@ -18,19 +19,20 @@ export class EventDatabaseService {
 
   /**
    * Get a single EventDto by their ID.
-   * @param id The ID we're trying to fetch.
+   * @param eventId The ID we're trying to fetch.
    * @returns The EventDto if there is one.
    */
   async getEventById(eventId: number): Promise<EventDto> {
-    const events: EventDto[] = await this.getEvents(
+    const events: PaginatedEventDto = await this.getEvents(
       FilterEventSchema.parse({ id: eventId }),
     );
-    if (events.length === 0)
+    const event: EventDto[] = events.objects;
+    if (event.length === 0)
       throw new ResourceGoneException(
         `No EventDto exists for provided ID(${eventId})`,
       );
 
-    return events[0]; // There should be an EventDto in here if the length is not 0.
+    return event[0]; // There should be an EventDto in here if the length is not 0.
   }
 
   /**
@@ -40,7 +42,7 @@ export class EventDatabaseService {
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All events for the given filters.
    */
-  async getEvents(filters: FilterEventDto): Promise<EventDto[]> {
+  async getEvents(filters: FilterEventDto): Promise<PaginatedEventDto> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -109,6 +111,14 @@ export class EventDatabaseService {
       values.push(offset);
     }
 
+    // count query uses same filters but no pagination
+    const countQuery = `
+    SELECT COUNT(*) as count
+    FROM events e
+      JOIN productions p ON e.production_id = p.id
+    ${whereClause}
+  `;
+
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
@@ -120,7 +130,20 @@ export class EventDatabaseService {
         ${paginationClause}
         `;
 
-    return this.db.query<EventDto>(query, values);
+    // count query only uses filter values, not pagination values
+    const filterValues = values.slice(0, i - 1);
+
+    const [objects, countResult] = await Promise.all([
+      this.db.query<EventDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
+    ]);
+
+    return {
+      page: filters.page,
+      limit: filters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**

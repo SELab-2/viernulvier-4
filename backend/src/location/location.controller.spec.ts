@@ -4,10 +4,11 @@ import { LocationService } from "./location.service";
 import { LanguageService } from "../util/language/language.service";
 import {
   CreateLocationDto,
+  LanguageQueryDto,
   LocationDto,
   LocationViewDto,
+  PaginationFilterDto,
   UpdateLocationDto,
-  LanguageQueryDto,
 } from "../dto/dto";
 import { ApiKeyGuard } from "../auth/authGuard";
 
@@ -54,6 +55,11 @@ describe("LocationController", () => {
     flattenByLanguage: jest.fn(),
   };
 
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LocationController],
@@ -94,7 +100,7 @@ describe("LocationController", () => {
         mockLocationViewArray,
       );
 
-      const result = await controller.getLocations(langQuery);
+      const result = await controller.getLocations(filter, langQuery);
 
       expect(result).toEqual(mockLocationViewArray);
       expect(service.getLocations).toHaveBeenCalledTimes(1);

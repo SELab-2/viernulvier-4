@@ -1,18 +1,8 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import {
-  CreateEventDto,
-  CreateProductionDto,
-  EventDto,
-  ProductionDto,
-  TagDto,
-} from "../dto/dto";
+import { CreateEventDto, CreateProductionDto } from "../dto/dto";
 import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
-import { EventService } from "../event/event.service";
-import { ProductionService } from "../production/production.service";
-import { TagService } from "../tag/tag.service";
-import { LocationService } from "../location/location.service";
 
 /**
  * Type used to structure production import
@@ -38,13 +28,6 @@ export class CSVFileParser {
       en: normalized,
       nl: normalized,
     };
-  }
-
-  private static getPreferredLocalizedValue(value: {
-    en: string;
-    nl: string;
-  }): string {
-    return (value.nl || value.en || "").trim();
   }
 
   /**
@@ -237,134 +220,4 @@ export class CSVFileParser {
       productionTagLinks,
     };
   }
-
-  /**
-   * Parse events from a CSV file and insert them into the database.
-   * @param filePath - Path to the CSV file containing events
-   * @param eventService - Instance of EventService to insert events into the database
-   * @param locationService - Instance of LocationService to insert locations into the database
-   * @returns A promise that resolves to an array of created EventDto objects
-   */
-  static async insertEventsFromCSV(
-    filePath: string,
-    eventService: EventService,
-    locationService: LocationService,
-  ): Promise<EventDto[]> {
-    const parsed = await this.parseEventsCSV(filePath);
-    const createdEvents: EventDto[] = [];
-
-    // prepopulate a map with existing locations so we don't create duplicates
-    const locationMap: Map<string, number> = new Map();
-    const existingLoc = await locationService.getLocations();
-    for (const loc of existingLoc) {
-      const locationName = this.getPreferredLocalizedValue(loc.location);
-      if (locationName) {
-        locationMap.set(locationName, loc.id);
-      }
-    }
-
-    for (const { event, location } of parsed) {
-      try {
-        let locId: number | null = null;
-        const loc = location.trim();
-
-        // if there's a location, either find it in the map or create it and add to the map
-        if (loc) {
-          if (locationMap.has(loc)) {
-            locId = locationMap.get(loc)!;
-          } else {
-            const createdLoc = await locationService.createLocation({
-              location: this.toLocalizedString(loc),
-              legacy_id: null,
-            });
-
-            if (!createdLoc) {
-              throw new Error("Location creation failed");
-            }
-
-            locId = createdLoc.id;
-            locationMap.set(loc, locId);
-          }
-        }
-
-        //create the event and link it to the location if applicable
-        const createdEvent = await eventService.createEvent(event);
-
-        if (locId !== null) {
-          await eventService.linkEventToLocation(createdEvent.id, locId);
-        }
-
-        createdEvents.push(createdEvent);
-      } catch (error) {
-        throw new Error(
-          `Failed to insert event: ${JSON.stringify(event)} - ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        );
-      }
-    }
-
-    return createdEvents;
-  }
-
-  /**
-   * Parse productions from a CSV file and insert them into the database, along with their associated tags.
-   * @param filePath - Path to the CSV file containing productions
-   * @param productionService - Instance of ProductionService to insert productions into the database and link tags
-   * @param tagService - Instance of TagService to insert tags into the database
-   * @returns A promise that resolves when all productions and tags have been inserted and linked
-   */
-  static async insertProductionsFromCSV(
-    filePath: string,
-    productionService: ProductionService,
-    tagService: TagService,
-  ): Promise<ProductionDto[]> {
-    const { productions, tags, productionTagLinks } =
-      await this.parseProductionsCSV(filePath);
-    const createdProductions: ProductionDto[] = [];
-
-    const legacyToDbId = new Map<string, number>();
-
-    // insert productions
-    for (const production of productions) {
-      const created = await productionService.createProduction(production);
-      createdProductions.push(created);
-
-      if (production.legacy_id) {
-        legacyToDbId.set(production.legacy_id, created.id);
-      }
-    }
-
-    // prepopulate a map with existing locations so we don't create duplicates
-    const tagMap: Map<string, number> = new Map();
-    const existingTags = await tagService.getAllTags();
-    for (const tag of existingTags) {
-      const normalizedTag = this.getPreferredLocalizedValue(tag.tag);
-      if (normalizedTag) {
-        tagMap.set(normalizedTag, tag.id);
-      }
-    }
-
-    for (const tagName of tags) {
-      if (!tagMap.has(tagName)) {
-        // insert tags, ignoring duplicates
-        const tagObject: TagDto = await tagService.createTag({
-          tag: this.toLocalizedString(tagName),
-          legacy_id: null,
-        });
-        tagMap.set(tagName, tagObject.id);
-      }
-    }
-
-    // link tags to productions
-    for (const link of productionTagLinks) {
-      const tagId = tagMap.get(link.tagName);
-      const prodId = legacyToDbId.get(link.legacyId);
-      if (!prodId || !tagId) continue;
-      await productionService.addTagToProduction(prodId, tagId);
-    }
-
-    return createdProductions;
-  }
-
 }

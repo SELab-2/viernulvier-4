@@ -1,5 +1,6 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { runScraper } from "./main";
+import { injectCsvData } from "./inject-csv";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
 
@@ -27,6 +28,22 @@ export class ScraperService implements OnApplicationBootstrap {
       this.logger.log("Skipping initial scrape (Scraping is DISABLED).");
       return;
     }
+
+    this.logger.log("Running initial CSV injection...");
+    injectCsvData()
+      .then(() => {
+        this.logger.log(
+          "Initial CSV injection finished successfully.",
+          "ScraperService",
+        );
+      })
+      .catch((err) => {
+        this.logger.error(
+          "Initial CSV injection failed",
+          (err as Error).stack,
+          "ScraperService",
+        );
+      });
 
     this.logger.log("Running initial scrape...");
     runScraper()

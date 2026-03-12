@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  CreateBlogDto,
+  PaginatedBlogDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 
 @Injectable()
 export class BlogService {
@@ -8,10 +14,16 @@ export class BlogService {
 
   /**
    * Gets all Blogs from the DatabaseService.
+   * @param paginationFilter iq the pagination params.
    * @returns A list of all Blog objects.
    */
-  async getAllBlogs(): Promise<BlogDto[]> {
-    return await this.blogDbService.getBlogs();
+  async getAllBlogs(
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedBlogDto> {
+    return await this.blogDbService.getBlogs(
+      paginationFilter.limit,
+      paginationFilter.page,
+    );
   }
 
   /**
