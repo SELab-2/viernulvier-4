@@ -1,17 +1,25 @@
-# Welcome to MkDocs
+# Welcome to VierNulVier Archive
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+This site contains the complete documentation for the VierNulVier project. 
 
-## Commands
+**VierNulVier Archive** is a website linked to **VierNulVier's** marketing website that stores all past events and productions and puts them on display. That way people can look for things that are no longer visible on the marketing website.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+## Where should I go next?
 
-## Project layout
+* **[Building & Run](./build-run/index.md):** Install the dependencies and run the project.
+* **[Server](./server/index.md):** Understand the architecture and how VierNulVier Archive works under the hood.
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Requirements
+To use VierNulVier, you will need:
+* A working Node installation.
+
+## Made By
+
+* **Matthieu De Clercq**: Group leader and backend manager
+* **Alex Nollet**: Technical Lead and backend manager
+* **Sebastien Harris**: System Admin and backend manager
+* **Lander De Geeter**: Customer Relations Officer and testing manager
+* **Robin De Rudder**: Secretary and testing manager
+* **Dominik Nowak**: Frontend manager
+* **Jill Van Ham**: Frontend manager
+* **Diana Dendauw**: Frontend manager

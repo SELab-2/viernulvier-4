@@ -4,6 +4,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  PaginatedProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
@@ -21,15 +22,17 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: ProductionDto[] = await this.getProductions(
+    const productions: PaginatedProductionDto = await this.getProductions(
       FilterProductionSchema.parse({ id: id }),
     );
-    if (productions.length === 0)
+
+    const production = productions.objects;
+    if (production.length === 0)
       throw new ResourceGoneException(
         `No ProductionDto exists for provided ID(${id})`,
       );
 
-    return productions[0]; // There should be a ProductionDto in here if the length is not 0.
+    return production[0]; // There should be a ProductionDto in here if the length is not 0.
   }
 
   /**
@@ -128,7 +131,9 @@ export class ProductionDatabaseService {
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
    */
-  async getProductions(filters: FilterProductionDto): Promise<ProductionDto[]> {
+  async getProductions(
+    filters: FilterProductionDto,
+  ): Promise<PaginatedProductionDto> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -231,51 +236,56 @@ export class ProductionDatabaseService {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    // pagination
+    // count query uses same filters but no pagination
+    const filterValues = [...values];
+    const countQuery = `
+    SELECT COUNT(DISTINCT p.id) as count
+    FROM productions p
+      LEFT JOIN events e ON e.production_id = p.id
+    ${whereClause}
+  `;
+
     let paginationClause = "";
     if (filters.limit > 0) {
       const offset = filters.page * filters.limit;
-
-      paginationClause = `
-      LIMIT $${i}
-      OFFSET $${i + 1}
-    `;
-
+      paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
       values.push(filters.limit);
       values.push(offset);
-
       i += 2;
     }
 
-    // p is defined, ignore error
-    // need DISTINCT as multiple event for each prod.
     const query = `
-      SELECT DISTINCT
-        p.id,
-        p.titel,
-        p.description1,
-        p.description2,
-        p.artist,
-        p.tagline,
-        p.credits,
-        p.created_at,
-        p.updated_at,
-        p.legacy_id,
-        p.performer_type,
-        p.attendance_mode
-      FROM productions p
-        LEFT JOIN events e ON e.production_id = p.id
-          ${whereClause}
-      ORDER BY p.id 
-        ${paginationClause}
-    `;
+    SELECT DISTINCT
+      p.id,
+      p.titel,
+      p.description1,
+      p.description2,
+      p.artist,
+      p.tagline,
+      p.credits,
+      p.created_at,
+      p.updated_at,
+      p.legacy_id,
+      p.performer_type,
+      p.attendance_mode
+    FROM productions p
+      LEFT JOIN events e ON e.production_id = p.id
+    ${whereClause}
+    ORDER BY p.id
+    ${paginationClause}
+  `;
 
-    const results: ProductionDto[] = await this.db.query<ProductionDto>(
-      query,
-      values,
-    );
+    const [objects, countResult] = await Promise.all([
+      this.db.query<ProductionDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
+    ]);
 
-    return results;
+    return {
+      page: filters.page,
+      limit: filters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**

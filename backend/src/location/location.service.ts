@@ -1,6 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { LocationDatabaseService } from "../database/db.location.service";
-import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import {
+  CreateLocationDto,
+  LocationDto,
+  PaginatedLocationDto,
+  PaginationFilterDto,
+  UpdateLocationDto,
+} from "../dto/dto";
 
 /**
  * Handles Core functionality for Locations.
@@ -20,11 +26,16 @@ export class LocationService {
 
   /**
    * Fetches a list of all Location objects.
+   * @param PaginationFilter is the pagination params requested
    * @returns A list of all Locations.
    */
-  async getLocations(): Promise<LocationDto[]> {
-    // TODO: Do we have to pass page and amount here? Will we ever have that many locations?
-    return await this.locationDbService.getLocations();
+  async getLocations(
+    PaginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedLocationDto> {
+    return await this.locationDbService.getLocations(
+      PaginationFilter.limit,
+      PaginationFilter.page,
+    );
   }
 
   /**

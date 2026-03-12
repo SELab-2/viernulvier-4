@@ -16,6 +16,7 @@ import {
   BlogSchema,
   CreateBlogSchema,
   LanguageQuerySchema,
+  PaginationFilterSchema,
   UpdateBlogSchema,
 } from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
@@ -24,6 +25,9 @@ import {
   BlogViewDto,
   CreateBlogDto,
   LanguageQueryDto,
+  PaginatedBlogDto,
+  PaginatedBlogViewDto,
+  PaginationFilterDto,
   UpdateBlogDto,
 } from "../dto/dto";
 import {
@@ -45,6 +49,8 @@ export class BlogController {
 
   /**
    * Responds to a GET to "/blogs"
+   * @param lang is the language filter
+   * @param paginationFilter is the pagination params
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
@@ -52,9 +58,12 @@ export class BlogController {
   @Get()
   async getAllBlogs(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<BlogDto[] | BlogViewDto[]> {
-    return this.ls.flattenByLanguage<BlogDto[] | BlogViewDto[]>(
-      await this.blogService.getAllBlogs(),
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedBlogDto | PaginatedBlogViewDto> {
+    const result = await this.blogService.getAllBlogs(paginationFilter);
+    return this.ls.flattenByLanguage<PaginatedBlogDto | PaginatedBlogViewDto>(
+      result,
       lang.lang,
     );
   }

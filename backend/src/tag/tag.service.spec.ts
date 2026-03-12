@@ -2,7 +2,12 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { TagService } from "./tag.service";
 import { TagDatabaseService } from "../database/db.tag.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
+import {
+  CreateTagDto,
+  PaginationFilterDto,
+  TagDto,
+  UpdateTagDto,
+} from "../dto/dto";
 
 describe("TagService", () => {
   let service: TagService;
@@ -18,6 +23,11 @@ describe("TagService", () => {
     created_at: "2024-01-15T19:00:00.000Z",
     updated_at: "2024-01-15T19:00:00.000Z",
     legacy_id: null,
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   const mockTags: TagDto[] = [mockTag];
@@ -76,7 +86,7 @@ describe("TagService", () => {
 
   describe("getAllTags", () => {
     it("should return all tags from database", async () => {
-      const result = await service.getAllTags();
+      const result = await service.getAllTags(filter);
       expect(result).toEqual(mockTags);
       expect(dbService.getTags).toHaveBeenCalled();
     });
@@ -85,7 +95,9 @@ describe("TagService", () => {
       jest
         .spyOn(dbService, "getTags")
         .mockRejectedValue(new Error("Database error"));
-      await expect(service.getAllTags()).rejects.toThrow("Database error");
+      await expect(service.getAllTags(filter)).rejects.toThrow(
+        "Database error",
+      );
     });
   });
 

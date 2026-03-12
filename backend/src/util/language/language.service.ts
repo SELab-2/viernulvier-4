@@ -23,6 +23,20 @@ export class LanguageService {
     if (!data) return data as T;
     if (!lang) return data as T;
 
+    // handle paginated wrapper
+    if (
+      typeof data === "object" &&
+      "objects" in data &&
+      "page" in data &&
+      "limit" in data &&
+      "totalItems" in data
+    ) {
+      return {
+        ...data,
+        objects: this.flattenByLanguage(data.objects, lang),
+      } as T;
+    }
+
     if (Array.isArray(data)) {
       return data.map((item) => this.flattenByLanguage(item, lang)) as T;
     }
