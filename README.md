@@ -4,7 +4,7 @@
 
 # viernulvier-4
 
-![Logo](assets/logo.svg)
+![Logo](assets/logo_white.svg)
 
 ## Mockup
 

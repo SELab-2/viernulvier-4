@@ -1,3 +1,5 @@
+![Logo](assets/logo_black.svg)
+
 # Welcome to VierNulVier Archive
 
 This site contains the complete documentation for the VierNulVier project. 
