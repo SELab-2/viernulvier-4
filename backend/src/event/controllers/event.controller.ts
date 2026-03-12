@@ -14,10 +14,26 @@ import {
 } from "@nestjs/common";
 import EventService from "../event.service";
 import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
-import { CreateEventSchema, EventSchema, FilterEventSchema, UpdateEventSchema, } from "@repo/common";
+import {
+  CreateEventSchema,
+  EventSchema,
+  FilterEventSchema,
+  UpdateEventSchema,
+} from "@repo/common";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { CreateEventDto, EventDto, FilterEventDto, PaginatedEventDto, UpdateEventDto, } from "../../dto/dto";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiSecurity, } from "@nestjs/swagger";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  PaginatedEventDto,
+  UpdateEventDto,
+} from "../../dto/dto";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
 
 @Controller("events")
 export class EventController {
