@@ -2,6 +2,8 @@
 
 # viernulvier-4
 
+![Logo](assets/logo.svg)
+
 ## Groepsleden
 
 * **Matthieu De Clercq:** Groepsleider, back-end verantwoordelijke
