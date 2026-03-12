@@ -7,22 +7,22 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "start:dev": "nuxt dev --port 3001",
-    "start:prod": "node .output/server/index.mjs",
+    "start:prod": "PORT=3001 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "nuxt": "^4.3.1",
+    "@repo/common": "*",
     "vue": "^3.5.28",
-    "vue-router": "^4.6.4",
-    "@repo/common": "*"
+    "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@nuxt/test-utils": "^4.0.0",
     "@vitest/coverage-v8": "^4.0.18",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.6.1",
+    "nuxt": "^4.3.1",
     "vitest": "^4.0.18"
   }
 }

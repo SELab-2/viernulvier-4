@@ -1,0 +1,99 @@
+name: Pull Request Build and Deploy
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # STAP 1: Node setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create env files
+        run: |
+          write_env() {
+            echo "DB_USER_DEV=selab2" >> $1
+            echo "DB_HOST_DEV=sel2-4.ugent.be" >> $1
+            echo "DB_NAME_DEV=selab2_dev" >> $1
+            echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> $1
+            echo "DB_PORT_DEV=2002" >> $1
+          }
+          write_env ".env"
+          write_env "backend/.env"
+
+      # STEP 2: Build & Test
+      - name: Install and Test
+        run: |
+          npm i
+          ls -la /var/run/postgresql/ || echo "No socket found"
+          npm run test --filter=backend
+        env:
+          DB_USER_DEV: selab2
+          DB_HOST_DEV: sel2-4.ugent.be
+          DB_NAME_DEV: selab2_dev
+          DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
+          DB_PORT_DEV: 2002
+
+      # STEP 3: Deploy (locally on server)
+      - name: Deploy preview
+        run: |
+          PR=${{ github.event.pull_request.number }}
+          export NUXT_BASE="/previews/$PR/"
+          PR_PATH="/home/selab2/project/previews/$PR"
+          PORT="30$PR"
+          
+          mkdir -p $PR_PATH
+          
+          # Sync files
+          rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
+
+          # Upload the docs
+          cd $PR_PATH
+          python3 -m pip install mkdocs-material
+          python3 -m mkdocs build
+
+          mkdir -p frontend/public
+          rm -rf frontend/public/docs
+          mv site frontend/public/docs
+          
+          # Now build Nuxt
+          cd $PR_PATH/frontend
+          
+          # Install & build frontend
+          npm install
+          NUXT_API_BASE="https://sel2-4.ugent.be/api" \
+          npm run build
+          
+          # Stop old preview if running
+          pm2 delete preview-$PR || true
+          
+          # Start new preview on dynamic port
+          PORT=$PORT pm2 start .output/server/index.mjs --name preview-$PR
+          pm2 save
+
+      # STEP 4: Post preview link as comment
+      - name: Post preview link
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            🚀 **Preview Build succesfully deployed!**
+
+            📱 **Website Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+            📚 **Docs Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+          comment_tag: preview_link
