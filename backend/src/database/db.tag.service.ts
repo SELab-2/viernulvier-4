@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTagDto, PaginatedTagDto, TagDto, UpdateTagDto, } from "../dto/dto";
+import {
+  CreateTagDto,
+  PaginatedTagDto,
+  TagDto,
+  UpdateTagDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
