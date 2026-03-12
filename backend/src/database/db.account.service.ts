@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { ApiKeyDto, CreateAccountDto, PaginatedAccountDto, PublicAccountDto, UpdateAccountDto, } from "../dto/dto";
+import {
+  ApiKeyDto,
+  CreateAccountDto,
+  PaginatedAccountDto,
+  PublicAccountDto,
+  UpdateAccountDto,
+} from "../dto/dto";
 import * as bcrypt from "bcryptjs"; // note all function should require guarding(except login) and all POST,DELETE,... super_guard
 
 // note all function should require guarding(except login) and all POST,DELETE,... super_guard

@@ -110,4 +110,3 @@ export async function injectCsvData() {
 
   logger.info("CSV injection completed.");
 }
-
