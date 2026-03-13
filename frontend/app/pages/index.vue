@@ -53,7 +53,7 @@ const highlights = [
     artist: 'Blue Note Trio',
     dates: ['2024-01-25'],
     category: 'Muziek',
-    image: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=600&q=80',  
   },
 ]
 
