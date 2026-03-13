@@ -40,7 +40,7 @@ jobs:
       # STEP 2: Build & Test
       - name: Install and Test
         run: |
-          npm i
+          npm ci
           ls -la /var/run/postgresql/ || echo "No socket found"
           npm run test --filter=backend
         env:
