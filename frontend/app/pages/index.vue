@@ -45,7 +45,7 @@ const highlights = [
     artist: 'Street Crew',
     dates: ['2024-06-12'],
     category: 'Performance',
-    image: 'https://images.unsplash.com/photo-1576848933451-c9c82f857ee4?w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=600&q=80',
   },
   {
     id: 6,
