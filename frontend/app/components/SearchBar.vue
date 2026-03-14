@@ -20,7 +20,6 @@ const emit = defineEmits<{
 }>()
 
 const internalQuery = ref(props.modelValue || "")
-const selected = ref("")
 
 const results: ComputedRef<string[]> = computed(() => {
   if (!internalQuery.value) return []
@@ -33,7 +32,6 @@ const results: ComputedRef<string[]> = computed(() => {
 })
 
 const select = (item: string) => {
-  selected.value = item
   internalQuery.value = ""
   emit("update:modelValue", item)
 }
@@ -45,7 +43,8 @@ const select = (item: string) => {
       {{ props.label }} <span v-if="props.required" class="required-star">*</span>
     </label>
 
-    <!-- Input field -->
+    <br>
+
     <input
         :id="props.id"
         type="text"
