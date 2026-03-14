@@ -1,91 +1,89 @@
-<script setup lang="ts">
-
-const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Archief', path: '/archief' },
-  { name: 'Verhalen', path: '/verhalen' },
-  {name: 'Drukwerk', path: '/drukwerk' }
-]
-</script>
-
 <template>
-  <header class="header">
-    <nav class="container">
+  <header class="custom-header">
+    <div class="container">
+      <nav class="nav-links">
+        <NuxtLink to="/" class="nav-item">HOME</NuxtLink>
+        <NuxtLink to="/archive" class="nav-item">ARCHIEF</NuxtLink>
+        <NuxtLink to="/blogs" class="nav-item">VERHALEN</NuxtLink>
+        <NuxtLink to="/uploads" class="nav-item">DRUKWERK</NuxtLink>
+      </nav>
+
       <div class="logo">
-        <NuxtLink to="/">VIERNULVIER ARCHIVE</NuxtLink>
+        <NuxtLink to="/">
+          <img src="/logo_black.svg" alt="viernulvier Logo" class="logo-img" style="height: 60px; width: auto;"/>
+        </NuxtLink>
       </div>
 
-      <ul class="nav-links">
-        <li v-for="link in navLinks" :key="link.path">
-          <NuxtLink :to="link.path" class="nav-item">
-            {{ link.name }}
-          </NuxtLink>
-        </li>
-      </ul>
-
-    </nav>
+      <div class="actions">
+        <button class="btn-outline">NL / EN</button>
+        <button class="btn-outline">DARK</button>
+      </div>
+    </div>
   </header>
 </template>
 
 <style scoped>
-.header {
-  width: 100%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #eaeaea;
-  padding: 1rem 0;
+.custom-header {
+  border-bottom: 4px solid black;
+  padding: 1.5rem 0;
+  background: white;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.logo a {
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-decoration: none;
-  color: #2d3436;
+  justify-content: space-between;
+  padding: 0 20px;
 }
 
 .nav-links {
   display: flex;
-  list-style: none;
-  gap: 2rem;
-  margin: 0;
-  padding: 0;
+  gap: 20px;
+  flex: 1;
 }
 
 .nav-item {
   text-decoration: none;
-  color: #636e72;
-  font-weight: 500;
-  transition: color 0.2s;
+  color: #999;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 2px;
 }
 
 .nav-item:hover, .router-link-active {
-  color: #00dc82; /* Nuxt Green */
+  color: black;
+  text-decoration: underline;
+  text-underline-offset: 8px;
 }
 
-.btn-primary {
-  background-color: #00dc82;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.25rem;
-  border-radius: 6px;
-  font-weight: 600;
+.logo {
+  text-align: center;
+  flex: 1;
+}
+
+.logo a {
+  text-decoration: none;
+  color: black;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.btn-outline {
+  background: none;
+  border: 2px solid black;
+  padding: 5px 15px;
+  font-weight: 900;
+  font-size: 10px;
   cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .nav-links {
-    display: none; /* Simple mobile hide - you can add a hamburger menu later */
-  }
 }
 </style>
