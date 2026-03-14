@@ -30,7 +30,7 @@ export default defineNuxtConfig({
     head: {
       title: 'Viernulvier-Archive', 
       link: [
-        { rel: 'icon', type: 'image/png', href: '/blue_black_reg.png' }
+        { rel: 'icon', type: 'image/png', href: '~/public/blue_black_reg.png' }
       ]
     }
   },
