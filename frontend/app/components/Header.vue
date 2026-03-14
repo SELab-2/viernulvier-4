@@ -55,7 +55,7 @@
   letter-spacing: 2px;
 }
 
-.nav-item:hover, .router-link-active {
+.nav-item:hover {
   color: black;
   text-decoration: underline;
   text-underline-offset: 8px;
