@@ -4,20 +4,25 @@ import type {
   UpdateEvent,
   FilterEvent,
   Location,
+  LocationView,
+  Language,
+  Price,
+  PriceView,
+  PaginatedResponse,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 /**
- * Composable for event endpoints.
- * getAll and getById are public. All other endpoints require an API key.
+ * Composable for event endpoints, including their related location and prices.
+ * getAll, getById, getLocation and getPrices are public. All other endpoints require an API key.
  */
 export function useEventApi() {
   const { get, post, put, patch, del } = useApi();
 
-  /** GET /events — returns all events, optionally filtered. */
+  /** GET /events — returns a paginated list of events, optionally filtered. */
   const getAll = (filters?: Partial<FilterEvent>) => {
     const query = filters ? "?" + new URLSearchParams(filters as Record<string, string>).toString() : "";
-    return get<Event[]>(`${API_ROUTES.events.base}${query}`);
+    return get<PaginatedResponse & { objects: Event[] }>(`${API_ROUTES.events.base}${query}`);
   };
 
   /** GET /events/:eventId — returns a single event. */
@@ -41,8 +46,10 @@ export function useEventApi() {
     del(API_ROUTES.events.byId(eventId));
 
   /** GET /events/:eventId/locations — returns the location linked to an event. */
-  const getLocation = (eventId: number) =>
-    get<Location>(API_ROUTES.events.locations(eventId));
+  const getLocation = (eventId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Location | LocationView>(`${API_ROUTES.events.locations(eventId)}${query}`);
+  };
 
   /** PUT /events/:eventId/locations/:locationId — links a location to an event. */
   const linkLocation = (eventId: number, locationId: number) =>
@@ -51,6 +58,20 @@ export function useEventApi() {
   /** DELETE /events/:eventId/locations — removes the location from an event. */
   const unlinkLocation = (eventId: number) =>
     del(API_ROUTES.events.locations(eventId));
+
+  /** GET /events/:eventId/prices — returns all prices linked to an event. */
+  const getPrices = (eventId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Price[] | PriceView[]>(`${API_ROUTES.events.prices(eventId)}${query}`);
+  };
+
+  /** PUT /events/:eventId/prices/:priceId — links a price to an event. */
+  const linkPrice = (eventId: number, priceId: number) =>
+    put<boolean, Record<string, never>>(API_ROUTES.events.priceById(eventId, priceId), {});
+
+  /** DELETE /events/:eventId/prices/:priceId — removes a price from an event. */
+  const unlinkPrice = (eventId: number, priceId: number) =>
+    del(API_ROUTES.events.priceById(eventId, priceId));
 
   return {
     getAll,
@@ -62,5 +83,8 @@ export function useEventApi() {
     getLocation,
     linkLocation,
     unlinkLocation,
+    getPrices,
+    linkPrice,
+    unlinkPrice,
   };
 }

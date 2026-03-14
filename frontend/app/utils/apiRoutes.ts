@@ -23,6 +23,8 @@ export const API_ROUTES = {
     byId: (eventId: number) => `/events/${eventId}`,
     locations: (eventId: number) => `/events/${eventId}/locations`,
     locationById: (eventId: number, locationId: number) => `/events/${eventId}/locations/${locationId}`,
+    prices: (eventId: number) => `/events/${eventId}/prices`,
+    priceById: (eventId: number, priceId: number) => `/events/${eventId}/prices/${priceId}`,
   },
   blogs: {
     base: "/blogs",
@@ -35,5 +37,9 @@ export const API_ROUTES = {
   locations: {
     base: "/locations",
     byId: (locationId: number) => `/locations/${locationId}`,
+  },
+  prices: {
+    base: "/prices",
+    byId: (priceId: number) => `/prices/${priceId}`,
   },
 } as const;

@@ -1,29 +1,39 @@
 import type {
   Production,
+  ProductionView,
   CreateProduction,
   UpdateProduction,
   FilterProduction,
   Tag,
+  TagView,
   Blog,
+  BlogView,
+  Language,
+  PaginatedResponse,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 /**
  * Composable for production endpoints, including their related tags and blogs.
- * getAll and getById are public. All other endpoints require an API key.
+ * getAll, getById, getTags and getBlogs are public. All other endpoints require an API key.
+ *
+ * Pass a `lang` code to receive flattened string values (ProductionView) instead of
+ * the full localized objects (Production). Without a lang, the raw localized object is returned.
  */
 export function useProductionApi() {
   const { get, post, put, patch, del } = useApi();
 
-  /** GET /productions — returns all productions, optionally filtered. */
+  /** GET /productions — returns a paginated list of productions, optionally filtered. */
   const getAll = (filters?: Partial<FilterProduction>) => {
     const query = filters ? "?" + new URLSearchParams(filters as Record<string, string>).toString() : "";
-    return get<Production[]>(`${API_ROUTES.productions.base}${query}`);
+    return get<PaginatedResponse & { objects: Production[] | ProductionView[] }>(`${API_ROUTES.productions.base}${query}`);
   };
 
   /** GET /productions/:productionId — returns a single production. */
-  const getById = (productionId: number) =>
-    get<Production>(API_ROUTES.productions.byId(productionId));
+  const getById = (productionId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Production | ProductionView>(`${API_ROUTES.productions.byId(productionId)}${query}`);
+  };
 
   /** POST /productions — creates a new production. */
   const create = (body: CreateProduction) =>
@@ -42,8 +52,10 @@ export function useProductionApi() {
     del(API_ROUTES.productions.byId(productionId));
 
   /** GET /productions/:productionId/tags — returns all tags linked to a production. */
-  const getTags = (productionId: number) =>
-    get<Tag[]>(API_ROUTES.productions.tags(productionId));
+  const getTags = (productionId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Tag[] | TagView[]>(`${API_ROUTES.productions.tags(productionId)}${query}`);
+  };
 
   /** PUT /productions/:productionId/tags/:tagId — links a tag to a production. */
   const addTag = (productionId: number, tagId: number) =>
@@ -54,8 +66,10 @@ export function useProductionApi() {
     del(API_ROUTES.productions.tagById(productionId, tagId));
 
   /** GET /productions/:productionId/blogs — returns all blogs linked to a production. */
-  const getBlogs = (productionId: number) =>
-    get<Blog[]>(API_ROUTES.productions.blogs(productionId));
+  const getBlogs = (productionId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Blog[] | BlogView[]>(`${API_ROUTES.productions.blogs(productionId)}${query}`);
+  };
 
   /** PUT /productions/:productionId/blogs/:blogId — links a blog to a production. */
   const linkBlog = (productionId: number, blogId: number) =>

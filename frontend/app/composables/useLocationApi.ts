@@ -1,20 +1,36 @@
-import type { Location, CreateLocation, UpdateLocation } from "@repo/common";
+import type {
+  Location,
+  LocationView,
+  CreateLocation,
+  UpdateLocation,
+  Language,
+  PaginationFilter,
+  PaginatedResponse,
+} from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 /**
  * Composable for location endpoints.
  * getAll and getById are public. All other endpoints require an API key.
+ *
+ * Pass a `lang` code to receive a flattened string value (LocationView) instead of
+ * the full localized object (Location). Without a lang, the raw localized object is returned.
  */
 export function useLocationApi() {
   const { get, post, patch, del } = useApi();
 
-  /** GET /locations — returns all locations. */
-  const getAll = () =>
-    get<Location[]>(API_ROUTES.locations.base);
+  /** GET /locations — returns a paginated list of locations. */
+  const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
+    const params = { ...pagination, ...(lang ? { lang } : {}) };
+    const query = Object.keys(params).length ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
+    return get<PaginatedResponse & { objects: Location[] | LocationView[] }>(`${API_ROUTES.locations.base}${query}`);
+  };
 
   /** GET /locations/:locationId — returns a single location. */
-  const getById = (locationId: number) =>
-    get<Location>(API_ROUTES.locations.byId(locationId));
+  const getById = (locationId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Location | LocationView>(`${API_ROUTES.locations.byId(locationId)}${query}`);
+  };
 
   /** POST /locations — creates a new location. */
   const create = (body: CreateLocation) =>

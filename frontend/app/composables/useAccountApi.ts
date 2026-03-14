@@ -1,4 +1,10 @@
-import type { PublicAccount, CreateAccount, UpdateAccount } from "@repo/common";
+import type {
+  PublicAccount,
+  CreateAccount,
+  UpdateAccount,
+  PaginationFilter,
+  PaginatedResponse,
+} from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 /**
@@ -8,9 +14,11 @@ import { API_ROUTES } from "../utils/apiRoutes";
 export function useAccountApi() {
   const { get, post, patch, del } = useApi();
 
-  /** GET /auth — returns all accounts. */
-  const getAll = () =>
-    get<PublicAccount[]>(API_ROUTES.auth.base);
+  /** GET /auth — returns a paginated list of accounts. */
+  const getAll = (pagination?: Partial<PaginationFilter>) => {
+    const query = pagination ? "?" + new URLSearchParams(pagination as Record<string, string>).toString() : "";
+    return get<PaginatedResponse & { objects: PublicAccount[] }>(`${API_ROUTES.auth.base}${query}`);
+  };
 
   /** POST /auth — creates a new account. */
   const create = (body: CreateAccount) =>
