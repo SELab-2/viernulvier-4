@@ -1,22 +1,26 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue"
+import { ref, computed } from "vue"
 import type { ComputedRef } from "vue"
 
 interface Props {
   modelValue: string
   items: string[]
   limit?: number
+  label?: string
+  placeholder?: string
+  id?: string
+  required?: boolean
 }
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  limit: 5,
+  placeholder: "Search...",
+})
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void
 }>()
 
 const internalQuery = ref(props.modelValue || "")
-
-watch(internalQuery, (newValue) => {
-  emit("update:modelValue", newValue)
-})
+const selected = ref("")
 
 const results: ComputedRef<string[]> = computed(() => {
   if (!internalQuery.value) return []
@@ -29,25 +33,30 @@ const results: ComputedRef<string[]> = computed(() => {
 })
 
 const select = (item: string) => {
-  internalQuery.value = item
+  selected.value = item
+  internalQuery.value = ""
+  emit("update:modelValue", item)
 }
 </script>
 
 <template>
-  <div class="search-container">
+  <div class="search-bar">
+    <label v-if="props.label" :for="props.id" class="input-label">
+      {{ props.label }} <span v-if="props.required" class="required-star">*</span>
+    </label>
+
+    <!-- Input field -->
     <input
-        v-model="internalQuery"
+        :id="props.id"
         type="text"
-        placeholder="Search..."
-        class="search-input"
+        :placeholder="props.placeholder"
+        v-model="internalQuery"
+        :required="props.required"
+        class="input-field"
     />
 
     <ul v-if="results.length" class="suggestions">
-      <li
-          v-for="item in results"
-          :key="item"
-          @click="select(item)"
-      >
+      <li v-for="item in results" :key="item" @click="select(item)">
         {{ item }}
       </li>
     </ul>
