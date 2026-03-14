@@ -10,6 +10,7 @@
  * <SearchBar
  *   v-model="selectedItem"
  *   :items="items"
+ *   :limit="3"
  *   label="Select an item"
  *   placeholder="Type to search..."
  * />
@@ -38,20 +39,23 @@ const emit = defineEmits<{ // update:modelValue gets called when a new selection
 
 const internalQuery = ref(props.modelValue || "") // so that a user can type without selecting something yet
 
-const results: ComputedRef<string[]> = computed(() => { // filtering based on current query
-  if (!internalQuery.value) return []
+const results: ComputedRef<string[]> = computed(() => {
 
-  return props.items
-      .filter((item) =>
-          item.toLowerCase().includes(internalQuery.value.toLowerCase())
-      )
-      .slice(0, props.limit ?? 5)
+  const filtered =
+      internalQuery.value
+        ? props.items.filter((item) => // filtering based on current query
+            item.toLowerCase().includes(internalQuery.value.toLowerCase())
+        )
+        : props.items // all items, to give some suggestions
+
+  return filtered.slice(0, props.limit ?? 5)
 })
 
 const select = (item: string) => { // handles selecting a suggestion
   internalQuery.value = ""
   emit("update:modelValue", item)
 }
+//TODO add language support, add css
 </script>
 
 <template>
