@@ -1,11 +1,22 @@
 <script setup lang="ts">
-import { ArrowRight, Calendar, FileText, ImageIcon } from 'lucide-vue-next'
+import { ArrowRight, Calendar, Sun, Moon } from 'lucide-vue-next'
 
 const { t, locale, setLocale } = useI18n()
 
 
-// mock data, replace with actual data !!!!!
+// TODO : remove these (dark mode and language toggle) once header is implemented
 
+// Dark mode
+const isDark = ref(false)
+const toggleDark = () => {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle('dark', isDark.value)
+}
+
+// Language toggle
+const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
+
+// TODO: replace with real API data
 const highlights = [
   {
     id: 1,
@@ -45,7 +56,7 @@ const highlights = [
     artist: 'Street Crew',
     dates: ['2024-06-12'],
     category: 'Performance',
-    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=600&q=80',
+    image: 'https://images.unsplash.com/photo-1576848933451-c9c82f857ee4?w=600&q=80',
   },
   {
     id: 6,
@@ -53,7 +64,7 @@ const highlights = [
     artist: 'Blue Note Trio',
     dates: ['2024-01-25'],
     category: 'Muziek',
-    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=600&q=80',  
+    image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=600&q=80',
   },
 ]
 
@@ -65,14 +76,12 @@ const formatDate = (dateStr: string | undefined): string => {
     day: 'numeric',
   })
 }
-
-const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 </script>
 
 <template>
   <div class="min-h-screen bg-white dark:bg-black text-black dark:text-white antialiased">
 
-    <!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+    <!-- ═══════════════════════ HERO ═══════════════════════ -->
     <section class="relative h-[85vh] min-h-[560px] overflow-hidden bg-black">
       <img
         src="https://images.unsplash.com/photo-1765278624799-9c90305b0b7e?w=1400&q=80"
@@ -81,8 +90,16 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-      <!-- Language toggle (tijdelijk hier, later naar header) -->
-      <div class="absolute top-6 right-6 z-30">
+      <!-- Top-right controls: dark mode + language (will move to header later) -->
+      <div class="absolute top-6 right-6 z-30 flex items-center gap-2">
+        <button
+          @click="toggleDark"
+          class="p-2 border border-white/30 text-white hover:bg-white hover:text-black transition-all duration-200"
+          :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <Sun v-if="isDark" class="w-4 h-4" />
+          <Moon v-else class="w-4 h-4" />
+        </button>
         <button
           @click="toggleLocale"
           class="px-3 py-1.5 border border-white/30 text-sm text-white font-mono hover:bg-white hover:text-black transition-all duration-200 tracking-widest"
@@ -91,10 +108,13 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
         </button>
       </div>
 
+      <!-- Hero content -->
       <div class="relative z-20 h-full flex flex-col justify-end px-6 md:px-12 lg:px-20 pb-16 max-w-7xl mx-auto w-full">
         <p class="text-xs font-mono tracking-[0.3em] uppercase text-white/50 mb-6">
           {{ t('hero.label') }}
         </p>
+
+        <!-- Title: VIERNULVIER large + Archive below in light weight -->
         <div class="mb-8">
           <h1 class="hero-title font-display font-black text-white uppercase leading-none tracking-tight">
             VIERNULVIER
@@ -104,7 +124,7 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
           </p>
         </div>
 
-        <p class="text-lg md:text-xl text-white/70 max-w-xl mb-10 leading-relaxed">
+        <p class="text-lg md:text-xl text-white/70 mb-10 leading-relaxed whitespace-nowrap">
           {{ t('hero.subtitle') }}
         </p>
 
@@ -117,13 +137,10 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
       </div>
     </section>
 
-    <!-- ══════════════════════════════ ARCHIVE HIGHLIGHTS ══════════════════════════════ -->
+    <!-- ═══════════════════════ ARCHIVE HIGHLIGHTS ═══════════════════════ -->
     <section class="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto">
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12 border-b border-black/10 dark:border-white/10 pb-6">
         <div>
-          <p class="text-xs font-mono tracking-[0.25em] uppercase text-black/40 dark:text-white/40 mb-2">
-            {{ t('highlights.label') }}
-          </p>
           <h2 class="text-3xl md:text-4xl font-display font-black tracking-tight">
             {{ t('highlights.title') }}
           </h2>
@@ -179,7 +196,7 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
       </div>
     </section>
 
-    <!-- ═══════════════════════════════ ABOUT SECTION ══════════════════════════════════ -->
+    <!-- ═══════════════════════ ABOUT ═══════════════════════ -->
     <section class="bg-black dark:bg-white text-white dark:text-black border-t border-white/5 dark:border-black/5">
       <div class="px-6 md:px-12 lg:px-20 py-24 max-w-7xl mx-auto">
         <div class="grid md:grid-cols-2 gap-16 items-center">
@@ -201,7 +218,7 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
           <div class="relative aspect-[4/3] overflow-hidden">
             <img
               src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80"
-              alt="VIERNULVIER archief"
+              alt="VIERNULVIER archive"
               class="w-full h-full object-cover"
             />
             <div class="absolute inset-0 border border-white/10 dark:border-black/10" />
@@ -210,9 +227,8 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
       </div>
     </section>
 
-    <!-- ══════════════════════════════ DISCOVER MORE ═══════════════════════════════════ -->
+    <!-- ═══════════════════════ DISCOVER MORE ═══════════════════════ -->
     <section class="py-24">
-      <!-- Section header -->
       <div class="px-6 md:px-12 lg:px-20 max-w-7xl mx-auto mb-12">
         <p class="text-xs font-mono tracking-[0.25em] uppercase text-black/40 dark:text-white/40 mb-2">
           {{ t('discover.label') }}
@@ -225,11 +241,11 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
       <!-- Full-bleed image cards -->
       <div class="grid md:grid-cols-2" style="height: 520px;">
 
-        <!-- Verhalen card -->
+        <!-- Stories card -->
         <NuxtLink to="/blogs" class="group relative overflow-hidden block">
           <img
             src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80"
-            alt="Verhalen en Geschiedenis"
+            alt="Stories and History"
             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
           <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
@@ -248,11 +264,11 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
           </div>
         </NuxtLink>
 
-        <!-- Affiches card -->
+        <!-- Posters card -->
         <NuxtLink to="/uploads" class="group relative overflow-hidden block">
           <img
             src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80"
-            alt="Affiches en Drukwerk"
+            alt="Posters and Printed Materials"
             class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
           <div class="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors duration-500" />
@@ -270,11 +286,10 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
             </div>
           </div>
         </NuxtLink>
-
       </div>
     </section>
 
-    <!-- ════════════════════════════════════ FOOTER ════════════════════════════════════ -->
+    <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
     <footer class="border-t border-black/10 dark:border-white/10 bg-black dark:bg-white text-white dark:text-black">
       <div class="px-6 md:px-12 lg:px-20 py-16 max-w-7xl mx-auto">
         <div class="grid md:grid-cols-4 gap-10 mb-12 pb-12 border-b border-white/10 dark:border-black/10">
@@ -343,16 +358,15 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 .font-display {
   font-family: 'Georgia', 'Times New Roman', serif;
 }
+
 .font-mono {
   font-family: 'Courier New', Courier, monospace;
 }
 
-/* VIERNULVIER — groot en bold */
 .hero-title {
   font-size: clamp(3.5rem, 10vw, 8rem);
 }
 
-/* Archief — iets kleiner, lichtgewicht, sluit aan op de mock-up */
 .hero-archief {
   font-size: clamp(2.5rem, 7vw, 5.5rem);
   margin-top: -0.05em;
