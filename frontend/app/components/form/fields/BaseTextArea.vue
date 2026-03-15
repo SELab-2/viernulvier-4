@@ -1,16 +1,16 @@
 <script setup lang="ts">
-  interface Props {
-    label?: string
-    placeholder?: string
-    id?: string
-    required?: boolean
-    rows?: number
-  }
-  withDefaults(defineProps<Props>(), {
-    rows: 5
-  })
+interface Props {
+  label?: string
+  placeholder?: string
+  id?: string
+  required?: boolean
+  rows?: number
+}
+withDefaults(defineProps<Props>(), {
+  rows: 5
+})
 
-  const model = defineModel<string>()
+const model = defineModel<string>()
 </script>
 
 <template>
@@ -31,37 +31,37 @@
 </template>
 
 <style scoped>
-  .base-textarea {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 1rem;
-  }
+.base-textarea {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
 
-  .textarea-label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
+.textarea-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
 
-  .required-star {
-    color: inherit;
-  }
+.required-star {
+  color: inherit;
+}
 
-  .textarea-field {
-    width: 100%;
-    min-height: 6rem;
-    padding: 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-    background-color: #ffffff;
-    font-size: 1rem;
-    outline: none;
-    resize: vertical;
-    transition: border-color 0.2s;
-  }
+.textarea-field {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  font-size: 1rem;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
 
-  .textarea-field:focus {
-    border-color: #d1d5db;
-  }
+.textarea-field:focus {
+  border-color: #d1d5db;
+}
 </style>
