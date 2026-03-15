@@ -1,0 +1,48 @@
+import type {
+  Tag,
+  TagView,
+  CreateTag,
+  UpdateTag,
+  Language,
+  PaginationFilter,
+  PaginatedResponse,
+} from "@repo/common";
+import { API_ROUTES } from "../utils/apiRoutes";
+
+/**
+ * Composable for tag endpoints.
+ * getAll and getById are public. All other endpoints require an API key.
+ *
+ * Pass a `lang` code to receive a flattened string value (TagView) instead of
+ * the full localized object (Tag). Without a lang, the raw localized object is returned.
+ */
+export function useTagApi() {
+  const { get, post, patch, del } = useApi();
+
+  /** GET /tags — returns a paginated list of tags. */
+  const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
+    const params = { ...pagination, ...(lang ? { lang } : {}) };
+    const query = Object.keys(params).length ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
+    return get<PaginatedResponse & { objects: Tag[] | TagView[] }>(`${API_ROUTES.tags.base}${query}`);
+  };
+
+  /** GET /tags/:tagId — returns a single tag. */
+  const getById = (tagId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Tag | TagView>(`${API_ROUTES.tags.byId(tagId)}${query}`);
+  };
+
+  /** POST /tags — creates a new tag. */
+  const create = (body: CreateTag) =>
+    post<Tag, CreateTag>(API_ROUTES.tags.base, body);
+
+  /** PATCH /tags/:tagId — updates an existing tag. */
+  const modify = (tagId: number, body: UpdateTag) =>
+    patch<Tag, UpdateTag>(API_ROUTES.tags.byId(tagId), body);
+
+  /** DELETE /tags/:tagId — deletes a tag. */
+  const remove = (tagId: number) =>
+    del(API_ROUTES.tags.byId(tagId));
+
+  return { getAll, getById, create, modify, remove };
+}
