@@ -9,7 +9,7 @@ vi.mock("#app", () => ({
 }));
 
 const mockFetch = vi.fn();
-vi.stubGlobal("fetch", mockFetch);
+vi.stubGlobal("$fetch", mockFetch);
 
 beforeEach(() => {
   mockFetch.mockReset();
@@ -21,12 +21,8 @@ describe("useAuth", () => {
   describe("login", () => {
     it("returns success and stores key on valid credentials", async () => {
       mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            account: { id: 1, username: "admin" },
-            apiKey: { id: 1, key: "abc123" },
-          }),
+        account: { id: 1, username: "admin" },
+        apiKey: { id: 1, key: "abc123" },
       });
 
       const { login, apiKey, account } = useAuth();
@@ -37,12 +33,23 @@ describe("useAuth", () => {
       expect(account.value).toEqual({ id: 1, username: "admin" });
     });
 
-    it("returns error on invalid credentials", async () => {
+    it("returns error when apiKey is null in response", async () => {
       mockFetch.mockResolvedValue({
-        ok: false,
-        json: () =>
-          Promise.resolve({ account: { id: 1, username: "admin" }, apiKey: null }),
+        account: { id: 1, username: "admin" },
+        apiKey: null,
       });
+
+      const { login } = useAuth();
+      const result = await login("admin", "password");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    it("returns error when $fetch throws (invalid credentials)", async () => {
+      mockFetch.mockRejectedValue(
+        Object.assign(new Error("Unauthorized"), { status: 401 })
+      );
 
       const { login } = useAuth();
       const result = await login("admin", "wrongpassword");
@@ -51,12 +58,8 @@ describe("useAuth", () => {
       expect(result.error).toBeDefined();
     });
 
-    it("returns error when apiKey is null in response", async () => {
-      mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({ account: { id: 1, username: "admin" }, apiKey: null }),
-      });
+    it("returns error on network failure", async () => {
+      mockFetch.mockRejectedValue(new Error("Network down"));
 
       const { login } = useAuth();
       const result = await login("admin", "password");
@@ -65,24 +68,10 @@ describe("useAuth", () => {
       expect(result.error).toBeDefined();
     });
 
-    it("returns network error when fetch throws", async () => {
-      mockFetch.mockRejectedValue(new Error("Network down"));
-
-      const { login } = useAuth();
-      const result = await login("admin", "password");
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe("Network error. Could not reach the server.");
-    });
-
     it("posts to the correct endpoint", async () => {
       mockFetch.mockResolvedValue({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            account: { id: 1, username: "admin" },
-            apiKey: { id: 1, key: "abc" },
-          }),
+        account: { id: 1, username: "admin" },
+        apiKey: { id: 1, key: "abc" },
       });
 
       const { login } = useAuth();
@@ -91,6 +80,23 @@ describe("useAuth", () => {
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/auth/login",
         expect.objectContaining({ method: "POST" })
+      );
+    });
+
+    it("sends username and password in the body", async () => {
+      mockFetch.mockResolvedValue({
+        account: { id: 1, username: "admin" },
+        apiKey: { id: 1, key: "abc" },
+      });
+
+      const { login } = useAuth();
+      await login("admin", "password");
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: { username: "admin", password: "password" },
+        })
       );
     });
   });

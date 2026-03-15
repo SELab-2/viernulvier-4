@@ -4,6 +4,7 @@
  *
  * Automatically attaches the x-api-key header when the user is logged in.
  * Reads the base URL from runtimeConfig (NUXT_API_BASE in .env).
+ * Uses Nuxt's $fetch (ofetch) instead of native fetch for automatic JSON parsing and better error handling.
  */
 
 export interface ApiOptions<TBody = unknown> {
@@ -32,39 +33,30 @@ export function useApi() {
     const { body, headers: extraHeaders, onError } = options;
 
     const headers: Record<string, string> = {
-      "Content-Type": "application/json",
       ...(apiKey.value ? { "x-api-key": apiKey.value } : {}),
       ...extraHeaders,
     };
 
     try {
-      const response = await fetch(`${baseUrl}${endpoint}`, {
+      const data = await $fetch<TData>(`${baseUrl}${endpoint}`, {
         method,
         headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        body: body !== undefined ? body : undefined,
       });
 
-      const text = await response.text();
-      const data: TData | null = text ? (JSON.parse(text) as TData) : null;
-
-      if (!response.ok) {
-        const message =
-          (data as { message?: string } | null)?.message ??
-          `Request failed with status ${response.status}`;
-
-        onError ? onError(response.status, message) : handleDefaultError(response.status, message);
-
-        return { data: null, error: message, status: response.status };
-      }
-
-      return { data, error: null, status: response.status };
-    } catch (err) {
+      return { data: data ?? null, error: null, status: 200 };
+    } catch (err: unknown) {
+      // $fetch throws a FetchError on non-ok responses with status and data attached
+      const fetchError = err as { status?: number; data?: { message?: string }; message?: string };
+      const status = fetchError.status ?? null;
       const message =
-        err instanceof Error ? err.message : "An unexpected network error occurred.";
+        fetchError.data?.message ??
+        fetchError.message ??
+        "An unexpected network error occurred.";
 
-      onError ? onError(0, message) : handleDefaultError(0, message);
+      onError ? onError(status ?? 0, message) : handleDefaultError(status ?? 0, message);
 
-      return { data: null, error: message, status: null };
+      return { data: null, error: message, status };
     }
   }
 

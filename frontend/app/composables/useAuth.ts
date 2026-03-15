@@ -42,15 +42,12 @@ export function useAuth() {
     password: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await fetch(`${baseUrl}/auth/login`, {
+      const data = await $fetch<LoginResponse>(`${baseUrl}/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: { username, password },
       });
 
-      const data: LoginResponse = await response.json();
-
-      if (!response.ok || !data.apiKey) {
+      if (!data.apiKey) {
         return {
           success: false,
           error: "Invalid credentials or no API key linked to this account.",
@@ -69,7 +66,7 @@ export function useAuth() {
     } catch {
       return {
         success: false,
-        error: "Network error. Could not reach the server.",
+        error: "Invalid credentials or no API key linked to this account.",
       };
     }
   }
