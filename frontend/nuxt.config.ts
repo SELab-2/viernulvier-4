@@ -11,8 +11,6 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_API_BASE || "http://localhost:3000",
-      adminApiBase: process.env.NUXT_API_BASE || "http://localhost:3000",
-      adminBaseURL: process.env.ADMIN_BASE || "/admin/",
     },
   },
   app: {
