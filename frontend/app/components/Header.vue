@@ -25,7 +25,7 @@
 <style scoped>
 .custom-header {
   border-bottom: 4px solid black;
-  padding: 1.5rem 0;
+  padding: 1.5rem;
   background: white;
   position: sticky;
   top: 0;
@@ -38,12 +38,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 50px;
 }
 
 .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 30px;
   flex: 1;
 }
 
@@ -59,21 +59,12 @@
   color: black;
   text-decoration: underline;
   text-underline-offset: 8px;
-}
-
-.logo {
-  text-align: center;
-  flex: 1;
-}
-
-.logo a {
-  text-decoration: none;
-  color: black;
+  text-decoration-thickness: 3px;
 }
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 20px;
   flex: 1;
   justify-content: flex-end;
 }
@@ -81,9 +72,10 @@
 .btn-outline {
   background: none;
   border: 2px solid black;
-  padding: 5px 15px;
+  border-radius: 6px;
+  padding: 7px 21px;
+  font-size: 11px;
   font-weight: 900;
-  font-size: 10px;
   cursor: pointer;
 }
 </style>
