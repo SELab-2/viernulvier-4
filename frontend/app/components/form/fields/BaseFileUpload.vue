@@ -48,6 +48,7 @@ function handleFileChange(event: Event) {
           @change="handleFileChange"
           class="input-field"
       />
+      <!-- TODO: maybe not display it if only one file name ? + multiple files are still not handled correctly -->
       <div class="file-name" v-if="displayName">{{ displayName }}</div>
     </div>
   </div>
