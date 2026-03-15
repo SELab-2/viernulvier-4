@@ -1,3 +1,10 @@
+/**
+ * All frontend page route paths.
+ * Use these with navigateTo() or <NuxtLink> instead of hardcoding strings in components.
+ *
+ * Note: these are frontend routes, not backend API endpoints.
+ * For backend endpoints see apiRoutes.ts.
+ */
 export const ROUTES = {
   home: {
     base: "/home"
