@@ -1,5 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Language } from "@repo/common";
+import { AppLogger } from "../logger/logger.service";
+import * as deepl from "deepl-node";
+import { Translator } from "deepl-node";
 
 /**
  * This service provides functionality for working with languages in
@@ -7,6 +10,19 @@ import { Language } from "@repo/common";
  */
 @Injectable()
 export class LanguageService {
+  private translator: Translator;
+
+  constructor(private readonly logger: AppLogger) {
+    // change this constructor when changing provider.
+    const apiKey = process.env.TRANSLATE_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("env variable TRANSLATE_API_KEY is not defined");
+    }
+
+    this.translator = new deepl.Translator(apiKey);
+  }
+
   /**
    * Flattens a JSON object or list of JSON objects recursively by their language.
    * This results in an object that contains only strings of the language specified
@@ -57,13 +73,50 @@ export class LanguageService {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           flattened[key] = value[lang];
         } else {
-          // TODO: Decide what we want to fallback to.
-          // TODO: Could be Google Translate, or just "nl".
           flattened[key] = null;
         }
       }
     }
 
     return flattened as T;
+  }
+
+  /**
+   * This function takes a language JSON (as described in the database & backend documentation) and adds translation to it.
+   * note that this function will modify the given object in memory.
+   * @param data is the JSON object. Note that it must be a language JSON for this to work
+   * @param langFrom is the language we will be using to translate
+   * @param langTo is the target language that we want to translate to
+   * @returns a language JSON, same as before just with the translated language added to it.
+   */
+  async translateText(
+    data: Record<string, string>,
+    langFrom: Language,
+    langTo: Language,
+  ): Promise<Record<string, string>> {
+    if (!data[langFrom]) {
+      this.logger.warn("Base language is not defined");
+      return data; // don't break API communication
+    }
+
+    if (data[langTo]) {
+      return data; // translation already exists
+    }
+
+    try {
+      // change this block when switching translation provider.
+      const result = await this.translator.translateText(
+        data[langFrom],
+        langFrom.toUpperCase() as deepl.SourceLanguageCode,
+        langTo.toUpperCase() as deepl.TargetLanguageCode,
+      );
+
+      data[langTo] = result.text;
+    } catch (error) {
+      this.logger.error("Translation failed", error);
+      data[langTo] = data[langFrom]; // fallback
+    }
+
+    return data;
   }
 }
