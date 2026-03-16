@@ -1,32 +1,33 @@
 <script setup>
 import { ref } from 'vue'
+import { ArrowRight, Sun, Moon } from 'lucide-vue-next'
 
-const isDarkMode = ref(false)
+const { t, locale, setLocale } = useI18n()
 
-function toggleDark() {
-  isDarkMode.value = !isDarkMode.value
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
+const isDark = ref(false)
+const toggleDark = () => {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle('dark', isDark.value)
 }
+
+const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
+
 </script>
 
 <template>
-  <header class="custom-header" :class="{ 'dark-mode': isDarkMode }">
+  <header class="custom-header" :class="{ 'dark-mode': isDark }">
     <div class="container">
       <nav class="nav-links">
-        <NuxtLink to="/" class="nav-item">HOME</NuxtLink>
-        <NuxtLink to="/archive" class="nav-item">ARCHIEF</NuxtLink>
-        <NuxtLink to="/blogs" class="nav-item">VERHALEN</NuxtLink>
-        <NuxtLink to="/uploads" class="nav-item">DRUKWERK</NuxtLink>
+        <NuxtLink to="/" class="nav-item">{{ t('nav.home').toUpperCase() }}</NuxtLink>
+        <NuxtLink to="/archive" class="nav-item"> {{ t('nav.archive').toUpperCase() }}</NuxtLink>
+        <NuxtLink to="/blogs" class="nav-item">{{ t('nav.stories').toUpperCase() }}</NuxtLink>
+        <NuxtLink to="/prints" class="nav-item">{{ t('nav.prints').toUpperCase() }}</NuxtLink>
       </nav>
 
       <div class="logo">
         <NuxtLink to="/">
           <img
-            :src="isDarkMode ? '/logo_white.svg' : '/logo_black.svg'"
+            :src="isDark ? '/logo_white.svg' : '/logo_black.svg'"
             alt="viernulvier Logo"
             style="height: 60px; width: auto;"
           />
@@ -34,9 +35,11 @@ function toggleDark() {
       </div>
 
       <div class="actions">
-        <button class="btn-outline">NL / EN</button>
+        <button @click="toggleLocale" class="btn-outline">
+          {{ locale.toUpperCase() }}
+        </button>
         <button @click="toggleDark" class="btn-outline">
-          {{ isDarkMode ? 'LIGHT' : 'DARK' }}
+          {{ isDark ? 'LIGHT' : 'DARK' }}
         </button>
       </div>
 
