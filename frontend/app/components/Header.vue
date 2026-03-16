@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import { ROUTES } from '~/utils/routes'
-import { ArrowRight, Sun, Moon } from 'lucide-vue-next' //TODO: afbeeldingen bij buttons
+import { Sun, Moon, LogOut} from 'lucide-vue-next'
 
-const isAdmin = ref(true) //TODO: zeg in pr dat je isAdmin op true moet zetten om te testen
+const isAdmin = ref(false) //TODO: in pr: zeg dat je isAdmin op true moet zetten om te testen
 
 const { t, locale, setLocale } = useI18n()
 
@@ -25,47 +25,55 @@ const logout = () => {
 <template>
   <header class="custom-header" :class="{ 'dark-mode': isDark, 'is-admin': isAdmin }">
     <div class="container">
-      <nav v-if="!isAdmin" class="nav-links">
-        <NuxtLink :to="ROUTES.home.base" class="nav-item">
-          {{ t('nav.home').toUpperCase() }}
-        </NuxtLink>
+      <div class="header-left">
+        <nav v-if="!isAdmin" class="nav-links">
+          <NuxtLink :to="ROUTES.home.base" class="nav-item">
+            {{ t('nav.home').toUpperCase() }}
+          </NuxtLink>
 
-        <NuxtLink :to="ROUTES.productions.base" class="nav-item">
-          {{ t('nav.archive').toUpperCase() }}
-        </NuxtLink>
+          <NuxtLink :to="ROUTES.productions.base" class="nav-item">
+            {{ t('nav.archive').toUpperCase() }}
+          </NuxtLink>
 
-        <NuxtLink :to="ROUTES.stories.base" class="nav-item">
-          {{ t('nav.stories').toUpperCase() }}
-        </NuxtLink>
+          <NuxtLink :to="ROUTES.stories.base" class="nav-item">
+            {{ t('nav.stories').toUpperCase() }}
+          </NuxtLink>
 
-        <NuxtLink :to="ROUTES.prints.base" class="nav-item">
-          {{ t('nav.prints').toUpperCase() }}
-        </NuxtLink>
-      </nav>
-
-      <div class="logo">
-        <NuxtLink :to="ROUTES.home.base">
-          <img
-            :src="isDark ? '/logo_white.svg' : '/logo_black.svg'"
-            alt="viernulvier Logo"
-            class="logo-img"
-          />
-        </NuxtLink>
-        <span v-if="isAdmin" class="admin-label">ADMIN</span>
+          <NuxtLink :to="ROUTES.prints.base" class="nav-item">
+            {{ t('nav.prints').toUpperCase() }}
+          </NuxtLink>
+        </nav>
       </div>
 
-      <div class="actions">
-        <button @click="toggleLocale" class="btn-outline">
-          {{ locale.toUpperCase() }}
-        </button>
-        <button @click="toggleDark" class="btn-outline">
-          {{ isDark ? 'LIGHT' : 'DARK' }}
-        </button>
-        <button v-if="isAdmin" @click="logout" class="btn-logout">
-          <LogOut :size="16" />
-          {{ t('nav.logout').toUpperCase() }}
-        </button>
+      <div class="header-center">
+        <div class="logo">
+          <NuxtLink :to="ROUTES.home.base">
+            <img
+              :src="isDark ? '/logo_white.svg' : '/logo_black.svg'"
+              alt="viernulvier Logo"
+              class="logo-img"
+            />
+          </NuxtLink>
+          <span v-if="isAdmin" class="admin-label">ADMIN</span>
+        </div>
+      </div>
 
+      <div class="header-right">
+        <div class="actions">
+          <button @click="toggleLocale" class="btn-outline">
+            {{ locale.toUpperCase() }}
+          </button>
+
+          <button @click="toggleDark" class="btn-outline icon-btn">
+            <component :is="isDark ? Sun : Moon" :size="16" />
+            <span>{{ isDark ? 'LIGHT' : 'DARK' }}</span>
+          </button>
+
+          <button v-if="isAdmin" @click="logout" class="btn-logout">
+            <LogOut :size="16" />
+            {{ t('nav.logout').toUpperCase() }}
+          </button>
+        </div>
       </div>
 
     </div>
@@ -89,6 +97,23 @@ const logout = () => {
   align-items: center;
   justify-content: space-between;
   padding: 0 50px;
+}
+
+.header-left,
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  justify-content: flex-end;
+}
+
+.header-center {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 .logo {
@@ -154,8 +179,15 @@ const logout = () => {
   cursor: pointer;
 }
 
+.icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
 .btn-logout {
-  background-color: #e11d48; /*TODO: houden we dit rood?*/
+  background-color: #e11d48; /* houden we dit rood? */
   color: white;
   border: none;
   border-radius: 6px;
