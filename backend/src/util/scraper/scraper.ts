@@ -13,6 +13,7 @@ import {
   vnvPrice,
   vnvProduction,
 } from "./vnv.parser";
+import { LanguageService } from "../language/language.service";
 
 /**
  * The Base of the VNV API.
@@ -85,13 +86,17 @@ export async function scrape(
 
   logger.info("Finished Scraper!");
 
-  return {
+  const results = {
     productions: parseProductions(productions),
     events: parseEvents(events),
     prices: parsePrices(event_prices),
     genres: parseGenres(genres),
     locations: parseLocations(halls),
   };
+  const ls = new LanguageService(this.logger);
+
+  // add translations here if you want to translate to more languages.
+  return ls.translateObject(results, "nl", "en");
 }
 
 /**
