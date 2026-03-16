@@ -1,5 +1,20 @@
+<script setup>
+import { ref } from 'vue'
+
+const isDarkMode = ref(false)
+
+function toggleDark() {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+</script>
+
 <template>
-  <header class="custom-header">
+  <header class="custom-header" :class="{ 'dark-mode': isDarkMode }">
     <div class="container">
       <nav class="nav-links">
         <NuxtLink to="/" class="nav-item">HOME</NuxtLink>
@@ -10,23 +25,30 @@
 
       <div class="logo">
         <NuxtLink to="/">
-          <img src="/logo_black.svg" alt="viernulvier Logo" class="logo-img" style="height: 60px; width: auto;"/>
+          <img
+            :src="isDarkMode ? '/logo_white.svg' : '/logo_black.svg'"
+            alt="viernulvier Logo"
+            style="height: 60px; width: auto;"
+          />
         </NuxtLink>
       </div>
 
       <div class="actions">
         <button class="btn-outline">NL / EN</button>
-        <button class="btn-outline">DARK</button>
+        <button @click="toggleDark" class="btn-outline">
+          {{ isDarkMode ? 'LIGHT' : 'DARK' }}
+        </button>
       </div>
+
     </div>
   </header>
 </template>
 
 <style scoped>
 .custom-header {
-  border-bottom: 4px solid black;
+  border-bottom: 4px solid var(--foreground);
+  background-color: var(--background);
   padding: 1.5rem;
-  background: white;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -49,14 +71,20 @@
 
 .nav-item {
   text-decoration: none;
-  color: #999;
+  color: var(--muted-foreground);
   font-weight: 900;
   font-size: 12px;
   letter-spacing: 2px;
 }
 
 .nav-item:hover {
-  color: black;
+  color: var(--foreground);
+  text-underline-offset: 8px;
+  text-decoration-thickness: 3px;
+}
+
+.nav-item.router-link-active {
+  color: var(--foreground);
   text-decoration: underline;
   text-underline-offset: 8px;
   text-decoration-thickness: 3px;
@@ -71,11 +99,13 @@
 
 .btn-outline {
   background: none;
-  border: 2px solid black;
-  border-radius: 6px;
+  border: 2px solid var(--foreground);
+  color: var(--foreground);
+  border-radius: 6px /*var(-radius)*/;
   padding: 7px 21px;
   font-size: 11px;
   font-weight: 900;
   cursor: pointer;
 }
+
 </style>
