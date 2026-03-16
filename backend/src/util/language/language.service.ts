@@ -82,6 +82,53 @@ export class LanguageService {
   }
 
   /**
+   * This function translates all fields of a given object from a language to a language
+   * @param data is the object you want to translate i.e. a production
+   * @param langFrom is the language you want to translate from
+   * @param langTo is the language you want to translate to
+   * @returns the object with all the new languages added to it.
+   */
+  async translateObject<T>(
+    data: any,
+    langFrom: Language,
+    langTo: Language,
+  ): Promise<T> {
+    if (!data) return data as T;
+
+    // handle arrays (should not be needed, but you never know)
+    if (Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        data[i] = await this.translateObject(data[i], langFrom, langTo);
+      }
+      return data as T;
+    }
+
+    // handle objects
+    if (data && typeof data === "object") {
+      for (const key of Object.keys(data)) {
+        const value = data[key];
+
+        // detect translation record { en: "...", nl: "..." }
+        if (
+          value &&
+          typeof value === "object" &&
+          !Array.isArray(value) &&
+          value[langFrom]
+        ) {
+          data[key] = await this.translateText(value, langFrom, langTo);
+        }
+
+        // recurse deeper (should not be needed, but you never know)
+        else if (typeof value === "object") {
+          data[key] = await this.translateObject(value, langFrom, langTo);
+        }
+      }
+    }
+
+    return data as T;
+  }
+
+  /**
    * This function takes a language JSON (as described in the database & backend documentation) and adds translation to it.
    * note that this function will modify the given object in memory.
    * @param data is the JSON object. Note that it must be a language JSON for this to work
@@ -90,23 +137,26 @@ export class LanguageService {
    * @returns a language JSON, same as before just with the translated language added to it.
    */
   async translateText(
-    data: Record<string, string>,
+    data: Partial<Record<Language, string>>,
     langFrom: Language,
     langTo: Language,
-  ): Promise<Record<string, string>> {
-    if (!data[langFrom]) {
+  ): Promise<Partial<Record<Language, string>>> {
+    const sourceText = data[langFrom];
+
+    if (!sourceText) {
       this.logger.warn("Base language is not defined");
       return data; // don't break API communication
     }
 
+    // Do not overwrite existing translation
     if (data[langTo]) {
-      return data; // translation already exists
+      return data;
     }
 
     try {
-      // change this block when switching translation provider.
       const result = await this.translator.translateText(
-        data[langFrom],
+        sourceText,
+        // need to cast here for the function to recognize the typing.
         langFrom.toUpperCase() as deepl.SourceLanguageCode,
         langTo.toUpperCase() as deepl.TargetLanguageCode,
       );
@@ -114,7 +164,9 @@ export class LanguageService {
       data[langTo] = result.text;
     } catch (error) {
       this.logger.error("Translation failed", error);
-      data[langTo] = data[langFrom]; // fallback
+
+      // fallback: copy original language
+      data[langTo] = sourceText;
     }
 
     return data;
