@@ -40,15 +40,23 @@ const emit = defineEmits<{ // update:modelValue gets called when a new selection
 const internalQuery = ref(props.modelValue || "") // so that a user can type without selecting something yet
 
 const results: ComputedRef<string[]> = computed(() => {
-
+  const query = internalQuery.value.toLowerCase()
   const filtered =
       internalQuery.value
         ? props.items.filter((item) => // filtering based on current query
-            item.toLowerCase().includes(internalQuery.value.toLowerCase())
+            item.toLowerCase().includes(query)
         )
-        : props.items // all items, to give some suggestions
+        : props.items // all items when nothing is typed in, to give some suggestions
 
-  return filtered.slice(0, props.limit ?? 5)
+  const sorted = filtered.sort((a, b) => {
+    const aStarts = a.toLowerCase().startsWith(query)
+    const bStarts = b.toLowerCase().startsWith(query)
+    if (aStarts && !bStarts) return -1 // a starts with current input, b doesn't
+    if (!aStarts && bStarts) return 1 // b starts with current input, a doesn't
+    return a.localeCompare(b) // if neither start with current input, sort alphabetically
+  })
+
+  return sorted.slice(0, props.limit ?? 5)
 })
 
 const select = (item: string) => { // handles selecting a suggestion
