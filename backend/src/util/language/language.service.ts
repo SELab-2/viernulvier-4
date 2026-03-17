@@ -160,6 +160,10 @@ export class LanguageService {
         this.formatTargetLanguageHelper(langTo),
       );
 
+      // rate limiting
+      // you will need to add more rate limiting or remove it depending on what your plan is or who your provider is.
+      await new Promise((r) => setTimeout(r, 100));
+
       data[langTo] = result.text;
     } catch (error) {
       this.logger.error(`Translation failed: ${error?.message}`, error);
