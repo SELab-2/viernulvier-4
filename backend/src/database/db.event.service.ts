@@ -216,6 +216,11 @@ export class EventDatabaseService {
       values.push(event.intermission_at);
     }
 
+    if (event.legacy_id !== undefined) {
+      fields.push(`legacy_id = $${index++}`);
+      values.push(event.legacy_id);
+    }
+
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
