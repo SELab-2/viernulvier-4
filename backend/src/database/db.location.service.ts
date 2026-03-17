@@ -94,7 +94,7 @@ export class LocationDatabaseService {
       ;
     `;
 
-    const values = [JSON.stringify(location.location)];
+    const values = [JSON.stringify(location.location), location.legacy_id];
 
     const result = await this.db.query<LocationDto>(query, values);
 
@@ -124,6 +124,11 @@ export class LocationDatabaseService {
         `location = COALESCE(location, '{}'::jsonb) || $${index++}::jsonb`,
       );
       values.push(JSON.stringify(location.location));
+    }
+
+    if (location.legacy_id !== undefined) {
+      fields.push(`legacy_id = $${index++}`);
+      values.push(location.legacy_id);
     }
 
     if (fields.length === 0) {
