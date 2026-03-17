@@ -17,7 +17,11 @@ export const CreateEventSchema = EventSchema.omit({
   created_at: true,
   updated_at: true,
 });
-export const UpdateEventSchema = EventSchema.partial();
+export const UpdateEventSchema = EventSchema.partial().omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export const FilterEventSchema = z.object({
   date: z.iso.date().optional(),

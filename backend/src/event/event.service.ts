@@ -43,7 +43,7 @@ export class EventService {
     if (id !== event.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    return await this.eventDBService.updateEvent(event);
+    return await this.eventDBService.updateEvent(id, event);
   }
 
   /**
@@ -61,7 +61,7 @@ export class EventService {
       id, // Force ID.
     };
 
-    return await this.eventDBService.updateEvent(mergedEvent);
+    return await this.eventDBService.updateEvent(id, mergedEvent);
   }
 
   /**

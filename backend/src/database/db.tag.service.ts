@@ -109,11 +109,7 @@ export class TagDatabaseService {
    * The id field in the tag MUST be defined.
    * @returns the updated tag if successful.
    */
-  async updateTag(tag: UpdateTagDto): Promise<TagDto> {
-    if (!tag.id) {
-      throw new BadRequestException("Tag id is required for update");
-    }
-
+  async updateTag(tagId: number, tag: UpdateTagDto): Promise<TagDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -127,7 +123,7 @@ export class TagDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(tag.id);
+    values.push(tagId);
 
     const query = `
       UPDATE tags
@@ -145,7 +141,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Tag not found");
+      throw new ResourceGoneException(`Tag with ID ${tagId} not found`);
     }
 
     return result[0];

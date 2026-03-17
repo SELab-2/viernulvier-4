@@ -111,11 +111,10 @@ export class LocationDatabaseService {
    * The id field in the location MUST be defined.
    * @returns the updated location if successful.
    */
-  async updateLocation(location: UpdateLocationDto): Promise<LocationDto> {
-    if (!location.id) {
-      throw new BadRequestException("Location id is required for update");
-    }
-
+  async updateLocation(
+    locationId: number,
+    location: UpdateLocationDto,
+  ): Promise<LocationDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -131,7 +130,7 @@ export class LocationDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(location.id);
+    values.push(locationId);
 
     const query = `
       UPDATE locations
@@ -150,7 +149,7 @@ export class LocationDatabaseService {
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Location with ID ${location.id} not found`,
+        `Location with ID ${locationId} not found`,
       );
     }
 

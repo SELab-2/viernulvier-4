@@ -32,7 +32,11 @@ export const CreateProductionSchema = ProductionSchema.omit({
   created_at: true,
   updated_at: true,
 });
-export const UpdateProductionSchema = ProductionSchema.partial();
+export const UpdateProductionSchema = ProductionSchema.partial().omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export const FilterProductionSchema = z.object({
   lang: LanguageEnum.optional(),

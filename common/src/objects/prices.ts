@@ -18,7 +18,11 @@ export const CreatePriceSchema = PriceSchema.omit({
   created_at: true,
   updated_at: true,
 });
-export const UpdatePriceSchema = PriceSchema.partial();
+export const UpdatePriceSchema = PriceSchema.partial().omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export type Price = z.infer<typeof PriceSchema>;
 export type PriceView = z.infer<typeof PriceViewSchema>;

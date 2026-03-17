@@ -17,7 +17,11 @@ export const CreateLocationSchema = LocationSchema.omit({
   created_at: true,
   updated_at: true,
 });
-export const UpdateLocationSchema = LocationSchema.partial();
+export const UpdateLocationSchema = LocationSchema.partial().omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export type Location = z.infer<typeof LocationSchema>;
 export type LocationView = z.infer<typeof LocationViewSchema>;

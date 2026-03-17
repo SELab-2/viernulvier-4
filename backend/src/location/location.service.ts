@@ -51,6 +51,7 @@ export class LocationService {
 
   /**
    * Updates an existing Location.
+   * @param locationId The ID of the Location.
    * @param updateLocation The Location we want to update.
    * @returns The updated Location.
    */
@@ -58,8 +59,10 @@ export class LocationService {
     locationId: number,
     updateLocation: UpdateLocationDto,
   ): Promise<LocationDto> {
-    updateLocation.id = locationId; // Set the location ID to the one in the URL.
-    return await this.locationDbService.updateLocation(updateLocation);
+    return await this.locationDbService.updateLocation(
+      locationId,
+      updateLocation,
+    );
   }
 
   /**

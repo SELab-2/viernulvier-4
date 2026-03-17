@@ -18,7 +18,11 @@ export const CreateBlogSchema = BlogSchema.omit({
   created_at: true,
   updated_at: true,
 });
-export const UpdateBlogSchema = BlogSchema.partial();
+export const UpdateBlogSchema = BlogSchema.partial().omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export type Blog = z.infer<typeof BlogSchema>;
 export type BlogView = z.infer<typeof BlogViewSchema>;

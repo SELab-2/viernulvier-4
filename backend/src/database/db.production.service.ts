@@ -425,12 +425,9 @@ export class ProductionDatabaseService {
    * @returns the updated production if successful.
    */
   async updateProduction(
+    productionId: number,
     production: UpdateProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.id) {
-      throw new BadRequestException("Production id is required for update");
-    }
-
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -472,7 +469,7 @@ export class ProductionDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(production.id);
+    values.push(productionId);
     const query = `
       UPDATE productions
       SET ${fields.join(", ")}

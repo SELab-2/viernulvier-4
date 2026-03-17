@@ -45,6 +45,7 @@ export class PriceService {
 
   /**
    * Updates an existing Price in the database.
+   * @param priceId The ID of the price.
    * @param updatePrice The needed values to update the Price.
    * @returns The newly updated Price object.
    */
@@ -52,8 +53,7 @@ export class PriceService {
     priceId: number,
     updatePrice: UpdatePriceDto,
   ): Promise<PriceDto> {
-    updatePrice.id = priceId;
-    return await this.priceDbService.updatePrice(updatePrice);
+    return await this.priceDbService.updatePrice(priceId, updatePrice);
   }
 
   /**

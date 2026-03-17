@@ -186,11 +186,7 @@ export class EventDatabaseService {
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
-  async updateEvent(event: UpdateEventDto): Promise<EventDto> {
-    if (!event.id) {
-      throw new Error("Event id is required for update");
-    }
-
+  async updateEvent(eventId: number, event: UpdateEventDto): Promise<EventDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -224,7 +220,7 @@ export class EventDatabaseService {
       throw new Error("No fields provided to update");
     }
 
-    values.push(event.id);
+    values.push(eventId);
 
     // ignore error on "RETURNING", query is correct.
     const query = `

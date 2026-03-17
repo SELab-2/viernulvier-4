@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { TagDatabaseService } from "../database/db.tag.service";
 import {
   CreateTagDto,
@@ -45,19 +45,13 @@ export class TagService {
   }
 
   /**
-   * Modifies an exising TagDto with the data provided in the body.
+   * Modifies an existing TagDto with the data provided in the body.
    * @param id The ID of the tag.
    * @param updateTag The data we want to update.
    * @returns The newly updated TagDto.
    */
   async updateTag(id: number, updateTag: UpdateTagDto): Promise<TagDto> {
-    if (updateTag.id && updateTag.id !== id) {
-      throw new BadRequestException(
-        "ID in the body does not match ID in the path.",
-      );
-    }
-    // De DatabaseService handelt de merge en update af
-    return await this.dbTagService.updateTag(updateTag);
+    return await this.dbTagService.updateTag(id, updateTag);
   }
 
   /**
