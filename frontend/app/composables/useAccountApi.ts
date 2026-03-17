@@ -17,7 +17,7 @@ export function useAccountApi() {
   /** GET /auth — returns a paginated list of accounts. */
   const getAll = (pagination?: Partial<PaginationFilter>) => {
     const query = pagination ? "?" + new URLSearchParams(pagination as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: PublicAccount[] }>(`${API_ROUTES.auth.base}${query}`);
+    return get<PaginatedResponse<PublicAccount>>(`${API_ROUTES.auth.base}${query}`);
   };
 
   /** POST /auth — creates a new account. */
