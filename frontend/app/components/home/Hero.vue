@@ -68,9 +68,6 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 </template>
 
 <style scoped>
-.font-display {
-  font-family: 'Georgia', 'Times New Roman', serif;
-}
 
 .font-mono {
   font-family: 'Courier New', Courier, monospace;
@@ -78,11 +75,17 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
 .hero-title {
   font-size: clamp(3.5rem, 10vw, 8rem);
+  letter-spacing: -0.02em;
 }
 
 .hero-archief {
   font-size: clamp(2.5rem, 7vw, 5.5rem);
+  font-weight: 400;
   margin-top: -0.05em;
+}
+
+.capital-n {
+  font-weight: 900;
 }
 
 @keyframes slow-zoom {

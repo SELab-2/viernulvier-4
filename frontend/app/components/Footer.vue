@@ -11,7 +11,6 @@ const { t } = useI18n()
 
         <!-- Brand and contact information -->
         <div>
-          <h3 class="font-display font-black text-2xl tracking-tight mb-4">VIERNULVIER</h3>
           <address class="not-italic flex flex-col gap-0.5 text-sm text-white dark:text-black leading-relaxed">
             <span>Kunstencentrum VIERNULVIER vzw.</span>
             <span>Sint-Pietersnieuwstraat 23, 9000 Gent</span>
@@ -87,7 +86,7 @@ const { t } = useI18n()
       </div>
 
       <!-- Copyright bar -->
-      <p class="text-center pt-6 text-[0.7rem] font-mono tracking-widest uppercase white:text-white/50 dark:text-black/50">
+      <p class="text-center pt-6 text-[0.7rem] font-mono tracking-widest uppercase white:text-white/50 dark:text-black">
         © {{ new Date().getFullYear() }} VIERNULVIER — {{ t('footer.rights') }}
       </p>
 

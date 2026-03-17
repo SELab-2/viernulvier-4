@@ -2,6 +2,24 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ABCMonumentGrotesk — the official VIERNULVIER brand font.
+   Font files live in /public/fonts/ */
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('/fonts/ABCMonumentGrotesk-Heavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('/fonts/ABCMonumentGrotesk-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --font-size: 16px;
   --background: #ffffff;
@@ -43,6 +61,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Make ABCMonumentGrotesk available as font-brand in Tailwind */
+  --font-brand: 'ABCMonumentGrotesk', sans-serif;
 }
 
 @layer base {
@@ -67,4 +88,7 @@
   font-weight: 700;
   margin-right: 0.5rem;
   margin-top: -0.6rem;
+}
+.font-brand {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
 }
