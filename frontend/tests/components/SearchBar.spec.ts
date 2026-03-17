@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
-import SearchBar from "../../components/SearchBar.vue";
+import SearchBar from "../../app/components/SearchBar.vue";
 describe("SearchBar", () => {
     let wrapper: ReturnType<typeof mount>;
     const items = ["Apple", "Banana", "Orange", "Grapes", "Pineapple", "Mango"];
