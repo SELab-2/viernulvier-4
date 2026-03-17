@@ -3,10 +3,10 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 import {
   BlogDto,
   CreateBlogDto,
-  PaginatedBlogDto,
   PaginationFilterDto,
   UpdateBlogDto,
 } from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogService {
@@ -19,7 +19,7 @@ export class BlogService {
    */
   async getAllBlogs(
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedBlogDto> {
+  ): Promise<PaginatedResponse<BlogDto>> {
     return await this.blogDbService.getBlogs(
       paginationFilter.limit,
       paginationFilter.page,

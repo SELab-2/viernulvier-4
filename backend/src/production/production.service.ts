@@ -3,13 +3,13 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginatedProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class ProductionService {
@@ -26,7 +26,7 @@ export class ProductionService {
    */
   async getAllProductions(
     filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto> {
+  ): Promise<PaginatedResponse<ProductionDto>> {
     return await this.productionDBService.getProductions(filters);
   }
 
