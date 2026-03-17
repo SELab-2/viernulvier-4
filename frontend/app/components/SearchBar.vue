@@ -18,6 +18,7 @@
 
 import { ref, computed } from "vue"
 import type { ComputedRef } from "vue"
+import { Search } from "lucide-vue-next"
 
 interface Props {
   modelValue: string // currently selected value
@@ -79,38 +80,38 @@ const hideSuggestions = () => {
 
 <template>
   <div class="search-bar">
-    <!-- Search icon -->
-    <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-
     <!-- Optional label -->
     <label v-if="props.label" :for="props.id" class="input-label">
       {{ props.label }} <span v-if="props.required" class="required-star">*</span>
     </label>
 
-    <br>
+    <div class="relative">
+      <!-- Search input based on internalQuery -->
+      <input
+          :id="props.id"
+          type="text"
+          :placeholder="props.placeholder"
+          v-model="internalQuery"
+          :required="props.required"
+          @focus="isFocused = true"
+          @blur="hideSuggestions"
+          class="pl-12 bg-zinc-100 dark:bg-zinc-900 border-none h-12 font-bold uppercase text-[10px] rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
-    <!-- Search input based on internalQuery -->
-    <input
-        :id="props.id"
-        type="text"
-        :placeholder="props.placeholder"
-        v-model="internalQuery"
-        :required="props.required"
-        @focus="isFocused = true"
-        @blur="hideSuggestions"
-        class="pl-12 bg-zinc-100 dark:bg-zinc-900 border-none h-12 font-bold uppercase text-[10px] rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-    />
+      <!-- Autocompletion suggestions -->
+      <ul v-if="results.length" class="absolute mt-1 w-full bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-lg z-10">
+        <li v-for="item in results"
+            :key="item"
+            @mousedown.prevent="select(item)"
+            @click="select(item)"
+            class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700">
+          {{ item }}
+        </li>
+      </ul>
 
-    <!-- Autocompletion suggestions -->
-    <ul v-if="results.length" class="absolute mt-1 w-full bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-lg z-10">
-      <li v-for="item in results"
-          :key="item"
-          @mousedown.prevent="select(item)"
-          @click="select(item)"
-          class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700">
-        {{ item }}
-      </li>
-    </ul>
+      <!-- Search icon -->
+      <Search class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+    </div>
   </div>
 </template>
 
