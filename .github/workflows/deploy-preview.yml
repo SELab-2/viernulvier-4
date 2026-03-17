@@ -28,6 +28,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install dependencies
+        run: npm ci
+        
       - name: Deploy preview
         run: |
           PR=${{ github.event.workflow_run.pull_requests[0].number }}
