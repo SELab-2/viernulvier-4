@@ -75,7 +75,7 @@ const hideSuggestions = () => {
     isFocused.value = false
   }, 150)
 }
-//TODO add language support, add css and tests
+//TODO lang support
 </script>
 
 <template>
