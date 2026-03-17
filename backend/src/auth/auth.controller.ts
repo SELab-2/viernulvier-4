@@ -34,7 +34,7 @@ import {
   PaginationFilterSchema,
   UpdateAccountSchema,
 } from "@repo/common";
-import { ApiOkPaginatedResponseAnyOf } from "src/common/decorators/api.ok";
+import { ApiOkPaginatedResponseAnyOf } from "../common/decorators/api.ok";
 
 @Controller("auth")
 export class AuthController {

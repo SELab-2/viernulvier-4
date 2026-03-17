@@ -34,7 +34,7 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
-import { ApiOkPaginatedResponseAnyOf } from "src/common/decorators/api.ok";
+import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 
 @Controller("events")
 export class EventController {
