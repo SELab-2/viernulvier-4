@@ -92,7 +92,7 @@ export class TagDatabaseService {
       ;
     `;
 
-    const values = [JSON.stringify(tag.tag)];
+    const values = [JSON.stringify(tag.tag), tag.legacy_id];
 
     const result = await this.db.query<TagDto>(query, values);
 
@@ -117,6 +117,11 @@ export class TagDatabaseService {
     if (tag.tag !== undefined) {
       fields.push(`tag = COALESCE(tag, '{}'::jsonb) || $${index++}::jsonb`);
       values.push(JSON.stringify(tag.tag));
+    }
+
+    if (tag.legacy_id !== undefined) {
+      fields.push(`legacy_id = $${index++}`);
+      values.push(tag.legacy_id);
     }
 
     if (fields.length === 0) {
