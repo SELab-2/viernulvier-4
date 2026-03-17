@@ -1,12 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "../../app/composables/useAuth";
 
-vi.mock("#app", () => ({
-  useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
-  useState: vi.fn((key: string, init: () => unknown) => ({ value: init() })),
-  navigateTo: vi.fn(),
-  computed: (fn: () => unknown) => ({ value: fn() }),
-}));
+vi.mock("#app", async(importOriginal) => {
+  const actual = await importOriginal();
+  return{
+    actual,
+    useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
+    useState: vi.fn((key: string, init: () => unknown) => ({ value: init() })),
+    navigateTo: vi.fn(),
+    computed: (fn: () => unknown) => ({ value: fn() }),
+
+  }
+});
 
 const mockFetch = vi.fn();
 vi.stubGlobal("$fetch", mockFetch);
