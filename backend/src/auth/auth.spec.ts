@@ -65,9 +65,9 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer()).delete("/events/1").expect(401);
     });
 
-    it("GET /events/:eventId/locations", async () => {
+    it("GET /events/:eventId/location", async () => {
       await request(app.getHttpServer())
-        .get("/events/1/locations")
+        .get("/events/1/location")
         .expect((res) => {
           expect([200, 410]).toContain(res.status);
         });
@@ -75,9 +75,9 @@ describe("AuthGuards tests", () => {
   });
 
   describe("Event - Location endpoints authentication", () => {
-    it("GET /events/:eventId/locations should work without API key", async () => {
+    it("GET /events/:eventId/location should work without API key", async () => {
       await request(app.getHttpServer())
-        .get("/events/1/locations")
+        .get("/events/1/location")
         .expect((res) => {
           expect([200, 410]).toContain(res.status);
         });
