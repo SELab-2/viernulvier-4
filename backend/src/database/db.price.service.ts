@@ -1,12 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreatePriceDto,
-  PaginatedPriceDto,
-  PriceDto,
-  UpdatePriceDto,
-} from "../dto/dto";
+import { CreatePriceDto, PriceDto, UpdatePriceDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class PriceDatabaseService {
@@ -39,7 +35,7 @@ export class PriceDatabaseService {
   async getPrices(
     amount: number = 0,
     page: number = 0,
-  ): Promise<PaginatedPriceDto> {
+  ): Promise<PaginatedResponse<PriceDto>> {
     let query = `
     SELECT id, price, name, created_at, updated_at
     FROM prices

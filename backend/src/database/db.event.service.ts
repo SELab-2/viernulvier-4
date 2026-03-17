@@ -6,11 +6,10 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
-  PaginatedEventDto,
   PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
-import { FilterEventSchema } from "@repo/common";
+import { FilterEventSchema, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -23,7 +22,7 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(eventId: number): Promise<EventDto> {
-    const events: PaginatedEventDto = await this.getEvents(
+    const events: PaginatedResponse<EventDto> = await this.getEvents(
       FilterEventSchema.parse({ id: eventId }),
     );
     const event: EventDto[] = events.objects;
@@ -42,7 +41,9 @@ export class EventDatabaseService {
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All events for the given filters.
    */
-  async getEvents(filters: FilterEventDto): Promise<PaginatedEventDto> {
+  async getEvents(
+    filters: FilterEventDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;

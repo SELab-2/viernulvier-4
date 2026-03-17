@@ -1,12 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreateLocationDto,
-  LocationDto,
-  PaginatedLocationDto,
-  UpdateLocationDto,
-} from "../dto/dto";
+import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -42,7 +38,7 @@ export class LocationDatabaseService {
   async getLocations(
     amount: number = 0,
     page: number = 0,
-  ): Promise<PaginatedLocationDto> {
+  ): Promise<PaginatedResponse<LocationDto>> {
     let query = `
     SELECT id, location, created_at, updated_at
     FROM locations
