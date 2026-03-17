@@ -29,7 +29,7 @@ function createMockStream(rows: any[], error?: Error) {
 }
 
 // TODO: Remove skip
-describe.skip("CSVFileParser", () => {
+describe("CSVFileParser", () => {
   describe("CSVFileParser.parseCSVWithSchema", () => {
     beforeEach(() => {
       // silence warnings emitted during parsing; tests will assert on them if needed
@@ -99,7 +99,6 @@ describe.skip("CSVFileParser", () => {
         location: "Main Hall",
         doors_at: null,
         intermission_at: null,
-        legacy_id: null,
       });
     });
 
@@ -221,7 +220,6 @@ describe.skip("CSVFileParser", () => {
           production_id: 10,
           doors_at: null,
           intermission_at: null,
-          legacy_id: null,
         },
         location: "Front Stage",
       });
