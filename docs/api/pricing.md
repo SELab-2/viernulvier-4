@@ -1,7 +1,7 @@
 # Pricing API
 
 ### [GET] `/prices`
-- **Returns:** Array of `PriceDto`
+- **Returns:** `PaginatedResponse<Price | PriceView>` a paginated list of prices or price views.
 
 ### [GET] `/prices/:priceId`
 - **Returns:** `PriceDto`

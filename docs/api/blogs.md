@@ -1,7 +1,7 @@
 # Blogs API
 
 ### [GET] `/blogs`
-- **Returns:** Array of `BlogDto`
+- **Returns:** `PaginatedResponse<Blog | BlogView>` a paginated list of blogs or blog views.
 
 ### [GET] `/blogs/:blogId`
 - **Returns:** `BlogDto`
