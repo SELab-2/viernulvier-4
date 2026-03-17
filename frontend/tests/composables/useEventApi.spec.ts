@@ -62,29 +62,29 @@ describe("useEventApi", () => {
     expect(mockDel).toHaveBeenCalledWith("/events/1");
   });
 
-  describe("locations", () => {
-    it("getLocation calls GET /events/:id/locations", () => {
+  describe("location", () => {
+    it("getLocation calls GET /events/:id/location", () => {
       const { getLocation } = useEventApi();
       getLocation(1);
-      expect(mockGet).toHaveBeenCalledWith("/events/1/locations");
+      expect(mockGet).toHaveBeenCalledWith("/events/1/location");
     });
 
     it("getLocation appends lang param", () => {
       const { getLocation } = useEventApi();
       getLocation(1, "nl");
-      expect(mockGet).toHaveBeenCalledWith("/events/1/locations?lang=nl");
+      expect(mockGet).toHaveBeenCalledWith("/events/1/location?lang=nl");
     });
 
-    it("linkLocation calls PUT /events/:id/locations/:locationId", () => {
+    it("linkLocation calls PUT /events/:id/location/:locationId", () => {
       const { linkLocation } = useEventApi();
       linkLocation(1, 2);
-      expect(mockPut).toHaveBeenCalledWith("/events/1/locations/2", {});
+      expect(mockPut).toHaveBeenCalledWith("/events/1/location/2", {});
     });
 
-    it("unlinkLocation calls DELETE /events/:id/locations", () => {
+    it("unlinkLocation calls DELETE /events/:id/location", () => {
       const { unlinkLocation } = useEventApi();
       unlinkLocation(1);
-      expect(mockDel).toHaveBeenCalledWith("/events/1/locations");
+      expect(mockDel).toHaveBeenCalledWith("/events/1/location");
     });
   });
 

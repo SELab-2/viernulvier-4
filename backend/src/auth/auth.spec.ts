@@ -56,25 +56,25 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer()).delete("/events/1").expect(401);
     });
 
-    it("GET /events/:eventId/locations", async () => {
-      await request(app.getHttpServer()).get("/events/1/locations").expect(200);
+    it("GET /events/:eventId/location", async () => {
+      await request(app.getHttpServer()).get("/events/1/location").expect(200);
     });
   });
 
   describe("Event - Location endpoints authentication", () => {
-    it("GET /events/:eventId/locations should work without API key", async () => {
-      await request(app.getHttpServer()).get("/events/1/locations").expect(200);
+    it("GET /events/:eventId/location should work without API key", async () => {
+      await request(app.getHttpServer()).get("/events/1/location").expect(200);
     });
 
-    it("PUT /events/:eventId/locations/:locationId should fail without API key.", async () => {
+    it("PUT /events/:eventId/location/:locationId should fail without API key.", async () => {
       await request(app.getHttpServer())
-        .put("/events/1/locations/1")
+        .put("/events/1/location/1")
         .expect(401);
     });
 
     it("DELETE /events/:eventId/locations should fail without API key.", async () => {
       await request(app.getHttpServer())
-        .delete("/events/1/locations")
+        .delete("/events/1/location")
         .expect(401);
     });
   });

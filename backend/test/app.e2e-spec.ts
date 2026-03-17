@@ -1074,66 +1074,66 @@ describe("EventLocationController (e2e)", () => {
     await app.close();
   });
 
-  describe("GET /events/:eventId/locations", () => {
+  describe("GET /events/:eventId/location", () => {
     it("should return 200 with the flattened location of the event", () => {
       return request(app.getHttpServer())
-        .get("/events/1/locations?lang=en")
+        .get("/events/1/location?lang=en")
         .expect(200)
         .expect(mockLocationView);
     });
 
     it("should call eventDb.getLocationOfEvent with the correct id", async () => {
-      await request(app.getHttpServer()).get("/events/1/locations?lang=en");
+      await request(app.getHttpServer()).get("/events/1/location?lang=en");
       expect(eventDb.getLocationOfEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
       return request(app.getHttpServer())
-        .get("/events/abc/locations")
+        .get("/events/abc/location")
         .expect(400);
     });
   });
 
-  describe("PUT /events/:eventId/locations/:locationId", () => {
+  describe("PUT /events/:eventId/location/:locationId", () => {
     it("should return 200 after successfully linking", () => {
       return request(app.getHttpServer())
-        .put("/events/1/locations/2")
+        .put("/events/1/location/2")
         .expect(200);
     });
 
     it("should call eventDb.linkEventToLocation with correct ids", async () => {
-      await request(app.getHttpServer()).put("/events/1/locations/2");
+      await request(app.getHttpServer()).put("/events/1/location/2");
       expect(eventDb.linkEventToLocation).toHaveBeenCalledWith(1, 2);
     });
 
     it("should return 400 when eventId is not a number", () => {
       return request(app.getHttpServer())
-        .put("/events/abc/locations/1")
+        .put("/events/abc/location/1")
         .expect(400);
     });
 
     it("should return 400 when locationId is not a number", () => {
       return request(app.getHttpServer())
-        .put("/events/1/locations/abc")
+        .put("/events/1/location/abc")
         .expect(400);
     });
   });
 
-  describe("DELETE /events/:eventId/locations", () => {
+  describe("DELETE /events/:eventId/location", () => {
     it("should return 200 after unlinking", () => {
       return request(app.getHttpServer())
-        .delete("/events/1/locations")
+        .delete("/events/1/location")
         .expect(200);
     });
 
     it("should call eventDb.deleteLocationFromEvent with the eventId", async () => {
-      await request(app.getHttpServer()).delete("/events/1/locations");
+      await request(app.getHttpServer()).delete("/events/1/location");
       expect(eventDb.deleteLocationFromEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
       return request(app.getHttpServer())
-        .delete("/events/abc/locations")
+        .delete("/events/abc/location")
         .expect(400);
     });
   });
