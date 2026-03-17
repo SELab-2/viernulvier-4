@@ -156,18 +156,44 @@ export class LanguageService {
       const result = await this.translator.translateText(
         sourceText,
         // need to cast here for the function to recognize the typing.
-        langFrom.toUpperCase() as deepl.SourceLanguageCode,
-        langTo.toUpperCase() as deepl.TargetLanguageCode,
+        this.formatSourceLanguageHelper(langFrom),
+        this.formatTargetLanguageHelper(langTo),
       );
 
       data[langTo] = result.text;
     } catch (error) {
-      this.logger.error("Translation failed", error);
+      this.logger.error(`Translation failed: ${error?.message}`, error);
 
       // fallback: copy original language
       data[langTo] = sourceText;
     }
 
     return data;
+  }
+
+  formatSourceLanguageHelper(lang: Language): deepl.SourceLanguageCode {
+    if (!lang) {
+      throw new Error("Source language is required");
+    }
+
+    // allows adding of types like in TagetLanguageHelper.
+    return lang.toUpperCase() as deepl.SourceLanguageCode;
+  }
+
+  formatTargetLanguageHelper(lang: Language): deepl.TargetLanguageCode {
+    if (!lang) {
+      throw new Error("Target language is required");
+    }
+
+    const upper = lang.toUpperCase();
+
+    // add cases here like nl-BE etc...
+    // default fallback is just normal upper.
+    switch (upper) {
+      case "EN":
+        return "en-GB"; // or "en-US"
+      default:
+        return upper as deepl.TargetLanguageCode;
+    }
   }
 }
