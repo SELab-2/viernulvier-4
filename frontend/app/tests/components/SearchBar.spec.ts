@@ -54,6 +54,7 @@ describe("SearchBar", () => {
     it("shows suggestions when input is empty", async () => {
         await wrapper.setProps({ limit: 3 });
         const input = wrapper.find("input");
+        await input.trigger("focus");
         await input.setValue("");
 
         expect(wrapper.findAll("li").length).toBe(3); //there should be max 3 suggestions given
