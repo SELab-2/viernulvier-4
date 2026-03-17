@@ -95,37 +95,36 @@ export class LanguageService {
   ): Promise<T> {
     if (!data) return data as T;
 
-    // handle arrays (should not be needed, but you never know)
+    // Handle arrays
     if (Array.isArray(data)) {
-      for (let i = 0; i < data.length; i++) {
-        data[i] = await this.translateObject(data[i], langFrom, langTo);
-      }
-      return data as T;
+      return Promise.all(
+        data.map((item) => this.translateObject(item, langFrom, langTo)),
+      ) as Promise<T>;
     }
 
-    // handle objects
-    if (data && typeof data === "object") {
-      for (const key of Object.keys(data)) {
-        const value = data[key];
+    // Only process real objects
+    if (typeof data !== "object") {
+      return data;
+    }
 
-        // detect translation record { en: "...", nl: "..." }
-        if (
-          value &&
-          typeof value === "object" &&
-          !Array.isArray(value) &&
-          value[langFrom]
-        ) {
-          data[key] = await this.translateText(value, langFrom, langTo);
-        }
+    const result: Record<string, any> = { ...data };
 
-        // recurse deeper (should not be needed, but you never know)
-        else if (typeof value === "object") {
-          data[key] = await this.translateObject(value, langFrom, langTo);
-        }
+    for (const key of Object.keys(result)) {
+      const value = result[key];
+
+      if (
+        value &&
+        typeof value === "object" &&
+        !Array.isArray(value) &&
+        value[langFrom]
+      ) {
+        result[key] = await this.translateText(value, langFrom, langTo);
+      } else if (typeof value === "object") {
+        result[key] = await this.translateObject(value, langFrom, langTo);
       }
     }
 
-    return data as T;
+    return result as T;
   }
 
   /**

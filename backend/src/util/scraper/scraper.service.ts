@@ -1,15 +1,18 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
-import { runScraper } from "./main";
 import { injectCsvData } from "./inject-csv";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { ScraperRunner } from "./main";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
  */
 @Injectable()
 export class ScraperService implements OnApplicationBootstrap {
-  constructor(private readonly logger: AppLogger) {}
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly runner: ScraperRunner,
+  ) {}
 
   /**
    * Checks whether the Scraper is currently enabled.
@@ -22,7 +25,7 @@ export class ScraperService implements OnApplicationBootstrap {
    * Ran when the app first starts, runs an initial scrape.
    * @returns Nothing.
    */
-  // eslint-disable-next-line @typescript-eslint/require-await
+  // eslint-disable-next-line @typeipt-eslint/require-await
   async onApplicationBootstrap() {
     if (!this.isScraperEnabled) {
       this.logger.log("Skipping initial scrape (Scraping is DISABLED).");
@@ -46,7 +49,8 @@ export class ScraperService implements OnApplicationBootstrap {
       });
 
     this.logger.log("Running initial scrape...");
-    runScraper()
+    this.runner
+      .runScraper()
       .then(() => {
         this.logger.log(
           "Initial scrape finished successfully.",
@@ -75,7 +79,8 @@ export class ScraperService implements OnApplicationBootstrap {
     }
 
     this.logger.log("Running scheduled daily scrape...");
-    runScraper()
+    this.runner
+      .runScraper()
       .then(() => {
         this.logger.log(
           "Scheduled scrape finished successfully.",
