@@ -38,8 +38,13 @@ const emit = defineEmits<{ // update:modelValue gets called when a new selection
 }>()
 
 const internalQuery = ref(props.modelValue || "") // so that a user can type without selecting something yet
+const isFocused = ref(false) // tracks if input is focused (user is typing)
 
 const results: ComputedRef<string[]> = computed(() => {
+  // suggestions do not need to appear if user did not click on the bar
+  // and if the bar is empty just after selecting anything
+  if (!isFocused.value && !internalQuery.value) return []
+
   const query = internalQuery.value.toLowerCase()
   const filtered =
       internalQuery.value
@@ -62,12 +67,21 @@ const results: ComputedRef<string[]> = computed(() => {
 const select = (item: string) => { // handles selecting a suggestion
   internalQuery.value = ""
   emit("update:modelValue", item)
+  isFocused.value = false
 }
-//TODO add language support, add css
+const hideSuggestions = () => {
+  setTimeout(() => {
+    isFocused.value = false
+  }, 150)
+}
+//TODO add language support, add css and tests
 </script>
 
 <template>
   <div class="search-bar">
+    <!-- Search icon -->
+    <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+
     <!-- Optional label -->
     <label v-if="props.label" :for="props.id" class="input-label">
       {{ props.label }} <span v-if="props.required" class="required-star">*</span>
@@ -82,12 +96,18 @@ const select = (item: string) => { // handles selecting a suggestion
         :placeholder="props.placeholder"
         v-model="internalQuery"
         :required="props.required"
-        class="input-field"
+        @focus="isFocused = true"
+        @blur="hideSuggestions"
+        class="pl-12 bg-zinc-100 dark:bg-zinc-900 border-none h-12 font-bold uppercase text-[10px] rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
 
     <!-- Autocompletion suggestions -->
-    <ul v-if="results.length" class="suggestions">
-      <li v-for="item in results" :key="item" @click="select(item)">
+    <ul v-if="results.length" class="absolute mt-1 w-full bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-lg z-10">
+      <li v-for="item in results"
+          :key="item"
+          @mousedown.prevent="select(item)"
+          @click="select(item)"
+          class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700">
         {{ item }}
       </li>
     </ul>
@@ -95,5 +115,4 @@ const select = (item: string) => { // handles selecting a suggestion
 </template>
 
 <style scoped>
-
 </style>
