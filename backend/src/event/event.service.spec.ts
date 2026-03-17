@@ -1,12 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type {
-  CreateEventDto,
-  EventDto,
-  LocationDto,
-  PriceDto,
-  UpdateEventDto,
+import {
+  type CreateEventDto,
+  type EventDto,
+  type LocationDto,
+  type PriceDto,
+  type UpdateEventDto,
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
@@ -129,9 +129,19 @@ describe("EventService", () => {
     });
 
     it("should return empty array when no events exist", async () => {
-      jest.spyOn(dbService, "getEvents").mockResolvedValueOnce([]);
+      jest.spyOn(dbService, "getEvents").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
       const result = await service.getAllEvents(FilterEventSchema.parse({}));
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
 
     it("should handle database errors", async () => {

@@ -26,7 +26,6 @@ describe("LocationController", () => {
     },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   // What the LanguageService returns after flattening
@@ -35,7 +34,6 @@ describe("LocationController", () => {
     location: "Citadel Park",
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   const mockLocationArray: LocationDto[] = [mockLocation];
@@ -133,7 +131,6 @@ describe("LocationController", () => {
     it("should create and return a new location", async () => {
       const dto: CreateLocationDto = {
         location: { en: "Citadel Park", nl: "Citadelpark" },
-        legacy_id: null,
       };
       const result = await controller.createLocation(dto);
 
@@ -145,7 +142,6 @@ describe("LocationController", () => {
   describe("updateLocation", () => {
     it("should update and return the location", async () => {
       const dto: UpdateLocationDto = {
-        id: 1,
         location: { en: "Updated Park", nl: "Bijgewerkt park" },
       };
       const result = await controller.updateLocation(1, dto);

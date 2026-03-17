@@ -19,7 +19,6 @@ describe("EventController", () => {
     intermission_at: "2024-01-15T19:00:00Z",
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: "str",
   };
 
   const mockEvents: EventDto[] = [mockEvent];
@@ -72,9 +71,19 @@ describe("EventController", () => {
     });
 
     it("should return empty array when no events exist", async () => {
-      jest.spyOn(service, "getAllEvents").mockResolvedValueOnce([]);
+      jest.spyOn(service, "getAllEvents").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
       const result = await controller.getAllEvents(FilterEventSchema.parse({}));
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
   });
 
@@ -184,7 +193,6 @@ describe("EventController", () => {
         production_id: 1,
         doors_at: "2024-01-15T19:00:00Z",
         intermission_at: "2024-01-15T19:00:00Z",
-        legacy_id: "str",
       };
 
       const createdEvent: EventDto = {
@@ -209,7 +217,6 @@ describe("EventController", () => {
         production_id: 1,
         doors_at: "2024-01-15T19:00:00Z",
         intermission_at: "2024-01-15T19:00:00Z",
-        legacy_id: "str",
       };
 
       jest

@@ -234,6 +234,7 @@ export class ProductionDatabaseService {
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     // count query uses same filters but no pagination
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
     SELECT COUNT(DISTINCT p.id) as count

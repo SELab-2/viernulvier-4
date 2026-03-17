@@ -40,7 +40,6 @@ describe("PriceController", () => {
     },
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: null,
   };
 
   // What the LanguageService will output
@@ -50,7 +49,6 @@ describe("PriceController", () => {
     name: "Standard",
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: null,
   };
 
   beforeEach(async () => {
@@ -127,7 +125,6 @@ describe("PriceController", () => {
       const createDto: CreatePriceDto = {
         price: 20.0,
         name: { en: "Standard", nl: "Standaard" },
-        legacy_id: null,
       };
       mockPriceService.createPrice.mockResolvedValue(mockPrice);
 
@@ -141,7 +138,6 @@ describe("PriceController", () => {
   describe("updatePrice", () => {
     it("should call updatePrice on the service and return the updated price", async () => {
       const updateDto: UpdatePriceDto = {
-        id: 1,
         price: 25.0,
       };
       const updatedPrice = { ...mockPrice, price: 25.0 };

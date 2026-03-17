@@ -27,7 +27,6 @@ describe("ProductionService", () => {
     description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: { en: "fixing", nl: "repareren" },
     artist: { en: "the", nl: "de" },
     credits: { en: "tests :-)", nl: "testen :-)" },
@@ -43,14 +42,12 @@ describe("ProductionService", () => {
       tag: { en: "Drama", nl: "Drama" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
-      legacy_id: "str",
     },
     {
       id: 2,
       tag: { en: "Classical", nl: "Klassiek" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
-      legacy_id: "str",
     },
   ];
 
@@ -115,11 +112,21 @@ describe("ProductionService", () => {
     });
 
     it("should return empty array when no productions exist", async () => {
-      jest.spyOn(dbService, "getProductions").mockResolvedValueOnce([]);
+      jest.spyOn(dbService, "getProductions").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
       );
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
 
     it("should handle database errors", async () => {
