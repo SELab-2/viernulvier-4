@@ -240,12 +240,7 @@ describe("AuthGuards tests", () => {
     });
 
     it("POST /blogs should fail without API key", async () => {
-      await request(app.getHttpServer())
-        .post("/blogs")
-        .send({})
-        .expect((res) => {
-          expect([200, 410]).toContain(res.status);
-        });
+      await request(app.getHttpServer()).post("/blogs").send({}).expect(401);
     });
 
     it("GET /blogs/:id should work without API key", async () => {
