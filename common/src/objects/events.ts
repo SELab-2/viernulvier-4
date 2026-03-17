@@ -9,7 +9,7 @@ export const EventSchema = z.object({
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   production_id: z.number(),
-  legacy_id: z.string().nullable(),
+  // Legacy ID is omitted here because the API doesn't use it.
 });
 
 export const CreateEventSchema = EventSchema.omit({

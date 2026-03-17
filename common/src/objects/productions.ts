@@ -17,7 +17,7 @@ export const ProductionSchema = z.object({
   attendance_mode: z.string().nullable(),
   created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
   updated_at: z.iso.datetime().nullable(), // TODO here too.
-  legacy_id: z.string().nullable(),
+  // Legacy ID is omitted here because the API doesn't use it.
 });
 export const ProductionViewSchema = ProductionSchema.extend({
   titel: z.string(),

@@ -51,7 +51,6 @@ export class ProductionDatabaseService {
       const query = `
       SELECT t.id,
              t.tag,
-             t.legacy_id,
              t.created_at,
              t.updated_at
       FROM tags t
@@ -69,7 +68,6 @@ export class ProductionDatabaseService {
              t.tag,
              t.created_at,
              t.updated_at,
-             t.legacy_id
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -114,7 +112,6 @@ export class ProductionDatabaseService {
              b.description,
              b.created_at,
              b.updated_at,
-             b.legacy_id
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -265,7 +262,6 @@ export class ProductionDatabaseService {
       p.credits,
       p.created_at,
       p.updated_at,
-      p.legacy_id,
       p.performer_type,
       p.attendance_mode
     FROM productions p
@@ -309,11 +305,10 @@ export class ProductionDatabaseService {
           artist,
           tagline,
           credits,
-          legacy_id,
           performer_type,
           attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING
           id,
           titel,
@@ -324,7 +319,6 @@ export class ProductionDatabaseService {
           credits,
           created_at,
           updated_at,
-          legacy_id,
           performer_type,
           attendance_mode;
       `;
@@ -336,7 +330,6 @@ export class ProductionDatabaseService {
       production.artist,
       production.tagline,
       production.credits,
-      production.legacy_id,
       production.performer_type,
       production.attendance_mode,
     ];
@@ -365,11 +358,10 @@ export class ProductionDatabaseService {
         artist,
         tagline,
         credits,
-        legacy_id,
         performer_type,
         attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       ON CONFLICT (id)
       DO UPDATE SET
         titel = EXCLUDED.titel,
@@ -378,7 +370,6 @@ export class ProductionDatabaseService {
         artist = EXCLUDED.artist,
         tagline = EXCLUDED.tagline,
         credits = EXCLUDED.credits,
-        legacy_id = EXCLUDED.legacy_id,
         performer_type = EXCLUDED.performer_type,
         attendance_mode = EXCLUDED.attendance_mode
         RETURNING
@@ -391,7 +382,6 @@ export class ProductionDatabaseService {
           credits,
           created_at,
           updated_at,
-          legacy_id,
           performer_type,
           attendance_mode
       `;
@@ -403,7 +393,6 @@ export class ProductionDatabaseService {
       production.artist,
       production.tagline,
       production.credits,
-      production.legacy_id ?? null,
       production.performer_type ?? null,
       production.attendance_mode ?? null,
     ];
@@ -450,11 +439,6 @@ export class ProductionDatabaseService {
       }
     }
 
-    if (production.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(production.legacy_id);
-    }
-
     if (production.performer_type !== undefined) {
       fields.push(`performer_type = $${index++}`);
       values.push(production.performer_type);
@@ -484,7 +468,6 @@ export class ProductionDatabaseService {
         credits,
         created_at,
         updated_at,
-        legacy_id,
         performer_type,
         attendance_mode;
     `;

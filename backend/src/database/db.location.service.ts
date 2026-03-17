@@ -22,8 +22,7 @@ export class LocationDatabaseService {
     const query = `SELECT id, 
        location, 
        created_at, 
-       updated_at, 
-       legacy_id 
+       updated_at
       FROM locations WHERE id = $1`;
 
     const result = await this.db.query<LocationDto>(query, [id]);
@@ -45,7 +44,7 @@ export class LocationDatabaseService {
     page: number = 0,
   ): Promise<PaginatedLocationDto> {
     let query = `
-    SELECT id, location, created_at, updated_at, legacy_id
+    SELECT id, location, created_at, updated_at
     FROM locations
     ORDER BY id
   `;
@@ -83,18 +82,17 @@ export class LocationDatabaseService {
     }
 
     const query = `
-      INSERT INTO locations (location, legacy_id)
-      VALUES ($1, $2)
+      INSERT INTO locations (location)
+      VALUES ($1)
       RETURNING
         id,
         location,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       ;
     `;
 
-    const values = [JSON.stringify(location.location), location.legacy_id];
+    const values = [JSON.stringify(location.location)];
 
     const result = await this.db.query<LocationDto>(query, values);
 
@@ -126,11 +124,6 @@ export class LocationDatabaseService {
       values.push(JSON.stringify(location.location));
     }
 
-    if (location.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(location.legacy_id);
-    }
-
     if (fields.length === 0) {
       throw new BadRequestException("No fields provided to update");
     }
@@ -145,8 +138,7 @@ export class LocationDatabaseService {
       id,
       location,
       created_at,
-      updated_at,
-      legacy_id
+      updated_at
     ;
   `;
 

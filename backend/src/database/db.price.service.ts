@@ -23,8 +23,7 @@ export class PriceDatabaseService {
        price, 
        name, 
        created_at, 
-       updated_at, 
-       legacy_id 
+       updated_at
       FROM prices WHERE id = $1`;
     const result = await this.db.query<PriceDto>(query, [id]);
 
@@ -42,7 +41,7 @@ export class PriceDatabaseService {
     page: number = 0,
   ): Promise<PaginatedPriceDto> {
     let query = `
-    SELECT id, price, name, created_at, updated_at, legacy_id
+    SELECT id, price, name, created_at, updated_at
     FROM prices
     ORDER BY id
   `;
@@ -78,18 +77,18 @@ export class PriceDatabaseService {
     }
 
     const query = `
-      INSERT INTO prices (name, price, legacy_id)
-      VALUES ($1, $2, $3)
+      INSERT INTO prices (name, price)
+      VALUES ($1, $2)
       RETURNING
         id,
         name,
         price,
         created_at,
-        updated_at,
-        legacy_id;
+        updated_at
+      ;
     `;
 
-    const values = [JSON.stringify(price.name), price.price, price.legacy_id];
+    const values = [JSON.stringify(price.name), price.price];
 
     const result = await this.db.query<PriceDto>(query, values);
 
@@ -121,11 +120,6 @@ export class PriceDatabaseService {
       values.push(price.price);
     }
 
-    if (price.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(price.legacy_id);
-    }
-
     if (fields.length === 0) {
       throw new BadRequestException("No valid fields to update");
     }
@@ -141,8 +135,8 @@ export class PriceDatabaseService {
         name,
         price,
         created_at,
-        updated_at,
-        legacy_id;
+        updated_at
+      ;
     `;
 
     const result = await this.db.query<PriceDto>(query, values);

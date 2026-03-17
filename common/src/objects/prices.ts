@@ -7,7 +7,7 @@ export const PriceSchema = z.object({
   name: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  legacy_id: z.string().nullable(),
+  // Legacy ID is omitted here because the API doesn't use it.
 });
 export const PriceViewSchema = PriceSchema.extend({
   name: z.string(),

@@ -6,7 +6,7 @@ export const LocationSchema = z.object({
   location: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  legacy_id: z.string().nullable(),
+  // Legacy ID is omitted here because the API doesn't use it.
 });
 export const LocationViewSchema = LocationSchema.extend({
   location: z.string(),

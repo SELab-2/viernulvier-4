@@ -25,7 +25,6 @@ export class TagDatabaseService {
         tag,
         created_at,
         updated_at,
-        legacy_id
       FROM tags
       WHERE id = $1
     `;
@@ -48,7 +47,7 @@ export class TagDatabaseService {
     amount: number = 0,
     page: number = 0,
   ): Promise<PaginatedTagDto> {
-    let query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags ORDER BY id`;
+    let query = `SELECT id, tag, created_at, updated_at FROM tags ORDER BY id`;
 
     const params: any[] = [];
 
@@ -81,18 +80,17 @@ export class TagDatabaseService {
     }
 
     const query = `
-      INSERT INTO tags (tag, legacy_id)
-      VALUES ($1, $2)
+      INSERT INTO tags (tag)
+      VALUES ($1)
       RETURNING
         id,
         tag,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       ;
     `;
 
-    const values = [JSON.stringify(tag.tag), tag.legacy_id];
+    const values = [JSON.stringify(tag.tag)];
 
     const result = await this.db.query<TagDto>(query, values);
 
@@ -119,11 +117,6 @@ export class TagDatabaseService {
       values.push(JSON.stringify(tag.tag));
     }
 
-    if (tag.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(tag.legacy_id);
-    }
-
     if (fields.length === 0) {
       throw new BadRequestException("No fields provided to update");
     }
@@ -138,8 +131,7 @@ export class TagDatabaseService {
         id,
         tag,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       ;
     `;
 
