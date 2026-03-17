@@ -9,7 +9,7 @@ import { Sun, Moon, LogOut} from 'lucide-vue-next'
 const { t, locale, setLocale } = useI18n()
 
 const { isLoggedIn, logout } = useAuth()
-const isAdmin = isLoggedIn
+const isAdmin = isLoggedIn // const isAdmin = ref(true) to check admin header
 
 const isDark = ref(false)
 const toggleDark = () => {
