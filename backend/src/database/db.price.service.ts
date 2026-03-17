@@ -121,6 +121,11 @@ export class PriceDatabaseService {
       values.push(price.price);
     }
 
+    if (price.legacy_id !== undefined) {
+      fields.push(`legacy_id = $${index++}`);
+      values.push(price.legacy_id);
+    }
+
     if (fields.length === 0) {
       throw new BadRequestException("No valid fields to update");
     }
