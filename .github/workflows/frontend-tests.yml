@@ -20,7 +20,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm i
 
       - name: Run Frontend Tests
+        working-directory: ./frontend
         run: npm run test --filter=frontend

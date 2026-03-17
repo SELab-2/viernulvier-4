@@ -37,9 +37,11 @@ jobs:
           write_env "backend/.env"
 
       - name: Install dependencies
+        working-directory: ./backend
         run: npm i
 
       - name: Run Backend Tests
+        working-directory: ./backend
         run: npm run test --filter=backend
         env:
           DB_USER_DEV: selab2
