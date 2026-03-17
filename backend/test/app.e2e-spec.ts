@@ -54,7 +54,6 @@ const mockBlog2View = {
 const mockTag = {
   id: 1,
   tag: { en: "Drama", nl: "Drama" },
-  legacy_id: "Test Legacy",
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -63,7 +62,6 @@ const mockTagView = { ...mockTag, tag: "Drama" };
 const mockTag2 = {
   id: 2,
   tag: { en: "Comedy", nl: "Komedie" },
-  legacy_id: null,
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -81,7 +79,6 @@ const mockProduction = {
   attendance_mode: "string",
   created_at: "2026-03-07T16:58:08.701Z",
   updated_at: "2026-03-07T16:58:08.701Z",
-  legacy_id: "string",
 };
 const mockProductionView = {
   ...mockProduction,
@@ -99,7 +96,6 @@ const mockEvent = {
   endtime: "2025-01-01T22:00:00.000Z",
   doors_at: "2025-06-01T22:00:00.000Z",
   intermission_at: "2025-06-01T22:00:00.000Z",
-  legacy_id: "string",
   created_at: "2026-03-07T00:00:00.000Z",
   updated_at: "2026-03-07T00:00:00.000Z",
   production_id: 1,
@@ -108,7 +104,6 @@ const mockEvent = {
 const mockLocation = {
   id: 1,
   location: { en: "Main Stage", nl: "Hoofdpodium" },
-  legacy_id: "Test Legacy",
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -118,7 +113,6 @@ const mockPrice = {
   id: 1,
   price: 15.5,
   name: { en: "Early Bird", nl: "Vroege Vogel" },
-  legacy_id: "Test Legacy",
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -339,13 +333,6 @@ describe("BlogController (e2e)", () => {
         .expect(mockBlog);
     });
 
-    it("should return 400 when URL id and body id do not match", () => {
-      return request(app.getHttpServer())
-        .put("/blogs/2")
-        .send(mockBlog)
-        .expect(400);
-    });
-
     it("should return 400 when id param is not a number", () => {
       return request(app.getHttpServer())
         .put("/blogs/abc")
@@ -449,7 +436,6 @@ describe("TagController (e2e)", () => {
   describe("POST /tags", () => {
     const createPayload = {
       tag: { en: "Thriller", nl: "Thriller" },
-      legacy_id: "test",
     };
 
     it("should return 201 with the created tag", () => {
@@ -477,13 +463,6 @@ describe("TagController (e2e)", () => {
         .send({ tag: { en: "Thriller", nl: "Thriller" } })
         .expect(200)
         .expect(mockTag);
-    });
-
-    it("should return 400 when body id does not match URL id", () => {
-      return request(app.getHttpServer())
-        .patch("/tags/1")
-        .send({ id: 99, tag: { en: "Other", nl: "Ander" } })
-        .expect(400);
     });
 
     it("should return 400 when id is not a number", () => {
@@ -573,7 +552,6 @@ describe("ProductionController (e2e)", () => {
       titel: { en: "New Production", nl: "Nieuwe Productie" },
       description1: { en: "Desc 1", nl: "Beschrijving 1" },
       description2: { en: "Desc 2", nl: "Beschrijving 2" },
-      legacy_id: "etst",
       attendance_mode: "etst",
       performer_type: "etst",
       tagline: { en: "test", nl: "test" },
@@ -896,7 +874,6 @@ describe("EventController (e2e)", () => {
       starttime: "2025-06-01T19:00:00.000Z",
       endtime: "2025-06-01T22:00:00.000Z",
       production_id: 1,
-      legacy_id: "1",
       doors_at: "2025-06-01T22:00:00.000Z",
       intermission_at: "2025-06-01T22:00:00.000Z",
     };
