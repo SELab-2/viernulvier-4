@@ -88,7 +88,7 @@ export class PriceDatabaseService {
         legacy_id;
     `;
 
-    const values = [JSON.stringify(price.name), price.price];
+    const values = [JSON.stringify(price.name), price.price, price.legacy_id];
 
     const result = await this.db.query<PriceDto>(query, values);
 

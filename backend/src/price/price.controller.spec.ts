@@ -147,9 +147,9 @@ describe("PriceController", () => {
       const updatedPrice = { ...mockPrice, price: 25.0 };
       mockPriceService.updatePrice.mockResolvedValue(updatedPrice);
 
-      const result = await controller.updatePrice(updateDto);
+      const result = await controller.updatePrice(1, updateDto);
 
-      expect(service.updatePrice).toHaveBeenCalledWith(updateDto);
+      expect(service.updatePrice).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(updatedPrice);
     });
   });

@@ -115,7 +115,7 @@ describe("PriceService", () => {
       const updatedPrice = { ...mockPrice, price: 25.0 };
       mockPriceDatabaseService.updatePrice.mockResolvedValue(updatedPrice);
 
-      const result = await service.updatePrice(updateDto);
+      const result = await service.updatePrice(1, updateDto);
 
       expect(dbService.updatePrice).toHaveBeenCalledWith(updateDto);
       expect(result).toEqual(updatedPrice);

@@ -1193,7 +1193,7 @@ describe("PriceController (e2e)", () => {
     });
   });
 
-  describe("PUT /prices", () => {
+  describe("PATCH /prices/:priceId", () => {
     it("should return 200 with the updated price", () => {
       const updatePayload = {
         id: 1,
@@ -1201,7 +1201,7 @@ describe("PriceController (e2e)", () => {
         name: { en: "Updated", nl: "Bijgewerkt" },
       };
       return request(app.getHttpServer())
-        .put("/prices")
+        .patch("/prices/1")
         .send(updatePayload)
         .expect(200)
         .expect(mockPrice);

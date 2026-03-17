@@ -5,8 +5,8 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Put,
   Query,
   UseGuards,
   UsePipes,
@@ -112,10 +112,12 @@ export class PriceController {
   @ApiOperation({ summary: "Updates an existing Price object." })
   @ApiBody({ type: UpdatePriceDto })
   @ApiOkResponse({ type: PriceDto, description: "Updated Price." })
-  @UsePipes(new ZodValidationPipe(UpdatePriceSchema))
-  @Put()
-  async updatePrice(@Body() updatePrice: UpdatePriceDto): Promise<PriceDto> {
-    return await this.priceService.updatePrice(updatePrice);
+  @Patch(":priceId")
+  async updatePrice(
+    @Param("priceId", ParseIntPipe) priceId: number,
+    @Body(new ZodValidationPipe(UpdatePriceSchema)) updatePrice: UpdatePriceDto,
+  ): Promise<PriceDto> {
+    return await this.priceService.updatePrice(priceId, updatePrice);
   }
 
   /**

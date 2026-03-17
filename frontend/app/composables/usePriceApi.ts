@@ -17,7 +17,7 @@ import { API_ROUTES } from "../utils/apiRoutes";
  * the full localized object (Price). Without a lang, the raw localized object is returned.
  */
 export function usePriceApi() {
-  const { get, post, put, del } = useApi();
+  const { get, post, patch, del } = useApi();
 
   /** GET /prices — returns a paginated list of prices. */
   const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
@@ -37,11 +37,11 @@ export function usePriceApi() {
     post<Price, CreatePrice>(API_ROUTES.prices.base, body);
 
   /**
-   * PUT /prices — fully replaces an existing price.
+   * PATCH /prices/:priceId — fully replaces an existing price.
    * The ID must be included in the body (no ID in the URL for this endpoint).
    */
-  const replace = (body: UpdatePrice) =>
-    put<Price, UpdatePrice>(API_ROUTES.prices.base, body);
+  const replace = (priceId: number, body: UpdatePrice) =>
+    patch<Price, UpdatePrice>(API_ROUTES.prices.byId(priceId), body);
 
   /** DELETE /prices/:priceId — deletes a price. */
   const remove = (priceId: number) =>

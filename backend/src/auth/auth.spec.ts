@@ -253,8 +253,8 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer()).post("/prices").expect(401);
     });
 
-    it("PUT /prices should fail without API key.", async () => {
-      await request(app.getHttpServer()).put("/prices").expect(401);
+    it("PATCH /prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer()).patch("/prices/2").expect(401);
     });
 
     it("DELETE /prices/:priceId should fail without API key.", async () => {

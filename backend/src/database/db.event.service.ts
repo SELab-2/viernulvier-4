@@ -167,6 +167,9 @@ export class EventDatabaseService {
       event.starttime,
       event.endtime,
       event.production_id,
+      event.intermission_at,
+      event.doors_at,
+      event.legacy_id,
     ]);
 
     // Validate output

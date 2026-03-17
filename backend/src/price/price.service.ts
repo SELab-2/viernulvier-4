@@ -48,7 +48,11 @@ export class PriceService {
    * @param updatePrice The needed values to update the Price.
    * @returns The newly updated Price object.
    */
-  async updatePrice(updatePrice: UpdatePriceDto): Promise<PriceDto> {
+  async updatePrice(
+    priceId: number,
+    updatePrice: UpdatePriceDto,
+  ): Promise<PriceDto> {
+    updatePrice.id = priceId;
     return await this.priceDbService.updatePrice(updatePrice);
   }
 
