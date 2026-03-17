@@ -32,6 +32,7 @@ export default [
           './frontend/.nuxt/tsconfig.app.json',
           './frontend/.nuxt/tsconfig.shared.json',
           './frontend/.nuxt/tsconfig.server.json',
+          './frontend/tests/tsconfig.json'
         ],
         tsconfigRootDir: import.meta.dirname,
       },

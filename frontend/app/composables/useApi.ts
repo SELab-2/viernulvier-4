@@ -22,13 +22,13 @@ export interface ApiResponse<TData> {
 
 export function useApi() {
   const config = useRuntimeConfig();
-  const baseUrl = config.public.apiBase as string;
+  const baseUrl = config.public.apiBase;
   const { apiKey } = useAuth();
 
   async function request<TData, TBody = unknown>(
     method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
     endpoint: string,
-    options: ApiOptions<TBody> = {}
+    options: ApiOptions<TBody> = {},
   ): Promise<ApiResponse<TData>> {
     const { body, headers: extraHeaders, onError } = options;
 
@@ -47,14 +47,20 @@ export function useApi() {
       return { data: data ?? null, error: null, status: 200 };
     } catch (err: unknown) {
       // $fetch throws a FetchError on non-ok responses with status and data attached
-      const fetchError = err as { status?: number; data?: { message?: string }; message?: string };
+      const fetchError = err as {
+        status?: number;
+        data?: { message?: string };
+        message?: string;
+      };
       const status = fetchError.status ?? null;
       const message =
         fetchError.data?.message ??
         fetchError.message ??
         "An unexpected network error occurred.";
 
-      onError ? onError(status ?? 0, message) : handleDefaultError(status ?? 0, message);
+      onError
+        ? onError(status ?? 0, message)
+        : handleDefaultError(status ?? 0, message);
 
       return { data: null, error: message, status };
     }
@@ -80,7 +86,7 @@ export function useApi() {
   /** request — asks for object. */
   function get<TData>(
     endpoint: string,
-    options?: Omit<ApiOptions<never>, "body">
+    options?: Omit<ApiOptions<never>, "body">,
   ): Promise<ApiResponse<TData>> {
     return request<TData>("GET", endpoint, options);
   }
@@ -89,7 +95,7 @@ export function useApi() {
   function post<TData, TBody = unknown>(
     endpoint: string,
     body: TBody,
-    options?: Omit<ApiOptions<TBody>, "body">
+    options?: Omit<ApiOptions<TBody>, "body">,
   ): Promise<ApiResponse<TData>> {
     return request<TData, TBody>("POST", endpoint, { ...options, body });
   }
@@ -98,7 +104,7 @@ export function useApi() {
   function put<TData, TBody = unknown>(
     endpoint: string,
     body: TBody,
-    options?: Omit<ApiOptions<TBody>, "body">
+    options?: Omit<ApiOptions<TBody>, "body">,
   ): Promise<ApiResponse<TData>> {
     return request<TData, TBody>("PUT", endpoint, { ...options, body });
   }
@@ -107,7 +113,7 @@ export function useApi() {
   function patch<TData, TBody = unknown>(
     endpoint: string,
     body: TBody,
-    options?: Omit<ApiOptions<TBody>, "body">
+    options?: Omit<ApiOptions<TBody>, "body">,
   ): Promise<ApiResponse<TData>> {
     return request<TData, TBody>("PATCH", endpoint, { ...options, body });
   }
@@ -115,7 +121,7 @@ export function useApi() {
   /** deletion — removes the object. */
   function del<TData>(
     endpoint: string,
-    options?: Omit<ApiOptions<never>, "body">
+    options?: Omit<ApiOptions<never>, "body">,
   ): Promise<ApiResponse<TData>> {
     return request<TData>("DELETE", endpoint, options);
   }

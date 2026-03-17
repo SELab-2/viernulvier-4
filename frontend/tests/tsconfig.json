@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "vitest/globals" // Or "jest" if you use Jest instead of Vitest
+    ]
+  },
+  "include": [
+    "./**/*"
+  ]
+}

@@ -51,7 +51,7 @@ describe("useApi", () => {
       await get("/productions");
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/productions",
-        expect.objectContaining({ method: "GET" })
+        expect.objectContaining({ method: "GET" }),
       );
     });
 
@@ -100,7 +100,7 @@ describe("useApi", () => {
         expect.objectContaining({
           method: "POST",
           body: { name: "test" },
-        })
+        }),
       );
     });
   });
@@ -112,7 +112,7 @@ describe("useApi", () => {
       await put("/test/1", { id: 1, name: "updated" });
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/test/1",
-        expect.objectContaining({ method: "PUT" })
+        expect.objectContaining({ method: "PUT" }),
       );
     });
   });
@@ -124,7 +124,7 @@ describe("useApi", () => {
       await patch("/test/1", { name: "patched" });
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/test/1",
-        expect.objectContaining({ method: "PATCH" })
+        expect.objectContaining({ method: "PATCH" }),
       );
     });
   });
@@ -136,7 +136,7 @@ describe("useApi", () => {
       await del("/test/1");
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/test/1",
-        expect.objectContaining({ method: "DELETE" })
+        expect.objectContaining({ method: "DELETE" }),
       );
     });
   });

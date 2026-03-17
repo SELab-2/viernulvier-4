@@ -22,8 +22,12 @@ export function useBlogApi() {
   /** GET /blogs — returns a paginated list of blogs. */
   const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
     const params = { ...pagination, ...(lang ? { lang } : {}) };
-    const query = Object.keys(params).length ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: Blog[] | BlogView[] }>(`${API_ROUTES.blogs.base}${query}`);
+    const query = Object.keys(params).length
+      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<Blog | BlogView>>(
+      `${API_ROUTES.blogs.base}${query}`,
+    );
   };
 
   /** GET /blogs/:blogId — returns a single blog. */
@@ -45,8 +49,7 @@ export function useBlogApi() {
     patch<Blog, UpdateBlog>(API_ROUTES.blogs.byId(blogId), body);
 
   /** DELETE /blogs/:blogId — deletes a blog. */
-  const remove = (blogId: number) =>
-    del(API_ROUTES.blogs.byId(blogId));
+  const remove = (blogId: number) => del(API_ROUTES.blogs.byId(blogId));
 
   return { getAll, getById, create, replace, modify, remove };
 }

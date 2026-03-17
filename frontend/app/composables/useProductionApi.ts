@@ -25,14 +25,20 @@ export function useProductionApi() {
 
   /** GET /productions — returns a paginated list of productions, optionally filtered. */
   const getAll = (filters?: Partial<FilterProduction>) => {
-    const query = filters ? "?" + new URLSearchParams(filters as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: Production[] | ProductionView[] }>(`${API_ROUTES.productions.base}${query}`);
+    const query = filters
+      ? "?" + new URLSearchParams(filters as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<Production | ProductionView>>(
+      `${API_ROUTES.productions.base}${query}`,
+    );
   };
 
   /** GET /productions/:productionId — returns a single production. */
   const getById = (productionId: number, lang?: Language) => {
     const query = lang ? `?lang=${lang}` : "";
-    return get<Production | ProductionView>(`${API_ROUTES.productions.byId(productionId)}${query}`);
+    return get<Production | ProductionView>(
+      `${API_ROUTES.productions.byId(productionId)}${query}`,
+    );
   };
 
   /** POST /productions — creates a new production. */
@@ -41,11 +47,17 @@ export function useProductionApi() {
 
   /** PUT /productions/:productionId — fully replaces an existing production. */
   const replace = (productionId: number, body: Production) =>
-    put<Production, Production>(API_ROUTES.productions.byId(productionId), body);
+    put<Production, Production>(
+      API_ROUTES.productions.byId(productionId),
+      body,
+    );
 
   /** PATCH /productions/:productionId — partially updates an existing production. */
   const modify = (productionId: number, body: UpdateProduction) =>
-    patch<Production, UpdateProduction>(API_ROUTES.productions.byId(productionId), body);
+    patch<Production, UpdateProduction>(
+      API_ROUTES.productions.byId(productionId),
+      body,
+    );
 
   /** DELETE /productions/:productionId — deletes a production. */
   const remove = (productionId: number) =>
@@ -54,12 +66,17 @@ export function useProductionApi() {
   /** GET /productions/:productionId/tags — returns all tags linked to a production. */
   const getTags = (productionId: number, lang?: Language) => {
     const query = lang ? `?lang=${lang}` : "";
-    return get<Tag[] | TagView[]>(`${API_ROUTES.productions.tags(productionId)}${query}`);
+    return get<Tag[] | TagView[]>(
+      `${API_ROUTES.productions.tags(productionId)}${query}`,
+    );
   };
 
   /** PUT /productions/:productionId/tags/:tagId — links a tag to a production. */
   const addTag = (productionId: number, tagId: number) =>
-    put<Production, Record<string, never>>(API_ROUTES.productions.tagById(productionId, tagId), {});
+    put<Production, Record<string, never>>(
+      API_ROUTES.productions.tagById(productionId, tagId),
+      {},
+    );
 
   /** DELETE /productions/:productionId/tags/:tagId — removes a tag from a production. */
   const removeTag = (productionId: number, tagId: number) =>
@@ -68,12 +85,17 @@ export function useProductionApi() {
   /** GET /productions/:productionId/blogs — returns all blogs linked to a production. */
   const getBlogs = (productionId: number, lang?: Language) => {
     const query = lang ? `?lang=${lang}` : "";
-    return get<Blog[] | BlogView[]>(`${API_ROUTES.productions.blogs(productionId)}${query}`);
+    return get<Blog[] | BlogView[]>(
+      `${API_ROUTES.productions.blogs(productionId)}${query}`,
+    );
   };
 
   /** PUT /productions/:productionId/blogs/:blogId — links a blog to a production. */
   const linkBlog = (productionId: number, blogId: number) =>
-    put<Blog, Record<string, never>>(API_ROUTES.productions.blogById(productionId, blogId), {});
+    put<Blog, Record<string, never>>(
+      API_ROUTES.productions.blogById(productionId, blogId),
+      {},
+    );
 
   /** DELETE /productions/:productionId/blogs/:blogId — unlinks a blog from a production. */
   const unlinkBlog = (productionId: number, blogId: number) =>
