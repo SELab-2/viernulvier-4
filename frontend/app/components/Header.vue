@@ -1,16 +1,15 @@
 <script setup>
-//TODO: tailwind.css style
 //TODO: aanpasbare grootte
 //TODO: dropdown menu (nieuwe component)
-//TODO: knop language veranderen
 
 import { ref } from 'vue'
 import { ROUTES } from '~/utils/routes'
 import { Sun, Moon, LogOut} from 'lucide-vue-next'
 
-const isAdmin = ref(false) //TODO: zet isAdmin op true + herlaad pagina om de admin header te testen
-
 const { t, locale, setLocale } = useI18n()
+
+const { isLoggedIn, logout } = useAuth()
+const isAdmin = isLoggedIn
 
 const isDark = ref(false)
 const toggleDark = () => {
@@ -20,9 +19,10 @@ const toggleDark = () => {
 
 const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
-const logout = () => {
-  console.log('Uitloggen...')
-  // TODO: vul aan
+const handleLogout = async () => {
+  if (confirm(t('auth.confirmLogout'))) {
+    logout()
+  }
 }
 
 </script>
@@ -70,13 +70,14 @@ const logout = () => {
           </button>
 
           <button @click="toggleDark" class="btn-outline flex items-center justify-center gap-2">
-            <component :is="isDark ? Sun : Moon" :size="16" />
+            <Sun v-if="isDark" :size="16" />
+            <Moon v-else :size="16" />
             <span>{{ isDark ? 'LIGHT' : 'DARK' }}</span>
           </button>
 
           <button
             v-if="isAdmin"
-            @click="logout"
+            @click="handleLogout"
             class="flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-[11px] font-black text-white transition hover:bg-[var(--foreground)]">
             <LogOut :size="16" />
             {{ t('nav.logout').toUpperCase() }}
