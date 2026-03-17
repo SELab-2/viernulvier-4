@@ -340,7 +340,7 @@ export class EventDatabaseService {
              p.created_at,
              p.updated_at,
              p.price,
-             p.name,
+             p.name
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
       WHERE ep.event_id = $1
@@ -356,7 +356,7 @@ export class EventDatabaseService {
            p.price,
            p.name,
            p.created_at,
-           p.updated_at,
+           p.updated_at
     FROM prices p
     INNER JOIN event_prices ep ON ep.price_id = p.id
     WHERE ep.event_id = $1

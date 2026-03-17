@@ -6,7 +6,7 @@ import {
   PriceDto,
   UpdatePriceDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "src/common/exceptions";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class PriceDatabaseService {

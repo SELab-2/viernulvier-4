@@ -25,7 +25,6 @@ describe("EventService", () => {
     intermission_at: "2024-01-15T19:00:00Z",
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: "str",
   };
 
   // Updated Location to use LocalizedStringSchema
@@ -37,7 +36,6 @@ describe("EventService", () => {
     },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   // Updated Blog to use LocalizedStringSchema (even if it's just mocked for db configuration)
@@ -66,7 +64,6 @@ describe("EventService", () => {
       },
       created_at: "2024-01-15T19:00:00Z",
       updated_at: "2024-01-15T19:00:00Z",
-      legacy_id: null,
     },
   ];
 
@@ -181,7 +178,7 @@ describe("EventService", () => {
   describe("replaceEvent", () => {
     it("should successfully replace and return the event", async () => {
       const result = await service.replaceEvent(1, mockEvent);
-      expect(dbService.updateEvent).toHaveBeenCalledWith(mockEvent);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(1, mockEvent);
       expect(result).toEqual(mockEvent);
     });
 
@@ -213,7 +210,10 @@ describe("EventService", () => {
       const result = await service.modifyEvent(1, patchData);
 
       expect(dbService.getEventById).toHaveBeenCalledWith(1);
-      expect(dbService.updateEvent).toHaveBeenCalledWith(expectedMergedEvent);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(
+        1,
+        expectedMergedEvent,
+      );
       expect(result).toEqual(expectedMergedEvent);
     });
   });
@@ -244,7 +244,6 @@ describe("EventService", () => {
         production_id: 1,
         doors_at: "2024-01-15T19:00:00Z",
         intermission_at: "2024-01-15T19:00:00Z",
-        legacy_id: "str",
       };
 
       const createdEvent: EventDto = {
@@ -269,7 +268,6 @@ describe("EventService", () => {
         production_id: 1,
         doors_at: "2024-01-15T19:00:00Z",
         intermission_at: "2024-01-15T19:00:00Z",
-        legacy_id: "str",
       };
 
       jest

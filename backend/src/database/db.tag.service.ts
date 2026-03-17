@@ -24,7 +24,7 @@ export class TagDatabaseService {
         id,
         tag,
         created_at,
-        updated_at,
+        updated_at
       FROM tags
       WHERE id = $1
     `;

@@ -21,7 +21,6 @@ describe("LocationService", () => {
     },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   const filter: PaginationFilterDto = {
@@ -79,7 +78,6 @@ describe("LocationService", () => {
     it("should create a location in the database", async () => {
       const dto: CreateLocationDto = {
         location: { en: "Citadel Park", nl: "Citadelpark" },
-        legacy_id: null,
       };
       const result = await service.createLocation(dto);
       expect(result).toEqual(mockLocation);
@@ -90,12 +88,11 @@ describe("LocationService", () => {
   describe("updateLocation", () => {
     it("should update a location in the database", async () => {
       const dto: UpdateLocationDto = {
-        id: 1,
         location: { en: "Updated Park", nl: "Bijgewerkt park" },
       };
       const result = await service.updateLocation(1, dto);
       expect(result).toEqual(mockLocation);
-      expect(dbService.updateLocation).toHaveBeenCalledWith(dto);
+      expect(dbService.updateLocation).toHaveBeenCalledWith(1, dto);
     });
   });
 

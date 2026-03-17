@@ -203,6 +203,7 @@ describe("ProductionService", () => {
 
       expect(dbService.getProductionById).toHaveBeenCalledWith(1);
       expect(dbService.updateProduction).toHaveBeenCalledWith(
+        1,
         expectedMergedProduction,
       );
       expect(result).toEqual(expectedMergedProduction);
@@ -474,7 +475,6 @@ describe("ProductionService", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },
@@ -507,7 +507,6 @@ describe("ProductionService", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },
