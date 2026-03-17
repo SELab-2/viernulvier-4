@@ -12,13 +12,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  */
 
 const mockApiKey = { value: null as string | null };
-vi.mock("../../app/composables/useAuth", async(importOriginal) => {
-  const actual = await importOriginal();
-  return{
-    actual,
-    useAuth: () => ({ apiKey: mockApiKey }),
-  }
-});
+vi.mock("../../app/composables/useAuth", () => ({
+  useAuth: () => ({ apiKey: mockApiKey }),
+}));
 
 vi.mock("#app", () => ({
   useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
