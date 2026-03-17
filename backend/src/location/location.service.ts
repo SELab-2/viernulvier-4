@@ -55,8 +55,10 @@ export class LocationService {
    * @returns The updated Location.
    */
   async updateLocation(
+    locationId: number,
     updateLocation: UpdateLocationDto,
   ): Promise<LocationDto> {
+    updateLocation.id = locationId; // Set the location ID to the one in the URL.
     return await this.locationDbService.updateLocation(updateLocation);
   }
 

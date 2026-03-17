@@ -148,10 +148,10 @@ describe("LocationController", () => {
         id: 1,
         location: { en: "Updated Park", nl: "Bijgewerkt park" },
       };
-      const result = await controller.updateLocation(dto);
+      const result = await controller.updateLocation(1, dto);
 
       expect(result).toEqual(mockLocation);
-      expect(service.updateLocation).toHaveBeenCalledWith(dto);
+      expect(service.updateLocation).toHaveBeenCalledWith(1, dto);
     });
   });
 

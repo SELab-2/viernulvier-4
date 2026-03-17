@@ -72,7 +72,7 @@ describe("AuthGuards tests", () => {
         .expect(401);
     });
 
-    it("DELETE /events/:eventId/locations should fail without API key.", async () => {
+    it("DELETE /events/:eventId/location should fail without API key.", async () => {
       await request(app.getHttpServer())
         .delete("/events/1/location")
         .expect(401);
@@ -231,8 +231,8 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer()).post("/locations").expect(401);
     });
 
-    it("PATCH /locations should fail without API key", async () => {
-      await request(app.getHttpServer()).patch("/locations").expect(401);
+    it("PATCH /locations/:locationId should fail without API key", async () => {
+      await request(app.getHttpServer()).patch("/locations/1").expect(401);
     });
 
     it("DELETE /locations/:locationId should fail without API key", async () => {

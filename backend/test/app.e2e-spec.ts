@@ -1032,14 +1032,14 @@ describe("LocationController (e2e)", () => {
     });
   });
 
-  describe("PATCH /locations", () => {
+  describe("PATCH /locations/:locationId", () => {
     it("should return 200 with the updated location", () => {
       const updatePayload = {
         id: 1,
         location: { en: "Updated Stage", nl: "Bijgewerkt podium" },
       };
       return request(app.getHttpServer())
-        .patch("/locations")
+        .patch("/locations/1")
         .send(updatePayload)
         .expect(200)
         .expect(mockLocation);

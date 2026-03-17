@@ -36,9 +36,9 @@ export function useLocationApi() {
   const create = (body: CreateLocation) =>
     post<Location, CreateLocation>(API_ROUTES.locations.base, body);
 
-  /** PATCH /locations — updates an existing location. The ID must be included in the body. */
-  const modify = (body: UpdateLocation) =>
-    patch<Location, UpdateLocation>(API_ROUTES.locations.base, body);
+  /** PATCH /locations — updates an existing location. */
+  const modify = (locationId: number, body: UpdateLocation) =>
+    patch<Location, UpdateLocation>(API_ROUTES.locations.byId(locationId), body);
 
   /** DELETE /locations/:locationId — deletes a location. */
   const remove = (locationId: number) =>
