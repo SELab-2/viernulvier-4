@@ -17,8 +17,6 @@ import {
   LanguageQueryDto,
   LocationDto,
   LocationViewDto,
-  PaginatedLocationDto,
-  PaginatedLocationViewDto,
   PaginationFilterDto,
   UpdateLocationDto,
 } from "../dto/dto";
@@ -33,12 +31,16 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateLocationSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
   UpdateLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("locations")
 export class LocationController {
@@ -52,15 +54,15 @@ export class LocationController {
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
-  @ApiOkArrayAnyOf(LocationDto, LocationViewDto)
+  @ApiOkPaginatedResponseAnyOf(LocationDto, LocationViewDto)
   @Get()
   async getLocations(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<PaginatedLocationDto | PaginatedLocationViewDto> {
+  ): Promise<PaginatedResponse<LocationDto | LocationViewDto>> {
     return this.ls.flattenByLanguage<
-      PaginatedLocationDto | PaginatedLocationViewDto
+      PaginatedResponse<LocationDto | LocationViewDto>
     >(await this.locationService.getLocations(paginationFilter), lang.lang);
   }
 

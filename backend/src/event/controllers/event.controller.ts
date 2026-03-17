@@ -18,6 +18,7 @@ import {
   CreateEventSchema,
   EventSchema,
   FilterEventSchema,
+  PaginatedResponse,
   UpdateEventSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../../auth/authGuard";
@@ -25,7 +26,6 @@ import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
-  PaginatedEventDto,
   UpdateEventDto,
 } from "../../dto/dto";
 import {
@@ -34,6 +34,7 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
+import { ApiOkPaginatedResponseAnyOf } from "src/common/decorators/api.ok";
 
 @Controller("events")
 export class EventController {
@@ -46,16 +47,12 @@ export class EventController {
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
-  @ApiOkResponse({
-    type: EventDto,
-    isArray: true,
-    description: "All Events returned.",
-  })
+  @ApiOkPaginatedResponseAnyOf(EventDto)
   @Get()
   @UsePipes(new ZodValidationPipe(FilterEventSchema))
   async getAllEvents(
     @Query() filters: FilterEventDto,
-  ): Promise<PaginatedEventDto> {
+  ): Promise<PaginatedResponse<EventDto>> {
     return await this.eventService.getAllEvents(filters);
   }
 
