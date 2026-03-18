@@ -1,6 +1,7 @@
 <script setup>
 //TODO: aanpasbare grootte
 //TODO: dropdown menu (nieuwe component)
+//TODO: als je back doet na error, style klopt niet meer, check!
 
 import { ref } from 'vue'
 import { ROUTES } from '~/utils/routes'
