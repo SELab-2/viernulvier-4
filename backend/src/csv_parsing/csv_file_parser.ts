@@ -489,6 +489,11 @@ export class CSVFileParser {
     };
   }
 
+  /**
+   * Parse events from a CSV file and return them along with their localized locations
+   * @param filePath - Path to the CSV file containing events
+   * @return A promise that resolves to an array of objects containing the event DTO and their localized locations
+   */
   static async parseEventsCSV(
     filePath: string,
   ): Promise<ParsedLocalizedEventRow[]> {
@@ -516,7 +521,14 @@ export class CSVFileParser {
     });
   }
 
-  static async parseProductionsCSV(filePath: string): Promise<ParsedProductionRow[]> {
+  /**
+   * Parse productions from a CSV file and return them along with their legacy IDs
+   * @param filePath - Path to the CSV file containing productions
+   * @return A promise that resolves to an array of objects containing the production DTO and their legacy IDs
+   */
+  static async parseProductionsCSV(
+    filePath: string,
+  ): Promise<ParsedProductionRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateProductionDto & { legacy_id: string }
     >(
