@@ -194,6 +194,47 @@ export class CSVFileParser {
     };
   }
 
+  static trandformEventRow(
+    row: Record<string, string>,
+  ): CreateEventDto & { location: {en: string; nl: string} } {
+      let endTime: string | null = null;
+
+      // Check for invalid date formats and handle them accordingly
+      const invalidDates = ["0000-00-00 00:00:00", "1970-01-01 00:00:00", ""];
+      const starttimeDate = new Date(row.Starttime);
+      if (isNaN(starttimeDate.getTime())) {
+        throw new Error(`Invalid starttime: ${row.Starttime}`);
+      }
+      if (row.Endtime && !invalidDates.includes(row.Endtime)) {
+        const endTimeDate = new Date(row.Endtime);
+        if (!isNaN(endTimeDate.getTime()) && endTimeDate > starttimeDate)
+          endTime = endTimeDate.toISOString();
+      }
+
+      const productionId = Number(row.Production);
+      if (isNaN(productionId)) {
+        throw new Error(`Invalid production id: ${row.Production}`);
+      }
+
+      const location_nl = (row.Location_NL || "").trim();
+      if (!location_nl) {
+        throw new Error(`Location_NL is required: ${row.Location_NL}`);
+      }
+      const location_en = (row.Location_EN || location_nl).trim();
+      if (!location_en) {
+        //TODO translate?
+      }   
+
+      return {
+        starttime: starttimeDate.toISOString(),
+        endtime: endTime,
+        production_id: productionId,
+        location: { en: location_en, nl: location_nl },
+        doors_at: null, // TODO
+        intermission_at: null, // TODO
+      };
+  }
+
   static transformPriceRow(
     row: Record<string, string>,
   ): CreatePriceDto & { event_id: number } {
