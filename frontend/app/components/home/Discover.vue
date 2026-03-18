@@ -1,4 +1,8 @@
 <script setup lang="ts">
+
+import { ROUTES } from '~/utils/routes'
+
+
 const { t } = useI18n()
 </script>
 
@@ -11,7 +15,7 @@ const { t } = useI18n()
 
       <div class="grid md:grid-cols-2 gap-4 md:gap-6">
         <HomeDiscoverCard
-          to="/blogs"
+          :to="ROUTES.stories.base"
           image="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80"
           image-alt="Stories and History"
           :title="t('discover.stories.title')"
@@ -19,7 +23,7 @@ const { t } = useI18n()
           :cta="t('discover.stories.cta')"
         />
         <HomeDiscoverCard
-          to="/uploads"
+          :to="ROUTES.prints.base"
           image="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=900&q=80"
           image-alt="Posters and Printed Materials"
           :title="t('discover.posters.title')"
