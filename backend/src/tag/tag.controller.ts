@@ -14,6 +14,9 @@ import { TagService } from "./tag.service";
 import {
   CreateTagDto,
   LanguageQueryDto,
+  PaginatedTagDto,
+  PaginatedTagViewDto,
+  PaginationFilterDto,
   TagDto,
   TagViewDto,
   UpdateTagDto,
@@ -29,6 +32,7 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateTagSchema,
   LanguageQuerySchema,
+  PaginationFilterSchema,
   UpdateTagSchema,
 } from "@repo/common";
 import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
@@ -43,6 +47,8 @@ export class TagController {
 
   /**
    * Responds to GET /tags
+   * @param lang is the language filter
+   * @param paginationFilter is the pagination parameters.
    * @returns All TagDto objects
    */
   @ApiOperation({ summary: "Returns all Tag objects." })
@@ -50,9 +56,11 @@ export class TagController {
   @Get()
   async getAllTags(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<TagDto[] | TagViewDto[]> {
-    return this.ls.flattenByLanguage<TagDto[] | TagViewDto[]>(
-      await this.tagService.getAllTags(),
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedTagDto | PaginatedTagViewDto> {
+    return this.ls.flattenByLanguage<PaginatedTagDto | PaginatedTagViewDto>(
+      await this.tagService.getAllTags(paginationFilter),
       lang.lang,
     );
   }
@@ -60,6 +68,7 @@ export class TagController {
   /**
    * Responds to GET /tags/:tagId
    * @param tagId ID in the URL of the request.
+   * @param lang is the Language filter
    * @returns The TagDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Tag with id in the URL." })
@@ -123,7 +132,7 @@ export class TagController {
   @Delete(":tagId")
   async deleteTag(
     @Param("tagId", ParseIntPipe) tagId: number,
-  ): Promise< {message: string} > {
+  ): Promise<{ message: string }> {
     return await this.tagService.deleteTag(tagId);
   }
 }

@@ -25,6 +25,8 @@ import {
   CreateProductionDto,
   FilterProductionDto,
   LanguageQueryDto,
+  PaginatedProductionDto,
+  PaginatedProductionViewDto,
   ProductionDto,
   ProductionViewDto,
   UpdateProductionDto,
@@ -52,6 +54,7 @@ export class ProductionController {
 
   /**
    * Responds to GET /productions.
+   * note: pagination is done here via the filters param.
    * @param filters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
@@ -62,16 +65,16 @@ export class ProductionController {
   @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
     @Query() filters: FilterProductionDto,
-  ): Promise<ProductionDto[] | ProductionViewDto[]> {
-    return this.ls.flattenByLanguage<ProductionDto[] | ProductionViewDto[]>(
-      await this.productionService.getAllProductions(filters),
-      filters.lang,
-    );
+  ): Promise<PaginatedProductionDto | PaginatedProductionViewDto> {
+    return this.ls.flattenByLanguage<
+      PaginatedProductionDto | PaginatedProductionViewDto
+    >(await this.productionService.getAllProductions(filters), filters.lang);
   }
 
   /**
    * Responds to GET /productions/:productionId.
    * @param productionId ID in the URL of the request.
+   * @param lang is the used language
    * @returns The ProductionDto object with corresponding ID
    */
   @ApiOperation({ summary: "Returns the Production with id in the URL." })

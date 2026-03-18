@@ -6,8 +6,9 @@ import {
   BlogDto,
   BlogViewDto,
   CreateBlogDto,
-  UpdateBlogDto,
   LanguageQueryDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
 } from "../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
 
@@ -53,6 +54,11 @@ describe("BlogController", () => {
     description: "Looking at the set of The Great Show.",
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   beforeEach(async () => {
@@ -104,7 +110,7 @@ describe("BlogController", () => {
       mockBlogService.getAllBlogs.mockResolvedValue(rawBlogs);
       mockLanguageService.flattenByLanguage.mockReturnValue(flattenedBlogs);
 
-      const result = await controller.getAllBlogs(langQuery);
+      const result = await controller.getAllBlogs(langQuery, filter);
 
       expect(result).toEqual(flattenedBlogs);
       expect(blogService.getAllBlogs).toHaveBeenCalledTimes(1);

@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreatePriceDto, PriceDto, UpdatePriceDto } from "../dto/dto";
+import {
+  CreatePriceDto,
+  PaginatedPriceDto,
+  PriceDto,
+  UpdatePriceDto,
+} from "../dto/dto";
 
 @Injectable()
 export class PriceDatabaseService {
@@ -31,37 +36,34 @@ export class PriceDatabaseService {
    * @param page page index (starts at 0)
    * @return prices
    */
-  async getPrices(amount: number = 0, page: number = 0): Promise<PriceDto[]> {
-    const offset = page * amount;
+  async getPrices(
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<PaginatedPriceDto> {
+    let query = `
+    SELECT id, price, name, created_at, updated_at, legacy_id
+    FROM prices
+    ORDER BY id
+  `;
 
-    if (amount === 0) {
-      const query = `
-      SELECT id,
-             price,
-             name,
-             created_at,
-             updated_at,
-             legacy_id
-      FROM prices
-      ORDER BY id
-      `;
+    const params: any[] = [];
 
-      return await this.db.query<PriceDto>(query);
+    if (amount > 0) {
+      query += ` LIMIT $1 OFFSET $2`;
+      params.push(amount, page * amount);
     }
 
-    const query = `
-    SELECT id,
-           price,
-           name,
-           created_at,
-           updated_at,
-           legacy_id
-    FROM prices
-    ORDER BY id 
-    LIMIT $1 OFFSET $2
-    `;
+    const [prices, countResult] = await Promise.all([
+      this.db.query<PriceDto>(query, params),
+      this.db.query<{ count: string }>(`SELECT COUNT(*) as count FROM prices`),
+    ]);
 
-    return await this.db.query<PriceDto>(query, [amount, offset]);
+    return {
+      page,
+      limit: amount,
+      totalItems: parseInt(countResult[0].count),
+      objects: prices,
+    };
   }
 
   /**

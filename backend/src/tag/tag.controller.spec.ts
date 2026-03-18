@@ -4,10 +4,11 @@ import { TagService } from "./tag.service";
 import { LanguageService } from "../util/language/language.service";
 import {
   CreateTagDto,
+  LanguageQueryDto,
+  PaginationFilterDto,
   TagDto,
   TagViewDto,
   UpdateTagDto,
-  LanguageQueryDto,
 } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
@@ -36,6 +37,11 @@ describe("TagController", () => {
     created_at: "2024-01-15T19:00:00.000Z",
     updated_at: "2024-01-15T19:00:00Z",
     legacy_id: null,
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   const mockTags: TagDto[] = [mockTag];
@@ -90,7 +96,7 @@ describe("TagController", () => {
         .spyOn(languageService, "flattenByLanguage")
         .mockReturnValue(mockTagViews);
 
-      const result = await controller.getAllTags(langQuery);
+      const result = await controller.getAllTags(langQuery, filter);
 
       expect(result).toEqual(mockTagViews);
       expect(service.getAllTags).toHaveBeenCalled();
