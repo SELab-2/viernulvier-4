@@ -12,24 +12,13 @@
     anchored to the bottom of the section
   - Subtitle and CTA button text sourced from i18n keys (hero.*)
   - CTA button links to the archive page
-
-  Dark mode and language switching are implemented in script but the
-  toggle buttons live in the global Header component.
 -->
 <script setup lang="ts">
 import { ArrowRight } from 'lucide-vue-next'
 import { ROUTES } from '~/utils/routes'
 
-const { t, locale, setLocale } = useI18n()
+const { t } = useI18n()
 
-// Dark mode toggle — controlled from AppHeader
-const isDark = ref(false)
-const toggleDark = () => {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-}
-
-const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 </script>
 
 <template>
