@@ -1,7 +1,7 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateBlogDto, CreateEventDto, CreatePriceDto, CreateProductionDto } from "../dto/dto";
+import { CreateBlogDto, CreateEventDto, CreatePriceDto, CreateProductionDto, CreateTagDto } from "../dto/dto";
 import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
 
 /**
@@ -214,6 +214,33 @@ export class CSVFileParser {
       titel: { en: title_en, nl: title_nl },
       description: { en: description_en, nl: description_nl },
       production_id: productionId,
+    };
+  }
+
+  static transformTagRow(
+    row: Record<string, string>,
+  ): CreateTagDto & { productionIds: number[] } {
+    const tagName_nl = row.TagName_NL;
+    if (!tagName_nl) {
+      throw new Error(`TagName_NL is required: ${row.TagName_NL}`);
+    }
+    const tagName_en = row.TagName_EN;
+    if (!tagName_en) {
+      //TODO: translating
+    }
+    const productionIds = (row.ProductionIDs || "")
+      .split(",")
+      .map((id) => {
+        const numId = Number(id.trim());
+        if (isNaN(numId)) {
+          throw new Error(`Invalid production id in ProductionIDs: ${id}`);
+        }
+        return numId;
+      });
+
+    return {
+      tag: { en: tagName_en, nl: tagName_nl },
+      productionIds,
     };
   }
 
