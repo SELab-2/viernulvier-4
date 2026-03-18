@@ -45,11 +45,11 @@ const emit = defineEmits<{ // update:modelValue gets called when a new selection
 
 const internalQuery = ref(props.modelValue || "") // so that a user can type without selecting something yet
 const isFocused = ref(false) // tracks if input is focused (user is typing)
+const inputRef = ref<HTMLInputElement | null>(null) // used for unfocusing the bar after selecting an item
 
 const results: ComputedRef<string[]> = computed(() => {
   // suggestions do not need to appear if user did not click on the bar
-  // and if the bar is empty just after selecting anything
-  if (!isFocused.value && !internalQuery.value) return []
+  if (!isFocused.value) return []
 
   const query = internalQuery.value.toLowerCase()
   const filtered =
@@ -71,14 +71,9 @@ const results: ComputedRef<string[]> = computed(() => {
 })
 
 const select = (item: string) => { // handles selecting a suggestion
-  internalQuery.value = ""
+  internalQuery.value = item
   emit("update:modelValue", item)
-  isFocused.value = false
-}
-const hideSuggestions = () => {
-  setTimeout(() => {
-    isFocused.value = false
-  }, 150)
+  inputRef.value?.blur()
 }
 </script>
 
@@ -92,13 +87,14 @@ const hideSuggestions = () => {
     <div class="relative">
       <!-- Search input based on internalQuery -->
       <input
+          ref="inputRef"
           :id="props.id"
           type="text"
           :placeholder="computedPlaceholder"
           v-model="internalQuery"
           :required="props.required"
           @focus="isFocused = true"
-          @blur="hideSuggestions"
+          @blur="isFocused = false"
           class="pl-12 pr-4 bg-muted border-none h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full focus:outline-none focus:ring-0"
       />
 
@@ -107,7 +103,6 @@ const hideSuggestions = () => {
         <li v-for="item in results"
             :key="item"
             @mousedown.prevent="select(item)"
-            @click="select(item)"
             class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-muted text-muted-foreground">
           {{ item }}
         </li>
