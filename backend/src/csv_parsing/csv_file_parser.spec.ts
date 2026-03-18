@@ -28,7 +28,6 @@ function createMockStream(rows: any[], error?: Error) {
   };
 }
 
-// TODO: Remove skip
 describe("CSVFileParser", () => {
   describe("CSVFileParser.parseCSVWithSchema", () => {
     beforeEach(() => {
