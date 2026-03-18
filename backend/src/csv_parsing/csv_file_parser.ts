@@ -331,6 +331,11 @@ export class CSVFileParser {
     };
   }
 
+  /**
+   * Parse prices from a CSV file and return them along with their associated event IDs
+   * @param filePath - Path to the CSV file containing prices
+   * @return A promise that resolves to an array of objects containing the price DTO and the associated event ID
+   */
   static async parsePricesCSV(filePath: string): Promise<ParsedPriceRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreatePriceDto & { event_id: number }
@@ -346,6 +351,11 @@ export class CSVFileParser {
     });
   }
 
+  /**
+   * Parse blogs from a CSV file and return them along with their associated production IDs
+   * @param filePath - Path to the CSV file containing blogs
+   * @return A promise that resolves to an array of objects containing the blog DTO and the associated production ID
+   */
   static async parseBlogsCSV(filePath: string): Promise<ParsedBlogRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateBlogDto & { production_id: number }
@@ -361,6 +371,11 @@ export class CSVFileParser {
     });
   }
 
+  /**
+   * Parse tags from a CSV file and return them along with their associated production IDs
+   * @param filePath - Path to the CSV file containing tags
+   * @return A promise that resolves to an array of objects containing the tag DTO and an array of associated production IDs
+   */
   static async parseTagsCSV(filePath: string): Promise<ParsedTagRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateTagDto & { productionIds: number[] }
