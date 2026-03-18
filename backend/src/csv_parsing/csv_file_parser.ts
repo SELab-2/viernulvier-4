@@ -194,45 +194,113 @@ export class CSVFileParser {
     };
   }
 
-  static trandformEventRow(
+  static transformEventRow(
     row: Record<string, string>,
-  ): CreateEventDto & { location: {en: string; nl: string} } {
-      let endTime: string | null = null;
+  ): CreateEventDto & {
+    location: { en: string; nl: string };
+    legacy_id: string;
+  } {
 
-      // Check for invalid date formats and handle them accordingly
-      const invalidDates = ["0000-00-00 00:00:00", "1970-01-01 00:00:00", ""];
-      const starttimeDate = new Date(row.Starttime);
-      if (isNaN(starttimeDate.getTime())) {
-        throw new Error(`Invalid starttime: ${row.Starttime}`);
-      }
-      if (row.Endtime && !invalidDates.includes(row.Endtime)) {
-        const endTimeDate = new Date(row.Endtime);
-        if (!isNaN(endTimeDate.getTime()) && endTimeDate > starttimeDate)
-          endTime = endTimeDate.toISOString();
-      }
+    const id = Number(row.ID);
+    if (isNaN(id)) {
+      throw new Error(`Invalid production id: ${row.ID}`);
+    }
+    let endTime: string | null = null;
 
-      const productionId = Number(row.Production);
-      if (isNaN(productionId)) {
-        throw new Error(`Invalid production id: ${row.Production}`);
-      }
+    // Check for invalid date formats and handle them accordingly
+    const invalidDates = ["0000-00-00 00:00:00", "1970-01-01 00:00:00", ""];
+    const starttimeDate = new Date(row.Starttime);
+    if (isNaN(starttimeDate.getTime())) {
+      throw new Error(`Invalid starttime: ${row.Starttime}`);
+    }
+    if (row.Endtime && !invalidDates.includes(row.Endtime)) {
+      const endTimeDate = new Date(row.Endtime);
+      if (!isNaN(endTimeDate.getTime()) && endTimeDate > starttimeDate)
+        endTime = endTimeDate.toISOString();
+    }
 
-      const location_nl = (row.Location_NL || "").trim();
-      if (!location_nl) {
-        throw new Error(`Location_NL is required: ${row.Location_NL}`);
-      }
-      const location_en = (row.Location_EN || location_nl).trim();
-      if (!location_en) {
-        //TODO translate?
-      }   
+    const productionId = Number(row.Production);
+    if (isNaN(productionId)) {
+      throw new Error(`Invalid production id: ${row.Production}`);
+    }
 
-      return {
-        starttime: starttimeDate.toISOString(),
-        endtime: endTime,
-        production_id: productionId,
-        location: { en: location_en, nl: location_nl },
-        doors_at: null, // TODO
-        intermission_at: null, // TODO
-      };
+    const location_nl = (row.Location_NL || "").trim();
+    const location_en = row.Location_EN.trim();
+    if (!location_en) {
+      //TODO translate?
+    }
+
+    return {
+      starttime: starttimeDate.toISOString(),
+      endtime: endTime,
+      production_id: productionId,
+      location: { en: location_en, nl: location_nl },
+      doors_at: null, // TODO
+      intermission_at: null, // TODO
+      legacy_id: `csv-${id}`,
+    };
+  }
+
+  static transformProductionRow(
+    row: Record<string, string>,
+  ): CreateProductionDto & { legacy_id: string } {
+    // validate and convert numeric fields manually to provide clearer errors
+    const id = Number(row.ID);
+    if (isNaN(id)) {
+      throw new Error(`Invalid production id: ${row.ID}`);
+    }
+
+    const titel_nl = (row.Titel_NL || "").trim();
+
+    const titel_en = row.Titel_EN.trim();
+    if (!titel_en) {
+      //TODO translate
+    }
+
+    const description1_nl = (row.Description1_NL || "").trim();
+    const description1_en = row.Description1_EN.trim();
+    if (!description1_en) {
+      //TODO translate
+    }
+
+    const description2_nl = (row.Description2_NL || "").trim();
+    const description2_en = row.Description2_EN.trim();
+    if (!description2_en) {
+      //TODO translate
+    }
+
+    const artist_nl = (row.Artist_NL || "").trim();
+    const artist_en = row.Artist_EN.trim();
+    if (!artist_en) {
+      //TODO translate
+    }
+
+    const tagline_nl = (row.Tagline_NL || "").trim();
+    const tagline_en = row.Tagline_EN.trim();
+    if (!tagline_en) {
+      //TODO translate
+    }
+
+    const credits_nl = (row.Credits_NL || "").trim();
+    const credits_en = row.Credits_EN.trim();
+    if (!credits_en) {
+      //TODO translate
+    }
+
+    const performer_type = row.Performer_Type.trim() || null;
+    const attendance_mode = row.Attendance_Mode.trim() || null;
+
+    return {
+      titel: { en: titel_en, nl: titel_nl },
+      description1: { en: description1_en, nl: description1_nl },
+      description2: { en: description2_en, nl: description2_nl },
+      artist: { en: artist_en, nl: artist_nl },
+      tagline: { en: tagline_en, nl: tagline_nl },
+      credits: { en: credits_en, nl: credits_nl },
+      attendance_mode: attendance_mode,
+      performer_type: performer_type,
+      legacy_id: `csv-${id}`,
+    };
   }
 
   static transformPriceRow(
@@ -267,12 +335,18 @@ export class CSVFileParser {
     if (!title_nl) {
       throw new Error(`Titel_NL is required: ${row.Titel_NL}`);
     }
-    const title_en = row.Titel_EN || title_nl;
+    const title_en = row.Titel_EN;
+    if (!title_en) {
+      //TODO translate
+    }
     const description_nl = row.Description_NL;
     if (!description_nl) {
       throw new Error(`Description_NL is required: ${row.Description_NL}`);
     }
-    const description_en = row.Description_EN || description_nl;
+    const description_en = row.Description_EN;
+    if (!description_en) {
+      //TODO translate
+    }
     const productionId = Number(row.ProductionID);
     if (isNaN(productionId)) {
       throw new Error(`Invalid production id: ${row.ProductionID}`);
@@ -292,7 +366,10 @@ export class CSVFileParser {
     if (!tagName_nl) {
       throw new Error(`TagName_NL is required: ${row.TagName_NL}`);
     }
-    const tagName_en = row.TagName_EN || tagName_nl;
+    const tagName_en = row.TagName_EN;
+    if (!tagName_en) {
+      //TODO translate
+    }
     const productionIds = (row.ProductionIDs || "").split(",").map((id) => {
       const numId = Number(id.trim());
       if (isNaN(numId)) {
