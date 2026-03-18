@@ -1,0 +1,132 @@
+/**
+ * tailwind.css
+ *
+ * Global stylesheet for the VIERNULVIER archive frontend.
+ *
+ * This file is responsible for:
+ * - Importing Tailwind CSS
+ * - Registering the dark mode variant (class-based via `.dark` on <html>)
+ * - Loading the ABCMonumentGrotesk brand font (Heavy + Regular weights)
+ * - Defining CSS custom properties (design tokens) for both light and dark mode
+ * - Exposing those tokens to Tailwind via @theme inline
+ * - Applying base styles to body and html
+ * - Defining the .dropcap utility used in article/about section intros
+ * - Defining the .font-brand utility class for the brand font
+ *
+ * Font files are stored in /public/fonts/.
+ * Dark mode is toggled by adding/removing the `dark` class on <html>.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ABCMonumentGrotesk — the official VIERNULVIER brand font.
+   Font files live in /public/fonts/ */
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('/fonts/ABCMonumentGrotesk-Heavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('/fonts/ABCMonumentGrotesk-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Design tokens: light mode ────────────────────────────────────────────── */
+:root {
+  --font-size: 16px;
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --primary: #030213;
+  --primary-foreground: oklch(1 0 0);
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --border: rgba(0, 0, 0, 0.1);
+  --ring: oklch(0.708 0 0);
+  --radius: 0.625rem;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+}
+
+/* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --border: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+}
+
+/* ─── Tailwind theme mapping ────────────────────────────────────────────────
+   Maps the CSS custom properties above to Tailwind utility classes so that
+   e.g. `bg-background`, `text-foreground`, `border-border` etc. work out
+   of the box.
+   ---------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Make ABCMonumentGrotesk available as font-brand in Tailwind */
+  --font-brand: 'ABCMonumentGrotesk', sans-serif;
+}
+
+/* ─── Base layer ────────────────────────────────────────────────────────────
+   Applied to every element and the body/html root.
+   ---------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+}
+
+/* ─── Drop cap ──────────────────────────────────────────────────────────────
+   Apply the `.dropcap` class to the first <p> of an article or section intro
+   to render an oversized first letter (editorial style).
+   Used in: HomeAbout.vue
+   ---------------------------------------------------------------------- */
+.dropcap::first-letter {
+  float: left;
+  font-size: 4.5rem;
+  line-height: 0.75;
+  font-weight: 700;
+  margin-right: 0.5rem;
+  margin-top: -0.6rem;
+}
+
+/* ─── Brand font utility ────────────────────────────────────────────────────
+   Convenience class for applying the ABCMonumentGrotesk font directly
+   without going through Tailwind's font-brand utility.
+   ---------------------------------------------------------------------- */
+.font-brand {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
+}

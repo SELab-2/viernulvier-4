@@ -1,0 +1,41 @@
+{
+  "hero": {
+    "title": "Archief",
+    "label": "Kunstencentrum Gent — Archief",
+    "subtitle": "Decennia van kunst, dans, muziek en theater in het hart van Gent.",
+    "cta": "Verken het archief"
+  },
+  "highlights": {
+    "title": "Archief Highlights",
+    "subtitle": "Recente voorstellingen en bijzondere momenten",
+    "viewAll": "Bekijk volledige archief"
+  },
+  "about": {
+    "title": "Over het archief",
+    "body1": "Het VIERNULVIER archief bevat een rijke collectie van voorstellingen, concerten en evenementen die plaatsvonden in ons kunstencentrum. Van legendarische optredens in de jaren '90 tot hedendaagse dans en theater.",
+    "body2": "Gebruik de zoekfunctie om specifieke artiesten, locaties of periodes te vinden. Ontdek verhalen achter de voorstellingen en herbeleef bijzondere momenten."
+  },
+  "discover": {
+    "title": "Meer ontdekken",
+    "stories": {
+      "title": "Verhalen & Geschiedenis",
+      "body": "Lees artikels, interviews en verhalen over het gebouw, de geschiedenis en bijzondere momenten.",
+      "cta": "Lees meer"
+    },
+    "posters": {
+      "title": "Affiches & Drukwerk",
+      "body": "Bekijk historische affiches, brochures en programmaboekjes uit het archief.",
+      "cta": "Bekijk collectie"
+    }
+  },
+  "footer": {
+    "tagline": "Kunstencentrum in het hart van Gent",
+    "links": "Links",
+    "mainSite": "Hoofdwebsite",
+    "archive": "Archief",
+    "stories": "Verhalen",
+    "prints": "Drukwerk",
+    "rights": "Alle rechten voorbehouden",
+    "newsletter": "Blijf op de hoogte"
+  }
+}
