@@ -125,7 +125,7 @@ export class CSVFileParser {
     });
   }
 
-  static transformEventRow(
+  static transformOldEventRow(
     row: Record<string, string>,
   ): CreateEventDto & { location: string } {
     let endTime: string | null = null;
@@ -159,7 +159,7 @@ export class CSVFileParser {
     };
   }
 
-  static transformProductionRow(
+  static transformOldProductionRow(
     row: Record<string, string>,
   ): CreateProductionDto & { tags: string[]; legacy_id: string } {
     // validate and convert numeric fields manually to provide clearer errors
@@ -267,19 +267,19 @@ export class CSVFileParser {
   }
 
   /**
-   * Parse events from a CSV file and return them along with a raw location
+   * Parse events from an old CSV file and return them along with a raw location
    * string.
    * @param filePath - Path to the CSV file containing events
    * @return A promise that resolves to an array of objects containing the
    *         event DTO and the value of the `Hall` column (may be empty).
    */
-  static async parseEventsCSV(filePath: string): Promise<ParsedEventRow[]> {
+  static async parseOldEventsCSV(filePath: string): Promise<ParsedEventRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateEventDto & { location: string }
     >(
       filePath,
       CreateEventSchema.extend({ location: string() }),
-      this.transformEventRow,
+      this.transformOldEventRow,
     );
 
     return parsed.map((r) => {
@@ -289,11 +289,11 @@ export class CSVFileParser {
   }
 
   /**
-   * Parse productions from a CSV file and return structured import data
+   * Parse productions from an old CSV file and return structured import data
    * @param filePath - Path to the CSV file containing productions
    * @return A promise that resolves to an object containing productions, unique tags, and production-tag links
    */
-  static async parseProductionsCSV(
+  static async parseOldProductionsCSV(
     filePath: string,
   ): Promise<ParsedProductionImport> {
     const productions: (CreateProductionDto & { legacy_id: string })[] = [];
@@ -308,7 +308,7 @@ export class CSVFileParser {
         tags: string().array(),
         legacy_id: string(),
       }),
-      this.transformProductionRow,
+      this.transformOldProductionRow,
     );
 
     for (const production of parsed) {

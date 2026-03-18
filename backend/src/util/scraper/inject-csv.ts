@@ -72,8 +72,8 @@ export async function injectCsvData() {
 
   logger.info("Parsing CSV files...");
   const { productions, tags, productionTagLinks } =
-    await CSVFileParser.parseProductionsCSV(productionsFile);
-  const parsedEvents = await CSVFileParser.parseEventsCSV(eventsFile);
+    await CSVFileParser.parseOldProductionsCSV(productionsFile);
+  const parsedEvents = await CSVFileParser.parseOldEventsCSV(eventsFile);
 
   const csvTags: vnvGenre[] = tags.map(toCsvTag);
   const csvProductions: vnvProduction[] = productions.map((production) =>

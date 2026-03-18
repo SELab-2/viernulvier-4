@@ -90,7 +90,7 @@ describe("CSVFileParser", () => {
         Hall: "Main Hall",
       };
 
-      const result = CSVFileParser.transformEventRow(row);
+      const result = CSVFileParser.transformOldEventRow(row);
 
       expect(result).toEqual({
         starttime: new Date("2024-01-01 10:00:00").toISOString(),
@@ -110,7 +110,7 @@ describe("CSVFileParser", () => {
         Hall: "",
       };
 
-      const result = CSVFileParser.transformEventRow(row);
+      const result = CSVFileParser.transformOldEventRow(row);
 
       expect(result.endtime).toBeNull();
       expect(result.location).toBe("");
@@ -123,7 +123,7 @@ describe("CSVFileParser", () => {
         Production: "5",
       };
 
-      expect(() => CSVFileParser.transformEventRow(row)).toThrow(
+      expect(() => CSVFileParser.transformOldEventRow(row)).toThrow(
         "Invalid starttime",
       );
     });
@@ -135,7 +135,7 @@ describe("CSVFileParser", () => {
         Production: "abc",
       };
 
-      expect(() => CSVFileParser.transformEventRow(row)).toThrow(
+      expect(() => CSVFileParser.transformOldEventRow(row)).toThrow(
         "Invalid production id",
       );
     });
@@ -152,7 +152,7 @@ describe("CSVFileParser", () => {
         Genre: "drama",
       };
 
-      const result = CSVFileParser.transformProductionRow(row);
+      const result = CSVFileParser.transformOldProductionRow(row);
 
       expect(result).toEqual({
         titel: { en: "Hamlet", nl: "Hamlet" },
@@ -176,7 +176,7 @@ describe("CSVFileParser", () => {
         Description1: "desc",
         Description2: "",
       };
-      expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
+      expect(() => CSVFileParser.transformOldProductionRow(row)).toThrow(
         /Invalid production id/,
       );
     });
@@ -211,7 +211,7 @@ describe("CSVFileParser", () => {
         ]) as any,
       );
 
-      const items = await CSVFileParser.parseEventsCSV("events.csv");
+      const items = await CSVFileParser.parseOldEventsCSV("events.csv");
       expect(items).toHaveLength(1);
       expect(items[0]).toEqual({
         event: {
@@ -246,7 +246,7 @@ describe("CSVFileParser", () => {
           },
         ]) as any,
       );
-      const result = await CSVFileParser.parseProductionsCSV("prods.csv");
+      const result = await CSVFileParser.parseOldProductionsCSV("prods.csv");
       // since we only provided one row without any comma-separated genres,
       // we expect a single production, no tags, and no links
       expect(result).toEqual({
