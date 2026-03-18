@@ -1,8 +1,20 @@
 import fs from "fs";
 import csvParser from "csv-parser";
-import { string, ZodType } from "zod";
-import { CreateBlogDto, CreateEventDto, CreatePriceDto, CreateProductionDto, CreateTagDto } from "../dto/dto";
-import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
+import { z, string, ZodType } from "zod";
+import {
+  CreateBlogDto,
+  CreateEventDto,
+  CreatePriceDto,
+  CreateProductionDto,
+  CreateTagDto,
+} from "../dto/dto";
+import {
+  CreateBlogSchema,
+  CreateEventSchema,
+  CreatePriceSchema,
+  CreateProductionSchema,
+  CreateTagSchema,
+} from "@repo/common";
 
 /**
  * Type used to structure production import
@@ -19,6 +31,30 @@ type ParsedProductionImport = {
 type ParsedEventRow = {
   event: CreateEventDto;
   location: string;
+};
+
+/**
+ * Internal helper used when parsing prices.
+ */
+type ParsedPriceRow = {
+  price: CreatePriceDto;
+  event_id: number;
+};
+
+/**
+ * Internal helper used when parsing blogs.
+ */
+type ParsedBlogRow = {
+  blog: CreateBlogDto;
+  production_id: number;
+};
+
+/**
+ * Internal helper used when parsing tags.
+ */
+type ParsedTagRow = {
+  tag: CreateTagDto;
+  productionIds: number[];
 };
 
 export class CSVFileParser {
@@ -165,10 +201,7 @@ export class CSVFileParser {
     if (!name_nl) {
       throw new Error(`Name_NL is required: ${row.Name_NL}`);
     }
-    const name_en = row.Name_EN;
-    if (!name_en) {
-      //TODO: translating
-    }
+    const name_en = row.Name_EN || name_nl;
     const price = Number(row.Price);
     const eventId = Number(row.EventID);
 
@@ -178,7 +211,7 @@ export class CSVFileParser {
     if (isNaN(eventId)) {
       throw new Error(`Invalid event id: ${row.EventID}`);
     }
-    
+
     return {
       name: { en: name_en, nl: name_nl },
       price,
@@ -193,18 +226,12 @@ export class CSVFileParser {
     if (!title_nl) {
       throw new Error(`Titel_NL is required: ${row.Titel_NL}`);
     }
-    const title_en = row.Titel_EN;
-    if (!title_en) {
-      //TODO: translating
-    }
+    const title_en = row.Titel_EN || title_nl;
     const description_nl = row.Description_NL;
     if (!description_nl) {
       throw new Error(`Description_NL is required: ${row.Description_NL}`);
     }
-    const description_en = row.Description_EN;
-    if (!description_en) {
-      //TODO: translating
-    }
+    const description_en = row.Description_EN || description_nl;
     const productionId = Number(row.ProductionID);
     if (isNaN(productionId)) {
       throw new Error(`Invalid production id: ${row.ProductionID}`);
@@ -224,26 +251,20 @@ export class CSVFileParser {
     if (!tagName_nl) {
       throw new Error(`TagName_NL is required: ${row.TagName_NL}`);
     }
-    const tagName_en = row.TagName_EN;
-    if (!tagName_en) {
-      //TODO: translating
-    }
-    const productionIds = (row.ProductionIDs || "")
-      .split(",")
-      .map((id) => {
-        const numId = Number(id.trim());
-        if (isNaN(numId)) {
-          throw new Error(`Invalid production id in ProductionIDs: ${id}`);
-        }
-        return numId;
-      });
+    const tagName_en = row.TagName_EN || tagName_nl;
+    const productionIds = (row.ProductionIDs || "").split(",").map((id) => {
+      const numId = Number(id.trim());
+      if (isNaN(numId)) {
+        throw new Error(`Invalid production id in ProductionIDs: ${id}`);
+      }
+      return numId;
+    });
 
     return {
       tag: { en: tagName_en, nl: tagName_nl },
       productionIds,
     };
   }
-
 
   /**
    * Parse events from a CSV file and return them along with a raw location
@@ -308,5 +329,50 @@ export class CSVFileParser {
       tags: Array.from(tagsSet),
       productionTagLinks,
     };
+  }
+
+  static async parsePricesCSV(filePath: string): Promise<ParsedPriceRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreatePriceDto & { event_id: number }
+    >(
+      filePath,
+      CreatePriceSchema.extend({ event_id: z.number() }),
+      this.transformPriceRow,
+    );
+
+    return parsed.map((r) => {
+      const { event_id, ...priceData } = r;
+      return { price: priceData, event_id };
+    });
+  }
+
+  static async parseBlogsCSV(filePath: string): Promise<ParsedBlogRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreateBlogDto & { production_id: number }
+    >(
+      filePath,
+      CreateBlogSchema.extend({ production_id: z.number() }),
+      this.transformBlogRow,
+    );
+
+    return parsed.map((r) => {
+      const { production_id, ...blogData } = r;
+      return { blog: blogData, production_id };
+    });
+  }
+
+  static async parseTagsCSV(filePath: string): Promise<ParsedTagRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreateTagDto & { productionIds: number[] }
+    >(
+      filePath,
+      CreateTagSchema.extend({ productionIds: z.number().array() }),
+      this.transformTagRow,
+    );
+
+    return parsed.map((r) => {
+      const { productionIds, ...tagData } = r;
+      return { tag: tagData, productionIds };
+    });
   }
 }
