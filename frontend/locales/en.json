@@ -1,5 +1,43 @@
 {
   "searchbar": {
     "placeholder": "Search..."
+  "hero": {
+    "title": "Archive",
+    "label": "Arts Centre Ghent — Archive",
+    "subtitle": "Decades of art, dance, music and theatre in the heart of Ghent.",
+    "cta": "Explore the archive"
+  },
+  "highlights": {
+    "title": "Archive Highlights",
+    "subtitle": "Recent performances and special moments",
+    "viewAll": "View full archive"
+  },
+  "about": {
+    "title": "About the archive",
+    "body1": "The VIERNULVIER archive contains a rich collection of performances, concerts and events that took place in our arts center. From legendary performances in the 90s to contemporary dance and theatre.",
+    "body2": "Use the search function to find specific artists, locations or periods. Discover stories behind the performances and relive special moments from the history of VIERNULVIER."
+  },
+  "discover": {
+    "title": "Discover More",
+    "stories": {
+      "title": "Stories & History",
+      "body": "Read articles, interviews and stories about the building, history and special moments.",
+      "cta": "Read more"
+    },
+    "posters": {
+      "title": "Posters & Printed Materials",
+      "body": "View historical posters, brochures and program booklets from the archive.",
+      "cta": "View collection"
+    }
+  },
+  "footer": {
+    "tagline": "Arts center in the heart of Ghent",
+    "links": "Links",
+    "mainSite": "Main Website",
+    "archive": "Archive",
+    "stories": "Stories",
+    "prints": "Prints",
+    "rights": "All rights reserved",
+    "newsletter": "Stay up to date"
   }
 }
