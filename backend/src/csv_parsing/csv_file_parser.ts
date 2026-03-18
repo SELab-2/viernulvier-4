@@ -39,6 +39,15 @@ type ParsedEventRow = {
 type ParsedLocalizedEventRow = {
   event: CreateEventDto;
   location: { en: string; nl: string };
+  legacy_id: string;
+};
+
+/**
+ * Internal helper used when parsing productions.
+ */
+type ParsedProductionRow = {
+  production: CreateProductionDto;
+  legacy_id: string;
 };
 
 /**
@@ -502,10 +511,28 @@ export class CSVFileParser {
       return {
         event: eventData,
         location: location,
+        legacy_id: legacy_id,
       };
     });
   }
 
+  static async parseProductionsCSV(filePath: string): Promise<ParsedProductionRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreateProductionDto & { legacy_id: string }
+    >(
+      filePath,
+      CreateProductionSchema.extend({ legacy_id: string() }),
+      this.transformProductionRow,
+    );
+
+    return parsed.map((r) => {
+      const { legacy_id, ...productionData } = r;
+      return {
+        production: productionData,
+        legacy_id: legacy_id,
+      };
+    });
+  }
 
   /**
    * Parse prices from a CSV file and return them along with their associated event IDs
