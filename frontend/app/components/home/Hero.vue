@@ -49,7 +49,7 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
           VIERNULVIER
         </h1>
         <p class="hero-archief font-display font-light text-white/90 leading-none tracking-tight">
-          {{ locale === 'nl' ? 'Archief' : 'Archive' }}
+          {{t('hero.title')}}
         </p>
       </div>
 
