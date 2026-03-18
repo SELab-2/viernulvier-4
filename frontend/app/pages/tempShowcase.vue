@@ -33,14 +33,14 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
     />
     <p v-if="searchQuery">Selected: {{ searchQuery }}</p>
   </div>
+  <br>
   <!-- extra zoekbalk om i18n the testen -->
   <div>
     <SearchBar
         v-model="searchQuery2"
         :items="mockItems"
         :limit="3"
-        label="Select a fruit"
-        required
+        label="Zoekbalk om i18n te testen"
     />
     <p v-if="searchQuery">Selected: {{ searchQuery2 }}</p>
   </div>

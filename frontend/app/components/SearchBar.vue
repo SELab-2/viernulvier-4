@@ -83,10 +83,10 @@ const hideSuggestions = () => {
 </script>
 
 <template>
-  <div class="search-bar">
+  <div class="search-bar m-4">
     <!-- Optional label -->
-    <label v-if="props.label" :for="props.id" class="input-label">
-      {{ props.label }} <span v-if="props.required" class="required-star">*</span>
+    <label v-if="props.label" :for="props.id" class="text-[12px] font-bold uppercase text-zinc-500 dark:text-zinc-400 mb-1 block">
+      {{ props.label }} <span v-if="props.required" class="text-red-500">*</span>
     </label>
 
     <div class="relative">
@@ -99,22 +99,22 @@ const hideSuggestions = () => {
           :required="props.required"
           @focus="isFocused = true"
           @blur="hideSuggestions"
-          class="pl-12 bg-zinc-100 dark:bg-zinc-900 border-none h-12 font-bold uppercase text-[10px] rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="pl-12 pr-4 bg-zinc-100 dark:bg-zinc-900 border-none h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full focus:outline-none focus:ring-0"
       />
 
       <!-- Autocompletion suggestions -->
-      <ul v-if="results.length" class="absolute mt-1 w-full bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg shadow-lg z-10">
+      <ul v-if="results.length" class="absolute mt-1 w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-2xl z-10">
         <li v-for="item in results"
             :key="item"
             @mousedown.prevent="select(item)"
             @click="select(item)"
-            class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 dark:hover:bg-zinc-700">
+            class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
           {{ item }}
         </li>
       </ul>
 
       <!-- Search icon -->
-      <Search class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+      <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
     </div>
   </div>
 </template>
