@@ -1,6 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import SearchBar from "../../app/components/SearchBar.vue";
+import { createI18n } from "vue-i18n";
+
+const i18n = createI18n({
+    locale: "nl",
+    messages: {
+        nl: { searchbar: { placeholder: "Zoeken..." } },
+        en: { searchbar: { placeholder: "Search..." } },
+    },
+});
 
 describe("SearchBar", () => {
     let wrapper: ReturnType<typeof mount>;
@@ -8,6 +17,9 @@ describe("SearchBar", () => {
 
     beforeEach(() => {
         wrapper = mount(SearchBar, {
+            global: {
+                plugins: [i18n],
+            },
             props: {
                 modelValue: "",
                 items,
