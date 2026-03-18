@@ -66,7 +66,7 @@ const handleLogout = async () => {
       <div class="flex flex-1 items-center justify-end">
         <div class="flex flex-1 justify-end gap-[15px]">
           <button @click="toggleLocale" class="btn-outline">
-            {{ locale.toUpperCase() }}
+            {{ locale === 'nl' ? 'EN' : 'NL' }}
           </button>
 
           <button @click="toggleDark" class="btn-outline flex items-center justify-center gap-2">
@@ -108,6 +108,8 @@ const handleLogout = async () => {
   font-size: 11px;
   font-weight: 900;
   cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
 }
 .btn-outline:hover {
   background: var(--foreground);
