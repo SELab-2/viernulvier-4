@@ -19,6 +19,7 @@
 import { ref, computed } from "vue"
 import type { ComputedRef } from "vue"
 import { Search } from "lucide-vue-next"
+const { t, locale, setLocale } = useI18n()
 
 interface Props {
   modelValue: string // currently selected value
@@ -32,8 +33,12 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), { // default prop values
   limit: 5,
-  placeholder: "Search...",
 })
+// default value of placeholder cannot be put in withDefaults, as we're working with i18n
+const computedPlaceholder = computed(() => {
+  return props.placeholder || t('searchbar.placeholder')
+})
+
 const emit = defineEmits<{ // update:modelValue gets called when a new selection is made
   (e: "update:modelValue", value: string): void
 }>()
@@ -75,7 +80,6 @@ const hideSuggestions = () => {
     isFocused.value = false
   }, 150)
 }
-//TODO lang support
 </script>
 
 <template>
@@ -90,7 +94,7 @@ const hideSuggestions = () => {
       <input
           :id="props.id"
           type="text"
-          :placeholder="props.placeholder"
+          :placeholder="computedPlaceholder"
           v-model="internalQuery"
           :required="props.required"
           @focus="isFocused = true"

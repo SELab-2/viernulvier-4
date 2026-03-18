@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue"
+const { locale, setLocale } = useI18n()
 
 const mockItems = ref([
   "Apple",
@@ -15,6 +16,9 @@ const mockItems = ref([
   "Lychee"
 ])
 const searchQuery = ref("")
+const searchQuery2 = ref("")
+
+const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 </script>
 
 <template>
@@ -29,6 +33,21 @@ const searchQuery = ref("")
     />
     <p v-if="searchQuery">Selected: {{ searchQuery }}</p>
   </div>
+  <!-- extra zoekbalk om i18n the testen -->
+  <div>
+    <SearchBar
+        v-model="searchQuery2"
+        :items="mockItems"
+        :limit="3"
+        label="Select a fruit"
+        required
+    />
+    <p v-if="searchQuery">Selected: {{ searchQuery2 }}</p>
+  </div>
+  <!-- knop om i18n the testen -->
+  <button @click="toggleLocale" class="btn-outline">
+    {{ locale.toUpperCase() }}
+  </button>
 </template>
 
 <style scoped>
