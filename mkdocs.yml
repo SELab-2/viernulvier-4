@@ -16,17 +16,17 @@ nav:
   - Pagination:
     - Overview: pagination/index.md
   - API Reference:
-      - Overview & Auth: api/index.md
-      - Events: api/events.md
-      - Productions: api/productions.md
-      - Blogs: api/blogs.md
-      - Tags: api/tags.md
-      - Locations: api/locations.md
-      - Pricing: api/pricing.md
+    - Overview & Auth: api/index.md
+    - Events: api/events.md
+    - Productions: api/productions.md
+    - Blogs: api/blogs.md
+    - Tags: api/tags.md
+    - Locations: api/locations.md
+    - Pricing: api/pricing.md
   - Data Schemas:
-      - Overview: schemas/index.md
-      - Core Entities: schemas/entities.md
-      - Metadata: schemas/metadata.md
+    - Overview: schemas/index.md
+    - Core Entities: schemas/entities.md
+    - Metadata: schemas/metadata.md
   - Testing:
     - Overview: testing/index.md
     - Backend: testing/backend.md
