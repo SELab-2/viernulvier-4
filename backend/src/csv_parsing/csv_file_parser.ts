@@ -1,7 +1,7 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateEventDto, CreatePriceDto, CreateProductionDto } from "../dto/dto";
+import { CreateBlogDto, CreateEventDto, CreatePriceDto, CreateProductionDto } from "../dto/dto";
 import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
 
 /**
@@ -167,7 +167,7 @@ export class CSVFileParser {
     }
     const name_en = row.Name_EN;
     if (!name_en) {
-      //do translating
+      //TODO: translating
     }
     const price = Number(row.Price);
     const eventId = Number(row.EventID);
@@ -183,6 +183,37 @@ export class CSVFileParser {
       name: { en: name_en, nl: name_nl },
       price,
       event_id: eventId,
+    };
+  }
+
+  static transformBlogRow(
+    row: Record<string, string>,
+  ): CreateBlogDto & { production_id: number } {
+    const title_nl = row.Titel_NL;
+    if (!title_nl) {
+      throw new Error(`Titel_NL is required: ${row.Titel_NL}`);
+    }
+    const title_en = row.Titel_EN;
+    if (!title_en) {
+      //TODO: translating
+    }
+    const description_nl = row.Description_NL;
+    if (!description_nl) {
+      throw new Error(`Description_NL is required: ${row.Description_NL}`);
+    }
+    const description_en = row.Description_EN;
+    if (!description_en) {
+      //TODO: translating
+    }
+    const productionId = Number(row.ProductionID);
+    if (isNaN(productionId)) {
+      throw new Error(`Invalid production id: ${row.ProductionID}`);
+    }
+
+    return {
+      titel: { en: title_en, nl: title_nl },
+      description: { en: description_en, nl: description_nl },
+      production_id: productionId,
     };
   }
 
