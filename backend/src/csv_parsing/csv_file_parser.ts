@@ -58,12 +58,39 @@ type ParsedTagRow = {
 };
 
 export class CSVFileParser {
-  private static toLocalizedString(value: string): { en: string; nl: string } {
+  private static toOldLocalizedString(value: string): {
+    en: string;
+    nl: string;
+  } {
     const normalized = (value || "").trim();
     return {
       en: normalized,
       nl: normalized,
     };
+  }
+
+  private static toLocalizedString(
+    value_nl: string,
+    value_en: string,
+    required_nl: boolean,
+    required_en: boolean,
+  ): { en: string; nl: string } {
+    const nl = (value_nl || "").trim();
+    const en = (value_en || "").trim();
+
+    if (required_nl && !nl) {
+      throw new Error(`Required Dutch value is missing: ${value_nl}`);
+    }
+    if (required_en && !en) {
+      throw new Error(`Required English value is missing: ${value_en}`);
+    }
+
+    if (!en && nl) {
+      //TODO translate
+      return { en: nl, nl };
+    }
+
+    return { en, nl };
   }
 
   /**
@@ -179,13 +206,13 @@ export class CSVFileParser {
     const legacy_id = `csv-${id}`;
 
     return {
-      titel: CSVFileParser.toLocalizedString(row.Titel),
-      description1: CSVFileParser.toLocalizedString(row.Description1),
+      titel: CSVFileParser.toOldLocalizedString(row.Titel),
+      description1: CSVFileParser.toOldLocalizedString(row.Description1),
       description2: row.Description2
-        ? CSVFileParser.toLocalizedString(row.Description2)
+        ? CSVFileParser.toOldLocalizedString(row.Description2)
         : null,
       artist: null, // TODO
-      tagline: tagLine ? CSVFileParser.toLocalizedString(tagLine) : null,
+      tagline: tagLine ? CSVFileParser.toOldLocalizedString(tagLine) : null,
       credits: null, // TODO
       attendance_mode: null, // TODO
       performer_type: null, // TODO
@@ -194,13 +221,10 @@ export class CSVFileParser {
     };
   }
 
-  static transformEventRow(
-    row: Record<string, string>,
-  ): CreateEventDto & {
+  static transformEventRow(row: Record<string, string>): CreateEventDto & {
     location: { en: string; nl: string };
     legacy_id: string;
   } {
-
     const id = Number(row.ID);
     if (isNaN(id)) {
       throw new Error(`Invalid production id: ${row.ID}`);
@@ -224,17 +248,18 @@ export class CSVFileParser {
       throw new Error(`Invalid production id: ${row.Production}`);
     }
 
-    const location_nl = (row.Location_NL || "").trim();
-    const location_en = row.Location_EN.trim();
-    if (!location_en) {
-      //TODO translate?
-    }
+    const location = this.toLocalizedString(
+      row.Location_NL,
+      row.Location_EN,
+      false,
+      false,
+    );
 
     return {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       production_id: productionId,
-      location: { en: location_en, nl: location_nl },
+      location,
       doors_at: null, // TODO
       intermission_at: null, // TODO
       legacy_id: `csv-${id}`,
@@ -250,53 +275,61 @@ export class CSVFileParser {
       throw new Error(`Invalid production id: ${row.ID}`);
     }
 
-    const titel_nl = (row.Titel_NL || "").trim();
+    const titel = this.toLocalizedString(
+      row.Titel_NL,
+      row.Titel_EN,
+      true,
+      false,
+    );
+    const description1 = this.toLocalizedString(
+      row.Description1_NL,
+      row.Description1_EN,
+      true,
+      false,
+    );
+    const description2Value = this.toLocalizedString(
+      row.Description2_NL,
+      row.Description2_EN,
+      false,
+      false,
+    );
+    const description2 =
+      description2Value.en || description2Value.nl ? description2Value : null;
 
-    const titel_en = row.Titel_EN.trim();
-    if (!titel_en) {
-      //TODO translate
-    }
+    const artistValue = this.toLocalizedString(
+      row.Artist_NL,
+      row.Artist_EN,
+      false,
+      false,
+    );
+    const artist = artistValue.en || artistValue.nl ? artistValue : null;
 
-    const description1_nl = (row.Description1_NL || "").trim();
-    const description1_en = row.Description1_EN.trim();
-    if (!description1_en) {
-      //TODO translate
-    }
+    const taglineValue = this.toLocalizedString(
+      row.Tagline_NL,
+      row.Tagline_EN,
+      false,
+      false,
+    );
+    const tagline = taglineValue.en || taglineValue.nl ? taglineValue : null;
 
-    const description2_nl = (row.Description2_NL || "").trim();
-    const description2_en = row.Description2_EN.trim();
-    if (!description2_en) {
-      //TODO translate
-    }
+    const creditsValue = this.toLocalizedString(
+      row.Credits_NL,
+      row.Credits_EN,
+      false,
+      false,
+    );
+    const credits = creditsValue.en || creditsValue.nl ? creditsValue : null;
 
-    const artist_nl = (row.Artist_NL || "").trim();
-    const artist_en = row.Artist_EN.trim();
-    if (!artist_en) {
-      //TODO translate
-    }
-
-    const tagline_nl = (row.Tagline_NL || "").trim();
-    const tagline_en = row.Tagline_EN.trim();
-    if (!tagline_en) {
-      //TODO translate
-    }
-
-    const credits_nl = (row.Credits_NL || "").trim();
-    const credits_en = row.Credits_EN.trim();
-    if (!credits_en) {
-      //TODO translate
-    }
-
-    const performer_type = row.Performer_Type.trim() || null;
-    const attendance_mode = row.Attendance_Mode.trim() || null;
+    const performer_type = (row.Performer_Type || "").trim() || null;
+    const attendance_mode = (row.Attendance_Mode || "").trim() || null;
 
     return {
-      titel: { en: titel_en, nl: titel_nl },
-      description1: { en: description1_en, nl: description1_nl },
-      description2: { en: description2_en, nl: description2_nl },
-      artist: { en: artist_en, nl: artist_nl },
-      tagline: { en: tagline_en, nl: tagline_nl },
-      credits: { en: credits_en, nl: credits_nl },
+      titel,
+      description1,
+      description2,
+      artist,
+      tagline,
+      credits,
       attendance_mode: attendance_mode,
       performer_type: performer_type,
       legacy_id: `csv-${id}`,
@@ -306,11 +339,7 @@ export class CSVFileParser {
   static transformPriceRow(
     row: Record<string, string>,
   ): CreatePriceDto & { event_id: number } {
-    const name_nl = row.Name_NL;
-    if (!name_nl) {
-      throw new Error(`Name_NL is required: ${row.Name_NL}`);
-    }
-    const name_en = row.Name_EN || name_nl;
+    const name = this.toLocalizedString(row.Name_NL, row.Name_EN, true, false);
     const price = Number(row.Price);
     const eventId = Number(row.EventID);
 
@@ -322,7 +351,7 @@ export class CSVFileParser {
     }
 
     return {
-      name: { en: name_en, nl: name_nl },
+      name,
       price,
       event_id: eventId,
     };
@@ -331,30 +360,26 @@ export class CSVFileParser {
   static transformBlogRow(
     row: Record<string, string>,
   ): CreateBlogDto & { production_id: number } {
-    const title_nl = row.Titel_NL;
-    if (!title_nl) {
-      throw new Error(`Titel_NL is required: ${row.Titel_NL}`);
-    }
-    const title_en = row.Titel_EN;
-    if (!title_en) {
-      //TODO translate
-    }
-    const description_nl = row.Description_NL;
-    if (!description_nl) {
-      throw new Error(`Description_NL is required: ${row.Description_NL}`);
-    }
-    const description_en = row.Description_EN;
-    if (!description_en) {
-      //TODO translate
-    }
+    const titel = this.toLocalizedString(
+      row.Titel_NL,
+      row.Titel_EN,
+      true,
+      false,
+    );
+    const description = this.toLocalizedString(
+      row.Description_NL,
+      row.Description_EN,
+      true,
+      false,
+    );
     const productionId = Number(row.ProductionID);
     if (isNaN(productionId)) {
       throw new Error(`Invalid production id: ${row.ProductionID}`);
     }
 
     return {
-      titel: { en: title_en, nl: title_nl },
-      description: { en: description_en, nl: description_nl },
+      titel,
+      description,
       production_id: productionId,
     };
   }
@@ -362,14 +387,12 @@ export class CSVFileParser {
   static transformTagRow(
     row: Record<string, string>,
   ): CreateTagDto & { productionIds: number[] } {
-    const tagName_nl = row.TagName_NL;
-    if (!tagName_nl) {
-      throw new Error(`TagName_NL is required: ${row.TagName_NL}`);
-    }
-    const tagName_en = row.TagName_EN;
-    if (!tagName_en) {
-      //TODO translate
-    }
+    const tag = this.toLocalizedString(
+      row.TagName_NL,
+      row.TagName_EN,
+      true,
+      false,
+    );
     const productionIds = (row.ProductionIDs || "").split(",").map((id) => {
       const numId = Number(id.trim());
       if (isNaN(numId)) {
@@ -379,7 +402,7 @@ export class CSVFileParser {
     });
 
     return {
-      tag: { en: tagName_en, nl: tagName_nl },
+      tag,
       productionIds,
     };
   }
