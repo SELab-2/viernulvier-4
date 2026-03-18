@@ -17,8 +17,13 @@ const mockItems = ref([
 ])
 const searchQuery = ref("")
 const searchQuery2 = ref("")
+const isDark = ref(false)
 
 const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
+const toggleDark = () => {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle("dark", isDark.value)
+}
 </script>
 
 <template>
@@ -47,6 +52,10 @@ const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
   <!-- knop om i18n the testen -->
   <button @click="toggleLocale" class="btn-outline">
     {{ locale.toUpperCase() }}
+  </button>
+  <br>
+  <button @click="toggleDark" class="btn-outline">
+    {{ isDark ? "Light" : "Dark" }}
   </button>
 </template>
 
