@@ -1,7 +1,21 @@
+<!--
+  HomeDiscover.vue
+
+  Implements the "Discover" section on the home page.
+
+  Renders two large full-height cards side by side that link visitors to
+  the two main content sections of the archive:
+  - Stories & History  → ROUTES.stories.base (/stories)
+  - Posters & Prints   → ROUTES.prints.base  (/prints)
+
+  Each card is rendered via the reusable HomeDiscoverCard component which
+  accepts image, title, body text and a CTA label as props. All text is
+  sourced from i18n translation keys (discover.*).
+
+  Routes are imported from ~/utils/routes to avoid hardcoded path strings.
+-->
 <script setup lang="ts">
-
 import { ROUTES } from '~/utils/routes'
-
 
 const { t } = useI18n()
 </script>

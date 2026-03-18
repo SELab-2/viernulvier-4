@@ -1,18 +1,43 @@
+<!--
+  AppFooter.vue
+
+  Implements the shared site footer, used on every page via layouts/default.vue.
+
+  The footer is divided into three columns:
+  1. Brand & contact — organisation name, address, phone and email
+  2. Navigation      — links to the main sections of the archive
+  3. Social media    — icon links to all VIERNULVIER social channels
+
+  Social media icons are defined as individual Vue components in
+  app/components/icons/ (e.g. FacebookSVG.vue) and are auto-imported by Nuxt
+  under the prefix "Icons" (e.g. <IconsFacebookSVG>). They are referenced via
+  resolveComponent() in the socials array so the template can stay clean with
+  a single v-for loop. Adding a new platform only requires a new entry in
+  that array — no template changes needed.
+
+  All navigation labels are sourced from i18n translation keys (footer.*).
+  Navigation routes use NuxtLink for internal pages and a plain <a> for the
+  external main website.
+
+  Color scheme is inverted: black background in light mode, white in dark mode.
+-->
 <script setup lang="ts">
-import IconInstagram from '~/assets/icons/IconInstagram.vue'
-import IconFacebook from '~/assets/icons/IconFacebook.vue'
-import IconTiktok from '~/assets/icons/IconTiktok.vue'
-import IconYoutube from '~/assets/icons/IconYoutube.vue'
-import IconLinkedin from '~/assets/icons/IconLinkedin.vue'
+import { ROUTES } from '~/utils/routes'
 
 const { t } = useI18n()
 
+/**
+ * Social media channels for VIERNULVIER.
+ * resolveComponent() looks up the auto-imported icon components by their
+ * Nuxt-generated name (folder prefix + filename, e.g. "IconsFacebookSVG").
+ * Add new channels here — no template changes needed.
+ */
 const socials = [
-  { label: 'Instagram', href: 'https://www.instagram.com/viernulvier.gent/', icon: IconInstagram },
-  { label: 'Facebook',  href: 'https://www.facebook.com/VIERNULVIER.gent/',  icon: IconFacebook },
-  { label: 'TikTok',    href: 'https://www.tiktok.com/@viernulvier.gent',     icon: IconTiktok },
-  { label: 'YouTube',   href: 'https://www.youtube.com/channel/UCdRYlqUQcIm6pbLgHHobQcQ', icon: IconYoutube },
-  { label: 'LinkedIn',  href: 'https://www.linkedin.com/company/viernulviergent', icon: IconLinkedin },
+  { label: 'Instagram', href: 'https://www.instagram.com/viernulvier.gent/', icon: resolveComponent('IconsInstagramSVG') },
+  { label: 'Facebook',  href: 'https://www.facebook.com/VIERNULVIER.gent/',  icon: resolveComponent('IconsFacebookSVG') },
+  { label: 'TikTok',    href: 'https://www.tiktok.com/@viernulvier.gent',     icon: resolveComponent('IconsTiktokSVG') },
+  { label: 'YouTube',   href: 'https://www.youtube.com/channel/UCdRYlqUQcIm6pbLgHHobQcQ', icon: resolveComponent('IconsYoutubeSVG') },
+  { label: 'LinkedIn',  href: 'https://www.linkedin.com/company/viernulviergent', icon: resolveComponent('IconsLinkedinSVG') },
 ]
 </script>
 
@@ -23,7 +48,7 @@ const socials = [
       <!-- Three-column grid: brand+contact | navigation | social -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 dark:border-black/10">
 
-        <!-- Brand and contact information -->
+        <!-- Column 1: Brand and contact information -->
         <div>
           <address class="not-italic flex flex-col gap-0.5 text-sm text-white dark:text-black leading-relaxed">
             <span>Kunstencentrum VIERNULVIER vzw.</span>
@@ -37,7 +62,7 @@ const socials = [
           </address>
         </div>
 
-        <!-- Site navigation links -->
+        <!-- Column 2: Site navigation links -->
         <div>
           <h4 class="font-display font-bold text-base mb-4">
             {{ t('footer.links') }}
@@ -54,24 +79,24 @@ const socials = [
               </a>
             </li>
             <li>
-              <NuxtLink to="/archive" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
+              <NuxtLink :to="ROUTES.productions.base" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
                 {{ t('footer.archive') }}
               </NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/blogs" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
+              <NuxtLink :to="ROUTES.stories.base" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
                 {{ t('footer.stories') }}
               </NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/uploads" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
+              <NuxtLink :to="ROUTES.prints.base" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
                 {{ t('footer.prints') }}
               </NuxtLink>
             </li>
           </ul>
         </div>
 
-        <!-- Social media icon links -->
+        <!-- Column 3: Social media icon links (rendered from the socials array) -->
         <div>
           <h4 class="font-display font-bold text-base mb-4">Social</h4>
           <div class="flex flex-wrap gap-2">

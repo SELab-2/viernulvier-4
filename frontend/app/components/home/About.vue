@@ -1,3 +1,18 @@
+<!--
+  HomeAbout.vue
+
+  Implements the "About the archive" section on the home page.
+
+  This section introduces VIERNULVIER's archive to visitors using:
+  - A heading and two body paragraphs sourced from i18n translation keys
+    (about.title, about.body1, about.body2)
+  - A drop cap on the first paragraph for editorial styling (uses the
+    .dropcap utility defined in main.css)
+  - An accompanying photo displayed in a 4:3 aspect ratio container
+
+  The section uses an inverted color scheme (black background in light mode,
+  white background in dark mode) to create visual contrast on the home page.
+-->
 <script setup lang="ts">
 const { t } = useI18n()
 </script>
