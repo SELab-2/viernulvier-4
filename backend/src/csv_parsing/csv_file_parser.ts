@@ -1,7 +1,7 @@
 import fs from "fs";
 import csvParser from "csv-parser";
 import { string, ZodType } from "zod";
-import { CreateEventDto, CreateProductionDto } from "../dto/dto";
+import { CreateEventDto, CreatePriceDto, CreateProductionDto } from "../dto/dto";
 import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
 
 /**
@@ -157,6 +157,35 @@ export class CSVFileParser {
       tags: [...new Set(tags)], // remove duplicate tags
     };
   }
+
+  static transformPriceRow(
+    row: Record<string, string>,
+  ): CreatePriceDto & { event_id: number } {
+    const name_nl = row.Name_NL;
+    if (!name_nl) {
+      throw new Error(`Name_NL is required: ${row.Name_NL}`);
+    }
+    const name_en = row.Name_EN;
+    if (!name_en) {
+      //do translating
+    }
+    const price = Number(row.Price);
+    const eventId = Number(row.EventID);
+
+    if (isNaN(price)) {
+      throw new Error(`Invalid price: ${row.Price}`);
+    }
+    if (isNaN(eventId)) {
+      throw new Error(`Invalid event id: ${row.EventID}`);
+    }
+    
+    return {
+      name: { en: name_en, nl: name_nl },
+      price,
+      event_id: eventId,
+    };
+  }
+
 
   /**
    * Parse events from a CSV file and return them along with a raw location
