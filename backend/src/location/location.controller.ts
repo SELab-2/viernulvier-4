@@ -104,7 +104,8 @@ export class LocationController {
   }
 
   /**
-   * Responds to a PATCH to "/locations"
+   * Responds to a PATCH to "/locations/:locationId"
+   * @param locationId The ID of the Location in the URL.
    * @param updateLocation The Location we want to update.
    * @returns The newly updated Location.
    */
@@ -116,12 +117,16 @@ export class LocationController {
     type: LocationDto,
     description: "The Location was updated.",
   })
-  @UsePipes(new ZodValidationPipe(UpdateLocationSchema))
-  @Patch()
+  @Patch(":locationId")
   async updateLocation(
-    @Body() updateLocation: UpdateLocationDto,
+    @Param("locationId", ParseIntPipe) locationId: number,
+    @Body(new ZodValidationPipe(UpdateLocationSchema))
+    updateLocation: UpdateLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationService.updateLocation(updateLocation);
+    return await this.locationService.updateLocation(
+      locationId,
+      updateLocation,
+    );
   }
 
   /**

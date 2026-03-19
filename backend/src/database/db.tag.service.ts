@@ -24,8 +24,7 @@ export class TagDatabaseService {
         id,
         tag,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       FROM tags
       WHERE id = $1
     `;
@@ -48,7 +47,7 @@ export class TagDatabaseService {
     amount: number = 0,
     page: number = 0,
   ): Promise<PaginatedTagDto> {
-    let query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags ORDER BY id`;
+    let query = `SELECT id, tag, created_at, updated_at FROM tags ORDER BY id`;
 
     const params: any[] = [];
 
@@ -81,14 +80,13 @@ export class TagDatabaseService {
     }
 
     const query = `
-      INSERT INTO tags (tag, legacy_id)
-      VALUES ($1, $2)
+      INSERT INTO tags (tag)
+      VALUES ($1)
       RETURNING
         id,
         tag,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       ;
     `;
 
@@ -109,11 +107,7 @@ export class TagDatabaseService {
    * The id field in the tag MUST be defined.
    * @returns the updated tag if successful.
    */
-  async updateTag(tag: UpdateTagDto): Promise<TagDto> {
-    if (!tag.id) {
-      throw new BadRequestException("Tag id is required for update");
-    }
-
+  async updateTag(tagId: number, tag: UpdateTagDto): Promise<TagDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -127,7 +121,7 @@ export class TagDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(tag.id);
+    values.push(tagId);
 
     const query = `
       UPDATE tags
@@ -137,15 +131,14 @@ export class TagDatabaseService {
         id,
         tag,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       ;
     `;
 
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Tag not found");
+      throw new ResourceGoneException(`Tag with ID ${tagId} not found`);
     }
 
     return result[0];

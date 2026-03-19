@@ -1,7 +1,7 @@
 import { createLogger, format, transports, Logger } from "winston";
 import * as dotenv from "dotenv";
 import * as path from "path";
-dotenv.config({ path: path.join(process.cwd(), "../.env") });
+dotenv.config({ path: path.join(process.cwd(), "../.env"), quiet: true });
 
 const { combine, timestamp, printf, colorize, json } = format;
 

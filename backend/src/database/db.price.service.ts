@@ -6,6 +6,7 @@ import {
   PriceDto,
   UpdatePriceDto,
 } from "../dto/dto";
+import { ResourceGoneException } from "../common/exceptions";
 
 @Injectable()
 export class PriceDatabaseService {
@@ -22,8 +23,7 @@ export class PriceDatabaseService {
        price, 
        name, 
        created_at, 
-       updated_at, 
-       legacy_id 
+       updated_at
       FROM prices WHERE id = $1`;
     const result = await this.db.query<PriceDto>(query, [id]);
 
@@ -41,7 +41,7 @@ export class PriceDatabaseService {
     page: number = 0,
   ): Promise<PaginatedPriceDto> {
     let query = `
-    SELECT id, price, name, created_at, updated_at, legacy_id
+    SELECT id, price, name, created_at, updated_at
     FROM prices
     ORDER BY id
   `;
@@ -77,15 +77,15 @@ export class PriceDatabaseService {
     }
 
     const query = `
-      INSERT INTO prices (name, price, legacy_id)
-      VALUES ($1, $2, $3)
+      INSERT INTO prices (name, price)
+      VALUES ($1, $2)
       RETURNING
         id,
         name,
         price,
         created_at,
-        updated_at,
-        legacy_id;
+        updated_at
+      ;
     `;
 
     const values = [JSON.stringify(price.name), price.price];
@@ -105,11 +105,7 @@ export class PriceDatabaseService {
    * The id field in the price MUST be defined.
    * @returns the updated price if successful.
    */
-  async updatePrice(price: UpdatePriceDto): Promise<PriceDto> {
-    if (!price.id) {
-      throw new BadRequestException("Price id is required for update");
-    }
-
+  async updatePrice(priceId: number, price: UpdatePriceDto): Promise<PriceDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -128,7 +124,7 @@ export class PriceDatabaseService {
       throw new BadRequestException("No valid fields to update");
     }
 
-    values.push(price.id);
+    values.push(priceId);
 
     const query = `
       UPDATE prices
@@ -139,14 +135,16 @@ export class PriceDatabaseService {
         name,
         price,
         created_at,
-        updated_at,
-        legacy_id;
+        updated_at
+      ;
     `;
 
     const result = await this.db.query<PriceDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to update price");
+      throw new ResourceGoneException(
+        `Failed to update price with ID ${priceId}.`,
+      );
     }
 
     return result[0];

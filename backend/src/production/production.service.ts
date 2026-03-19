@@ -76,7 +76,10 @@ export class ProductionService {
       id,
     };
 
-    return await this.productionDBService.updateProduction(mergedProduction);
+    return await this.productionDBService.updateProduction(
+      id,
+      mergedProduction,
+    );
   }
 
   /**

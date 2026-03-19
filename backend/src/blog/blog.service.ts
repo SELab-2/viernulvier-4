@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import {
   BlogDto,
@@ -51,12 +51,7 @@ export class BlogService {
    * @returns The newly replaced Blog.
    */
   async replaceBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
-    if (blog.id !== id)
-      throw new BadRequestException(
-        "Blog ID and URL ID do not match. Cannot replace Blog.",
-      );
-
-    return await this.blogDbService.updateBlog(blog);
+    return await this.blogDbService.updateBlog(id, blog);
   }
 
   /**
@@ -66,8 +61,7 @@ export class BlogService {
    * @returns The newly modified Blog.
    */
   async modifyBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
-    blog.id = id;
-    return await this.blogDbService.updateBlog(blog);
+    return await this.blogDbService.updateBlog(id, blog);
   }
 
   /**

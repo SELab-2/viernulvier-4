@@ -127,11 +127,7 @@ export class BlogDatabaseService {
    * The id field in the blog MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
-    if (!blog.id) {
-      throw new BadRequestException("Blog id is required for update");
-    }
-
+  async updateBlog(blogId: number, blog: UpdateBlogDto): Promise<BlogDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -152,7 +148,7 @@ export class BlogDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(blog.id);
+    values.push(blogId);
 
     const query = `
       UPDATE blogs
@@ -170,7 +166,7 @@ export class BlogDatabaseService {
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Cannot update: Blog ${blog.id} not found`,
+        `Cannot update: Blog ${blogId} not found`,
       );
     }
 

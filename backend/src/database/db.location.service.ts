@@ -22,8 +22,7 @@ export class LocationDatabaseService {
     const query = `SELECT id, 
        location, 
        created_at, 
-       updated_at, 
-       legacy_id 
+       updated_at
       FROM locations WHERE id = $1`;
 
     const result = await this.db.query<LocationDto>(query, [id]);
@@ -45,7 +44,7 @@ export class LocationDatabaseService {
     page: number = 0,
   ): Promise<PaginatedLocationDto> {
     let query = `
-    SELECT id, location, created_at, updated_at, legacy_id
+    SELECT id, location, created_at, updated_at
     FROM locations
     ORDER BY id
   `;
@@ -83,14 +82,13 @@ export class LocationDatabaseService {
     }
 
     const query = `
-      INSERT INTO locations (location, legacy_id)
-      VALUES ($1, $2)
+      INSERT INTO locations (location)
+      VALUES ($1)
       RETURNING
         id,
         location,
         created_at,
-        updated_at,
-        legacy_id
+        updated_at
       ;
     `;
 
@@ -111,11 +109,10 @@ export class LocationDatabaseService {
    * The id field in the location MUST be defined.
    * @returns the updated location if successful.
    */
-  async updateLocation(location: UpdateLocationDto): Promise<LocationDto> {
-    if (!location.id) {
-      throw new BadRequestException("Location id is required for update");
-    }
-
+  async updateLocation(
+    locationId: number,
+    location: UpdateLocationDto,
+  ): Promise<LocationDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -131,7 +128,7 @@ export class LocationDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(location.id);
+    values.push(locationId);
 
     const query = `
       UPDATE locations
@@ -141,8 +138,7 @@ export class LocationDatabaseService {
       id,
       location,
       created_at,
-      updated_at,
-      legacy_id
+      updated_at
     ;
   `;
 
@@ -150,7 +146,7 @@ export class LocationDatabaseService {
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Location with ID ${location.id} not found`,
+        `Location with ID ${locationId} not found`,
       );
     }
 
