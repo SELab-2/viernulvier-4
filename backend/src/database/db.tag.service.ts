@@ -1,12 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  CreateTagDto,
-  PaginatedTagDto,
-  TagDto,
-  UpdateTagDto,
-} from "../dto/dto";
+import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class TagDatabaseService {
@@ -46,7 +42,7 @@ export class TagDatabaseService {
   async getTags(
     amount: number = 0,
     page: number = 0,
-  ): Promise<PaginatedTagDto> {
+  ): Promise<PaginatedResponse<TagDto>> {
     let query = `SELECT id, tag, created_at, updated_at FROM tags ORDER BY id`;
 
     const params: any[] = [];

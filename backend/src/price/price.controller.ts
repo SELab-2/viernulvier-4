@@ -15,8 +15,6 @@ import { PriceService } from "./price.service";
 import {
   CreatePriceDto,
   LanguageQueryDto,
-  PaginatedPriceDto,
-  PaginatedPriceViewDto,
   PaginationFilterDto,
   PriceDto,
   PriceViewDto,
@@ -26,6 +24,7 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreatePriceSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
   UpdatePriceSchema,
 } from "@repo/common";
@@ -38,7 +37,10 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("prices")
 export class PriceController {
@@ -54,17 +56,16 @@ export class PriceController {
    * @returns A list of Price objects.
    */
   @ApiOperation({ summary: "Fetches All Prices." })
-  @ApiOkArrayAnyOf(PriceDto, PriceViewDto)
+  @ApiOkPaginatedResponseAnyOf(PriceDto, PriceViewDto)
   @Get()
   async getPrices(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<PaginatedPriceDto | PaginatedPriceViewDto> {
-    return this.ls.flattenByLanguage<PaginatedPriceDto | PaginatedPriceViewDto>(
-      await this.priceService.getPrices(paginationFilter),
-      lang.lang,
-    );
+  ): Promise<PaginatedResponse<PriceDto | PriceViewDto>> {
+    return this.ls.flattenByLanguage<
+      PaginatedResponse<PriceDto | PriceViewDto>
+    >(await this.priceService.getPrices(paginationFilter), lang.lang);
   }
 
   /**

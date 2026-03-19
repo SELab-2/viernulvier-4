@@ -2,11 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { TagDatabaseService } from "../database/db.tag.service";
 import {
   CreateTagDto,
-  PaginatedTagDto,
   PaginationFilterDto,
   TagDto,
   UpdateTagDto,
 } from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class TagService {
@@ -37,7 +37,7 @@ export class TagService {
    */
   async getAllTags(
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedTagDto> {
+  ): Promise<PaginatedResponse<TagDto>> {
     return await this.dbTagService.getTags(
       paginationFilter.limit,
       paginationFilter.page,

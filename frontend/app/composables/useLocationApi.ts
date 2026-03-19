@@ -22,14 +22,20 @@ export function useLocationApi() {
   /** GET /locations — returns a paginated list of locations. */
   const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
     const params = { ...pagination, ...(lang ? { lang } : {}) };
-    const query = Object.keys(params).length ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: Location[] | LocationView[] }>(`${API_ROUTES.locations.base}${query}`);
+    const query = Object.keys(params).length
+      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<Location | LocationView>>(
+      `${API_ROUTES.locations.base}${query}`,
+    );
   };
 
   /** GET /locations/:locationId — returns a single location. */
   const getById = (locationId: number, lang?: Language) => {
     const query = lang ? `?lang=${lang}` : "";
-    return get<Location | LocationView>(`${API_ROUTES.locations.byId(locationId)}${query}`);
+    return get<Location | LocationView>(
+      `${API_ROUTES.locations.byId(locationId)}${query}`,
+    );
   };
 
   /** POST /locations — creates a new location. */
@@ -38,7 +44,10 @@ export function useLocationApi() {
 
   /** PATCH /locations — updates an existing location. */
   const modify = (locationId: number, body: UpdateLocation) =>
-    patch<Location, UpdateLocation>(API_ROUTES.locations.byId(locationId), body);
+    patch<Location, UpdateLocation>(
+      API_ROUTES.locations.byId(locationId),
+      body,
+    );
 
   /** DELETE /locations/:locationId — deletes a location. */
   const remove = (locationId: number) =>

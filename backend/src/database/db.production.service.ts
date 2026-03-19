@@ -4,13 +4,16 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginatedProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { FilterProductionSchema, SUPPORTED_LANGUAGES } from "@repo/common";
+import {
+  FilterProductionSchema,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -22,9 +25,8 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: PaginatedProductionDto = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
-    );
+    const productions: PaginatedResponse<ProductionDto> =
+      await this.getProductions(FilterProductionSchema.parse({ id: id }));
 
     const production = productions.objects;
     if (production.length === 0)
@@ -130,7 +132,7 @@ export class ProductionDatabaseService {
    */
   async getProductions(
     filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto> {
+  ): Promise<PaginatedResponse<ProductionDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;

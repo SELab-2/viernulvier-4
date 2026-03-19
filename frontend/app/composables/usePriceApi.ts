@@ -22,8 +22,12 @@ export function usePriceApi() {
   /** GET /prices — returns a paginated list of prices. */
   const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
     const params = { ...pagination, ...(lang ? { lang } : {}) };
-    const query = Object.keys(params).length ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: Price[] | PriceView[] }>(`${API_ROUTES.prices.base}${query}`);
+    const query = Object.keys(params).length
+      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<Price | PriceView>>(
+      `${API_ROUTES.prices.base}${query}`,
+    );
   };
 
   /** GET /prices/:priceId — returns a single price. */
@@ -43,8 +47,7 @@ export function usePriceApi() {
     patch<Price, UpdatePrice>(API_ROUTES.prices.byId(priceId), body);
 
   /** DELETE /prices/:priceId — deletes a price. */
-  const remove = (priceId: number) =>
-    del(API_ROUTES.prices.byId(priceId));
+  const remove = (priceId: number) => del(API_ROUTES.prices.byId(priceId));
 
   return { getAll, getById, create, replace, remove };
 }
