@@ -6,12 +6,8 @@
 import { ref } from 'vue'
 import { ROUTES } from '~/utils/routes'
 import { Sun, Moon, LogOut} from 'lucide-vue-next'
-import { useRuntimeConfig } from '#app'
-
-const config = useRuntimeConfig()
-
-// Dit zorgt ervoor dat de baseURL (bijv. '/') altijd voor je plaatje geplakt wordt
-const logoPath = (name) => `${config.app.baseURL}${name}`
+import logoBlack from '~/assets/logo_black.svg'
+import logoWhite from '~/assets/logo_white.svg'
 
 const { t, locale, setLocale } = useI18n()
 
@@ -61,7 +57,7 @@ const handleLogout = async () => {
         <div class="flex items-center gap-[10px]">
           <NuxtLink :to="ROUTES.home.base">
             <img
-              :src="isDark ? logoPath('logo_white.svg') : logoPath('logo_black.svg')"
+              :src="isDark ? logoWhite : logoBlack"
               alt="viernulvier Logo"
               class="h-[60px] w-auto"
             />
