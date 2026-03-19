@@ -9,6 +9,7 @@ import { Sun, Moon, LogOut} from 'lucide-vue-next'
 import { useRuntimeConfig } from '#app'
 
 const config = useRuntimeConfig()
+
 // Dit zorgt ervoor dat de baseURL (bijv. '/') altijd voor je plaatje geplakt wordt
 const logoPath = (name) => `${config.app.baseURL}${name}`
 
@@ -84,7 +85,7 @@ const handleLogout = async () => {
           <button
             v-if="isAdmin"
             @click="handleLogout"
-            class="flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-[11px] font-black text-white transition hover:bg-[var(--foreground)]">
+            class="flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-[11px] font-black text-white transition hover:bg-[var(--foreground)] hover:text-[var(--background)]">
             <LogOut :size="16" />
             {{ t('nav.logout').toUpperCase() }}
           </button>
