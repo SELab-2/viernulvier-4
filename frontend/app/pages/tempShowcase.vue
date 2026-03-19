@@ -8,7 +8,7 @@ const productions = ref<ProductionView[]>([])
 const { getAll } = useProductionApi()
 
 const response = await getAll({
-  limit: 5,
+  limit: 6,
   lang: 'nl',
 })
 
@@ -21,25 +21,24 @@ if (response.data?.objects) {
 
 <template>
   <div class="min-h-screen bg-zinc-50 px-6 py-12">
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-6xl mx-auto">
 
       <!-- Header -->
       <div class="mb-8">
-        <p class="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Overzicht</p>
-        <h1 class="text-2xl font-bold text-zinc-800">Producties</h1>
+        <p class="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-2">Overzicht</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-zinc-800">Producties showcase</h1>
+        <p class="mt-2 text-sm text-zinc-500">This page previews the new list view item component for production.</p>
       </div>
 
-      <!-- List -->
-      <div class="flex flex-col gap-2">
-        <ProductionViewItem
-          v-for="production in productions"
-          :key="production.id"
-          :productionView="production"
-        />
+      <!-- List - each item full width -->
+      <div class="flex flex-col items-center gap-3">
+        <div v-for="production in productions" :key="production.id" class="w-full">
+          <ProductionViewItem :productionView="production" />
+        </div>
       </div>
 
       <!-- Footer count -->
-      <p class="mt-6 text-xs text-zinc-400 text-right">{{ productions.length }} producties geladen</p>
+      <p class="mt-8 text-sm text-zinc-400 text-right">{{ productions.length }} producties geladen</p>
 
     </div>
   </div>
