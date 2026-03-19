@@ -2,11 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { PriceDatabaseService } from "../database/db.price.service";
 import {
   CreatePriceDto,
-  PaginatedPriceDto,
   PaginationFilterDto,
   PriceDto,
   UpdatePriceDto,
 } from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class PriceService {
@@ -27,7 +27,7 @@ export class PriceService {
    */
   async getPrices(
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedPriceDto> {
+  ): Promise<PaginatedResponse<PriceDto>> {
     return await this.priceDbService.getPrices(
       paginationFilter.limit,
       paginationFilter.page,
@@ -45,11 +45,15 @@ export class PriceService {
 
   /**
    * Updates an existing Price in the database.
+   * @param priceId The ID of the price.
    * @param updatePrice The needed values to update the Price.
    * @returns The newly updated Price object.
    */
-  async updatePrice(updatePrice: UpdatePriceDto): Promise<PriceDto> {
-    return await this.priceDbService.updatePrice(updatePrice);
+  async updatePrice(
+    priceId: number,
+    updatePrice: UpdatePriceDto,
+  ): Promise<PriceDto> {
+    return await this.priceDbService.updatePrice(priceId, updatePrice);
   }
 
   /**

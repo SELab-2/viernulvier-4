@@ -14,8 +14,6 @@ import { TagService } from "./tag.service";
 import {
   CreateTagDto,
   LanguageQueryDto,
-  PaginatedTagDto,
-  PaginatedTagViewDto,
   PaginationFilterDto,
   TagDto,
   TagViewDto,
@@ -32,10 +30,14 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateTagSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
   UpdateTagSchema,
 } from "@repo/common";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 import { LanguageService } from "../util/language/language.service";
 
 @Controller("tags")
@@ -52,14 +54,14 @@ export class TagController {
    * @returns All TagDto objects
    */
   @ApiOperation({ summary: "Returns all Tag objects." })
-  @ApiOkArrayAnyOf(TagDto, TagViewDto)
+  @ApiOkPaginatedResponseAnyOf(TagDto, TagViewDto)
   @Get()
   async getAllTags(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedTagDto | PaginatedTagViewDto> {
-    return this.ls.flattenByLanguage<PaginatedTagDto | PaginatedTagViewDto>(
+  ): Promise<PaginatedResponse<TagDto | TagViewDto>> {
+    return this.ls.flattenByLanguage<PaginatedResponse<TagDto | TagViewDto>>(
       await this.tagService.getAllTags(paginationFilter),
       lang.lang,
     );

@@ -4,11 +4,11 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
-  PaginatedEventDto,
   PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class EventService {
@@ -19,7 +19,9 @@ export class EventService {
    * @param filters The Filters to be applied to the query.
    * @returns All EventDto objects.
    */
-  async getAllEvents(filters: FilterEventDto): Promise<PaginatedEventDto> {
+  async getAllEvents(
+    filters: FilterEventDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     return await this.eventDBService.getEvents(filters);
   }
 
@@ -43,7 +45,7 @@ export class EventService {
     if (id !== event.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    return await this.eventDBService.updateEvent(event);
+    return await this.eventDBService.updateEvent(id, event);
   }
 
   /**
@@ -61,7 +63,7 @@ export class EventService {
       id, // Force ID.
     };
 
-    return await this.eventDBService.updateEvent(mergedEvent);
+    return await this.eventDBService.updateEvent(id, mergedEvent);
   }
 
   /**

@@ -16,6 +16,7 @@ import {
   BlogSchema,
   CreateBlogSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
   UpdateBlogSchema,
 } from "@repo/common";
@@ -25,8 +26,6 @@ import {
   BlogViewDto,
   CreateBlogDto,
   LanguageQueryDto,
-  PaginatedBlogDto,
-  PaginatedBlogViewDto,
   PaginationFilterDto,
   UpdateBlogDto,
 } from "../dto/dto";
@@ -38,7 +37,10 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("blogs")
 export class BlogController {
@@ -54,15 +56,15 @@ export class BlogController {
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
-  @ApiOkArrayAnyOf(BlogDto, BlogViewDto)
+  @ApiOkPaginatedResponseAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getAllBlogs(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedBlogDto | PaginatedBlogViewDto> {
+  ): Promise<PaginatedResponse<BlogDto | BlogViewDto>> {
     const result = await this.blogService.getAllBlogs(paginationFilter);
-    return this.ls.flattenByLanguage<PaginatedBlogDto | PaginatedBlogViewDto>(
+    return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
       result,
       lang.lang,
     );

@@ -4,11 +4,11 @@ import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
-  PaginatedAccountDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
 } from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class AuthService {
@@ -24,7 +24,7 @@ export class AuthService {
    */
   async getAccounts(
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedAccountDto> {
+  ): Promise<PaginatedResponse<PublicAccountDto>> {
     return await this.accountDbService.getAccounts(
       paginationFilter.limit,
       paginationFilter.page,

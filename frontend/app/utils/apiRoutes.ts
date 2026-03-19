@@ -21,8 +21,8 @@ export const API_ROUTES = {
   events: {
     base: "/events",
     byId: (eventId: number) => `/events/${eventId}`,
-    locations: (eventId: number) => `/events/${eventId}/locations`,
-    locationById: (eventId: number, locationId: number) => `/events/${eventId}/locations/${locationId}`,
+    locations: (eventId: number) => `/events/${eventId}/location`,
+    locationById: (eventId: number, locationId: number) => `/events/${eventId}/location/${locationId}`,
     prices: (eventId: number) => `/events/${eventId}/prices`,
     priceById: (eventId: number, priceId: number) => `/events/${eventId}/prices/${priceId}`,
   },

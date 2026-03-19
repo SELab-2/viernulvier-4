@@ -6,7 +6,7 @@ import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
 import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
 
 // Load DEV database env vars for script usage from root .env
-dotenv.config({ path: path.join(process.cwd(), ".env") });
+dotenv.config({ path: path.join(process.cwd(), ".env"), quiet: true });
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
 

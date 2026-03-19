@@ -4,13 +4,16 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginatedProductionDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { FilterProductionSchema, SUPPORTED_LANGUAGES } from "@repo/common";
+import {
+  FilterProductionSchema,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -22,9 +25,8 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: PaginatedProductionDto = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
-    );
+    const productions: PaginatedResponse<ProductionDto> =
+      await this.getProductions(FilterProductionSchema.parse({ id: id }));
 
     const production = productions.objects;
     if (production.length === 0)
@@ -51,7 +53,6 @@ export class ProductionDatabaseService {
       const query = `
       SELECT t.id,
              t.tag,
-             t.legacy_id,
              t.created_at,
              t.updated_at
       FROM tags t
@@ -69,7 +70,6 @@ export class ProductionDatabaseService {
              t.tag,
              t.created_at,
              t.updated_at,
-             t.legacy_id
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -114,7 +114,6 @@ export class ProductionDatabaseService {
              b.description,
              b.created_at,
              b.updated_at,
-             b.legacy_id
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -133,7 +132,7 @@ export class ProductionDatabaseService {
    */
   async getProductions(
     filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto> {
+  ): Promise<PaginatedResponse<ProductionDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -237,6 +236,7 @@ export class ProductionDatabaseService {
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     // count query uses same filters but no pagination
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
     SELECT COUNT(DISTINCT p.id) as count
@@ -265,7 +265,6 @@ export class ProductionDatabaseService {
       p.credits,
       p.created_at,
       p.updated_at,
-      p.legacy_id,
       p.performer_type,
       p.attendance_mode
     FROM productions p
@@ -309,11 +308,10 @@ export class ProductionDatabaseService {
           artist,
           tagline,
           credits,
-          legacy_id,
           performer_type,
           attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING
           id,
           titel,
@@ -324,7 +322,6 @@ export class ProductionDatabaseService {
           credits,
           created_at,
           updated_at,
-          legacy_id,
           performer_type,
           attendance_mode;
       `;
@@ -336,7 +333,6 @@ export class ProductionDatabaseService {
       production.artist,
       production.tagline,
       production.credits,
-      production.legacy_id,
       production.performer_type,
       production.attendance_mode,
     ];
@@ -365,11 +361,10 @@ export class ProductionDatabaseService {
         artist,
         tagline,
         credits,
-        legacy_id,
         performer_type,
         attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       ON CONFLICT (id)
       DO UPDATE SET
         titel = EXCLUDED.titel,
@@ -378,7 +373,6 @@ export class ProductionDatabaseService {
         artist = EXCLUDED.artist,
         tagline = EXCLUDED.tagline,
         credits = EXCLUDED.credits,
-        legacy_id = EXCLUDED.legacy_id,
         performer_type = EXCLUDED.performer_type,
         attendance_mode = EXCLUDED.attendance_mode
         RETURNING
@@ -391,7 +385,6 @@ export class ProductionDatabaseService {
           credits,
           created_at,
           updated_at,
-          legacy_id,
           performer_type,
           attendance_mode
       `;
@@ -403,7 +396,6 @@ export class ProductionDatabaseService {
       production.artist,
       production.tagline,
       production.credits,
-      production.legacy_id ?? null,
       production.performer_type ?? null,
       production.attendance_mode ?? null,
     ];
@@ -425,12 +417,9 @@ export class ProductionDatabaseService {
    * @returns the updated production if successful.
    */
   async updateProduction(
+    productionId: number,
     production: UpdateProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.id) {
-      throw new BadRequestException("Production id is required for update");
-    }
-
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -453,11 +442,6 @@ export class ProductionDatabaseService {
       }
     }
 
-    if (production.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(production.legacy_id);
-    }
-
     if (production.performer_type !== undefined) {
       fields.push(`performer_type = $${index++}`);
       values.push(production.performer_type);
@@ -472,7 +456,7 @@ export class ProductionDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(production.id);
+    values.push(productionId);
     const query = `
       UPDATE productions
       SET ${fields.join(", ")}
@@ -487,7 +471,6 @@ export class ProductionDatabaseService {
         credits,
         created_at,
         updated_at,
-        legacy_id,
         performer_type,
         attendance_mode;
     `;

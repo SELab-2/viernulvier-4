@@ -21,8 +21,10 @@ export function useEventApi() {
 
   /** GET /events — returns a paginated list of events, optionally filtered. */
   const getAll = (filters?: Partial<FilterEvent>) => {
-    const query = filters ? "?" + new URLSearchParams(filters as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: Event[] }>(`${API_ROUTES.events.base}${query}`);
+    const query = filters
+      ? "?" + new URLSearchParams(filters as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<Event>>(`${API_ROUTES.events.base}${query}`);
   };
 
   /** GET /events/:eventId — returns a single event. */
@@ -42,18 +44,22 @@ export function useEventApi() {
     patch<Event, UpdateEvent>(API_ROUTES.events.byId(eventId), body);
 
   /** DELETE /events/:eventId — deletes an event. */
-  const remove = (eventId: number) =>
-    del(API_ROUTES.events.byId(eventId));
+  const remove = (eventId: number) => del(API_ROUTES.events.byId(eventId));
 
   /** GET /events/:eventId/locations — returns the location linked to an event. */
   const getLocation = (eventId: number, lang?: Language) => {
     const query = lang ? `?lang=${lang}` : "";
-    return get<Location | LocationView>(`${API_ROUTES.events.locations(eventId)}${query}`);
+    return get<Location | LocationView>(
+      `${API_ROUTES.events.locations(eventId)}${query}`,
+    );
   };
 
   /** PUT /events/:eventId/locations/:locationId — links a location to an event. */
   const linkLocation = (eventId: number, locationId: number) =>
-    put<boolean, Record<string, never>>(API_ROUTES.events.locationById(eventId, locationId), {});
+    put<boolean, Record<string, never>>(
+      API_ROUTES.events.locationById(eventId, locationId),
+      {},
+    );
 
   /** DELETE /events/:eventId/locations — removes the location from an event. */
   const unlinkLocation = (eventId: number) =>
@@ -62,12 +68,17 @@ export function useEventApi() {
   /** GET /events/:eventId/prices — returns all prices linked to an event. */
   const getPrices = (eventId: number, lang?: Language) => {
     const query = lang ? `?lang=${lang}` : "";
-    return get<Price[] | PriceView[]>(`${API_ROUTES.events.prices(eventId)}${query}`);
+    return get<Price[] | PriceView[]>(
+      `${API_ROUTES.events.prices(eventId)}${query}`,
+    );
   };
 
   /** PUT /events/:eventId/prices/:priceId — links a price to an event. */
   const linkPrice = (eventId: number, priceId: number) =>
-    put<boolean, Record<string, never>>(API_ROUTES.events.priceById(eventId, priceId), {});
+    put<boolean, Record<string, never>>(
+      API_ROUTES.events.priceById(eventId, priceId),
+      {},
+    );
 
   /** DELETE /events/:eventId/prices/:priceId — removes a price from an event. */
   const unlinkPrice = (eventId: number, priceId: number) =>
