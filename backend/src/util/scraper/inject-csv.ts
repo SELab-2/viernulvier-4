@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 import { DbConnection } from "./db.connection";
 import logger from "../logger/logger";
-import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
+import { OldCSVFileParser } from "../../csv_parsing/old_csv_file_parser";
 import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
 
 // Load DEV database env vars for script usage from root .env
@@ -72,8 +72,8 @@ export async function injectCsvData() {
 
   logger.info("Parsing CSV files...");
   const { productions, tags, productionTagLinks } =
-    await CSVFileParser.parseOldProductionsCSV(productionsFile);
-  const parsedEvents = await CSVFileParser.parseOldEventsCSV(eventsFile);
+    await OldCSVFileParser.parseOldProductionsCSV(productionsFile);
+  const parsedEvents = await OldCSVFileParser.parseOldEventsCSV(eventsFile);
 
   const csvTags: vnvGenre[] = tags.map(toCsvTag);
   const csvProductions: vnvProduction[] = productions.map((production) =>
