@@ -3,7 +3,7 @@
 ## 📅 Events Management
 ### [GET] `/events`
 Returns all events. Supports filters via query parameters.
-- **Returns:** `PaginatedResponse<Event>` a paginated list of events.
+- **Returns:** `PaginatedResponse<Event>` a [paginated](../pagination/index.md) list of events.
 
 ### [GET] `/events/:eventId`
 Retrieves a specific event by its ID.
