@@ -20,10 +20,18 @@ export function useBlogApi() {
   const { get, post, put, patch, del } = useApi();
 
   /** GET /blogs — returns a paginated list of blogs. */
-  const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
-    const params = { ...pagination, ...(lang ? { lang } : {}) };
+  const getAll = (
+    pagination?: Partial<PaginationFilter>,
+    lang?: Language,
+    descending: boolean = true, // Defaults to descending for bog timeline.
+  ) => {
+    const params = {
+      ...pagination,
+      ...(lang ? { lang } : {}),
+      ...{ descending: descending },
+    };
     const query = Object.keys(params).length
-      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      ? "?" + new URLSearchParams(params as Record<string, any>).toString()
       : "";
     return get<PaginatedResponse<Blog | BlogView>>(
       `${API_ROUTES.blogs.base}${query}`,
