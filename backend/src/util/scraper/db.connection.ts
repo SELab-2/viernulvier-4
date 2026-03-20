@@ -8,6 +8,7 @@ import {
 } from "./vnv.parser";
 import { Production, Tag, Event, Price, Location } from "@repo/common";
 import logger from "../logger/logger";
+import { ResourceGoneException } from "../../common/exceptions";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -58,6 +59,54 @@ export class DbConnection {
       );
       throw error; // Let the caller know it failed!
     }
+  }
+
+  /**
+   * Fetches a production by legacy id.
+   * @param legacyId The production legacy id.
+   * @returns The production row.
+   */
+  async getProductionByLegacyId(legacyId: string): Promise<Production> {
+    if (!legacyId || !legacyId.trim()) {
+      throw new Error("legacyId is required to fetch a production");
+    }
+
+    const rows = await this.query<Production>(
+      `SELECT * FROM productions WHERE legacy_id = $1 LIMIT 1;`,
+      [legacyId],
+    );
+
+    if (rows.length === 0) {
+      throw new ResourceGoneException(
+        `No Production exists for provided legacy_id(${legacyId})`,
+      );
+    }
+
+    return rows[0];
+  }
+
+  /**
+   * Fetches an event by legacy id.
+   * @param legacyId The event legacy id.
+   * @returns The event row.
+   */
+  async getEventByLegacyId(legacyId: string): Promise<Event> {
+    if (!legacyId || !legacyId.trim()) {
+      throw new Error("legacyId is required to fetch an event");
+    }
+
+    const rows = await this.query<Event>(
+      `SELECT * FROM events WHERE legacy_id = $1 LIMIT 1;`,
+      [legacyId],
+    );
+
+    if (rows.length === 0) {
+      throw new ResourceGoneException(
+        `No Event exists for provided legacy_id(${legacyId})`,
+      );
+    }
+
+    return rows[0];
   }
 
   /**
