@@ -68,6 +68,16 @@ describe("SearchBar", () => {
         expect(wrapper.find("input").element.value).toBe("Apple"); // internalQuery contains selected value
     });
 
+    it("emits `update:modelValue` with typed value when Enter is pressed", async () => {
+        const input = wrapper.find("input");
+        await input.trigger("focus");
+        await input.setValue("ap");
+
+        await input.trigger("keydown.enter");
+
+        expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["ap"]);
+    });
+
     it("shows suggestions when input is empty", async () => {
         await wrapper.setProps({ limit: 3 });
         const input = wrapper.find("input");
