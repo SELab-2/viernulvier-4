@@ -69,6 +69,225 @@ function toOldCsvEvent(
   };
 }
 
+function toCsvLegacyIdFromNumericId(id: number): string {
+  return `csv-${id}`;
+}
+
+function toCsvLocation(location: { en: string; nl: string }): vnvLocation {
+  return {
+    legacy_id: `csv-${location.nl}`,
+    created_at: DEFAULT_DATE,
+    updated_at: DEFAULT_DATE,
+    name: {
+      en: location.en,
+      nl: location.nl,
+    },
+  };
+}
+
+function toCsvEvent(row: {
+  event: any;
+  legacy_id: string;
+  locationLegacyId: string;
+}): vnvEvent {
+  const event = row.event;
+  return {
+    legacy_id: row.legacy_id,
+    production_id: toCsvLegacyIdFromNumericId(event.production_id),
+    created_at: DEFAULT_DATE,
+    updated_at: DEFAULT_DATE,
+    starts_at: event.starttime,
+    ends_at: event.endtime ?? event.starttime,
+    intermission_at: event.intermission_at ?? DEFAULT_DATE,
+    doors_at: event.doors_at ?? DEFAULT_DATE,
+    location: row.locationLegacyId,
+    prices: [],
+  };
+}
+
+function toCsvProduction(row: {
+  production: any;
+  legacy_id: string;
+}): vnvProduction {
+  const production = row.production;
+  return {
+    legacy_id: row.legacy_id,
+    created_at: DEFAULT_DATE,
+    updated_at: DEFAULT_DATE,
+    performer_type: production.performer_type ?? "N/A",
+    attendance_mode: production.attendance_mode ?? "N/A",
+    title: production.titel,
+    artist: production.artist ?? { en: "N/A", nl: "N/A" },
+    tagline: production.tagline ?? { en: "N/A", nl: "N/A" },
+    description: production.description1,
+    description_2: production.description2 ?? { en: "N/A", nl: "N/A" },
+    info: production.credits ?? { en: "N/A", nl: "N/A" },
+    events: [],
+    genres: [],
+  };
+}
+
+/**
+ * Import only productions from the structured CSV.
+ * Can be run independently from other imports.
+ */
+export async function injectProductionsCSV(filePath: string) {
+  const dbConnection = new DbConnection();
+  logger.info(`Parsing productions CSV: ${filePath}`);
+
+  const parsedProductions = await CSVFileParser.parseProductionsCSV(filePath);
+
+  const csvProductions: vnvProduction[] = parsedProductions.map((row) =>
+    toCsvProduction({
+      production: row.production,
+      legacy_id: row.legacy_id,
+    }),
+  );
+
+  await dbConnection.insertProductions(csvProductions);
+  logger.info("Structured productions CSV injection completed.");
+}
+
+/**
+ * Import only events (+ locations) from the structured CSV.
+ * Can be run independently from other imports.
+ */
+export async function injectEventsCSV(filePath: string) {
+  const dbConnection = new DbConnection();
+  logger.info(`Parsing events CSV: ${filePath}`);
+
+  const parsedEvents = await CSVFileParser.parseEventsCSV(filePath);
+
+  const locationNames = new Set(
+    parsedEvents
+      .map((row) => row.location.nl.trim())
+      .filter(Boolean),
+  );
+  const csvLocations: vnvLocation[] =
+    Array.from(locationNames).map(toOldCsvLocation);
+
+  await dbConnection.insertLocations(csvLocations);
+
+  const csvEvents: vnvEvent[] = parsedEvents.map((row) => {
+    const locationName = row.location.nl.trim();
+    const locationLegacyId = locationName ? `csv-${locationName}` : "N/A";
+
+    return toCsvEvent({
+      event: row.event,
+      legacy_id: row.legacy_id,
+      locationLegacyId,
+    });
+  });
+
+  await dbConnection.insertEvents(csvEvents);
+  logger.info("Structured events CSV injection completed.");
+}
+
+/**
+ * Import only tags from the structured CSV and link them to already existing productions.
+ * Can be run independently from other imports.
+ */
+export async function injectTagsCSV(filePath: string) {
+  const dbConnection = new DbConnection();
+  logger.info(`Parsing tags CSV: ${filePath}`);
+
+  const parsedTags = await CSVFileParser.parseTagsCSV(filePath);
+
+  for (const row of parsedTags) {
+    const tagValue = row.tag.tag.en || row.tag.tag.nl || "unknown";
+    const tagLegacyId = "";
+
+    const tagId = await dbConnection.insertTag({
+      legacy_id: tagLegacyId,
+      created_at: DEFAULT_DATE,
+      updated_at: DEFAULT_DATE,
+      name: row.tag.tag,
+    });
+
+    for (const productionId of row.productionIds) {
+      const productionLegacyId = toCsvLegacyIdFromNumericId(productionId);
+      try {
+        const production =
+          await dbConnection.getProductionByLegacyId(productionLegacyId);
+        await dbConnection.linkTag(production.id, tagId);
+      } catch {
+        logger.warn(
+          `Skipping tag link; production not found for ${productionLegacyId}`,
+        );
+      }
+    }
+  }
+
+  logger.info("Structured tags CSV injection completed.");
+}
+
+/**
+ * Import only blogs from the structured CSV and link them to already existing productions.
+ * Can be run independently from other imports.
+ */
+export async function injectBlogsCSV(filePath: string) {
+  const dbConnection = new DbConnection();
+  logger.info(`Parsing blogs CSV: ${filePath}`);
+
+  const parsedBlogs = await CSVFileParser.parseBlogsCSV(filePath);
+
+  for (const row of parsedBlogs) {
+    const productionLegacyId = toCsvLegacyIdFromNumericId(row.production_id);
+    try {
+      const production =
+        await dbConnection.getProductionByLegacyId(productionLegacyId);
+
+      const blog = await dbConnection.insertBlog(
+        row.blog.titel,
+        row.blog.description,
+      );
+
+      await dbConnection.linkBlog(production.id, blog.id);
+    } catch {
+      logger.warn(
+        `Skipping blog link; production not found for ${productionLegacyId}`,
+      );
+    }
+  }
+
+  logger.info("Structured blogs CSV injection completed.");
+}
+
+/**
+ * Import only prices from the structured CSV and link them to already existing events.
+ * Can be run independently from other imports.
+ */
+export async function injectPricesCSV(filePath: string) {
+  const dbConnection = new DbConnection();
+  logger.info(`Parsing prices CSV: ${filePath}`);
+
+  const parsedPrices = await CSVFileParser.parsePricesCSV(filePath);
+
+  for (const row of parsedPrices) {
+    const eventLegacyId = toCsvLegacyIdFromNumericId(row.event_id);
+    try {
+      const event = await dbConnection.getEventByLegacyId(eventLegacyId);
+
+      const priceName = row.price.name.en || row.price.name.nl || "unknown";
+      const priceLegacyId = "";
+
+      const price = await dbConnection.insertPrice({
+        legacy_id: priceLegacyId,
+        created_at: DEFAULT_DATE,
+        updated_at: DEFAULT_DATE,
+        amount: row.price.price,
+        name: row.price.name,
+      });
+
+      await dbConnection.linkPrice(event.id, price.id);
+    } catch {
+      logger.warn(`Skipping price link; event not found for ${eventLegacyId}`);
+    }
+  }
+
+  logger.info("Structured prices CSV injection completed.");
+}
+
 export async function injectOldCsvData() {
   const dbConnection = new DbConnection();
 
