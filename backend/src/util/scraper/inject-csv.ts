@@ -158,19 +158,24 @@ export async function injectEventsCSV(filePath: string) {
 
   const parsedEvents = await CSVFileParser.parseEventsCSV(filePath);
 
-  const locationNames = new Set(
-    parsedEvents
-      .map((row) => row.location.nl.trim())
-      .filter(Boolean),
-  );
-  const csvLocations: vnvLocation[] =
-    Array.from(locationNames).map(toOldCsvLocation);
+  // deduplicate locations from events and convert to csvLocations
+  const locationByName = new Map<string, vnvLocation>();
+  for (const row of parsedEvents) {
+    const key = `${row.location.en}||${row.location.nl}`;
+    if (!locationByName.has(key)) {
+      locationByName.set(key, toCsvLocation(row.location));
+    }
+  }
+
+  const csvLocations: vnvLocation[] = Array.from(locationByName.values());
 
   await dbConnection.insertLocations(csvLocations);
 
+  // Now that locations are inserted, we can convert events to csvEvents with locationLegacyIds
   const csvEvents: vnvEvent[] = parsedEvents.map((row) => {
-    const locationName = row.location.nl.trim();
-    const locationLegacyId = locationName ? `csv-${locationName}` : "N/A";
+    const locationKey = `${row.location.en}||${row.location.nl}`;
+    const locationLegacyId =
+      locationByName.get(locationKey)?.legacy_id ?? "csv-location-unknown";
 
     return toCsvEvent({
       event: row.event,
