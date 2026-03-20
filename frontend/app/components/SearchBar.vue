@@ -10,7 +10,8 @@
  * <SearchBar
  *   v-model="selectedItem"
  *   :items="items"
- *   :limit="3"
+ *   :limit="6"
+ *   :scrollLimit="3"
  *   label="Select an item"
  *   placeholder="Type to search..."
  * />
@@ -25,6 +26,7 @@ interface Props {
   modelValue: string // currently selected value
   items: string[] // list of searchable items
   limit?: number // max suggestions
+  scrollLimit?: number // number of suggestions before scrollbar appears
   label?: string // label displayed above the input
   placeholder?: string // placeholder text displayed inside the input
   id?: string
@@ -37,6 +39,12 @@ const props = withDefaults(defineProps<Props>(), { // default prop values
 // default value of placeholder cannot be put in withDefaults, as we're working with i18n
 const computedPlaceholder = computed(() => {
   return props.placeholder || t('searchbar.placeholder')
+})
+// computes when a scrollbar should be used
+const dropdownStyle = computed(() => {
+  const limit = props.scrollLimit ?? props.limit // is default the same num as max suggestions (there will be no scrollbar then)
+  const itemHeightPx = 36 // matches the py-2 height of each <li>
+  return { maxHeight: `${limit * itemHeightPx}px` }
 })
 
 const emit = defineEmits<{ // update:modelValue gets called when a new selection is made
@@ -103,7 +111,7 @@ const clear = () => { // handles clearing the input
       />
 
       <!-- Autocompletion suggestions -->
-      <ul v-if="results.length" class="absolute mt-1 w-full bg-background border border-border rounded-lg shadow-2xl z-10">
+      <ul v-if="results.length" :style="dropdownStyle" class="absolute mt-1 w-full bg-background border border-border rounded-lg shadow-2xl z-10 overflow-y-auto">
         <li v-for="item in results"
             :key="item"
             @mousedown.prevent="select(item)"

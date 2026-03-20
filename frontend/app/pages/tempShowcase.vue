@@ -31,7 +31,8 @@ const toggleDark = () => {
     <SearchBar
         v-model="searchQuery"
         :items="mockItems"
-        :limit="3"
+        :limit="4"
+        :scroll-limit="3"
         label="Select a fruit"
         placeholder="Type a fruit..."
         required
