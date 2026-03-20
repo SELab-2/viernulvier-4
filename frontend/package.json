@@ -22,10 +22,6 @@
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
-    "@nuxtjs/i18n": "^10.2.3",
-    "@tailwindcss/postcss": "^4.0.0",
-    "tailwindcss": "^4.0.0",
-    "lucide-vue-next": "^0.469.0",
     "@nuxt/test-utils": "^4.0.0",
     "@vitest/coverage-v8": "^4.0.18",
     "@vue/test-utils": "^2.4.6",
