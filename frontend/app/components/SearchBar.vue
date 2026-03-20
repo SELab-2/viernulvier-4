@@ -115,7 +115,7 @@ const clear = () => { // handles clearing the input
         <li v-for="item in results"
             :key="item"
             @mousedown.prevent="select(item)"
-            class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-muted text-muted-foreground">
+            class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-muted text-muted-foreground overflow-hidden truncate">
           {{ item }}
         </li>
       </ul>
