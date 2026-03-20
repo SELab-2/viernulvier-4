@@ -36,6 +36,7 @@ describe("SearchBar", () => {
 
     it("filters results case-insensitively based on input", async () => {
         const input = wrapper.find("input");
+        await input.trigger("focus");
         await input.setValue("ap"); // types in the value in the field
 
         const suggestions = wrapper.findAll("li"); // searches for all list items
@@ -47,7 +48,9 @@ describe("SearchBar", () => {
     it("limits the number of results to `limit` prop", async () => {
         await wrapper.setProps({ limit: 2 });
         const input = wrapper.find("input");
-        await input.setValue("a"); // normally matches Apple, Banana, Orange, Grapes, Pineapple, Mango
+        await input.trigger("focus");
+        await input.setValue("a");
+        // normally matches Apple, Banana, Orange, Grapes, Pineapple, Mango, but only needs to show 2
 
         const suggestions = wrapper.findAll("li");
         expect(suggestions.length).toBe(2);
@@ -55,13 +58,14 @@ describe("SearchBar", () => {
 
     it("emits `update:modelValue` when a suggestion is clicked", async () => {
         const input = wrapper.find("input");
+        await input.trigger("focus");
         await input.setValue("ap"); // matches Apple, Grapes, Pineapple
 
         const firstSuggestion = wrapper.find("li");
-        await firstSuggestion.trigger("click");
+        await firstSuggestion.trigger("mousedown");
 
         expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["Apple"]); // grabs the first time the event was emitted
-        expect(wrapper.find("input").element.value).toBe(""); // internalQuery cleared
+        expect(wrapper.find("input").element.value).toBe("Apple"); // internalQuery contains selected value
     });
 
     it("shows suggestions when input is empty", async () => {
@@ -71,5 +75,22 @@ describe("SearchBar", () => {
         await input.setValue("");
 
         expect(wrapper.findAll("li").length).toBe(3); //there should be max 3 suggestions given
+    });
+
+    it("clear button appears when input has text and clears on click", async () => {
+        const input = wrapper.find("input");
+        await input.trigger("focus");
+        await input.setValue("ap");
+        expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["ap"]); // from setValue
+
+        // button should be visible now
+        const clearButton = wrapper.find("button");
+        expect(clearButton.exists()).toBe(true);
+
+        await clearButton.trigger("mousedown"); // clicking on the clear button
+
+        expect(wrapper.find("input").element.value).toBe("");
+        expect(wrapper.emitted("update:modelValue")?.[1]).toEqual([""]); // from clear
+        expect(wrapper.find("button").exists()).toBe(false); // button disappears when empty
     });
 });
