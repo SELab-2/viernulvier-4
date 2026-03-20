@@ -1,5 +1,7 @@
 {
-  "_comment": "Dutch translations for the VIERNULVIER archive frontend.",
+   "searchbar": {
+    "placeholder": "Zoek..."
+  },
   "hero": {
     "title": "Archief",
     "label": "Kunstencentrum Gent — Archief",

@@ -54,5 +54,8 @@
     "ariaHide": "Hide",
     "loadMore": "Load more",
     "remaining": "remaining"
+  },
+  "searchbar": {
+    "placeholder": "Search..."
   }
 }
