@@ -107,7 +107,7 @@ const clear = () => { // handles clearing the input
           :required="props.required"
           @focus="isFocused = true"
           @blur="isFocused = false"
-          class="pl-12 pr-10 bg-muted border-none h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full focus:outline-none focus:ring-0"
+          class="pl-12 pr-10 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background"
       />
 
       <!-- Autocompletion suggestions -->
