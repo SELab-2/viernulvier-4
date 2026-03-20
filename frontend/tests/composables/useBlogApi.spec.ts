@@ -25,7 +25,7 @@ describe("useBlogApi", () => {
   it("getAll calls GET /blogs", () => {
     const { getAll } = useBlogApi();
     getAll();
-    expect(mockGet).toHaveBeenCalledWith("/blogs");
+    expect(mockGet).toHaveBeenCalledWith("/blogs?descending=true");
   });
 
   it("getAll appends lang query param", () => {
