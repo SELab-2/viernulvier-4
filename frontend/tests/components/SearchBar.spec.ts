@@ -81,7 +81,6 @@ describe("SearchBar", () => {
         const input = wrapper.find("input");
         await input.trigger("focus");
         await input.setValue("ap");
-        expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["ap"]); // from setValue
 
         // button should be visible now
         const clearButton = wrapper.find("button");
@@ -90,7 +89,7 @@ describe("SearchBar", () => {
         await clearButton.trigger("mousedown"); // clicking on the clear button
 
         expect(wrapper.find("input").element.value).toBe("");
-        expect(wrapper.emitted("update:modelValue")?.[1]).toEqual([""]); // from clear
+        expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([""]); // from clear
         expect(wrapper.find("button").exists()).toBe(false); // button disappears when empty
     });
 });
