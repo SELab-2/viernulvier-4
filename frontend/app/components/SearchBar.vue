@@ -18,7 +18,7 @@
 
 import { ref, computed } from "vue"
 import type { ComputedRef } from "vue"
-import { Search } from "lucide-vue-next"
+import { Search, X } from "lucide-vue-next"
 const { t } = useI18n()
 
 interface Props {
@@ -75,6 +75,10 @@ const select = (item: string) => { // handles selecting a suggestion
   emit("update:modelValue", item)
   inputRef.value?.blur()
 }
+const clear = () => { // handles clearing the input
+  internalQuery.value = ""
+  emit("update:modelValue", "")
+}
 </script>
 
 <template>
@@ -95,7 +99,7 @@ const select = (item: string) => { // handles selecting a suggestion
           :required="props.required"
           @focus="isFocused = true"
           @blur="isFocused = false"
-          class="pl-12 pr-4 bg-muted border-none h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full focus:outline-none focus:ring-0"
+          class="pl-12 pr-10 bg-muted border-none h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full focus:outline-none focus:ring-0"
       />
 
       <!-- Autocompletion suggestions -->
@@ -110,6 +114,16 @@ const select = (item: string) => { // handles selecting a suggestion
 
       <!-- Search icon -->
       <Search class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+
+      <!-- Clear button -->
+      <button
+          v-if="internalQuery"
+          @mousedown.prevent="clear"
+          type="button"
+          class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <X class="w-4 h-4" />
+      </button>
     </div>
   </div>
 </template>
