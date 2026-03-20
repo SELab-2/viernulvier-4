@@ -28,7 +28,7 @@ export default defineNuxtConfig({
   app: {
     baseURL: process.env.NUXT_BASE || "/",
     head: {
-      title: 'Viernulvier-Archive', 
+      title: 'Viernulvier-Archive',
       link: [
         { rel: 'icon', type: 'image/png',  href: `${process.env.NUXT_BASE || '/'}favicon.png` }
       ]
