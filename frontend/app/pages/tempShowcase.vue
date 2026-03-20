@@ -38,7 +38,7 @@ const toggleDark = () => {
         placeholder="Type a fruit..."
         required
     />
-    <p v-if="searchQuery">Selected: {{ searchQuery }}</p>
+    <p v-if="searchQuery">Input val: {{ searchQuery }}</p>
   </div>
   <br>
   <!-- extra zoekbalk om i18n the testen -->
@@ -49,7 +49,7 @@ const toggleDark = () => {
         :limit="3"
         label="Zoekbalk om i18n te testen"
     />
-    <p v-if="searchQuery2">Selected: {{ searchQuery2 }}</p>
+    <p v-if="searchQuery2">Input val: {{ searchQuery2 }}</p>
   </div>
   <!-- knop om i18n the testen -->
   <button @click="toggleLocale" class="btn-outline">

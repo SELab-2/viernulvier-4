@@ -87,6 +87,10 @@ const clear = () => { // handles clearing the input
   internalQuery.value = ""
   emit("update:modelValue", "")
 }
+const submit = () => { // handles input when pressing enter
+  emit("update:modelValue", internalQuery.value)
+  inputRef.value?.blur()
+}
 </script>
 
 <template>
@@ -107,6 +111,7 @@ const clear = () => { // handles clearing the input
           :required="props.required"
           @focus="isFocused = true"
           @blur="isFocused = false"
+          @keydown.enter="submit"
           class="pl-12 pr-10 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background"
       />
 
