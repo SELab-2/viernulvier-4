@@ -3,6 +3,7 @@ import * as path from "path";
 import { DbConnection } from "./db.connection";
 import logger from "../logger/logger";
 import { OldCSVFileParser } from "../../csv_parsing/old_csv_file_parser";
+import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
 import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
 
 // Load DEV database env vars for script usage from root .env
@@ -10,7 +11,7 @@ dotenv.config({ path: path.join(process.cwd(), ".env"), quiet: true });
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
 
-function toCsvTag(tagName: string): vnvGenre {
+function toOldCsvTag(tagName: string): vnvGenre {
   return {
     legacy_id: `csv-${tagName}`,
     created_at: DEFAULT_DATE,
@@ -19,7 +20,7 @@ function toCsvTag(tagName: string): vnvGenre {
   };
 }
 
-function toCsvLocation(locationName: string): vnvLocation {
+function toOldCsvLocation(locationName: string): vnvLocation {
   return {
     legacy_id: `csv-${locationName}`,
     created_at: DEFAULT_DATE,
@@ -28,7 +29,7 @@ function toCsvLocation(locationName: string): vnvLocation {
   };
 }
 
-function toCsvProduction(
+function toOldCsvProduction(
   production: any,
   tagsForProduction: string[],
 ): vnvProduction {
@@ -49,7 +50,11 @@ function toCsvProduction(
   };
 }
 
-function toCsvEvent(event: any, index: number, locationName: string): vnvEvent {
+function toOldCsvEvent(
+  event: any,
+  index: number,
+  locationName: string,
+): vnvEvent {
   return {
     legacy_id: `csv-${index}`,
     production_id: `csv-${event.production_id}`,
@@ -64,7 +69,7 @@ function toCsvEvent(event: any, index: number, locationName: string): vnvEvent {
   };
 }
 
-export async function injectCsvData() {
+export async function injectOldCsvData() {
   const dbConnection = new DbConnection();
 
   const productionsFile = "../common/res/productions_output.csv";
@@ -75,9 +80,9 @@ export async function injectCsvData() {
     await OldCSVFileParser.parseOldProductionsCSV(productionsFile);
   const parsedEvents = await OldCSVFileParser.parseOldEventsCSV(eventsFile);
 
-  const csvTags: vnvGenre[] = tags.map(toCsvTag);
+  const csvTags: vnvGenre[] = tags.map(toOldCsvTag);
   const csvProductions: vnvProduction[] = productions.map((production) =>
-    toCsvProduction(
+    toOldCsvProduction(
       production,
       productionTagLinks
         .filter((link) => link.legacyId === (production.legacy_id ?? ""))
@@ -90,10 +95,10 @@ export async function injectCsvData() {
     parsedEvents.map((row) => row.location.trim()).filter(Boolean),
   );
   const csvLocations: vnvLocation[] =
-    Array.from(locationNames).map(toCsvLocation);
+    Array.from(locationNames).map(toOldCsvLocation);
 
   const csvEvents: vnvEvent[] = parsedEvents.map((row, index) =>
-    toCsvEvent(row.event, index, row.location.trim()),
+    toOldCsvEvent(row.event, index, row.location.trim()),
   );
 
   logger.info(
