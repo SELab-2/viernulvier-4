@@ -23,7 +23,7 @@ export function useBlogApi() {
   const getAll = (
     pagination?: Partial<PaginationFilter>,
     lang?: Language,
-    descending: boolean = true, // Defaults to descending for bog timeline.
+    descending: boolean = true, // Defaults to descending for blog timeline.
   ) => {
     const params = {
       ...pagination,
