@@ -19,10 +19,12 @@ export class BlogService {
    */
   async getAllBlogs(
     paginationFilter: PaginationFilterDto,
+    descending: boolean,
   ): Promise<PaginatedResponse<BlogDto>> {
     return await this.blogDbService.getBlogs(
       paginationFilter.limit,
       paginationFilter.page,
+      descending,
     );
   }
 
