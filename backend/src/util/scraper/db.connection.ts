@@ -6,7 +6,7 @@ import {
   vnvPrice,
   vnvProduction,
 } from "./vnv.parser";
-import { Production, Tag, Event, Price, Location } from "@repo/common";
+import { Production, Tag, Event, Price, Location, Blog } from "@repo/common";
 import logger from "../logger/logger";
 import { ResourceGoneException } from "../../common/exceptions";
 
@@ -131,7 +131,7 @@ export class DbConnection {
    * @param vnvProduction The vnvProduction we want to add.
    * @returns T/F Whether the change went through or not.
    */
-  private async insertProduction(
+  async insertProduction(
     vnvProduction: vnvProduction,
   ): Promise<Production> {
     const query = `
@@ -217,7 +217,7 @@ export class DbConnection {
    * @param genre The vnvGenre that is to be turned into a Tag.
    * @returns The ID of the Tag.
    */
-  private async insertTag(genre: vnvGenre): Promise<number> {
+  async insertTag(genre: vnvGenre): Promise<number> {
     const query = `
       INSERT INTO tags (tag, legacy_id)
       VALUES ($1, $2)
@@ -236,7 +236,7 @@ export class DbConnection {
    * @param tagId The ID of the Tag.
    * @returns T/F Whether the link was created.
    */
-  private async linkTag(productionId: number, tagId: number): Promise<boolean> {
+  async linkTag(productionId: number, tagId: number): Promise<boolean> {
     const query = `
       INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
@@ -278,7 +278,7 @@ export class DbConnection {
    * @param vnvEvent The particular vnvEvent.
    * @returns Nothing.
    */
-  private async insertEvent(vnvEvent: vnvEvent) {
+  async insertEvent(vnvEvent: vnvEvent) {
     const productions: Production[] = await this.query<Production>(
       `SELECT * from productions WHERE legacy_id = $1;`,
       [vnvEvent.production_id],
@@ -385,7 +385,7 @@ export class DbConnection {
    * @param location The location we want inserted.
    * @returns Nothing.
    */
-  private async insertLocation(location: vnvLocation) {
+  async insertLocation(location: vnvLocation) {
     const query = `
       INSERT INTO locations (location, legacy_id)
       VALUES ($1, $2)
@@ -402,7 +402,7 @@ export class DbConnection {
    * @param locationId The Location ID.
    * @returns T/F Whether it Failed or not.
    */
-  private async linkLocation(
+  async linkLocation(
     eventId: number,
     locationId: number,
   ): Promise<boolean> {
@@ -438,7 +438,7 @@ export class DbConnection {
    * @param price The vnvPrice object we want inserted.
    * @returns Nothing.
    */
-  private async insertPrice(price: vnvPrice) {
+  async insertPrice(price: vnvPrice): Promise<Price> {
     const query = `
       INSERT INTO prices (name, price, legacy_id)
       VALUES ($1, $2, $3)
@@ -446,7 +446,12 @@ export class DbConnection {
       DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price
       RETURNING *;
     `;
-    await this.query<Price>(query, [price.name, price.amount, price.legacy_id]);
+    const rows = await this.query<Price>(query, [
+      price.name,
+      price.amount,
+      price.legacy_id,
+    ]);
+    return rows[0];
   }
 
   /**
@@ -455,7 +460,7 @@ export class DbConnection {
    * @param priceId The Price ID.
    * @returns T/F Whether it Failed or not.
    */
-  private async linkPrice(eventId: number, priceId: number): Promise<boolean> {
+  async linkPrice(eventId: number, priceId: number): Promise<boolean> {
     const query = `
       INSERT INTO event_prices (event_id, price_id)
       VALUES ($1, $2)
@@ -465,5 +470,51 @@ export class DbConnection {
 
     const output = await this.query(query, [eventId, priceId]);
     return output.length >= 1;
+  }
+
+  /**
+   * Blogs.
+   */
+
+  /**
+   * Inserts a single blog row.
+   * @param titel Localized blog title.
+   * @param description Localized blog description.
+   * @returns Inserted blog row.
+   */
+  async insertBlog(
+    titel: { en: string; nl: string },
+    description: { en: string; nl: string },
+  ): Promise<Blog> {
+    const rows = await this.query<Blog>(
+      `
+        INSERT INTO blogs (titel, description)
+        VALUES ($1, $2)
+        RETURNING *;
+      `,
+      [titel, description],
+    );
+
+    return rows[0];
+  }
+
+  /**
+   * Links a blog to a production.
+   * @param productionId Production id.
+   * @param blogId Blog id.
+   * @returns T/F Whether the link was created.
+   */
+  async linkBlog(productionId: number, blogId: number): Promise<boolean> {
+    const rows = await this.query(
+      `
+        INSERT INTO production_blogs (production_id, blog_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `,
+      [productionId, blogId],
+    );
+
+    return rows.length >= 1;
   }
 }
