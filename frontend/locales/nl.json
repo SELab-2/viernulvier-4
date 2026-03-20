@@ -1,4 +1,5 @@
 {
+  "_comment": "Dutch translations for the VIERNULVIER archive frontend.",
   "hero": {
     "title": "Archief",
     "label": "Kunstencentrum Gent — Archief",
@@ -37,5 +38,22 @@
     "prints": "Drukwerk",
     "rights": "Alle rechten voorbehouden",
     "newsletter": "Blijf op de hoogte"
+  },
+  "stories": {
+    "locale": "nl-BE",
+    "searchPlaceholder": "Zoeken...",
+    "sortNewest": "Nieuw → Oud",
+    "sortOldest": "Oud → Nieuw",
+    "results": "resultaten",
+    "retry": "Opnieuw proberen",
+    "loading": "Laden...",
+    "noStories": "Geen verhalen",
+    "noStoriesDesc": "Er zijn momenteel geen verhalen beschikbaar.",
+    "storySingular": "verhaal",
+    "storyPlural": "verhalen",
+    "ariaShow": "Toon",
+    "ariaHide": "Verberg",
+    "loadMore": "Meer laden",
+    "remaining": "resterend"
   }
 }

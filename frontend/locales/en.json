@@ -37,5 +37,22 @@
     "prints": "Prints",
     "rights": "All rights reserved",
     "newsletter": "Stay up to date"
+  },
+  "stories": {
+    "locale": "en-GB",
+    "searchPlaceholder": "Search...",
+    "sortNewest": "New → Old",
+    "sortOldest": "Old → New",
+    "results": "results",
+    "retry": "Try again",
+    "loading": "Loading...",
+    "noStories": "No stories",
+    "noStoriesDesc": "There are no stories available at this time.",
+    "storySingular": "story",
+    "storyPlural": "stories",
+    "ariaShow": "Show",
+    "ariaHide": "Hide",
+    "loadMore": "Load more",
+    "remaining": "remaining"
   }
 }

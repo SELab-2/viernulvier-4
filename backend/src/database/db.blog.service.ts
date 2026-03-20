@@ -59,7 +59,7 @@ export class BlogDatabaseService {
         limit: amount,
         page: page,
         totalItems: parseInt(countResult[0].count),
-        objects: await this.db.query<BlogDto>(query, [amount, offset]),
+        objects: await this.db.query<BlogDto>(query),
       };
     }
 
