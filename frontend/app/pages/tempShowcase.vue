@@ -47,13 +47,14 @@ const toggleDark = () => {
         :limit="3"
         label="Zoekbalk om i18n te testen"
     />
-    <p v-if="searchQuery">Selected: {{ searchQuery2 }}</p>
+    <p v-if="searchQuery2">Selected: {{ searchQuery2 }}</p>
   </div>
   <!-- knop om i18n the testen -->
   <button @click="toggleLocale" class="btn-outline">
     {{ locale.toUpperCase() }}
   </button>
   <br>
+  <!-- knop om light-dark the testen -->
   <button @click="toggleDark" class="btn-outline">
     {{ isDark ? "Light" : "Dark" }}
   </button>
