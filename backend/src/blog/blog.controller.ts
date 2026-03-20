@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -53,6 +54,7 @@ export class BlogController {
    * Responds to a GET to "/blogs"
    * @param lang is the language filter
    * @param paginationFilter is the pagination params
+   * @param descending Whether the list of blogs will be descending in date.
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
@@ -62,8 +64,12 @@ export class BlogController {
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
+    @Query("descending", ParseBoolPipe) descending: boolean,
   ): Promise<PaginatedResponse<BlogDto | BlogViewDto>> {
-    const result = await this.blogService.getAllBlogs(paginationFilter);
+    const result = await this.blogService.getAllBlogs(
+      paginationFilter,
+      descending,
+    );
     return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
       result,
       lang.lang,

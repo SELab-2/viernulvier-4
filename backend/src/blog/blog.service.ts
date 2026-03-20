@@ -14,15 +14,18 @@ export class BlogService {
 
   /**
    * Gets all Blogs from the DatabaseService.
-   * @param paginationFilter iq the pagination params.
+   * @param paginationFilter is the pagination params.
+   * @param descending Whether the blogs should be sorted descending or ascending.
    * @returns A list of all Blog objects.
    */
   async getAllBlogs(
     paginationFilter: PaginationFilterDto,
+    descending: boolean,
   ): Promise<PaginatedResponse<BlogDto>> {
     return await this.blogDbService.getBlogs(
       paginationFilter.limit,
       paginationFilter.page,
+      descending,
     );
   }
 
