@@ -199,8 +199,7 @@ export async function injectTagsCSV(filePath: string) {
   const parsedTags = await CSVFileParser.parseTagsCSV(filePath);
 
   for (const row of parsedTags) {
-    const tagValue = row.tag.tag.en || row.tag.tag.nl || "unknown";
-    const tagLegacyId = "";
+    const tagLegacyId = "csv-" + row.tag.tag.nl;
 
     const tagId = await dbConnection.insertTag({
       legacy_id: tagLegacyId,
@@ -273,8 +272,7 @@ export async function injectPricesCSV(filePath: string) {
     try {
       const event = await dbConnection.getEventByLegacyId(eventLegacyId);
 
-      const priceName = row.price.name.en || row.price.name.nl || "unknown";
-      const priceLegacyId = "";
+      const priceLegacyId = "csv-" + row.price.name.nl;
 
       const price = await dbConnection.insertPrice({
         legacy_id: priceLegacyId,
