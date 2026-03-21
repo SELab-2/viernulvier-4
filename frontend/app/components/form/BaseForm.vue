@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * A dynamic form component that renders fields based on a given array, includes:
- *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate, BaseTagInput, BaseFileUpload)
+ *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate, BaseTagInput, BaseFileUpload, BaseSelect)
  *  - Multiple instances of the same component type are supported
  *  - Emits all field values on submit via @submit
  *
@@ -27,6 +27,7 @@ import BaseTextArea from "./fields/BaseTextArea.vue";
 import BaseDate from "./fields/BaseDate.vue";
 import BaseFileUpload from "./fields/BaseFileUpload.vue";
 import BaseTagInput from "./fields/BaseTagInput.vue";
+import BaseSelect from "./fields/BaseSelect.vue";
 
 
 interface Props {
@@ -40,7 +41,8 @@ const components: Record<FieldComponent, any> = { // mapping
   BaseTextArea,
   BaseDate,
   BaseFileUpload,
-  BaseTagInput
+  BaseTagInput,
+  BaseSelect
 }
 
 const emit = defineEmits<{

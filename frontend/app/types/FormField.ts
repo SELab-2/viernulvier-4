@@ -4,6 +4,7 @@ export type FieldComponent =
     | 'BaseDate'
     | 'BaseFileUpload'
     | 'BaseTagInput'
+    | 'BaseSelect'
 
 export interface FormField {
     component: FieldComponent // which base component

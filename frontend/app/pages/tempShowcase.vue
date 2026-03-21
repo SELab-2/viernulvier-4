@@ -47,6 +47,15 @@ const fields: FormField[] = [
     }
   },
   {
+    component: 'BaseSelect',
+    name: 'category',
+    props: {
+      label: 'Category',
+      options: ['Option A', 'Option B', 'Option C'],
+      required: true
+    }
+  },
+  {
     component: 'BaseFileUpload',
     name: 'multipleattachments',
     props: {
