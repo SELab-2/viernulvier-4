@@ -7,7 +7,7 @@ import logoBlack from '~/assets/logo_black.svg'
 import logoWhite from '~/assets/logo_white.svg'
 
 const { isLoggedIn, logout } = useAuth()
-const isAdmin = isLoggedIn // to test admin: const isAdmin = ref(true)
+const isAdmin = ref(true) // isLoggedIn // to test admin: const isAdmin = ref(true)
 
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
@@ -84,7 +84,7 @@ const handleLogout = async () => {
         <button
           v-if="isAdmin"
           @click="handleLogout"
-          class="hidden md:flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-[11px] font-black text-white hover:bg-[var(--foreground)] transition-colors">
+          class="hidden md:flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white hover:bg-[var(--foreground)] hover:border-[var(--foreground)] transition-colors">
           <LogOut :size="16" />
           <span class="hidden xl:inline">{{ t('nav.logout').toUpperCase() }}</span>
         </button>
