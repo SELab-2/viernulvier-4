@@ -27,6 +27,7 @@ export class BlogDatabaseService {
     if (result.length === 0) {
       throw new ResourceGoneException(`Blog with ID ${id} not found`);
     }
+
     return result[0];
   }
 
@@ -191,7 +192,7 @@ export class BlogDatabaseService {
    * @param blog_id The ID of the blog you want.
    * @returns List of MediaGalleryDto linked to the blog.
    */
-  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto[]> {
+  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto> {
     const query = `
       SELECT mg.id, mg.legacy_id, mg.name, mg.created_at, mg.updated_at
       FROM media_gallery mg
@@ -200,6 +201,47 @@ export class BlogDatabaseService {
       ORDER BY mg.id
     `;
 
-    return this.db.query<MediaGalleryDto>(query, [blog_id]);
+    const result = await this.db.query<MediaGalleryDto>(query, [blog_id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Blog with ID ${blog_id} has no media gallery`,
+      );
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given blog.
+   * @param blog_id The ID of the blog to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   * @returns void
+   */
+  async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
+    const query = `
+    INSERT INTO blog_media_gallery (blog_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given blog.
+   * @param blog_id The ID of the blog.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromBlog(
+    blog_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM blog_media_gallery
+    WHERE blog_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
   }
 }

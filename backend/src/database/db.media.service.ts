@@ -15,7 +15,7 @@ import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
-export class EventMediaService {
+export class MediaDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 

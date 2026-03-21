@@ -10,11 +10,7 @@ import {
   UpdateProductionDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import {
-  FilterProductionSchema,
-  PaginatedResponse,
-  SUPPORTED_LANGUAGES,
-} from "@repo/common";
+import { FilterProductionSchema, PaginatedResponse, SUPPORTED_LANGUAGES, } from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -593,7 +589,7 @@ export class ProductionDatabaseService {
    * @param prod_id The ID of the production you want.
    * @returns List of MediaGalleryDto linked to the production.
    */
-  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto[]> {
+  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto> {
     const query = `
       SELECT mg.id, mg.legacy_id, mg.name, mg.created_at, mg.updated_at
       FROM media_gallery mg
@@ -602,6 +598,49 @@ export class ProductionDatabaseService {
       ORDER BY mg.id
     `;
 
-    return this.db.query<MediaGalleryDto>(query, [prod_id]);
+    const result = await this.db.query<MediaGalleryDto>(query, [prod_id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Production with ID ${prod_id} has no media gallery`,
+      );
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given production.
+   * @param prod_id The ID of the production to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   */
+  async linkMediaToProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    INSERT INTO production_media_gallery (production_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given production.
+   * @param prod_id The ID of the production.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM production_media_gallery
+    WHERE production_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
   }
 }
