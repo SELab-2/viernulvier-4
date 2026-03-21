@@ -7,7 +7,7 @@ import logoBlack from '~/assets/logo_black.svg'
 import logoWhite from '~/assets/logo_white.svg'
 
 const { isLoggedIn, logout } = useAuth()
-const isAdmin = ref(true) // isLoggedIn
+const isAdmin = isLoggedIn // to test admin: const isAdmin = ref(true)
 
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
