@@ -101,7 +101,7 @@ const handleLogout = async () => {
         </template>
 
         <div
-          class="pt-6 border-t-2 border-gray-100 flex flex-wrap gap-4"
+          class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
           :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
         >
           <button @click="toggleLocale" class="btn-outline">
