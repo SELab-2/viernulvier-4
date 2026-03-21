@@ -135,7 +135,7 @@ export class LanguageService {
    * @param langTo is the target language that we want to translate to
    * @returns a language JSON, same as before just with the translated language added to it.
    */
-  async translateText(
+  private async translateText(
     data: Partial<Record<Language, string>>,
     langFrom: Language,
     langTo: Language,
@@ -175,7 +175,7 @@ export class LanguageService {
     return data;
   }
 
-  formatSourceLanguageHelper(lang: Language): deepl.SourceLanguageCode {
+  private formatSourceLanguageHelper(lang: Language): deepl.SourceLanguageCode {
     if (!lang) {
       throw new Error("Source language is required");
     }
@@ -184,7 +184,7 @@ export class LanguageService {
     return lang.toUpperCase() as deepl.SourceLanguageCode;
   }
 
-  formatTargetLanguageHelper(lang: Language): deepl.TargetLanguageCode {
+  private formatTargetLanguageHelper(lang: Language): deepl.TargetLanguageCode {
     if (!lang) {
       throw new Error("Target language is required");
     }

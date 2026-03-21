@@ -25,7 +25,7 @@ export class ScraperService implements OnApplicationBootstrap {
    * Ran when the app first starts, runs an initial scrape.
    * @returns Nothing.
    */
-  // eslint-disable-next-line @typeipt-eslint/require-await
+  // eslint-disable-next-line @typescript-eslint/require-await
   async onApplicationBootstrap() {
     if (!this.isScraperEnabled) {
       this.logger.log("Skipping initial scrape (Scraping is DISABLED).");
