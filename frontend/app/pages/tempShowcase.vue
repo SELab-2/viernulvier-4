@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { FormField } from "../types/FormField";
+import { ref } from "vue";
 
 const fields: FormField[] = [
   {
@@ -10,6 +11,15 @@ const fields: FormField[] = [
       placeholder: 'Enter title',
       required: true
     }
+  },
+  {
+    component: 'BaseInput', // 2 instances of the same component should be possible
+    name: 'num',
+    props: {
+      label: 'Number',
+      placeholder: 'Enter a number',
+      type: 'number', // this one asks for a number
+    } // this one is not required
   },
   {
     component: 'BaseTextArea',
@@ -46,13 +56,24 @@ const fields: FormField[] = [
   }
 ]
 
+const submittedData = ref<Record<string, any> | null>(null)
 function handleSubmit(formData: Record<string, any>) {
-  // does nothing for the moment
+  submittedData.value = formData
 }
 </script>
 
 <template>
-  <FormManualForm :fields="fields" @submit="handleSubmit" />
+  <FormBaseForm :fields="fields" @submit="handleSubmit" />
+
+  <br>
+  <!-- To see the results after clicking submit -->
+  <div v-if="submittedData">
+    <p>Submitted values:</p>
+    <div v-for="(value, key) in submittedData" :key="key">
+      <span>{{ key }}: </span>
+      <span>{{ value }}</span>
+    </div>
+  </div>
 </template>
 
 <style scoped>

@@ -1,10 +1,24 @@
 <script setup lang="ts">
+/**
+ * A reusable input field , includes:
+ *  - Optional label and placeholder
+ *  - Supports text and number inputs (default: text)
+ *  - Binds value via v-model
+ *
+ * Usage:
+ * <BaseInput
+ *   v-model="title"
+ *   label="Title"
+ *   placeholder="Enter title"
+ *   required
+ * />
+ */
 interface Props {
-  label?: string
-  placeholder?: string
-  type?: 'text' | 'number'
+  label?: string // label displayed above the field
+  placeholder?: string // placeholder text displayed inside the field
+  type?: 'text' | 'number' // input accepts either text, or a number
   id?: string
-  required?: boolean
+  required?: boolean // adds a "*" if required
 }
 withDefaults(defineProps<Props>(), {
   type: 'text'
@@ -14,49 +28,23 @@ const model = defineModel<string | number>()
 </script>
 
 <template>
-  <div class="base-input">
-    <label v-if="label" :for="id" class="input-label">
-      {{ label }} <span v-if="required" class="required-star">*</span>
+  <div class="m-4">
+    <!-- Optional Label -->
+    <label v-if="label" :for="id" class="text-[12px] font-bold uppercase text-muted-foreground mb-1 block">
+      {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
 
+    <!-- Input field -->
     <input
         :id="id"
         :type="type"
         :placeholder="placeholder"
         v-model="model"
         :required="required"
-        class="input-field"
+        class="px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background"
     />
   </div>
 </template>
 
 <style scoped>
-.base-input {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-.input-label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-.required-star {
-  color: inherit;
-}
-.input-field {
-  width: 100%;
-  height: 3rem;
-  padding: 0 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.input-field:focus {
-  border-color: #d1d5db;
-}
 </style>
