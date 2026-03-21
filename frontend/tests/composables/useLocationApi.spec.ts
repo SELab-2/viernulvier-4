@@ -55,10 +55,10 @@ describe("useLocationApi", () => {
     expect(mockPost).toHaveBeenCalledWith("/locations", body);
   });
 
-  it("modify calls PATCH /locations with body", () => {
+  it("modify calls PATCH /locations/:id with body", () => {
     const { modify } = useLocationApi();
-    modify({ id: 1, location: { nl: "Brugge", en: "Brugge" } });
-    expect(mockPatch).toHaveBeenCalledWith("/locations", { id: 1, location: { nl: "Brugge", en: "Brugge" } });
+    modify(1, { id: 1, location: { nl: "Brugge", en: "Brugge" } });
+    expect(mockPatch).toHaveBeenCalledWith("/locations/1", { id: 1, location: { nl: "Brugge", en: "Brugge" } });
   });
 
   it("remove calls DELETE /locations/:id", () => {

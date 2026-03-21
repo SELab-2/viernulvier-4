@@ -8,7 +8,13 @@ const mockPatch = vi.fn();
 const mockDel = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
-  useApi: () => ({ get: mockGet, post: mockPost, put: mockPut, patch: mockPatch, del: mockDel }),
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    put: mockPut,
+    patch: mockPatch,
+    del: mockDel,
+  }),
 }));
 
 beforeEach(() => {
@@ -19,7 +25,7 @@ describe("useBlogApi", () => {
   it("getAll calls GET /blogs", () => {
     const { getAll } = useBlogApi();
     getAll();
-    expect(mockGet).toHaveBeenCalledWith("/blogs");
+    expect(mockGet).toHaveBeenCalledWith("/blogs?descending=true");
   });
 
   it("getAll appends lang query param", () => {
@@ -30,11 +36,12 @@ describe("useBlogApi", () => {
 
   it("getAll appends pagination and lang together", () => {
     const { getAll } = useBlogApi();
-    getAll({ page: 0, limit: 5 }, "nl");
+    getAll({ page: 0, limit: 5 }, "nl", true);
     const url = mockGet.mock.calls[0][0];
     expect(url).toContain("page=0");
     expect(url).toContain("limit=5");
     expect(url).toContain("lang=nl");
+    expect(url).toContain("descending=true");
   });
 
   it("getById calls GET /blogs/:id", () => {

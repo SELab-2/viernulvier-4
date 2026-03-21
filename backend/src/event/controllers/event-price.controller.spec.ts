@@ -69,7 +69,6 @@ describe("EventPriceController", () => {
           name: { en: "Early Bird", nl: "Vroege vogel" },
           created_at: "2024-01-15T19:00:00Z",
           updated_at: "2024-01-15T19:00:00Z",
-          legacy_id: null,
         },
       ];
 
@@ -81,7 +80,6 @@ describe("EventPriceController", () => {
           name: "Early Bird",
           created_at: "2024-01-15T19:00:00Z",
           updated_at: "2024-01-15T19:00:00Z",
-          legacy_id: null,
         },
       ];
 

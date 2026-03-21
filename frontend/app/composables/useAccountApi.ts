@@ -16,8 +16,13 @@ export function useAccountApi() {
 
   /** GET /auth — returns a paginated list of accounts. */
   const getAll = (pagination?: Partial<PaginationFilter>) => {
-    const query = pagination ? "?" + new URLSearchParams(pagination as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: PublicAccount[] }>(`${API_ROUTES.auth.base}${query}`);
+    const query = pagination
+      ? "?" +
+        new URLSearchParams(pagination as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<PublicAccount>>(
+      `${API_ROUTES.auth.base}${query}`,
+    );
   };
 
   /** POST /auth — creates a new account. */
@@ -29,8 +34,7 @@ export function useAccountApi() {
     patch<PublicAccount, UpdateAccount>(API_ROUTES.auth.base, body);
 
   /** DELETE /auth/:accountId — deletes an account. */
-  const remove = (accountId: number) =>
-    del(API_ROUTES.auth.byId(accountId));
+  const remove = (accountId: number) => del(API_ROUTES.auth.byId(accountId));
 
   return { getAll, create, modify, remove };
 }

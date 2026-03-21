@@ -1,5 +1,4 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { BadRequestException } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import {
@@ -121,23 +120,7 @@ describe("BlogService", () => {
       const result = await service.replaceBlog(1, replaceDto);
 
       expect(result).toEqual(mockBlog);
-      expect(blogDbService.updateBlog).toHaveBeenCalledWith(replaceDto);
-    });
-
-    it("should throw a BadRequestException when IDs do not match", async () => {
-      const replaceDto: BlogDto = { ...mockBlog, id: 2 }; // ID mismatch here
-
-      // We expect the promise to reject with the specific exception
-      await expect(service.replaceBlog(1, replaceDto)).rejects.toThrow(
-        BadRequestException,
-      );
-
-      await expect(service.replaceBlog(1, replaceDto)).rejects.toThrow(
-        "Blog ID and URL ID do not match. Cannot replace Blog.",
-      );
-
-      // Ensure the database service was never called
-      expect(blogDbService.updateBlog).not.toHaveBeenCalled();
+      expect(blogDbService.updateBlog).toHaveBeenCalledWith(1, replaceDto);
     });
   });
 
@@ -163,13 +146,7 @@ describe("BlogService", () => {
 
       expect(result).toEqual(expectedUpdatedBlog);
       // Validate that the ID was injected into the DTO before calling the DB
-      expect(blogDbService.updateBlog).toHaveBeenCalledWith({
-        id: 1,
-        titel: {
-          en: "Updated titel",
-          nl: "Bijgewerkte titel",
-        },
-      });
+      expect(blogDbService.updateBlog).toHaveBeenCalledWith(1, updateDto);
     });
   });
 

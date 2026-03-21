@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -16,6 +17,7 @@ import {
   BlogSchema,
   CreateBlogSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
   UpdateBlogSchema,
 } from "@repo/common";
@@ -25,8 +27,6 @@ import {
   BlogViewDto,
   CreateBlogDto,
   LanguageQueryDto,
-  PaginatedBlogDto,
-  PaginatedBlogViewDto,
   PaginationFilterDto,
   UpdateBlogDto,
 } from "../dto/dto";
@@ -38,7 +38,10 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("blogs")
 export class BlogController {
@@ -51,18 +54,23 @@ export class BlogController {
    * Responds to a GET to "/blogs"
    * @param lang is the language filter
    * @param paginationFilter is the pagination params
+   * @param descending Whether the list of blogs will be descending in date.
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
-  @ApiOkArrayAnyOf(BlogDto, BlogViewDto)
+  @ApiOkPaginatedResponseAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getAllBlogs(
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedBlogDto | PaginatedBlogViewDto> {
-    const result = await this.blogService.getAllBlogs(paginationFilter);
-    return this.ls.flattenByLanguage<PaginatedBlogDto | PaginatedBlogViewDto>(
+    @Query("descending", ParseBoolPipe) descending: boolean,
+  ): Promise<PaginatedResponse<BlogDto | BlogViewDto>> {
+    const result = await this.blogService.getAllBlogs(
+      paginationFilter,
+      descending,
+    );
+    return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
       result,
       lang.lang,
     );

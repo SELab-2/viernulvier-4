@@ -6,7 +6,7 @@ export const TagSchema = z.object({
   tag: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  legacy_id: z.string().nullable(),
+  // Legacy ID is omitted here because the API doesn't use it.
 });
 export const TagViewSchema = TagSchema.extend({
   tag: z.string(),
@@ -17,7 +17,11 @@ export const CreateTagSchema = TagSchema.omit({
   created_at: true,
   updated_at: true,
 });
-export const UpdateTagSchema = TagSchema.partial();
+export const UpdateTagSchema = TagSchema.partial().omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+});
 
 export type Tag = z.infer<typeof TagSchema>;
 export type TagView = z.infer<typeof TagViewSchema>;

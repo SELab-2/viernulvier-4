@@ -34,10 +34,9 @@ import {
 } from "./objects/events";
 import {
   PaginatedResponse,
-  PaginatedResponseSchema,
   PaginationFilter,
   PaginationFilterSchema,
-} from "./objects/extra";
+} from "./objects/pagination";
 import {
   DEFAULT_LANGUAGE,
   Language,
@@ -124,7 +123,6 @@ export {
   LanguageQuerySchema,
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
-  PaginatedResponseSchema,
 };
 export type {
   Production,

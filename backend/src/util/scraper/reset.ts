@@ -4,8 +4,7 @@ import logger from "../logger/logger";
 // Make sure to execute from the root.
 import * as dotenv from "dotenv";
 import * as path from "path";
-
-dotenv.config({ path: path.join(process.cwd(), ".env") });
+dotenv.config({ path: path.join(process.cwd(), ".env"), quiet: true });
 
 /**
  * Will remove all data from the database but the leave the tables.

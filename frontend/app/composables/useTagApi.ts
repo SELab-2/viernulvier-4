@@ -22,8 +22,12 @@ export function useTagApi() {
   /** GET /tags — returns a paginated list of tags. */
   const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
     const params = { ...pagination, ...(lang ? { lang } : {}) };
-    const query = Object.keys(params).length ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
-    return get<PaginatedResponse & { objects: Tag[] | TagView[] }>(`${API_ROUTES.tags.base}${query}`);
+    const query = Object.keys(params).length
+      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      : "";
+    return get<PaginatedResponse<Tag | TagView>>(
+      `${API_ROUTES.tags.base}${query}`,
+    );
   };
 
   /** GET /tags/:tagId — returns a single tag. */
@@ -41,8 +45,7 @@ export function useTagApi() {
     patch<Tag, UpdateTag>(API_ROUTES.tags.byId(tagId), body);
 
   /** DELETE /tags/:tagId — deletes a tag. */
-  const remove = (tagId: number) =>
-    del(API_ROUTES.tags.byId(tagId));
+  const remove = (tagId: number) => del(API_ROUTES.tags.byId(tagId));
 
   return { getAll, getById, create, modify, remove };
 }

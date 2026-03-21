@@ -18,6 +18,7 @@ import {
   CreateProductionSchema,
   FilterProductionSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   ProductionSchema,
   UpdateProductionSchema,
 } from "@repo/common";
@@ -25,8 +26,6 @@ import {
   CreateProductionDto,
   FilterProductionDto,
   LanguageQueryDto,
-  PaginatedProductionDto,
-  PaginatedProductionViewDto,
   ProductionDto,
   ProductionViewDto,
   UpdateProductionDto,
@@ -40,7 +39,10 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageService } from "../../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../../common/decorators/api.ok";
 
 /**
  * Handles CORE functionality for Productions.
@@ -60,14 +62,14 @@ export class ProductionController {
    */
   @ApiOperation({ summary: "Returns all Production objects." })
   @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
-  @ApiOkArrayAnyOf(ProductionDto, ProductionViewDto)
+  @ApiOkPaginatedResponseAnyOf(ProductionDto, ProductionViewDto)
   @Get()
   @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
     @Query() filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto | PaginatedProductionViewDto> {
+  ): Promise<PaginatedResponse<ProductionDto | ProductionViewDto>> {
     return this.ls.flattenByLanguage<
-      PaginatedProductionDto | PaginatedProductionViewDto
+      PaginatedResponse<ProductionDto | ProductionViewDto>
     >(await this.productionService.getAllProductions(filters), filters.lang);
   }
 

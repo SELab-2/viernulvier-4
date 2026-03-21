@@ -28,7 +28,6 @@ describe("ProductionController", () => {
     description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: { en: "fixing", nl: "repareren" },
     artist: { en: "the", nl: "de" },
     credits: { en: "tests :-)", nl: "testen :-)" },
@@ -43,7 +42,6 @@ describe("ProductionController", () => {
     description2: "With great actors",
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: "fixing",
     artist: "the",
     credits: "tests :-)",
@@ -117,12 +115,27 @@ describe("ProductionController", () => {
 
     it("should return empty array when no productions exist", async () => {
       const filters = FilterProductionSchema.parse({ lang: "en" });
-      jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue([]);
+      jest.spyOn(service, "getAllProductions").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
+      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
 
       const result = await controller.getAllProductions(filters);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
   });
 
@@ -232,7 +245,6 @@ describe("ProductionController", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },
@@ -265,7 +277,6 @@ describe("ProductionController", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },

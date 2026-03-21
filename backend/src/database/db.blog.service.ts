@@ -1,12 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import {
-  BlogDto,
-  CreateBlogDto,
-  PaginatedBlogDto,
-  UpdateBlogDto,
-} from "../dto/dto";
+import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -38,12 +34,14 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
    * @param page page index (starts at 0)
+   * @param descending Whether the dates should be sorted descending or ascending.
    * @returns blogs
    */
   async getBlogs(
     amount: number = 0,
     page: number = 0,
-  ): Promise<PaginatedBlogDto> {
+    descending: boolean = true,
+  ): Promise<PaginatedResponse<BlogDto>> {
     const offset = page * amount;
     const countResult = await this.db.query<{ count: string }>(
       `SELECT COUNT(*) as count FROM blogs`,
@@ -56,7 +54,7 @@ export class BlogDatabaseService {
              created_at,
              updated_at
       FROM blogs
-      ORDER BY id
+      ORDER BY created_at ${descending ? "DESC" : "ASC"}
       `;
 
       return {
@@ -74,7 +72,7 @@ export class BlogDatabaseService {
            created_at,
            updated_at
     FROM blogs
-    ORDER BY id
+    ORDER BY created_at ${descending ? "DESC" : "ASC"}
     LIMIT $1 OFFSET $2
     `;
 
@@ -127,11 +125,7 @@ export class BlogDatabaseService {
    * The id field in the blog MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
-    if (!blog.id) {
-      throw new BadRequestException("Blog id is required for update");
-    }
-
+  async updateBlog(blogId: number, blog: UpdateBlogDto): Promise<BlogDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -152,7 +146,7 @@ export class BlogDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(blog.id);
+    values.push(blogId);
 
     const query = `
       UPDATE blogs
@@ -170,7 +164,7 @@ export class BlogDatabaseService {
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Cannot update: Blog ${blog.id} not found`,
+        `Cannot update: Blog ${blogId} not found`,
       );
     }
 
