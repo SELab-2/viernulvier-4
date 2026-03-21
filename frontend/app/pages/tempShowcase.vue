@@ -65,6 +65,15 @@ const fields: FormField[] = [
     }
   },
   {
+    component: 'BaseMultiSelect',
+    name: 'multiselect2',
+    props: {
+      label: 'Multi Select (only given options allowed)',
+      options: ['Banana', 'Apple', 'Pineapple', 'Grape', 'Mango', "Blueberry", "Lychee"],
+      multiple: true,
+    }
+  },
+  {
     component: 'BaseFileUpload',
     name: 'multipleattachments',
     props: {
@@ -107,9 +116,9 @@ function objectURL(file: File): string {
 
       <!-- Case file array -->
       <span v-if="isFileArray(value)">
-        <div v-for="file in value" :key="file.name">
-          <img v-if="file.type.startsWith('image/')" :src="objectURL(file)" style="max-width: 200px; display: block;" />
-        </div>
+        <span v-for="file in value" :key="file.name" style="display: block;">
+          <img v-if="file.type.startsWith('image/')" :src="objectURL(file)" :alt="file.name" style="max-width: 200px; display: block;" />
+        </span>
       </span>
 
       <!-- Everything else -->
