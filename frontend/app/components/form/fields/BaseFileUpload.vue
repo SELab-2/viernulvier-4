@@ -1,12 +1,31 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+/**
+ * A reusable file upload component, includes:
+ *  - Optional label
+ *  - Required indicator
+ *  - Single or multiple file selection (default singular files)
+ *  - Accepts specific file types via accept prop (default no restriction)
+ *  - Selected filenames displayed below the input
+ *  - Binds File objects via v-model
+ *
+ * Usage:
+ * <BaseFileUpload
+ *   v-model="attachment"
+ *   label="Attachment"
+ *   accept=".pdf,.png"
+ *   multiple
+ *   required
+ * />
+ */
+
+import { Paperclip, X } from 'lucide-vue-next'
 
 interface Props {
-  label?: string
+  label?: string // label displayed above the field
   id?: string
-  required?: boolean
-  accept?: string
-  multiple?: boolean
+  required?: boolean // adds a "*" if required
+  accept?: string // accepted file types
+  multiple?: boolean // accepts one or multiple files ?
 }
 const props = withDefaults(defineProps<Props>(), {
   accept: '',
@@ -15,30 +34,37 @@ const props = withDefaults(defineProps<Props>(), {
 
 const model = defineModel<File[]>({
   default: [] as File[]
-})
-
-const displayName = computed(() => model.value.map(f => f.name).join(', '))
+}) // model holds list of selected files
 
 function handleFileChange(event: Event) {
   const target = event.target as HTMLInputElement
   if (!target.files) return
 
-  const filesArray = Array.from(target.files)
-  if (props.multiple) {
-    model.value = filesArray
-  } else {
-    model.value = filesArray.length > 0 ? [filesArray[0]!] : []
+  const newFiles  = Array.from(target.files)
+  if (props.multiple) { // case where multiple files are allowed
+    const existing = model.value.map(f => f.name)
+    const toAdd = newFiles.filter(f => !existing.includes(f.name))
+    model.value = [...model.value, ...toAdd]
+  } else { // case where only one file is allowed
+    model.value = newFiles.length > 0 ? [newFiles[0]!] : [] // ! to tell ts that it is not undefined
   }
+  target.value = '' // resetting input
+}
+
+function removeFile(index: number) { // handles removing a file
+  model.value = model.value.filter((_, i) => i !== index)
 }
 </script>
 
 <template>
-  <div class="base-input">
-    <label v-if="props.label" :for="props.id" class="input-label">
-      {{ props.label }} <span v-if="props.required" class="required-star">*</span>
+  <div class="m-4">
+    <!-- Optional Label -->
+    <label v-if="props.label" :for="props.id" class="text-[12px] font-bold uppercase text-muted-foreground mb-1 block">
+      {{ props.label }} <span v-if="props.required" class="text-red-500">*</span>
     </label>
 
-    <div class="file-input-wrapper">
+    <!-- File input -->
+    <div class="relative flex items-center">
       <input
           :id="props.id"
           type="file"
@@ -46,61 +72,27 @@ function handleFileChange(event: Event) {
           :accept="props.accept"
           :multiple="props.multiple"
           @change="handleFileChange"
-          class="input-field"
+          class="pl-10 pr-4 bg-muted border border-border h-12 leading-[3rem] font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background file:hidden cursor-pointer"
       />
-      <!-- TODO: maybe not display it if only one file name ? + multiple files are still not handled correctly -->
-      <div class="file-name" v-if="displayName">{{ displayName }}</div>
+
+      <!-- Paperclip icon -->
+      <Paperclip class="absolute left-4 w-4 h-4 text-muted-foreground pointer-events-none" />
     </div>
+
+    <!-- Selected files -->
+    <div v-if="model.length" class="mt-2 border border-border rounded-lg overflow-hidden">
+      <div
+          v-for="(file, index) in model"
+          :key="file.name"
+          class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors duration-150 hover:bg-muted border-b border-border last:border-b-0"
+      >
+        <span class="truncate mr-4">{{ file.name }}</span>
+        <X class="w-3 h-3 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors" @click="removeFile(index)" />
+      </div>
+    </div>
+
   </div>
 </template>
 
 <style scoped>
-.base-input {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.input-label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.required-star {
-  color: inherit;
-}
-
-.file-input-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.input-field {
-  width: 100%;
-  height: 3rem;
-  padding: 0 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input-field:focus {
-  border-color: #d1d5db;
-}
-
-.file-name {
-  position: static;
-  margin-top: 0.25rem;
-  pointer-events: none;
-  color: #374151;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 </style>

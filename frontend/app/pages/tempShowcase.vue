@@ -48,17 +48,30 @@ const fields: FormField[] = [
   },
   {
     component: 'BaseFileUpload',
-    name: 'attachment',
+    name: 'multipleattachments',
     props: {
-      label: 'Attachment',
+      label: 'Multiple Attachments',
       multiple: true
     }
-  }
-]
+  },
+  {
+    component: 'BaseFileUpload',
+    name: 'singularattachment',
+    props: {
+      label: 'Singular Attachment',
+    }
+  }]
 
 const submittedData = ref<Record<string, any> | null>(null)
 function handleSubmit(formData: Record<string, any>) {
   submittedData.value = formData
+}
+
+function isFileArray(value: any): value is File[] {
+  return Array.isArray(value) && value.length > 0 && value[0] instanceof File
+}
+function objectURL(file: File): string {
+  return URL.createObjectURL(file)
 }
 </script>
 
@@ -73,7 +86,16 @@ function handleSubmit(formData: Record<string, any>) {
     <p>Submitted values:</p>
     <div v-for="(value, key) in submittedData" :key="key">
       <span>{{ key }}: </span>
-      <span>{{ value }}</span>
+
+      <!-- Case file array -->
+      <span v-if="isFileArray(value)">
+        <div v-for="file in value" :key="file.name">
+          <img v-if="file.type.startsWith('image/')" :src="objectURL(file)" style="max-width: 200px; display: block;" />
+        </div>
+      </span>
+
+      <!-- Everything else -->
+      <span v-else>{{ value }}</span>
     </div>
   </div>
 </template>
