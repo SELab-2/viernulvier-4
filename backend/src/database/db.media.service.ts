@@ -37,6 +37,12 @@ export class EventMediaService {
 
     const result = await this.db.query<MediaGalleryDto>(query, [id]);
 
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `No MediaGalleryDto exists for provided ID(${id})`,
+      );
+    }
+
     return result[0];
   }
 
@@ -181,6 +187,12 @@ export class EventMediaService {
     `;
 
     const result = await this.db.query<MediaItemDto>(query, [id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `No MediaItemDto exists for provided ID(${id})`,
+      );
+    }
 
     return result[0];
   }
@@ -338,6 +350,12 @@ export class EventMediaService {
     `;
 
     const result = await this.db.query<MediaCropDto>(query, [id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `No MediaCropDto exists for provided ID(${id})`,
+      );
+    }
 
     return result[0];
   }
