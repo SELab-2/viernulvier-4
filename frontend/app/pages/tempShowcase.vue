@@ -8,7 +8,7 @@ const productions = ref<ProductionView[]>([])
 const { getAll } = useProductionApi()
 
 const response = await getAll({
-  limit: 6,
+  limit: 10,
   lang: 'nl',
 })
 

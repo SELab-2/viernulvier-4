@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import type { ProductionView, Tag, Event } from '@repo/common'
 import { useProductionApi } from '../composables/useProductionApi'
 import { useEventApi } from '../composables/useEventApi'
 import { ROUTES } from '../utils/routes'
-import { PLACEHOLDER_GRADIENTS } from '../utils/constants'
+import { computeDateRangeFromEvents } from '../utils/formatters'
+import { useTagFit } from '../composables/useTagFit'
+import TagPill from './TagPill.vue'
+import ThumbnailPlaceholder from './ThumbnailPlaceholder.vue'
 
 const { productionView } = defineProps<{
   productionView: ProductionView
@@ -12,82 +15,36 @@ const { productionView } = defineProps<{
 
 const tags = ref<Tag[]>([])
 const events = ref<Event[]>([])
-const tagsLimit = 3
 
 const { getTags } = useProductionApi()
 const { getAll: getAllEvents } = useEventApi()
 
-// Read gradients from shared constants (fallback to first)
-function gradientForId(id?: number) {
-  const list = Array.isArray(PLACEHOLDER_GRADIENTS) && PLACEHOLDER_GRADIENTS.length ? PLACEHOLDER_GRADIENTS : ['linear-gradient(135deg, rgba(130,36,227,0.12), rgba(255,159,102,0.10))']
-  if (id == null || !Number.isInteger(id)) return list[0]
-  const idx = Math.abs(id) % list.length
-  return list[idx]
-}
+const { tagsContainer, setTagRef, moreEl, fitCount, scheduleMeasure } = useTagFit()
 
 function formatText(text: string | null) {
   if (!text) return ''
   return text.replace(/\+/g, '<br>')
 }
 
-function formatDateShort(iso: string) {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleDateString('nl-NL', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    })
-  } catch (e) {
-    return ''
+const dateRangeText = computed(() => computeDateRangeFromEvents(events.value as any))
+
+function getTagLabel(tag: any): string {
+  if (!tag) return ''
+  if (typeof tag.tag === 'string') return tag.tag
+  if (typeof tag === 'string') return tag
+  // localized object like { nl: 'x', en: 'y' }
+  if (tag.tag && typeof tag.tag === 'object') {
+    if (tag.tag.nl) return tag.tag.nl
+    if (tag.tag.en) return tag.tag.en
+    // fallback: pick first available
+    const v = Object.values(tag.tag)[0]
+    return typeof v === 'string' ? v : ''
   }
+  // sometimes tag itself might be localized object
+  if (tag.nl) return tag.nl
+  if (tag.en) return tag.en
+  return String((tag.tag ?? tag) || '')
 }
-
-const dateRangeText = computed(() => {
-  if (!events.value.length) return 'TBA'
-
-  // parse dates and compute earliest start and latest end (fallback to start)
-  const starts = events.value
-    .map((e) => (e.starttime ? new Date(e.starttime).getTime() : NaN))
-    .filter((t) => !Number.isNaN(t))
-  const ends = events.value
-    .map((e) => (e.endtime ? new Date(e.endtime).getTime() : NaN))
-    .map((t, i) => (Number.isNaN(t) ? (events.value[i]?.starttime ? new Date(events.value[i]!.starttime).getTime() : NaN) : t))
-    .filter((t) => !Number.isNaN(t))
-
-  if (!starts.length) return 'TBA'
-
-  const earliest = new Date(Math.min(...starts))
-  const latest = new Date(Math.max(...ends))
-
-  // if same day show single date
-  const sameDay = earliest.toDateString() === latest.toDateString()
-  if (sameDay) return formatDateShort(earliest.toISOString())
-
-  return `${formatDateShort(earliest.toISOString())} — ${formatDateShort(latest.toISOString())}`
-})
-
-const displayTags = computed(() => tags.value.slice(0, tagsLimit))
-const overflowCount = computed(() => Math.max(0, tags.value.length - tagsLimit))
-
-// accentRgb fetched on mounted (safe for SSR)
-const accentRgb = ref('130, 36, 227')
-const tagStyle = computed(() => ({
-  background: `rgba(${accentRgb.value}, 0.08)`,
-  color: 'var(--accent)'
-}))
-
-onMounted(() => {
-  // read CSS variable if available in browser
-  if (typeof window !== 'undefined' && document?.documentElement) {
-    try {
-      const val = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb')
-      if (val && val.trim().length > 0) accentRgb.value = val.trim()
-    } catch (e) {
-      // ignore
-    }
-  }
-})
 
 async function loadTagsAndEvents() {
   if (productionView && productionView.id) {
@@ -100,60 +57,37 @@ async function loadTagsAndEvents() {
       console.error('Error loading tags:', err)
     }
 
-    // load events (fetch a reasonable number; backend limits to max 100)
+    // load events
     try {
       const resp = await getAllEvents({ production_id: productionView.id as any, limit: 100 })
       if (resp.data && Array.isArray((resp.data as any).objects)) {
         events.value = (resp.data as any).objects as Event[]
       } else {
-        // fallback: if API returns array directly
         if (resp.data && Array.isArray(resp.data)) events.value = resp.data as Event[]
       }
     } catch (err) {
       console.error('Error loading events:', err)
     }
+
+    scheduleMeasure()
   }
 }
 
 onMounted(() => loadTagsAndEvents())
 watch(() => productionView.id, () => loadTagsAndEvents())
+watch(() => tags.value.length, () => scheduleMeasure())
 </script>
 
 <template>
-  <NuxtLink
-    :to="ROUTES.productions.byId(productionView.id)"
-    class="group block"
-  >
-    <article
-      class="flex items-center gap-4 p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-sm hover:bg-zinc-50/10 transition-colors transition-shadow duration-150"
-      :aria-label="`${productionView.titel ?? 'Production'} — ${dateRangeText}`"
-    >
+  <NuxtLink :to="ROUTES.productions.byId(productionView.id)" class="group block">
+    <article class="flex items-center gap-4 p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-sm hover:bg-zinc-50/10 transition-colors transition-shadow duration-150" :aria-label="`${productionView.titel ?? 'Production'} — ${dateRangeText}`">
 
-      <!-- Thumbnail placeholder: reduced size with no pop effect -->
-      <div
-        class="thumbnail shrink-0 w-48 h-32 rounded-lg overflow-hidden flex items-center justify-center border border-zinc-300"
-        :style="{ background: gradientForId(productionView.id) }"
-      >
-        <div class="w-full h-full flex items-center justify-center text-white">
-          <!-- clear icon on top -->
-          <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5">
-            <rect x="3" y="4" width="18" height="14" rx="2" />
-            <path d="M3 15l4-4 6 6 4-5 4 5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </div>
-      </div>
+      <ThumbnailPlaceholder :id="productionView.id" size="md" :showIcon="true" />
 
-      <!-- Content -->
       <div class="flex-1 min-w-0">
-
         <div class="flex items-start justify-between gap-3">
-          <!-- Title + date -->
           <div class="min-w-0">
-            <h3
-              class="text-3xl sm:text-4xl font-semibold text-zinc-900 leading-tight truncate"
-              v-html="formatText(productionView.titel)"
-              :title="productionView.titel || ''"
-            />
+            <h3 class="text-3xl sm:text-4xl font-semibold text-zinc-900 leading-tight truncate" v-html="formatText(productionView.titel)" :title="productionView.titel || ''" />
 
             <p class="mt-2 text-sm text-zinc-500 flex items-center gap-2">
               <svg class="w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -163,30 +97,19 @@ watch(() => productionView.id, () => loadTagsAndEvents())
               <span>{{ dateRangeText }}</span>
             </p>
           </div>
-
-          <!-- removed chevron for a cleaner look -->
         </div>
 
-        <!-- Tags -->
-        <div class="mt-2 flex items-center gap-2">
-          <div v-if="tags.length" class="flex flex-wrap items-center gap-2">
-            <span
-              v-for="tag in displayTags"
-              :key="tag.id"
-              class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium"
-              :style="tagStyle"
-            >
-              {{ tag.tag }}
-            </span>
+        <div class="mt-2" ref="tagsContainer">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <TagPill v-for="(tag, idx) in tags" :key="tag.id" :ref="el => setTagRef(el, idx)" v-show="idx < fitCount" :label="getTagLabel(tag)" />
 
-            <span v-if="overflowCount > 0" class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-zinc-100 text-zinc-600">
-              +{{ overflowCount }}
-            </span>
+            <span v-if="(tags.length - fitCount) > 0" class="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-zinc-100 text-zinc-600">+{{ tags.length - fitCount }} more</span>
+
+            <span ref="moreEl" class="absolute left-[-9999px] top-[-9999px] inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-zinc-100 text-zinc-600">+99 more</span>
           </div>
 
-          <div v-else class="text-sm text-zinc-400">No tags</div>
+          <div v-if="!tags.length" class="text-sm text-zinc-400">No tags</div>
         </div>
-
       </div>
 
     </article>
@@ -194,20 +117,6 @@ watch(() => productionView.id, () => loadTagsAndEvents())
 </template>
 
 <style scoped>
-[tabindex="0"]:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-}
-
-/* make sure NuxtLink wrapper doesn't reset group hover */
-.group:hover {
-  text-decoration: none;
-}
-
-/* thumbnail subtle transitions and stronger baseline contrast */
-.thumbnail {
-  transition: box-shadow 180ms ease, border-color 180ms ease;
-}
-
-/* removed group hover rule to avoid thumbnail changing separately */
+[tabindex="0"]:focus { outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12); }
+.group:hover { text-decoration: none; }
 </style>
