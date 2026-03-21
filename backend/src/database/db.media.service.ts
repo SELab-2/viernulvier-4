@@ -167,7 +167,13 @@ export class MediaDatabaseService {
    * @param id The gallery to delete.
    */
   async deleteGallery(id: number): Promise<void> {
-    await this.db.query(`DELETE FROM media_gallery WHERE id = $1`, [id]);
+    const result = await this.db.query(
+      `DELETE FROM media_gallery WHERE id = $1 RETURNING id`,
+      [id],
+    );
+    if (result.length == 0) {
+      throw new ResourceGoneException(`Cannot delete: Gallery ${id} not found`);
+    }
   }
 
   // ----------------------------------------------------------------
@@ -216,23 +222,23 @@ export class MediaDatabaseService {
   }
 
   /**
-   * Create a new media item and link it to a gallery.
+   * Create a new media item and link it to 1 or more gallery(s).
    * @param item Must be of type CreateMediaItemDto.
-   * @param galleryId The gallery to link this item to.
+   * @param galleryIds a list of galleryIds you want to link this item to. (if left empty it will link to none)
    * @returns The created media item.
    */
   async createItem(
     item: CreateMediaItemDto,
-    galleryId: number,
+    galleryIds: number[],
   ): Promise<MediaItemDto> {
     if (!item.type || !item.original_filename) {
       throw new BadRequestException("Missing required fields");
     }
 
     const insertQuery = `
-      INSERT INTO media_item (legacy_id, type, original_filename, position, width, height, format)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id, legacy_id, type, original_filename, position, width, height, format, created_at, updated_at
+        INSERT INTO media_item (legacy_id, type, original_filename, position, width, height, format)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING id, legacy_id, type, original_filename, position, width, height, format, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaItemDto>(insertQuery, [
@@ -249,10 +255,14 @@ export class MediaDatabaseService {
       throw new Error("Failed to create media item");
     }
 
-    await this.db.query(
-      `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2)`,
-      [galleryId, result[0].id],
-    );
+    if (galleryIds.length > 0) {
+      for (const galleryId of galleryIds) {
+        await this.db.query(
+          `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2)`,
+          [galleryId, result[0].id],
+        );
+      }
+    }
 
     return result[0];
   }
@@ -330,7 +340,13 @@ export class MediaDatabaseService {
    * @param id The item to delete.
    */
   async deleteItem(id: number): Promise<void> {
-    await this.db.query(`DELETE FROM media_item WHERE id = $1`, [id]);
+    const result = await this.db.query(
+      `DELETE FROM media_item WHERE id = $1 RETURNING id`,
+      [id],
+    );
+    if (result.length == 0) {
+      throw new ResourceGoneException(`Cannot delete: Item ${id} not found`);
+    }
   }
 
   // ----------------------------------------------------------------
@@ -378,23 +394,24 @@ export class MediaDatabaseService {
   }
 
   /**
-   * Create a new crop and link it to a media item.
+   * Create a new crop and link it to 1 or more media item(s).
    * @param crop Must be of type CreateMediaCropDto.
-   * @param itemId The item to link this crop to.
+   * @param itemIds The items to link this crop to.
+   * (if left empty then it will not be linked to anything)
    * @returns The created crop.
    */
   async createCrop(
     crop: CreateMediaCropDto,
-    itemId: number,
+    itemIds: number[],
   ): Promise<MediaCropDto> {
     if (!crop.name || !crop.url) {
       throw new BadRequestException("Missing required fields");
     }
 
     const insertQuery = `
-      INSERT INTO media_crop (legacy_id, name, url)
-      VALUES ($1, $2, $3)
-      RETURNING id, legacy_id, name, url, created_at, updated_at
+        INSERT INTO media_crop (legacy_id, name, url)
+        VALUES ($1, $2, $3)
+        RETURNING id, legacy_id, name, url, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaCropDto>(insertQuery, [
@@ -407,10 +424,14 @@ export class MediaDatabaseService {
       throw new Error("Failed to create media crop");
     }
 
-    await this.db.query(
-      `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2)`,
-      [itemId, result[0].id],
-    );
+    if (itemIds.length > 0) {
+      for (const itemId of itemIds) {
+        await this.db.query(
+          `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2)`,
+          [itemId, result[0].id],
+        );
+      }
+    }
 
     return result[0];
   }
@@ -468,12 +489,14 @@ export class MediaDatabaseService {
    * @param id The crop to delete.
    */
   async deleteCrop(id: number): Promise<void> {
-    await this.db.query(`DELETE FROM media_crop WHERE id = $1`, [id]);
+    const result = await this.db.query(
+      `DELETE FROM media_crop WHERE id = $1 RETURNING id`,
+      [id],
+    );
+    if (result.length == 0) {
+      throw new ResourceGoneException(`Cannot delete: Crop ${id} not found`);
+    }
   }
-
-  // ----------------------------------------------------------------
-  // Linking
-  // ----------------------------------------------------------------
 
   /**
    * Link an existing crop to an existing item.
