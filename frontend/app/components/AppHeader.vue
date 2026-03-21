@@ -6,19 +6,20 @@ import { Sun, Moon, LogOut, Menu, X } from 'lucide-vue-next'
 import logoBlack from '~/assets/logo_black.svg'
 import logoWhite from '~/assets/logo_white.svg'
 
-const { t, locale, setLocale } = useI18n()
 const { isLoggedIn, logout } = useAuth()
 const isAdmin = isLoggedIn
 
+const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
 const isMenuOpen = ref(false)
+
+const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
 const toggleDark = () => {
   isDark.value = !isDark.value
   document.documentElement.classList.toggle('dark', isDark.value)
 }
 
-const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
@@ -101,11 +102,13 @@ const handleLogout = async () => {
         <NuxtLink :to="ROUTES.prints.base" @click="isMenuOpen = false" class="nav-item text-lg">
           {{ t('nav.prints').toUpperCase() }}
         </NuxtLink>
-        <div class="flex gap-4 pt-4 border-t border-[var(--foreground)] border-opacity-20 sm:hidden">
-          <button @click="toggleLocale" class="btn-outline flex-1">
-            LANG: {{ locale === 'nl' ? 'EN' : 'NL' }}
+
+        <div class="flex justify-start pt-4 gap-4">
+          <button @click="toggleLocale" class="btn-outline">
+            {{ locale === 'nl' ? 'EN' : 'NL' }}
           </button>
-          <button @click="toggleDark" class="btn-outline flex-1 flex items-center justify-center gap-2">
+
+          <button @click="toggleDark" class="btn-outline flex items-center gap-2">
             <Sun v-if="isDark" :size="16" />
             <Moon v-else :size="16" />
             {{ isDark ? 'LIGHT' : 'DARK' }}
