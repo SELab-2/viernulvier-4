@@ -4,6 +4,7 @@ import type { ProductionView, Tag, Event } from '@repo/common'
 import { useProductionApi } from '../composables/useProductionApi'
 import { useEventApi } from '../composables/useEventApi'
 import { ROUTES } from '../utils/routes'
+import { PLACEHOLDER_GRADIENTS } from '../utils/constants'
 
 const { productionView } = defineProps<{
   productionView: ProductionView
@@ -16,41 +17,17 @@ const tagsLimit = 3
 const { getTags } = useProductionApi()
 const { getAll: getAllEvents } = useEventApi()
 
-// Read gradients from CSS variables exposed in tailwind.css
+// Read gradients from shared constants (fallback to first)
 function gradientForId(id?: number) {
-  const fallback = 'linear-gradient(135deg, rgba(130,36,227,0.12), rgba(255,159,102,0.10))'
-  try {
-    if (typeof document === 'undefined') return fallback
-    const root = document.documentElement
-
-    // Try to read the count from CSS custom property so the list is maintained in CSS
-    let count = 5 // default fallback
-    try {
-      const countRaw = getComputedStyle(root).getPropertyValue('--placeholder-grad-count')
-      const parsed = parseInt(countRaw?.trim() || '', 10)
-      if (!Number.isNaN(parsed) && parsed > 0) count = parsed
-    } catch (e) {
-      // ignore and use default
-    }
-
-    const idx = (id != null && Number.isInteger(id)) ? Math.abs(id) % count : 0
-    const prop = `--placeholder-grad-${idx}`
-    const val = getComputedStyle(root).getPropertyValue(prop)
-    if (val && val.trim()) return val.trim()
-    // fallback: find first defined gradient
-    for (let i = 0; i < count; i++) {
-      const v = getComputedStyle(root).getPropertyValue(`--placeholder-grad-${i}`)
-      if (v && v.trim()) return v.trim()
-    }
-    return fallback
-  } catch (e) {
-    return fallback
-  }
+  const list = Array.isArray(PLACEHOLDER_GRADIENTS) && PLACEHOLDER_GRADIENTS.length ? PLACEHOLDER_GRADIENTS : ['linear-gradient(135deg, rgba(130,36,227,0.12), rgba(255,159,102,0.10))']
+  if (id == null || !Number.isInteger(id)) return list[0]
+  const idx = Math.abs(id) % list.length
+  return list[idx]
 }
 
 function formatText(text: string | null) {
   if (!text) return ''
-  return text.replace(/\\+/g, '<br>')
+  return text.replace(/\+/g, '<br>')
 }
 
 function formatDateShort(iso: string) {
