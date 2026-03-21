@@ -189,3 +189,89 @@ CREATE TABLE scraper_dates
     if   SERIAL PRIMARY KEY,
     date TIMESTAMP DEFAULT '1970-01-01 00:00:00'
 );
+
+CREATE TYPE crop_name AS ENUM (
+    'hd_ready',
+    'FE3_header',
+    'thumbnail',
+    'og_image',
+    'mobile'
+    );
+
+CREATE TABLE media_gallery
+(
+    id         SERIAL PRIMARY KEY,
+    legacy_id  VARCHAR(255) UNIQUE,
+    name       VARCHAR(255) NOT NULL,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_media_gallery_legacy_id ON media_gallery (legacy_id);
+
+CREATE TABLE media_item
+(
+    id                SERIAL PRIMARY KEY,
+    legacy_id         VARCHAR(255) UNIQUE,
+    type              VARCHAR(100) NOT NULL,
+    original_filename VARCHAR(500) NOT NULL,
+    position          INTEGER      NOT NULL DEFAULT 0,
+    width             INTEGER,
+    height            INTEGER,
+    format            VARCHAR(50),
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_media_item_legacy_id ON media_item (legacy_id);
+CREATE INDEX idx_media_item_position ON media_item (position);
+
+CREATE TABLE media_crop
+(
+    id         SERIAL PRIMARY KEY,
+    legacy_id  VARCHAR(255) UNIQUE,
+    name       crop_name   NOT NULL,
+    url        TEXT        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_media_crop_legacy_id ON media_crop (legacy_id);
+CREATE INDEX idx_media_crop_name ON media_crop (name);
+
+CREATE TABLE gallery_item
+(
+    gallery_id INTEGER NOT NULL REFERENCES media_gallery (id) ON DELETE CASCADE,
+    item_id    INTEGER NOT NULL REFERENCES media_item (id) ON DELETE CASCADE,
+    position   INTEGER NOT NULL DEFAULT 0, -- per-gallery ordering (overrides global item position)
+    PRIMARY KEY (gallery_id, item_id)
+);
+
+CREATE INDEX idx_gallery_item_item_id ON gallery_item (item_id);
+
+CREATE TABLE item_crop
+(
+    item_id INTEGER NOT NULL REFERENCES media_item (id) ON DELETE CASCADE,
+    crop_id INTEGER NOT NULL REFERENCES media_crop (id) ON DELETE CASCADE,
+    PRIMARY KEY (item_id, crop_id)
+);
+
+CREATE INDEX idx_item_crop_crop_id ON item_crop (crop_id);
+
+CREATE TRIGGER trg_media_gallery_updated_at
+    BEFORE UPDATE
+    ON media_gallery
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER trg_media_item_updated_at
+    BEFORE UPDATE
+    ON media_item
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER trg_media_crop_updated_at
+    BEFORE UPDATE
+    ON media_crop
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
