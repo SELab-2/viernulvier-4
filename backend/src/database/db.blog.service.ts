@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { BlogDto, CreateBlogDto, MediaGalleryDto, UpdateBlogDto, } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -186,5 +186,20 @@ export class BlogDatabaseService {
     }
   }
 
-  // insert extra functions here if desired.
+  /**
+   * Gets all media galleries linked to a given blog.
+   * @param blog_id The ID of the blog you want.
+   * @returns List of MediaGalleryDto linked to the blog.
+   */
+  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto[]> {
+    const query = `
+      SELECT mg.id, mg.legacy_id, mg.name, mg.created_at, mg.updated_at
+      FROM media_gallery mg
+      INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
+      WHERE bmg.blog_id = $1
+      ORDER BY mg.id
+    `;
+
+    return this.db.query<MediaGalleryDto>(query, [blog_id]);
+  }
 }

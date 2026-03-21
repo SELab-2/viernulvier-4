@@ -4,6 +4,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  MediaGalleryDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
@@ -69,7 +70,7 @@ export class ProductionDatabaseService {
       SELECT t.id,
              t.tag,
              t.created_at,
-             t.updated_at,
+             t.updated_at
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -113,7 +114,7 @@ export class ProductionDatabaseService {
              b.titel,
              b.description,
              b.created_at,
-             b.updated_at,
+             b.updated_at
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -585,5 +586,22 @@ export class ProductionDatabaseService {
         "Cannot delete: Tag-Production link not found",
       );
     }
+  }
+
+  /**
+   * Gets all media galleries linked to a given production.
+   * @param prod_id The ID of the production you want.
+   * @returns List of MediaGalleryDto linked to the production.
+   */
+  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto[]> {
+    const query = `
+      SELECT mg.id, mg.legacy_id, mg.name, mg.created_at, mg.updated_at
+      FROM media_gallery mg
+      INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
+      WHERE pmg.production_id = $1
+      ORDER BY mg.id
+    `;
+
+    return this.db.query<MediaGalleryDto>(query, [prod_id]);
   }
 }
