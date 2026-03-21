@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
- * A reusable input field , includes:
+ * A reusable input field, includes:
  *  - Optional label and placeholder
  *  - Supports text and number inputs (default: text)
+ *  - Required indicator
  *  - Binds value via v-model
  *
  * Usage:
