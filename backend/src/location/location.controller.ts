@@ -7,11 +7,19 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import { LocationService } from "./location.service";
-import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import {
+  CreateLocationDto,
+  LanguageQueryDto,
+  LocationDto,
+  LocationViewDto,
+  PaginationFilterDto,
+  UpdateLocationDto,
+} from "../dto/dto";
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -20,26 +28,42 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ZodValidationPipe } from "nestjs-zod";
-import { CreateLocationSchema, UpdateLocationSchema } from "@repo/common";
+import {
+  CreateLocationSchema,
+  LanguageQuerySchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+  UpdateLocationSchema,
+} from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { LanguageService } from "../util/language/language.service";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("locations")
 export class LocationController {
-  constructor(private readonly locationService: LocationService) {}
+  constructor(
+    private readonly locationService: LocationService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/locations"
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
-  @ApiOkResponse({
-    type: LocationDto,
-    isArray: true,
-    description: "Returned a list of all Locations.",
-  })
+  @ApiOkPaginatedResponseAnyOf(LocationDto, LocationViewDto)
   @Get()
-  async getLocations(): Promise<LocationDto[]> {
-    return await this.locationService.getLocations();
+  async getLocations(
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilter: PaginationFilterDto,
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<PaginatedResponse<LocationDto | LocationViewDto>> {
+    return this.ls.flattenByLanguage<
+      PaginatedResponse<LocationDto | LocationViewDto>
+    >(await this.locationService.getLocations(paginationFilter), lang.lang);
   }
 
   /**
@@ -48,15 +72,16 @@ export class LocationController {
    * @returns The Location with that ID.
    */
   @ApiOperation({ summary: "Fetches a Location by it's ID." })
-  @ApiOkResponse({
-    type: LocationDto,
-    description: "The Location with provided ID",
-  })
+  @ApiOkAnyOf(LocationDto, LocationViewDto)
   @Get(":locationId")
   async getLocationById(
     @Param("locationId", ParseIntPipe) locationId: number,
-  ): Promise<LocationDto> {
-    return await this.locationService.getLocationById(locationId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<LocationDto | LocationViewDto> {
+    return this.ls.flattenByLanguage<LocationDto | LocationViewDto>(
+      await this.locationService.getLocationById(locationId),
+      lang.lang,
+    );
   }
 
   /**
@@ -81,7 +106,8 @@ export class LocationController {
   }
 
   /**
-   * Responds to a PATCH to "/locations"
+   * Responds to a PATCH to "/locations/:locationId"
+   * @param locationId The ID of the Location in the URL.
    * @param updateLocation The Location we want to update.
    * @returns The newly updated Location.
    */
@@ -93,12 +119,16 @@ export class LocationController {
     type: LocationDto,
     description: "The Location was updated.",
   })
-  @UsePipes(new ZodValidationPipe(UpdateLocationSchema))
-  @Patch()
+  @Patch(":locationId")
   async updateLocation(
-    @Body() updateLocation: UpdateLocationDto,
+    @Param("locationId", ParseIntPipe) locationId: number,
+    @Body(new ZodValidationPipe(UpdateLocationSchema))
+    updateLocation: UpdateLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationService.updateLocation(updateLocation);
+    return await this.locationService.updateLocation(
+      locationId,
+      updateLocation,
+    );
   }
 
   /**

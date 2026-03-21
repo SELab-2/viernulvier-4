@@ -2,7 +2,11 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { AccountDatabaseService } from "../database/db.account.service";
 import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
-import { CreateAccountDto, UpdateAccountDto } from "../dto/dto";
+import {
+  CreateAccountDto,
+  PaginationFilterDto,
+  UpdateAccountDto,
+} from "../dto/dto";
 
 describe("AuthService", () => {
   let service: AuthService;
@@ -20,6 +24,11 @@ describe("AuthService", () => {
 
   const mockApiKeyDbService = {
     generateApiKey: jest.fn(),
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   beforeEach(async () => {
@@ -55,7 +64,7 @@ describe("AuthService", () => {
       ];
       mockAccountDbService.getAccounts.mockResolvedValue(expectedResult);
 
-      const result = await service.getAccounts();
+      const result = await service.getAccounts(filter);
 
       expect(accountDbService.getAccounts).toHaveBeenCalled();
       expect(result).toEqual(expectedResult);

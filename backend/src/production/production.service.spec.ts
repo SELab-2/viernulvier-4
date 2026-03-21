@@ -19,11 +19,19 @@ describe("ProductionService", () => {
 
   const mockProduction: ProductionDto = {
     id: 1,
-    titel: "The Great Show",
-    ondertitel: "A masterpiece",
-    description1: "An amazing production",
-    description2: "With great actors",
-    planning_id: "1",
+    titel: { en: "The Great Show", nl: "De Geweldige Show" },
+    description1: {
+      en: "An amazing production",
+      nl: "Een geweldige productie",
+    },
+    description2: { en: "With great actors", nl: "Met geweldige acteurs" },
+    performer_type: "happy",
+    attendance_mode: "I",
+    tagline: { en: "fixing", nl: "repareren" },
+    artist: { en: "the", nl: "de" },
+    credits: { en: "tests :-)", nl: "testen :-)" },
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
   };
 
   const mockProductions: ProductionDto[] = [mockProduction];
@@ -31,11 +39,15 @@ describe("ProductionService", () => {
   const mockTags: TagDto[] = [
     {
       id: 1,
-      tag: "Drama",
+      tag: { en: "Drama", nl: "Drama" },
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
     },
     {
       id: 2,
-      tag: "Classical",
+      tag: { en: "Classical", nl: "Klassiek" },
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
     },
   ];
 
@@ -100,11 +112,21 @@ describe("ProductionService", () => {
     });
 
     it("should return empty array when no productions exist", async () => {
-      jest.spyOn(dbService, "getProductions").mockResolvedValueOnce([]);
+      jest.spyOn(dbService, "getProductions").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
       );
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
 
     it("should handle database errors", async () => {
@@ -171,7 +193,9 @@ describe("ProductionService", () => {
 
   describe("modifyProduction", () => {
     it("should fetch, merge, update, and return the modified production", async () => {
-      const patchData: UpdateProductionDto = { titel: "Patched titel" };
+      const patchData: UpdateProductionDto = {
+        titel: { en: "Patched titel", nl: "Bijgewerkte titel" },
+      };
       const expectedMergedProduction = {
         ...mockProduction,
         ...patchData,
@@ -186,13 +210,16 @@ describe("ProductionService", () => {
 
       expect(dbService.getProductionById).toHaveBeenCalledWith(1);
       expect(dbService.updateProduction).toHaveBeenCalledWith(
+        1,
         expectedMergedProduction,
       );
       expect(result).toEqual(expectedMergedProduction);
     });
 
     it("should throw an error if the production to modify does not exist", async () => {
-      const patchData: UpdateProductionDto = { titel: "Patched titel" };
+      const patchData: UpdateProductionDto = {
+        titel: { en: "Patched titel", nl: "Bijgewerkte titel" },
+      };
 
       // Simulate the database failing to find the record
       jest
@@ -231,8 +258,13 @@ describe("ProductionService", () => {
   describe("-- Blogs --", () => {
     const mockBlog: BlogDto = {
       id: 1,
-      titel: "Behind the Scenes",
-      description: "Looking at the set of The Great Show.",
+      titel: { en: "Behind the Scenes", nl: "Achter de schermen" },
+      description: {
+        en: "Looking at the set of The Great Show.",
+        nl: "Kijken naar de set van De Geweldige Show.",
+      },
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
     };
 
     describe("getProductionBlogs", () => {
@@ -442,14 +474,25 @@ describe("ProductionService", () => {
   describe("createProduction", () => {
     it("should create a production successfully", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
+        titel: { en: "The Great Show", nl: "De Geweldige Show" },
+        description1: {
+          en: "An amazing production",
+          nl: "Een geweldige productie",
+        },
+        description2: { en: "With great actors", nl: "Met geweldige acteurs" },
+        performer_type: "happy",
+        attendance_mode: "I",
+        tagline: { en: "fixing", nl: "repareren" },
+        artist: { en: "the", nl: "de" },
+        credits: { en: "tests :-)", nl: "testen :-)" },
       };
 
-      const createdProduction: ProductionDto = { id: 2, ...newProduction };
+      const createdProduction: ProductionDto = {
+        id: 2,
+        ...newProduction,
+        created_at: "2025-06-01T22:00:00.000Z",
+        updated_at: "2025-06-01T22:00:00.000Z",
+      };
 
       jest
         .spyOn(dbService, "createProduction")
@@ -463,11 +506,17 @@ describe("ProductionService", () => {
 
     it("should handle database errors when creation fails", async () => {
       const newProduction: CreateProductionDto = {
-        titel: "New Show",
-        ondertitel: "Exciting",
-        description1: "Awesome description",
-        description2: "Even more awesome",
-        planning_id: "2",
+        titel: { en: "The Great Show", nl: "De Geweldige Show" },
+        description1: {
+          en: "An amazing production",
+          nl: "Een geweldige productie",
+        },
+        description2: { en: "With great actors", nl: "Met geweldige acteurs" },
+        performer_type: "happy",
+        attendance_mode: "I",
+        tagline: { en: "fixing", nl: "repareren" },
+        artist: { en: "the", nl: "de" },
+        credits: { en: "tests :-)", nl: "testen :-)" },
       };
 
       jest

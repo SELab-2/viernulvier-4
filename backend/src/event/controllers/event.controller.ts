@@ -8,8 +8,8 @@ import {
   Patch,
   Post,
   Put,
-  UseGuards,
   Query,
+  UseGuards,
   UsePipes,
 } from "@nestjs/common";
 import EventService from "../event.service";
@@ -18,6 +18,7 @@ import {
   CreateEventSchema,
   EventSchema,
   FilterEventSchema,
+  PaginatedResponse,
   UpdateEventSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../../auth/authGuard";
@@ -33,6 +34,7 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
+import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 
 @Controller("events")
 export class EventController {
@@ -40,18 +42,17 @@ export class EventController {
 
   /**
    * Responds to GET /events
+   * note: pagination is done via the filters param.
    * @param filters The filters that should be applied to the query.
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
-  @ApiOkResponse({
-    type: EventDto,
-    isArray: true,
-    description: "All Events returned.",
-  })
+  @ApiOkPaginatedResponseAnyOf(EventDto)
   @Get()
   @UsePipes(new ZodValidationPipe(FilterEventSchema))
-  async getAllEvents(@Query() filters: FilterEventDto): Promise<EventDto[]> {
+  async getAllEvents(
+    @Query() filters: FilterEventDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     return await this.eventService.getAllEvents(filters);
   }
 

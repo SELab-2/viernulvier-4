@@ -1,12 +1,14 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import type {
+import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
   LocationDto,
+  PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class EventService {
@@ -17,7 +19,9 @@ export class EventService {
    * @param filters The Filters to be applied to the query.
    * @returns All EventDto objects.
    */
-  async getAllEvents(filters: FilterEventDto): Promise<EventDto[]> {
+  async getAllEvents(
+    filters: FilterEventDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     return await this.eventDBService.getEvents(filters);
   }
 
@@ -41,7 +45,7 @@ export class EventService {
     if (id !== event.id)
       throw new BadRequestException("ID in the URL must match ID in the body.");
 
-    return await this.eventDBService.updateEvent(event);
+    return await this.eventDBService.updateEvent(id, event);
   }
 
   /**
@@ -59,7 +63,7 @@ export class EventService {
       id, // Force ID.
     };
 
-    return await this.eventDBService.updateEvent(mergedEvent);
+    return await this.eventDBService.updateEvent(id, mergedEvent);
   }
 
   /**
@@ -80,6 +84,10 @@ export class EventService {
   async createEvent(newEvent: CreateEventDto): Promise<EventDto> {
     return await this.eventDBService.createEvent(newEvent);
   }
+
+  /**
+   * Location specific functionality.
+   */
 
   /**
    * Links an existing Location to an Event.
@@ -109,6 +117,39 @@ export class EventService {
    */
   async getLocationForEvent(eventId: number): Promise<LocationDto> {
     return await this.eventDBService.getLocationOfEvent(eventId);
+  }
+
+  /**
+   * Price specific functionality.
+   */
+
+  /**
+   * Returns all the Price objects linked to this Event.
+   * @param eventId The ID of the Event.
+   * @returns The Prices.
+   */
+  async getPricesForEvent(eventId: number): Promise<PriceDto[]> {
+    return await this.eventDBService.getPricesOfEvent(eventId);
+  }
+
+  /**
+   * Adds an existing Price to an Event.
+   * @param eventId The ID of the Event.
+   * @param priceId The ID of the Price.
+   * @returns T/F whether it worked or not.
+   */
+  async addPriceToEvent(eventId: number, priceId: number): Promise<boolean> {
+    return await this.eventDBService.addPriceToEvent(eventId, priceId);
+  }
+
+  /**
+   * Removes an existing Price from an Event.
+   * @param eventId The ID of the Event.
+   * @param priceId The ID of the Price.
+   * @returns Nothing.
+   */
+  async removePriceFromEvent(eventId: number, priceId: number): Promise<void> {
+    return await this.eventDBService.removePriceFromEvent(eventId, priceId);
   }
 }
 

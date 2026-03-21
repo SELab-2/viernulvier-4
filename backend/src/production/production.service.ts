@@ -9,6 +9,7 @@ import {
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class ProductionService {
@@ -19,12 +20,13 @@ export class ProductionService {
 
   /**
    * Fetches all ProductionDto objects from the DBService
+   * note: pagination is done here via the filters param.
    * @param filters The filters to be applied to the query.
    * @returns All ProductionDto objects
    */
   async getAllProductions(
     filters: FilterProductionDto,
-  ): Promise<ProductionDto[]> {
+  ): Promise<PaginatedResponse<ProductionDto>> {
     return await this.productionDBService.getProductions(filters);
   }
 
@@ -74,7 +76,10 @@ export class ProductionService {
       id,
     };
 
-    return await this.productionDBService.updateProduction(mergedProduction);
+    return await this.productionDBService.updateProduction(
+      id,
+      mergedProduction,
+    );
   }
 
   /**

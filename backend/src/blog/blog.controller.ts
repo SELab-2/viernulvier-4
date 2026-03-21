@@ -4,16 +4,32 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { BlogService } from "./blog.service";
-import { BlogSchema, CreateBlogSchema, UpdateBlogSchema } from "@repo/common";
+import {
+  BlogSchema,
+  CreateBlogSchema,
+  LanguageQuerySchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+  UpdateBlogSchema,
+} from "@repo/common";
 import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  BlogViewDto,
+  CreateBlogDto,
+  LanguageQueryDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 import {
   ApiBody,
   ApiOkResponse,
@@ -21,24 +37,43 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { LanguageService } from "../util/language/language.service";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("blogs")
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(
+    private readonly blogService: BlogService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/blogs"
+   * @param lang is the language filter
+   * @param paginationFilter is the pagination params
+   * @param descending Whether the list of blogs will be descending in date.
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
-  @ApiOkResponse({
-    type: BlogDto,
-    isArray: true,
-    description: "Returned all blogs.",
-  })
+  @ApiOkPaginatedResponseAnyOf(BlogDto, BlogViewDto)
   @Get()
-  async getAllBlogs(): Promise<BlogDto[]> {
-    return await this.blogService.getAllBlogs();
+  async getAllBlogs(
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilter: PaginationFilterDto,
+    @Query("descending", ParseBoolPipe) descending: boolean,
+  ): Promise<PaginatedResponse<BlogDto | BlogViewDto>> {
+    const result = await this.blogService.getAllBlogs(
+      paginationFilter,
+      descending,
+    );
+    return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
+      result,
+      lang.lang,
+    );
   }
 
   /**
@@ -47,12 +82,16 @@ export class BlogController {
    * @returns The Blog corresponding to ID if there was one.
    */
   @ApiOperation({ summary: "Returns a single blog." })
-  @ApiOkResponse({ type: BlogDto, description: "Found Blog." })
+  @ApiOkAnyOf(BlogDto, BlogViewDto)
   @Get(":blogId")
   async getBlogById(
     @Param("blogId", ParseIntPipe) blogId: number,
-  ): Promise<BlogDto> {
-    return await this.blogService.getBlogById(blogId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<BlogDto | BlogViewDto> {
+    return this.ls.flattenByLanguage<BlogDto | BlogViewDto>(
+      await this.blogService.getBlogById(blogId),
+      lang.lang,
+    );
   }
 
   /**
@@ -81,12 +120,12 @@ export class BlogController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing blog." })
-  @ApiBody({ type: BlogDto })
+  @ApiBody({ type: UpdateBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Replaced Blog." })
   @Put(":blogId")
   async replaceBlog(
     @Param("blogId", ParseIntPipe) blogId: number,
-    @Body(new ZodValidationPipe(BlogSchema)) blog: BlogDto,
+    @Body(new ZodValidationPipe(BlogSchema)) blog: UpdateBlogDto,
   ): Promise<BlogDto> {
     return await this.blogService.replaceBlog(blogId, blog);
   }

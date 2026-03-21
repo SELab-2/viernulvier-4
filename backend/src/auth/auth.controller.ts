@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
@@ -14,6 +15,7 @@ import { AuthService } from "./auth.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
+  PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
 } from "../dto/dto";
@@ -26,7 +28,13 @@ import {
 } from "@nestjs/swagger";
 import { SuperApiKeyGuard } from "./authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
-import { CreateAccountSchema, UpdateAccountSchema } from "@repo/common";
+import {
+  CreateAccountSchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+  UpdateAccountSchema,
+} from "@repo/common";
+import { ApiOkPaginatedResponseAnyOf } from "../common/decorators/api.ok";
 
 @Controller("auth")
 export class AuthController {
@@ -49,19 +57,19 @@ export class AuthController {
 
   /**
    * Responds to GET to "/auth".
+   * @param paginationFilter is the pagination params.
    * @returns A list of all existing Account objects.
    */
   @UseGuards(SuperApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Returns a list of Accounts." })
-  @ApiOkResponse({
-    type: PublicAccountDto,
-    isArray: true,
-    description: "Accounts found.",
-  })
+  @ApiOkPaginatedResponseAnyOf(PublicAccountDto)
   @Get()
-  async getAccounts(): Promise<PublicAccountDto[]> {
-    return await this.authService.getAccounts();
+  async getAccounts(
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedResponse<PublicAccountDto>> {
+    return await this.authService.getAccounts(paginationFilter);
   }
 
   /**

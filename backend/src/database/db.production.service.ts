@@ -8,7 +8,12 @@ import {
   TagDto,
   UpdateProductionDto,
 } from "../dto/dto";
-import { FilterProductionSchema } from "@repo/common";
+import { ResourceGoneException } from "../common/exceptions";
+import {
+  FilterProductionSchema,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -20,15 +25,16 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: ProductionDto[] = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
-    );
-    if (productions.length === 0)
-      throw new BadRequestException(
+    const productions: PaginatedResponse<ProductionDto> =
+      await this.getProductions(FilterProductionSchema.parse({ id: id }));
+
+    const production = productions.objects;
+    if (production.length === 0)
+      throw new ResourceGoneException(
         `No ProductionDto exists for provided ID(${id})`,
       );
 
-    return productions[0]; // There should be a ProductionDto in here if the length is not 0.
+    return production[0]; // There should be a ProductionDto in here if the length is not 0.
   }
 
   /**
@@ -45,7 +51,10 @@ export class ProductionDatabaseService {
   ): Promise<TagDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT t.*
+      SELECT t.id,
+             t.tag,
+             t.created_at,
+             t.updated_at
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -57,7 +66,10 @@ export class ProductionDatabaseService {
     const offset = page * amount;
 
     const query = `
-      SELECT t.*
+      SELECT t.id,
+             t.tag,
+             t.created_at,
+             t.updated_at,
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -81,7 +93,11 @@ export class ProductionDatabaseService {
   ): Promise<BlogDto[]> {
     if (amount === 0) {
       const query = `
-      SELECT b.*
+      SELECT b.id, 
+             b.titel, 
+             b.description,
+             b.created_at,
+             b.updated_at
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -93,7 +109,11 @@ export class ProductionDatabaseService {
     const offset = page * amount;
 
     const query = `
-      SELECT b.*
+      SELECT b.id,
+             b.titel,
+             b.description,
+             b.created_at,
+             b.updated_at,
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -106,23 +126,19 @@ export class ProductionDatabaseService {
   /**
    * Generic get function for productions.
    * @param filters gives the freedom to define the filters of the search you want.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
    */
-  async getProductions(filters: FilterProductionDto): Promise<ProductionDto[]> {
+  async getProductions(
+    filters: FilterProductionDto,
+  ): Promise<PaginatedResponse<ProductionDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
 
     // Filter by location
-    if (filters.hall) {
-      conditions.push(`e.hall = $${i}`);
-      values.push(filters.hall);
-      i++;
-    }
+    // TODO: Rewrite this filter since it would not work anymore under the new location structure.
 
     // Filter by event date (start or end date)
     if (filters.date) {
@@ -155,9 +171,40 @@ export class ProductionDatabaseService {
 
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
+    // For all supported languages.
     if (filters.titel) {
-      conditions.push(`p.titel ILIKE $${i}`);
+      const titelClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `p.titel->>'${lang}' ILIKE $${i}`,
+      );
+
+      conditions.push(`(${titelClauses.join(" OR ")})`);
       values.push(`%${filters.titel}%`);
+      i++;
+    }
+
+    // Will look anywhere in the artist field for what was searched.
+    // This checks all supported languages.
+    if (filters.artist) {
+      const artistClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `p.artist->>'${lang}' ILIKE $${i}`,
+      );
+
+      conditions.push(`(${artistClauses.join(" OR ")})`);
+      values.push(`%${filters.artist}%`);
+      i++;
+    }
+
+    // Filter by performance_type
+    if (filters.performer_type) {
+      conditions.push(`p.performer_type = $${i}`);
+      values.push(`%${filters.performer_type}%`);
+      i++;
+    }
+
+    // Filter by attendance_mode
+    if (filters.attendance_mode) {
+      conditions.push(`p.attendance_mode = $${i}`);
+      values.push(`%${filters.attendance_mode}%`);
       i++;
     }
 
@@ -188,45 +235,61 @@ export class ProductionDatabaseService {
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    // pagination
+    // count query uses same filters but no pagination
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const filterValues = [...values];
+    const countQuery = `
+    SELECT COUNT(DISTINCT p.id) as count
+    FROM productions p
+      LEFT JOIN events e ON e.production_id = p.id
+    ${whereClause}
+  `;
+
     let paginationClause = "";
     if (filters.limit > 0) {
       const offset = filters.page * filters.limit;
-
-      paginationClause = `
-      LIMIT $${i}
-      OFFSET $${i + 1}
-    `;
-
+      paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
       values.push(filters.limit);
       values.push(offset);
-
       i += 2;
     }
 
-    // p is defined, ignore error
-    // need DISTINCT as multiple event for each prod.
     const query = `
-      SELECT DISTINCT
-        p.id,
-        p.titel,
-        p.ondertitel,
-        p.description1,
-        p.description2,
-        p.planning_id
-      FROM productions p
-        LEFT JOIN events e ON e.production_id = p.id
-          ${whereClause}
-      ORDER BY p.id 
-        ${paginationClause}
-    `;
+    SELECT DISTINCT
+      p.id,
+      p.titel,
+      p.description1,
+      p.description2,
+      p.artist,
+      p.tagline,
+      p.credits,
+      p.created_at,
+      p.updated_at,
+      p.performer_type,
+      p.attendance_mode
+    FROM productions p
+      LEFT JOIN events e ON e.production_id = p.id
+    ${whereClause}
+    ORDER BY p.id
+    ${paginationClause}
+  `;
 
-    return this.db.query<ProductionDto>(query, values);
+    const [objects, countResult] = await Promise.all([
+      this.db.query<ProductionDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
+    ]);
+
+    return {
+      page: filters.page,
+      limit: filters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**
    * Create production function, creates a production in the database.
-   * @param production must be of the type "CreateProduction" which has all fields defined,
+   * @param production must be of the type "CreateProduction" which has all necessary fields defined,
    * besides primary key id. (database auto-generates that)
    * @returns the added production if it was successful.
    */
@@ -238,29 +301,40 @@ export class ProductionDatabaseService {
     }
 
     const query = `
-    INSERT INTO productions (
-        titel,
-        ondertitel,
-        description1,
-        description2,
-        planning_id
-    )
-    VALUES ($1,$2,$3,$4,$5)
-    RETURNING
-        id,
-        titel,
-        ondertitel,
-        description1,
-        description2,
-        planning_id
-  `;
+      INSERT INTO productions (
+          titel,
+          description1,
+          description2,
+          artist,
+          tagline,
+          credits,
+          performer_type,
+          attendance_mode
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      RETURNING
+          id,
+          titel,
+          description1,
+          description2,
+          artist,
+          tagline,
+          credits,
+          created_at,
+          updated_at,
+          performer_type,
+          attendance_mode;
+      `;
 
     const values = [
       production.titel,
-      production.ondertitel ?? null,
-      production.description1 ?? null,
-      production.description2 ?? null,
-      production.planning_id ?? null,
+      production.description1,
+      production.description2,
+      production.artist,
+      production.tagline,
+      production.credits,
+      production.performer_type,
+      production.attendance_mode,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -281,37 +355,49 @@ export class ProductionDatabaseService {
   async upsertProduction(production: ProductionDto): Promise<ProductionDto> {
     const query = `
       INSERT INTO productions (
-        id,
         titel,
-        ondertitel,
         description1,
         description2,
-        planning_id
+        artist,
+        tagline,
+        credits,
+        performer_type,
+        attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       ON CONFLICT (id)
       DO UPDATE SET
         titel = EXCLUDED.titel,
-        ondertitel = EXCLUDED.ondertitel,
         description1 = EXCLUDED.description1,
         description2 = EXCLUDED.description2,
-        planning_id = EXCLUDED.planning_id
-      RETURNING
-        id,
-        titel,
-        ondertitel,
-        description1,
-        description2,
-        planning_id
-    `;
+        artist = EXCLUDED.artist,
+        tagline = EXCLUDED.tagline,
+        credits = EXCLUDED.credits,
+        performer_type = EXCLUDED.performer_type,
+        attendance_mode = EXCLUDED.attendance_mode
+        RETURNING
+          id,
+          titel,
+          description1,
+          description2,
+          artist,
+          tagline,
+          credits,
+          created_at,
+          updated_at,
+          performer_type,
+          attendance_mode
+      `;
 
     const values = [
-      production.id,
       production.titel,
-      production.ondertitel ?? null,
-      production.description1 ?? null,
-      production.description2 ?? null,
-      production.planning_id ?? null,
+      production.description1,
+      production.description2,
+      production.artist,
+      production.tagline,
+      production.credits,
+      production.performer_type ?? null,
+      production.attendance_mode ?? null,
     ];
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -325,65 +411,74 @@ export class ProductionDatabaseService {
 
   /**
    * Update function for productions. Updates the production in the database.
+   * note: this function can be used to update/add all of a certain language to a prod.
    * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
   async updateProduction(
+    productionId: number,
     production: UpdateProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.id) {
-      throw new Error("Production id is required for update");
-    }
-
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
 
-    if (production.titel !== undefined) {
-      fields.push(`titel = $${index++}`);
-      values.push(production.titel);
+    const jsonbColumns = [
+      "titel",
+      "description1",
+      "description2",
+      "artist",
+      "tagline",
+      "credits",
+    ] as const;
+    for (const column of jsonbColumns) {
+      if (production[column] !== undefined) {
+        fields.push(
+          `${column} = COALESCE(${column}, '{}'::jsonb) || $${index++}::jsonb`,
+        );
+
+        values.push(JSON.stringify(production[column]));
+      }
     }
 
-    if (production.ondertitel !== undefined) {
-      fields.push(`ondertitel = $${index++}`);
-      values.push(production.ondertitel);
+    if (production.performer_type !== undefined) {
+      fields.push(`performer_type = $${index++}`);
+      values.push(production.performer_type);
     }
 
-    if (production.description1 !== undefined) {
-      fields.push(`description1 = $${index++}`);
-      values.push(production.description1);
-    }
-
-    if (production.description2 !== undefined) {
-      fields.push(`description2 = $${index++}`);
-      values.push(production.description2);
-    }
-
-    if (production.planning_id !== undefined) {
-      fields.push(`planning_id = $${index++}`);
-      values.push(production.planning_id);
+    if (production.attendance_mode !== undefined) {
+      fields.push(`attendance_mode = $${index++}`);
+      values.push(production.attendance_mode);
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
-    // Add id as the last parameter
-    values.push(production.id);
-
-    // ignore error on "RETURNING", query is correct.
+    values.push(productionId);
     const query = `
-    UPDATE productions
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING *;
+      UPDATE productions
+      SET ${fields.join(", ")}
+      WHERE id = $${index}
+      RETURNING
+        id,
+        titel,
+        description1,
+        description2,
+        artist,
+        tagline,
+        credits,
+        created_at,
+        updated_at,
+        performer_type,
+        attendance_mode;
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Production not found");
+      throw new ResourceGoneException("Production not found");
     }
 
     return result[0];
@@ -404,24 +499,6 @@ export class ProductionDatabaseService {
 
   /**
    * Delete function for deleting blogs from the database.
-   * This function deletes all blogs associated with a given production_id
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteBlogsWithProductionID(production_id: number): Promise<void> {
-    const query = `
-      DELETE FROM blogs
-        USING production_blogs
-      WHERE blogs.id = production_blogs.blog_id
-        AND production_blogs.production_id = $1
-    `;
-
-    await this.db.query(query, [production_id]);
-  }
-
-  /**
-   * Delete function for deleting blogs from the database.
    * This function deletes a single blog-LINK associated with a given prod_id
    * note: it does not delete the blog itself only from being linked to the given production.
    * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
@@ -437,9 +514,14 @@ export class ProductionDatabaseService {
       DELETE FROM production_blogs
       WHERE production_blogs.blog_id = $1
         AND production_blogs.production_id = $2
+        RETURNING *;
     `;
-
-    await this.db.query(query, [blog_id, production_id]);
+    const result = await this.db.query(query, [blog_id, production_id]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        "Cannot delete: Blog-Production link not found",
+      );
+    }
   }
 
   /**
@@ -495,8 +577,13 @@ export class ProductionDatabaseService {
       DELETE FROM production_tag
       WHERE production_tag.tag_id = $1
         AND production_tag.production_id = $2
+      RETURNING *;
     `;
-
-    await this.db.query(query, [tag_id, production_id]);
+    const result = await this.db.query(query, [tag_id, production_id]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        "Cannot delete: Tag-Production link not found",
+      );
+    }
   }
 }

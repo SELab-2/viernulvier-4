@@ -1,7 +1,15 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateEventDto, EventDto, FilterEventDto, LocationDto, UpdateEventDto, } from "../dto/dto";
-import { FilterEventSchema } from "@repo/common";
+import { ResourceGoneException } from "../common/exceptions";
+import {
+  CreateEventDto,
+  EventDto,
+  FilterEventDto,
+  LocationDto,
+  PriceDto,
+  UpdateEventDto,
+} from "../dto/dto";
+import { FilterEventSchema, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -10,19 +18,20 @@ export class EventDatabaseService {
 
   /**
    * Get a single EventDto by their ID.
-   * @param id The ID we're trying to fetch.
+   * @param eventId The ID we're trying to fetch.
    * @returns The EventDto if there is one.
    */
-  async getEventById(id: number): Promise<EventDto> {
-    const events: EventDto[] = await this.getEvents(
-      FilterEventSchema.parse({ id: id }),
+  async getEventById(eventId: number): Promise<EventDto> {
+    const events: PaginatedResponse<EventDto> = await this.getEvents(
+      FilterEventSchema.parse({ id: eventId }),
     );
-    if (events.length === 0)
-      throw new BadRequestException(
-        `No EventDto exists for provided ID(${id})`,
+    const event: EventDto[] = events.objects;
+    if (event.length === 0)
+      throw new ResourceGoneException(
+        `No EventDto exists for provided ID(${eventId})`,
       );
 
-    return events[0]; // There should be an EventDto in here if the length is not 0.
+    return event[0]; // There should be an EventDto in here if the length is not 0.
   }
 
   /**
@@ -32,7 +41,9 @@ export class EventDatabaseService {
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All events for the given filters.
    */
-  async getEvents(filters: FilterEventDto): Promise<EventDto[]> {
+  async getEvents(
+    filters: FilterEventDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -101,10 +112,18 @@ export class EventDatabaseService {
       values.push(offset);
     }
 
+    // count query uses same filters but no pagination
+    const countQuery = `
+    SELECT COUNT(*) as count
+    FROM events e
+      JOIN productions p ON e.production_id = p.id
+    ${whereClause}
+  `;
+
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id, e.price
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.created_at, e.updated_at
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
@@ -112,7 +131,20 @@ export class EventDatabaseService {
         ${paginationClause}
         `;
 
-    return this.db.query<EventDto>(query, values);
+    // count query only uses filter values, not pagination values
+    const filterValues = values.slice(0, i - 1);
+
+    const [objects, countResult] = await Promise.all([
+      this.db.query<EventDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
+    ]);
+
+    return {
+      page: filters.page,
+      limit: filters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**
@@ -127,16 +159,17 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id, price)
-      VALUES ($1, $2, $3, $4)
-      RETURNING id, starttime, endtime, production_id, price
+      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at
     `;
 
     const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
       event.production_id,
-      event.price,
+      event.intermission_at,
+      event.doors_at,
     ]);
 
     // Validate output
@@ -153,11 +186,7 @@ export class EventDatabaseService {
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
-  async updateEvent(event: UpdateEventDto): Promise<EventDto> {
-    if (!event.id) {
-      throw new Error("Event id is required for update");
-    }
-
+  async updateEvent(eventId: number, event: UpdateEventDto): Promise<EventDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -172,34 +201,39 @@ export class EventDatabaseService {
       values.push(event.endtime);
     }
 
-    if (event.price !== undefined) {
-      fields.push(`price = $${index++}`);
-      values.push(event.price);
-    }
-
     if (event.production_id !== undefined) {
       fields.push(`production_id = $${index++}`);
       values.push(event.production_id);
+    }
+
+    if (event.doors_at !== undefined) {
+      fields.push(`doors_at = $${index++}`);
+      values.push(event.doors_at);
+    }
+
+    if (event.intermission_at !== undefined) {
+      fields.push(`intermission_at = $${index++}`);
+      values.push(event.intermission_at);
     }
 
     if (fields.length === 0) {
       throw new Error("No fields provided to update");
     }
 
-    values.push(event.id);
+    values.push(eventId);
 
     // ignore error on "RETURNING", query is correct.
     const query = `
     UPDATE events
     SET ${fields.join(", ")}
     WHERE id = $${index}
-    RETURNING *;
+    RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at;
     `;
 
     const result = await this.db.query<EventDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Event not found");
+      throw new ResourceGoneException("Event not found");
     }
 
     return result[0]; // should have the updated event only.
@@ -207,29 +241,20 @@ export class EventDatabaseService {
 
   /**
    * Delete function for deleting events from the database.
-   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
+   * @param blogId must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * (silent handling)
    * @returns nothing.
    */
-  async deleteEvent(id: number): Promise<void> {
+  async deleteEvent(blogId: number): Promise<void> {
     // note we delete on id not p_id as that would affect more events.
     // to delete all events using p_id -> use deleteEventsWithPID()
-    const query = `DELETE FROM events WHERE id = $1`;
-
-    await this.db.query(query, [id]);
-  }
-
-  /**
-   * Delete function for deleting all events from the database given a certain p_id.
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
-   * @returns nothing.
-   */
-  async deleteEventsWithPID(production_id: number): Promise<void> {
-    // note: here we delete using the production id so possibly multiple events are affected!
-    const query = `DELETE FROM events WHERE production_id = $1`;
-
-    await this.db.query(query, [production_id]);
+    const query = `DELETE FROM events WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        `Cannot delete: Event ${blogId} not found`,
+      );
+    }
   }
 
   /**
@@ -239,17 +264,17 @@ export class EventDatabaseService {
    */
   async getLocationOfEvent(id: number): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location
+    SELECT l.id, l.location, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
     LIMIT 1
   `;
 
-    const result = await this.db.query(query, [id]);
+    const result = await this.db.query<LocationDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Could not find location");
+      throw new ResourceGoneException("Could not find location");
     }
 
     return result[0];
@@ -289,8 +314,94 @@ export class EventDatabaseService {
    * @returns nothing (silent handling.)
    */
   async deleteLocationFromEvent(event_id: number): Promise<void> {
-    const query = `DELETE FROM event_locations WHERE event_id = $1`;
+    const query = `DELETE FROM event_locations WHERE event_id = $1 RETURNING event_id;`;
+    const result = await this.db.query(query, [event_id]);
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Cannot delete location: Event ${event_id} not found or has no location linked`,
+      );
+    }
+  }
 
-    await this.db.query(query, [event_id]);
+  /**
+   * get all the prices linked with an event
+   * @param id the ID of the event we want all the prices of.
+   * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
+   * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
+   * @returns a list of PriceDto objects linked to the given event.
+   */
+  async getPricesOfEvent(
+    id: number,
+    amount: number = 0,
+    page: number = 0,
+  ): Promise<PriceDto[]> {
+    if (amount === 0) {
+      const query = `
+      SELECT p.id,
+             p.created_at,
+             p.updated_at,
+             p.price,
+             p.name
+      FROM prices p
+      JOIN event_prices ep ON ep.price_id = p.id
+      WHERE ep.event_id = $1
+      `;
+
+      return await this.db.query(query, [id]);
+    }
+
+    const offset = page * amount;
+
+    const query = `
+    SELECT p.id,
+           p.price,
+           p.name,
+           p.created_at,
+           p.updated_at
+    FROM prices p
+    INNER JOIN event_prices ep ON ep.price_id = p.id
+    WHERE ep.event_id = $1
+    LIMIT $2 OFFSET $3
+    `;
+
+    return await this.db.query(query, [id, amount, offset]);
+  }
+
+  /**
+   * link a price to an event
+   * @param event_id the ID of the event you want to link
+   * @param price_id the ID of the price you want to link
+   * @returns T/F whether if the linking was successful.
+   */
+  async addPriceToEvent(event_id: number, price_id: number): Promise<boolean> {
+    const query = `
+    INSERT INTO event_prices (event_id, price_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+    RETURNING event_id
+    `;
+
+    const result = await this.db.query(query, [event_id, price_id]);
+
+    return result.length !== 0;
+  }
+
+  /**
+   * Removes a previously linked Price from an existing Event in the Database.
+   * @param event_id the ID of the event you want to remove a price of.
+   * @param price_id the ID of the price you want to remove.
+   * @returns nothing (silent handling.)
+   */
+  async removePriceFromEvent(
+    event_id: number,
+    price_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM event_prices
+      WHERE event_prices.event_id = $1 
+        AND event_prices.price_id = $2
+    `;
+
+    await this.db.query(query, [event_id, price_id]);
   }
 }

@@ -28,504 +28,243 @@ function createMockStream(rows: any[], error?: Error) {
   };
 }
 
-describe("CSVFileParser.parseCSVWithSchema", () => {
-  beforeEach(() => {
-    // silence warnings emitted during parsing; tests will assert on them if needed
-    jest.spyOn(console, "warn").mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
-  it("should parse valid rows", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        { name: "John", age: "30" },
-        { name: "Jane", age: "25" },
-      ]) as any,
-    );
-
-    const schema = z.object({
-      name: z.string(),
-      age: z.number(),
+describe("CSVFileParser", () => {
+  describe("CSVFileParser.parseCSVWithSchema", () => {
+    beforeEach(() => {
+      // silence warnings emitted during parsing; tests will assert on them if needed
+      jest.spyOn(console, "warn").mockImplementation(() => {});
     });
 
-    const result = await CSVFileParser.parseCSVWithSchema(
-      "dummy.csv",
-      schema,
-      (row) => ({
-        name: row.name,
-        age: Number(row.age),
-      }),
-    );
+    afterEach(() => {
+      jest.clearAllMocks();
+      jest.restoreAllMocks();
+    });
 
-    expect(result).toEqual([
-      { name: "John", age: 30 },
-      { name: "Jane", age: 25 },
-    ]);
-  });
+    it("should parse valid rows", async () => {
+      mockedFs.createReadStream.mockReturnValue(
+        createMockStream([
+          { name: "John", age: "30" },
+          { name: "Jane", age: "25" },
+        ]) as any,
+      );
 
-  it("should reject when stream emits error", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([], new Error("Stream failure")) as any,
-    );
+      const schema = z.object({
+        name: z.string(),
+        age: z.number(),
+      });
 
-    await expect(
-      CSVFileParser.parseCSVWithSchema("dummy.csv", z.any(), (row) => row),
-    ).rejects.toThrow("Stream failure");
-  });
-});
+      const result = await CSVFileParser.parseCSVWithSchema(
+        "dummy.csv",
+        schema,
+        (row) => ({
+          name: row.name,
+          age: Number(row.age),
+        }),
+      );
 
-describe("CSVFileParser.transformEventRow", () => {
-  it("should transform a valid row correctly", () => {
-    const row = {
-      Starttime: "2024-01-01 10:00:00",
-      Endtime: "2024-01-01 12:00:00",
-      Production: "5",
-      Genre: "drama",
-      Price: "25",
-      Hall: "Main Hall",
-    };
+      expect(result).toEqual([
+        { name: "John", age: 30 },
+        { name: "Jane", age: 25 },
+      ]);
+    });
 
-    const result = CSVFileParser.transformEventRow(row);
+    it("should reject when stream emits error", async () => {
+      mockedFs.createReadStream.mockReturnValue(
+        createMockStream([], new Error("Stream failure")) as any,
+      );
 
-    expect(result).toEqual({
-      starttime: new Date("2024-01-01 10:00:00").toISOString(),
-      endtime: new Date("2024-01-01 12:00:00").toISOString(),
-      production_id: 5,
-      price: 25,
-      location: "Main Hall",
+      await expect(
+        CSVFileParser.parseCSVWithSchema("dummy.csv", z.any(), (row) => row),
+      ).rejects.toThrow("Stream failure");
     });
   });
 
-  it("should set endtime to null if invalid", () => {
-    const row = {
-      Starttime: "2024-01-01 10:00:00",
-      Endtime: "0000-00-00 00:00:00",
-      Production: "5",
-      Price: "",
-      Hall: "",
-    };
+  describe("CSVFileParser.transformEventRow", () => {
+    it("should transform a valid row correctly", () => {
+      const row = {
+        Starttime: "2024-01-01 10:00:00",
+        Endtime: "2024-01-01 12:00:00",
+        Production: "5",
+        Genre: "drama",
+        Hall: "Main Hall",
+      };
 
-    const result = CSVFileParser.transformEventRow(row);
+      const result = CSVFileParser.transformEventRow(row);
 
-    expect(result.endtime).toBeNull();
-    expect(result.price).toBeNull();
-    expect(result.location).toBe("");
-  });
+      expect(result).toEqual({
+        starttime: new Date("2024-01-01 10:00:00").toISOString(),
+        endtime: new Date("2024-01-01 12:00:00").toISOString(),
+        production_id: 5,
+        location: "Main Hall",
+        doors_at: null,
+        intermission_at: null,
+      });
+    });
 
-  it("should throw if starttime is invalid", () => {
-    const row = {
-      Starttime: "invalid-date",
-      Endtime: "",
-      Production: "5",
-      Price: "10",
-    };
+    it("should set endtime to null if invalid", () => {
+      const row = {
+        Starttime: "2024-01-01 10:00:00",
+        Endtime: "0000-00-00 00:00:00",
+        Production: "5",
+        Hall: "",
+      };
 
-    expect(() => CSVFileParser.transformEventRow(row)).toThrow(
-      "Invalid starttime",
-    );
-  });
+      const result = CSVFileParser.transformEventRow(row);
 
-  it("should throw if production id is invalid", () => {
-    const row = {
-      Starttime: "2024-01-01 10:00:00",
-      Endtime: "",
-      Production: "abc",
-      Price: "10",
-    };
+      expect(result.endtime).toBeNull();
+      expect(result.location).toBe("");
+    });
 
-    expect(() => CSVFileParser.transformEventRow(row)).toThrow(
-      "Invalid production id",
-    );
-  });
-});
+    it("should throw if starttime is invalid", () => {
+      const row = {
+        Starttime: "invalid-date",
+        Endtime: "",
+        Production: "5",
+      };
 
-describe("CSVFileParser.transformProductionRow", () => {
-  it("should transform production row correctly", () => {
-    const row = {
-      ID: "1",
-      Titel: "Hamlet",
-      Ondertitel: "A tragedy",
-      Description1: "Main description",
-      Description2: "",
-      Genre: "drama",
-      "Planning ID": "42",
-    };
+      expect(() => CSVFileParser.transformEventRow(row)).toThrow(
+        "Invalid starttime",
+      );
+    });
 
-    const result = CSVFileParser.transformProductionRow(row);
+    it("should throw if production id is invalid", () => {
+      const row = {
+        Starttime: "2024-01-01 10:00:00",
+        Endtime: "",
+        Production: "abc",
+      };
 
-    expect(result).toEqual({
-      id: 1,
-      titel: "Hamlet",
-      ondertitel: "A tragedy",
-      description1: "Main description",
-      description2: null,
-      planning_id: "42",
-      tags: ["drama"],
+      expect(() => CSVFileParser.transformEventRow(row)).toThrow(
+        "Invalid production id",
+      );
     });
   });
 
-  it("should throw if ID is invalid", () => {
-    const row = {
-      ID: "notanumber",
-      Titel: "Title",
-      Ondertitel: "Sub",
-      Description1: "desc",
-      Description2: "",
-      "Planning ID": "123",
-    };
-    expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
-      /Invalid production id/,
-    );
-  });
-});
+  describe("CSVFileParser.transformProductionRow", () => {
+    it("should transform production row correctly", () => {
+      const row = {
+        ID: "1",
+        Titel: "Hamlet",
+        Ondertitel: "A tragedy",
+        Description1: "Main description",
+        Description2: "",
+        Genre: "drama",
+      };
 
-// additional tests for the convenience wrappers and insertion logic
+      const result = CSVFileParser.transformProductionRow(row);
 
-describe("CSVFileParser.parseEventsCSV", () => {
-  beforeEach(() => {
-    jest.spyOn(console, "warn").mockImplementation(() => {});
-  });
-
-  afterEach(() => jest.clearAllMocks());
-
-  it("should parse and transform event rows, skipping invalid ones", async () => {
-    // include one valid and one invalid row; valid row contains a hall
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          Starttime: "2025-05-01 14:00:00",
-          Endtime: "2025-05-01 15:00:00",
-          Production: "10",
-          Price: "20",
-          Hall: "Front Stage",
-        },
-        {
-          // bad start time will be skipped by transform
-          Starttime: "not-a-date",
-          Endtime: "",
-          Production: "10",
-          Price: "20",
-          Hall: "Backstage",
-        },
-      ]) as any,
-    );
-
-    const items = await CSVFileParser.parseEventsCSV("events.csv");
-    expect(items).toHaveLength(1);
-    expect(items[0]).toEqual({
-      event: {
-        starttime: new Date("2025-05-01 14:00:00").toISOString(),
-        endtime: new Date("2025-05-01 15:00:00").toISOString(),
-        production_id: 10,
-        price: 20,
-      },
-      location: "Front Stage",
-    });
-
-    expect(console.warn).toHaveBeenCalledWith(
-      expect.stringContaining("Skipping invalid row"),
-    );
-  });
-});
-
-describe("CSVFileParser.parseProductionsCSV", () => {
-  afterEach(() => jest.clearAllMocks());
-
-  it("should parse production rows and validate against schema", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          ID: "2",
-          Titel: "Macbeth",
-          Ondertitel: "",
-          Description1: "desc",
-          Description2: "more",
-          Genre: "tragedy",
-          "Planning ID": "5",
-        },
-      ]) as any,
-    );
-    const result = await CSVFileParser.parseProductionsCSV("prods.csv");
-    // since we only provided one row without any comma-separated genres,
-    // we expect a single production, no tags, and no links
-    expect(result).toEqual({
-      productions: [
-        {
-          id: 2,
-          titel: "Macbeth",
-          ondertitel: "",
-          description1: "desc",
-          description2: "more",
-          planning_id: "5",
-        },
-      ],
-      tags: ["tragedy"],
-      productionTagLinks: [{ productionId: 2, tagName: "tragedy" }],
-    });
-  });
-});
-
-describe("CSVFileParser.insertEventsFromCSV", () => {
-  const fakeEventService = {
-    createEvent: jest.fn(),
-    linkEventToLocation: jest.fn(),
-  } as any;
-  const fakeLocationService = {
-    createLocation: jest.fn(),
-    getLocations: jest.fn().mockResolvedValue([]),
-  } as any;
-
-  afterEach(() => jest.clearAllMocks());
-
-  it("should call eventService.createEvent for each parsed event when no hall is provided", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          Starttime: "2025-06-01 10:00:00",
-          Endtime: "2025-06-01 11:00:00",
-          Production: "1",
-          Price: "15",
-          Hall: "", // explicit empty hall
-        },
-      ]) as any,
-    );
-
-    fakeEventService.createEvent.mockResolvedValue({ id: 123 });
-    const created = await CSVFileParser.insertEventsFromCSV(
-      "file.csv",
-      fakeEventService,
-      fakeLocationService,
-    );
-    expect(fakeEventService.createEvent).toHaveBeenCalledTimes(1);
-    expect(fakeEventService.linkEventToLocation).not.toHaveBeenCalled();
-    expect(created).toEqual([{ id: 123 }]);
-  });
-
-  it("should propagate errors with contextual information", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          Starttime: "2025-06-01 10:00:00",
-          Endtime: "",
-          Production: "2",
-          Price: "0",
-          Hall: "Hadrian",
-        },
-      ]) as any,
-    );
-
-    fakeEventService.createEvent.mockRejectedValue(new Error("DB fail"));
-
-    await expect(
-      CSVFileParser.insertEventsFromCSV(
-        "file.csv",
-        fakeEventService,
-        fakeLocationService,
-      ),
-    ).rejects.toThrow(/Failed to insert event/);
-  });
-
-  it("should create a location and link it when hall field is present", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          Starttime: "2025-06-02 09:00:00",
-          Endtime: "2025-06-02 10:00:00",
-          Production: "3",
-          Price: "5",
-          Hall: "Large Room",
-        },
-      ]) as any,
-    );
-
-    fakeLocationService.createLocation.mockResolvedValue({
-      id: 77,
-      location: "Large Room",
-    });
-    fakeEventService.createEvent.mockResolvedValue({ id: 321 });
-
-    const created = await CSVFileParser.insertEventsFromCSV(
-      "file.csv",
-      fakeEventService,
-      fakeLocationService,
-    );
-
-    expect(fakeLocationService.createLocation).toHaveBeenCalledWith({
-      location: "Large Room",
-    });
-    expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(321, 77);
-    expect(created).toEqual([{ id: 321 }]);
-  });
-
-  it("should reuse an existing location when multiple events share the same hall", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          Starttime: "2025-06-03 09:00:00",
-          Endtime: "2025-06-03 10:00:00",
-          Production: "4",
-          Price: "5",
-          Hall: "Shared Hall",
-        },
-        {
-          Starttime: "2025-06-04 09:00:00",
-          Endtime: "2025-06-04 10:00:00",
-          Production: "5",
-          Price: "10",
-          Hall: "Shared Hall",
-        },
-      ]) as any,
-    );
-
-    // pretend the location already exists in the system
-    fakeLocationService.getLocations.mockResolvedValue([
-      { id: 99, location: "Shared Hall" },
-    ]);
-    fakeEventService.createEvent.mockResolvedValue({ id: 400 });
-
-    const created = await CSVFileParser.insertEventsFromCSV(
-      "file.csv",
-      fakeEventService,
-      fakeLocationService,
-    );
-
-    expect(fakeLocationService.createLocation).not.toHaveBeenCalled();
-    // link called for each event but with same location id
-    expect(fakeEventService.linkEventToLocation).toHaveBeenCalledTimes(2);
-    expect(fakeEventService.linkEventToLocation).toHaveBeenCalledWith(400, 99);
-    expect(created).toHaveLength(2);
-  });
-});
-
-// tests for productions insertion
-
-describe("CSVFileParser.insertProductionsFromCSV", () => {
-  const fakeProdService: any = {
-    replaceProduction: jest.fn(),
-    addTagToProduction: jest.fn(),
-  };
-  const fakeTagService: any = {
-    createTag: jest.fn(),
-    getAllTags: jest.fn().mockResolvedValue([]),
-  };
-
-  beforeEach(() => {
-    jest.spyOn(console, "warn").mockImplementation(() => {});
-  });
-
-  afterEach(() => jest.clearAllMocks());
-
-  it("should insert productions and link tags correctly", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          ID: "1",
-          Titel: "First",
-          Ondertitel: "",
-          Description1: "d1",
-          Description2: "",
-          Genre: "drama, comedy",
-          "Planning ID": "100",
-        },
-        {
-          ID: "2",
-          Titel: "Second",
-          Ondertitel: "",
-          Description1: "d2",
-          Description2: "",
-          Genre: "drama",
-          "Planning ID": "101",
-        },
-      ]) as any,
-    );
-
-    // simulate insertion returning the same object plus an auto-generated id property
-    fakeProdService.replaceProduction.mockImplementation(async (id: number, prod: any) => ({
-      ...prod,
-      id,
-      replaced: true,
-    }));
-
-    fakeTagService.createTag.mockImplementation(async ({ tag }: any) => ({
-      id: `${tag}-id`,
-      tag,
-    }));
-
-    const created = await CSVFileParser.insertProductionsFromCSV(
-      "prods.csv",
-      fakeProdService,
-      fakeTagService,
-    );
-
-    expect(fakeProdService.replaceProduction).toHaveBeenCalledTimes(2);
-    expect(fakeTagService.createTag).toHaveBeenCalledTimes(2); // drama + comedy
-
-    // ensure tags linked the right number of times
-    expect(fakeProdService.addTagToProduction).toHaveBeenCalledWith(
-      1,
-      "drama-id",
-    );
-    expect(fakeProdService.addTagToProduction).toHaveBeenCalledWith(
-      1,
-      "comedy-id",
-    );
-    expect(fakeProdService.addTagToProduction).toHaveBeenCalledWith(
-      2,
-      "drama-id",
-    );
-
-    // return value should match array returned by service
-    expect(created).toEqual([
-      {
-        id: 1,
-        titel: "First",
-        ondertitel: "",
-        description1: "d1",
+      expect(result).toEqual({
+        titel: { en: "Hamlet", nl: "Hamlet" },
+        description1: { en: "Main description", nl: "Main description" },
         description2: null,
-        planning_id: "100",
-        replaced: true,
-      },
-      {
-        id: 2,
-        titel: "Second",
-        ondertitel: "",
-        description1: "d2",
-        description2: null,
-        planning_id: "101",
-        replaced: true,
-      },
-    ]);
+        tags: ["drama"],
+        artist: null,
+        tagline: { en: "A tragedy", nl: "A tragedy" },
+        credits: null,
+        performer_type: null,
+        attendance_mode: null,
+        legacy_id: "csv-1",
+      });
+    });
+
+    it("should throw if ID is invalid", () => {
+      const row = {
+        ID: "notanumber",
+        Titel: "Title",
+        Ondertitel: "Sub",
+        Description1: "desc",
+        Description2: "",
+      };
+      expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
+        /Invalid production id/,
+      );
+    });
   });
 
-  it("should propagate errors from production insertion", async () => {
-    mockedFs.createReadStream.mockReturnValue(
-      createMockStream([
-        {
-          ID: "3",
-          Titel: "Bad",
-          Ondertitel: "",
-          Description1: "x",
-          Description2: "",
-          Genre: "history",
-          "Planning ID": "102",
+  // additional tests for the convenience wrappers and insertion logic
+
+  describe("CSVFileParser.parseEventsCSV", () => {
+    beforeEach(() => {
+      jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => jest.clearAllMocks());
+
+    it("should parse and transform event rows, skipping invalid ones", async () => {
+      // include one valid and one invalid row; valid row contains a hall
+      mockedFs.createReadStream.mockReturnValue(
+        createMockStream([
+          {
+            Starttime: "2025-05-01 14:00:00",
+            Endtime: "2025-05-01 15:00:00",
+            Production: "10",
+            Hall: "Front Stage",
+          },
+          {
+            // bad start time will be skipped by transform
+            Starttime: "not-a-date",
+            Endtime: "",
+            Production: "10",
+            Hall: "Backstage",
+          },
+        ]) as any,
+      );
+
+      const items = await CSVFileParser.parseEventsCSV("events.csv");
+      expect(items).toHaveLength(1);
+      expect(items[0]).toEqual({
+        event: {
+          starttime: new Date("2025-05-01 14:00:00").toISOString(),
+          endtime: new Date("2025-05-01 15:00:00").toISOString(),
+          production_id: 10,
+          doors_at: null,
+          intermission_at: null,
         },
-      ]) as any,
-    );
+        location: "Front Stage",
+      });
 
-    fakeProdService.replaceProduction.mockRejectedValue(
-      new Error("insert failed"),
-    );
+      expect(console.warn).toHaveBeenCalledWith(
+        expect.stringContaining("Skipping invalid row"),
+      );
+    });
+  });
 
-    await expect(
-      CSVFileParser.insertProductionsFromCSV(
-        "prods.csv",
-        fakeProdService,
-        fakeTagService,
-      ),
-    ).rejects.toThrow(/insert failed/);
+  describe("CSVFileParser.parseProductionsCSV", () => {
+    afterEach(() => jest.clearAllMocks());
+
+    it("should parse production rows and validate against schema", async () => {
+      mockedFs.createReadStream.mockReturnValue(
+        createMockStream([
+          {
+            ID: "2",
+            Titel: "Macbeth",
+            Ondertitel: "",
+            Description1: "desc",
+            Description2: "more",
+            Genre: "tragedy",
+          },
+        ]) as any,
+      );
+      const result = await CSVFileParser.parseProductionsCSV("prods.csv");
+      // since we only provided one row without any comma-separated genres,
+      // we expect a single production, no tags, and no links
+      expect(result).toEqual({
+        productions: [
+          {
+            titel: { en: "Macbeth", nl: "Macbeth" },
+            tagline: null,
+            description1: { en: "desc", nl: "desc" },
+            description2: { en: "more", nl: "more" },
+            artist: null,
+            credits: null,
+            performer_type: null,
+            attendance_mode: null,
+            legacy_id: "csv-2",
+          },
+        ],
+        tags: ["tragedy"],
+        productionTagLinks: [{ legacyId: "csv-2", tagName: "tragedy" }],
+      });
+    });
   });
 });

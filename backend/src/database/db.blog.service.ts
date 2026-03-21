@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import { ResourceGoneException } from "../common/exceptions";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -13,12 +15,17 @@ export class BlogDatabaseService {
    * @returns The Blog if there is one.
    */
   async getBlogById(id: number): Promise<BlogDto> {
-    const query = `SELECT * FROM blogs WHERE id = $1`;
+    const query = `SELECT id, 
+       titel, 
+       description, 
+       created_at, 
+       updated_at
+    FROM blogs WHERE id = $1`;
 
     const result = await this.db.query<BlogDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(`Blog with ID ${id} not found`);
     }
     return result[0];
   }
@@ -27,41 +34,54 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
    * @param page page index (starts at 0)
+   * @param descending Whether the dates should be sorted descending or ascending.
    * @returns blogs
    */
-  async getBlogs(amount: number = 0, page: number = 0): Promise<BlogDto[]> {
+  async getBlogs(
+    amount: number = 0,
+    page: number = 0,
+    descending: boolean = true,
+  ): Promise<PaginatedResponse<BlogDto>> {
     const offset = page * amount;
-
+    const countResult = await this.db.query<{ count: string }>(
+      `SELECT COUNT(*) as count FROM blogs`,
+    );
     if (amount === 0) {
       const query = `
-      SELECT *
+      SELECT id, 
+             titel, 
+             description,
+             created_at,
+             updated_at
       FROM blogs
-      ORDER BY id
+      ORDER BY created_at ${descending ? "DESC" : "ASC"}
       `;
 
-      const result = await this.db.query<BlogDto>(query);
-
-      if (result.length === 0) {
-        throw new Error("no blogs found");
-      }
-
-      return result;
+      return {
+        limit: amount,
+        page: page,
+        totalItems: parseInt(countResult[0].count),
+        objects: await this.db.query<BlogDto>(query, [amount, offset]),
+      };
     }
 
-    let query = `
-    SELECT *
+    const query = `
+    SELECT id,
+           titel,
+           description,
+           created_at,
+           updated_at
     FROM blogs
-    ORDER BY id
+    ORDER BY created_at ${descending ? "DESC" : "ASC"}
     LIMIT $1 OFFSET $2
     `;
 
-    const result = await this.db.query<BlogDto>(query, [amount, offset]);
-
-    if (result.length === 0) {
-      throw new Error("no blogs found");
-    }
-
-    return result;
+    return {
+      limit: amount,
+      page: page,
+      totalItems: parseInt(countResult[0].count),
+      objects: await this.db.query<BlogDto>(query, [amount, offset]),
+    };
   }
 
   /**
@@ -75,15 +95,20 @@ export class BlogDatabaseService {
     }
 
     const query = `
-    INSERT INTO blogs (
-      titel,
-      description
-    )
-    VALUES ($1, $2)
-    RETURNING id, titel, description;
-  `;
+      INSERT INTO blogs (titel, description)
+      VALUES ($1, $2)
+      RETURNING
+        id,
+        titel,
+        description,
+        created_at,
+        updated_at;
+    `;
 
-    const values = [blog.titel, blog.description];
+    const values = [
+      JSON.stringify(blog.titel),
+      JSON.stringify(blog.description),
+    ];
 
     const result = await this.db.query<BlogDto>(query, values);
 
@@ -100,44 +125,47 @@ export class BlogDatabaseService {
    * The id field in the blog MUST be defined.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
-    if (!blog.id) {
-      throw new Error("Blog id is required for update");
-    }
-
+  async updateBlog(blogId: number, blog: UpdateBlogDto): Promise<BlogDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
 
     if (blog.titel !== undefined) {
-      fields.push(`titel = $${index++}`);
-      values.push(blog.titel);
+      fields.push(`titel = COALESCE(titel, '{}'::jsonb) || $${index++}::jsonb`);
+      values.push(JSON.stringify(blog.titel));
     }
 
     if (blog.description !== undefined) {
-      fields.push(`description = $${index++}`);
-      values.push(blog.description);
+      fields.push(
+        `description = COALESCE(description, '{}'::jsonb) || $${index++}::jsonb`,
+      );
+      values.push(JSON.stringify(blog.description));
     }
 
     if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+      throw new BadRequestException("No fields provided to update");
     }
 
-    // Add id as final parameter
-    values.push(blog.id);
+    values.push(blogId);
 
-    // ignore "RETURNING" error, query is correct.
     const query = `
-    UPDATE blogs
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING id, titel, description;
+      UPDATE blogs
+      SET ${fields.join(", ")}
+      WHERE id = $${index}
+    RETURNING
+      id,
+      titel,
+      description,
+      created_at,
+      updated_at;
   `;
 
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Blog not found");
+      throw new ResourceGoneException(
+        `Cannot update: Blog ${blogId} not found`,
+      );
     }
 
     return result[0];
@@ -145,14 +173,17 @@ export class BlogDatabaseService {
 
   /**
    * Delete function for deleting blogs from the database.
-   * @param id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
+   * @param blogId must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
    * @returns nothing.
    */
-  async deleteBlog(id: number): Promise<void> {
-    const query = `DELETE FROM blogs WHERE id = $1`;
-
-    await this.db.query(query, [id]);
+  async deleteBlog(blogId: number): Promise<void> {
+    const query = `DELETE FROM blogs WHERE id = $1 RETURNING id;`;
+    const result = await this.db.query(query, [blogId]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        `Cannot delete: Blog ${blogId} not found`,
+      );
+    }
   }
 
   // insert extra functions here if desired.

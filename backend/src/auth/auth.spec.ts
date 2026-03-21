@@ -2,6 +2,8 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { AppModule } from "../app.module";
+import { ScraperService } from "../util/scraper/scraper.service";
+import { AppLogger } from "../util/logger/logger.service";
 
 describe("AuthGuards tests", () => {
   let app: INestApplication;
@@ -9,7 +11,21 @@ describe("AuthGuards tests", () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(AppLogger) // We override these so they don't make a fuss during testing.
+      .useValue({
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        debug: jest.fn(),
+        verbose: jest.fn(),
+      })
+      .overrideProvider(ScraperService)
+      .useValue({
+        onApplicationBootstrap: jest.fn(),
+        handleDailyScrape: jest.fn(),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -21,11 +37,20 @@ describe("AuthGuards tests", () => {
 
   describe("Event endpoints authentication", () => {
     it("GET /events should work without API key", async () => {
-      await request(app.getHttpServer()).get("/events").expect(200);
+      await request(app.getHttpServer())
+        .get("/events")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("GET /events/:id should work without API key", async () => {
-      await request(app.getHttpServer()).get("/events/1").send({}).expect(200);
+      await request(app.getHttpServer())
+        .get("/events/1")
+        .send({})
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("POST /events should fail without API key", async () => {
@@ -40,39 +65,73 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer()).delete("/events/1").expect(401);
     });
 
-    it("GET /events/:eventId/locations", async () => {
-      await request(app.getHttpServer()).get("/events/1/locations").expect(200);
+    it("GET /events/:eventId/location", async () => {
+      await request(app.getHttpServer())
+        .get("/events/1/location")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
   });
 
   describe("Event - Location endpoints authentication", () => {
-    it("GET /events/:eventId/locations should work without API key", async () => {
-      await request(app.getHttpServer()).get("/events/1/locations").expect(200);
+    it("GET /events/:eventId/location should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/events/1/location")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
-    it("PUT /events/:eventId/locations/:locationId should fail without API key.", async () => {
+    it("PUT /events/:eventId/location/:locationId should fail without API key.", async () => {
       await request(app.getHttpServer())
-        .put("/events/1/locations/1")
+        .put("/events/1/location/1")
         .expect(401);
     });
 
-    it("DELETE /events/:eventId/locations should fail without API key.", async () => {
+    it("DELETE /events/:eventId/location should fail without API key.", async () => {
       await request(app.getHttpServer())
-        .delete("/events/1/locations")
+        .delete("/events/1/location")
+        .expect(401);
+    });
+  });
+
+  describe("Event - Price endpoints authentication", () => {
+    it("GET /events/:eventId/prices should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/events/1/prices")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("PUT /events/:eventId/prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer()).put("/events/1/prices/2").expect(401);
+    });
+
+    it("DELETE /events/:eventId/prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer())
+        .delete("/events/1/prices/2")
         .expect(401);
     });
   });
 
   describe("Production endpoints authentication", () => {
     it("GET /productions should work without API key", async () => {
-      await request(app.getHttpServer()).get("/productions").expect(200);
+      await request(app.getHttpServer())
+        .get("/productions")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("GET /productions/:id should work without API key", async () => {
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .get("/productions/1")
         .send({})
-        .expect(200);
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("POST /productions should fail without API key", async () => {
@@ -102,7 +161,9 @@ describe("AuthGuards tests", () => {
     it("GET /productions/:id/blogs should work without API key", async () => {
       await request(app.getHttpServer())
         .get("/productions/1/blogs")
-        .expect(200);
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("PUT /productions/:id/blogs/:id should fail without API key", async () => {
@@ -121,7 +182,10 @@ describe("AuthGuards tests", () => {
 
   describe("Production-tag endpoints authentication", () => {
     it("GET /productions/:id/tags should work without API key", async () => {
-      await request(app.getHttpServer()).get("/productions/1/tags").expect(200);
+      const response = await request(app.getHttpServer()).get(
+        "/productions/1/tags",
+      );
+      expect([200, 410]).toContain(response.status);
     });
 
     it("PUT /productions/:id/tags/:id should fail without API key", async () => {
@@ -140,7 +204,11 @@ describe("AuthGuards tests", () => {
 
   describe("Tag endpoints authentication", () => {
     it("GET /tags should work without API key", async () => {
-      await request(app.getHttpServer()).get("/tags").expect(200);
+      await request(app.getHttpServer())
+        .get("/tags")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("POST /tags should fail without API key", async () => {
@@ -148,7 +216,12 @@ describe("AuthGuards tests", () => {
     });
 
     it("GET /tags/:id should work without API key", async () => {
-      await request(app.getHttpServer()).get("/tags/1").send({}).expect(200);
+      await request(app.getHttpServer())
+        .get("/tags/1")
+        .send({})
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("DELETE /tags/:id should fail without API key", async () => {
@@ -162,7 +235,11 @@ describe("AuthGuards tests", () => {
 
   describe("Blog endpoints authentication", () => {
     it("GET /blogs should work without API key", async () => {
-      await request(app.getHttpServer()).get("/blogs").expect(200);
+      await request(app.getHttpServer())
+        .get("/blogs?descending=true")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("POST /blogs should fail without API key", async () => {
@@ -170,7 +247,12 @@ describe("AuthGuards tests", () => {
     });
 
     it("GET /blogs/:id should work without API key", async () => {
-      await request(app.getHttpServer()).get("/blogs/1").send({}).expect(200);
+      await request(app.getHttpServer())
+        .get("/blogs/1")
+        .send({})
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("DELETE /blogs/:id should fail without API key", async () => {
@@ -188,23 +270,61 @@ describe("AuthGuards tests", () => {
 
   describe("Location endpoints authentication", () => {
     it("GET /locations should work without API key", async () => {
-      await request(app.getHttpServer()).get("/locations").expect(200);
+      await request(app.getHttpServer())
+        .get("/locations")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("GET /locations/:locationId should work without API key", async () => {
-      await request(app.getHttpServer()).get("/locations/1").expect(200);
+      await request(app.getHttpServer())
+        .get("/locations/1")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
     });
 
     it("POST /locations should fail without API key", async () => {
       await request(app.getHttpServer()).post("/locations").expect(401);
     });
 
-    it("PATCH /locations should fail without API key", async () => {
-      await request(app.getHttpServer()).patch("/locations").expect(401);
+    it("PATCH /locations/:locationId should fail without API key", async () => {
+      await request(app.getHttpServer()).patch("/locations/1").expect(401);
     });
 
     it("DELETE /locations/:locationId should fail without API key", async () => {
       await request(app.getHttpServer()).delete("/locations/1").expect(401);
+    });
+  });
+
+  describe("Price endpoints authentication", () => {
+    it("GET /prices should work without API key.", async () => {
+      await request(app.getHttpServer())
+        .get("/prices")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("GET /prices/:priceId should work without API key.", async () => {
+      await request(app.getHttpServer())
+        .get("/prices/2")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("POST /prices should fail without API key.", async () => {
+      await request(app.getHttpServer()).post("/prices").expect(401);
+    });
+
+    it("PATCH /prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer()).patch("/prices/2").expect(401);
+    });
+
+    it("DELETE /prices/:priceId should fail without API key.", async () => {
+      await request(app.getHttpServer()).delete("/prices/2").expect(401);
     });
   });
 

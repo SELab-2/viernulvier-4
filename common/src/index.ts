@@ -1,59 +1,96 @@
-import { z } from "zod";
+import {
+  CreateAccount,
+  CreateAccountSchema,
+  PublicAccount,
+  PublicAccountSchema,
+  UpdateAccount,
+  UpdateAccountSchema,
+} from "./objects/accounts";
 import {
   ApiKey,
   ApiKeySchema,
+  VerifyApiKey,
+  VerifyApiKeySchema,
+} from "./objects/api.keys";
+import {
   Blog,
   BlogSchema,
-  CreateAccount,
-  CreateAccountSchema,
+  BlogView,
+  BlogViewSchema,
   CreateBlog,
   CreateBlogSchema,
+  UpdateBlog,
+  UpdateBlogSchema,
+} from "./objects/blogs";
+import {
   CreateEvent,
   CreateEventSchema,
-  CreateLocation,
-  CreateLocationSchema,
-  CreateProduction,
-  CreateProductionSchema,
-  CreateTag,
-  CreateTagSchema,
   Event,
   EventSchema,
   FilterEvent,
   FilterEventSchema,
-  FilterProduction,
-  FilterProductionSchema,
-  Location,
-  LocationSchema,
-  Production,
-  ProductionSchema,
-  PublicAccount,
-  PublicAccountSchema,
-  Tag,
-  TagSchema,
-  UpdateAccount,
-  UpdateAccountSchema,
-  UpdateBlog,
-  UpdateBlogSchema,
   UpdateEvent,
   UpdateEventSchema,
+} from "./objects/events";
+import {
+  PaginatedResponse,
+  PaginationFilter,
+  PaginationFilterSchema,
+} from "./objects/pagination";
+import {
+  DEFAULT_LANGUAGE,
+  Language,
+  LanguageQuery,
+  LanguageQuerySchema,
+  SUPPORTED_LANGUAGES,
+} from "./objects/language";
+import {
+  CreateLocation,
+  CreateLocationSchema,
+  Location,
+  LocationSchema,
+  LocationView,
+  LocationViewSchema,
   UpdateLocation,
   UpdateLocationSchema,
+} from "./objects/locations";
+import {
+  CreatePrice,
+  CreatePriceSchema,
+  Price,
+  PriceSchema,
+  PriceView,
+  PriceViewSchema,
+  UpdatePrice,
+  UpdatePriceSchema,
+} from "./objects/prices";
+import {
+  CreateProduction,
+  CreateProductionSchema,
+  FilterProduction,
+  FilterProductionSchema,
+  Production,
+  ProductionSchema,
+  ProductionView,
+  ProductionViewSchema,
   UpdateProduction,
   UpdateProductionSchema,
+} from "./objects/productions";
+import {
+  CreateTag,
+  CreateTagSchema,
+  Tag,
+  TagSchema,
+  TagView,
+  TagViewSchema,
   UpdateTag,
   UpdateTagSchema,
-  VerifyApiKey,
-  VerifyApiKeySchema,
-} from "./database_objects";
-
-// Een voorbeeld van een globaal schema...
-export const HelloWorldSchema = z.object({
-  text: z.string(),
-});
+} from "./objects/tags";
 
 // list of all exports: (this way only need to import this file.)
 export {
   ProductionSchema,
+  ProductionViewSchema,
   CreateProductionSchema,
   UpdateProductionSchema,
   FilterProductionSchema,
@@ -62,12 +99,15 @@ export {
   UpdateEventSchema,
   FilterEventSchema,
   BlogSchema,
+  BlogViewSchema,
   UpdateBlogSchema,
   CreateBlogSchema,
   TagSchema,
+  TagViewSchema,
   CreateTagSchema,
   UpdateTagSchema,
   LocationSchema,
+  LocationViewSchema,
   CreateLocationSchema,
   UpdateLocationSchema,
   CreateAccountSchema,
@@ -75,9 +115,18 @@ export {
   UpdateAccountSchema,
   ApiKeySchema,
   VerifyApiKeySchema,
+  PriceSchema,
+  PriceViewSchema,
+  CreatePriceSchema,
+  UpdatePriceSchema,
+  PaginationFilterSchema,
+  LanguageQuerySchema,
+  DEFAULT_LANGUAGE,
+  SUPPORTED_LANGUAGES,
 };
 export type {
   Production,
+  ProductionView,
   CreateProduction,
   UpdateProduction,
   FilterProduction,
@@ -86,12 +135,15 @@ export type {
   UpdateEvent,
   FilterEvent,
   Tag,
+  TagView,
   CreateTag,
   UpdateTag,
   Blog,
+  BlogView,
   CreateBlog,
   UpdateBlog,
   Location,
+  LocationView,
   CreateLocation,
   UpdateLocation,
   UpdateAccount,
@@ -99,5 +151,12 @@ export type {
   CreateAccount,
   ApiKey,
   VerifyApiKey,
+  Price,
+  PriceView,
+  CreatePrice,
+  UpdatePrice,
+  PaginationFilter,
+  Language,
+  LanguageQuery,
+  PaginatedResponse,
 };
-export type HelloWorld = z.infer<typeof HelloWorldSchema>;

@@ -1,8 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { BadRequestException } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  CreateBlogDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 
 describe("BlogService", () => {
   let service: BlogService;
@@ -20,8 +24,21 @@ describe("BlogService", () => {
   // Sample data for testing
   const mockBlog: BlogDto = {
     id: 1,
-    titel: "My First Blog",
-    description: "Hello World!",
+    titel: {
+      en: "Behind the Scenes",
+      nl: "Achter de schermen",
+    },
+    description: {
+      en: "Looking at the set of The Great Show.",
+      nl: "Kijken naar de set van The Great Show",
+    },
+    created_at: "2025-06-01T22:00:00.000Z",
+    updated_at: "2025-06-01T22:00:00.000Z",
+  };
+
+  const filter: PaginationFilterDto = {
+    limit: 10,
+    page: 1,
   };
 
   beforeEach(async () => {
@@ -56,7 +73,7 @@ describe("BlogService", () => {
       const expectedBlogs = [mockBlog];
       mockBlogDbService.getBlogs.mockResolvedValue(expectedBlogs);
 
-      const result = await service.getAllBlogs();
+      const result = await service.getAllBlogs(filter);
 
       expect(result).toEqual(expectedBlogs);
       expect(blogDbService.getBlogs).toHaveBeenCalledTimes(1);
@@ -77,8 +94,14 @@ describe("BlogService", () => {
   describe("createBlog", () => {
     it("should create and return a new blog", async () => {
       const createDto: CreateBlogDto = {
-        titel: "My First Blog",
-        description: "Hello World!",
+        titel: {
+          en: "My First Blog",
+          nl: "Mijn eerste blog",
+        },
+        description: {
+          en: "Hello World!",
+          nl: "Hallo Wereld!",
+        },
       };
       mockBlogDbService.createBlog.mockResolvedValue(mockBlog);
 
@@ -97,30 +120,25 @@ describe("BlogService", () => {
       const result = await service.replaceBlog(1, replaceDto);
 
       expect(result).toEqual(mockBlog);
-      expect(blogDbService.updateBlog).toHaveBeenCalledWith(replaceDto);
-    });
-
-    it("should throw a BadRequestException when IDs do not match", async () => {
-      const replaceDto: BlogDto = { ...mockBlog, id: 2 }; // ID mismatch here
-
-      // We expect the promise to reject with the specific exception
-      await expect(service.replaceBlog(1, replaceDto)).rejects.toThrow(
-        BadRequestException,
-      );
-
-      await expect(service.replaceBlog(1, replaceDto)).rejects.toThrow(
-        "Blog ID and URL ID do not match. Cannot replace Blog.",
-      );
-
-      // Ensure the database service was never called
-      expect(blogDbService.updateBlog).not.toHaveBeenCalled();
+      expect(blogDbService.updateBlog).toHaveBeenCalledWith(1, replaceDto);
     });
   });
 
   describe("modifyBlog", () => {
     it("should assign the ID to the DTO and update the blog", async () => {
-      const updateDto: UpdateBlogDto = { titel: "Updated titel" };
-      const expectedUpdatedBlog = { ...mockBlog, titel: "Updated titel" };
+      const updateDto: UpdateBlogDto = {
+        titel: {
+          en: "Updated titel",
+          nl: "Bijgewerkte titel",
+        },
+      };
+      const expectedUpdatedBlog = {
+        ...mockBlog,
+        titel: {
+          en: "Updated titel",
+          nl: "Bijgewerkte titel",
+        },
+      };
 
       mockBlogDbService.updateBlog.mockResolvedValue(expectedUpdatedBlog);
 
@@ -128,10 +146,7 @@ describe("BlogService", () => {
 
       expect(result).toEqual(expectedUpdatedBlog);
       // Validate that the ID was injected into the DTO before calling the DB
-      expect(blogDbService.updateBlog).toHaveBeenCalledWith({
-        id: 1,
-        titel: "Updated titel",
-      });
+      expect(blogDbService.updateBlog).toHaveBeenCalledWith(1, updateDto);
     });
   });
 

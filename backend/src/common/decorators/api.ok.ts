@@ -1,0 +1,76 @@
+import { applyDecorators, Type } from "@nestjs/common";
+import { ApiExtraModels, ApiOkResponse, getSchemaPath } from "@nestjs/swagger";
+
+/**
+ * Custom decorator for paginated types.
+ * @param models The models we want to include in the paginated type.
+ * @returns The Decorator.
+ */
+export function ApiOkPaginatedResponseAnyOf(...models: Type<any>[]) {
+  const modelNames = models.map((m) => m.name).join(" | ");
+  const schemaTitle: string = `PaginatedResponse<${modelNames}>`;
+
+  return applyDecorators(
+    ApiExtraModels(...models),
+    ApiOkResponse({
+      description: "Successfully returned a paginated list.",
+      schema: {
+        title: schemaTitle,
+        type: "object",
+        properties: {
+          page: { type: "number" },
+          limit: { type: "number" },
+          totalItems: { type: "number" },
+          objects: {
+            type: "array",
+            items: {
+              anyOf: models.map((model) => ({
+                $ref: getSchemaPath(model),
+              })),
+            },
+          },
+        },
+        required: ["page", "limit", "totalItems", "objects"],
+      },
+    }),
+  );
+}
+
+/**
+ * Custom decorator for arrays of joint types.
+ * @param models The Array types of the models we want to use.
+ * @returns The Decorator.
+ */
+export function ApiOkArrayAnyOf(...models: Type<any>[]) {
+  return applyDecorators(
+    ApiExtraModels(...models),
+    ApiOkResponse({
+      description: "Successfully returned array of objects.",
+      schema: {
+        anyOf: models.map((model) => ({
+          type: "array",
+          items: { $ref: getSchemaPath(model) },
+        })),
+      },
+    }),
+  );
+}
+
+/**
+ * Custom decorator for base types of joint types.
+ * @param models The base types of the models we want to use.
+ * @returns The Decorator.
+ */
+export function ApiOkAnyOf(...models: Type<any>[]) {
+  return applyDecorators(
+    ApiExtraModels(...models),
+    ApiOkResponse({
+      description: "Successfully returned objects.",
+      schema: {
+        anyOf: models.map((model) => ({
+          $ref: getSchemaPath(model),
+        })),
+      },
+    }),
+  );
+}

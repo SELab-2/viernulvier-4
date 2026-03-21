@@ -1,6 +1,12 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  CreateBlogDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
+} from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogService {
@@ -8,10 +14,19 @@ export class BlogService {
 
   /**
    * Gets all Blogs from the DatabaseService.
+   * @param paginationFilter is the pagination params.
+   * @param descending Whether the blogs should be sorted descending or ascending.
    * @returns A list of all Blog objects.
    */
-  async getAllBlogs(): Promise<BlogDto[]> {
-    return await this.blogDbService.getBlogs();
+  async getAllBlogs(
+    paginationFilter: PaginationFilterDto,
+    descending: boolean,
+  ): Promise<PaginatedResponse<BlogDto>> {
+    return await this.blogDbService.getBlogs(
+      paginationFilter.limit,
+      paginationFilter.page,
+      descending,
+    );
   }
 
   /**
@@ -38,13 +53,8 @@ export class BlogService {
    * @param blog The Blog object we want to replace the existing Blog with.
    * @returns The newly replaced Blog.
    */
-  async replaceBlog(id: number, blog: BlogDto): Promise<BlogDto> {
-    if (blog.id !== id)
-      throw new BadRequestException(
-        "Blog ID and URL ID do not match. Cannot replace Blog.",
-      );
-
-    return await this.blogDbService.updateBlog(blog);
+  async replaceBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
+    return await this.blogDbService.updateBlog(id, blog);
   }
 
   /**
@@ -54,8 +64,7 @@ export class BlogService {
    * @returns The newly modified Blog.
    */
   async modifyBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
-    blog.id = id;
-    return await this.blogDbService.updateBlog(blog);
+    return await this.blogDbService.updateBlog(id, blog);
   }
 
   /**

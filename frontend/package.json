@@ -13,6 +13,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/i18n": "^10.2.3",
+    "@tailwindcss/postcss": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "lucide-vue-next": "^0.469.0",
     "@repo/common": "*",
     "vue": "^3.5.28",
     "vue-router": "^4.6.4"

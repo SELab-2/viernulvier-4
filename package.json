@@ -14,7 +14,8 @@
     "start:prod": "turbo start:prod",
     "start:dev": "turbo start:dev",
     "test": "turbo test",
-    "test:coverage": "turbo test:coverage"
+    "test:coverage": "turbo test:coverage",
+    "scraper:reset": "turbo scraper:reset"
   },
   "repository": {
     "type": "git",
@@ -31,20 +32,22 @@
   "packageManager": "npm@11.10.0",
   "devDependencies": {
     "@eslint/js": "^9.18.0",
+    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.16.0",
+    "@types/sanitize-html": "^2.16.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
     "prettier": "^3.4.2",
+    "tsx": "^4.21.0",
     "turbo": "^2.8.9",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
   "dependencies": {
-    "csv-parser": "^3.2.0",
     "argon2": "^0.44.0",
     "dotenv": "^17.3.1",
-    "pg": "^8.18.0"
+    "sanitize-html": "^2.17.1"
   }
 }
