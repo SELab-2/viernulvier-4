@@ -27,7 +27,7 @@ const fields: FormField[] = [
     props: {
       label: 'Description',
       placeholder: 'Enter description',
-      rows: 3
+      rows: 6
     }
   },
   {

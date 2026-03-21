@@ -1,11 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+/**
+ * A reusable tag input component, includes:
+ *  - Optional label
+ *  - Required indicator
+ *  - Add tags by pressing Enter
+ *  - Duplicate tags are ignored
+ *  - Remove tags by clicking the X button
+ *  - Binds value via v-model
+ *
+ * Usage:
+ * <BaseTagInput
+ *   v-model="tags"
+ *   label="Tags"
+ *   placeholder="Add tags"
+ *   required
+ * />
+ */
+
+import { X } from 'lucide-vue-next'
 
 interface Props {
-  label?: string
-  placeholder?: string
+  label?: string // label displayed above the field
+  placeholder?: string // placeholder text displayed inside the field
   id?: string
-  required?: boolean
+  required?: boolean // adds a "*" if required
 }
 defineProps<Props>()
 
@@ -14,17 +32,17 @@ const inputText = ref('')
 
 function addTag() {
   const value = inputText.value.trim()
-  if (value && !model.value.includes(value)) {
+  if (value && !model.value.includes(value)) { // only add the tag if it doesn't exist already
     model.value.push(value)
   }
-  inputText.value = ''
+  inputText.value = '' // clearing text input
 }
 
-function removeTag(tag: string) {
+function removeTag(tag: string) { // handles removing the tag
   model.value = model.value.filter(t => t !== tag)
 }
 
-function handleKey(event: KeyboardEvent) {
+function handleKey(event: KeyboardEvent) { // handles pressing enter
   if (event.key === 'Enter') {
     event.preventDefault()
     addTag()
@@ -33,83 +51,35 @@ function handleKey(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="base-input">
-    <label v-if="label" :for="id" class="input-label">
-      {{ label }} <span v-if="required" class="required-star">*</span>
+  <div class="m-4">
+    <!-- Optional Label -->
+    <label v-if="label" :for="id" class="text-[12px] font-bold uppercase text-muted-foreground mb-1 block">
+      {{ label }} <span v-if="required" class="text-red-500">*</span>
     </label>
 
-    <div class="tag-input-wrapper">
+    <!-- Input field -->
+    <input
+        :id="id"
+        type="text"
+        :placeholder="placeholder"
+        v-model="inputText"
+        @keydown.enter="handleKey"
+        class="px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground"
+    />
+
+    <!-- Added tags -->
+    <div v-if="model.length" class="flex flex-wrap gap-2 mt-2">
       <span
           v-for="tag in model"
           :key="tag"
-          class="tag"
+          class="flex items-center gap-1 px-2 py-1 bg-background border border-border rounded-md text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors duration-150 hover:bg-muted hover:border-foreground/20 min-w-0 max-w-full"
       >
-        {{ tag }}
-        <span class="remove-tag" @click.stop="removeTag(tag)">×</span>
+        <span class="truncate">{{ tag }}</span>
+        <X class="w-3 h-3 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors" @click.stop="removeTag(tag)" />
       </span>
-
-      <input
-          ref="input"
-          type="text"
-          :placeholder="placeholder"
-          v-model="inputText"
-          @keydown.enter="handleKey"
-          class="input-field tag-input"
-      />
     </div>
   </div>
 </template>
 
 <style scoped>
-.input-label {
-display: block;
-margin-bottom: 0.25rem;
-font-size: 0.875rem;
-font-weight: 500;
-}
-
-.required-star {
-  color: inherit;
-}
-
-.tag-input-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  min-height: 3rem;
-  cursor: text;
-}
-
-.tag-input-wrapper:focus-within {
-  border-color: #d1d5db;
-}
-
-.tag {
-  background-color: #f3f4f6;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  display: flex;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.remove-tag {
-  margin-left: 0.25rem;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.tag-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  min-width: 120px;
-  font-size: 1rem;
-  padding: 0.25rem;
-  background-color: transparent;
-}
 </style>
