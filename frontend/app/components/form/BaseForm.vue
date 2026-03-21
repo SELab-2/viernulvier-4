@@ -34,7 +34,8 @@ function submit() {
 </script>
 
 <template>
-  <form class="base-form" @submit.prevent="submit">
+  <form @submit.prevent="submit" class="m-4 border border-border rounded-lg bg-background overflow-hidden">
+    <!-- All components of the form under each other -->
     <component
         v-for="field in fields"
         :key="field.name"
@@ -44,27 +45,17 @@ function submit() {
         v-bind="field.props"
     />
 
-    <button type="submit" class="submit-btn">
-      Submit
-    </button>
+    <!-- Submit button -->
+    <div class="p-4">
+      <button
+        type="submit"
+        class="w-full h-12 bg-primary/80 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-90 cursor-pointer"
+      >
+        Submit
+      </button>
+    </div>
   </form>
 </template>
 
 <style scoped>
-.base-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.submit-btn {
-  margin-top: 1rem;
-  height: 3rem;
-  border-radius: 0.5rem;
-  border: none;
-  background: black;
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-}
 </style>
