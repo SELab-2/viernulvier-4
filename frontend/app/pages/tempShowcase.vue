@@ -63,7 +63,9 @@ function handleSubmit(formData: Record<string, any>) {
 </script>
 
 <template>
-  <FormBaseForm :fields="fields" @submit="handleSubmit" />
+  <div @input="submittedData = null">
+    <FormBaseForm :fields="fields" @submit="handleSubmit" />
+  </div>
 
   <br>
   <!-- To see the results after clicking submit -->
