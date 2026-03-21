@@ -7,7 +7,7 @@ import logoBlack from '~/assets/logo_black.svg'
 import logoWhite from '~/assets/logo_white.svg'
 
 const { isLoggedIn, logout } = useAuth()
-const isAdmin = isLoggedIn
+const isAdmin = ref(true) // isLoggedIn
 
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
@@ -44,7 +44,10 @@ const handleLogout = async () => {
           <NuxtLink :to="ROUTES.prints.base" class="nav-item">{{ t('nav.prints').toUpperCase() }}</NuxtLink>
         </nav>
 
-        <button @click="toggleMenu" class="lg:hidden text-[var(--foreground)] outline-none">
+        <button @click="toggleMenu"
+                class="text-[var(--foreground)] outline-none"
+                :class="[isAdmin ? 'md:hidden' : 'lg:hidden']"
+        >
           <Menu v-if="!isMenuOpen" :size="28" />
           <X v-else :size="28" />
         </button>
@@ -64,7 +67,7 @@ const handleLogout = async () => {
       </div>
 
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
-        <div class="hidden sm:flex items-center gap-2 lg:gap-[15px]">
+        <div :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']" class="items-center gap-2 lg:gap-[15px]">
           <button @click="toggleLocale" class="btn-outline">
             {{ locale === 'nl' ? 'EN' : 'NL' }}
           </button>
@@ -72,38 +75,35 @@ const handleLogout = async () => {
           <button @click="toggleDark" class="btn-outline flex items-center justify-center gap-2">
             <Sun v-if="isDark" :size="16" />
             <Moon v-else :size="16" />
-            <span class="hidden lg:inline">{{ isDark ? 'LIGHT' : 'DARK' }}</span>
+            <span :class="isAdmin ? 'hidden xl:inline' : 'hidden lg:inline'">
+              {{ isDark ? 'LIGHT' : 'DARK' }}
+            </span>
           </button>
         </div>
 
         <button
           v-if="isAdmin"
           @click="handleLogout"
-          class="flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-[11px] font-black text-white hover:bg-[var(--foreground)] transition-colors"
-        >
+          class="hidden md:flex items-center gap-2 rounded-md bg-rose-600 px-4 py-2 text-[11px] font-black text-white hover:bg-[var(--foreground)] transition-colors">
           <LogOut :size="16" />
-          <span class="hidden lg:inline">{{ t('nav.logout').toUpperCase() }}</span>
+          <span class="hidden xl:inline">{{ t('nav.logout').toUpperCase() }}</span>
         </button>
       </div>
     </div>
 
     <div v-if="isMenuOpen"
-         class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl">
+         class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl">
       <nav class="flex flex-col gap-6">
-        <NuxtLink :to="ROUTES.home.base" @click="isMenuOpen = false" class="nav-item text-lg">
-          {{ t('nav.home').toUpperCase() }}
-        </NuxtLink>
-        <NuxtLink :to="ROUTES.productions.base" @click="isMenuOpen = false" class="nav-item text-lg">
-          {{ t('nav.archive').toUpperCase() }}
-        </NuxtLink>
-        <NuxtLink :to="ROUTES.stories.base" @click="isMenuOpen = false" class="nav-item text-lg">
-          {{ t('nav.stories').toUpperCase() }}
-        </NuxtLink>
-        <NuxtLink :to="ROUTES.prints.base" @click="isMenuOpen = false" class="nav-item text-lg">
-          {{ t('nav.prints').toUpperCase() }}
-        </NuxtLink>
+        <template v-if="!isAdmin">
+          <NuxtLink v-for="item in ['home', 'productions', 'stories', 'prints']" :key="item" :to="ROUTES[item].base" @click="isMenuOpen = false" class="nav-item text-lg">
+            {{ t(`nav.${item === 'productions' ? 'archive' : item}`).toUpperCase() }}
+          </NuxtLink>
+        </template>
 
-        <div class="flex justify-start pt-4 gap-4">
+        <div
+          class="pt-6 border-t-2 border-gray-100 flex flex-wrap gap-4"
+          :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
+        >
           <button @click="toggleLocale" class="btn-outline">
             {{ locale === 'nl' ? 'EN' : 'NL' }}
           </button>
@@ -112,6 +112,15 @@ const handleLogout = async () => {
             <Sun v-if="isDark" :size="16" />
             <Moon v-else :size="16" />
             {{ isDark ? 'LIGHT' : 'DARK' }}
+          </button>
+
+          <button
+            v-if="isAdmin"
+            @click="handleLogout"
+            class="flex items-center gap-2 rounded-md bg-rose-600 px-[21px] py-[7px] text-[11px] font-black text-white hover:bg-[var(--foreground)] transition-colors"
+          >
+            <LogOut :size="16" />
+            {{ t('nav.logout').toUpperCase() }}
           </button>
         </div>
       </nav>
