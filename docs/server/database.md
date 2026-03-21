@@ -1,8 +1,8 @@
 ## Database
 
 The database runs on PostgreSQL and stores all data related to productions, events, blogs, tags, locations, pricing,
-accounts, and API keys. The schema is relational, uses junction tables for many-to-many relationships, and uses JSONB
-fields throughout to support multilingual content.
+accounts, API keys, and media. The schema is relational, uses junction tables for many-to-many relationships, and uses
+JSONB fields throughout to support multilingual content.
 
 ---
 
@@ -44,15 +44,32 @@ Stores `starttime`, `endtime`, `doors_at`, and `intermission_at`.
 
 ---
 
+### Media Tables
+
+**`media_gallery`** – A named collection of media items. Galleries can be linked to productions and blogs via junction
+tables.
+
+**`media_item`** – An individual media file within a gallery. Stores `type`, `original_filename`, `width`, `height`,
+and `format`.
+
+**`media_crop`** – A cropped variant of a media item, identified by a `crop_name` enum (`hd_ready`, `FE3_header`,
+`thumbnail`, `og_image`, `mobile`) and a `url`. Linked to items via `item_crop`.
+
+---
+
 ### Junction Tables
 
-| Table              | Joins                   | Cascade Delete |
-|--------------------|-------------------------|----------------|
-| `event_locations`  | `events` ↔ `locations`  | Yes            |
-| `event_prices`     | `events` ↔ `prices`     | Yes            |
-| `production_tag`   | `productions` ↔ `tags`  | Yes            |
-| `production_blogs` | `productions` ↔ `blogs` | Yes            |
-| `account_api_keys` | `accounts` ↔ `api_keys` | Yes            |
+| Table                      | Joins                           | Cascade Delete |
+|----------------------------|---------------------------------|----------------|
+| `event_locations`          | `events` ↔ `locations`          | Yes            |
+| `event_prices`             | `events` ↔ `prices`             | Yes            |
+| `production_tag`           | `productions` ↔ `tags`          | Yes            |
+| `production_blogs`         | `productions` ↔ `blogs`         | Yes            |
+| `account_api_keys`         | `accounts` ↔ `api_keys`         | Yes            |
+| `gallery_item`             | `media_gallery` ↔ `media_item`  | Yes            |
+| `item_crop`                | `media_item` ↔ `media_crop`     | Yes            |
+| `production_media_gallery` | `productions` ↔ `media_gallery` | Yes            |
+| `blog_media_gallery`       | `blogs` ↔ `media_gallery`       | Yes            |
 
 All junction tables use composite primary keys.
 
@@ -79,8 +96,11 @@ permissions. Linked to accounts via `account_api_keys`.
 productions ──< events ──< event_locations >── locations
      │                └──< event_prices    >── prices
      │
-     ├──< production_tag   >── tags
-     └──< production_blogs >── blogs
+     ├──< production_tag            >── tags
+     ├──< production_blogs          >── blogs
+     └──< production_media_gallery  >── media_gallery ──< gallery_item >── media_item ──< item_crop >── media_crop
+
+blogs ──< blog_media_gallery >── media_gallery
 
 accounts ──< account_api_keys >── api_keys
 ```
@@ -89,8 +109,8 @@ accounts ──< account_api_keys >── api_keys
 
 ## Extra Information
 
-As an alternative to restoring from the dump, a backup of the raw SQL setup scripts is also available. These can be used
-to set up a clean empty database from scratch.
+As an alternative to restoring from the dump, a backup of the raw SQL setup scripts is also available. These can be
+used to set up a clean empty database from scratch.
 
 > **Important:** If you use this method, you will need to manually create an initial admin account and API key before
 > the backend will function.
