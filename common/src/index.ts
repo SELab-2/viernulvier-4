@@ -36,7 +36,7 @@ import {
   PaginatedResponse,
   PaginationFilter,
   PaginationFilterSchema,
-} from "./objects/extra";
+} from "./objects/pagination";
 import {
   DEFAULT_LANGUAGE,
   Language,

@@ -13,7 +13,7 @@ Authenticates a user and starts a session.
 ### [GET] `/auth`
 Returns a list of all existing accounts.
 - **Security:** `SuperApiKey` required.
-- **Returns:** `PaginatedResponse<PublicAccount>` a paginated list of public accounts. 
+- **Returns:** `PaginatedResponse<PublicAccount>` a [paginated](../pagination/index.md) list of public accounts. 
 
 ### [POST] `/auth`
 Creates a new account.

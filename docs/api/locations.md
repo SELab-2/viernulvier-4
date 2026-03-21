@@ -2,7 +2,7 @@
 
 ### [GET] `/locations`
 Retrieves a list of all registered venues and locations.
-- **Returns:** `PaginatedResponse<Location | LocationView>` a paginated list of locations or location views.
+- **Returns:** `PaginatedResponse<Location | LocationView>` a [paginated](../pagination/index.md) list of locations or location views.
 
 ### [GET] `/locations/:locationId`
 Retrieves a specific location by its ID.

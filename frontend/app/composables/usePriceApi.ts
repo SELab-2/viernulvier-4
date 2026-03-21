@@ -42,7 +42,6 @@ export function usePriceApi() {
 
   /**
    * PATCH /prices/:priceId — fully replaces an existing price.
-   * The ID must be included in the body (no ID in the URL for this endpoint).
    */
   const replace = (priceId: number, body: UpdatePrice) =>
     patch<Price, UpdatePrice>(API_ROUTES.prices.byId(priceId), body);

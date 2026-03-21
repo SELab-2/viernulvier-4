@@ -2,7 +2,7 @@
 
 ### [GET] `/tags`
 Retrieves a list of all available tags.
-- **Returns:** `PaginatedResponse<Tag | TagView>` a paginated list of tags or tag views.
+- **Returns:** `PaginatedResponse<Tag | TagView>` a [paginated](../pagination/index.md) list of tags or tag views.
 
 ### [GET] `/tags/:tagId`
 Retrieves a specific tag by its ID.

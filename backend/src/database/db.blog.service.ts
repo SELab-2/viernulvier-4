@@ -34,11 +34,13 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
    * @param page page index (starts at 0)
+   * @param descending Whether the dates should be sorted descending or ascending.
    * @returns blogs
    */
   async getBlogs(
     amount: number = 0,
     page: number = 0,
+    descending: boolean = true,
   ): Promise<PaginatedResponse<BlogDto>> {
     const offset = page * amount;
     const countResult = await this.db.query<{ count: string }>(
@@ -52,7 +54,7 @@ export class BlogDatabaseService {
              created_at,
              updated_at
       FROM blogs
-      ORDER BY id
+      ORDER BY created_at ${descending ? "DESC" : "ASC"}
       `;
 
       return {
@@ -70,7 +72,7 @@ export class BlogDatabaseService {
            created_at,
            updated_at
     FROM blogs
-    ORDER BY id
+    ORDER BY created_at ${descending ? "DESC" : "ASC"}
     LIMIT $1 OFFSET $2
     `;
 

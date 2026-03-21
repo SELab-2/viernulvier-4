@@ -16,9 +16,13 @@ vi.mock("../../app/composables/useAuth", () => ({
   useAuth: () => ({ apiKey: mockApiKey }),
 }));
 
-vi.mock("#app", () => ({
-  useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
-}));
+vi.mock("#app", async (importOriginal) => {
+  const actual = await importOriginal() as Record<string, unknown>;
+  return {
+    ...actual,
+    useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
+  }
+});
 
 import { useApi } from "../../app/composables/useApi";
 
