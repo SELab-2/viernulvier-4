@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormField } from "../types/FormField";
-import { ref } from "vue";
 
 const fields: FormField[] = [
   {
@@ -53,6 +52,16 @@ const fields: FormField[] = [
       label: 'Category',
       options: ['Option A', 'Option B', 'Option C'],
       required: true
+    }
+  },
+  {
+    component: 'BaseMultiSelect',
+    name: 'multiselect',
+    props: {
+      label: 'Multi Select',
+      options: ['Banana', 'Apple', 'Pineapple', 'Grape', 'Mango', "Blueberry", "Lychee"],
+      multiple: true,
+      freeInput: true
     }
   },
   {

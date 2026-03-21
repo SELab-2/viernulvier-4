@@ -28,6 +28,7 @@ import BaseDate from "./fields/BaseDate.vue";
 import BaseFileUpload from "./fields/BaseFileUpload.vue";
 import BaseTagInput from "./fields/BaseTagInput.vue";
 import BaseSelect from "./fields/BaseSelect.vue";
+import BaseMultiSelect from "./fields/BaseMultiSelect.vue";
 
 
 interface Props {
@@ -42,7 +43,8 @@ const components: Record<FieldComponent, any> = { // mapping
   BaseDate,
   BaseFileUpload,
   BaseTagInput,
-  BaseSelect
+  BaseSelect,
+  BaseMultiSelect
 }
 
 const emit = defineEmits<{

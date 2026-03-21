@@ -87,6 +87,7 @@ const clear = () => { // handles clearing the input
   internalQuery.value = ""
   emit("update:modelValue", "")
 }
+defineExpose({clear}) // exposes the clear method to the parent components
 const submit = () => { // handles input when pressing enter
   emit("update:modelValue", internalQuery.value)
   inputRef.value?.blur()

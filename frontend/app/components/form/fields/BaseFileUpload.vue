@@ -25,7 +25,7 @@ interface Props {
   id?: string
   required?: boolean // adds a "*" if required
   accept?: string // accepted file types
-  multiple?: boolean // accepts one or multiple files ?
+  multiple?: boolean // if multiple files are accepted
 }
 const props = withDefaults(defineProps<Props>(), {
   accept: '',
