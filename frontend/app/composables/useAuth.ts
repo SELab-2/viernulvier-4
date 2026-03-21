@@ -39,7 +39,7 @@ export function useAuth() {
    */
   async function login(
     username: string,
-    password: string
+    password: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
       const data = await $fetch<LoginResponse>(`${baseUrl}/auth/login`, {

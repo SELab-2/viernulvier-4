@@ -3,11 +3,11 @@ import { DbService } from "./db.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
-  PaginatedAccountDto,
   PublicAccountDto,
   UpdateAccountDto,
 } from "../dto/dto";
 import * as bcrypt from "bcryptjs"; // note all function should require guarding(except login) and all POST,DELETE,... super_guard
+import { PaginatedResponse } from "@repo/common";
 
 // note all function should require guarding(except login) and all POST,DELETE,... super_guard
 @Injectable()
@@ -23,7 +23,7 @@ export class AccountDatabaseService {
   async getAccounts(
     amount: number = 0,
     page: number = 0,
-  ): Promise<PaginatedAccountDto> {
+  ): Promise<PaginatedResponse<PublicAccountDto>> {
     let query = `
       SELECT id, username, super_admin
       FROM accounts

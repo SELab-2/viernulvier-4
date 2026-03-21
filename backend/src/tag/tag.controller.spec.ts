@@ -27,7 +27,6 @@ describe("TagController", () => {
     },
     created_at: "2024-01-15T19:00:00.000Z",
     updated_at: "2024-01-15T19:00:00.000Z",
-    legacy_id: null,
   };
 
   // What the LanguageService will output
@@ -36,7 +35,6 @@ describe("TagController", () => {
     tag: "Drama",
     created_at: "2024-01-15T19:00:00.000Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: null,
   };
 
   const filter: PaginationFilterDto = {
@@ -142,7 +140,6 @@ describe("TagController", () => {
     it("should create and return a new tag", async () => {
       const dto: CreateTagDto = {
         tag: { en: "Action", nl: "Actie" },
-        legacy_id: null,
       };
       const result = await controller.createTag(dto);
 

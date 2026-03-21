@@ -8,7 +8,7 @@ import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
  * Type used to structure production import
  */
 type ParsedProductionImport = {
-  productions: CreateProductionDto[];
+  productions: (CreateProductionDto & { legacy_id: string })[];
   tags: string[];
   productionTagLinks: { legacyId: string; tagName: string }[];
 };
@@ -120,13 +120,12 @@ export class CSVFileParser {
       location: location,
       doors_at: null, // TODO
       intermission_at: null, // TODO
-      legacy_id: null,
     };
   }
 
   static transformProductionRow(
     row: Record<string, string>,
-  ): CreateProductionDto & { tags: string[] } {
+  ): CreateProductionDto & { tags: string[]; legacy_id: string } {
     // validate and convert numeric fields manually to provide clearer errors
     const id = Number(row.ID);
     if (isNaN(id)) {
@@ -189,15 +188,18 @@ export class CSVFileParser {
   static async parseProductionsCSV(
     filePath: string,
   ): Promise<ParsedProductionImport> {
-    const productions: CreateProductionDto[] = [];
+    const productions: (CreateProductionDto & { legacy_id: string })[] = [];
     const tagsSet: Set<string> = new Set();
     const productionTagLinks: { legacyId: string; tagName: string }[] = [];
 
     const parsed = await this.parseCSVWithSchema<
-      CreateProductionDto & { tags: string[] }
+      CreateProductionDto & { tags: string[]; legacy_id: string }
     >(
       filePath,
-      CreateProductionSchema.extend({ tags: string().array() }),
+      CreateProductionSchema.extend({
+        tags: string().array(),
+        legacy_id: string(),
+      }),
       this.transformProductionRow,
     );
 
@@ -208,7 +210,7 @@ export class CSVFileParser {
       for (const tag of tags) {
         tagsSet.add(tag);
         productionTagLinks.push({
-          legacyId: prodData.legacy_id!,
+          legacyId: prodData.legacy_id,
           tagName: tag,
         });
       }

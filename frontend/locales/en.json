@@ -6,6 +6,9 @@
     "prints": "prints",
     "logout": "logout"
   },
+  "searchbar": {
+    "placeholder": "Search..."
+  },
   "hero": {
     "title": "Archive",
     "label": "Arts Centre Ghent — Archive",

@@ -7,7 +7,12 @@ const mockPatch = vi.fn();
 const mockDel = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
-  useApi: () => ({ get: mockGet, post: mockPost, patch: mockPatch, del: mockDel }),
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    patch: mockPatch,
+    del: mockDel,
+  }),
 }));
 
 beforeEach(() => {

@@ -17,8 +17,6 @@ import {
   LanguageQueryDto,
   LocationDto,
   LocationViewDto,
-  PaginatedLocationDto,
-  PaginatedLocationViewDto,
   PaginationFilterDto,
   UpdateLocationDto,
 } from "../dto/dto";
@@ -33,12 +31,16 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateLocationSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
   UpdateLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("locations")
 export class LocationController {
@@ -52,15 +54,15 @@ export class LocationController {
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
-  @ApiOkArrayAnyOf(LocationDto, LocationViewDto)
+  @ApiOkPaginatedResponseAnyOf(LocationDto, LocationViewDto)
   @Get()
   async getLocations(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<PaginatedLocationDto | PaginatedLocationViewDto> {
+  ): Promise<PaginatedResponse<LocationDto | LocationViewDto>> {
     return this.ls.flattenByLanguage<
-      PaginatedLocationDto | PaginatedLocationViewDto
+      PaginatedResponse<LocationDto | LocationViewDto>
     >(await this.locationService.getLocations(paginationFilter), lang.lang);
   }
 
@@ -104,7 +106,8 @@ export class LocationController {
   }
 
   /**
-   * Responds to a PATCH to "/locations"
+   * Responds to a PATCH to "/locations/:locationId"
+   * @param locationId The ID of the Location in the URL.
    * @param updateLocation The Location we want to update.
    * @returns The newly updated Location.
    */
@@ -116,12 +119,16 @@ export class LocationController {
     type: LocationDto,
     description: "The Location was updated.",
   })
-  @UsePipes(new ZodValidationPipe(UpdateLocationSchema))
-  @Patch()
+  @Patch(":locationId")
   async updateLocation(
-    @Body() updateLocation: UpdateLocationDto,
+    @Param("locationId", ParseIntPipe) locationId: number,
+    @Body(new ZodValidationPipe(UpdateLocationSchema))
+    updateLocation: UpdateLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationService.updateLocation(updateLocation);
+    return await this.locationService.updateLocation(
+      locationId,
+      updateLocation,
+    );
   }
 
   /**

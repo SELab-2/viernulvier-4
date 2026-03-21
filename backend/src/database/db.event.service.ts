@@ -6,11 +6,10 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
-  PaginatedEventDto,
   PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
-import { FilterEventSchema } from "@repo/common";
+import { FilterEventSchema, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -23,7 +22,7 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(eventId: number): Promise<EventDto> {
-    const events: PaginatedEventDto = await this.getEvents(
+    const events: PaginatedResponse<EventDto> = await this.getEvents(
       FilterEventSchema.parse({ id: eventId }),
     );
     const event: EventDto[] = events.objects;
@@ -42,7 +41,9 @@ export class EventDatabaseService {
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All events for the given filters.
    */
-  async getEvents(filters: FilterEventDto): Promise<PaginatedEventDto> {
+  async getEvents(
+    filters: FilterEventDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -122,7 +123,7 @@ export class EventDatabaseService {
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id, e.legacy_id, e.created_at, e.updated_at
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.created_at, e.updated_at
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
@@ -158,15 +159,17 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at, legacy_id)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at, legacy_id
+      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at
     `;
 
     const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
       event.production_id,
+      event.intermission_at,
+      event.doors_at,
     ]);
 
     // Validate output
@@ -183,11 +186,7 @@ export class EventDatabaseService {
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
-  async updateEvent(event: UpdateEventDto): Promise<EventDto> {
-    if (!event.id) {
-      throw new Error("Event id is required for update");
-    }
-
+  async updateEvent(eventId: number, event: UpdateEventDto): Promise<EventDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -221,14 +220,14 @@ export class EventDatabaseService {
       throw new Error("No fields provided to update");
     }
 
-    values.push(event.id);
+    values.push(eventId);
 
     // ignore error on "RETURNING", query is correct.
     const query = `
     UPDATE events
     SET ${fields.join(", ")}
     WHERE id = $${index}
-    RETURNING *;
+    RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at;
     `;
 
     const result = await this.db.query<EventDto>(query, values);
@@ -265,7 +264,7 @@ export class EventDatabaseService {
    */
   async getLocationOfEvent(id: number): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location, l.legacy_id, l.created_at, l.updated_at
+    SELECT l.id, l.location, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
@@ -342,8 +341,7 @@ export class EventDatabaseService {
              p.created_at,
              p.updated_at,
              p.price,
-             p.name,
-             p.legacy_id
+             p.name
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
       WHERE ep.event_id = $1
@@ -359,8 +357,7 @@ export class EventDatabaseService {
            p.price,
            p.name,
            p.created_at,
-           p.updated_at,
-           p.legacy_id
+           p.updated_at
     FROM prices p
     INNER JOIN event_prices ep ON ep.price_id = p.id
     WHERE ep.event_id = $1

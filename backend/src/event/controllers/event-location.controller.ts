@@ -22,8 +22,8 @@ import { ApiOkAnyOf } from "../../common/decorators/api.ok";
 import { LanguageQuerySchema } from "@repo/common";
 import { ZodValidationPipe } from "nestjs-zod";
 
-@ApiTags("Events - Locations")
-@Controller("events/:eventId/locations")
+@ApiTags("Events - Location")
+@Controller("events/:eventId/location")
 export class EventLocationController {
   constructor(
     private readonly eventService: EventService,
