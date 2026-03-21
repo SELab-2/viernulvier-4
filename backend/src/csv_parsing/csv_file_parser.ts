@@ -168,7 +168,7 @@ export class CSVFileParser {
       throw new Error(`Invalid production id: ${row.Production}`);
     }
 
-    const location = this.toLocalizedString(
+    const location = CSVFileParser.toLocalizedString(
       row.Location_NL,
       row.Location_EN,
       false,
@@ -195,19 +195,19 @@ export class CSVFileParser {
       throw new Error(`Invalid production id: ${row.ID}`);
     }
 
-    const titel = this.toLocalizedString(
+    const titel = CSVFileParser.toLocalizedString(
       row.Titel_NL,
       row.Titel_EN,
       true,
       false,
     );
-    const description1 = this.toLocalizedString(
+    const description1 = CSVFileParser.toLocalizedString(
       row.Description1_NL,
       row.Description1_EN,
       true,
       false,
     );
-    const description2Value = this.toLocalizedString(
+    const description2Value = CSVFileParser.toLocalizedString(
       row.Description2_NL,
       row.Description2_EN,
       false,
@@ -216,7 +216,7 @@ export class CSVFileParser {
     const description2 =
       description2Value.en || description2Value.nl ? description2Value : null;
 
-    const artistValue = this.toLocalizedString(
+    const artistValue = CSVFileParser.toLocalizedString(
       row.Artist_NL,
       row.Artist_EN,
       false,
@@ -224,7 +224,7 @@ export class CSVFileParser {
     );
     const artist = artistValue.en || artistValue.nl ? artistValue : null;
 
-    const taglineValue = this.toLocalizedString(
+    const taglineValue = CSVFileParser.toLocalizedString(
       row.Tagline_NL,
       row.Tagline_EN,
       false,
@@ -232,7 +232,7 @@ export class CSVFileParser {
     );
     const tagline = taglineValue.en || taglineValue.nl ? taglineValue : null;
 
-    const creditsValue = this.toLocalizedString(
+    const creditsValue = CSVFileParser.toLocalizedString(
       row.Credits_NL,
       row.Credits_EN,
       false,
@@ -259,7 +259,12 @@ export class CSVFileParser {
   static transformPriceRow(
     row: Record<string, string>,
   ): CreatePriceDto & { event_id: number } {
-    const name = this.toLocalizedString(row.Name_NL, row.Name_EN, true, false);
+    const name = CSVFileParser.toLocalizedString(
+      row.Name_NL,
+      row.Name_EN,
+      true,
+      false,
+    );
     const price = Number(row.Price);
     const eventId = Number(row.EventID);
 
@@ -280,13 +285,13 @@ export class CSVFileParser {
   static transformBlogRow(
     row: Record<string, string>,
   ): CreateBlogDto & { production_id: number } {
-    const titel = this.toLocalizedString(
+    const titel = CSVFileParser.toLocalizedString(
       row.Titel_NL,
       row.Titel_EN,
       true,
       false,
     );
-    const description = this.toLocalizedString(
+    const description = CSVFileParser.toLocalizedString(
       row.Description_NL,
       row.Description_EN,
       true,
@@ -307,7 +312,7 @@ export class CSVFileParser {
   static transformTagRow(
     row: Record<string, string>,
   ): CreateTagDto & { productionIds: number[] } {
-    const tag = this.toLocalizedString(
+    const tag = CSVFileParser.toLocalizedString(
       row.TagName_NL,
       row.TagName_EN,
       true,
