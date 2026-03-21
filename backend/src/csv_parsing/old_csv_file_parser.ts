@@ -62,8 +62,8 @@ export class OldCSVFileParser {
       endtime: endTime,
       production_id: productionId,
       location,
-      doors_at: null, // TODO
-      intermission_at: null, // TODO
+      doors_at: null,
+      intermission_at: null,
     };
   }
 
@@ -92,11 +92,11 @@ export class OldCSVFileParser {
       description2: row.Description2
         ? OldCSVFileParser.toOldLocalizedString(row.Description2)
         : null,
-      artist: null, // TODO
+      artist: null,
       tagline: tagLine ? OldCSVFileParser.toOldLocalizedString(tagLine) : null,
-      credits: null, // TODO
-      attendance_mode: null, // TODO
-      performer_type: null, // TODO
+      credits: null,
+      attendance_mode: null,
+      performer_type: null,
       legacy_id,
       tags: [...new Set(tags)], // Remove duplicate tags.
     };
