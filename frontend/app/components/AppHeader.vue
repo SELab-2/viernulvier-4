@@ -1,4 +1,13 @@
 <script setup>
+/**
+ * Header Component handles:
+ * - Navigation
+ * - Localization (EN / NL)
+ * - Theme switching (Dark / Light)
+ * - Admin-specific actions (Logout functionality)
+ * Features a dynamic responsive design that adapts based on the user's role.
+ */
+
 import { ref } from 'vue'
 import { ROUTES } from '~/utils/routes'
 import { Sun, Moon, LogOut, Menu, X } from 'lucide-vue-next'
@@ -7,11 +16,13 @@ import logoBlack from '~/assets/logo_black.svg'
 import logoWhite from '~/assets/logo_white.svg'
 
 const { isLoggedIn, logout } = useAuth()
-const isAdmin = ref(true) // isLoggedIn // to test admin: const isAdmin = ref(true)
+
+// Determines if the header should render the admin view (logged-in state)
+const isAdmin = isLoggedIn
 
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
-const isMenuOpen = ref(false)
+const isMenuOpen = ref(false) // Controls the mobile/tablet hamburger menu
 
 const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
@@ -37,11 +48,20 @@ const handleLogout = async () => {
       class="mx-auto grid max-w-[1400px] grid-cols-3 items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
       <div class="flex items-center justify-start">
+
         <nav v-if="!isAdmin" class="hidden lg:flex gap-[20px] xl:gap-[30px]">
-          <NuxtLink :to="ROUTES.home.base" class="nav-item">{{ t('nav.home').toUpperCase() }}</NuxtLink>
-          <NuxtLink :to="ROUTES.productions.base" class="nav-item">{{ t('nav.archive').toUpperCase() }}</NuxtLink>
-          <NuxtLink :to="ROUTES.stories.base" class="nav-item">{{ t('nav.stories').toUpperCase() }}</NuxtLink>
-          <NuxtLink :to="ROUTES.prints.base" class="nav-item">{{ t('nav.prints').toUpperCase() }}</NuxtLink>
+          <NuxtLink :to="ROUTES.home.base" class="nav-item">
+            {{ t('nav.home').toUpperCase() }}
+          </NuxtLink>
+          <NuxtLink :to="ROUTES.productions.base" class="nav-item">
+            {{ t('nav.archive').toUpperCase() }}
+          </NuxtLink>
+          <NuxtLink :to="ROUTES.stories.base" class="nav-item">
+            {{ t('nav.stories').toUpperCase() }}
+          </NuxtLink>
+          <NuxtLink :to="ROUTES.prints.base" class="nav-item">
+            {{ t('nav.prints').toUpperCase() }}
+          </NuxtLink>
         </nav>
 
         <button @click="toggleMenu"
@@ -67,6 +87,7 @@ const handleLogout = async () => {
       </div>
 
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
+
         <div :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']" class="items-center gap-2 lg:gap-[15px]">
           <button @click="toggleLocale" class="btn-outline">
             {{ locale === 'nl' ? 'EN' : 'NL' }}
@@ -81,6 +102,7 @@ const handleLogout = async () => {
           </button>
         </div>
 
+        <!-- Admin-only logout button -->
         <button
           v-if="isAdmin"
           @click="handleLogout"
@@ -91,15 +113,18 @@ const handleLogout = async () => {
       </div>
     </div>
 
+    <!-- Mobile hamburger menu -->
     <div v-if="isMenuOpen"
          class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl">
       <nav class="flex flex-col gap-6">
+
         <template v-if="!isAdmin">
           <NuxtLink v-for="item in ['home', 'productions', 'stories', 'prints']" :key="item" :to="ROUTES[item].base" @click="isMenuOpen = false" class="nav-item text-lg">
             {{ t(`nav.${item === 'productions' ? 'archive' : item}`).toUpperCase() }}
           </NuxtLink>
         </template>
 
+        <!-- buttons appear in hamburger menu when screen size is too small to show in header -->
         <div
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
           :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
