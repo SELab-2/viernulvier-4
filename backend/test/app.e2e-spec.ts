@@ -253,20 +253,20 @@ describe("BlogController (e2e)", () => {
   describe("GET /blogs", () => {
     it("should return 200 with an array of flattened blogs", () => {
       return request(app.getHttpServer())
-        .get("/blogs?lang=en")
+        .get("/blogs?lang=en&descending=true")
         .expect(200)
         .expect([mockBlogView, mockBlog2View]);
     });
 
     it("should call blogDb.getBlogs()", async () => {
-      await request(app.getHttpServer()).get("/blogs?lang=en");
+      await request(app.getHttpServer()).get("/blogs?lang=en&descending=true");
       expect(blogDb.getBlogs).toHaveBeenCalled();
     });
 
     it("should return 200 with an empty array when no blogs exist", async () => {
       jest.spyOn(blogDb, "getBlogs").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
-        .get("/blogs?lang=en")
+        .get("/blogs?lang=en&descending=true")
         .expect(200)
         .expect([]);
     });

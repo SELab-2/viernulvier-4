@@ -236,7 +236,7 @@ describe("AuthGuards tests", () => {
   describe("Blog endpoints authentication", () => {
     it("GET /blogs should work without API key", async () => {
       await request(app.getHttpServer())
-        .get("/blogs")
+        .get("/blogs?descending=true")
         .expect((res) => {
           expect([200, 410]).toContain(res.status);
         });
