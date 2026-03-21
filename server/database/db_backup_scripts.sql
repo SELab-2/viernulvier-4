@@ -47,6 +47,8 @@ CREATE TABLE events
             REFERENCES productions (id)
             ON DELETE CASCADE
 );
+CREATE INDEX idx_events_production_id ON events (production_id);
+CREATE INDEX idx_events_starttime ON events (starttime);
 
 CREATE TRIGGER set_updated_at_events
     BEFORE UPDATE
@@ -86,6 +88,7 @@ CREATE TABLE production_blogs
             REFERENCES blogs (id)
             ON DELETE CASCADE
 );
+CREATE INDEX idx_production_blogs_blog_id ON production_blogs (blog_id);
 
 CREATE TABLE tags
 (
@@ -116,6 +119,7 @@ CREATE TABLE production_tag
             REFERENCES tags (id)
             ON DELETE CASCADE
 );
+CREATE INDEX idx_production_tag_tag_id ON production_tag (tag_id);
 
 CREATE TABLE locations
 (
@@ -142,6 +146,7 @@ CREATE TABLE event_locations
     FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
     FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE CASCADE
 );
+CREATE INDEX idx_event_locations_location_id ON event_locations (location_id);
 
 CREATE TABLE accounts
 (
@@ -166,6 +171,7 @@ CREATE TABLE account_api_keys
     active     boolean not null default true,
     PRIMARY KEY (account_id, api_key_id)
 );
+CREATE INDEX idx_account_api_keys_api_key_id ON account_api_keys (api_key_id);
 
 CREATE TABLE prices
 (
@@ -183,6 +189,7 @@ CREATE TABLE event_prices
     price_id INT NOT NULL REFERENCES prices (id) ON DELETE CASCADE,
     PRIMARY KEY (event_id, price_id)
 );
+CREATE INDEX idx_event_prices_price_id ON event_prices (price_id);
 
 CREATE TABLE scraper_dates
 (
@@ -275,3 +282,21 @@ CREATE TRIGGER trg_media_crop_updated_at
     ON media_crop
     FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+
+CREATE TABLE production_media_gallery
+(
+    production_id INT NOT NULL REFERENCES productions (id) ON DELETE CASCADE,
+    gallery_id    INT NOT NULL REFERENCES media_gallery (id) ON DELETE CASCADE,
+    PRIMARY KEY (production_id, gallery_id)
+);
+
+CREATE INDEX idx_production_media_gallery_gallery_id ON production_media_gallery (gallery_id);
+
+CREATE TABLE blog_media_gallery
+(
+    blog_id    INT NOT NULL REFERENCES blogs (id) ON DELETE CASCADE,
+    gallery_id INT NOT NULL REFERENCES media_gallery (id) ON DELETE CASCADE,
+    PRIMARY KEY (blog_id, gallery_id)
+);
+
+CREATE INDEX idx_blog_media_gallery_gallery_id ON blog_media_gallery (gallery_id);
