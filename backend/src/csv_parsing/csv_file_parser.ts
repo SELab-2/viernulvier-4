@@ -163,6 +163,22 @@ export class CSVFileParser {
         endTime = endTimeDate.toISOString();
     }
 
+    let doorsAt: string | null = null;
+    if (row.DoorsAt) {
+      const doorsAtDate = new Date(row.DoorsAt);
+      if (!isNaN(doorsAtDate.getTime()) && doorsAtDate < starttimeDate) {
+        doorsAt = doorsAtDate.toISOString();
+      }
+    }
+
+    let intermissionAt: string | null = null;
+    if (row.IntermissionAt) {
+      const intermissionAtDate = new Date(row.IntermissionAt);
+      if (!isNaN(intermissionAtDate.getTime())) {
+        intermissionAt = intermissionAtDate.toISOString();
+      }
+    }
+
     const productionId = Number(row.Production);
     if (isNaN(productionId)) {
       throw new Error(`Invalid production id: ${row.Production}`);
@@ -180,8 +196,8 @@ export class CSVFileParser {
       endtime: endTime,
       production_id: productionId,
       location,
-      doors_at: null, // TODO
-      intermission_at: null, // TODO
+      doors_at: doorsAt,
+      intermission_at: intermissionAt,
       legacy_id: `csv-${id}`,
     };
   }
