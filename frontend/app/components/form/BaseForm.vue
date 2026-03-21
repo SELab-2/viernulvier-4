@@ -1,4 +1,23 @@
 <script setup lang="ts">
+/**
+ * A dynamic form component that renders fields based on a given array, includes:
+ *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate, BaseTagInput, BaseFileUpload)
+ *  - Multiple instances of the same component type are supported
+ *  - Emits all field values on submit via @submit
+ *
+ * Usage:
+ * <FormBaseForm
+ *   :fields="fields"
+ *   @submit="handleSubmit"
+ * />
+ *
+ * Example fields config:
+ * const fields: FormField[] = [
+ *   { component: 'BaseInput', name: 'title', props: { label: 'Title', required: true } },
+ *   { component: 'BaseDate',  name: 'dueDate', props: { label: 'Due Date' } }
+ * ]
+ */
+
 import { reactive } from 'vue' // reactive instead of ref so we don't have to add ".value" every time
 import type {FieldComponent, FormField} from '../../types/FormField'
 
