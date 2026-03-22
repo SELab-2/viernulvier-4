@@ -99,7 +99,7 @@ describe("BaseFileUpload", () => {
         await input.trigger("change");
 
         const occurrences = w.text().split("same.pdf").length - 1; // counts how many times "same.pdf" appears in the rendered text
-        // (produces an array with one more element than there are occurences
+        // (produces an array with one more element than there are occurences)
         expect(occurrences).toBe(1);
     });
 
