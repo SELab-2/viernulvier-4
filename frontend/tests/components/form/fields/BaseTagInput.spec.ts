@@ -11,6 +11,7 @@ describe("BaseTagInput", () => {
                 label: "Tags",
                 placeholder: "Add tags",
                 required: true,
+                modelValue: [], // to be safe
             },
         });
     });
