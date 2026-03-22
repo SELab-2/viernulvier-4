@@ -43,7 +43,7 @@ function removeTag(tag: string) { // handles removing the tag
 }
 
 function handleKey(event: KeyboardEvent) { // handles pressing enter
-  if (event.key === 'Enter') {
+  if (event.key === 'Enter') { // manual check if enter was the button that was pressed
     event.preventDefault()
     addTag()
   }
@@ -63,7 +63,7 @@ function handleKey(event: KeyboardEvent) { // handles pressing enter
         type="text"
         :placeholder="placeholder"
         v-model="inputText"
-        @keydown.enter="handleKey"
+        @keydown="handleKey"
         class="px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground"
     />
 
