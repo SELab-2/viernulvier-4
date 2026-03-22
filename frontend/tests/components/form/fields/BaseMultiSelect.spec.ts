@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
+import { X } from "lucide-vue-next";
 import BaseMultiSelect from "../../../../app/components/form/fields/BaseMultiSelect.vue";
 
 const i18n = createI18n({ // needed so no error is thrown when mounted
@@ -113,7 +114,7 @@ describe("BaseMultiSelect", () => {
         await input.setValue("Apple");
         await wrapper.find("li").trigger("mousedown");
 
-        await wrapper.find("svg").trigger("click");
+        await wrapper.findComponent(X).trigger("click");
         expect(wrapper.find(".mt-2").exists()).toBe(false); // // matches the tailwind class of the selected items container
     });
 });

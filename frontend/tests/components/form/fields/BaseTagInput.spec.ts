@@ -63,11 +63,11 @@ describe("BaseTagInput", () => {
     it("does not add empty tags", async () => {
         await wrapper.find("input").setValue("   ");
         await wrapper.find("input").trigger("keydown", { key: "Enter" });
-        expect(wrapper.find(".flex.flex-wrap.gap-2").exists()).toBe(false); // gap-2 is only on the added tag container
+        expect(wrapper.find('[data-testid="tag-container"]').exists()).toBe(false);
     });
 
     it("does not show tag list when no tags are added", () => {
-        expect(wrapper.find(".flex.flex-wrap.gap-2").exists()).toBe(false); // gap-2 is only on the added tag container
+        expect(wrapper.find('[data-testid="tag-container"]').exists()).toBe(false);
     });
 
     it("removes a tag when X is clicked", async () => {

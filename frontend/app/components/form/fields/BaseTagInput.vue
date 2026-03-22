@@ -68,7 +68,7 @@ function handleKey(event: KeyboardEvent) { // handles pressing enter
     />
 
     <!-- Added tags -->
-    <div v-if="model.length" class="flex flex-wrap gap-2 mt-2">
+    <div v-if="model.length" data-testid="tag-container" class="flex flex-wrap gap-2 mt-2"> <!-- testid to make it easier for testing -->
       <span
           v-for="tag in model"
           :key="tag"
