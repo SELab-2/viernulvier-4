@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -64,13 +65,17 @@ export class ProductionController {
   @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
   @ApiOkPaginatedResponseAnyOf(ProductionDto, ProductionViewDto)
   @Get()
-  @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
-    @Query() filters: FilterProductionDto,
+    @Query(new ZodValidationPipe(FilterProductionSchema))
+    filters: FilterProductionDto,
+    @Query("descending", ParseBoolPipe) descending: boolean,
   ): Promise<PaginatedResponse<ProductionDto | ProductionViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<ProductionDto | ProductionViewDto>
-    >(await this.productionService.getAllProductions(filters), filters.lang);
+    >(
+      await this.productionService.getAllProductions(filters, descending),
+      filters.lang,
+    );
   }
 
   /**

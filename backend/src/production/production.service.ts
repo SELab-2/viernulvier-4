@@ -26,8 +26,9 @@ export class ProductionService {
    */
   async getAllProductions(
     filters: FilterProductionDto,
+    descending: boolean,
   ): Promise<PaginatedResponse<ProductionDto>> {
-    return await this.productionDBService.getProductions(filters);
+    return await this.productionDBService.getProductions(filters, descending);
   }
 
   /**

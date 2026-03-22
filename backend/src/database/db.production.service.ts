@@ -26,7 +26,7 @@ export class ProductionDatabaseService {
    */
   async getProductionById(id: number): Promise<ProductionDto> {
     const productions: PaginatedResponse<ProductionDto> =
-      await this.getProductions(FilterProductionSchema.parse({ id: id }));
+      await this.getProductions(FilterProductionSchema.parse({ id: id }), true);
 
     const production = productions.objects;
     if (production.length === 0)
@@ -132,6 +132,7 @@ export class ProductionDatabaseService {
    */
   async getProductions(
     filters: FilterProductionDto,
+    descending: boolean,
   ): Promise<PaginatedResponse<ProductionDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -254,8 +255,9 @@ export class ProductionDatabaseService {
       i += 2;
     }
 
+    // The Ordered by the first held event of the production.
     const query = `
-    SELECT DISTINCT
+    SELECT
       p.id,
       p.titel,
       p.description1,
@@ -270,7 +272,9 @@ export class ProductionDatabaseService {
     FROM productions p
       LEFT JOIN events e ON e.production_id = p.id
     ${whereClause}
-    ORDER BY p.id
+    GROUP BY
+      p.id
+    ORDER BY MIN(e.starttime) ${descending ? "DESC" : "ASC"} NULLS LAST
     ${paginationClause}
   `;
 
