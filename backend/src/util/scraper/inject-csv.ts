@@ -59,7 +59,7 @@ function toOldCsvTag(tagName: string): vnvGenre {
     legacy_id: `csv-${tagName}`,
     created_at: DEFAULT_DATE,
     updated_at: DEFAULT_DATE,
-    name: { en: tagName, nl: tagName }, //TODO translate with Google Translate API
+    name: { en: "", nl: tagName },
   };
 }
 
@@ -68,7 +68,7 @@ function toOldCsvLocation(locationName: string): vnvLocation {
     legacy_id: `csv-${locationName}`,
     created_at: DEFAULT_DATE,
     updated_at: DEFAULT_DATE,
-    name: { en: locationName, nl: locationName }, //TODO translate with Google Translate API
+    name: { en: "", nl: locationName },
   };
 }
 
