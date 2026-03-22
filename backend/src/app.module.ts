@@ -8,10 +8,12 @@ import { BlogModule } from "./blog/blog.module";
 import { LocationModule } from "./location/location.module";
 import { AuthModule } from "./auth/auth.module";
 import { PriceModule } from "./price/price.module";
-import { UtilModule } from "./util/util.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { MediaModule } from "./media/media.module";
 import { RouterModule } from "@nestjs/core";
+import { LoggerModule } from "./util/logger/logger.module";
+import { LanguageModule } from "./util/language/LanguageModule";
+import { ScraperModule } from "./util/scraper/scraper.module";
 
 @Module({
   imports: [
@@ -27,7 +29,6 @@ import { RouterModule } from "@nestjs/core";
     LocationModule,
     PriceModule,
     AuthModule,
-    UtilModule,
     MediaModule,
 
     // This allows all controllers in the MediaModule to use same base name
@@ -37,6 +38,9 @@ import { RouterModule } from "@nestjs/core";
         module: MediaModule,
       },
     ]),
+    LoggerModule,
+    LanguageModule,
+    ScraperModule,
   ],
   controllers: [AppController],
 })
