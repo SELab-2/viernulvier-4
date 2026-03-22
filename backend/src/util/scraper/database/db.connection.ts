@@ -5,10 +5,11 @@ import {
   vnvLocation,
   vnvPrice,
   vnvProduction,
-} from "./vnv.parser";
+} from "../vnv.parser";
 import { Production, Tag, Event, Price, Location, Blog } from "@repo/common";
-import logger from "../logger/logger";
-import { ResourceGoneException } from "../../common/exceptions";
+import logger from "../../logger/logger";
+import { ResourceGoneException } from "../../../common/exceptions";
+import { Injectable } from "@nestjs/common";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -24,7 +25,8 @@ import { ResourceGoneException } from "../../common/exceptions";
  *           sure there can be no confusions between the two and so they can't
  *           hinder each other either.
  */
-export class DbConnection {
+@Injectable()
+export class UtilsDbConnection {
   /**
    * The Pool to the database, used to execute queries.
    */
@@ -126,6 +128,70 @@ export class DbConnection {
   }
 
   /**
+   * Inserts a list of vnvGenre objects into Tags.
+   * @param genres The list of vnvGenre objects.
+   */
+  async insertTags(genres: vnvGenre[]) {
+    logger.info("Inserting Tags...");
+    for (const genre of genres) {
+      await this.insertTag(genre);
+    }
+    logger.info("Inserted Tags!");
+  }
+
+  /**
+   * Tags
+   */
+
+  /**
+   * Inserts a list of vnvEvent objects into the database.
+   * @param events The list of vnvEvent objects.
+   */
+  async insertEvents(events: vnvEvent[]) {
+    logger.info("Inserting Events...");
+    for (const event of events) {
+      try {
+        await this.insertEvent(event);
+      } catch (error) {
+        // If something errors out that means the VNV API had invalid data.
+        logger.warn(
+          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
+          error,
+        );
+      }
+    }
+    logger.info("Inserted Events!");
+  }
+
+  /**
+   * Inserts a list of vnvLocation objects.
+   * @param locations The list of vnvLocation objects.
+   */
+  async insertLocations(locations: vnvLocation[]) {
+    logger.info("Inserting Locations...");
+    for (const location of locations) {
+      await this.insertLocation(location);
+    }
+    logger.info("Inserted Locations!");
+  }
+
+  /**
+   * Insert a list of vnvPrice objects.
+   * @param prices The list of vnvPrice objects.
+   */
+  async insertPrices(prices: vnvPrice[]) {
+    logger.info("Inserting Prices...");
+    for (const price of prices) {
+      await this.insertPrice(price);
+    }
+    logger.info("Inserted Prices!");
+  }
+
+  /**
+   * Events
+   */
+
+  /**
    * Inserts a Production by it's legacy_id or creates a new one.
    * Also links it's respective tags.
    * @param vnvProduction The vnvProduction we want to add.
@@ -196,22 +262,6 @@ export class DbConnection {
   }
 
   /**
-   * Tags
-   */
-
-  /**
-   * Inserts a list of vnvGenre objects into Tags.
-   * @param genres The list of vnvGenre objects.
-   */
-  async insertTags(genres: vnvGenre[]) {
-    logger.info("Inserting Tags...");
-    for (const genre of genres) {
-      await this.insertTag(genre);
-    }
-    logger.info("Inserted Tags!");
-  }
-
-  /**
    * Inserts/Updates a single tag into the database based
    * on it's legacy_id.
    * @param genre The vnvGenre that is to be turned into a Tag.
@@ -231,6 +281,10 @@ export class DbConnection {
   }
 
   /**
+   * Locations
+   */
+
+  /**
    * Link a Tag to a Production in the database.
    * @param productionId The ID of the Production.
    * @param tagId The ID of the Tag.
@@ -246,30 +300,6 @@ export class DbConnection {
 
     const output = await this.query(query, [productionId, tagId]);
     return output.length >= 1;
-  }
-
-  /**
-   * Events
-   */
-
-  /**
-   * Inserts a list of vnvEvent objects into the database.
-   * @param events The list of vnvEvent objects.
-   */
-  async insertEvents(events: vnvEvent[]) {
-    logger.info("Inserting Events...");
-    for (const event of events) {
-      try {
-        await this.insertEvent(event);
-      } catch (error) {
-        // If something errors out that means the VNV API had invalid data.
-        logger.warn(
-          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
-          error,
-        );
-      }
-    }
-    logger.info("Inserted Events!");
   }
 
   /**
@@ -365,22 +395,6 @@ export class DbConnection {
   }
 
   /**
-   * Locations
-   */
-
-  /**
-   * Inserts a list of vnvLocation objects.
-   * @param locations The list of vnvLocation objects.
-   */
-  async insertLocations(locations: vnvLocation[]) {
-    logger.info("Inserting Locations...");
-    for (const location of locations) {
-      await this.insertLocation(location);
-    }
-    logger.info("Inserted Locations!");
-  }
-
-  /**
    * Inserts a single vnvLocation into the database.
    * @param location The location we want inserted.
    * @returns Nothing.
@@ -395,6 +409,10 @@ export class DbConnection {
     `;
     await this.query<Location>(query, [location.name, location.legacy_id]);
   }
+
+  /**
+   * Price.
+   */
 
   /**
    * Links an Event and a Location by their ids.
@@ -415,22 +433,6 @@ export class DbConnection {
 
     const output = await this.query(query, [eventId, locationId]);
     return output.length >= 1;
-  }
-
-  /**
-   * Price.
-   */
-
-  /**
-   * Insert a list of vnvPrice objects.
-   * @param prices The list of vnvPrice objects.
-   */
-  async insertPrices(prices: vnvPrice[]) {
-    logger.info("Inserting Prices...");
-    for (const price of prices) {
-      await this.insertPrice(price);
-    }
-    logger.info("Inserted Prices!");
   }
 
   /**

@@ -1,48 +1,57 @@
-import { scrape, ScrapeResult } from "./scraper";
-import { DbConnection } from "./db.connection";
-import logger from "../logger/logger";
+import { ScraperEngine, ScrapeResult } from "./scraper";
+import { Injectable } from "@nestjs/common";
+import { AppLogger } from "../logger/logger.service";
+import { UtilsDbConnection } from "./database/db.connection";
 
-/**
- * Main entrypoint of the worker.
- */
-export async function runScraper() {
-  const dbConnection: DbConnection = new DbConnection();
+@Injectable()
+export class ScraperRunner {
+  constructor(
+    private readonly scraperEngine: ScraperEngine,
+    private readonly logger: AppLogger,
+    private readonly dbConnection: UtilsDbConnection,
+  ) {}
 
-  // Fetch the last scraped date.
-  const dates = await dbConnection.query(
-    `
-      SELECT date FROM scraper_dates ORDER BY date DESC LIMIT 1;
-    `,
-  );
-  const date: string = (dates[0] as Record<string, string>).date;
+  /**
+   * Main entrypoint of the worker.
+   */
+  async runScraper() {
+    // Fetch the last scraped date.
+    const dates = await this.dbConnection.query(
+      `
+        SELECT date FROM scraper_dates ORDER BY date DESC LIMIT 1;
+      `,
+    );
+    const date: string = (dates[0] as Record<string, string>).date;
 
-  // Need to format the date so it can be used in the link correctly.
-  const formattedDate: string = new Date(date).toISOString();
+    // Need to format the date so it can be used in the link correctly.
+    const formattedDate: string = new Date(date).toISOString();
 
-  // Scrape all the data we need.
-  const scrapeResults: ScrapeResult = await scrape(formattedDate);
+    // Scrape all the data we need.
+    const scrapeResults: ScrapeResult =
+      await this.scraperEngine.scrape(formattedDate);
 
-  logger.info("Inserting Scraped Data...");
+    this.logger.debug("Inserting Scraped Data...");
 
-  // We can bundle the adding of tags, locations and prices.
-  // We need to insert these BEFORE the Productions and Events
-  // because we need them to already be in the database when linking them up.
-  await Promise.all([
-    dbConnection.insertTags(scrapeResults.genres),
-    dbConnection.insertPrices(scrapeResults.prices),
-    dbConnection.insertLocations(scrapeResults.locations),
-  ]);
+    // We can bundle the adding of tags, locations and prices.
+    // We need to insert these BEFORE the Productions and Events
+    // because we need them to already be in the database when linking them up.
+    await Promise.all([
+      this.dbConnection.insertTags(scrapeResults.genres),
+      this.dbConnection.insertPrices(scrapeResults.prices),
+      this.dbConnection.insertLocations(scrapeResults.locations),
+    ]);
 
-  // First Productions since we need those ids for Events.
-  await dbConnection.insertProductions(scrapeResults.productions);
-  await dbConnection.insertEvents(scrapeResults.events);
+    // First Productions since we need those ids for Events.
+    await this.dbConnection.insertProductions(scrapeResults.productions);
+    await this.dbConnection.insertEvents(scrapeResults.events);
 
-  // After scraping all data we can update the date in the DB.
-  await dbConnection.query(
-    `
-      INSERT INTO scraper_dates (date) VALUES (NOW());
-    `,
-  );
+    // After scraping all data we can update the date in the DB.
+    await this.dbConnection.query(
+      `
+        INSERT INTO scraper_dates (date) VALUES (NOW());
+      `,
+    );
 
-  logger.info("Insertion Finished!");
+    this.logger.debug("Insertion Finished!");
+  }
 }

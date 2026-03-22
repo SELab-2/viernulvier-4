@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { DbConnection } from "./db.connection";
+import { UtilsDbConnection } from "./database/db.connection";
 import logger from "../logger/logger";
 import { OldCSVFileParser } from "../../csv_parsing/old_csv_file_parser";
 import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
@@ -132,7 +132,7 @@ function toCsvProduction(row: {
  * Can be run independently from other imports.
  */
 export async function injectProductionsCSV(filePath: string) {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
   logger.info(`Parsing productions CSV: ${filePath}`);
 
   const parsedProductions = await CSVFileParser.parseProductionsCSV(filePath);
@@ -153,7 +153,7 @@ export async function injectProductionsCSV(filePath: string) {
  * Can be run independently from other imports.
  */
 export async function injectEventsCSV(filePath: string) {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
   logger.info(`Parsing events CSV: ${filePath}`);
 
   const parsedEvents = await CSVFileParser.parseEventsCSV(filePath);
@@ -193,7 +193,7 @@ export async function injectEventsCSV(filePath: string) {
  * Can be run independently from other imports.
  */
 export async function injectTagsCSV(filePath: string) {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
   logger.info(`Parsing tags CSV: ${filePath}`);
 
   const parsedTags = await CSVFileParser.parseTagsCSV(filePath);
@@ -230,7 +230,7 @@ export async function injectTagsCSV(filePath: string) {
  * Can be run independently from other imports.
  */
 export async function injectBlogsCSV(filePath: string) {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
   logger.info(`Parsing blogs CSV: ${filePath}`);
 
   const parsedBlogs = await CSVFileParser.parseBlogsCSV(filePath);
@@ -262,7 +262,7 @@ export async function injectBlogsCSV(filePath: string) {
  * Can be run independently from other imports.
  */
 export async function injectPricesCSV(filePath: string) {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
   logger.info(`Parsing prices CSV: ${filePath}`);
 
   const parsedPrices = await CSVFileParser.parsePricesCSV(filePath);
@@ -292,7 +292,7 @@ export async function injectPricesCSV(filePath: string) {
 }
 
 export async function injectOldCsvData() {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
 
   const productionsFile = "../common/res/productions_output.csv";
   const eventsFile = "../common/res/events_voorstellingen.csv";

@@ -1,23 +1,34 @@
-# Util Module
+# Util Modules
 
 **Category:** Shared/Utility
 
 ## Overview
 
-This module acts as a container for shared, stateless utility services that are used across multiple different feature modules, such as our logging implementation.
+This module has been split into three separate modules: `LoggerModule`, `LanguageModule`, and `ScraperModule`.
 
-## Module Boundaries
+## Modules
 
-### Dependencies 
+### LoggerModule
 
-None.
+Provides the `AppLogger`. No dependencies.
 
-### Provides
+### LanguageModule
 
-* The `AppLogger`.
-* The `Scraper` provider. See [Scraper](../scraping/index.md) for more info.
-* The `Language` provider that helps with flattening multi-lingual representations of data.
+Provides the `LanguageService` for flattening and translating multi-lingual data. Depends on `LoggerModule`.
 
-## Usage 
+### ScraperModule
 
-To use a utility like the `AppLogger`, simply import the `UtilModule` into your feature module and inject the required service into your constructor. See the [Logging Overview](../logging.md) for specific examples.
+Provides the `ScraperService`, `ScraperEngine`, and `ScraperRunner`. Depends on `LanguageModule`, `LoggerModule`, and
+`ScraperDbModule`.
+
+## Usage
+
+Import only the module you need into your feature module:
+
+```typescript
+@Module({
+  imports: [LoggerModule],
+})
+```
+
+See the [Logging Overview](../logging.md) for specific `AppLogger` examples.

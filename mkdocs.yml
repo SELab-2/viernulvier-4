@@ -3,54 +3,56 @@ site_name: VierNulVier Archive Documentation
 extra:
   version:
     provider: mike
-theme:  
+theme:
   name: material
 markdown_extensions:
   - admonition
 nav:
   - Home: index.md
   - Build & Run:
-    - Overview: build-run/index.md
-    - Backend: build-run/backend.md
-    - Frontend: build-run/frontend.md
+      - Overview: build-run/index.md
+      - Backend: build-run/backend.md
+      - Frontend: build-run/frontend.md
   - Pagination:
-    - Overview: pagination/index.md
+      - Overview: pagination/index.md
   - API Reference:
-    - Overview & Auth: api/index.md
-    - Events: api/events.md
-    - Productions: api/productions.md
-    - Blogs: api/blogs.md
-    - Tags: api/tags.md
-    - Locations: api/locations.md
-    - Pricing: api/pricing.md
+      - Overview & Auth: api/index.md
+      - Events: api/events.md
+      - Productions: api/productions.md
+      - Blogs: api/blogs.md
+      - Tags: api/tags.md
+      - Locations: api/locations.md
+      - Pricing: api/pricing.md
   - Data Schemas:
-    - Overview: schemas/index.md
-    - Core Entities: schemas/entities.md
-    - Metadata: schemas/metadata.md
+      - Overview: schemas/index.md
+      - Core Entities: schemas/entities.md
+      - Metadata: schemas/metadata.md
   - Testing:
-    - Overview: testing/index.md
-    - Backend: testing/backend.md
-    - Frontend: testing/frontend.md
+      - Overview: testing/index.md
+      - Backend: testing/backend.md
+      - Frontend: testing/frontend.md
   - Scraping:
-    - Overview: scraping/index.md
+      - Overview: scraping/index.md
   - Logging:
-    - Overview: logging/index.md
+      - Overview: logging/index.md
+  - Translation:
+      - Overview: translation/index.md
   - Server:
-    - Overview: server/index.md
-    - Database: server/database.md
-    - Backend: server/backend.md
-    - Frontend: server/frontend.md
+      - Overview: server/index.md
+      - Database: server/database.md
+      - Backend: server/backend.md
+      - Frontend: server/frontend.md
   - Nest Modules:
-    - Overview: modules/index.md
-    - Feature Modules:
-      - Production: modules/production.md
-      - Event: modules/event.md
-      - Tag: modules/tag.md
-      - Blog: modules/blog.md
-      - Location: modules/location.md
-      - Price: modules/price.md
-    - Core Modules:
-      - Database: modules/database.md
-      - Auth: modules/auth.md
-    - Shared Modules:
-      - Util: modules/util.md
+      - Overview: modules/index.md
+      - Feature Modules:
+          - Production: modules/production.md
+          - Event: modules/event.md
+          - Tag: modules/tag.md
+          - Blog: modules/blog.md
+          - Location: modules/location.md
+          - Price: modules/price.md
+      - Core Modules:
+          - Database: modules/database.md
+          - Auth: modules/auth.md
+      - Shared Modules:
+          - Util: modules/util.md

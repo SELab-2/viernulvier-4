@@ -32,6 +32,7 @@ jobs:
             echo "DB_NAME_DEV=selab2_dev" >> $1
             echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> $1
             echo "DB_PORT_DEV=2002" >> $1
+            echo "TRANSLATE_API_KEY=abcdlalala" >> $1
           }
           write_env ".env"
           write_env "backend/.env"
