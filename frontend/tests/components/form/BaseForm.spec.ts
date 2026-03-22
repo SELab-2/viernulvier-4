@@ -59,4 +59,15 @@ describe("FormBaseForm", () => {
         });
         expect(w.findAll("input").length).toBe(2);
     });
+
+    it("pre-fills form with initialValues", async () => {
+        const w = mount(FormBaseForm, {
+            global: { plugins: [i18n] },
+            props: {
+                fields,
+                initialValues: { title: "Default title" }
+            }
+        });
+        expect(w.find("input").element.value).toBe("Default title");
+    });
 });

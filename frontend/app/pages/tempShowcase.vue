@@ -113,7 +113,10 @@ const toggleDark = () => {
 
 <template>
   <div @input="submittedData = null">
-    <FormBaseForm :fields="fields" @submit="handleSubmit" />
+    <FormBaseForm
+        :fields="fields"
+        :initialValues="{ num: 6 }"
+        @submit="handleSubmit" />
   </div>
 
   <br>

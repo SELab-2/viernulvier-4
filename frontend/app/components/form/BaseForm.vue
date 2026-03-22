@@ -1,13 +1,15 @@
 <script setup lang="ts">
 /**
  * A dynamic form component that renders fields based on a given array, includes:
- *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate, BaseTagInput, BaseFileUpload, BaseSelect)
+ *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate, BaseTagInput, BaseFileUpload, BaseSelect, BaseMultiSelect)
  *  - Multiple instances of the same component type are supported
+ *  - Pre-filled values supported (the key needs to match the name of the field you want to fill in)
  *  - Emits all field values on submit via @submit
  *
  * Usage:
  * <FormBaseForm
  *   :fields="fields"
+ *   :initialValues="{ title: 'Default title' }"
  *   @submit="handleSubmit"
  * />
  *
@@ -33,10 +35,11 @@ import BaseMultiSelect from "./fields/BaseMultiSelect.vue";
 
 interface Props {
   fields: FormField[] // Can store multiple fields, allows us to have multiple of the same type
+  initialValues?: Record<string, any> // Optional pre-filled values
 }
 
-const { fields } = defineProps<Props>() // shortcut for const props = defineProps<Props>(); const fields = props.fields
-const form = reactive<Record<string, any>>({}) // form will hold all dynamic values
+const { fields, initialValues } = defineProps<Props>()
+const form = reactive<Record<string, any>>({ ...initialValues }) // form will hold all dynamic values, will be prefilled with initialValues
 const components: Record<FieldComponent, any> = { // mapping
   BaseInput,
   BaseTextArea,
