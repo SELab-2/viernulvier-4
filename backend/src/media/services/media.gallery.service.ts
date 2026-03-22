@@ -85,12 +85,24 @@ export class MediaGalleryService {
     return await this.mediaDbService.getItemsByGallery(galleryId);
   }
 
-  async linkItemToGallery(itemId: number, galleryId: number): Promise<boolean> {
-    // TODO: Implement when db service is there.
-    return true;
+  /**
+   * Links an existing item to a gallery with the ids provided.
+   * @param galleryId The ID of the media gallery.
+   * @param itemId The ID of the media item.
+   */
+  async linkItemToGallery(galleryId: number, itemId: number): Promise<void> {
+    await this.mediaDbService.linkItemToGallery(galleryId, itemId);
   }
 
-  async unlinkItemFromGallery(itemId: number, galleryId: number): Promise<void> {
-    // TODO: Implement when db service is there.
+  /**
+   * Unlinks an existing item from an existing gallery.
+   * @param galleryId The ID of the gallery.
+   * @param itemId The ID of the item.
+   */
+  async unlinkItemFromGallery(
+    galleryId: number,
+    itemId: number,
+  ): Promise<void> {
+    await this.mediaDbService.unlinkItemFromGallery(galleryId, itemId);
   }
 }

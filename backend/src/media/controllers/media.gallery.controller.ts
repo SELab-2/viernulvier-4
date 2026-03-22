@@ -169,8 +169,8 @@ export class MediaGalleryController {
   async linkItemToGallery(
     @Param("galleryId", ParseIntPipe) galleryId: number,
     @Param("itemId", ParseIntPipe) itemId: number,
-  ): Promise<boolean> {
-    return await this.linkItemToGallery(galleryId, itemId);
+  ): Promise<void> {
+    await this.mediaGalleryService.linkItemToGallery(galleryId, itemId);
   }
 
   /**
@@ -187,6 +187,6 @@ export class MediaGalleryController {
     @Param("galleryId", ParseIntPipe) galleryId: number,
     @Param("itemId", ParseIntPipe) itemId: number,
   ): Promise<void> {
-    await this.unlinkItemFromGallery(galleryId, itemId);
+    await this.mediaGalleryService.unlinkItemFromGallery(galleryId, itemId);
   }
 }
