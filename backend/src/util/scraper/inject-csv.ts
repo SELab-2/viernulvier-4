@@ -131,8 +131,10 @@ function toCsvProduction(row: {
  * Import only productions from the structured CSV.
  * Can be run independently from other imports.
  */
-export async function injectProductionsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectProductionsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing productions CSV: ${filePath}`);
 
   const parsedProductions = await CSVFileParser.parseProductionsCSV(filePath);
@@ -152,8 +154,10 @@ export async function injectProductionsCSV(filePath: string) {
  * Import only events (+ locations) from the structured CSV.
  * Can be run independently from other imports.
  */
-export async function injectEventsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectEventsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing events CSV: ${filePath}`);
 
   const parsedEvents = await CSVFileParser.parseEventsCSV(filePath);
@@ -192,8 +196,10 @@ export async function injectEventsCSV(filePath: string) {
  * Import only tags from the structured CSV and link them to already existing productions.
  * Can be run independently from other imports.
  */
-export async function injectTagsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectTagsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing tags CSV: ${filePath}`);
 
   const parsedTags = await CSVFileParser.parseTagsCSV(filePath);
@@ -229,8 +235,10 @@ export async function injectTagsCSV(filePath: string) {
  * Import only blogs from the structured CSV and link them to already existing productions.
  * Can be run independently from other imports.
  */
-export async function injectBlogsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectBlogsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing blogs CSV: ${filePath}`);
 
   const parsedBlogs = await CSVFileParser.parseBlogsCSV(filePath);
@@ -261,8 +269,10 @@ export async function injectBlogsCSV(filePath: string) {
  * Import only prices from the structured CSV and link them to already existing events.
  * Can be run independently from other imports.
  */
-export async function injectPricesCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectPricesCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing prices CSV: ${filePath}`);
 
   const parsedPrices = await CSVFileParser.parsePricesCSV(filePath);
@@ -291,9 +301,9 @@ export async function injectPricesCSV(filePath: string) {
   logger.info("Structured prices CSV injection completed.");
 }
 
-export async function injectOldCsvData() {
-  const dbConnection = new UtilsDbConnection();
-
+export async function injectOldCsvData(
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   const productionsFile = "../common/res/productions_output.csv";
   const eventsFile = "../common/res/events_voorstellingen.csv";
 
