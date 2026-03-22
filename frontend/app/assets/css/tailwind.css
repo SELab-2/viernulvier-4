@@ -54,7 +54,7 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
 
-  /* Accent color for tags and accents (requested #8224e3) */
+  /* Accent color for tags */
   --accent: #8224e3;
 }
 
@@ -71,7 +71,7 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
 
-  /* keep the same accent in dark mode for brand consistency */
+  /* Accent color for tags */
   --accent: #8224e3;
 }
 

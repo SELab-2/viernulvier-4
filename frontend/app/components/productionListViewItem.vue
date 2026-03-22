@@ -99,6 +99,12 @@ watch(locale, () => loadTags())
               :key="tag.id"
               :label="typeof(tag.tag) === 'string' ? tag.tag : ''"
             />
+            <!-- Invisible fallback tag if there are no tags to keep the same layout -->
+            <TagPill
+              v-if="tags.length === 0"
+              :label="''"
+              class="opacity-0 pointer-events-none"
+            />
           </div>
 
           <!-- Fade effect -->
