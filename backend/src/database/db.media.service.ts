@@ -30,7 +30,7 @@ export class MediaDatabaseService {
    */
   async getGalleryById(id: number): Promise<MediaGalleryDto> {
     const query = `
-      SELECT id, legacy_id, name, created_at, updated_at
+      SELECT id, name, created_at, updated_at
       FROM media_gallery
       WHERE id = $1
     `;
@@ -57,7 +57,7 @@ export class MediaDatabaseService {
     page: number = 0,
   ): Promise<PaginatedResponse<MediaGalleryDto>> {
     let query = `
-      SELECT id, legacy_id, name, created_at, updated_at
+      SELECT id, name, created_at, updated_at
       FROM media_gallery
       ORDER BY id
     `;
@@ -97,15 +97,12 @@ export class MediaDatabaseService {
     }
 
     const query = `
-      INSERT INTO media_gallery (name, legacy_id)
-      VALUES ($1, $2)
-      RETURNING id, legacy_id, name, created_at, updated_at
+      INSERT INTO media_gallery (name)
+      VALUES ($1)
+      RETURNING id, name, created_at, updated_at
     `;
 
-    const result = await this.db.query<MediaGalleryDto>(query, [
-      gallery.name,
-      gallery.legacy_id ?? null,
-    ]);
+    const result = await this.db.query<MediaGalleryDto>(query, [gallery.name]);
 
     if (result.length === 0) {
       throw new Error("Failed to create gallery");
@@ -133,11 +130,6 @@ export class MediaDatabaseService {
       values.push(gallery.name);
     }
 
-    if (gallery.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(gallery.legacy_id);
-    }
-
     if (fields.length === 0) {
       throw new BadRequestException("No valid fields to update");
     }
@@ -148,7 +140,7 @@ export class MediaDatabaseService {
       UPDATE media_gallery
       SET ${fields.join(", ")}
       WHERE id = $${index}
-      RETURNING id, legacy_id, name, created_at, updated_at
+      RETURNING id, name, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaGalleryDto>(query, values);
@@ -187,7 +179,7 @@ export class MediaDatabaseService {
    */
   async getItemById(id: number): Promise<MediaItemDto> {
     const query = `
-      SELECT id, legacy_id, type, original_filename, position, width, height, format, created_at, updated_at
+      SELECT id, type, original_filename, position, width, height, format, created_at, updated_at
       FROM media_item
       WHERE id = $1
     `;
@@ -210,7 +202,7 @@ export class MediaDatabaseService {
    */
   async getItemsByGallery(galleryId: number): Promise<MediaItemDto[]> {
     const query = `
-      SELECT mi.id, mi.legacy_id, mi.type, mi.original_filename, mi.position,
+      SELECT mi.id, mi.type, mi.original_filename, mi.position,
              mi.width, mi.height, mi.format, mi.created_at, mi.updated_at
       FROM media_item mi
       INNER JOIN gallery_item gi ON gi.item_id = mi.id
@@ -236,13 +228,12 @@ export class MediaDatabaseService {
     }
 
     const insertQuery = `
-        INSERT INTO media_item (legacy_id, type, original_filename, position, width, height, format)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING id, legacy_id, type, original_filename, position, width, height, format, created_at, updated_at
+        INSERT INTO media_item (type, original_filename, position, width, height, format)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, type, original_filename, position, width, height, format, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaItemDto>(insertQuery, [
-      item.legacy_id ?? null,
       item.type,
       item.original_filename,
       item.position ?? 0,
@@ -321,7 +312,7 @@ export class MediaDatabaseService {
       UPDATE media_item
       SET ${fields.join(", ")}
       WHERE id = $${index}
-      RETURNING id, legacy_id, type, original_filename, position, width, height, format, created_at, updated_at
+      RETURNING id, type, original_filename, position, width, height, format, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaItemDto>(query, values);
@@ -360,7 +351,7 @@ export class MediaDatabaseService {
    */
   async getCropById(id: number): Promise<MediaCropDto> {
     const query = `
-      SELECT id, legacy_id, name, url, created_at, updated_at
+      SELECT id, name, url, created_at, updated_at
       FROM media_crop
       WHERE id = $1
     `;
@@ -383,7 +374,7 @@ export class MediaDatabaseService {
    */
   async getCropsByItem(itemId: number): Promise<MediaCropDto[]> {
     const query = `
-      SELECT mc.id, mc.legacy_id, mc.name, mc.url, mc.created_at, mc.updated_at
+      SELECT mc.id, mc.name, mc.url, mc.created_at, mc.updated_at
       FROM media_crop mc
       INNER JOIN item_crop ic ON ic.crop_id = mc.id
       WHERE ic.item_id = $1
@@ -409,13 +400,12 @@ export class MediaDatabaseService {
     }
 
     const insertQuery = `
-        INSERT INTO media_crop (legacy_id, name, url)
-        VALUES ($1, $2, $3)
-        RETURNING id, legacy_id, name, url, created_at, updated_at
+        INSERT INTO media_crop (name, url)
+        VALUES ($1, $2)
+        RETURNING id, name, url, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaCropDto>(insertQuery, [
-      crop.legacy_id ?? null,
       crop.name,
       crop.url,
     ]);
@@ -470,7 +460,7 @@ export class MediaDatabaseService {
       UPDATE media_crop
       SET ${fields.join(", ")}
       WHERE id = $${index}
-      RETURNING id, legacy_id, name, url, created_at, updated_at
+      RETURNING id, name, url, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaCropDto>(query, values);

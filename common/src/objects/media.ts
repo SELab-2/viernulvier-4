@@ -6,7 +6,6 @@ export const MediaGallerySchema = z.object({
   name: z.string(), // TODO this needs language?
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  legacy_id: z.string(),
 });
 export const CreateMediaGallerySchema = MediaGallerySchema.omit({
   id: true,
@@ -33,7 +32,6 @@ export const MediaItemSchema = z.object({
   format: z.string(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  legacy_id: z.string(),
 });
 export const CreateMediaItemSchema = MediaItemSchema.omit({
   id: true,
@@ -56,7 +54,6 @@ export const MediaCropSchema = z.object({
   url: z.string(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
-  legacy_id: z.string(),
 });
 export const CreateMediaCropSchema = MediaCropSchema.omit({
   id: true,
