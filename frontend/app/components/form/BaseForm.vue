@@ -72,7 +72,7 @@ function submit() {
     <div class="p-4">
       <button
         type="submit"
-        class="w-full h-12 bg-primary/80 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-90 cursor-pointer"
+        class="w-full h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-90 cursor-pointer"
       >
         Submit
       </button>

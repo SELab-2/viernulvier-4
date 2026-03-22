@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { FormField } from "../types/FormField";
 
+const { locale, setLocale } = useI18n()
+const isDark = ref(false)
+
 const fields: FormField[] = [
   {
     component: 'BaseInput',
@@ -100,6 +103,12 @@ function isFileArray(value: any): value is File[] {
 function objectURL(file: File): string {
   return URL.createObjectURL(file)
 }
+
+const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
+const toggleDark = () => {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle("dark", isDark.value)
+}
 </script>
 
 <template>
@@ -124,6 +133,17 @@ function objectURL(file: File): string {
       <!-- Everything else -->
       <span v-else>{{ value }}</span>
     </div>
+  </div>
+  <div class="flex gap-2 m-4">
+    <!-- knop om i18n the testen -->
+    <button @click="toggleLocale" class="btn-outline">
+      {{ locale.toUpperCase() }}
+    </button>
+    <br>
+    <!-- knop om light-dark the testen -->
+    <button @click="toggleDark" class="btn-outline">
+      {{ isDark ? "Light" : "Dark" }}
+    </button>
   </div>
 </template>
 
