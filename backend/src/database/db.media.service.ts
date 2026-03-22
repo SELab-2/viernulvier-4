@@ -340,6 +340,35 @@ export class MediaDatabaseService {
     }
   }
 
+  /**
+   * Link an existing item to an existing gallery.
+   * Silently does nothing if the link already exists (ON CONFLICT DO NOTHING).
+   * @param galleryId The gallery to link to.
+   * @param itemId The item to link.
+   */
+  async linkItemToGallery(galleryId: number, itemId: number): Promise<void> {
+    await this.db.query(
+      `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [galleryId, itemId],
+    );
+  }
+
+  /**
+   * Unlink an item from a gallery. Does not delete the item itself.
+   * Silently does nothing if the link doesn't exist.
+   * @param galleryId The gallery to unlink from.
+   * @param itemId The item to unlink.
+   */
+  async unlinkItemFromGallery(
+    galleryId: number,
+    itemId: number,
+  ): Promise<void> {
+    await this.db.query(
+      `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`,
+      [galleryId, itemId],
+    );
+  }
+
   // ----------------------------------------------------------------
   // Media Crop
   // ----------------------------------------------------------------
