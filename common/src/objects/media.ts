@@ -1,9 +1,10 @@
 import z from "zod";
+import { LocalizedStringSchema } from "./language";
 
 // Gallery
 export const MediaGallerySchema = z.object({
   id: z.number(),
-  name: z.string(), // TODO this needs language?
+  name: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
@@ -50,7 +51,7 @@ export type UpdateMediaItem = z.infer<typeof UpdatedMediaItemSchema>;
 // crop
 export const MediaCropSchema = z.object({
   id: z.number(),
-  name: z.string(), // TODO this needs language?
+  name: LocalizedStringSchema,
   url: z.string(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),

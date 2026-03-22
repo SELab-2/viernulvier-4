@@ -589,7 +589,7 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * Gets all media galleries linked to a given production.
+   * Gets media gallery linked to a given production.
    * @param prod_id The ID of the production you want.
    * @returns List of MediaGalleryDto linked to the production.
    */

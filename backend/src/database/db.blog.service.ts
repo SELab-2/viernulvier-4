@@ -188,7 +188,7 @@ export class BlogDatabaseService {
   }
 
   /**
-   * Gets all media galleries linked to a given blog.
+   * Gets media gallery linked to a given blog.
    * @param blog_id The ID of the blog you want.
    * @returns List of MediaGalleryDto linked to the blog.
    */
