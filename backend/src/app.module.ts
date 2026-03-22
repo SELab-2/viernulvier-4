@@ -10,6 +10,8 @@ import { AuthModule } from "./auth/auth.module";
 import { PriceModule } from "./price/price.module";
 import { UtilModule } from "./util/util.module";
 import { ScheduleModule } from "@nestjs/schedule";
+import { MediaModule } from "./media/media.module";
+import { RouterModule } from "@nestjs/core";
 
 @Module({
   imports: [
@@ -26,6 +28,15 @@ import { ScheduleModule } from "@nestjs/schedule";
     PriceModule,
     AuthModule,
     UtilModule,
+    MediaModule,
+
+    // This allows all controllers in the MediaModule to use same base name
+    RouterModule.register([
+      {
+        path: "media",
+        module: MediaModule,
+      },
+    ]),
   ],
   controllers: [AppController],
 })
