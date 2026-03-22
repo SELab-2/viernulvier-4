@@ -5,7 +5,7 @@ import type { ProductionView, Tag, Event } from '@repo/common'
 import { useProductionApi } from '../composables/useProductionApi'
 import { useEventApi } from '../composables/useEventApi'
 import { ROUTES } from '../utils/routes'
-import { computeDateRangeFromEvents, formatHTMLText } from '../utils/formatters'
+import { computeDateRangeFromEvents } from '../utils/formatters'
 import TagPill from './TagPill.vue'
 import ThumbnailPlaceholder from './ThumbnailPlaceholder.vue'
 
@@ -74,12 +74,10 @@ watch(locale, () => loadTags())
 
       <div class="flex-1 min-w-0">
         <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
+          <div class="min-w-0 max-w-[60%]">
             <h3
-              class="text-3xl sm:text-4xl font-semibold text-zinc-900 leading-tight truncate"
-              v-html="formatHTMLText(productionView.titel)"
-              :title="productionView.titel || ''"
-            />
+              class="text-2xl sm:text-3xl font-semibold text-zinc-900 leading-tight truncate"
+            >{{ productionView.titel }}</h3>
 
             <p class="mt-2 text-sm text-zinc-500 flex items-center gap-2">
               <svg class="w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -92,7 +90,7 @@ watch(locale, () => loadTags())
         </div>
 
         <!-- Tags container -->
-        <div class="mt-2 relative overflow-hidden">
+        <div class="mt-2 overflow-hidden">
           <div class="flex items-center gap-2">
             <TagPill
               v-for="tag in tags"
@@ -106,9 +104,6 @@ watch(locale, () => loadTags())
               class="opacity-0 pointer-events-none"
             />
           </div>
-
-          <!-- Fade effect -->
-          <div class="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
         </div>
 
       </div>
