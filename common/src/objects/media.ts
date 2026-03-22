@@ -34,7 +34,10 @@ export const MediaItemSchema = z.object({
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
-export const CreateMediaItemSchema = MediaItemSchema.omit({
+export const CreateMediaItemSchema = MediaItemSchema.extend({
+  // An array of gallery ids to link to on creation.
+  gallery_ids: z.array(z.number().int().positive()).optional(),
+}).omit({
   id: true,
   created_at: true,
   updated_at: true,
@@ -56,7 +59,10 @@ export const MediaCropSchema = z.object({
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
-export const CreateMediaCropSchema = MediaCropSchema.omit({
+export const CreateMediaCropSchema = MediaCropSchema.extend({
+  // The item this crop is supposed to be linked to.
+  item_id: z.number().int().positive(),
+}).omit({
   id: true,
   created_at: true,
   updated_at: true,
