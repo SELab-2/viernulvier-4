@@ -55,7 +55,7 @@ describe("BaseTagInput", () => {
         await wrapper.find("input").setValue("Vue");
         await wrapper.find("input").trigger("keydown", { key: "Enter" });
 
-        const occurrences = wrapper.text().split("Vue").length - 1; //// counts how many times "Vue" appears in the rendered text
+        const occurrences = wrapper.text().split("Vue").length - 1; // counts how many times "Vue" appears in the rendered text
         // (produces an array with one more element than there are occurences)
         expect(occurrences).toBe(1);
     });
@@ -63,11 +63,11 @@ describe("BaseTagInput", () => {
     it("does not add empty tags", async () => {
         await wrapper.find("input").setValue("   ");
         await wrapper.find("input").trigger("keydown", { key: "Enter" });
-        expect(wrapper.findAll("span.truncate").length).toBe(0);
+        expect(wrapper.find(".flex.flex-wrap.gap-2").exists()).toBe(false); // gap-2 is only on the added tag container
     });
 
     it("does not show tag list when no tags are added", () => {
-        expect(wrapper.find(".flex.flex-wrap").exists()).toBe(false);
+        expect(wrapper.find(".flex.flex-wrap.gap-2").exists()).toBe(false); // gap-2 is only on the added tag container
     });
 
     it("removes a tag when X is clicked", async () => {

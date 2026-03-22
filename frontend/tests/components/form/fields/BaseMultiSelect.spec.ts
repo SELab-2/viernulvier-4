@@ -82,8 +82,9 @@ describe("BaseMultiSelect", () => {
         await input.setValue("Banana");
         await w.find("li").trigger("mousedown");
 
-        expect(w.text()).not.toContain("Apple");
-        expect(w.text()).toContain("Banana");
+        const selectedList = w.find(".mt-2"); // matches the tailwind class of the selected items container
+        expect(selectedList.text()).not.toContain("Apple");
+        expect(selectedList.text()).toContain("Banana");
     });
 
     it("rejects values not in options when freeInput is false", async () => {
@@ -113,6 +114,6 @@ describe("BaseMultiSelect", () => {
         await wrapper.find("li").trigger("mousedown");
 
         await wrapper.find("svg").trigger("click");
-        expect(wrapper.text()).not.toContain("Apple");
+        expect(wrapper.find(".mt-2").exists()).toBe(false); // // matches the tailwind class of the selected items container
     });
 });

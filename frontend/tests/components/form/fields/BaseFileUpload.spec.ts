@@ -110,7 +110,8 @@ describe("BaseFileUpload", () => {
         Object.defineProperty(input.element, "files", { value: [file], configurable: true });
         await input.trigger("change");
 
-        await wrapper.find("svg").trigger("click");
+        const svgs = wrapper.findAll("svg"); // since there is both a paperclip icon + X icon
+        await svgs[svgs.length - 1].trigger("click"); // last one should be X icon
         expect(wrapper.text()).not.toContain("document.pdf");
     });
 });
