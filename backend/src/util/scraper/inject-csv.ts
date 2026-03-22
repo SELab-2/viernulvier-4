@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { DbConnection } from "./db.connection";
+import { UtilsDbConnection } from "./database/db.connection";
 import logger from "../logger/logger";
 import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
 import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
@@ -65,7 +65,7 @@ function toCsvEvent(event: any, index: number, locationName: string): vnvEvent {
 }
 
 export async function injectCsvData() {
-  const dbConnection = new DbConnection();
+  const dbConnection = new UtilsDbConnection();
 
   const productionsFile = "../common/res/productions_output.csv";
   const eventsFile = "../common/res/events_voorstellingen.csv";

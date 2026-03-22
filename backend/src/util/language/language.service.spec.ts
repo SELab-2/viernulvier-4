@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { LanguageService } from "./language.service";
 import { Language } from "@repo/common";
+import { AppLogger } from "../logger/logger.service";
 
 // --- Interfaces for Testing ---
 interface LocalizedText {
@@ -36,7 +37,18 @@ describe("LanguageService", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LanguageService],
+      providers: [
+        LanguageService,
+        {
+          provide: AppLogger,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<LanguageService>(LanguageService);
