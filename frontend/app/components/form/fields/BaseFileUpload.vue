@@ -72,7 +72,7 @@ function removeFile(index: number) { // handles removing a file
           :accept="props.accept"
           :multiple="props.multiple"
           @change="handleFileChange"
-          class="pl-10 pr-4 bg-muted border border-border h-12 leading-[3rem] font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background file:hidden cursor-pointer"
+          class="pl-10 pr-4 bg-muted border border-border h-12 leading-[3rem] font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background file:hidden cursor-pointer text-transparent"
       />
 
       <!-- Paperclip icon -->
