@@ -1,5 +1,5 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
-import { injectCsvData } from "./inject-csv";
+import { injectOldCsvData } from "./inject-csv";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ScraperRunner } from "./main";
@@ -33,7 +33,7 @@ export class ScraperService implements OnApplicationBootstrap {
     }
 
     this.logger.log("Running initial CSV injection...");
-    injectCsvData()
+    injectOldCsvData()
       .then(() => {
         this.logger.log(
           "Initial CSV injection finished successfully.",

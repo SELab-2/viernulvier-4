@@ -15,7 +15,8 @@
     "start:dev": "turbo start:dev",
     "test": "turbo test",
     "test:coverage": "turbo test:coverage",
-    "scraper:reset": "turbo scraper:reset"
+    "scraper:reset": "turbo scraper:reset",
+    "scraper:inject:structured:test": "turbo scraper:inject:structured:test"
   },
   "repository": {
     "type": "git",
