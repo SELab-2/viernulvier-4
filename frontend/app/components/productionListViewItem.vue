@@ -102,7 +102,7 @@ watch(locale, () => loadTags())
             <!-- Invisible fallback tag if there are no tags to keep the same layout -->
             <TagPill
               v-if="tags.length === 0"
-              :label="''"
+              :label="'/'"
               class="opacity-0 pointer-events-none"
             />
           </div>
