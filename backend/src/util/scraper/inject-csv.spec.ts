@@ -23,8 +23,8 @@ jest.mock("../../csv_parsing/csv_file_parser", () => ({
   },
 }));
 
-jest.mock("./db.connection", () => ({
-  DbConnection: function () {
+jest.mock("./database/db.connection", () => ({
+  UtilsDbConnection: function () {
     return mockDbConnectionCtor();
   },
 }));
