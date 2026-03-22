@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { ProductionView, Tag, Event } from '@repo/common'
 import { useProductionApi } from '../composables/useProductionApi'
 import { useEventApi } from '../composables/useEventApi'
@@ -18,33 +19,51 @@ const events = ref<Event[]>([])
 const { getTags } = useProductionApi()
 const { getAll: getAllEvents } = useEventApi()
 
-const dateRangeText = computed(() => computeDateRangeFromEvents(events.value as any))
+const { locale } = useI18n()
 
-async function loadTagsAndEvents() {
-  if (productionView && productionView.id) {
-    try {
-      const response = await getTags(productionView.id, 'nl')
-      if (response.data) tags.value = response.data as Tag[]
-      else console.error('Failed to load tags:', response.error)
-    } catch (err) {
-      console.error('Error loading tags:', err)
-    }
+async function loadTags() {
+  if (!productionView?.id) return
 
-    try {
-      const resp = await getAllEvents({ production_id: productionView.id as any, limit: 100 })
-      if (resp.data && Array.isArray((resp.data as any).objects)) {
-        events.value = (resp.data as any).objects as Event[]
-      } else if (resp.data && Array.isArray(resp.data)) {
-        events.value = resp.data as Event[]
-      }
-    } catch (err) {
-      console.error('Error loading events:', err)
-    }
+  try {
+    const response = await getTags(productionView.id, locale.value)
+    if (response.data) tags.value = response.data as Tag[]
+    else console.error('Failed to load tags:', response.error)
+  } catch (err) {
+    console.error('Error loading tags:', err)
   }
 }
 
-onMounted(() => loadTagsAndEvents())
-watch(() => productionView.id, () => loadTagsAndEvents())
+async function loadEvents() {
+  if (!productionView?.id) return
+
+  try {
+    const resp = await getAllEvents({ production_id: productionView.id as any, limit: 100 })
+    if (resp.data && Array.isArray((resp.data as any).objects)) {
+      events.value = (resp.data as any).objects as Event[]
+    } else if (resp.data && Array.isArray(resp.data)) {
+      events.value = resp.data as Event[]
+    }
+  } catch (err) {
+    console.error('Error loading events:', err)
+  }
+}
+
+// Recompute dateRangeText whenever events or locale changes
+const dateRangeText = computed(() => computeDateRangeFromEvents(events.value, locale.value))
+
+onMounted(() => {
+  loadEvents()
+  loadTags()
+})
+
+watch(() => productionView.id, () => {
+  loadEvents()
+  loadTags()
+})
+
+// reload tags if language changes
+watch(locale, () => loadTags())
+
 </script>
 
 <template>
@@ -78,7 +97,7 @@ watch(() => productionView.id, () => loadTagsAndEvents())
             <TagPill
               v-for="tag in tags"
               :key="tag.id"
-              :label="typeof tag.tag === 'string' ? tag.tag : ''"
+              :label="typeof(tag.tag) === 'string' ? tag.tag : ''"
             />
           </div>
           <!-- Fade effect -->

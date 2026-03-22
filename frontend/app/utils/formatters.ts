@@ -1,10 +1,11 @@
 // Formatting helpers used across the frontend (dates and ranges).
 
-// Format ISO date to short NL string (e.g. "21 mrt. 2026").
-export function formatDateShortNL(iso: string): string {
+// Format ISO date to short string according to locale ('nl' or 'en')
+export function formatDateShort(iso: string, lang: string): string {
   try {
     const d = new Date(iso)
-    return d.toLocaleDateString('nl-NL', {
+    const localeStr = lang === 'en' ? 'en-US' : 'nl-NL'
+    return d.toLocaleDateString(localeStr, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -14,9 +15,13 @@ export function formatDateShortNL(iso: string): string {
   }
 }
 
-// Compute a human-friendly date range from events with starttime/endtime.
-export function computeDateRangeFromEvents(events: Array<{ starttime?: string | null; endtime?: string | null }>): string {
-  if (!events || !events.length) return 'TBA'
+// Compute a date range from events with starttime/endtime
+export function computeDateRangeFromEvents(
+  events: Array<{ starttime?: string | null; endtime?: string | null }>,
+  lang: string
+): string {
+  if (!events || !events.length) return '/'
+
   const times: number[] = []
   for (const e of events) {
     if (e?.starttime) {
@@ -28,12 +33,15 @@ export function computeDateRangeFromEvents(events: Array<{ starttime?: string | 
       if (!Number.isNaN(t2)) times.push(t2)
     }
   }
-  if (!times.length) return 'TBA'
+
+  if (!times.length) return '/'
+
   const earliest = new Date(Math.min(...times))
   const latest = new Date(Math.max(...times))
   const sameDay = earliest.toDateString() === latest.toDateString()
-  if (sameDay) return formatDateShortNL(earliest.toISOString())
-  return `${formatDateShortNL(earliest.toISOString())} — ${formatDateShortNL(latest.toISOString())}`
+  if (sameDay) return formatDateShort(earliest.toISOString(), lang)
+
+  return `${formatDateShort(earliest.toISOString(), lang)} — ${formatDateShort(latest.toISOString(), lang)}`
 }
 
 export function formatHTMLText(text: string | null) {
