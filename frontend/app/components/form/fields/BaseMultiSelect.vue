@@ -83,7 +83,7 @@ const availableOptions = computed(() =>
     </div>
 
     <!-- Selected items -->
-    <div v-if="model.length" class="mt-2 border border-border rounded-lg overflow-hidden">
+    <div v-if="model.length" data-testid="item-container" class="mt-2 border border-border rounded-lg overflow-hidden"> <!-- testid to make it easier for testing -->
       <div
           v-for="item in model"
           :key="item"

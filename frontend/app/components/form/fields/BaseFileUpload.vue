@@ -80,7 +80,7 @@ function removeFile(index: number) { // handles removing a file
     </div>
 
     <!-- Selected files -->
-    <div v-if="model.length" class="mt-2 border border-border rounded-lg overflow-hidden">
+    <div v-if="model.length" data-testid="file-container" class="mt-2 border border-border rounded-lg overflow-hidden"> <!-- testid to make it easier for testing -->
       <div
           v-for="(file, index) in model"
           :key="file.name"

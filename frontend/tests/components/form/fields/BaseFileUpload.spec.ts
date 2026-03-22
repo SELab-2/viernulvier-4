@@ -40,7 +40,7 @@ describe("BaseFileUpload", () => {
     });
 
     it("does not show file list when no files are selected", () => {
-        expect(wrapper.find(".mt-2").exists()).toBe(false);
+        expect(wrapper.find('[data-testid="file-container"]').exists()).toBe(false);
     });
 
     it("displays filename after selecting a file", async () => {

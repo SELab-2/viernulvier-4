@@ -45,7 +45,7 @@ describe("BaseMultiSelect", () => {
     });
 
     it("does not show selected list when nothing is selected", () => {
-        expect(wrapper.find(".mt-2").exists()).toBe(false); // matches the tailwind class of the selected items container
+        expect(wrapper.find('[data-testid="item-container"]').exists()).toBe(false);
     });
 
     it("adds an item when selected from suggestions", async () => {
@@ -83,7 +83,7 @@ describe("BaseMultiSelect", () => {
         await input.setValue("Banana");
         await w.find("li").trigger("mousedown");
 
-        const selectedList = w.find(".mt-2"); // matches the tailwind class of the selected items container
+        const selectedList = w.find('[data-testid="item-container"]');
         expect(selectedList.text()).not.toContain("Apple");
         expect(selectedList.text()).toContain("Banana");
     });
@@ -115,6 +115,6 @@ describe("BaseMultiSelect", () => {
         await wrapper.find("li").trigger("mousedown");
 
         await wrapper.findComponent(X).trigger("click");
-        expect(wrapper.find(".mt-2").exists()).toBe(false); // // matches the tailwind class of the selected items container
+        expect(wrapper.find('[data-testid="item-container"]').exists()).toBe(false);
     });
 });
