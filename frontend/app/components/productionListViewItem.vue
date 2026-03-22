@@ -91,8 +91,8 @@ watch(locale, () => loadTags())
           </div>
         </div>
 
-        <!-- Tags with fade overflow -->
-        <div v-if="tags.length" class="mt-2 relative overflow-hidden">
+        <!-- Tags container -->
+        <div class="mt-2 relative overflow-hidden">
           <div class="flex items-center gap-2">
             <TagPill
               v-for="tag in tags"
@@ -100,6 +100,7 @@ watch(locale, () => loadTags())
               :label="typeof(tag.tag) === 'string' ? tag.tag : ''"
             />
           </div>
+
           <!-- Fade effect -->
           <div class="absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
         </div>
