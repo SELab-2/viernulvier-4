@@ -1,4 +1,8 @@
 {
+  "_comment": "English translations for the VIERNULVIER archive frontend.",
+  "searchbar": {
+    "placeholder": "Search..."
+  },
   "hero": {
     "title": "Archive",
     "label": "Arts Centre Ghent — Archive",
@@ -48,14 +52,14 @@
     "loading": "Loading...",
     "noStories": "No stories",
     "noStoriesDesc": "There are no stories available at this time.",
+    "notFound": "Story not found",
     "storySingular": "story",
     "storyPlural": "stories",
     "ariaShow": "Show",
     "ariaHide": "Hide",
     "loadMore": "Load more",
-    "remaining": "remaining"
-  },
-  "searchbar": {
-    "placeholder": "Search..."
+    "remaining": "remaining",
+    "backToStories": "Back to stories",
+    "minRead": "min read"
   }
 }

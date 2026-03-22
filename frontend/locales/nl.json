@@ -1,4 +1,5 @@
 {
+  "_comment": "Dutch translations for the VIERNULVIER archive frontend.",
    "searchbar": {
     "placeholder": "Zoek..."
   },
@@ -51,11 +52,14 @@
     "loading": "Laden...",
     "noStories": "Geen verhalen",
     "noStoriesDesc": "Er zijn momenteel geen verhalen beschikbaar.",
+    "notFound": "Verhaal niet gevonden",
     "storySingular": "verhaal",
     "storyPlural": "verhalen",
     "ariaShow": "Toon",
     "ariaHide": "Verberg",
     "loadMore": "Meer laden",
-    "remaining": "resterend"
+    "remaining": "resterend",
+    "backToStories": "Terug naar verhalen",
+    "minRead": "min. lezen"
   }
 }
