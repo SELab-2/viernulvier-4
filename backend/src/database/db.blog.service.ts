@@ -188,13 +188,13 @@ export class BlogDatabaseService {
   }
 
   /**
-   * Gets all media galleries linked to a given blog.
+   * Gets media gallery linked to a given blog.
    * @param blog_id The ID of the blog you want.
    * @returns List of MediaGalleryDto linked to the blog.
    */
   async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto> {
     const query = `
-      SELECT mg.id, mg.legacy_id, mg.name, mg.created_at, mg.updated_at
+      SELECT mg.id, mg.name, mg.created_at, mg.updated_at
       FROM media_gallery mg
       INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
       WHERE bmg.blog_id = $1

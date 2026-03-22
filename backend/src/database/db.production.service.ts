@@ -589,13 +589,13 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * Gets all media galleries linked to a given production.
+   * Gets media gallery linked to a given production.
    * @param prod_id The ID of the production you want.
    * @returns List of MediaGalleryDto linked to the production.
    */
   async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto> {
     const query = `
-      SELECT mg.id, mg.legacy_id, mg.name, mg.created_at, mg.updated_at
+      SELECT mg.id, mg.name, mg.created_at, mg.updated_at
       FROM media_gallery mg
       INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
       WHERE pmg.production_id = $1
