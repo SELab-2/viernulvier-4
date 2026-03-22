@@ -21,7 +21,6 @@ import {
   PaginationFilterSchema,
   UpdateBlogSchema,
 } from "@repo/common";
-import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import {
   BlogDto,
   BlogViewDto,
@@ -42,6 +41,7 @@ import {
   ApiOkAnyOf,
   ApiOkPaginatedResponseAnyOf,
 } from "../common/decorators/api.ok";
+import { ZodValidationPipe } from "nestjs-zod";
 
 @Controller("blogs")
 export class BlogController {
