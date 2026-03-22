@@ -4,7 +4,7 @@ import type { ProductionView, Tag, Event } from '@repo/common'
 import { useProductionApi } from '../composables/useProductionApi'
 import { useEventApi } from '../composables/useEventApi'
 import { ROUTES } from '../utils/routes'
-import { computeDateRangeFromEvents } from '../utils/formatters'
+import { computeDateRangeFromEvents, formatHTMLText } from '../utils/formatters'
 import TagPill from './TagPill.vue'
 import ThumbnailPlaceholder from './ThumbnailPlaceholder.vue'
 
@@ -18,27 +18,7 @@ const events = ref<Event[]>([])
 const { getTags } = useProductionApi()
 const { getAll: getAllEvents } = useEventApi()
 
-function formatText(text: string | null) {
-  if (!text) return ''
-  return text.replace(/\+/g, '<br>')
-}
-
 const dateRangeText = computed(() => computeDateRangeFromEvents(events.value as any))
-
-function getTagLabel(tag: any): string {
-  if (!tag) return ''
-  if (typeof tag.tag === 'string') return tag.tag
-  if (typeof tag === 'string') return tag
-  if (tag.tag && typeof tag.tag === 'object') {
-    if (tag.tag.nl) return tag.tag.nl
-    if (tag.tag.en) return tag.tag.en
-    const v = Object.values(tag.tag)[0]
-    return typeof v === 'string' ? v : ''
-  }
-  if (tag.nl) return tag.nl
-  if (tag.en) return tag.en
-  return String((tag.tag ?? tag) || '')
-}
 
 async function loadTagsAndEvents() {
   if (productionView && productionView.id) {
@@ -78,7 +58,7 @@ watch(() => productionView.id, () => loadTagsAndEvents())
           <div class="min-w-0">
             <h3
               class="text-3xl sm:text-4xl font-semibold text-zinc-900 leading-tight truncate"
-              v-html="formatText(productionView.titel)"
+              v-html="formatHTMLText(productionView.titel)"
               :title="productionView.titel || ''"
             />
 
@@ -98,7 +78,7 @@ watch(() => productionView.id, () => loadTagsAndEvents())
             <TagPill
               v-for="tag in tags"
               :key="tag.id"
-              :label="getTagLabel(tag)"
+              :label="typeof tag.tag === 'string' ? tag.tag : ''"
             />
           </div>
           <!-- Fade effect -->

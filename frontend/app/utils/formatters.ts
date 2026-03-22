@@ -35,3 +35,8 @@ export function computeDateRangeFromEvents(events: Array<{ starttime?: string | 
   if (sameDay) return formatDateShortNL(earliest.toISOString())
   return `${formatDateShortNL(earliest.toISOString())} — ${formatDateShortNL(latest.toISOString())}`
 }
+
+export function formatHTMLText(text: string | null) {
+  if (!text) return ''
+  return text.replace(/\+/g, '<br>')
+}
