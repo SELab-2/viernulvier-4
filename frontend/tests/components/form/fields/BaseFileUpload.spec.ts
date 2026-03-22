@@ -110,7 +110,7 @@ describe("BaseFileUpload", () => {
         Object.defineProperty(input.element, "files", { value: [file], configurable: true });
         await input.trigger("change");
 
-        await wrapper.find(".lucide-x").trigger("click");
+        await wrapper.find("svg").trigger("click");
         expect(wrapper.text()).not.toContain("document.pdf");
     });
 });

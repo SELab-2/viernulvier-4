@@ -39,21 +39,21 @@ describe("BaseTagInput", () => {
 
     it("adds a tag when Enter is pressed", async () => {
         await wrapper.find("input").setValue("Vue");
-        await wrapper.find("input").trigger("keydown.enter");
+        await wrapper.find("input").trigger("keydown", { key: "Enter" });
         expect(wrapper.text()).toContain("Vue");
     });
 
     it("clears the input after adding a tag", async () => {
         await wrapper.find("input").setValue("Vue");
-        await wrapper.find("input").trigger("keydown.enter");
+        await wrapper.find("input").trigger("keydown", { key: "Enter" });
         expect(wrapper.find("input").element.value).toBe("");
     });
 
     it("does not add duplicate tags", async () => {
         await wrapper.find("input").setValue("Vue");
-        await wrapper.find("input").trigger("keydown.enter");
+        await wrapper.find("input").trigger("keydown", { key: "Enter" });
         await wrapper.find("input").setValue("Vue");
-        await wrapper.find("input").trigger("keydown.enter");
+        await wrapper.find("input").trigger("keydown", { key: "Enter" });
 
         const occurrences = wrapper.text().split("Vue").length - 1; //// counts how many times "Vue" appears in the rendered text
         // (produces an array with one more element than there are occurences)
@@ -62,7 +62,7 @@ describe("BaseTagInput", () => {
 
     it("does not add empty tags", async () => {
         await wrapper.find("input").setValue("   ");
-        await wrapper.find("input").trigger("keydown.enter");
+        await wrapper.find("input").trigger("keydown", { key: "Enter" });
         expect(wrapper.findAll("span.truncate").length).toBe(0);
     });
 
@@ -72,9 +72,9 @@ describe("BaseTagInput", () => {
 
     it("removes a tag when X is clicked", async () => {
         await wrapper.find("input").setValue("Vue");
-        await wrapper.find("input").trigger("keydown.enter");
+        await wrapper.find("input").trigger("keydown", { key: "Enter" });
 
-        await wrapper.find(".lucide-x").trigger("click");
+        await wrapper.find("svg").trigger("click");
         expect(wrapper.text()).not.toContain("Vue");
     });
 });
