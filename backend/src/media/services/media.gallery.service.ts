@@ -1,7 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse, PaginationFilter } from "@repo/common";
-import { MediaGalleryDto } from "src/dto/dto";
+import {
+  CreateMediaGalleryDto,
+  MediaGalleryDto,
+  MediaItemDto,
+  UpdateMediaGalleryDto,
+} from "../../dto/dto";
 
 /**
  * Defines the connections between controller and database for
@@ -23,5 +28,69 @@ export class MediaGalleryService {
       paginationFilter.limit,
       paginationFilter.page,
     );
+  }
+
+  /**
+   * Fetches one single gallery by it's id from the database service.
+   * @param id The ID of the gallery we want to fetch.
+   * @returns The gallery that was fetched if it exists.
+   */
+  async getGalleryById(id: number): Promise<MediaGalleryDto> {
+    return await this.mediaDbService.getGalleryById(id);
+  }
+
+  /**
+   * Creates a new media gallery object.
+   * @param createGallery The object we want to create in the database.
+   * @returns The newly created gallery object.
+   */
+  async createGallery(
+    createGallery: CreateMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    return await this.mediaDbService.createGallery(createGallery);
+  }
+
+  /**
+   * Modifies a single gallery. Galleries only have one modify-able field
+   * so that means no replace function is needed.
+   * @param galleryId The ID of the gallery we want to modify.
+   * @param modifyGallery The object we want to modify to.
+   * @returns The updated gallery object.
+   */
+  async modifyGallery(
+    galleryId: number,
+    modifyGallery: UpdateMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    return await this.mediaDbService.updateGallery(galleryId, modifyGallery);
+  }
+
+  /**
+   * Removes a single gallery from the database.
+   * @param galleryId The ID of the gallery we want to remove.
+   */
+  async deleteGallery(galleryId: number): Promise<void> {
+    await this.mediaDbService.deleteGallery(galleryId);
+  }
+
+  /**
+   * Gallery -- Item
+   */
+
+  /**
+   * Fetches a list of media items linked to the gallery provided.
+   * @param galleryId The ID of the gallery we want to fetch items for.
+   * @returns A list of media items.
+   */
+  async getGalleryItems(galleryId: number): Promise<MediaItemDto[]> {
+    return await this.mediaDbService.getItemsByGallery(galleryId);
+  }
+
+  async linkItemToGallery(itemId: number, galleryId: number): Promise<boolean> {
+    // TODO: Implement when db service is there.
+    return true;
+  }
+
+  async unlinkItemFromGallery(itemId: number, galleryId: number): Promise<void> {
+    // TODO: Implement when db service is there.
   }
 }
