@@ -3,10 +3,12 @@ import { DbModule } from "../database/db.module";
 import { MediaGalleryController } from "./controllers/media.gallery.controller";
 import { MediaGalleryService } from "./services/media.gallery.service";
 import { LoggerModule } from "../util/logger/logger.module";
+import { MediaItemService } from "./services/media.item.service";
+import { MediaItemController } from "./controllers/media.item.controller";
 
 @Module({
   imports: [DbModule, LoggerModule],
-  providers: [MediaGalleryService],
-  controllers: [MediaGalleryController],
+  providers: [MediaGalleryService, MediaItemService],
+  controllers: [MediaGalleryController, MediaItemController],
 })
 export class MediaModule {}
