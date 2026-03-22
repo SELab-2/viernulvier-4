@@ -29,15 +29,15 @@ function createMockStream(rows: any[], error?: Error) {
 }
 
 describe("CSVFileParser", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
   describe("CSVFileParser.parseCSVWithSchema", () => {
     beforeEach(() => {
       // silence warnings emitted during parsing; tests will assert on them if needed
       jest.spyOn(console, "warn").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-      jest.clearAllMocks();
-      jest.restoreAllMocks();
     });
 
     it("should parse valid rows", async () => {
@@ -80,58 +80,70 @@ describe("CSVFileParser", () => {
   });
 
   describe("CSVFileParser.transformEventRow", () => {
-    it("should transform a valid row correctly", () => {
+    it("should transform a valid new format event row correctly", () => {
       const row = {
-        Starttime: "2024-01-01 10:00:00",
-        Endtime: "2024-01-01 12:00:00",
-        Production: "5",
-        Genre: "drama",
-        Hall: "Main Hall",
+        ID: "42",
+        Starttime: "2024-03-15 19:00:00",
+        Endtime: "2024-03-15 21:00:00",
+        Production: "7",
+        Location_NL: "Grote Zaal",
+        Location_EN: "Main Hall",
       };
 
       const result = CSVFileParser.transformEventRow(row);
 
       expect(result).toEqual({
-        starttime: new Date("2024-01-01 10:00:00").toISOString(),
-        endtime: new Date("2024-01-01 12:00:00").toISOString(),
-        production_id: 5,
-        location: "Main Hall",
+        starttime: new Date("2024-03-15 19:00:00").toISOString(),
+        endtime: new Date("2024-03-15 21:00:00").toISOString(),
+        production_id: 7,
+        location: { en: "Main Hall", nl: "Grote Zaal" },
         doors_at: null,
         intermission_at: null,
+        legacy_id: "csv-42",
       });
     });
 
-    it("should set endtime to null if invalid", () => {
+    it("should handle missing English location with Dutch fallback", () => {
       const row = {
+        ID: "1",
+        Starttime: "2024-01-01 10:00:00",
+        Endtime: "2024-01-01 12:00:00",
+        Production: "5",
+        Location_NL: "Nederlandse Zaal",
+        Location_EN: "",
+      };
+
+      const result = CSVFileParser.transformEventRow(row);
+
+      expect(result.location).toEqual({
+        en: "Nederlandse Zaal",
+        nl: "Nederlandse Zaal",
+      });
+    });
+
+    it("should set endtime to null for invalid or empty endtime", () => {
+      const row = {
+        ID: "1",
         Starttime: "2024-01-01 10:00:00",
         Endtime: "0000-00-00 00:00:00",
         Production: "5",
-        Hall: "",
+        Location_NL: "",
+        Location_EN: "",
       };
 
       const result = CSVFileParser.transformEventRow(row);
 
       expect(result.endtime).toBeNull();
-      expect(result.location).toBe("");
     });
 
-    it("should throw if starttime is invalid", () => {
+    it("should throw if ID is invalid", () => {
       const row = {
-        Starttime: "invalid-date",
-        Endtime: "",
-        Production: "5",
-      };
-
-      expect(() => CSVFileParser.transformEventRow(row)).toThrow(
-        "Invalid starttime",
-      );
-    });
-
-    it("should throw if production id is invalid", () => {
-      const row = {
+        ID: "invalid",
         Starttime: "2024-01-01 10:00:00",
         Endtime: "",
-        Production: "abc",
+        Production: "5",
+        Location_NL: "",
+        Location_EN: "",
       };
 
       expect(() => CSVFileParser.transformEventRow(row)).toThrow(
@@ -141,129 +153,419 @@ describe("CSVFileParser", () => {
   });
 
   describe("CSVFileParser.transformProductionRow", () => {
-    it("should transform production row correctly", () => {
+    it("should transform a valid new format production row correctly", () => {
       const row = {
-        ID: "1",
-        Titel: "Hamlet",
-        Ondertitel: "A tragedy",
-        Description1: "Main description",
-        Description2: "",
-        Genre: "drama",
+        ID: "10",
+        Titel_NL: "Hamlet",
+        Titel_EN: "Hamlet",
+        Description1_NL: "Een tragedie",
+        Description1_EN: "A tragedy",
+        Description2_NL: "Meer details",
+        Description2_EN: "More details",
+        Artist_NL: "Shakespeare",
+        Artist_EN: "Shakespeare",
+        Tagline_NL: "Ondertitel",
+        Tagline_EN: "Subtitle",
+        Credits_NL: "Regisseur",
+        Credits_EN: "Director",
+        Performer_Type: "actors",
+        Attendance_Mode: "online",
       };
 
       const result = CSVFileParser.transformProductionRow(row);
 
       expect(result).toEqual({
         titel: { en: "Hamlet", nl: "Hamlet" },
-        description1: { en: "Main description", nl: "Main description" },
-        description2: null,
-        tags: ["drama"],
-        artist: null,
-        tagline: { en: "A tragedy", nl: "A tragedy" },
-        credits: null,
-        performer_type: null,
-        attendance_mode: null,
-        legacy_id: "csv-1",
+        description1: { en: "A tragedy", nl: "Een tragedie" },
+        description2: { en: "More details", nl: "Meer details" },
+        artist: { en: "Shakespeare", nl: "Shakespeare" },
+        tagline: { en: "Subtitle", nl: "Ondertitel" },
+        credits: { en: "Director", nl: "Regisseur" },
+        attendance_mode: "online",
+        performer_type: "actors",
+        legacy_id: "csv-10",
       });
+    });
+
+    it("should handle missing optional fields as null", () => {
+      const row = {
+        ID: "5",
+        Titel_NL: "Title",
+        Titel_EN: "Title",
+        Description1_NL: "Description",
+        Description1_EN: "Description",
+        Description2_NL: "",
+        Description2_EN: "",
+        Artist_NL: "",
+        Artist_EN: "",
+        Tagline_NL: "",
+        Tagline_EN: "",
+        Credits_NL: "",
+        Credits_EN: "",
+        Performer_Type: "",
+        Attendance_Mode: "",
+      };
+
+      const result = CSVFileParser.transformProductionRow(row);
+
+      expect(result.description2).toBeNull();
+      expect(result.artist).toBeNull();
+      expect(result.tagline).toBeNull();
+      expect(result.credits).toBeNull();
+      expect(result.performer_type).toBeNull();
+      expect(result.attendance_mode).toBeNull();
     });
 
     it("should throw if ID is invalid", () => {
       const row = {
-        ID: "notanumber",
-        Titel: "Title",
-        Ondertitel: "Sub",
-        Description1: "desc",
-        Description2: "",
+        ID: "not-a-number",
+        Titel_NL: "Title",
+        Titel_EN: "Title",
+        Description1_NL: "Desc",
+        Description1_EN: "Desc",
+        Description2_NL: "",
+        Description2_EN: "",
+        Artist_NL: "",
+        Artist_EN: "",
+        Tagline_NL: "",
+        Tagline_EN: "",
+        Credits_NL: "",
+        Credits_EN: "",
+        Performer_Type: "",
+        Attendance_Mode: "",
       };
+
       expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
-        /Invalid production id/,
+        "Invalid production id",
+      );
+    });
+
+    it("should throw if required Titel_NL is missing", () => {
+      const row = {
+        ID: "1",
+        Titel_NL: "",
+        Titel_EN: "Title",
+        Description1_NL: "",
+        Description1_EN: "Desc",
+        Description2_NL: "",
+        Description2_EN: "",
+        Artist_NL: "",
+        Artist_EN: "",
+        Tagline_NL: "",
+        Tagline_EN: "",
+        Credits_NL: "",
+        Credits_EN: "",
+        Performer_Type: "",
+        Attendance_Mode: "",
+      };
+
+      expect(() => CSVFileParser.transformProductionRow(row)).toThrow(
+        "Required Dutch value is missing",
       );
     });
   });
 
-  // additional tests for the convenience wrappers and insertion logic
+  describe("CSVFileParser.transformPriceRow", () => {
+    it("should transform a valid price row correctly", () => {
+      const row = {
+        Name_NL: "Volwassenen",
+        Name_EN: "Adults",
+        Price: "25.50",
+        EventID: "1",
+      };
 
-  describe("CSVFileParser.parseEventsCSV", () => {
-    beforeEach(() => {
-      jest.spyOn(console, "warn").mockImplementation(() => {});
+      const result = CSVFileParser.transformPriceRow(row);
+
+      expect(result).toEqual({
+        name: { en: "Adults", nl: "Volwassenen" },
+        price: 25.5,
+        event_id: 1,
+      });
     });
 
-    afterEach(() => jest.clearAllMocks());
+    it("should throw if price is invalid", () => {
+      const row = {
+        Name_NL: "Price",
+        Name_EN: "Price",
+        Price: "invalid",
+        EventID: "1",
+      };
 
-    it("should parse and transform event rows, skipping invalid ones", async () => {
-      // include one valid and one invalid row; valid row contains a hall
-      mockedFs.createReadStream.mockReturnValue(
-        createMockStream([
-          {
-            Starttime: "2025-05-01 14:00:00",
-            Endtime: "2025-05-01 15:00:00",
-            Production: "10",
-            Hall: "Front Stage",
-          },
-          {
-            // bad start time will be skipped by transform
-            Starttime: "not-a-date",
-            Endtime: "",
-            Production: "10",
-            Hall: "Backstage",
-          },
-        ]) as any,
+      expect(() => CSVFileParser.transformPriceRow(row)).toThrow(
+        "Invalid price",
       );
+    });
 
-      const items = await CSVFileParser.parseEventsCSV("events.csv");
-      expect(items).toHaveLength(1);
-      expect(items[0]).toEqual({
+    it("should throw if event id is invalid", () => {
+      const row = {
+        Name_NL: "Price",
+        Name_EN: "Price",
+        Price: "20",
+        EventID: "not-an-id",
+      };
+
+      expect(() => CSVFileParser.transformPriceRow(row)).toThrow(
+        "Invalid event id",
+      );
+    });
+
+    it("should throw if Name_NL is missing", () => {
+      const row = {
+        Name_NL: "",
+        Name_EN: "Price",
+        Price: "20",
+        EventID: "1",
+      };
+
+      expect(() => CSVFileParser.transformPriceRow(row)).toThrow(
+        "Required Dutch value is missing",
+      );
+    });
+  });
+
+  describe("CSVFileParser.transformBlogRow", () => {
+    it("should transform a valid blog row correctly", () => {
+      const row = {
+        Titel_NL: "Blog Post",
+        Titel_EN: "Blog Post",
+        Description_NL: "Beschrijving",
+        Description_EN: "Description",
+        ProductionID: "5",
+      };
+
+      const result = CSVFileParser.transformBlogRow(row);
+
+      expect(result).toEqual({
+        titel: { en: "Blog Post", nl: "Blog Post" },
+        description: { en: "Description", nl: "Beschrijving" },
+        production_id: 5,
+      });
+    });
+
+    it("should throw if ProductionID is invalid", () => {
+      const row = {
+        Titel_NL: "Title",
+        Titel_EN: "Title",
+        Description_NL: "Desc",
+        Description_EN: "Desc",
+        ProductionID: "abc",
+      };
+
+      expect(() => CSVFileParser.transformBlogRow(row)).toThrow(
+        "Invalid production id",
+      );
+    });
+
+    it("should throw if Titel_NL is required and missing", () => {
+      const row = {
+        Titel_NL: "",
+        Titel_EN: "Title",
+        Description_NL: "",
+        Description_EN: "Desc",
+        ProductionID: "1",
+      };
+
+      expect(() => CSVFileParser.transformBlogRow(row)).toThrow(
+        "Required Dutch value is missing",
+      );
+    });
+  });
+
+  describe("CSVFileParser.transformTagRow", () => {
+    it("should transform a valid tag row correctly", () => {
+      const row = {
+        TagName_NL: "Drama",
+        TagName_EN: "Drama",
+        ProductionIDs: "1,2,3",
+      };
+
+      const result = CSVFileParser.transformTagRow(row);
+
+      expect(result).toEqual({
+        tag: { en: "Drama", nl: "Drama" },
+        productionIds: [1, 2, 3],
+      });
+    });
+
+    it("should handle single production ID", () => {
+      const row = {
+        TagName_NL: "Comedy",
+        TagName_EN: "Comedy",
+        ProductionIDs: "10",
+      };
+
+      const result = CSVFileParser.transformTagRow(row);
+
+      expect(result.productionIds).toEqual([10]);
+    });
+
+    it("should handle empty ProductionIDs with single zero element", () => {
+      const row = {
+        TagName_NL: "Tag",
+        TagName_EN: "Tag",
+        ProductionIDs: "",
+      };
+
+      const result = CSVFileParser.transformTagRow(row);
+
+      // Empty string split gives [""], which converts to [0]
+      expect(result.productionIds).toEqual([0]);
+    });
+
+    it("should throw if a production ID is invalid", () => {
+      const row = {
+        TagName_NL: "Tag",
+        TagName_EN: "Tag",
+        ProductionIDs: "1,invalid,3",
+      };
+
+      expect(() => CSVFileParser.transformTagRow(row)).toThrow(
+        "Invalid production id in ProductionIDs",
+      );
+    });
+  });
+
+  describe("CSVFileParser.parseEventsCSV", () => {
+    it("should extract location and legacy_id from parsed events", async () => {
+      jest.spyOn(CSVFileParser, "parseCSVWithSchema" as any).mockResolvedValue([
+        {
+          starttime: "2025-05-01T14:00:00.000Z",
+          endtime: "2025-05-01T16:00:00.000Z",
+          production_id: 10,
+          location: { en: "Hall A", nl: "Zaal A" },
+          legacy_id: "csv-1",
+          doors_at: null,
+          intermission_at: null,
+        },
+      ]);
+
+      const result = await CSVFileParser.parseEventsCSV("events.csv");
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
         event: {
-          starttime: new Date("2025-05-01 14:00:00").toISOString(),
-          endtime: new Date("2025-05-01 15:00:00").toISOString(),
+          starttime: "2025-05-01T14:00:00.000Z",
+          endtime: "2025-05-01T16:00:00.000Z",
           production_id: 10,
           doors_at: null,
           intermission_at: null,
         },
-        location: "Front Stage",
+        location: { en: "Hall A", nl: "Zaal A" },
+        legacy_id: "csv-1",
       });
-
-      expect(console.warn).toHaveBeenCalledWith(
-        expect.stringContaining("Skipping invalid row"),
-      );
     });
   });
 
   describe("CSVFileParser.parseProductionsCSV", () => {
-    afterEach(() => jest.clearAllMocks());
+    it("should extract production data and legacy_id", async () => {
+      jest.spyOn(CSVFileParser, "parseCSVWithSchema" as any).mockResolvedValue([
+        {
+          titel: { en: "Macbeth", nl: "Macbeth" },
+          description1: { en: "Tragedy", nl: "Tragedy" },
+          description2: null,
+          artist: null,
+          tagline: null,
+          credits: null,
+          attendance_mode: "live",
+          performer_type: "actors",
+          legacy_id: "csv-5",
+        },
+      ]);
 
-    it("should parse production rows and validate against schema", async () => {
-      mockedFs.createReadStream.mockReturnValue(
-        createMockStream([
-          {
-            ID: "2",
-            Titel: "Macbeth",
-            Ondertitel: "",
-            Description1: "desc",
-            Description2: "more",
-            Genre: "tragedy",
-          },
-        ]) as any,
-      );
       const result = await CSVFileParser.parseProductionsCSV("prods.csv");
-      // since we only provided one row without any comma-separated genres,
-      // we expect a single production, no tags, and no links
-      expect(result).toEqual({
-        productions: [
-          {
-            titel: { en: "Macbeth", nl: "Macbeth" },
-            tagline: null,
-            description1: { en: "desc", nl: "desc" },
-            description2: { en: "more", nl: "more" },
-            artist: null,
-            credits: null,
-            performer_type: null,
-            attendance_mode: null,
-            legacy_id: "csv-2",
-          },
-        ],
-        tags: ["tragedy"],
-        productionTagLinks: [{ legacyId: "csv-2", tagName: "tragedy" }],
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        production: {
+          titel: { en: "Macbeth", nl: "Macbeth" },
+          description1: { en: "Tragedy", nl: "Tragedy" },
+          description2: null,
+          artist: null,
+          tagline: null,
+          credits: null,
+          attendance_mode: "live",
+          performer_type: "actors",
+        },
+        legacy_id: "csv-5",
+      });
+    });
+  });
+
+  describe("CSVFileParser.parsePricesCSV", () => {
+    it("should extract price data and event_id", async () => {
+      jest.spyOn(CSVFileParser, "parseCSVWithSchema" as any).mockResolvedValue([
+        {
+          name: { en: "Adults", nl: "Volwassenen" },
+          price: 35,
+          event_id: 1,
+        },
+        {
+          name: { en: "Children", nl: "Kinderen" },
+          price: 20,
+          event_id: 1,
+        },
+      ]);
+
+      const result = await CSVFileParser.parsePricesCSV("prices.csv");
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        price: { name: { en: "Adults", nl: "Volwassenen" }, price: 35 },
+        event_id: 1,
+      });
+      expect(result[1]).toEqual({
+        price: { name: { en: "Children", nl: "Kinderen" }, price: 20 },
+        event_id: 1,
+      });
+    });
+  });
+
+  describe("CSVFileParser.parseBlogsCSV", () => {
+    it("should extract blog data and production_id", async () => {
+      jest.spyOn(CSVFileParser, "parseCSVWithSchema" as any).mockResolvedValue([
+        {
+          titel: { en: "Review", nl: "Review" },
+          description: { en: "A good review", nl: "Een goede review" },
+          production_id: 3,
+        },
+      ]);
+
+      const result = await CSVFileParser.parseBlogsCSV("blogs.csv");
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        blog: {
+          titel: { en: "Review", nl: "Review" },
+          description: { en: "A good review", nl: "Een goede review" },
+        },
+        production_id: 3,
+      });
+    });
+  });
+
+  describe("CSVFileParser.parseTagsCSV", () => {
+    it("should extract tag data and production IDs", async () => {
+      jest.spyOn(CSVFileParser, "parseCSVWithSchema" as any).mockResolvedValue([
+        {
+          tag: { en: "Drama", nl: "Drama" },
+          productionIds: [1, 2],
+        },
+        {
+          tag: { en: "Comedy", nl: "Komedie" },
+          productionIds: [3],
+        },
+      ]);
+
+      const result = await CSVFileParser.parseTagsCSV("tags.csv");
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        tag: { tag: { en: "Drama", nl: "Drama" } },
+        productionIds: [1, 2],
+      });
+      expect(result[1]).toEqual({
+        tag: { tag: { en: "Comedy", nl: "Komedie" } },
+        productionIds: [3],
       });
     });
   });

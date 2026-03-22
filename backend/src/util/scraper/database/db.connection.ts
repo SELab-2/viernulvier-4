@@ -1,7 +1,14 @@
 import { Pool, QueryResultRow } from "pg";
-import { vnvEvent, vnvGenre, vnvLocation, vnvPrice, vnvProduction, } from "../vnv.parser";
-import { Event, Location, Price, Production, Tag } from "@repo/common";
+import {
+  vnvEvent,
+  vnvGenre,
+  vnvLocation,
+  vnvPrice,
+  vnvProduction,
+} from "../vnv.parser";
+import { Production, Tag, Event, Price, Location, Blog } from "@repo/common";
 import logger from "../../logger/logger";
+import { ResourceGoneException } from "../../../common/exceptions";
 import { Injectable } from "@nestjs/common";
 
 /**
@@ -54,6 +61,54 @@ export class UtilsDbConnection {
       );
       throw error; // Let the caller know it failed!
     }
+  }
+
+  /**
+   * Fetches a production by legacy id.
+   * @param legacyId The production legacy id.
+   * @returns The production row.
+   */
+  async getProductionByLegacyId(legacyId: string): Promise<Production> {
+    if (!legacyId || !legacyId.trim()) {
+      throw new Error("legacyId is required to fetch a production");
+    }
+
+    const rows = await this.query<Production>(
+      `SELECT * FROM productions WHERE legacy_id = $1 LIMIT 1;`,
+      [legacyId],
+    );
+
+    if (rows.length === 0) {
+      throw new ResourceGoneException(
+        `No Production exists for provided legacy_id(${legacyId})`,
+      );
+    }
+
+    return rows[0];
+  }
+
+  /**
+   * Fetches an event by legacy id.
+   * @param legacyId The event legacy id.
+   * @returns The event row.
+   */
+  async getEventByLegacyId(legacyId: string): Promise<Event> {
+    if (!legacyId || !legacyId.trim()) {
+      throw new Error("legacyId is required to fetch an event");
+    }
+
+    const rows = await this.query<Event>(
+      `SELECT * FROM events WHERE legacy_id = $1 LIMIT 1;`,
+      [legacyId],
+    );
+
+    if (rows.length === 0) {
+      throw new ResourceGoneException(
+        `No Event exists for provided legacy_id(${legacyId})`,
+      );
+    }
+
+    return rows[0];
   }
 
   /**
@@ -142,7 +197,7 @@ export class UtilsDbConnection {
    * @param vnvProduction The vnvProduction we want to add.
    * @returns T/F Whether the change went through or not.
    */
-  private async insertProduction(
+  async insertProduction(
     vnvProduction: vnvProduction,
   ): Promise<Production> {
     const query = `
@@ -212,7 +267,7 @@ export class UtilsDbConnection {
    * @param genre The vnvGenre that is to be turned into a Tag.
    * @returns The ID of the Tag.
    */
-  private async insertTag(genre: vnvGenre): Promise<number> {
+  async insertTag(genre: vnvGenre): Promise<number> {
     const query = `
       INSERT INTO tags (tag, legacy_id)
       VALUES ($1, $2)
@@ -235,7 +290,7 @@ export class UtilsDbConnection {
    * @param tagId The ID of the Tag.
    * @returns T/F Whether the link was created.
    */
-  private async linkTag(productionId: number, tagId: number): Promise<boolean> {
+  async linkTag(productionId: number, tagId: number): Promise<boolean> {
     const query = `
       INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
@@ -253,7 +308,7 @@ export class UtilsDbConnection {
    * @param vnvEvent The particular vnvEvent.
    * @returns Nothing.
    */
-  private async insertEvent(vnvEvent: vnvEvent) {
+  async insertEvent(vnvEvent: vnvEvent) {
     const productions: Production[] = await this.query<Production>(
       `SELECT * from productions WHERE legacy_id = $1;`,
       [vnvEvent.production_id],
@@ -344,7 +399,7 @@ export class UtilsDbConnection {
    * @param location The location we want inserted.
    * @returns Nothing.
    */
-  private async insertLocation(location: vnvLocation) {
+  async insertLocation(location: vnvLocation) {
     const query = `
       INSERT INTO locations (location, legacy_id)
       VALUES ($1, $2)
@@ -365,7 +420,7 @@ export class UtilsDbConnection {
    * @param locationId The Location ID.
    * @returns T/F Whether it Failed or not.
    */
-  private async linkLocation(
+  async linkLocation(
     eventId: number,
     locationId: number,
   ): Promise<boolean> {
@@ -385,7 +440,7 @@ export class UtilsDbConnection {
    * @param price The vnvPrice object we want inserted.
    * @returns Nothing.
    */
-  private async insertPrice(price: vnvPrice) {
+  async insertPrice(price: vnvPrice): Promise<Price> {
     const query = `
       INSERT INTO prices (name, price, legacy_id)
       VALUES ($1, $2, $3)
@@ -393,7 +448,12 @@ export class UtilsDbConnection {
       DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price
       RETURNING *;
     `;
-    await this.query<Price>(query, [price.name, price.amount, price.legacy_id]);
+    const rows = await this.query<Price>(query, [
+      price.name,
+      price.amount,
+      price.legacy_id,
+    ]);
+    return rows[0];
   }
 
   /**
@@ -402,7 +462,7 @@ export class UtilsDbConnection {
    * @param priceId The Price ID.
    * @returns T/F Whether it Failed or not.
    */
-  private async linkPrice(eventId: number, priceId: number): Promise<boolean> {
+  async linkPrice(eventId: number, priceId: number): Promise<boolean> {
     const query = `
       INSERT INTO event_prices (event_id, price_id)
       VALUES ($1, $2)
@@ -412,5 +472,51 @@ export class UtilsDbConnection {
 
     const output = await this.query(query, [eventId, priceId]);
     return output.length >= 1;
+  }
+
+  /**
+   * Blogs.
+   */
+
+  /**
+   * Inserts a single blog row.
+   * @param titel Localized blog title.
+   * @param description Localized blog description.
+   * @returns Inserted blog row.
+   */
+  async insertBlog(
+    titel: { en: string; nl: string },
+    description: { en: string; nl: string },
+  ): Promise<Blog> {
+    const rows = await this.query<Blog>(
+      `
+        INSERT INTO blogs (titel, description)
+        VALUES ($1, $2)
+        RETURNING *;
+      `,
+      [titel, description],
+    );
+
+    return rows[0];
+  }
+
+  /**
+   * Links a blog to a production.
+   * @param productionId Production id.
+   * @param blogId Blog id.
+   * @returns T/F Whether the link was created.
+   */
+  async linkBlog(productionId: number, blogId: number): Promise<boolean> {
+    const rows = await this.query(
+      `
+        INSERT INTO production_blogs (production_id, blog_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `,
+      [productionId, blogId],
+    );
+
+    return rows.length >= 1;
   }
 }
