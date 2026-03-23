@@ -2,21 +2,77 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 import { UtilsDbConnection } from "./database/db.connection";
 import logger from "../logger/logger";
+import { AppLogger } from "../logger/logger.service";
+import { LanguageService } from "../language/language.service";
 import { OldCSVFileParser } from "../../csv_parsing/old_csv_file_parser";
 import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
 import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
+import { Language } from "@repo/common";
 
 // Load DEV database env vars for script usage from root .env
 dotenv.config({ path: path.join(process.cwd(), ".env"), quiet: true });
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
+const TRANSLATION_LANG_FROM: Language = "nl";
+const TRANSLATION_LANG_TO: Language = "en";
+
+let languageService: LanguageService | null = null;
+
+function getLanguageService(): LanguageService | null {
+  if (languageService) {
+    return languageService;
+  }
+
+  if (!process.env.TRANSLATE_API_KEY) {
+    logger.warn(
+      "TRANSLATE_API_KEY is not set; CSV injection will continue without DeepL translation.",
+    );
+    return null;
+  }
+
+  try {
+    languageService = new LanguageService(logger as unknown as AppLogger);
+    return languageService;
+  } catch (error) {
+    logger.warn(
+      `Failed to initialize LanguageService; continuing without translation: ${String(error)}`,
+    );
+    return null;
+  }
+}
+
+async function translateBeforeInsert<T>(data: T): Promise<T> {
+  const translator = getLanguageService();
+  if (!translator) {
+    logger.debug(
+      `[translation] skipped (${TRANSLATION_LANG_FROM} -> ${TRANSLATION_LANG_TO}) because translator is unavailable`,
+    );
+    return data;
+  }
+
+  logger.debug(
+    `[translation] started (${TRANSLATION_LANG_FROM} -> ${TRANSLATION_LANG_TO})`,
+  );
+
+  const translated = await translator.translateObject<T>(
+    data,
+    TRANSLATION_LANG_FROM,
+    TRANSLATION_LANG_TO,
+  );
+
+  logger.debug(
+    `[translation] finished (${TRANSLATION_LANG_FROM} -> ${TRANSLATION_LANG_TO})`,
+  );
+
+  return translated;
+}
 
 function toOldCsvTag(tagName: string): vnvGenre {
   return {
     legacy_id: `csv-${tagName}`,
     created_at: DEFAULT_DATE,
     updated_at: DEFAULT_DATE,
-    name: { en: tagName, nl: tagName }, //TODO translate with Google Translate API
+    name: { en: "", nl: tagName },
   };
 }
 
@@ -25,7 +81,7 @@ function toOldCsvLocation(locationName: string): vnvLocation {
     legacy_id: `csv-${locationName}`,
     created_at: DEFAULT_DATE,
     updated_at: DEFAULT_DATE,
-    name: { en: locationName, nl: locationName }, //TODO translate with Google Translate API
+    name: { en: "", nl: locationName },
   };
 }
 
@@ -131,8 +187,10 @@ function toCsvProduction(row: {
  * Import only productions from the structured CSV.
  * Can be run independently from other imports.
  */
-export async function injectProductionsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectProductionsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing productions CSV: ${filePath}`);
 
   const parsedProductions = await CSVFileParser.parseProductionsCSV(filePath);
@@ -144,7 +202,10 @@ export async function injectProductionsCSV(filePath: string) {
     }),
   );
 
-  await dbConnection.insertProductions(csvProductions);
+  const translatedProductions =
+    await translateBeforeInsert<vnvProduction[]>(csvProductions);
+
+  await dbConnection.insertProductions(translatedProductions);
   logger.info("Structured productions CSV injection completed.");
 }
 
@@ -152,8 +213,10 @@ export async function injectProductionsCSV(filePath: string) {
  * Import only events (+ locations) from the structured CSV.
  * Can be run independently from other imports.
  */
-export async function injectEventsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectEventsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing events CSV: ${filePath}`);
 
   const parsedEvents = await CSVFileParser.parseEventsCSV(filePath);
@@ -169,7 +232,10 @@ export async function injectEventsCSV(filePath: string) {
 
   const csvLocations: vnvLocation[] = Array.from(locationByName.values());
 
-  await dbConnection.insertLocations(csvLocations);
+  const translatedLocations =
+    await translateBeforeInsert<vnvLocation[]>(csvLocations);
+
+  await dbConnection.insertLocations(translatedLocations);
 
   // Now that locations are inserted, we can convert events to csvEvents with locationLegacyIds
   const csvEvents: vnvEvent[] = parsedEvents.map((row) => {
@@ -184,7 +250,9 @@ export async function injectEventsCSV(filePath: string) {
     });
   });
 
-  await dbConnection.insertEvents(csvEvents);
+  const translatedEvents = await translateBeforeInsert<vnvEvent[]>(csvEvents);
+
+  await dbConnection.insertEvents(translatedEvents);
   logger.info("Structured events CSV injection completed.");
 }
 
@@ -192,20 +260,24 @@ export async function injectEventsCSV(filePath: string) {
  * Import only tags from the structured CSV and link them to already existing productions.
  * Can be run independently from other imports.
  */
-export async function injectTagsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectTagsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing tags CSV: ${filePath}`);
 
   const parsedTags = await CSVFileParser.parseTagsCSV(filePath);
 
   for (const row of parsedTags) {
-    const tagLegacyId = "csv-" + row.tag.tag.nl;
+    const translatedTagData = await translateBeforeInsert(row.tag);
+
+    const tagLegacyId = "csv-" + translatedTagData.tag.nl;
 
     const tagId = await dbConnection.insertTag({
       legacy_id: tagLegacyId,
       created_at: DEFAULT_DATE,
       updated_at: DEFAULT_DATE,
-      name: row.tag.tag,
+      name: translatedTagData.tag,
     });
 
     for (const productionId of row.productionIds) {
@@ -229,21 +301,25 @@ export async function injectTagsCSV(filePath: string) {
  * Import only blogs from the structured CSV and link them to already existing productions.
  * Can be run independently from other imports.
  */
-export async function injectBlogsCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectBlogsCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing blogs CSV: ${filePath}`);
 
   const parsedBlogs = await CSVFileParser.parseBlogsCSV(filePath);
 
   for (const row of parsedBlogs) {
+    const translatedBlogRow = await translateBeforeInsert(row);
+
     const productionLegacyId = toCsvLegacyIdFromNumericId(row.production_id);
     try {
       const production =
         await dbConnection.getProductionByLegacyId(productionLegacyId);
 
       const blog = await dbConnection.insertBlog(
-        row.blog.titel,
-        row.blog.description,
+        translatedBlogRow.blog.titel,
+        translatedBlogRow.blog.description,
       );
 
       await dbConnection.linkBlog(production.id, blog.id);
@@ -261,25 +337,29 @@ export async function injectBlogsCSV(filePath: string) {
  * Import only prices from the structured CSV and link them to already existing events.
  * Can be run independently from other imports.
  */
-export async function injectPricesCSV(filePath: string) {
-  const dbConnection = new UtilsDbConnection();
+export async function injectPricesCSV(
+  filePath: string,
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   logger.info(`Parsing prices CSV: ${filePath}`);
 
   const parsedPrices = await CSVFileParser.parsePricesCSV(filePath);
 
   for (const row of parsedPrices) {
+    const translatedPriceData = await translateBeforeInsert(row.price);
+
     const eventLegacyId = toCsvLegacyIdFromNumericId(row.event_id);
     try {
       const event = await dbConnection.getEventByLegacyId(eventLegacyId);
 
-      const priceLegacyId = "csv-" + row.price.name.nl;
+      const priceLegacyId = "csv-" + translatedPriceData.name.nl;
 
       const price = await dbConnection.insertPrice({
         legacy_id: priceLegacyId,
         created_at: DEFAULT_DATE,
         updated_at: DEFAULT_DATE,
-        amount: row.price.price,
-        name: row.price.name,
+        amount: translatedPriceData.price,
+        name: translatedPriceData.name,
       });
 
       await dbConnection.linkPrice(event.id, price.id);
@@ -291,9 +371,9 @@ export async function injectPricesCSV(filePath: string) {
   logger.info("Structured prices CSV injection completed.");
 }
 
-export async function injectOldCsvData() {
-  const dbConnection = new UtilsDbConnection();
-
+export async function injectOldCsvData(
+  dbConnection: UtilsDbConnection = new UtilsDbConnection(),
+) {
   const productionsFile = "../common/res/productions_output.csv";
   const eventsFile = "../common/res/events_voorstellingen.csv";
 
@@ -323,17 +403,24 @@ export async function injectOldCsvData() {
     toOldCsvEvent(row.event, index, row.location.trim()),
   );
 
+  const translatedTags = await translateBeforeInsert<vnvGenre[]>(csvTags);
+  const translatedLocations =
+    await translateBeforeInsert<vnvLocation[]>(csvLocations);
+  const translatedProductions =
+    await translateBeforeInsert<vnvProduction[]>(csvProductions);
+  const translatedEvents = await translateBeforeInsert<vnvEvent[]>(csvEvents);
+
   logger.info(
     "Injecting CSV data into DEV database using DbConnection insert functions...",
   );
 
   await Promise.all([
-    dbConnection.insertTags(csvTags),
-    dbConnection.insertLocations(csvLocations),
+    dbConnection.insertTags(translatedTags),
+    dbConnection.insertLocations(translatedLocations),
   ]);
 
-  await dbConnection.insertProductions(csvProductions);
-  await dbConnection.insertEvents(csvEvents);
+  await dbConnection.insertProductions(translatedProductions);
+  await dbConnection.insertEvents(translatedEvents);
 
   logger.info("CSV injection completed.");
 }
