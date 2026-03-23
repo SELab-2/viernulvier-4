@@ -7,7 +7,12 @@ const mockPatch = vi.fn();
 const mockDel = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
-  useApi: () => ({ get: mockGet, post: mockPost, patch: mockPatch, del: mockDel }),
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    patch: mockPatch,
+    del: mockDel,
+  }),
 }));
 
 beforeEach(() => {
@@ -23,13 +28,16 @@ describe("useTagApi", () => {
 
   it("getAll appends lang query param", () => {
     const { getAll } = useTagApi();
-    getAll(undefined, "en");
+    getAll({ languageFilters: { lang: "en" } });
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=en"));
   });
 
   it("getAll appends pagination and lang together", () => {
     const { getAll } = useTagApi();
-    getAll({ page: 0, limit: 10 }, "nl");
+    getAll({
+      paginationFilters: { page: 0, limit: 10, descending: true },
+      languageFilters: { lang: "nl" },
+    });
     const url = mockGet.mock.calls[0][0];
     expect(url).toContain("page=0");
     expect(url).toContain("limit=10");
@@ -58,7 +66,9 @@ describe("useTagApi", () => {
   it("modify calls PATCH /tags/:id with body", () => {
     const { modify } = useTagApi();
     modify(1, { tag: { nl: "Dans", en: "Dance" } });
-    expect(mockPatch).toHaveBeenCalledWith("/tags/1", { tag: { nl: "Dans", en: "Dance" } });
+    expect(mockPatch).toHaveBeenCalledWith("/tags/1", {
+      tag: { nl: "Dans", en: "Dance" },
+    });
   });
 
   it("remove calls DELETE /tags/:id", () => {

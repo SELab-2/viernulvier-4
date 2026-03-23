@@ -40,9 +40,11 @@ export function useLocationApi() {
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
-    const query =
-      "?" +
-      new URLSearchParams(cleanParams as Record<string, string>).toString();
+    const queryString = new URLSearchParams(
+      cleanParams as Record<string, string>,
+    ).toString();
+
+    const query = queryString ? `?${queryString}` : "";
 
     return get<PaginatedResponse<Location | LocationView>>(
       `${API_ROUTES.locations.base}${query}`,

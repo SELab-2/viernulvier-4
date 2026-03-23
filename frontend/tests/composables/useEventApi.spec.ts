@@ -8,7 +8,13 @@ const mockPatch = vi.fn();
 const mockDel = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
-  useApi: () => ({ get: mockGet, post: mockPost, put: mockPut, patch: mockPatch, del: mockDel }),
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    put: mockPut,
+    patch: mockPatch,
+    del: mockDel,
+  }),
 }));
 
 beforeEach(() => {
@@ -24,7 +30,7 @@ describe("useEventApi", () => {
 
   it("getAll appends filter query params", () => {
     const { getAll } = useEventApi();
-    getAll({ page: 0, limit: 10 });
+    getAll({ paginationFilters: { page: 0, limit: 10, descending: true } });
     const url = mockGet.mock.calls[0][0];
     expect(url).toContain("page=0");
     expect(url).toContain("limit=10");
@@ -38,14 +44,31 @@ describe("useEventApi", () => {
 
   it("create calls POST /events with body", () => {
     const { create } = useEventApi();
-    const body = { starttime: "2025-01-01T00:00:00Z", endtime: null, doors_at: null, intermission_at: null, production_id: 1, legacy_id: null };
+    const body = {
+      starttime: "2025-01-01T00:00:00Z",
+      endtime: null,
+      doors_at: null,
+      intermission_at: null,
+      production_id: 1,
+      legacy_id: null,
+    };
     create(body);
     expect(mockPost).toHaveBeenCalledWith("/events", body);
   });
 
   it("replace calls PUT /events/:id with body", () => {
     const { replace } = useEventApi();
-    const body = { id: 1, starttime: "2025-01-01T00:00:00Z", endtime: null, doors_at: null, intermission_at: null, production_id: 1, legacy_id: null, created_at: "", updated_at: "" };
+    const body = {
+      id: 1,
+      starttime: "2025-01-01T00:00:00Z",
+      endtime: null,
+      doors_at: null,
+      intermission_at: null,
+      production_id: 1,
+      legacy_id: null,
+      created_at: "",
+      updated_at: "",
+    };
     replace(1, body);
     expect(mockPut).toHaveBeenCalledWith("/events/1", body);
   });
@@ -53,7 +76,9 @@ describe("useEventApi", () => {
   it("modify calls PATCH /events/:id with body", () => {
     const { modify } = useEventApi();
     modify(1, { starttime: "2025-06-01T00:00:00Z" });
-    expect(mockPatch).toHaveBeenCalledWith("/events/1", { starttime: "2025-06-01T00:00:00Z" });
+    expect(mockPatch).toHaveBeenCalledWith("/events/1", {
+      starttime: "2025-06-01T00:00:00Z",
+    });
   });
 
   it("remove calls DELETE /events/:id", () => {

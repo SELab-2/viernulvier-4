@@ -48,9 +48,11 @@ export function useProductionApi() {
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
-    const query =
-      "?" +
-      new URLSearchParams(cleanParams as Record<string, string>).toString();
+    const queryString = new URLSearchParams(
+      cleanParams as Record<string, string>,
+    ).toString();
+
+    const query = queryString ? `?${queryString}` : "";
 
     return get<PaginatedResponse<Production | ProductionView>>(
       `${API_ROUTES.productions.base}${query}`,

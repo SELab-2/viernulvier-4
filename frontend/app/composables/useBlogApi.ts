@@ -40,9 +40,11 @@ export function useBlogApi() {
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
-    const query =
-      "?" +
-      new URLSearchParams(cleanParams as Record<string, string>).toString();
+    const queryString = new URLSearchParams(
+      cleanParams as Record<string, string>,
+    ).toString();
+
+    const query = queryString ? `?${queryString}` : "";
 
     return get<PaginatedResponse<Blog | BlogView>>(
       `${API_ROUTES.blogs.base}${query}`,

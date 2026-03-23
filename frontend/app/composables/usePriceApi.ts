@@ -40,9 +40,11 @@ export function usePriceApi() {
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
-    const query =
-      "?" +
-      new URLSearchParams(cleanParams as Record<string, string>).toString();
+    const queryString = new URLSearchParams(
+      cleanParams as Record<string, string>,
+    ).toString();
+
+    const query = queryString ? `?${queryString}` : "";
 
     return get<PaginatedResponse<Price | PriceView>>(
       `${API_ROUTES.prices.base}${query}`,
