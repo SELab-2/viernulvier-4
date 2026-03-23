@@ -44,14 +44,27 @@ function getLanguageService(): LanguageService | null {
 async function translateBeforeInsert<T>(data: T): Promise<T> {
   const translator = getLanguageService();
   if (!translator) {
+    logger.debug(
+      `[translation] skipped (${TRANSLATION_LANG_FROM} -> ${TRANSLATION_LANG_TO}) because translator is unavailable`,
+    );
     return data;
   }
 
-  return translator.translateObject<T>(
+  logger.debug(
+    `[translation] started (${TRANSLATION_LANG_FROM} -> ${TRANSLATION_LANG_TO})`,
+  );
+
+  const translated = await translator.translateObject<T>(
     data,
     TRANSLATION_LANG_FROM,
     TRANSLATION_LANG_TO,
   );
+
+  logger.debug(
+    `[translation] finished (${TRANSLATION_LANG_FROM} -> ${TRANSLATION_LANG_TO})`,
+  );
+
+  return translated;
 }
 
 function toOldCsvTag(tagName: string): vnvGenre {
