@@ -99,12 +99,12 @@ import {
   MediaGallerySchema,
   MediaItem,
   MediaItemSchema,
+  UpdatedMediaCrop,
   UpdatedMediaCropSchema,
+  UpdatedMediaGallery,
   UpdatedMediaGallerySchema,
+  UpdatedMediaItem,
   UpdatedMediaItemSchema,
-  UpdateMediaCrop,
-  UpdateMediaGallery,
-  UpdateMediaItem,
 } from "./objects/media";
 
 // list of all exports: (this way only need to import this file.)
@@ -194,7 +194,7 @@ export type {
   CreateMediaCrop,
   CreateMediaGallery,
   CreateMediaItem,
-  UpdateMediaItem,
-  UpdateMediaGallery,
-  UpdateMediaCrop,
+  UpdatedMediaItem,
+  UpdatedMediaGallery,
+  UpdatedMediaCrop,
 };

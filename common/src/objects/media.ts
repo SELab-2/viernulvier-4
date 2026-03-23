@@ -1,10 +1,15 @@
 import z from "zod";
 import { LocalizedStringSchema } from "./language";
 
+// enums
+export const CROP_NAMES = [] as const;
+export const CropNameEnum = z.enum(CROP_NAMES);
+export const ITEM_POSITIONS = ["main", "carousel"] as const;
+export const ItemPositionEnum = z.enum(ITEM_POSITIONS);
+
 // Gallery
 export const MediaGallerySchema = z.object({
   id: z.number(),
-  name: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
@@ -20,17 +25,19 @@ export const UpdatedMediaGallerySchema = MediaGallerySchema.partial().omit({
 });
 export type MediaGallery = z.infer<typeof MediaGallerySchema>;
 export type CreateMediaGallery = z.infer<typeof CreateMediaGallerySchema>;
-export type UpdateMediaGallery = z.infer<typeof UpdatedMediaGallerySchema>;
+export type UpdatedMediaGallery = z.infer<typeof UpdatedMediaGallerySchema>;
 
 // item
 export const MediaItemSchema = z.object({
   id: z.number(),
   type: z.string(),
   original_filename: z.string(),
-  position: z.number(),
+  position: ItemPositionEnum,
   width: z.number(),
   height: z.number(),
-  format: z.string(),
+  title: LocalizedStringSchema,
+  description: LocalizedStringSchema,
+  credits: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
@@ -46,12 +53,12 @@ export const UpdatedMediaItemSchema = MediaItemSchema.partial().omit({
 });
 export type MediaItem = z.infer<typeof MediaItemSchema>;
 export type CreateMediaItem = z.infer<typeof CreateMediaItemSchema>;
-export type UpdateMediaItem = z.infer<typeof UpdatedMediaItemSchema>;
+export type UpdatedMediaItem = z.infer<typeof UpdatedMediaItemSchema>;
 
 // crop
 export const MediaCropSchema = z.object({
   id: z.number(),
-  name: LocalizedStringSchema,
+  name: CropNameEnum,
   url: z.string(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
@@ -68,4 +75,4 @@ export const UpdatedMediaCropSchema = MediaCropSchema.partial().omit({
 });
 export type MediaCrop = z.infer<typeof MediaCropSchema>;
 export type CreateMediaCrop = z.infer<typeof CreateMediaCropSchema>;
-export type UpdateMediaCrop = z.infer<typeof UpdatedMediaCropSchema>;
+export type UpdatedMediaCrop = z.infer<typeof UpdatedMediaCropSchema>;

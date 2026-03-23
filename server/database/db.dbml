@@ -142,7 +142,6 @@ Table scraper_dates {
 Table media_gallery {
   id int [pk, increment]
   legacy_id varchar(255) [unique]
-  name varchar(255) [not null]
   created_at timestamptz [not null, default: `now()`]
   updated_at timestamptz [not null, default: `now()`]
 
@@ -156,10 +155,12 @@ Table media_item {
   legacy_id varchar(255) [unique]
   type varchar(100) [not null]
   original_filename varchar(500) [not null]
-  position int [not null, default: 0]
+  position ItemPositionEnum
   width int
   height int
-  format varchar(50)
+  credits jsonb
+  description jsonb
+  title jsonb
   created_at timestamptz [not null, default: `now()`]
   updated_at timestamptz [not null, default: `now()`]
 
