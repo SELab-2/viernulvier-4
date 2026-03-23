@@ -408,10 +408,30 @@ export class MediaDatabaseService {
    * Get all media crops
    * @returns The MediaCrops.
    */
-  async getAllCrops(): Promise<MediaCropDto[]> {
-    const query = `SELECT * FROM media_crop`;
+  async getAllCrops(
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<MediaCropDto>> {
+    const query = `
+      SELECT * FROM media_crop
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = `
+      SELECT COUNT(DISTINCT id) as count
+      FROM media_crop;
+    `;
+    const offset = paginationFilters.page * paginationFilters.limit;
 
-    return await this.db.query<MediaCropDto>(query);
+    const [objects, countResult] = await Promise.all([
+      this.db.query<MediaCropDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery, []),
+    ]);
+
+    return {
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**
