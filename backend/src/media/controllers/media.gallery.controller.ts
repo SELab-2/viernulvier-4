@@ -29,6 +29,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
+  ApiTags,
 } from "@nestjs/swagger";
 import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
@@ -36,6 +37,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 /**
  * Defines all media gallery related endpoints.
  */
+@ApiTags("Media - Galleries")
 @Controller("galleries")
 export class MediaGalleryController {
   constructor(private readonly mediaGalleryService: MediaGalleryService) {}

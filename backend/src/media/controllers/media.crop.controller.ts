@@ -32,6 +32,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
+  ApiTags,
 } from "@nestjs/swagger";
 import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
@@ -39,6 +40,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 /**
  * Defines all media crop related endpoints
  */
+@ApiTags("Media - Crops")
 @Controller("crops")
 export class MediaCropController {
   constructor(private readonly mediaCropService: MediaCropService) {}

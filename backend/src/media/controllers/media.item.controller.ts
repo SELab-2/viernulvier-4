@@ -37,6 +37,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
+  ApiTags,
 } from "@nestjs/swagger";
 import {
   ApiOkAnyOf,
@@ -47,6 +48,7 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 /**
  * Defines all media item related endpoints.
  */
+@ApiTags("Media - Items")
 @Controller("items")
 export class MediaItemController {
   constructor(

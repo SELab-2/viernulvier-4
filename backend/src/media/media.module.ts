@@ -6,10 +6,16 @@ import { LoggerModule } from "../util/logger/logger.module";
 import { MediaItemService } from "./services/media.item.service";
 import { MediaItemController } from "./controllers/media.item.controller";
 import { LanguageModule } from "../util/language/LanguageModule";
+import { MediaCropService } from "./services/media.crop.service";
+import { MediaCropController } from "./controllers/media.crop.controller";
 
 @Module({
   imports: [DbModule, LoggerModule, LanguageModule],
-  providers: [MediaGalleryService, MediaItemService],
-  controllers: [MediaGalleryController, MediaItemController],
+  providers: [MediaGalleryService, MediaItemService, MediaCropService],
+  controllers: [
+    MediaGalleryController,
+    MediaItemController,
+    MediaCropController,
+  ],
 })
 export class MediaModule {}
