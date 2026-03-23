@@ -4,6 +4,7 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
+  PaginationFilterDto,
   PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
@@ -16,14 +17,15 @@ export class EventService {
 
   /**
    * Fetches all EventDto objects from the DBService
-   * @param filters The Filters to be applied to the query.
+   * @param eventFilters The Filters to be applied to the query.
+   * @param paginationFilters Filters to do with pagination and ordering.
    * @returns All EventDto objects.
    */
   async getAllEvents(
-    filters: FilterEventDto,
-    descending: boolean,
+    eventFilters: FilterEventDto,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<EventDto>> {
-    return await this.eventDBService.getEvents(filters, descending);
+    return await this.eventDBService.getEvents(eventFilters, paginationFilters);
   }
 
   /**

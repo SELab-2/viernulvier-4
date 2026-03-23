@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -20,6 +19,7 @@ import {
   FilterProductionSchema,
   LanguageQuerySchema,
   PaginatedResponse,
+  PaginationFilterSchema,
   ProductionSchema,
   UpdateProductionSchema,
 } from "@repo/common";
@@ -27,6 +27,7 @@ import {
   CreateProductionDto,
   FilterProductionDto,
   LanguageQueryDto,
+  PaginationFilterDto,
   ProductionDto,
   ProductionViewDto,
   UpdateProductionDto,
@@ -58,8 +59,8 @@ export class ProductionController {
   /**
    * Responds to GET /productions.
    * note: pagination is done here via the filters param.
-   * @param filters The Filters that should be applied to the query.
-   * @param descending Whether the list should be sorted descending or ascending.
+   * @param productionFilters The Filters that should be applied to the query.
+   * @param paginationFilters Filters to do with the pagination and ordering of items.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
@@ -67,15 +68,19 @@ export class ProductionController {
   @ApiOkPaginatedResponseAnyOf(ProductionDto, ProductionViewDto)
   @Get()
   async getAllProductions(
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilters: PaginationFilterDto,
     @Query(new ZodValidationPipe(FilterProductionSchema))
-    filters: FilterProductionDto,
-    @Query("descending", ParseBoolPipe) descending: boolean,
+    productionFilters: FilterProductionDto,
   ): Promise<PaginatedResponse<ProductionDto | ProductionViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<ProductionDto | ProductionViewDto>
     >(
-      await this.productionService.getAllProductions(filters, descending),
-      filters.lang,
+      await this.productionService.getAllProductions(
+        productionFilters,
+        paginationFilters,
+      ),
+      productionFilters.lang,
     );
   }
 

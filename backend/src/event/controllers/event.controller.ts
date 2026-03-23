@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -20,6 +19,7 @@ import {
   EventSchema,
   FilterEventSchema,
   PaginatedResponse,
+  PaginationFilterSchema,
   UpdateEventSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../../auth/authGuard";
@@ -27,6 +27,7 @@ import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
+  PaginationFilterDto,
   UpdateEventDto,
 } from "../../dto/dto";
 import {
@@ -44,7 +45,7 @@ export class EventController {
   /**
    * Responds to GET /events
    * note: pagination is done via the filters param.
-   * @param filters The filters that should be applied to the query.
+   * @param eventFilters The filters that should be applied to the query.
    * @param descending Whether the list should be sorted descending or ascending.
    * @returns All EventDto objects.
    */
@@ -52,10 +53,15 @@ export class EventController {
   @ApiOkPaginatedResponseAnyOf(EventDto)
   @Get()
   async getAllEvents(
-    @Query(new ZodValidationPipe(FilterEventSchema)) filters: FilterEventDto,
-    @Query("descending", ParseBoolPipe) descending: boolean,
+    @Query(new ZodValidationPipe(FilterEventSchema))
+    eventFilters: FilterEventDto,
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<EventDto>> {
-    return await this.eventService.getAllEvents(filters, descending);
+    return await this.eventService.getAllEvents(
+      eventFilters,
+      paginationFilters,
+    );
   }
 
   /**

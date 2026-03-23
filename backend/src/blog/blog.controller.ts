@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -61,15 +60,11 @@ export class BlogController {
   @ApiOkPaginatedResponseAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getAllBlogs(
-    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-    @Query("descending", ParseBoolPipe) descending: boolean,
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
   ): Promise<PaginatedResponse<BlogDto | BlogViewDto>> {
-    const result = await this.blogService.getAllBlogs(
-      paginationFilter,
-      descending,
-    );
+    const result = await this.blogService.getAllBlogs(paginationFilter);
     return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
       result,
       lang.lang,
