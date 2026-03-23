@@ -437,14 +437,10 @@ export class MediaDatabaseService {
   /**
    * Create a new crop and link it to a media item.
    * @param crop Must be of type CreateMediaCropDto.
-   * @param itemId The item to link this crop to.
    * (if left empty then it will not be linked to anything)
    * @returns The created crop.
    */
-  async createCrop(
-    crop: CreateMediaCropDto,
-    itemId?: number,
-  ): Promise<MediaCropDto> {
+  async createCrop(crop: CreateMediaCropDto): Promise<MediaCropDto> {
     if (!crop.name || !crop.url) {
       throw new BadRequestException("Missing required fields");
     }
@@ -464,10 +460,10 @@ export class MediaDatabaseService {
       throw new Error("Failed to create media crop");
     }
 
-    if (itemId) {
+    if (crop.item_id) {
       await this.db.query(
         `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2)`,
-        [itemId, result[0].id],
+        [crop.item_id, result[0].id],
       );
     }
 

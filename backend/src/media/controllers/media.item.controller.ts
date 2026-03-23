@@ -190,5 +190,37 @@ export class MediaItemController {
     return await this.mediaItemService.getItemCrops(itemId);
   }
 
-  // TODO: Manual linking for crops.
+  /**
+   * Responds to a PUT to "/media/items/:itemId/crops/:cropId"
+   * @param itemId The ID of the item.
+   * @param cropId The ID of the crop.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Links a crop to an item." })
+  @ApiOkResponse({ description: "Crop linked to item." })
+  @Put(":itemId/crops/:cropId")
+  async linkCropToItem(
+    @Param("itemId", ParseIntPipe) itemId: number,
+    @Param("cropId", ParseIntPipe) cropId: number,
+  ): Promise<void> {
+    await this.mediaItemService.linkCropToItem(itemId, cropId);
+  }
+
+  /**
+   * Responds to a DELETE to "/media/items/:itemId/crops/:cropId"
+   * @param itemId The ID of the item.
+   * @param cropId The ID of the crop.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Unlinks a crop from an item." })
+  @ApiOkResponse({ description: "Crop unlinked from item." })
+  @Delete(":itemId/crops/:cropId")
+  async unlinkCropFromItem(
+    @Param("itemId", ParseIntPipe) itemId: number,
+    @Param("cropId", ParseIntPipe) cropId: number,
+  ): Promise<void> {
+    await this.mediaItemService.unlinkCropFromItem(itemId, cropId);
+  }
 }

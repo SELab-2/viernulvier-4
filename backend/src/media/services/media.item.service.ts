@@ -106,5 +106,21 @@ export class MediaItemService {
     return await this.mediaDbService.getCropsByItem(itemId);
   }
 
-  // TODO: Manual linking for crops.
+  /**
+   * Links a crop to an item.
+   * @param itemId The ID of the item.
+   * @param cropId The ID of the crop.
+   */
+  async linkCropToItem(itemId: number, cropId: number): Promise<void> {
+    await this.mediaDbService.linkCropToItem(itemId, cropId);
+  }
+
+  /**
+   * Unlinks a crop from an item.
+   * @param itemId The ID of the item.
+   * @param cropId The ID of the crop.
+   */
+  async unlinkCropFromItem(itemId: number, cropId: number): Promise<void> {
+    await this.mediaDbService.unlinkCropFromItem(itemId, cropId);
+  }
 }
