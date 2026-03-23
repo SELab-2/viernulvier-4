@@ -68,7 +68,7 @@ watch(locale, () => loadTags())
 
 <template>
   <NuxtLink :to="ROUTES.productions.byId(productionView.id)" class="group block">
-    <div class="flex items-center gap-4 p-4 rounded-xl border border-zinc-200 bg-white hover:border-zinc-300 hover:shadow-sm hover:bg-zinc-50/10 transition-colors transition-shadow duration-150">
+    <div class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150">
 
       <ThumbnailPlaceholder :id="productionView.id" size="md" :showIcon="true" />
 
@@ -76,11 +76,11 @@ watch(locale, () => loadTags())
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 max-w-[60%]">
             <h3
-              class="text-2xl sm:text-3xl font-semibold text-zinc-900 leading-tight truncate"
+              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate"
             >{{ productionView.titel }}</h3>
 
-            <p class="mt-2 text-sm text-zinc-500 flex items-center gap-2">
-              <svg class="w-4 h-4 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <p class="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+              <svg class="w-4 h-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="4" width="18" height="18" rx="2" />
                 <path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
@@ -97,7 +97,6 @@ watch(locale, () => loadTags())
               :key="tag.id"
               :label="typeof(tag.tag) === 'string' ? tag.tag : ''"
             />
-            <!-- Invisible fallback tag if there are no tags to keep the same layout -->
             <TagPill
               v-if="tags.length === 0"
               :label="'/'"
