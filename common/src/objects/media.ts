@@ -2,10 +2,20 @@ import z from "zod";
 import { LocalizedStringSchema } from "./language";
 
 // enums
-export const CROP_NAMES = [] as const;
+export const CROP_NAMES = [
+  "hd_ready",
+  "nb_ready",
+  "FE3_header",
+  "thumbnail",
+  "og_image",
+  "mobile",
+] as const;
 export const CropNameEnum = z.enum(CROP_NAMES);
 export const ITEM_POSITIONS = ["main", "carousel"] as const;
 export const ItemPositionEnum = z.enum(ITEM_POSITIONS);
+
+export type CropName = z.infer<typeof CropNameEnum>;
+export type ItemPosition = z.infer<typeof ItemPositionEnum>;
 
 // Gallery
 export const MediaGallerySchema = z.object({
@@ -41,6 +51,12 @@ export const MediaItemSchema = z.object({
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
+export const MediaItemViewSchema = MediaItemSchema.extend({
+  title: z.string(),
+  description: z.string(),
+  credits: z.string(),
+});
+
 export const CreateMediaItemSchema = MediaItemSchema.extend({
   // An array of gallery ids to link to on creation.
   gallery_ids: z.array(z.number().int().positive()).optional(),
@@ -55,6 +71,7 @@ export const UpdatedMediaItemSchema = MediaItemSchema.partial().omit({
   updated_at: true,
 });
 export type MediaItem = z.infer<typeof MediaItemSchema>;
+export type MediaItemView = z.infer<typeof MediaItemViewSchema>;
 export type CreateMediaItem = z.infer<typeof CreateMediaItemSchema>;
 export type UpdatedMediaItem = z.infer<typeof UpdatedMediaItemSchema>;
 

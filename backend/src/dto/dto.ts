@@ -21,6 +21,7 @@ import {
   MediaCropSchema,
   MediaGallerySchema,
   MediaItemSchema,
+  MediaItemViewSchema,
   PaginationFilterSchema,
   PriceSchema,
   PriceViewSchema,
@@ -105,6 +106,7 @@ export class UpdateMediaGalleryDto extends createZodDto(
   UpdatedMediaGallerySchema,
 ) {}
 export class MediaItemDto extends createZodDto(MediaItemSchema) {}
+export class MediaItemViewDto extends createZodDto(MediaItemViewSchema) {}
 export class CreateMediaItemDto extends createZodDto(CreateMediaItemSchema) {}
 export class UpdateMediaItemDto extends createZodDto(UpdatedMediaItemSchema) {}
 export class MediaCropDto extends createZodDto(MediaCropSchema) {}

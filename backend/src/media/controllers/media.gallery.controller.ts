@@ -24,6 +24,7 @@ import {
 } from "../../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
+  ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -76,6 +77,7 @@ export class MediaGalleryController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates a new media gallery." })
+  @ApiBody({ type: CreateMediaGalleryDto })
   @ApiCreatedResponse({
     type: MediaGalleryDto,
     description: "Created gallery.",

@@ -1,6 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { MediaDatabaseService } from "../../database/db.media.service";
-import { CreateMediaItemDto, MediaItemDto } from "../../dto/dto";
+import {
+  CreateMediaItemDto,
+  MediaItemDto,
+  PaginationFilterDto,
+  UpdateMediaItemDto,
+} from "../../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 /**
  * Defines the connection between controller and database service
@@ -9,6 +15,17 @@ import { CreateMediaItemDto, MediaItemDto } from "../../dto/dto";
 @Injectable()
 export class MediaItemService {
   constructor(private readonly mediaDbService: MediaDatabaseService) {}
+
+  /**
+   * Fetches all media items in paginated lists.
+   * @param paginationFilters The pagination parameters.
+   * @returns The Paginated list of media items.
+   */
+  async getItems(
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<MediaItemDto>> {
+    return await this.mediaDbService.getAllItems(paginationFilters);
+  }
 
   /**
    * Fetches a single media item from the database.
@@ -43,5 +60,35 @@ export class MediaItemService {
   ): Promise<MediaItemDto> {
     replaceItem.id = itemId; // Make sure the ID is correct.
     return await this.mediaDbService.updateItem(itemId, replaceItem);
+  }
+
+  /**
+   * Modifies an existing media item with partial data.
+   * @param itemId The ID of the item.
+   * @param modifyItem The partial object we want to modify to.
+   * @returns The modified media item.
+   */
+  async modifyItem(
+    itemId: number,
+    modifyItem: UpdateMediaItemDto,
+  ): Promise<MediaItemDto> {
+    const existingItem: MediaItemDto =
+      await this.mediaDbService.getItemById(itemId);
+
+    const mergedItem: MediaItemDto = {
+      ...existingItem,
+      ...modifyItem,
+      id: itemId,
+    };
+
+    return await this.mediaDbService.updateItem(itemId, mergedItem);
+  }
+
+  /**
+   * Deletes a single media item.
+   * @param itemId The ID of said item.
+   */
+  async deleteItem(itemId: number): Promise<void> {
+    await this.mediaDbService.deleteItem(itemId);
   }
 }

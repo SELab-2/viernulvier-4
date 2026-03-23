@@ -7,6 +7,7 @@ import {
   MediaCropDto,
   MediaGalleryDto,
   MediaItemDto,
+  PaginationFilterDto,
   UpdateMediaCropDto,
   UpdateMediaItemDto,
 } from "../dto/dto";
@@ -147,13 +148,34 @@ export class MediaDatabaseService {
   }
 
   /**
-   * Get all media items
+   * Get all media items paginated.
+   * @param paginationFilters The Filters regarding ordering and pagination.
    * @returns The MediaItems.
    */
-  async getAllItems(): Promise<MediaItemDto[]> {
-    const query = `SELECT * FROM media_item`;
+  async getAllItems(
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<MediaItemDto>> {
+    const query = `
+      SELECT * FROM media_item
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = `
+      SELECT COUNT(DISTINCT id) as count
+      FROM media_item;
+    `;
+    const offset = paginationFilters.page * paginationFilters.limit;
 
-    return await this.db.query<MediaItemDto>(query);
+    const [objects, countResult] = await Promise.all([
+      this.db.query<MediaItemDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery, []),
+    ]);
+
+    return {
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**

@@ -5,9 +5,10 @@ import { MediaGalleryService } from "./services/media.gallery.service";
 import { LoggerModule } from "../util/logger/logger.module";
 import { MediaItemService } from "./services/media.item.service";
 import { MediaItemController } from "./controllers/media.item.controller";
+import { LanguageModule } from "../util/language/LanguageModule";
 
 @Module({
-  imports: [DbModule, LoggerModule],
+  imports: [DbModule, LoggerModule, LanguageModule],
   providers: [MediaGalleryService, MediaItemService],
   controllers: [MediaGalleryController, MediaItemController],
 })
