@@ -86,6 +86,26 @@ import {
   UpdateTag,
   UpdateTagSchema,
 } from "./objects/tags";
+import {
+  CreateMediaCrop,
+  CreateMediaCropSchema,
+  CreateMediaGallery,
+  CreateMediaGallerySchema,
+  CreateMediaItem,
+  CreateMediaItemSchema,
+  MediaCrop,
+  MediaCropSchema,
+  MediaGallery,
+  MediaGallerySchema,
+  MediaItem,
+  MediaItemSchema,
+  UpdatedMediaCrop,
+  UpdatedMediaCropSchema,
+  UpdatedMediaGallery,
+  UpdatedMediaGallerySchema,
+  UpdatedMediaItem,
+  UpdatedMediaItemSchema,
+} from "./objects/media";
 
 // list of all exports: (this way only need to import this file.)
 export {
@@ -123,6 +143,15 @@ export {
   LanguageQuerySchema,
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
+  MediaGallerySchema,
+  MediaItemSchema,
+  MediaCropSchema,
+  CreateMediaCropSchema,
+  CreateMediaGallerySchema,
+  CreateMediaItemSchema,
+  UpdatedMediaCropSchema,
+  UpdatedMediaItemSchema,
+  UpdatedMediaGallerySchema,
 };
 export type {
   Production,
@@ -159,4 +188,13 @@ export type {
   Language,
   LanguageQuery,
   PaginatedResponse,
+  MediaGallery,
+  MediaItem,
+  MediaCrop,
+  CreateMediaCrop,
+  CreateMediaGallery,
+  CreateMediaItem,
+  UpdatedMediaItem,
+  UpdatedMediaGallery,
+  UpdatedMediaCrop,
 };

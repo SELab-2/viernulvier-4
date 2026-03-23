@@ -13,7 +13,6 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
-import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateProductionSchema,
   FilterProductionSchema,
@@ -45,6 +44,7 @@ import {
   ApiOkAnyOf,
   ApiOkPaginatedResponseAnyOf,
 } from "../../common/decorators/api.ok";
+import { ZodValidationPipe } from "nestjs-zod";
 
 /**
  * Handles CORE functionality for Productions.

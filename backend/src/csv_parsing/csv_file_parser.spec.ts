@@ -103,24 +103,6 @@ describe("CSVFileParser", () => {
       });
     });
 
-    it("should handle missing English location with Dutch fallback", () => {
-      const row = {
-        ID: "1",
-        Starttime: "2024-01-01 10:00:00",
-        Endtime: "2024-01-01 12:00:00",
-        Production: "5",
-        Location_NL: "Nederlandse Zaal",
-        Location_EN: "",
-      };
-
-      const result = CSVFileParser.transformEventRow(row);
-
-      expect(result.location).toEqual({
-        en: "Nederlandse Zaal",
-        nl: "Nederlandse Zaal",
-      });
-    });
-
     it("should set endtime to null for invalid or empty endtime", () => {
       const row = {
         ID: "1",

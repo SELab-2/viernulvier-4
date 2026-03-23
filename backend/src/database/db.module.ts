@@ -8,6 +8,7 @@ import { LocationDatabaseService } from "./db.location.service";
 import { ApiKeyDatabaseService } from "./db.apiKey.service";
 import { AccountDatabaseService } from "./db.account.service";
 import { PriceDatabaseService } from "./db.price.service";
+import { MediaDatabaseService } from "./db.media.service";
 
 @Module({
   imports: [],
@@ -22,6 +23,7 @@ import { PriceDatabaseService } from "./db.price.service";
     PriceDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
+    MediaDatabaseService,
   ],
   controllers: [],
   exports: [
@@ -35,6 +37,7 @@ import { PriceDatabaseService } from "./db.price.service";
     PriceDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
+    MediaDatabaseService,
   ],
 })
 export class DbModule {}

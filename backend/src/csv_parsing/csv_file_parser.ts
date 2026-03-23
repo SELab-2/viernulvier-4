@@ -75,8 +75,8 @@ export class CSVFileParser {
     }
 
     if (!en && nl) {
-      //TODO translate
-      return { en: nl, nl };
+      //translating will be done before inserting
+      return { en: "", nl };
     }
 
     return { en, nl };
