@@ -112,10 +112,8 @@ export class MediaDatabaseService {
    * @param id The gallery to delete.
    */
   async deleteGallery(id: number): Promise<void> {
-    const result = await this.db.query(
-      `DELETE FROM media_gallery WHERE id = $1 RETURNING id`,
-      [id],
-    );
+    const query = `DELETE FROM media_gallery WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
     if (result.length == 0) {
       throw new ResourceGoneException(`Cannot delete: Gallery ${id} not found`);
     }
@@ -307,10 +305,8 @@ export class MediaDatabaseService {
    * @param id The item to delete.
    */
   async deleteItem(id: number): Promise<void> {
-    const result = await this.db.query(
-      `DELETE FROM media_item WHERE id = $1 RETURNING id`,
-      [id],
-    );
+    const query = `DELETE FROM media_item WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
     if (result.length == 0) {
       throw new ResourceGoneException(`Cannot delete: Item ${id} not found`);
     }
@@ -323,10 +319,8 @@ export class MediaDatabaseService {
    * @param itemId The item to link.
    */
   async linkItemToGallery(galleryId: number, itemId: number): Promise<void> {
-    await this.db.query(
-      `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [galleryId, itemId],
-    );
+    const query = `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
+    await this.db.query(query, [galleryId, itemId]);
   }
 
   /**
@@ -339,10 +333,8 @@ export class MediaDatabaseService {
     galleryId: number,
     itemId: number,
   ): Promise<void> {
-    await this.db.query(
-      `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`,
-      [galleryId, itemId],
-    );
+    const query = `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`;
+    await this.db.query(query, [galleryId, itemId]);
   }
 
   // ----------------------------------------------------------------
@@ -493,10 +485,8 @@ export class MediaDatabaseService {
    * @param id The crop to delete.
    */
   async deleteCrop(id: number): Promise<void> {
-    const result = await this.db.query(
-      `DELETE FROM media_crop WHERE id = $1 RETURNING id`,
-      [id],
-    );
+    const query = `DELETE FROM media_crop WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
     if (result.length == 0) {
       throw new ResourceGoneException(`Cannot delete: Crop ${id} not found`);
     }
@@ -509,10 +499,8 @@ export class MediaDatabaseService {
    * @param cropId The crop to link.
    */
   async linkCropToItem(itemId: number, cropId: number): Promise<void> {
-    await this.db.query(
-      `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [itemId, cropId],
-    );
+    const query = `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
+    await this.db.query(query, [itemId, cropId]);
   }
 
   /**
@@ -522,9 +510,7 @@ export class MediaDatabaseService {
    * @param cropId The crop to unlink.
    */
   async unlinkCropFromItem(itemId: number, cropId: number): Promise<void> {
-    await this.db.query(
-      `DELETE FROM item_crop WHERE item_id = $1 AND crop_id = $2`,
-      [itemId, cropId],
-    );
+    const query = `DELETE FROM item_crop WHERE item_id = $1 AND crop_id = $2`;
+    await this.db.query(query, [itemId, cropId]);
   }
 }
