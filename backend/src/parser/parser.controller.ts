@@ -1,12 +1,18 @@
 import { Controller, Post, Body, UseGuards } from "@nestjs/common";
 import { CsvInjectionService } from "../util/scraper/csv-injection.service";
-import { ApiOkResponse, ApiOperation, ApiSecurity} from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiSecurity } from "@nestjs/swagger";
 import { ApiKeyGuard } from "src/auth/authGuard";
 
 @Controller("parser")
 export class ParserController {
   constructor(private readonly csvInjectionService: CsvInjectionService) {}
 
+  /**
+   * Responds to a POST to "/parser/productions" with a file path in the body,
+   * and injects productions from the specified CSV file into the database.
+   * The CSV file should be formatted according to the expected schema for productions.
+   * @param filePath The path to the CSV file containing production data to be injected.
+   */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject productions from CSV file" })
@@ -16,6 +22,12 @@ export class ParserController {
     return this.csvInjectionService.injectProductionsCSV(filePath);
   }
 
+  /**
+   * Responds to a POST to "/parser/events" with a file path in the body,
+   * and injects events from the specified CSV file into the database.
+   * The CSV file should be formatted according to the expected schema for events.
+   * @param filePath The path to the CSV file containing event data to be injected.
+   */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject events from CSV file" })
@@ -25,6 +37,12 @@ export class ParserController {
     return this.csvInjectionService.injectEventsCSV(filePath);
   }
 
+  /**
+   * Responds to a POST to "/parser/tags" with a file path in the body,
+   * and injects tags from the specified CSV file into the database.
+   * The CSV file should be formatted according to the expected schema for tags.
+   * @param filePath The path to the CSV file containing tag data to be injected.
+   */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject tags from CSV file" })
@@ -34,6 +52,12 @@ export class ParserController {
     return this.csvInjectionService.injectTagsCSV(filePath);
   }
 
+  /**
+   * Responds to a POST to "/parser/blogs" with a file path in the body,
+   * and injects blogs from the specified CSV file into the database.
+   * The CSV file should be formatted according to the expected schema for blogs.
+   * @param filePath The path to the CSV file containing blog data to be injected.
+   */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject blogs from CSV file" })
@@ -43,6 +67,12 @@ export class ParserController {
     return this.csvInjectionService.injectBlogsCSV(filePath);
   }
 
+  /**
+   * Responds to a POST to "/parser/prices" with a file path in the body,
+   * and injects prices from the specified CSV file into the database.
+   * The CSV file should be formatted according to the expected schema for prices.
+   * @param filePath The path to the CSV file containing price data to be injected.
+   */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject prices from CSV file" })
