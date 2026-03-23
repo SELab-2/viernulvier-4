@@ -5,12 +5,18 @@ import FormBaseForm from "../../../app/components/form/BaseForm.vue";
 import type { FormField } from "../../../app/types/FormField";
 
 const i18n = createI18n({ // needed so no error is thrown when mounted
-    locale: "nl",
-    messages: {
-        nl: { searchbar: { placeholder: "Zoeken..." } },
-        en: { searchbar: { placeholder: "Search..." } },
-    },
-});
+        locale: "nl",
+        messages: {
+            nl: {
+                searchbar: { placeholder: "Zoeken..." },
+                baseform: { submitbutton: "Indienen" }
+            },
+            en: {
+                searchbar: { placeholder: "Search..." },
+                baseform: { submitbutton: "Submit" }
+            },
+        },
+    });
 
 const fields: FormField[] = [
     { component: "BaseInput", name: "title", props: { label: "Title", required: true } },
