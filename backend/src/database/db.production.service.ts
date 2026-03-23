@@ -4,6 +4,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  MediaGalleryDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
@@ -69,7 +70,7 @@ export class ProductionDatabaseService {
       SELECT t.id,
              t.tag,
              t.created_at,
-             t.updated_at,
+             t.updated_at
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -113,7 +114,7 @@ export class ProductionDatabaseService {
              b.titel,
              b.description,
              b.created_at,
-             b.updated_at,
+             b.updated_at
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -585,5 +586,65 @@ export class ProductionDatabaseService {
         "Cannot delete: Tag-Production link not found",
       );
     }
+  }
+
+  /**
+   * Gets media gallery linked to a given production.
+   * @param prod_id The ID of the production you want.
+   * @returns List of MediaGalleryDto linked to the production.
+   */
+  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto> {
+    const query = `
+      SELECT mg.id, mg.name, mg.created_at, mg.updated_at
+      FROM media_gallery mg
+      INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
+      WHERE pmg.production_id = $1
+      ORDER BY mg.id
+    `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, [prod_id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Production with ID ${prod_id} has no media gallery`,
+      );
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given production.
+   * @param prod_id The ID of the production to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   */
+  async linkMediaToProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    INSERT INTO production_media_gallery (production_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given production.
+   * @param prod_id The ID of the production.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM production_media_gallery
+    WHERE production_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
   }
 }
