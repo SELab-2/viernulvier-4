@@ -23,6 +23,7 @@ import {
 import {
   CreateMediaItemDto,
   LanguageQueryDto,
+  MediaCropDto,
   MediaItemDto,
   MediaItemViewDto,
   PaginationFilterDto,
@@ -166,4 +167,28 @@ export class MediaItemController {
   ): Promise<void> {
     await this.mediaItemService.deleteItem(itemId);
   }
+
+  /**
+   * Item -- Crop
+   */
+
+  /**
+   * Responds to a GET to "/media/items/:itemId/crops"
+   * @param itemId The ID of the item we want crops for.
+   * @returns The Crops of that item.
+   */
+  @ApiOperation({ summary: "Get all crops for an item." })
+  @ApiOkResponse({
+    type: MediaCropDto,
+    isArray: true,
+    description: "Fetched all crops for this item.",
+  })
+  @Get(":itemId/crops")
+  async getItemCrops(
+    @Param("itemId", ParseIntPipe) itemId: number,
+  ): Promise<MediaCropDto[]> {
+    return await this.mediaItemService.getItemCrops(itemId);
+  }
+
+  // TODO: Manual linking for crops.
 }

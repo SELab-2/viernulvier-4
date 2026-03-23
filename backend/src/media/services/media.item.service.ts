@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { MediaDatabaseService } from "../../database/db.media.service";
 import {
   CreateMediaItemDto,
+  MediaCropDto,
   MediaItemDto,
   PaginationFilterDto,
   UpdateMediaItemDto,
@@ -91,4 +92,19 @@ export class MediaItemService {
   async deleteItem(itemId: number): Promise<void> {
     await this.mediaDbService.deleteItem(itemId);
   }
+
+  /**
+   * Item -- Crop
+   */
+
+  /**
+   * Returns all crops for a media item.
+   * @param itemId The ID of the media item.
+   * @returns All of the crops for that item.
+   */
+  async getItemCrops(itemId: number): Promise<MediaCropDto[]> {
+    return await this.mediaDbService.getCropsByItem(itemId);
+  }
+
+  // TODO: Manual linking for crops.
 }
