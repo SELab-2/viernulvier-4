@@ -149,6 +149,16 @@ export class MediaDatabaseService {
   }
 
   /**
+   * Get all media items
+   * @returns The MediaItems.
+   */
+  async getAllItems(): Promise<MediaItemDto[]> {
+    const query = `SELECT * FROM media_item`;
+
+    return await this.db.query<MediaItemDto>(query);
+  }
+
+  /**
    * Get all items belonging to a gallery.
    * @param galleryId The gallery to fetch items for.
    * @returns Ordered list of media items.
@@ -377,6 +387,17 @@ export class MediaDatabaseService {
     `;
 
     return this.db.query<MediaCropDto>(query, [itemId]);
+  }
+
+  // overkill but rather overkill than underkill
+  /**
+   * Get all media crops
+   * @returns The MediaCrops.
+   */
+  async getAllCrops(): Promise<MediaCropDto[]> {
+    const query = `SELECT * FROM media_crop`;
+
+    return await this.db.query<MediaCropDto>(query);
   }
 
   /**
