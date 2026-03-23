@@ -31,7 +31,7 @@ import BaseFileUpload from "./fields/BaseFileUpload.vue";
 import BaseTagInput from "./fields/BaseTagInput.vue";
 import BaseSelect from "./fields/BaseSelect.vue";
 import BaseMultiSelect from "./fields/BaseMultiSelect.vue";
-
+const { t } = useI18n()
 
 interface Props {
   fields: FormField[] // Can store multiple fields, allows us to have multiple of the same type
@@ -77,7 +77,7 @@ function submit() {
         type="submit"
         class="w-full h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-90 cursor-pointer"
       >
-        Submit
+        {{ t('baseform.submitbutton') }}
       </button>
     </div>
   </form>

@@ -2,6 +2,9 @@
   "searchbar": {
     "placeholder": "Zoek..."
   },
+  "baseform": {
+    "submitbutton": "Dien in"
+  },
   "hero": {
     "title": "Archief",
     "label": "Kunstencentrum Gent — Archief",
