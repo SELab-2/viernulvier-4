@@ -5,7 +5,6 @@ import {
   CreateMediaGalleryDto,
   MediaGalleryDto,
   MediaItemDto,
-  UpdateMediaGalleryDto,
 } from "../../dto/dto";
 
 /**
@@ -48,20 +47,6 @@ export class MediaGalleryService {
     createGallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
     return await this.mediaDbService.createGallery(createGallery);
-  }
-
-  /**
-   * Modifies a single gallery. Galleries only have one modify-able field
-   * so that means no replace function is needed.
-   * @param galleryId The ID of the gallery we want to modify.
-   * @param modifyGallery The object we want to modify to.
-   * @returns The updated gallery object.
-   */
-  async modifyGallery(
-    galleryId: number,
-    modifyGallery: UpdateMediaGalleryDto,
-  ): Promise<MediaGalleryDto> {
-    return await this.mediaDbService.updateGallery(galleryId, modifyGallery);
   }
 
   /**

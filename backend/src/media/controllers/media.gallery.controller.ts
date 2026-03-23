@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Put,
   Query,
@@ -16,14 +15,12 @@ import {
   CreateMediaGallerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdatedMediaGallerySchema,
 } from "@repo/common";
 import {
   CreateMediaGalleryDto,
   MediaGalleryDto,
   MediaItemDto,
   PaginationFilterDto,
-  UpdateMediaGalleryDto,
 } from "../../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
@@ -89,31 +86,6 @@ export class MediaGalleryController {
     createGallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
     return await this.mediaGalleryService.createGallery(createGallery);
-  }
-
-  /**
-   * Responds to a PATCH to "/media/galleries/:galleryId"
-   * @param galleryId The ID of the gallery.
-   * @param modifyGallery The fields needed to modify it.
-   * @returns The newly modified gallery.
-   */
-  @UseGuards(ApiKeyGuard)
-  @ApiSecurity("apiKey")
-  @ApiOperation({ summary: "Modifies an existing gallery." })
-  @ApiOkResponse({
-    type: MediaGalleryDto,
-    description: "Modified an existing gallery.",
-  })
-  @Patch(":galleryId")
-  async modifyGallery(
-    @Param("galleryId", ParseIntPipe) galleryId: number,
-    @Body(new ZodValidationPipe(UpdatedMediaGallerySchema))
-    modifyGallery: UpdateMediaGalleryDto,
-  ): Promise<MediaGalleryDto> {
-    return await this.mediaGalleryService.modifyGallery(
-      galleryId,
-      modifyGallery,
-    );
   }
 
   /**
