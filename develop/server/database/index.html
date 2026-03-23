@@ -1397,6 +1397,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#media-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#junction-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2097,6 +2108,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#media-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Media Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#junction-tables" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2177,8 +2199,8 @@
 
 <h2 id="database">Database</h2>
 <p>The database runs on PostgreSQL and stores all data related to productions, events, blogs, tags, locations, pricing,
-accounts, and API keys. The schema is relational, uses junction tables for many-to-many relationships, and uses JSONB
-fields throughout to support multilingual content.</p>
+accounts, API keys, and media. The schema is relational, uses junction tables for many-to-many relationships, and uses
+JSONB fields throughout to support multilingual content.</p>
 <hr />
 <h2 id="getting-started">Getting Started</h2>
 <p>Install PostgreSQL by following <a href="https://www.postgresql.org/download/">this guide</a>, then restore the database from the
@@ -2201,6 +2223,15 @@ Stores <code>starttime</code>, <code>endtime</code>, <code>doors_at</code>, and 
 <p><strong><code>tags</code></strong> – Unique multilingual JSONB tags, linked to productions via <code>production_tag</code>.</p>
 <p><strong><code>blogs</code></strong> – Standalone blog entries with multilingual <code>titel</code> and <code>description</code>. Linked to productions via
 <code>production_blogs</code>.</p>
+<hr />
+<h3 id="media-tables">Media Tables</h3>
+<p><strong><code>media_gallery</code></strong> – A collection of media items. Galleries can be linked to productions and blogs via junction
+tables.</p>
+<p><strong><code>media_item</code></strong> – An individual media file within a gallery. Stores <code>type</code>, <code>original_filename</code>, <code>position</code>, <code>width</code>,
+<code>height</code>,
+<code>title</code>, <code>description</code> and <code>credits</code>.</p>
+<p><strong><code>media_crop</code></strong> – A cropped variant of a media item, identified by a <code>crop_name</code> enum (<code>hd_ready</code>, <code>FE3_header</code>,
+<code>thumbnail</code>, <code>og_image</code>, <code>mobile</code>, <code>nb_ready</code>) and a <code>url</code>. Linked to items via <code>item_crop</code>.</p>
 <hr />
 <h3 id="junction-tables">Junction Tables</h3>
 <table>
@@ -2237,6 +2268,26 @@ Stores <code>starttime</code>, <code>endtime</code>, <code>doors_at</code>, and 
 <td><code>accounts</code> ↔ <code>api_keys</code></td>
 <td>Yes</td>
 </tr>
+<tr>
+<td><code>gallery_item</code></td>
+<td><code>media_gallery</code> ↔ <code>media_item</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>item_crop</code></td>
+<td><code>media_item</code> ↔ <code>media_crop</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>production_media_gallery</code></td>
+<td><code>productions</code> ↔ <code>media_gallery</code></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>blog_media_gallery</code></td>
+<td><code>blogs</code> ↔ <code>media_gallery</code></td>
+<td>Yes</td>
+</tr>
 </tbody>
 </table>
 <p>All junction tables use composite primary keys.</p>
@@ -2253,15 +2304,18 @@ permissions. Linked to accounts via <code>account_api_keys</code>.</p>
 <pre><code>productions ──&lt; events ──&lt; event_locations &gt;── locations
      │                └──&lt; event_prices    &gt;── prices
      │
-     ├──&lt; production_tag   &gt;── tags
-     └──&lt; production_blogs &gt;── blogs
+     ├──&lt; production_tag            &gt;── tags
+     ├──&lt; production_blogs          &gt;── blogs
+     └──&lt; production_media_gallery  &gt;── media_gallery ──&lt; gallery_item &gt;── media_item ──&lt; item_crop &gt;── media_crop
+
+blogs ──&lt; blog_media_gallery &gt;── media_gallery
 
 accounts ──&lt; account_api_keys &gt;── api_keys
 </code></pre>
 <hr />
 <h2 id="extra-information">Extra Information</h2>
-<p>As an alternative to restoring from the dump, a backup of the raw SQL setup scripts is also available. These can be used
-to set up a clean empty database from scratch.</p>
+<p>As an alternative to restoring from the dump, a backup of the raw SQL setup scripts is also available. These can be
+used to set up a clean empty database from scratch.</p>
 <blockquote>
 <p><strong>Important:</strong> If you use this method, you will need to manually create an initial admin account and API key before
 the backend will function.</p>
