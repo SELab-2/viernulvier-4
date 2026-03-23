@@ -13,7 +13,6 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import EventService from "../event.service";
-import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateEventSchema,
   EventSchema,
@@ -35,6 +34,7 @@ import {
   ApiSecurity,
 } from "@nestjs/swagger";
 import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
+import { ZodValidationPipe } from "nestjs-zod";
 
 @Controller("events")
 export class EventController {
