@@ -8,7 +8,6 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   UpdateMediaCropDto,
-  UpdateMediaGalleryDto,
   UpdateMediaItemDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
@@ -30,7 +29,7 @@ export class MediaDatabaseService {
    */
   async getGalleryById(id: number): Promise<MediaGalleryDto> {
     const query = `
-      SELECT id, name, created_at, updated_at
+      SELECT id, created_at, updated_at
       FROM media_gallery
       WHERE id = $1
     `;
@@ -57,7 +56,7 @@ export class MediaDatabaseService {
     page: number = 0,
   ): Promise<PaginatedResponse<MediaGalleryDto>> {
     let query = `
-      SELECT id, name, created_at, updated_at
+      SELECT id, created_at, updated_at
       FROM media_gallery
       ORDER BY id
     `;
@@ -92,14 +91,9 @@ export class MediaDatabaseService {
   async createGallery(
     gallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
-    if (!gallery.name) {
-      throw new BadRequestException("Missing required fields");
-    }
-
     const query = `
-      INSERT INTO media_gallery (name)
-      VALUES ($1)
-      RETURNING id, name, created_at, updated_at
+      INSERT INTO media_gallery DEFAULT VALUES 
+      RETURNING id, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaGalleryDto>(query, [gallery.name]);
@@ -111,58 +105,15 @@ export class MediaDatabaseService {
     return result[0];
   }
 
-  /**
-   * Update a gallery by ID.
-   * @param galleryId The gallery to update.
-   * @param gallery Fields to update, all optional.
-   * @returns The updated gallery.
-   */
-  async updateGallery(
-    galleryId: number,
-    gallery: UpdateMediaGalleryDto,
-  ): Promise<MediaGalleryDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
-
-    if (gallery.name !== undefined) {
-      fields.push(`name = $${index++}`);
-      values.push(gallery.name);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No valid fields to update");
-    }
-
-    values.push(galleryId);
-
-    const query = `
-      UPDATE media_gallery
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING id, name, created_at, updated_at
-    `;
-
-    const result = await this.db.query<MediaGalleryDto>(query, values);
-
-    if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update gallery with ID ${galleryId}.`,
-      );
-    }
-
-    return result[0];
-  }
+  // note: no update function for galleries seeing as there are no fields to be updated. (name has been removed)
 
   /**
    * Delete a gallery by ID. Silently does nothing if the ID doesn't exist.
    * @param id The gallery to delete.
    */
   async deleteGallery(id: number): Promise<void> {
-    const result = await this.db.query(
-      `DELETE FROM media_gallery WHERE id = $1 RETURNING id`,
-      [id],
-    );
+    const query = `DELETE FROM media_gallery WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
     if (result.length == 0) {
       throw new ResourceGoneException(`Cannot delete: Gallery ${id} not found`);
     }
@@ -179,7 +130,7 @@ export class MediaDatabaseService {
    */
   async getItemById(id: number): Promise<MediaItemDto> {
     const query = `
-      SELECT id, type, original_filename, position, width, height, format, created_at, updated_at
+      SELECT id, type, original_filename, position, width, height, title, description, credits , created_at, updated_at
       FROM media_item
       WHERE id = $1
     `;
@@ -196,6 +147,16 @@ export class MediaDatabaseService {
   }
 
   /**
+   * Get all media items
+   * @returns The MediaItems.
+   */
+  async getAllItems(): Promise<MediaItemDto[]> {
+    const query = `SELECT * FROM media_item`;
+
+    return await this.db.query<MediaItemDto>(query);
+  }
+
+  /**
    * Get all items belonging to a gallery.
    * @param galleryId The gallery to fetch items for.
    * @returns Ordered list of media items.
@@ -203,7 +164,7 @@ export class MediaDatabaseService {
   async getItemsByGallery(galleryId: number): Promise<MediaItemDto[]> {
     const query = `
       SELECT mi.id, mi.type, mi.original_filename, mi.position,
-             mi.width, mi.height, mi.format, mi.created_at, mi.updated_at
+             mi.width, mi.height, mi.title, mi.description, mi.credits, mi.created_at, mi.updated_at
       FROM media_item mi
       INNER JOIN gallery_item gi ON gi.item_id = mi.id
       WHERE gi.gallery_id = $1
@@ -228,9 +189,9 @@ export class MediaDatabaseService {
     }
 
     const insertQuery = `
-        INSERT INTO media_item (type, original_filename, position, width, height, format)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, type, original_filename, position, width, height, format, created_at, updated_at
+        INSERT INTO media_item (type, original_filename, position, width, height, title, description, credits)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING id, type, original_filename, position, width, height, title, description, credits, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaItemDto>(insertQuery, [
@@ -239,13 +200,16 @@ export class MediaDatabaseService {
       item.position ?? 0,
       item.width ?? null,
       item.height ?? null,
-      item.format ?? null,
+      item.title ?? null,
+      item.description ?? null,
+      item.credits ?? null,
     ]);
 
     if (result.length === 0) {
       throw new Error("Failed to create media item");
     }
 
+    // link to a list of galleries
     if (galleryIds.length > 0) {
       for (const galleryId of galleryIds) {
         await this.db.query(
@@ -297,9 +261,19 @@ export class MediaDatabaseService {
       values.push(item.height);
     }
 
-    if (item.format !== undefined) {
-      fields.push(`format = $${index++}`);
-      values.push(item.format);
+    if (item.title !== undefined) {
+      fields.push(`title = $${index++}`);
+      values.push(item.title);
+    }
+
+    if (item.description !== undefined) {
+      fields.push(`description = $${index++}`);
+      values.push(item.description);
+    }
+
+    if (item.credits !== undefined) {
+      fields.push(`credits = $${index++}`);
+      values.push(item.credits);
     }
 
     if (fields.length === 0) {
@@ -312,7 +286,7 @@ export class MediaDatabaseService {
       UPDATE media_item
       SET ${fields.join(", ")}
       WHERE id = $${index}
-      RETURNING id, type, original_filename, position, width, height, format, created_at, updated_at
+      RETURNING id, type, original_filename, position, width, height, description, title, credits, created_at, updated_at
     `;
 
     const result = await this.db.query<MediaItemDto>(query, values);
@@ -331,10 +305,8 @@ export class MediaDatabaseService {
    * @param id The item to delete.
    */
   async deleteItem(id: number): Promise<void> {
-    const result = await this.db.query(
-      `DELETE FROM media_item WHERE id = $1 RETURNING id`,
-      [id],
-    );
+    const query = `DELETE FROM media_item WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
     if (result.length == 0) {
       throw new ResourceGoneException(`Cannot delete: Item ${id} not found`);
     }
@@ -347,10 +319,8 @@ export class MediaDatabaseService {
    * @param itemId The item to link.
    */
   async linkItemToGallery(galleryId: number, itemId: number): Promise<void> {
-    await this.db.query(
-      `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [galleryId, itemId],
-    );
+    const query = `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
+    await this.db.query(query, [galleryId, itemId]);
   }
 
   /**
@@ -363,10 +333,8 @@ export class MediaDatabaseService {
     galleryId: number,
     itemId: number,
   ): Promise<void> {
-    await this.db.query(
-      `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`,
-      [galleryId, itemId],
-    );
+    const query = `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`;
+    await this.db.query(query, [galleryId, itemId]);
   }
 
   // ----------------------------------------------------------------
@@ -411,6 +379,17 @@ export class MediaDatabaseService {
     `;
 
     return this.db.query<MediaCropDto>(query, [itemId]);
+  }
+
+  // overkill but rather overkill than underkill
+  /**
+   * Get all media crops
+   * @returns The MediaCrops.
+   */
+  async getAllCrops(): Promise<MediaCropDto[]> {
+    const query = `SELECT * FROM media_crop`;
+
+    return await this.db.query<MediaCropDto>(query);
   }
 
   /**
@@ -506,10 +485,8 @@ export class MediaDatabaseService {
    * @param id The crop to delete.
    */
   async deleteCrop(id: number): Promise<void> {
-    const result = await this.db.query(
-      `DELETE FROM media_crop WHERE id = $1 RETURNING id`,
-      [id],
-    );
+    const query = `DELETE FROM media_crop WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
     if (result.length == 0) {
       throw new ResourceGoneException(`Cannot delete: Crop ${id} not found`);
     }
@@ -522,10 +499,8 @@ export class MediaDatabaseService {
    * @param cropId The crop to link.
    */
   async linkCropToItem(itemId: number, cropId: number): Promise<void> {
-    await this.db.query(
-      `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [itemId, cropId],
-    );
+    const query = `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
+    await this.db.query(query, [itemId, cropId]);
   }
 
   /**
@@ -535,9 +510,7 @@ export class MediaDatabaseService {
    * @param cropId The crop to unlink.
    */
   async unlinkCropFromItem(itemId: number, cropId: number): Promise<void> {
-    await this.db.query(
-      `DELETE FROM item_crop WHERE item_id = $1 AND crop_id = $2`,
-      [itemId, cropId],
-    );
+    const query = `DELETE FROM item_crop WHERE item_id = $1 AND crop_id = $2`;
+    await this.db.query(query, [itemId, cropId]);
   }
 }

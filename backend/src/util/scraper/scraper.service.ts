@@ -1,8 +1,8 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
-import { injectOldCsvData } from "./inject-csv";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ScraperRunner } from "./main";
+import { CsvInjectionService } from "./csv-injection.service";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -12,6 +12,7 @@ export class ScraperService implements OnApplicationBootstrap {
   constructor(
     private readonly logger: AppLogger,
     private readonly runner: ScraperRunner,
+    private readonly csvInjectionService: CsvInjectionService,
   ) {}
 
   /**
@@ -33,7 +34,8 @@ export class ScraperService implements OnApplicationBootstrap {
     }
 
     this.logger.log("Running initial CSV injection...");
-    injectOldCsvData()
+    this.csvInjectionService
+      .injectOldCsvData()
       .then(() => {
         this.logger.log(
           "Initial CSV injection finished successfully.",

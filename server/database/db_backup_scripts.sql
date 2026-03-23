@@ -202,16 +202,18 @@ CREATE TYPE crop_name AS ENUM (
     'FE3_header',
     'thumbnail',
     'og_image',
-    'mobile'
+    'mobile',
+    'nb_ready'
     );
+
+CREATE TYPE "ItemPositionEnum" AS ENUM ('main', 'carousel');
 
 CREATE TABLE media_gallery
 (
     id         SERIAL PRIMARY KEY,
     legacy_id  VARCHAR(255) UNIQUE,
-    name       VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_media_gallery_legacy_id ON media_gallery (legacy_id);
@@ -220,14 +222,16 @@ CREATE TABLE media_item
 (
     id                SERIAL PRIMARY KEY,
     legacy_id         VARCHAR(255) UNIQUE,
-    type              VARCHAR(100) NOT NULL,
-    original_filename VARCHAR(500) NOT NULL,
-    position          INTEGER      NOT NULL DEFAULT 0,
+    type              VARCHAR(100)     NOT NULL,
+    original_filename VARCHAR(500)     NOT NULL,
+    position          ItemPositionEnum NOT NULL,
     width             INTEGER,
     height            INTEGER,
-    format            VARCHAR(50),
-    created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+    credits           jsonb,
+    description       jsonb,
+    title             jsonb,
+    created_at        TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMPTZ      NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_media_item_legacy_id ON media_item (legacy_id);

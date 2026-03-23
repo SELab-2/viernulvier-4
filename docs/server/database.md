@@ -46,14 +46,15 @@ Stores `starttime`, `endtime`, `doors_at`, and `intermission_at`.
 
 ### Media Tables
 
-**`media_gallery`** – A named collection of media items. Galleries can be linked to productions and blogs via junction
+**`media_gallery`** – A collection of media items. Galleries can be linked to productions and blogs via junction
 tables.
 
-**`media_item`** – An individual media file within a gallery. Stores `type`, `original_filename`, `width`, `height`,
-and `format`.
+**`media_item`** – An individual media file within a gallery. Stores `type`, `original_filename`, `position`, `width`,
+`height`,
+`title`, `description` and `credits`.
 
 **`media_crop`** – A cropped variant of a media item, identified by a `crop_name` enum (`hd_ready`, `FE3_header`,
-`thumbnail`, `og_image`, `mobile`) and a `url`. Linked to items via `item_crop`.
+`thumbnail`, `og_image`, `mobile`, `nb_ready`) and a `url`. Linked to items via `item_crop`.
 
 ---
 
