@@ -60,8 +60,8 @@ export class ProductionController {
    * Responds to GET /productions.
    * note: pagination is done here via the filters param.
    * @param lang The Language filter for this query.
-   * @param productionFilters The Filters that should be applied to the query.
    * @param paginationFilters Filters to do with the pagination and ordering of items.
+   * @param productionFilters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })

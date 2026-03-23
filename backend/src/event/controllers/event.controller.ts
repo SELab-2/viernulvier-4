@@ -46,7 +46,7 @@ export class EventController {
    * Responds to GET /events
    * note: pagination is done via the filters param.
    * @param eventFilters The filters that should be applied to the query.
-   * @param descending Whether the list should be sorted descending or ascending.
+   * @param paginationFilters Filters for pagination and ordering.
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
