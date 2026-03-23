@@ -24,10 +24,24 @@ export function useProductionApi() {
   const { get, post, put, patch, del } = useApi();
 
   /** GET /productions — returns a paginated list of productions, optionally filtered. */
-  const getAll = (filters?: Partial<FilterProduction>) => {
-    const query = filters
-      ? "?" + new URLSearchParams(filters as Record<string, string>).toString()
-      : "";
+  const getAll = (
+    filters?: Partial<FilterProduction>,
+    descending: boolean = true, // Defaults to descending for production list.
+  ) => {
+    const params = {
+      ...filters,
+      descending: String(descending),
+    };
+
+    const cleanParams = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(params).filter(([_, value]) => value != null),
+    );
+
+    const query =
+      "?" +
+      new URLSearchParams(cleanParams as Record<string, string>).toString();
+
     return get<PaginatedResponse<Production | ProductionView>>(
       `${API_ROUTES.productions.base}${query}`,
     );

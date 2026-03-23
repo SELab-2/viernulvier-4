@@ -28,11 +28,18 @@ export function useBlogApi() {
     const params = {
       ...pagination,
       ...(lang ? { lang } : {}),
-      ...{ descending: descending },
+      descending: String(descending),
     };
-    const query = Object.keys(params).length
-      ? "?" + new URLSearchParams(params as Record<string, any>).toString()
-      : "";
+
+    const cleanParams = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(params).filter(([_, value]) => value != null),
+    );
+
+    const query =
+      "?" +
+      new URLSearchParams(cleanParams as Record<string, string>).toString();
+
     return get<PaginatedResponse<Blog | BlogView>>(
       `${API_ROUTES.blogs.base}${query}`,
     );
