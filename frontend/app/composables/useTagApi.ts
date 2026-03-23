@@ -6,8 +6,14 @@ import type {
   Language,
   PaginationFilter,
   PaginatedResponse,
+  LanguageQuery,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+
+interface TagListOptions {
+  paginationFilters?: PaginationFilter;
+  languageFilters?: LanguageQuery;
+}
 
 /**
  * Composable for tag endpoints.
@@ -20,11 +26,24 @@ export function useTagApi() {
   const { get, post, patch, del } = useApi();
 
   /** GET /tags — returns a paginated list of tags. */
-  const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
-    const params = { ...pagination, ...(lang ? { lang } : {}) };
-    const query = Object.keys(params).length
-      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
-      : "";
+  const getAll = ({
+    paginationFilters,
+    languageFilters,
+  }: TagListOptions = {}) => {
+    const params = {
+      ...paginationFilters,
+      ...languageFilters,
+    };
+
+    const cleanParams = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(params).filter(([_, value]) => value != null),
+    );
+
+    const query =
+      "?" +
+      new URLSearchParams(cleanParams as Record<string, string>).toString();
+
     return get<PaginatedResponse<Tag | TagView>>(
       `${API_ROUTES.tags.base}${query}`,
     );

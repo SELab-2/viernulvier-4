@@ -6,8 +6,14 @@ import type {
   Language,
   PaginationFilter,
   PaginatedResponse,
+  LanguageQuery,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+
+interface BlogListOptions {
+  paginationFilters?: PaginationFilter;
+  languageFilters?: LanguageQuery;
+}
 
 /**
  * Composable for blog endpoints.
@@ -20,15 +26,13 @@ export function useBlogApi() {
   const { get, post, put, patch, del } = useApi();
 
   /** GET /blogs — returns a paginated list of blogs. */
-  const getAll = (
-    pagination?: Partial<PaginationFilter>,
-    lang?: Language,
-    descending: boolean = true, // Defaults to descending for blog timeline.
-  ) => {
+  const getAll = ({
+    paginationFilters,
+    languageFilters,
+  }: BlogListOptions = {}) => {
     const params = {
-      ...pagination,
-      ...(lang ? { lang } : {}),
-      descending: String(descending),
+      ...paginationFilters,
+      ...languageFilters,
     };
 
     const cleanParams = Object.fromEntries(

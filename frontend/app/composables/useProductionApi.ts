@@ -10,8 +10,16 @@ import type {
   BlogView,
   Language,
   PaginatedResponse,
+  PaginationFilter,
+  LanguageQuery,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+
+interface ProductionListOptions {
+  productionFilters?: FilterProduction;
+  paginationFilters?: PaginationFilter;
+  languageFilters?: LanguageQuery;
+}
 
 /**
  * Composable for production endpoints, including their related tags and blogs.
@@ -24,13 +32,15 @@ export function useProductionApi() {
   const { get, post, put, patch, del } = useApi();
 
   /** GET /productions — returns a paginated list of productions, optionally filtered. */
-  const getAll = (
-    filters?: Partial<FilterProduction>,
-    descending: boolean = true, // Defaults to descending for production list.
-  ) => {
+  const getAll = ({
+    productionFilters,
+    paginationFilters,
+    languageFilters,
+  }: ProductionListOptions = {}) => {
     const params = {
-      ...filters,
-      descending: String(descending),
+      ...productionFilters,
+      ...paginationFilters,
+      ...languageFilters,
     };
 
     const cleanParams = Object.fromEntries(

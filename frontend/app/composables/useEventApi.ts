@@ -9,8 +9,14 @@ import type {
   Price,
   PriceView,
   PaginatedResponse,
+  PaginationFilter,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+
+interface EventListOptions {
+  eventFilters?: FilterEvent;
+  paginationFilters?: PaginationFilter;
+}
 
 /**
  * Composable for event endpoints, including their related location and prices.
@@ -20,10 +26,24 @@ export function useEventApi() {
   const { get, post, put, patch, del } = useApi();
 
   /** GET /events — returns a paginated list of events, optionally filtered. */
-  const getAll = (filters?: Partial<FilterEvent>) => {
-    const query = filters
-      ? "?" + new URLSearchParams(filters as Record<string, string>).toString()
-      : "";
+  const getAll = ({
+    eventFilters,
+    paginationFilters,
+  }: EventListOptions = {}) => {
+    const params = {
+      ...eventFilters,
+      ...paginationFilters,
+    };
+
+    const cleanParams = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(params).filter(([_, value]) => value != null),
+    );
+
+    const query =
+      "?" +
+      new URLSearchParams(cleanParams as Record<string, string>).toString();
+
     return get<PaginatedResponse<Event>>(`${API_ROUTES.events.base}${query}`);
   };
 
