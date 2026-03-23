@@ -1,7 +1,7 @@
 import { Controller, Post, Body, UseGuards } from "@nestjs/common";
 import { CsvInjectionService } from "../util/scraper/csv-injection.service";
 import { ApiOkResponse, ApiOperation, ApiSecurity } from "@nestjs/swagger";
-import { ApiKeyGuard } from "src/auth/authGuard";
+import { ApiKeyGuard } from "../auth/authGuard";
 
 @Controller("parser")
 export class ParserController {
