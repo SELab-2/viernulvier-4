@@ -12,7 +12,7 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { BlogService } from "./blog.service";
+import { BlogService } from "../blog.service";
 import {
   BlogSchema,
   CreateBlogSchema,
@@ -28,19 +28,19 @@ import {
   LanguageQueryDto,
   PaginationFilterDto,
   UpdateBlogDto,
-} from "../dto/dto";
+} from "../../dto/dto";
 import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
-import { ApiKeyGuard } from "../auth/authGuard";
-import { LanguageService } from "../util/language/language.service";
+import { ApiKeyGuard } from "../../auth/authGuard";
+import { LanguageService } from "../../util/language/language.service";
 import {
   ApiOkAnyOf,
   ApiOkPaginatedResponseAnyOf,
-} from "../common/decorators/api.ok";
+} from "../../common/decorators/api.ok";
 import { ZodValidationPipe } from "nestjs-zod";
 
 @Controller("blogs")

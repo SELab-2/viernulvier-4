@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { BlogController } from "./blog.controller";
-import { BlogService } from "./blog.service";
-import { LanguageService } from "../util/language/language.service";
+import { BlogService } from "../blog.service";
+import { LanguageService } from "../../util/language/language.service";
 import {
   BlogDto,
   BlogViewDto,
@@ -9,8 +9,8 @@ import {
   LanguageQueryDto,
   PaginationFilterDto,
   UpdateBlogDto,
-} from "../dto/dto";
-import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
+} from "../../dto/dto";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 
 describe("BlogController", () => {
   let controller: BlogController;
