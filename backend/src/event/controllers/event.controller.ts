@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -44,16 +45,17 @@ export class EventController {
    * Responds to GET /events
    * note: pagination is done via the filters param.
    * @param filters The filters that should be applied to the query.
+   * @param descending Whether the list should be sorted descending or ascending.
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
   @ApiOkPaginatedResponseAnyOf(EventDto)
   @Get()
-  @UsePipes(new ZodValidationPipe(FilterEventSchema))
   async getAllEvents(
-    @Query() filters: FilterEventDto,
+    @Query(new ZodValidationPipe(FilterEventSchema)) filters: FilterEventDto,
+    @Query("descending", ParseBoolPipe) descending: boolean,
   ): Promise<PaginatedResponse<EventDto>> {
-    return await this.eventService.getAllEvents(filters);
+    return await this.eventService.getAllEvents(filters, descending);
   }
 
   /**

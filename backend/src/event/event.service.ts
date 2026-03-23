@@ -21,8 +21,9 @@ export class EventService {
    */
   async getAllEvents(
     filters: FilterEventDto,
+    descending: boolean,
   ): Promise<PaginatedResponse<EventDto>> {
-    return await this.eventDBService.getEvents(filters);
+    return await this.eventDBService.getEvents(filters, descending);
   }
 
   /**

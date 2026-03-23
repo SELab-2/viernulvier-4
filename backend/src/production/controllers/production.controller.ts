@@ -59,6 +59,7 @@ export class ProductionController {
    * Responds to GET /productions.
    * note: pagination is done here via the filters param.
    * @param filters The Filters that should be applied to the query.
+   * @param descending Whether the list should be sorted descending or ascending.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })

@@ -24,6 +24,7 @@ export class EventDatabaseService {
   async getEventById(eventId: number): Promise<EventDto> {
     const events: PaginatedResponse<EventDto> = await this.getEvents(
       FilterEventSchema.parse({ id: eventId }),
+      true,
     );
     const event: EventDto[] = events.objects;
     if (event.length === 0)
@@ -43,6 +44,7 @@ export class EventDatabaseService {
    */
   async getEvents(
     filters: FilterEventDto,
+    descending: boolean,
   ): Promise<PaginatedResponse<EventDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -127,7 +129,7 @@ export class EventDatabaseService {
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
-      ORDER BY e.starttime 
+      ORDER BY e.starttime ${descending ? "DESC" : "ASC"}
         ${paginationClause}
         `;
 
