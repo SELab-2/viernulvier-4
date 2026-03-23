@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  LanguageEnum,
   LocalizedStringNullableSchema,
   LocalizedStringSchema,
 } from "./language";
@@ -39,7 +38,6 @@ export const UpdateProductionSchema = ProductionSchema.partial().omit({
 });
 
 export const FilterProductionSchema = z.object({
-  lang: LanguageEnum.optional(),
   titel: z.string().optional(),
   id: z.coerce.number().optional(),
   tag_ids: z

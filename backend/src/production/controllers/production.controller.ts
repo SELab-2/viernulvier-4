@@ -59,6 +59,7 @@ export class ProductionController {
   /**
    * Responds to GET /productions.
    * note: pagination is done here via the filters param.
+   * @param lang The Language filter for this query.
    * @param productionFilters The Filters that should be applied to the query.
    * @param paginationFilters Filters to do with the pagination and ordering of items.
    * @returns All ProductionDto objects
@@ -68,6 +69,7 @@ export class ProductionController {
   @ApiOkPaginatedResponseAnyOf(ProductionDto, ProductionViewDto)
   @Get()
   async getAllProductions(
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilters: PaginationFilterDto,
     @Query(new ZodValidationPipe(FilterProductionSchema))
@@ -80,7 +82,7 @@ export class ProductionController {
         productionFilters,
         paginationFilters,
       ),
-      productionFilters.lang,
+      lang.lang,
     );
   }
 
