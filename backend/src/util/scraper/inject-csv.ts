@@ -5,7 +5,10 @@ import logger from "../logger/logger";
 import { AppLogger } from "../logger/logger.service";
 import { LanguageService } from "../language/language.service";
 import { OldCSVFileParser } from "../../csv_parsing/old_csv_file_parser";
-import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
+import {
+  CSVFileParser,
+  CsvInputSource,
+} from "../../csv_parsing/csv_file_parser";
 import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
 import { Language } from "@repo/common";
 
@@ -183,17 +186,18 @@ function toCsvProduction(row: {
   };
 }
 
+
 /**
  * Import only productions from the structured CSV.
  * Can be run independently from other imports.
  */
 export async function injectProductionsCSV(
-  filePath: string,
+  input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing productions CSV: ${filePath}`);
+  logger.info(`Parsing productions CSV: ${input}`);
 
-  const parsedProductions = await CSVFileParser.parseProductionsCSV(filePath);
+  const parsedProductions = await CSVFileParser.parseProductionsCSV(input);
 
   const csvProductions: vnvProduction[] = parsedProductions.map((row) =>
     toCsvProduction({
@@ -214,12 +218,12 @@ export async function injectProductionsCSV(
  * Can be run independently from other imports.
  */
 export async function injectEventsCSV(
-  filePath: string,
+  input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing events CSV: ${filePath}`);
+  logger.info(`Parsing events CSV: ${input}`);
 
-  const parsedEvents = await CSVFileParser.parseEventsCSV(filePath);
+  const parsedEvents = await CSVFileParser.parseEventsCSV(input);
 
   // deduplicate locations from events and convert to csvLocations
   const locationByName = new Map<string, vnvLocation>();
@@ -261,12 +265,12 @@ export async function injectEventsCSV(
  * Can be run independently from other imports.
  */
 export async function injectTagsCSV(
-  filePath: string,
+  input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing tags CSV: ${filePath}`);
+  logger.info(`Parsing tags CSV: ${input}`);
 
-  const parsedTags = await CSVFileParser.parseTagsCSV(filePath);
+  const parsedTags = await CSVFileParser.parseTagsCSV(input);
 
   for (const row of parsedTags) {
     const translatedTagData = await translateBeforeInsert(row.tag);
@@ -302,12 +306,12 @@ export async function injectTagsCSV(
  * Can be run independently from other imports.
  */
 export async function injectBlogsCSV(
-  filePath: string,
+  input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing blogs CSV: ${filePath}`);
+  logger.info(`Parsing blogs CSV: ${input}`);
 
-  const parsedBlogs = await CSVFileParser.parseBlogsCSV(filePath);
+  const parsedBlogs = await CSVFileParser.parseBlogsCSV(input);
 
   for (const row of parsedBlogs) {
     const translatedBlogRow = await translateBeforeInsert(row);
@@ -338,12 +342,12 @@ export async function injectBlogsCSV(
  * Can be run independently from other imports.
  */
 export async function injectPricesCSV(
-  filePath: string,
+  input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing prices CSV: ${filePath}`);
+  logger.info(`Parsing prices CSV: ${input}`);
 
-  const parsedPrices = await CSVFileParser.parsePricesCSV(filePath);
+  const parsedPrices = await CSVFileParser.parsePricesCSV(input);
 
   for (const row of parsedPrices) {
     const translatedPriceData = await translateBeforeInsert(row.price);
