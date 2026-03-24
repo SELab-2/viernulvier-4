@@ -3,7 +3,8 @@
     "placeholder": "Zoek..."
   },
   "baseform": {
-    "submitbutton": "Indienen"
+    "submitbutton": "Indienen",
+    "resetbutton": "Herstellen"
   },
   "hero": {
     "title": "Archief",

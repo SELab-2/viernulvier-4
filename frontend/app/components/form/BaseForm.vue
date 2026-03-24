@@ -5,6 +5,7 @@
  *  - Multiple instances of the same component type are supported
  *  - Pre-filled values supported (the key needs to match the name of the field you want to fill in)
  *  - Emits all field values on submit via @submit
+ *  - Resets all field values to inital values via a reset-button
  *
  * Usage:
  * <FormBaseForm
@@ -54,8 +55,22 @@ const emit = defineEmits<{
   submit: [Record<string, any>]
 }>()
 
+const multiSelectRefs = ref<InstanceType<typeof BaseMultiSelect>[]>([]) // references all instances of BaseMultiSelect
+
 function submit() {
   emit('submit', form) // current state of the form will be send to parent component
+}
+
+function reset() { // clears everything, restores initial values
+  Object.keys(form).forEach(key => delete form[key])
+  Object.assign(form, initialValues ?? {})
+  multiSelectRefs.value.forEach(c => c?.clear()) // needed zo half typed in input also gets cleared
+  multiSelectRefs.value = []
+}
+
+onBeforeUpdate(() => { multiSelectRefs.value = [] })
+function collectMultiSelectRef(el: any) { // adds to the array if MultiSelect and if mounted
+  if (el) multiSelectRefs.value.push(el)
 }
 </script>
 
@@ -69,15 +84,40 @@ function submit() {
         v-model="form[field.name]"
         :id="field.name"
         v-bind="field.props"
+        :ref="field.component === 'BaseMultiSelect' ? collectMultiSelectRef : undefined"
     />
 
-    <!-- Submit button -->
-    <div class="p-4">
+    <!-- Buttons -->
+    <div class="p-4 flex gap-3">
+      <!-- Submit button -->
       <button
-        type="submit"
-        class="w-full h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-90 cursor-pointer"
+          type="submit"
+          class="
+          flex-1 h-12
+          bg-primary/80 dark:bg-muted
+          text-primary-foreground
+          font-bold uppercase text-[10px] tracking-widest
+          rounded-lg transition-colors duration-150
+          hover:opacity-90 dark:hover:bg-border dark:text-foreground dark:border dark:border-border
+          cursor-pointer"
       >
         {{ t('baseform.submitbutton') }}
+      </button>
+      <!-- Reset button -->
+      <button
+          type="button"
+          @click="reset"
+          class="
+          flex-1 h-12
+          bg-primary/80 dark:bg-muted
+          text-primary-foreground
+          font-bold uppercase text-[10px] tracking-widest
+          rounded-lg transition-colors duration-150
+          hover:opacity-90 dark:hover:bg-border dark:text-foreground dark:border dark:border-border
+          cursor-pointer
+        "
+      >
+        {{ t('baseform.resetbutton') }}
       </button>
     </div>
   </form>

@@ -61,6 +61,14 @@ function removeItem(item: string) { // handles removing an item
 const availableOptions = computed(() =>
     props.options.filter(o => !model.value.includes(o))
 )
+
+function clear() {
+  model.value = []
+  searchQuery.value = ''
+  searchBarRef.value?.clear()
+}
+
+defineExpose({clear}) // exposes a clear method to the parent components
 </script>
 
 <template>

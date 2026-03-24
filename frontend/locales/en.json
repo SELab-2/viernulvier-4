@@ -3,7 +3,8 @@
     "placeholder": "Search..."
   },
   "baseform": {
-    "submitbutton": "Submit"
+    "submitbutton": "Submit",
+    "resetbutton": "Reset"
   },
   "hero": {
     "title": "Archive",
