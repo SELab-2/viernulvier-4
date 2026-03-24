@@ -146,10 +146,6 @@ export class CSVFileParser {
       stream.on("error", (error) => {
         cleanupAndReject(new Error(`Error reading CSV file: ${error.message}`));
       });
-
-      sourceStream.on("error", (error) => {
-        cleanupAndReject(new Error(`Error reading CSV file: ${error.message}`));
-      });
     });
   }
 
@@ -422,7 +418,9 @@ export class CSVFileParser {
    * @param filePath - Path to the CSV file containing prices
    * @return A promise that resolves to an array of objects containing the price DTO and the associated event ID
    */
-  static async parsePricesCSV(input: CsvInputSource): Promise<ParsedPriceRow[]> {
+  static async parsePricesCSV(
+    input: CsvInputSource,
+  ): Promise<ParsedPriceRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreatePriceDto & { event_id: number }
     >(
