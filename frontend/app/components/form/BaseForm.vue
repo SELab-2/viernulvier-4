@@ -94,7 +94,7 @@ function collectMultiSelectRef(el: any) { // adds to the array if MultiSelect an
           type="submit"
           class="
           flex-1 h-12
-          bg-primary/80 dark:bg-muted
+          bg-primary/80 dark:bg-primary/60
           text-primary-foreground
           font-bold uppercase text-[10px] tracking-widest
           rounded-lg transition-colors duration-150
@@ -109,7 +109,7 @@ function collectMultiSelectRef(el: any) { // adds to the array if MultiSelect an
           @click="reset"
           class="
           flex-1 h-12
-          bg-primary/80 dark:bg-muted
+          bg-primary/80 dark:bg-primary/60
           text-primary-foreground
           font-bold uppercase text-[10px] tracking-widest
           rounded-lg transition-colors duration-150
