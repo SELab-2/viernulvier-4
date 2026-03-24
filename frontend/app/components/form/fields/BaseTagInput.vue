@@ -64,7 +64,17 @@ function handleKey(event: KeyboardEvent) { // handles pressing enter
         :placeholder="placeholder"
         v-model="inputText"
         @keydown="handleKey"
-        class="px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground"
+        class="
+        px-4 bg-muted border border-border
+        h-12 font-bold uppercase text-[10px]
+        tracking-widest rounded-lg w-full outline-none
+        transition-colors duration-150
+        hover:border-foreground/20 hover:bg-muted/70
+        focus:border-foreground/30 focus:bg-background
+
+        placeholder:text-muted-foreground
+        placeholder:opacity-100
+        dark:placeholder:opacity-90"
     />
 
     <!-- Added tags -->

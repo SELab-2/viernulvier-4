@@ -54,7 +54,7 @@ const model = defineModel<string>()
         resize-none
 
         placeholder:text-muted-foreground
-        placeholder:opacity-70
+        placeholder:opacity-100
         dark:placeholder:opacity-90"
     />
   </div>
