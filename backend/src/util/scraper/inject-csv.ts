@@ -186,6 +186,14 @@ function toCsvProduction(row: {
   };
 }
 
+/**
+  * Helper to describe the CSV input source for logging purposes.
+ */
+function describeCsvInput(input: CsvInputSource): string {
+  return typeof input === "string"
+    ? input
+    : `uploaded file buffer (${input.length} bytes)`;
+}
 
 /**
  * Import only productions from the structured CSV.
@@ -195,7 +203,7 @@ export async function injectProductionsCSV(
   input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing productions CSV: ${input}`);
+  logger.info(`Parsing productions CSV: ${describeCsvInput(input)}`);
 
   const parsedProductions = await CSVFileParser.parseProductionsCSV(input);
 
@@ -221,7 +229,7 @@ export async function injectEventsCSV(
   input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing events CSV: ${input}`);
+  logger.info(`Parsing events CSV: ${describeCsvInput(input)}`);
 
   const parsedEvents = await CSVFileParser.parseEventsCSV(input);
 
@@ -268,7 +276,7 @@ export async function injectTagsCSV(
   input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing tags CSV: ${input}`);
+  logger.info(`Parsing tags CSV: ${describeCsvInput(input)}`);
 
   const parsedTags = await CSVFileParser.parseTagsCSV(input);
 
@@ -309,7 +317,7 @@ export async function injectBlogsCSV(
   input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing blogs CSV: ${input}`);
+  logger.info(`Parsing blogs CSV: ${describeCsvInput(input)}`);
 
   const parsedBlogs = await CSVFileParser.parseBlogsCSV(input);
 
@@ -345,7 +353,7 @@ export async function injectPricesCSV(
   input: CsvInputSource,
   dbConnection: UtilsDbConnection = new UtilsDbConnection(),
 ) {
-  logger.info(`Parsing prices CSV: ${input}`);
+  logger.info(`Parsing prices CSV: ${describeCsvInput(input)}`);
 
   const parsedPrices = await CSVFileParser.parsePricesCSV(input);
 
