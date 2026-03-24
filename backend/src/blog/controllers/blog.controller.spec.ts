@@ -59,6 +59,7 @@ describe("BlogController", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: true,
   };
 
   beforeEach(async () => {
@@ -110,7 +111,7 @@ describe("BlogController", () => {
       mockBlogService.getAllBlogs.mockResolvedValue(rawBlogs);
       mockLanguageService.flattenByLanguage.mockReturnValue(flattenedBlogs);
 
-      const result = await controller.getAllBlogs(langQuery, filter);
+      const result = await controller.getAllBlogs(filter, langQuery);
 
       expect(result).toEqual(flattenedBlogs);
       expect(blogService.getAllBlogs).toHaveBeenCalledTimes(1);
