@@ -1,3 +1,7 @@
+<!--
+  A simple component to display a tag as a pill-shaped label.
+  It accepts a `label` prop for the text to display and an optional `compact` prop to adjust the padding for a more compact appearance.
+-->
 <script setup lang="ts">
 // TagPill: small presentational tag label component.
 const props = defineProps<{

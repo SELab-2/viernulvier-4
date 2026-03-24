@@ -63,6 +63,7 @@
   --card-border: rgba(0, 0, 0, 0.1);
   --card-hover: #f9f9fb;
 
+  /* Colours used in the gradient placeholder */
   --thumbnail-bg: #ffffff;
   --thumbnail-icon: #ffffff;
 }
@@ -89,6 +90,7 @@
   --card-border: oklch(0.3 0 0);
   --card-hover: oklch(0.25 0 0);
 
+  /* Colours used in the gradient placeholder */
   --thumbnail-bg: oklch(0.35 0 0);
   --thumbnail-icon: oklch(0.75 0 0);
 }

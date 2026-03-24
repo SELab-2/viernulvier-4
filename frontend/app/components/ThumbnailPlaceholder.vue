@@ -1,3 +1,12 @@
+<!--
+  A placeholder component for thumbnails with a gradient background and an optional icon.
+
+  Props:
+    - id: An optional identifier used to pick a consistent gradient.
+    - size: The size of the placeholder, can be 'sm', 'md', 'lg', or a custom number.
+    - showIcon: A boolean to determine whether to show the thumbnail icon.
+-->
+
 <script setup lang="ts">
 import { computed } from 'vue'
 import { pickPlaceholderGradient } from '../utils/constants'
@@ -16,8 +25,6 @@ const containerClass = computed(() => {
   return `${base} w-48 h-32`
 })
 </script>
-
-<!-- ThumbnailPlaceholder: reusable gradient-based thumbnail placeholder component. -->
 
 <template>
   <div :class="containerClass" class="bg-thumbnail-bg">
