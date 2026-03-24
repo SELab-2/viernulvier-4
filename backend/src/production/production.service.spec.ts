@@ -10,7 +10,7 @@ import type {
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { FilterProductionSchema } from "@repo/common";
+import { FilterProductionSchema, PaginationFilterSchema } from "@repo/common";
 
 describe("ProductionService", () => {
   let service: ProductionService;
@@ -96,17 +96,23 @@ describe("ProductionService", () => {
     it("should return all productions from database", async () => {
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
       expect(result).toEqual(mockProductions);
       expect(dbService.getProductions).toHaveBeenCalledWith(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
     });
 
     it("should call dbService.getProductions with empty filter", async () => {
-      await service.getAllProductions(FilterProductionSchema.parse({}));
+      await service.getAllProductions(
+        FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
       expect(dbService.getProductions).toHaveBeenCalledWith(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
       expect(dbService.getProductions).toHaveBeenCalledTimes(1);
     });
@@ -120,6 +126,7 @@ describe("ProductionService", () => {
       });
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
       expect(result).toEqual({
         page: 0,
@@ -134,7 +141,10 @@ describe("ProductionService", () => {
         .spyOn(dbService, "getProductions")
         .mockRejectedValueOnce(new Error("Database error"));
       await expect(
-        service.getAllProductions(FilterProductionSchema.parse({})),
+        service.getAllProductions(
+          FilterProductionSchema.parse({}),
+          PaginationFilterSchema.parse({}),
+        ),
       ).rejects.toThrow("Database error");
     });
   });

@@ -3,6 +3,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  PaginationFilterDto,
   ProductionDto,
   TagDto,
   UpdateProductionDto,
@@ -21,13 +22,18 @@ export class ProductionService {
   /**
    * Fetches all ProductionDto objects from the DBService
    * note: pagination is done here via the filters param.
-   * @param filters The filters to be applied to the query.
+   * @param productionFilters The filters to be applied to the query.
+   * @param paginationFilters Filters to do with pagination and ordering.
    * @returns All ProductionDto objects
    */
   async getAllProductions(
-    filters: FilterProductionDto,
+    productionFilters: FilterProductionDto,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<ProductionDto>> {
-    return await this.productionDBService.getProductions(filters);
+    return await this.productionDBService.getProductions(
+      productionFilters,
+      paginationFilters,
+    );
   }
 
   /**

@@ -6,8 +6,14 @@ import type {
   Language,
   PaginationFilter,
   PaginatedResponse,
+  LanguageQuery,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+
+interface PriceListOptions {
+  paginationFilters?: PaginationFilter;
+  languageFilters?: LanguageQuery;
+}
 
 /**
  * Composable for price endpoints.
@@ -20,11 +26,26 @@ export function usePriceApi() {
   const { get, post, patch, del } = useApi();
 
   /** GET /prices — returns a paginated list of prices. */
-  const getAll = (pagination?: Partial<PaginationFilter>, lang?: Language) => {
-    const params = { ...pagination, ...(lang ? { lang } : {}) };
-    const query = Object.keys(params).length
-      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
-      : "";
+  const getAll = ({
+    paginationFilters,
+    languageFilters,
+  }: PriceListOptions = {}) => {
+    const params = {
+      ...paginationFilters,
+      ...languageFilters,
+    };
+
+    const cleanParams = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(params).filter(([_, value]) => value != null),
+    );
+
+    const queryString = new URLSearchParams(
+      cleanParams as Record<string, string>,
+    ).toString();
+
+    const query = queryString ? `?${queryString}` : "";
+
     return get<PaginatedResponse<Price | PriceView>>(
       `${API_ROUTES.prices.base}${query}`,
     );

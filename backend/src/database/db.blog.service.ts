@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateBlogDto, MediaGalleryDto, UpdateBlogDto, } from "../dto/dto";
+import {
+  BlogDto,
+  CreateBlogDto,
+  MediaGalleryDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -39,15 +45,13 @@ export class BlogDatabaseService {
    * @returns blogs
    */
   async getBlogs(
-    amount: number = 0,
-    page: number = 0,
-    descending: boolean = true,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<BlogDto>> {
-    const offset = page * amount;
+    const offset = paginationFilters.page * paginationFilters.limit;
     const countResult = await this.db.query<{ count: string }>(
       `SELECT COUNT(*) as count FROM blogs`,
     );
-    if (amount === 0) {
+    if (paginationFilters.limit === 0) {
       const query = `
       SELECT id, 
              titel, 
@@ -55,14 +59,17 @@ export class BlogDatabaseService {
              created_at,
              updated_at
       FROM blogs
-      ORDER BY created_at ${descending ? "DESC" : "ASC"}
+      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
       `;
 
       return {
-        limit: amount,
-        page: page,
+        limit: paginationFilters.limit,
+        page: paginationFilters.page,
         totalItems: parseInt(countResult[0].count),
-        objects: await this.db.query<BlogDto>(query, [amount, offset]),
+        objects: await this.db.query<BlogDto>(query, [
+          paginationFilters.limit,
+          offset,
+        ]),
       };
     }
 
@@ -73,15 +80,18 @@ export class BlogDatabaseService {
            created_at,
            updated_at
     FROM blogs
-    ORDER BY created_at ${descending ? "DESC" : "ASC"}
+    ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
     LIMIT $1 OFFSET $2
     `;
 
     return {
-      limit: amount,
-      page: page,
+      limit: paginationFilters.limit,
+      page: paginationFilters.page,
       totalItems: parseInt(countResult[0].count),
-      objects: await this.db.query<BlogDto>(query, [amount, offset]),
+      objects: await this.db.query<BlogDto>(query, [
+        paginationFilters.limit,
+        offset,
+      ]),
     };
   }
 
