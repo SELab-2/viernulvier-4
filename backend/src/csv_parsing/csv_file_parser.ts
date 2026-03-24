@@ -58,6 +58,7 @@ type ParsedTagRow = {
   productionIds: number[];
 };
 
+/// Type used to describe the CSV input source, can be either a file path or a buffer containing the CSV data.
 export type CsvInputSource = string | Buffer;
 
 export class CSVFileParser {

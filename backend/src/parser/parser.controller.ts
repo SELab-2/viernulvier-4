@@ -21,6 +21,7 @@ import { ParserUploadCsvBodyDto } from "./dto/parser-upload-csv-body.dto";
 
 type UploadedCsvFile = {
   buffer: Buffer;
+  // Optional MIME type for validation purposes, is automatically added by FileInterceptor when a file is uploaded, but can be undefined if the file is provided via filePath instead.
   mimetype?: string;
 };
 
@@ -35,6 +36,10 @@ export class ParserController {
     "text/plain",
   ]);
 
+  /**
+   * Helper method to determine the CSV source from the uploaded file or file path, with validation for accepted MIME types when a file is uploaded.
+   * If both sources are provided, the uploaded file takes precedence. If neither source is valid, a BadRequestException is thrown.
+   */
   private getCsvSource(
     file?: UploadedCsvFile,
     filePath?: string,
