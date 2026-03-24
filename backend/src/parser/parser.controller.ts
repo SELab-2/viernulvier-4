@@ -1,8 +1,23 @@
-import { Controller, Post, Body, UseGuards, UploadedFile, UseInterceptors, BadRequestException } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  UploadedFile,
+  UseInterceptors,
+  BadRequestException,
+} from "@nestjs/common";
 import { CsvInjectionService } from "../util/scraper/csv-injection.service";
-import { ApiOkResponse, ApiOperation, ApiSecurity } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+} from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { ParserUploadCsvBodyDto } from "./dto/parser-upload-csv-body.dto";
 
 type UploadedCsvFile = {
   buffer: Buffer;
@@ -38,6 +53,8 @@ export class ParserController {
    */
   @UseGuards(ApiKeyGuard)
   @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({ type: ParserUploadCsvBodyDto })
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject productions from CSV file" })
   @ApiOkResponse({ description: "Productions CSV injected successfully" })
@@ -59,6 +76,8 @@ export class ParserController {
    */
   @UseGuards(ApiKeyGuard)
   @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({ type: ParserUploadCsvBodyDto })
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject events from CSV file" })
   @ApiOkResponse({ description: "Events CSV injected successfully" })
@@ -80,6 +99,8 @@ export class ParserController {
    */
   @UseGuards(ApiKeyGuard)
   @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({ type: ParserUploadCsvBodyDto })
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject tags from CSV file" })
   @ApiOkResponse({ description: "Tags CSV injected successfully" })
@@ -101,6 +122,8 @@ export class ParserController {
    */
   @UseGuards(ApiKeyGuard)
   @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({ type: ParserUploadCsvBodyDto })
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject blogs from CSV file" })
   @ApiOkResponse({ description: "Blogs CSV injected successfully" })
@@ -122,6 +145,8 @@ export class ParserController {
    */
   @UseGuards(ApiKeyGuard)
   @UseInterceptors(FileInterceptor("file"))
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({ type: ParserUploadCsvBodyDto })
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject prices from CSV file" })
   @ApiOkResponse({ description: "Prices CSV injected successfully" })
