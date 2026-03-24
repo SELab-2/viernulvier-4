@@ -9,11 +9,15 @@ const i18n = createI18n({ // needed so no error is thrown when mounted
         messages: {
             nl: {
                 searchbar: { placeholder: "Zoeken..." },
-                baseform: { submitbutton: "Indienen" }
+                baseform: {
+                    submitbutton: "Indienen",
+                    resetbutton: "Herstellen",}
             },
             en: {
                 searchbar: { placeholder: "Search..." },
-                baseform: { submitbutton: "Submit" }
+                baseform: {
+                    submitbutton: "Submit",
+                    resetbutton: "Reset",}
             },
         },
     });
@@ -74,6 +78,29 @@ describe("FormBaseForm", () => {
                 initialValues: { title: "Default title" }
             }
         });
+        expect(w.find("input").element.value).toBe("Default title");
+    });
+
+    it("renders a reset button", () => { // only the reset button has type="button"
+        expect(wrapper.find("button[type='button']").exists()).toBe(true);
+    });
+
+    it("resets form to empty when reset is clicked", async () => {
+        await wrapper.find("input").setValue("Hello");
+        await wrapper.find("button[type='button']").trigger("click");
+        expect(wrapper.find("input").element.value).toBe("");
+    });
+
+    it("resets form to initialValues when reset is clicked", async () => {
+        const w = mount(FormBaseForm, {
+            global: { plugins: [i18n] },
+            props: {
+                fields,
+                initialValues: { title: "Default title" }
+            }
+        });
+        await w.find("input").setValue("Changed");
+        await w.find("button[type='button']").trigger("click");
         expect(w.find("input").element.value).toBe("Default title");
     });
 });
