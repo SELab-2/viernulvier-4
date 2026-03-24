@@ -21,18 +21,34 @@ import { ParserUploadCsvBodyDto } from "./dto/parser-upload-csv-body.dto";
 
 type UploadedCsvFile = {
   buffer: Buffer;
-  mimetype?: string; // not yet used, but can be helpful for future validation if needed
+  mimetype?: string;
 };
 
 @Controller("parser")
 export class ParserController {
   constructor(private readonly csvInjectionService: CsvInjectionService) {}
 
+  private readonly acceptedCsvMimeTypes = new Set([
+    "text/csv",
+    "application/csv",
+    "application/vnd.ms-excel",
+    "text/plain",
+  ]);
+
   private getCsvSource(
     file?: UploadedCsvFile,
     filePath?: string,
   ): string | Buffer {
     if (file?.buffer?.length) {
+      if (
+        file.mimetype &&
+        !this.acceptedCsvMimeTypes.has(file.mimetype.toLowerCase())
+      ) {
+        throw new BadRequestException(
+          `Unsupported file type '${file.mimetype}'. Please upload a CSV file.`,
+        );
+      }
+
       return file.buffer;
     }
 

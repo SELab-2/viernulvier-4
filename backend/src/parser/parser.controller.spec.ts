@@ -61,6 +61,37 @@ describe("ParserController", () => {
       expect(result).toEqual(expectedResult);
     });
 
+    it("should accept known csv mimetype", async () => {
+      const csvBuffer = Buffer.from("ID,Titel_NL\n1,Test\n", "utf8");
+      const expectedResult = { inserted: 10 };
+      mockCsvInjectionService.injectProductionsCSV.mockResolvedValue(
+        expectedResult,
+      );
+
+      const result = await controller.injectProductions({
+        buffer: csvBuffer,
+        mimetype: "text/csv",
+      });
+
+      expect(csvInjectionService.injectProductionsCSV).toHaveBeenCalledWith(
+        csvBuffer,
+      );
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should throw for unsupported uploaded mimetype", async () => {
+      const csvBuffer = Buffer.from("ID,Titel_NL\n1,Test\n", "utf8");
+
+      await expect(
+        controller.injectProductions({
+          buffer: csvBuffer,
+          mimetype: "application/pdf",
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(csvInjectionService.injectProductionsCSV).not.toHaveBeenCalled();
+    });
+
     it("should fallback to filePath when no uploaded file is provided", async () => {
       const filePath = "test/productions.csv";
       const expectedResult = { inserted: 10 };
@@ -85,7 +116,9 @@ describe("ParserController", () => {
 
   describe("injectEvents", () => {
     it("should inject events CSV data", async () => {
-      const csvBuffer = Buffer.from("ID,Production,Starttime\n1,1,2025-01-01\n");
+      const csvBuffer = Buffer.from(
+        "ID,Production,Starttime\n1,1,2025-01-01\n",
+      );
       const expectedResult = { inserted: 12 };
       mockCsvInjectionService.injectEventsCSV.mockResolvedValue(expectedResult);
 
@@ -115,13 +148,17 @@ describe("ParserController", () => {
 
   describe("injectBlogs", () => {
     it("should inject blogs CSV data", async () => {
-      const csvBuffer = Buffer.from("Titel_NL,Description_NL,ProductionID\nA,B,1\n");
+      const csvBuffer = Buffer.from(
+        "Titel_NL,Description_NL,ProductionID\nA,B,1\n",
+      );
       const expectedResult = { inserted: 6 };
       mockCsvInjectionService.injectBlogsCSV.mockResolvedValue(expectedResult);
 
       const result = await controller.injectBlogs({ buffer: csvBuffer });
 
-      expect(csvInjectionService.injectBlogsCSV).toHaveBeenCalledWith(csvBuffer);
+      expect(csvInjectionService.injectBlogsCSV).toHaveBeenCalledWith(
+        csvBuffer,
+      );
       expect(csvInjectionService.injectBlogsCSV).toHaveBeenCalledTimes(1);
       expect(result).toEqual(expectedResult);
     });
