@@ -1,11 +1,34 @@
-import { Controller, Post, Body, UseGuards } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, UploadedFile, UseInterceptors, BadRequestException } from "@nestjs/common";
 import { CsvInjectionService } from "../util/scraper/csv-injection.service";
 import { ApiOkResponse, ApiOperation, ApiSecurity } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
+import { FileInterceptor } from "@nestjs/platform-express";
+
+type UploadedCsvFile = {
+  buffer: Buffer;
+  mimetype?: string; // not yet used, but can be helpful for future validation if needed
+};
 
 @Controller("parser")
 export class ParserController {
   constructor(private readonly csvInjectionService: CsvInjectionService) {}
+
+  private getCsvSource(
+    file?: UploadedCsvFile,
+    filePath?: string,
+  ): string | Buffer {
+    if (file?.buffer?.length) {
+      return file.buffer;
+    }
+
+    if (filePath?.trim()) {
+      return filePath;
+    }
+
+    throw new BadRequestException(
+      "No CSV provided. Upload a file in the 'file' field or provide a filePath.",
+    );
+  }
 
   /**
    * Responds to a POST to "/parser/productions" with a file path in the body,
@@ -14,12 +37,18 @@ export class ParserController {
    * @param filePath The path to the CSV file containing production data to be injected.
    */
   @UseGuards(ApiKeyGuard)
+  @UseInterceptors(FileInterceptor("file"))
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject productions from CSV file" })
   @ApiOkResponse({ description: "Productions CSV injected successfully" })
   @Post("productions")
-  async injectProductions(@Body("filePath") filePath: string) {
-    return this.csvInjectionService.injectProductionsCSV(filePath);
+  async injectProductions(
+    @UploadedFile() file?: UploadedCsvFile,
+    @Body("filePath") filePath?: string,
+  ) {
+    return this.csvInjectionService.injectProductionsCSV(
+      this.getCsvSource(file, filePath),
+    );
   }
 
   /**
@@ -29,12 +58,18 @@ export class ParserController {
    * @param filePath The path to the CSV file containing event data to be injected.
    */
   @UseGuards(ApiKeyGuard)
+  @UseInterceptors(FileInterceptor("file"))
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject events from CSV file" })
   @ApiOkResponse({ description: "Events CSV injected successfully" })
   @Post("events")
-  async injectEvents(@Body("filePath") filePath: string) {
-    return this.csvInjectionService.injectEventsCSV(filePath);
+  async injectEvents(
+    @UploadedFile() file?: UploadedCsvFile,
+    @Body("filePath") filePath?: string,
+  ) {
+    return this.csvInjectionService.injectEventsCSV(
+      this.getCsvSource(file, filePath),
+    );
   }
 
   /**
@@ -44,12 +79,18 @@ export class ParserController {
    * @param filePath The path to the CSV file containing tag data to be injected.
    */
   @UseGuards(ApiKeyGuard)
+  @UseInterceptors(FileInterceptor("file"))
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject tags from CSV file" })
   @ApiOkResponse({ description: "Tags CSV injected successfully" })
   @Post("tags")
-  async injectTags(@Body("filePath") filePath: string) {
-    return this.csvInjectionService.injectTagsCSV(filePath);
+  async injectTags(
+    @UploadedFile() file?: UploadedCsvFile,
+    @Body("filePath") filePath?: string,
+  ) {
+    return this.csvInjectionService.injectTagsCSV(
+      this.getCsvSource(file, filePath),
+    );
   }
 
   /**
@@ -59,12 +100,18 @@ export class ParserController {
    * @param filePath The path to the CSV file containing blog data to be injected.
    */
   @UseGuards(ApiKeyGuard)
+  @UseInterceptors(FileInterceptor("file"))
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject blogs from CSV file" })
   @ApiOkResponse({ description: "Blogs CSV injected successfully" })
   @Post("blogs")
-  async injectBlogs(@Body("filePath") filePath: string) {
-    return this.csvInjectionService.injectBlogsCSV(filePath);
+  async injectBlogs(
+    @UploadedFile() file?: UploadedCsvFile,
+    @Body("filePath") filePath?: string,
+  ) {
+    return this.csvInjectionService.injectBlogsCSV(
+      this.getCsvSource(file, filePath),
+    );
   }
 
   /**
@@ -74,11 +121,17 @@ export class ParserController {
    * @param filePath The path to the CSV file containing price data to be injected.
    */
   @UseGuards(ApiKeyGuard)
+  @UseInterceptors(FileInterceptor("file"))
   @ApiSecurity("api_key")
   @ApiOperation({ summary: "Inject prices from CSV file" })
   @ApiOkResponse({ description: "Prices CSV injected successfully" })
   @Post("prices")
-  async injectPrices(@Body("filePath") filePath: string) {
-    return this.csvInjectionService.injectPricesCSV(filePath);
+  async injectPrices(
+    @UploadedFile() file?: UploadedCsvFile,
+    @Body("filePath") filePath?: string,
+  ) {
+    return this.csvInjectionService.injectPricesCSV(
+      this.getCsvSource(file, filePath),
+    );
   }
 }
