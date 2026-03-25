@@ -98,7 +98,10 @@ function collectMultiSelectRef(el: any) { // adds to the array if MultiSelect an
           text-primary-foreground
           font-bold uppercase text-[10px] tracking-widest
           rounded-lg transition-colors duration-150
-          hover:opacity-90 dark:hover:bg-border dark:text-foreground dark:border dark:border-border
+          hover:opacity-70
+          dark:hover:bg-primary/50
+          dark:text-bg-primary/80
+          dark:border dark:border-border
           cursor-pointer"
       >
         {{ t('baseform.submitbutton') }}
@@ -113,7 +116,10 @@ function collectMultiSelectRef(el: any) { // adds to the array if MultiSelect an
           text-primary-foreground
           font-bold uppercase text-[10px] tracking-widest
           rounded-lg transition-colors duration-150
-          hover:opacity-90 dark:hover:bg-border dark:text-foreground dark:border dark:border-border
+          hover:opacity-70
+          dark:hover:bg-primary/50
+          dark:text-bg-primary/80
+          dark:border dark:border-border
           cursor-pointer
         "
       >
