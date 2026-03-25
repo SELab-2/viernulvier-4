@@ -2,6 +2,10 @@
   "searchbar": {
     "placeholder": "Zoek..."
   },
+  "baseform": {
+    "submitbutton": "Indienen",
+    "resetbutton": "Herstellen"
+  },
   "hero": {
     "title": "Archief",
     "label": "Kunstencentrum Gent — Archief",
