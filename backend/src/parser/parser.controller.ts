@@ -17,7 +17,7 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ParserUploadCsvBodyDto } from "./dto/parser-upload-csv-body.dto";
+import { ParserUploadCsvBodyDto } from "../dto/dto";
 
 type UploadedCsvFile = {
   buffer: Buffer;
