@@ -7,7 +7,12 @@ const mockPatch = vi.fn();
 const mockDel = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
-  useApi: () => ({ get: mockGet, post: mockPost, patch: mockPatch, del: mockDel }),
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    patch: mockPatch,
+    del: mockDel,
+  }),
 }));
 
 beforeEach(() => {
@@ -23,13 +28,16 @@ describe("useLocationApi", () => {
 
   it("getAll appends lang query param", () => {
     const { getAll } = useLocationApi();
-    getAll(undefined, "en");
+    getAll({ languageFilters: { lang: "en" } });
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=en"));
   });
 
   it("getAll appends pagination and lang together", () => {
     const { getAll } = useLocationApi();
-    getAll({ page: 1, limit: 20 }, "nl");
+    getAll({
+      paginationFilters: { page: 1, limit: 20, descending: true },
+      languageFilters: { lang: "nl" },
+    });
     const url = mockGet.mock.calls[0][0];
     expect(url).toContain("page=1");
     expect(url).toContain("limit=20");
@@ -57,8 +65,10 @@ describe("useLocationApi", () => {
 
   it("modify calls PATCH /locations/:id with body", () => {
     const { modify } = useLocationApi();
-    modify(1, { id: 1, location: { nl: "Brugge", en: "Brugge" } });
-    expect(mockPatch).toHaveBeenCalledWith("/locations/1", { id: 1, location: { nl: "Brugge", en: "Brugge" } });
+    modify(1, { location: { nl: "Brugge", en: "Brugge" } });
+    expect(mockPatch).toHaveBeenCalledWith("/locations/1", {
+      location: { nl: "Brugge", en: "Brugge" },
+    });
   });
 
   it("remove calls DELETE /locations/:id", () => {

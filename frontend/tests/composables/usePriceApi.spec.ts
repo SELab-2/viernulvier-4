@@ -7,7 +7,12 @@ const mockPatch = vi.fn();
 const mockDel = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
-  useApi: () => ({ get: mockGet, post: mockPost, patch: mockPatch, del: mockDel }),
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    patch: mockPatch,
+    del: mockDel,
+  }),
 }));
 
 beforeEach(() => {
@@ -23,13 +28,16 @@ describe("usePriceApi", () => {
 
   it("getAll appends lang query param", () => {
     const { getAll } = usePriceApi();
-    getAll(undefined, "nl");
+    getAll({ languageFilters: { lang: "nl" } });
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=nl"));
   });
 
   it("getAll appends pagination and lang together", () => {
     const { getAll } = usePriceApi();
-    getAll({ page: 0, limit: 5 }, "en");
+    getAll({
+      paginationFilters: { page: 0, limit: 5, descending: true },
+      languageFilters: { lang: "en" },
+    });
     const url = mockGet.mock.calls[0][0];
     expect(url).toContain("page=0");
     expect(url).toContain("limit=5");
@@ -50,14 +58,22 @@ describe("usePriceApi", () => {
 
   it("create calls POST /prices with body", () => {
     const { create } = usePriceApi();
-    const body = { price: 10.0, name: { nl: "Standaard", en: "Standard" }, legacy_id: null };
+    const body = {
+      price: 10.0,
+      name: { nl: "Standaard", en: "Standard" },
+      legacy_id: null,
+    };
     create(body);
     expect(mockPost).toHaveBeenCalledWith("/prices", body);
   });
 
   it("replace calls PATCH /prices/:priceId with body", () => {
     const { replace } = usePriceApi();
-    const body = { id: 1, price: 15.0, name: { nl: "Aangepast", en: "Updated" } };
+    const body = {
+      id: 1,
+      price: 15.0,
+      name: { nl: "Aangepast", en: "Updated" },
+    };
     replace(1, body);
     expect(mockPatch).toHaveBeenCalledWith("/prices/1", body);
   });

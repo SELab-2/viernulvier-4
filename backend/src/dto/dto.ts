@@ -6,6 +6,9 @@ import {
   CreateBlogSchema,
   CreateEventSchema,
   CreateLocationSchema,
+  CreateMediaCropSchema,
+  CreateMediaGallerySchema,
+  CreateMediaItemSchema,
   CreatePriceSchema,
   CreateProductionSchema,
   CreateTagSchema,
@@ -15,6 +18,9 @@ import {
   LanguageQuerySchema,
   LocationSchema,
   LocationViewSchema,
+  MediaCropSchema,
+  MediaGallerySchema,
+  MediaItemSchema,
   PaginationFilterSchema,
   PriceSchema,
   PriceViewSchema,
@@ -25,6 +31,9 @@ import {
   TagViewSchema,
   UpdateAccountSchema,
   UpdateBlogSchema,
+  UpdatedMediaCropSchema,
+  UpdatedMediaGallerySchema,
+  UpdatedMediaItemSchema,
   UpdateEventSchema,
   UpdateLocationSchema,
   UpdatePriceSchema,
@@ -86,3 +95,18 @@ export class PaginationFilterDto extends createZodDto(PaginationFilterSchema) {}
 
 // Language
 export class LanguageQueryDto extends createZodDto(LanguageQuerySchema) {}
+
+// Media
+export class MediaGalleryDto extends createZodDto(MediaGallerySchema) {}
+export class CreateMediaGalleryDto extends createZodDto(
+  CreateMediaGallerySchema,
+) {}
+export class UpdateMediaGalleryDto extends createZodDto(
+  UpdatedMediaGallerySchema,
+) {}
+export class MediaItemDto extends createZodDto(MediaItemSchema) {}
+export class CreateMediaItemDto extends createZodDto(CreateMediaItemSchema) {}
+export class UpdateMediaItemDto extends createZodDto(UpdatedMediaItemSchema) {}
+export class MediaCropDto extends createZodDto(MediaCropSchema) {}
+export class CreateMediaCropDto extends createZodDto(CreateMediaCropSchema) {}
+export class UpdateMediaCropDto extends createZodDto(UpdatedMediaCropSchema) {}

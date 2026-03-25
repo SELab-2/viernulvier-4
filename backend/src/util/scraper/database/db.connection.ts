@@ -5,9 +5,11 @@ import {
   vnvLocation,
   vnvPrice,
   vnvProduction,
-} from "./vnv.parser";
-import { Production, Tag, Event, Price, Location } from "@repo/common";
-import logger from "../logger/logger";
+} from "../vnv.parser";
+import { Production, Tag, Event, Price, Location, Blog } from "@repo/common";
+import logger from "../../logger/logger";
+import { ResourceGoneException } from "../../../common/exceptions";
+import { Injectable } from "@nestjs/common";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -23,7 +25,8 @@ import logger from "../logger/logger";
  *           sure there can be no confusions between the two and so they can't
  *           hinder each other either.
  */
-export class DbConnection {
+@Injectable()
+export class UtilsDbConnection {
   /**
    * The Pool to the database, used to execute queries.
    */
@@ -61,6 +64,54 @@ export class DbConnection {
   }
 
   /**
+   * Fetches a production by legacy id.
+   * @param legacyId The production legacy id.
+   * @returns The production row.
+   */
+  async getProductionByLegacyId(legacyId: string): Promise<Production> {
+    if (!legacyId || !legacyId.trim()) {
+      throw new Error("legacyId is required to fetch a production");
+    }
+
+    const rows = await this.query<Production>(
+      `SELECT * FROM productions WHERE legacy_id = $1 LIMIT 1;`,
+      [legacyId],
+    );
+
+    if (rows.length === 0) {
+      throw new ResourceGoneException(
+        `No Production exists for provided legacy_id(${legacyId})`,
+      );
+    }
+
+    return rows[0];
+  }
+
+  /**
+   * Fetches an event by legacy id.
+   * @param legacyId The event legacy id.
+   * @returns The event row.
+   */
+  async getEventByLegacyId(legacyId: string): Promise<Event> {
+    if (!legacyId || !legacyId.trim()) {
+      throw new Error("legacyId is required to fetch an event");
+    }
+
+    const rows = await this.query<Event>(
+      `SELECT * FROM events WHERE legacy_id = $1 LIMIT 1;`,
+      [legacyId],
+    );
+
+    if (rows.length === 0) {
+      throw new ResourceGoneException(
+        `No Event exists for provided legacy_id(${legacyId})`,
+      );
+    }
+
+    return rows[0];
+  }
+
+  /**
    * Productions.
    */
 
@@ -77,12 +128,76 @@ export class DbConnection {
   }
 
   /**
+   * Inserts a list of vnvGenre objects into Tags.
+   * @param genres The list of vnvGenre objects.
+   */
+  async insertTags(genres: vnvGenre[]) {
+    logger.info("Inserting Tags...");
+    for (const genre of genres) {
+      await this.insertTag(genre);
+    }
+    logger.info("Inserted Tags!");
+  }
+
+  /**
+   * Tags
+   */
+
+  /**
+   * Inserts a list of vnvEvent objects into the database.
+   * @param events The list of vnvEvent objects.
+   */
+  async insertEvents(events: vnvEvent[]) {
+    logger.info("Inserting Events...");
+    for (const event of events) {
+      try {
+        await this.insertEvent(event);
+      } catch (error) {
+        // If something errors out that means the VNV API had invalid data.
+        logger.warn(
+          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
+          error,
+        );
+      }
+    }
+    logger.info("Inserted Events!");
+  }
+
+  /**
+   * Inserts a list of vnvLocation objects.
+   * @param locations The list of vnvLocation objects.
+   */
+  async insertLocations(locations: vnvLocation[]) {
+    logger.info("Inserting Locations...");
+    for (const location of locations) {
+      await this.insertLocation(location);
+    }
+    logger.info("Inserted Locations!");
+  }
+
+  /**
+   * Insert a list of vnvPrice objects.
+   * @param prices The list of vnvPrice objects.
+   */
+  async insertPrices(prices: vnvPrice[]) {
+    logger.info("Inserting Prices...");
+    for (const price of prices) {
+      await this.insertPrice(price);
+    }
+    logger.info("Inserted Prices!");
+  }
+
+  /**
+   * Events
+   */
+
+  /**
    * Inserts a Production by it's legacy_id or creates a new one.
    * Also links it's respective tags.
    * @param vnvProduction The vnvProduction we want to add.
    * @returns T/F Whether the change went through or not.
    */
-  private async insertProduction(
+  async insertProduction(
     vnvProduction: vnvProduction,
   ): Promise<Production> {
     const query = `
@@ -147,28 +262,12 @@ export class DbConnection {
   }
 
   /**
-   * Tags
-   */
-
-  /**
-   * Inserts a list of vnvGenre objects into Tags.
-   * @param genres The list of vnvGenre objects.
-   */
-  async insertTags(genres: vnvGenre[]) {
-    logger.info("Inserting Tags...");
-    for (const genre of genres) {
-      await this.insertTag(genre);
-    }
-    logger.info("Inserted Tags!");
-  }
-
-  /**
    * Inserts/Updates a single tag into the database based
    * on it's legacy_id.
    * @param genre The vnvGenre that is to be turned into a Tag.
    * @returns The ID of the Tag.
    */
-  private async insertTag(genre: vnvGenre): Promise<number> {
+  async insertTag(genre: vnvGenre): Promise<number> {
     const query = `
       INSERT INTO tags (tag, legacy_id)
       VALUES ($1, $2)
@@ -182,12 +281,16 @@ export class DbConnection {
   }
 
   /**
+   * Locations
+   */
+
+  /**
    * Link a Tag to a Production in the database.
    * @param productionId The ID of the Production.
    * @param tagId The ID of the Tag.
    * @returns T/F Whether the link was created.
    */
-  private async linkTag(productionId: number, tagId: number): Promise<boolean> {
+  async linkTag(productionId: number, tagId: number): Promise<boolean> {
     const query = `
       INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
@@ -200,36 +303,12 @@ export class DbConnection {
   }
 
   /**
-   * Events
-   */
-
-  /**
-   * Inserts a list of vnvEvent objects into the database.
-   * @param events The list of vnvEvent objects.
-   */
-  async insertEvents(events: vnvEvent[]) {
-    logger.info("Inserting Events...");
-    for (const event of events) {
-      try {
-        await this.insertEvent(event);
-      } catch (error) {
-        // If something errors out that means the VNV API had invalid data.
-        logger.warn(
-          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
-          error,
-        );
-      }
-    }
-    logger.info("Inserted Events!");
-  }
-
-  /**
    * Insert a single vnvEvent into the database by it's legacy_id.
    * Also links the appropriate Price objects and Location object.
    * @param vnvEvent The particular vnvEvent.
    * @returns Nothing.
    */
-  private async insertEvent(vnvEvent: vnvEvent) {
+  async insertEvent(vnvEvent: vnvEvent) {
     const productions: Production[] = await this.query<Production>(
       `SELECT * from productions WHERE legacy_id = $1;`,
       [vnvEvent.production_id],
@@ -316,27 +395,11 @@ export class DbConnection {
   }
 
   /**
-   * Locations
-   */
-
-  /**
-   * Inserts a list of vnvLocation objects.
-   * @param locations The list of vnvLocation objects.
-   */
-  async insertLocations(locations: vnvLocation[]) {
-    logger.info("Inserting Locations...");
-    for (const location of locations) {
-      await this.insertLocation(location);
-    }
-    logger.info("Inserted Locations!");
-  }
-
-  /**
    * Inserts a single vnvLocation into the database.
    * @param location The location we want inserted.
    * @returns Nothing.
    */
-  private async insertLocation(location: vnvLocation) {
+  async insertLocation(location: vnvLocation) {
     const query = `
       INSERT INTO locations (location, legacy_id)
       VALUES ($1, $2)
@@ -348,12 +411,16 @@ export class DbConnection {
   }
 
   /**
+   * Price.
+   */
+
+  /**
    * Links an Event and a Location by their ids.
    * @param eventId The Event ID.
    * @param locationId The Location ID.
    * @returns T/F Whether it Failed or not.
    */
-  private async linkLocation(
+  async linkLocation(
     eventId: number,
     locationId: number,
   ): Promise<boolean> {
@@ -369,27 +436,11 @@ export class DbConnection {
   }
 
   /**
-   * Price.
-   */
-
-  /**
-   * Insert a list of vnvPrice objects.
-   * @param prices The list of vnvPrice objects.
-   */
-  async insertPrices(prices: vnvPrice[]) {
-    logger.info("Inserting Prices...");
-    for (const price of prices) {
-      await this.insertPrice(price);
-    }
-    logger.info("Inserted Prices!");
-  }
-
-  /**
    * Insert a single vnvPrice into the database.
    * @param price The vnvPrice object we want inserted.
    * @returns Nothing.
    */
-  private async insertPrice(price: vnvPrice) {
+  async insertPrice(price: vnvPrice): Promise<Price> {
     const query = `
       INSERT INTO prices (name, price, legacy_id)
       VALUES ($1, $2, $3)
@@ -397,7 +448,12 @@ export class DbConnection {
       DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price
       RETURNING *;
     `;
-    await this.query<Price>(query, [price.name, price.amount, price.legacy_id]);
+    const rows = await this.query<Price>(query, [
+      price.name,
+      price.amount,
+      price.legacy_id,
+    ]);
+    return rows[0];
   }
 
   /**
@@ -406,7 +462,7 @@ export class DbConnection {
    * @param priceId The Price ID.
    * @returns T/F Whether it Failed or not.
    */
-  private async linkPrice(eventId: number, priceId: number): Promise<boolean> {
+  async linkPrice(eventId: number, priceId: number): Promise<boolean> {
     const query = `
       INSERT INTO event_prices (event_id, price_id)
       VALUES ($1, $2)
@@ -416,5 +472,51 @@ export class DbConnection {
 
     const output = await this.query(query, [eventId, priceId]);
     return output.length >= 1;
+  }
+
+  /**
+   * Blogs.
+   */
+
+  /**
+   * Inserts a single blog row.
+   * @param titel Localized blog title.
+   * @param description Localized blog description.
+   * @returns Inserted blog row.
+   */
+  async insertBlog(
+    titel: { en: string; nl: string },
+    description: { en: string; nl: string },
+  ): Promise<Blog> {
+    const rows = await this.query<Blog>(
+      `
+        INSERT INTO blogs (titel, description)
+        VALUES ($1, $2)
+        RETURNING *;
+      `,
+      [titel, description],
+    );
+
+    return rows[0];
+  }
+
+  /**
+   * Links a blog to a production.
+   * @param productionId Production id.
+   * @param blogId Blog id.
+   * @returns T/F Whether the link was created.
+   */
+  async linkBlog(productionId: number, blogId: number): Promise<boolean> {
+    const rows = await this.query(
+      `
+        INSERT INTO production_blogs (production_id, blog_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `,
+      [productionId, blogId],
+    );
+
+    return rows.length >= 1;
   }
 }

@@ -10,7 +10,7 @@ import {
 } from "../dto/dto";
 import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { FilterEventSchema } from "@repo/common";
+import { FilterEventSchema, PaginationFilterSchema } from "@repo/common";
 
 describe("EventService", () => {
   let service: EventService;
@@ -113,17 +113,25 @@ describe("EventService", () => {
 
   describe("getAllEvents", () => {
     it("should return all events from database", async () => {
-      const result = await service.getAllEvents(FilterEventSchema.parse({}));
+      const result = await service.getAllEvents(
+        FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
       expect(result).toEqual(mockEvents);
       expect(dbService.getEvents).toHaveBeenCalledWith(
         FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
     });
 
     it("should call dbService.getEvents with empty filter", async () => {
-      await service.getAllEvents(FilterEventSchema.parse({}));
+      await service.getAllEvents(
+        FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
       expect(dbService.getEvents).toHaveBeenCalledWith(
         FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
       expect(dbService.getEvents).toHaveBeenCalledTimes(1);
     });
@@ -135,7 +143,10 @@ describe("EventService", () => {
         totalItems: 0,
         objects: [],
       });
-      const result = await service.getAllEvents(FilterEventSchema.parse({}));
+      const result = await service.getAllEvents(
+        FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
       expect(result).toEqual({
         page: 0,
         limit: 20,
@@ -149,7 +160,10 @@ describe("EventService", () => {
         .spyOn(dbService, "getEvents")
         .mockRejectedValueOnce(new Error("Database error"));
       await expect(
-        service.getAllEvents(FilterEventSchema.parse({})),
+        service.getAllEvents(
+          FilterEventSchema.parse({}),
+          PaginationFilterSchema.parse({}),
+        ),
       ).rejects.toThrow("Database error");
     });
   });

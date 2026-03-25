@@ -4,7 +4,8 @@ import { ProductionController } from "./controllers/production.controller";
 import { DbModule } from "../database/db.module";
 import { ProductionBlogController } from "./controllers/production-blog.controller";
 import { ProductionTagController } from "./controllers/production-tag.controller";
-import { UtilModule } from "../util/util.module";
+import { LanguageModule } from "../util/language/LanguageModule";
+import { LoggerModule } from "../util/logger/logger.module";
 
 @Module({
   providers: [ProductionService],
@@ -13,6 +14,6 @@ import { UtilModule } from "../util/util.module";
     ProductionBlogController,
     ProductionTagController,
   ],
-  imports: [DbModule, UtilModule],
+  imports: [DbModule, LanguageModule, LoggerModule],
 })
 export class ProductionModule {}

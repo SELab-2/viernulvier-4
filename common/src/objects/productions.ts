@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  LanguageEnum,
   LocalizedStringNullableSchema,
   LocalizedStringSchema,
 } from "./language";
@@ -39,7 +38,6 @@ export const UpdateProductionSchema = ProductionSchema.partial().omit({
 });
 
 export const FilterProductionSchema = z.object({
-  lang: LanguageEnum.optional(),
   titel: z.string().optional(),
   id: z.coerce.number().optional(),
   tag_ids: z
@@ -55,8 +53,6 @@ export const FilterProductionSchema = z.object({
   date_between: z.iso.date().optional(),
   date_before: z.iso.date().optional(),
   date_after: z.iso.date().optional(),
-  page: z.coerce.number().min(0).default(0),
-  limit: z.coerce.number().min(1).max(100).default(20),
   artist: z.string().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),

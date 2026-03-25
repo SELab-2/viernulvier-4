@@ -264,6 +264,7 @@ describe("BlogController (e2e)", () => {
     });
 
     it("should return 200 with an empty array when no blogs exist", async () => {
+      // @ts-ignore
       jest.spyOn(blogDb, "getBlogs").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
         .get("/blogs?lang=en&descending=true")
@@ -407,6 +408,7 @@ describe("TagController (e2e)", () => {
     });
 
     it("should return 200 with empty array when no tags exist", async () => {
+      // @ts-ignore
       jest.spyOn(tagDb, "getTags").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
         .get("/tags?lang=en")
@@ -521,6 +523,7 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should return 200 with empty array when no productions exist", async () => {
+      // @ts-ignore
       jest.spyOn(productionDb, "getProductions").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
         .get("/productions?lang=en")
@@ -846,6 +849,7 @@ describe("EventController (e2e)", () => {
     });
 
     it("should return 200 with empty array when no events exist", async () => {
+      // @ts-ignore
       jest.spyOn(eventDb, "getEvents").mockResolvedValueOnce([]);
       return request(app.getHttpServer()).get("/events").expect(200).expect([]);
     });
