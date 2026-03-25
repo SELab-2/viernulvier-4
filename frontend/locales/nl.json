@@ -61,6 +61,10 @@
     "remaining": "resterend",
     "backToStories": "Terug naar verhalen",
     "minRead": "min. lezen",
-    "now": "nu"
+    "now": "nu",
+    "title": "Verhalen",
+    "changeLanguage": "Wijzig taal",
+    "lightMode": "Lichte modus",
+    "darkMode": "Donkere modus"
   }
 }

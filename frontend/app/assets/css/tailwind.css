@@ -1,28 +1,7 @@
-/**
- * tailwind.css
- *
- * Global stylesheet for the VIERNULVIER archive frontend.
- *
- * This file is responsible for:
- * - Importing Tailwind CSS
- * - Registering the dark mode variant (class-based via `.dark` on <html>)
- * - Loading the ABCMonumentGrotesk brand font (Heavy + Regular weights)
- * - Defining CSS custom properties (design tokens) for both light and dark mode
- * - Exposing those tokens to Tailwind via @theme inline
- * - Applying base styles to body and html
- * - Defining the .dropcap utility used in article/about section intros
- * - Defining the .font-brand utility class for the brand font
- *
- * Font files are stored in /public/fonts/.
- * Dark mode is toggled by adding/removing the `dark` class on <html>.
- */
-
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
-/* ABCMonumentGrotesk — the official VIERNULVIER brand font.
-   Font files live in /public/fonts/ */
 @font-face {
   font-family: 'ABCMonumentGrotesk';
   src: url('/fonts/ABCMonumentGrotesk-Heavy.otf') format('opentype');
@@ -39,7 +18,7 @@
   font-display: swap;
 }
 
-/* ─── Design tokens: light mode ────────────────────────────────────────────── */
+/* ── Design tokens: light ───────────────────────────────────────── */
 :root {
   --font-size: 16px;
   --background: #ffffff;
@@ -53,53 +32,67 @@
   --radius: 0.625rem;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-
-  /* Accent color for tags */
   --accent: #8224e3;
-
-  /* Card */
   --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
   --card-border: rgba(0, 0, 0, 0.1);
   --card-hover: #f9f9fb;
-
-  /* Colours used in the gradient placeholder */
   --thumbnail-bg: #ffffff;
   --thumbnail-icon: #ffffff;
+
+  /* Story card surfaces */
+  --story-card: #ffffff;
+  --story-card-border: #e5e7eb;
+  --story-card-hover: #f9fafb;
+
+  /* Blog timeline — purple accent */
+  --blog-purple-strong:  #534AB7;
+  --blog-purple-mid:     #7F77DD;
+  --blog-purple-soft:    #AFA9EC;
+  --blog-purple-pale:    #CECBF6;
+  --blog-purple-ghost:   #EEEDFE;
+  --blog-year-rule:      #7F77DD;
+  --blog-month-dot:      #AFA9EC;
+  --blog-accent:         #534AB7;
+  --blog-accent-text:    #3C3489;
 }
 
-/* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
+/* ── Design tokens: dark ────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --border: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --font-weight-medium: 500;
-  --font-weight-normal: 400;
+  --background: #151821;
+  --foreground: #e8eaf0;
+  --primary: #e8eaf0;
+  --primary-foreground: #1e2130;
+  --muted: #1e2130;
+  --muted-foreground: #8b8fa8;
+  --border: #2e3347;
+  --ring: #4a4f6a;
+  --accent: #a855f7;
+  --card: #1e2130;
+  --card-foreground: #e8eaf0;
+  --card-border: #2e3347;
+  --card-hover: #252839;
+  --thumbnail-bg: #2e3347;
+  --thumbnail-icon: #8b8fa8;
 
-  /* Accent color for tags */
-  --accent: #8224e3;
+  /* Story card surfaces */
+  --story-card: #1e2130;
+  --story-card-border: #2e3347;
+  --story-card-hover: #252839;
 
-  /* Card — slightly lighter than background so cards lift off the page */
-  --card: oklch(0.22 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --card-border: oklch(0.3 0 0);
-  --card-hover: oklch(0.25 0 0);
-
-  /* Colours used in the gradient placeholder */
-  --thumbnail-bg: oklch(0.35 0 0);
-  --thumbnail-icon: oklch(0.75 0 0);
+  /* Blog timeline — purple accent, lighter for dark bg */
+  --blog-purple-strong:  #7F77DD;
+  --blog-purple-mid:     #AFA9EC;
+  --blog-purple-soft:    #534AB7;
+  --blog-purple-pale:    #3C3489;
+  --blog-purple-ghost:   #26215C;
+  --blog-year-rule:      #AFA9EC;
+  --blog-month-dot:      #7F77DD;
+  --blog-accent:         #AFA9EC;
+  --blog-accent-text:    #CECBF6;
 }
 
-/* ─── Tailwind theme mapping ────────────────────────────────────────────────
-   Maps the CSS custom properties above to Tailwind utility classes so that
-   e.g. `bg-background`, `text-foreground`, `border-border` etc. work out
-   of the box.
-   ---------------------------------------------------------------------- */
+/* ── Tailwind theme mapping ──────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -120,33 +113,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
-  /* Make ABCMonumentGrotesk available as font-brand in Tailwind */
   --font-brand: 'ABCMonumentGrotesk', sans-serif;
 }
 
-/* ─── Base layer ────────────────────────────────────────────────────────────
-   Applied to every element and the body/html root.
-   ---------------------------------------------------------------------- */
+/* ── Base ────────────────────────────────────────────────────────── */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  html {
-    font-size: var(--font-size);
-  }
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground; }
+  html { font-size: var(--font-size); }
 }
 
-/* ─── Drop cap ──────────────────────────────────────────────────────────────
-   Apply the `.dropcap` class to the first <p> of an article or section intro
-   to render an oversized first letter (editorial style).
-   Used in: HomeAbout.vue
-   ---------------------------------------------------------------------- */
+/* ── Utilities ───────────────────────────────────────────────────── */
+.font-brand {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
+}
+
 .dropcap::first-letter {
   float: left;
   font-size: 4.5rem;
@@ -156,10 +137,264 @@
   margin-top: -0.6rem;
 }
 
-/* ─── Brand font utility ────────────────────────────────────────────────────
-   Convenience class for applying the ABCMonumentGrotesk font directly
-   without going through Tailwind's font-brand utility.
-   ---------------------------------------------------------------------- */
-.font-brand {
-  font-family: 'ABCMonumentGrotesk', sans-serif;
+/* ── Story card dark-mode surfaces ───────────────────────────────── */
+.story-card {
+  background-color: var(--story-card);
+  border-color: var(--story-card-border);
+}
+.story-card:hover {
+  background-color: var(--story-card-hover);
+}
+
+/* ── Blog timeline ───────────────────────────────────────────────── */
+
+/* Year section separator */
+.blog-year-section + .blog-year-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Year heading row */
+.blog-year-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.blog-year-accent {
+  width: 4px;
+  height: 2rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, var(--blog-purple-strong), var(--blog-purple-soft));
+}
+
+.blog-year-label {
+  font-size: 2.25rem;
+  font-weight: 900;
+  font-family: var(--font-brand, 'ABCMonumentGrotesk', sans-serif);
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--blog-accent-text);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.blog-year-label:hover { opacity: 0.65; }
+
+.blog-year-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+
+.blog-year-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--blog-purple-pale);
+  opacity: 0.5;
+}
+
+/* Month heading row */
+.blog-month-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-month-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: var(--blog-month-dot);
+}
+
+.blog-month-label {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blog-year-rule);
+  flex-shrink: 0;
+}
+
+.blog-month-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--blog-purple-ghost);
+}
+
+.blog-month-count {
+  font-size: 8px;
+  font-weight: 900;
+  color: var(--blog-purple-soft);
+}
+
+/* Story card group */
+.blog-story-group {
+  border: 1px solid var(--blog-purple-ghost);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.blog-story-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--blog-purple-ghost);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: background-color 0.1s;
+}
+.blog-story-btn:last-child { border-bottom: none; }
+.blog-story-btn:hover { background-color: var(--card-hover); }
+.blog-story-btn:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--blog-purple-strong);
+}
+
+/* Month group spacing */
+.blog-month-group + .blog-month-group {
+  margin-top: 2rem;
+}
+
+/* ── Year nav sidebar ────────────────────────────────────────────── */
+.blog-nav-rail {
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  border-radius: 9999px;
+  background: var(--blog-purple-pale);
+  opacity: 0.4;
+}
+
+.blog-nav-year-btn {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.6rem 0;
+  width: 100%;
+  cursor: pointer;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.blog-nav-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+  border: 2px solid var(--blog-purple-soft);
+  background: var(--background);
+  transition: all 0.2s;
+}
+.blog-nav-year-btn:hover .blog-nav-dot {
+  border-color: var(--blog-purple-mid);
+  transform: scale(1.15);
+}
+.blog-nav-dot--active {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-color: var(--blog-purple-strong) !important;
+  background: var(--blog-purple-strong) !important;
+  box-shadow: 0 0 0 3px var(--blog-purple-ghost);
+}
+
+.blog-nav-label {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--blog-purple-soft);
+  transition: color 0.2s;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.blog-nav-year-btn:hover .blog-nav-label { color: var(--blog-purple-mid); }
+.blog-nav-label--active {
+  font-size: 10px !important;
+  color: var(--blog-accent-text) !important;
+}
+
+.blog-nav-pill {
+  margin-top: 2px;
+  padding: 1px 6px;
+  border-radius: 9999px;
+  font-size: 7px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+
+/* ── Mobile year pills ───────────────────────────────────────────── */
+.blog-mobile-nav {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  scrollbar-width: none;
+}
+.blog-mobile-nav::-webkit-scrollbar { display: none; }
+
+.blog-mobile-pill {
+  flex-shrink: 0;
+  height: 1.75rem;
+  padding: 0 0.75rem;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.blog-mobile-pill:hover {
+  border-color: var(--blog-purple-mid);
+  color: var(--blog-purple-mid);
+}
+.blog-mobile-pill--active {
+  background: var(--blog-purple-strong);
+  border-color: var(--blog-purple-strong);
+  color: #ffffff;
+}
+
+/* ── Blog page background ────────────────────────────────────────── */
+.blog-page {
+  background: var(--background);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .blog-year-label { font-size: 1.75rem; }
+  .blog-month-label { font-size: 8px; }
 }

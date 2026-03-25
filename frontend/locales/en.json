@@ -61,6 +61,10 @@
     "remaining": "remaining",
     "backToStories": "Back to stories",
     "minRead": "min read",
-    "now": "now"
+    "now": "now",
+    "title": "Stories",
+    "changeLanguage": "Change language",
+    "lightMode": "Light mode",
+    "darkMode": "Dark mode"
   }
 }
