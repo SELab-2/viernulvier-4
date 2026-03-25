@@ -24,6 +24,8 @@ export class BlogMediaController {
 
   /**
    * Responds to a GET to "/blogs/:blogId/media"
+   * This endpoint only returns one singular Gallery
+   * because in any case only one will be assigned to a Blog.
    * @param blogId The ID of the blog.
    * @returns The media gallery associated with this blog.
    */

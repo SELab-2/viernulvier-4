@@ -24,6 +24,8 @@ export class ProductionMediaController {
 
   /**
    * Responds to a GET to "/productions/:productionId/media"
+   * This endpoint only returns one singular Gallery
+   * because in any case only one will be assigned to a Production.
    * @param productionId The ID of the production to get media for.
    * @returns The media gallery associated to this production.
    */
