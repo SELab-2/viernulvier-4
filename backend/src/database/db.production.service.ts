@@ -4,6 +4,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  PaginationFilterDto,
   MediaGalleryDto,
   ProductionDto,
   TagDto,
@@ -13,6 +14,7 @@ import { ResourceGoneException } from "../common/exceptions";
 import {
   FilterProductionSchema,
   PaginatedResponse,
+  PaginationFilterSchema,
   SUPPORTED_LANGUAGES,
 } from "@repo/common";
 
@@ -27,7 +29,10 @@ export class ProductionDatabaseService {
    */
   async getProductionById(id: number): Promise<ProductionDto> {
     const productions: PaginatedResponse<ProductionDto> =
-      await this.getProductions(FilterProductionSchema.parse({ id: id }));
+      await this.getProductions(
+        FilterProductionSchema.parse({ id: id }),
+        PaginationFilterSchema.parse({}),
+      );
 
     const production = productions.objects;
     if (production.length === 0)
@@ -126,13 +131,15 @@ export class ProductionDatabaseService {
 
   /**
    * Generic get function for productions.
-   * @param filters gives the freedom to define the filters of the search you want.
+   * @param productionFilters gives the freedom to define the filters of the search you want.
+   * @param paginationFilters Filters to do with pagination and ordering.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
    */
   async getProductions(
-    filters: FilterProductionDto,
+    productionFilters: FilterProductionDto,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<ProductionDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -142,92 +149,92 @@ export class ProductionDatabaseService {
     // TODO: Rewrite this filter since it would not work anymore under the new location structure.
 
     // Filter by event date (start or end date)
-    if (filters.date) {
+    if (productionFilters.date) {
       conditions.push(`(DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i})`);
-      values.push(filters.date);
+      values.push(productionFilters.date);
       i++;
     }
 
     // Filter by given date lying between starttime and endtime (inclusive)
-    if (filters.date_between) {
+    if (productionFilters.date_between) {
       // Use explicit timestamp comparison to include time component
       conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(filters.date_between);
+      values.push(productionFilters.date_between);
       i++;
     }
 
     // Filter events whose starttime is before the provided date
-    if (filters.date_before) {
+    if (productionFilters.date_before) {
       conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(filters.date_before);
+      values.push(productionFilters.date_before);
       i++;
     }
 
     // Filter events whose endtime is after the provided date
-    if (filters.date_after) {
+    if (productionFilters.date_after) {
       conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(filters.date_after);
+      values.push(productionFilters.date_after);
       i++;
     }
 
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
     // For all supported languages.
-    if (filters.titel) {
+    if (productionFilters.titel) {
       const titelClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `p.titel->>'${lang}' ILIKE $${i}`,
       );
 
       conditions.push(`(${titelClauses.join(" OR ")})`);
-      values.push(`%${filters.titel}%`);
+      values.push(`%${productionFilters.titel}%`);
       i++;
     }
 
     // Will look anywhere in the artist field for what was searched.
     // This checks all supported languages.
-    if (filters.artist) {
+    if (productionFilters.artist) {
       const artistClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `p.artist->>'${lang}' ILIKE $${i}`,
       );
 
       conditions.push(`(${artistClauses.join(" OR ")})`);
-      values.push(`%${filters.artist}%`);
+      values.push(`%${productionFilters.artist}%`);
       i++;
     }
 
     // Filter by performance_type
-    if (filters.performer_type) {
+    if (productionFilters.performer_type) {
       conditions.push(`p.performer_type = $${i}`);
-      values.push(`%${filters.performer_type}%`);
+      values.push(`%${productionFilters.performer_type}%`);
       i++;
     }
 
     // Filter by attendance_mode
-    if (filters.attendance_mode) {
+    if (productionFilters.attendance_mode) {
       conditions.push(`p.attendance_mode = $${i}`);
-      values.push(`%${filters.attendance_mode}%`);
+      values.push(`%${productionFilters.attendance_mode}%`);
       i++;
     }
 
     // Filter by id
-    if (filters.id) {
+    if (productionFilters.id) {
       conditions.push(`p.id = $${i}`);
-      values.push(filters.id);
+      values.push(productionFilters.id);
       i++;
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
-    if (filters.tag_ids && filters.tag_ids.length > 0) {
+    if (productionFilters.tag_ids && productionFilters.tag_ids.length > 0) {
       conditions.push(`
         p.id IN (
           SELECT production_id 
           FROM production_tag 
           WHERE tag_id = ANY($${i}::int[])
           GROUP BY production_id 
-          HAVING COUNT(DISTINCT tag_id) = ${filters.tag_ids.length}
+          HAVING COUNT(DISTINCT tag_id) = ${productionFilters.tag_ids.length}
         )
       `);
-      values.push(filters.tag_ids);
+      values.push(productionFilters.tag_ids);
       i++;
     }
 
@@ -247,16 +254,17 @@ export class ProductionDatabaseService {
   `;
 
     let paginationClause = "";
-    if (filters.limit > 0) {
-      const offset = filters.page * filters.limit;
+    if (paginationFilters.limit > 0) {
+      const offset = paginationFilters.page * paginationFilters.limit;
       paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
-      values.push(filters.limit);
+      values.push(paginationFilters.limit);
       values.push(offset);
       i += 2;
     }
 
+    // The Ordered by the first held event of the production.
     const query = `
-    SELECT DISTINCT
+    SELECT
       p.id,
       p.titel,
       p.description1,
@@ -271,7 +279,9 @@ export class ProductionDatabaseService {
     FROM productions p
       LEFT JOIN events e ON e.production_id = p.id
     ${whereClause}
-    ORDER BY p.id
+    GROUP BY
+      p.id
+    ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
     ${paginationClause}
   `;
 
@@ -281,8 +291,8 @@ export class ProductionDatabaseService {
     ]);
 
     return {
-      page: filters.page,
-      limit: filters.limit,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects,
     };
