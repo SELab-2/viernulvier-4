@@ -24,6 +24,13 @@ const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
 const isMenuOpen = ref(false) // Controls the mobile/tablet hamburger menu
 
+const navItems = [
+  { label: 'home', route: ROUTES.home.base },
+  { label: 'archive', route: ROUTES.productions.base },
+  { label: 'stories', route: ROUTES.stories.base },
+  { label: 'prints', route: ROUTES.prints.base },
+]
+
 const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
 const toggleDark = () => {
@@ -50,17 +57,13 @@ const handleLogout = async () => {
       <div class="flex items-center justify-start">
 
         <nav v-if="!isAdmin" class="hidden lg:flex gap-[20px] xl:gap-[30px]">
-          <NuxtLink :to="ROUTES.home.base" class="nav-item">
-            {{ t('nav.home').toUpperCase() }}
-          </NuxtLink>
-          <NuxtLink :to="ROUTES.productions.base" class="nav-item">
-            {{ t('nav.archive').toUpperCase() }}
-          </NuxtLink>
-          <NuxtLink :to="ROUTES.stories.base" class="nav-item">
-            {{ t('nav.stories').toUpperCase() }}
-          </NuxtLink>
-          <NuxtLink :to="ROUTES.prints.base" class="nav-item">
-            {{ t('nav.prints').toUpperCase() }}
+          <NuxtLink
+            v-for="item in navItems"
+            :key="item.route"
+            :to="item.route"
+            class="nav-item"
+          >
+            {{ t('nav.' + item.label).toUpperCase() }}
           </NuxtLink>
         </nav>
 
@@ -119,8 +122,14 @@ const handleLogout = async () => {
       <nav class="flex flex-col gap-6">
 
         <template v-if="!isAdmin">
-          <NuxtLink v-for="item in ['home', 'productions', 'stories', 'prints']" :key="item" :to="ROUTES[item].base" @click="isMenuOpen = false" class="nav-item text-lg">
-            {{ t(`nav.${item === 'productions' ? 'archive' : item}`).toUpperCase() }}
+          <NuxtLink
+            v-for="item in navItems"
+            :key="item.route"
+            :to="item.route"
+            @click="isMenuOpen = false"
+            class="nav-item text-lg"
+          >
+            {{ t(`nav.${item.label}`).toUpperCase() }}
           </NuxtLink>
         </template>
 
