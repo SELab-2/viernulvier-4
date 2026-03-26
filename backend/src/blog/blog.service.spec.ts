@@ -5,7 +5,7 @@ import {
   BlogDto,
   CreateBlogDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ModifyBlogDto,
 } from "../dto/dto";
 
 describe("BlogService", () => {
@@ -126,7 +126,7 @@ describe("BlogService", () => {
 
   describe("modifyBlog", () => {
     it("should assign the ID to the DTO and update the blog", async () => {
-      const updateDto: UpdateBlogDto = {
+      const updateDto: ModifyBlogDto = {
         titel: {
           en: "Updated titel",
           nl: "Bijgewerkte titel",

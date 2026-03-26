@@ -19,8 +19,10 @@ import {
   BlogViewSchema,
   CreateBlog,
   CreateBlogSchema,
-  UpdateBlog,
-  UpdateBlogSchema,
+  ReplaceBlog,
+  ReplaceBlogSchema,
+  ModifyBlog,
+  ModifyBlogSchema,
 } from "./objects/blogs";
 import {
   CreateEvent,
@@ -125,8 +127,9 @@ export {
   // Blog Schemas.
   BlogSchema,
   BlogViewSchema,
-  UpdateBlogSchema,
+  ModifyBlogSchema,
   CreateBlogSchema,
+  ReplaceBlogSchema,
 
   // Tag Schemas.
   TagSchema,
@@ -196,7 +199,8 @@ export type {
   Blog,
   BlogView,
   CreateBlog,
-  UpdateBlog,
+  ModifyBlog,
+  ReplaceBlog,
 
   // Location Types.
   Location,

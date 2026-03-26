@@ -27,10 +27,11 @@ import {
   ProductionSchema,
   ProductionViewSchema,
   PublicAccountSchema,
+  ReplaceBlogSchema,
   TagSchema,
   TagViewSchema,
   UpdateAccountSchema,
-  UpdateBlogSchema,
+  ModifyBlogSchema,
   UpdatedMediaCropSchema,
   UpdatedMediaGallerySchema,
   UpdatedMediaItemSchema,
@@ -61,7 +62,8 @@ export class FilterEventDto extends createZodDto(FilterEventSchema) {}
 export class BlogDto extends createZodDto(BlogSchema) {}
 export class BlogViewDto extends createZodDto(BlogViewSchema) {}
 export class CreateBlogDto extends createZodDto(CreateBlogSchema) {}
-export class UpdateBlogDto extends createZodDto(UpdateBlogSchema) {}
+export class ModifyBlogDto extends createZodDto(ModifyBlogSchema) {}
+export class ReplaceBlogDto extends createZodDto(ReplaceBlogSchema) {}
 
 // Tag Wrappers
 export class TagDto extends createZodDto(TagSchema) {}
