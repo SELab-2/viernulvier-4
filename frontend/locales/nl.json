@@ -65,5 +65,9 @@
     "changeLanguage": "Wijzig taal",
     "lightMode": "Lichte modus",
     "darkMode": "Donkere modus"
+  },
+  "baseform": {
+    "submitbutton": "Indienen",
+    "resetbutton": "Herstellen"
   }
 }

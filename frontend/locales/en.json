@@ -65,5 +65,9 @@
     "changeLanguage": "Change language",
     "lightMode": "Light mode",
     "darkMode": "Dark mode"
+  },
+  "baseform": {
+    "submitbutton": "Submit",
+    "resetbutton": "Reset"
   }
 }

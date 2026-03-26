@@ -41,7 +41,7 @@ async function loadEvents() {
   if (!productionView?.id) return
 
   try {
-    const resp = await getAllEvents({ production_id: productionView.id as any, limit: 100 })
+    const resp = await getAllEvents({ eventFilters: { production_id: productionView.id as any } });
     if (resp.data && Array.isArray((resp.data as any).objects)) {
       events.value = (resp.data as any).objects as Event[]
     } else if (resp.data && Array.isArray(resp.data)) {
