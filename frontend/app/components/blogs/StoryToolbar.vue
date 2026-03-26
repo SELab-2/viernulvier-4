@@ -6,8 +6,8 @@
     - sortOrder   ("newest" | "oldest")  controls the sort direction
     - showFilter  (boolean)              toggles the filter panel visibility
 
-  The story count display (loaded / total) gives the user a sense of how many
-  items have been fetched so far vs. the total available on the server.
+  The toolbar is not sticky — it scrolls with the page so the nav sidebar
+  is never obscured. The scroll progress bar lives in StoriesHeader instead.
 -->
 
 <script lang="ts" setup>
@@ -23,10 +23,9 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="border-b border-border bg-background/95 backdrop-blur-sm sticky top-14 z-10">
+  <div class="relative border-b border-border bg-background">
     <div class="container mx-auto px-4 max-w-5xl py-3 flex items-center gap-2">
 
-      <!-- Filter toggle button -->
       <button
         class="
           h-9 px-4 font-brand font-black text-[10px] uppercase tracking-widest
@@ -44,17 +43,8 @@ const { t } = useI18n();
         Filter
       </button>
 
-      <div class="flex-1" />
-
-      <!-- Count: loaded / total -->
-      <span class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground shrink-0">
-        {{ loaded }}
-        <span v-if="totalItems > 0" class="text-border"> / {{ totalItems }}</span>
-        {{ t("stories.results") }}
-      </span>
     </div>
 
-    <!-- Collapsible filter panel -->
     <Transition
       enter-active-class="transition-all duration-200 ease-out"
       enter-from-class="opacity-0 -translate-y-1"
@@ -67,7 +57,6 @@ const { t } = useI18n();
         v-if="showFilter"
         class="container mx-auto px-4 max-w-5xl pb-3 border-t border-border pt-3 flex items-center gap-3"
       >
-        <!-- Sort order selector -->
         <select
           v-model="sortOrder"
           class="

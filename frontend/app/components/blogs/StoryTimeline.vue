@@ -76,8 +76,8 @@ const attachObserver = () => {
       }
     },
     // rootMargin keeps the active highlight stable: trigger when the section
-    // is in the top ~30% of the viewport.
-    { rootMargin: "-80px 0px -70% 0px", threshold: 0 },
+    // is in the top ~30% of the viewport. Aangepast naar -120px vanwege de nieuwe padding.
+    { rootMargin: "-120px 0px -70% 0px", threshold: 0 },
   );
 
   for (const year of allYears.value) {
@@ -110,20 +110,16 @@ const scrollToYear = (year: string) => {
 
 <template>
   <div>
-    <!-- Sidebar + content in a flex row on all screen sizes -->
-    <div class="flex gap-4 sm:gap-6">
+    <div class="flex gap-4 sm:gap-6 pt-8">
 
-      <!-- Year navigation sidebar — always visible -->
       <StoryNav
         :years="allYears"
         :active-year="activeYear"
         @scroll-to="scrollToYear"
       />
 
-      <!-- Main content column -->
       <div class="flex-1 min-w-0">
 
-        <!-- Empty state -->
         <div v-if="grouped.length === 0" class="py-24 text-center">
           <p class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2">
             {{ t("stories.noStories") }}
@@ -133,7 +129,6 @@ const scrollToYear = (year: string) => {
           </p>
         </div>
 
-        <!-- One section per year -->
         <div v-else class="space-y-0">
           <StoryYearSection
             v-for="group in grouped"

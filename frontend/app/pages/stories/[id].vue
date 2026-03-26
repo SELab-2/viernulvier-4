@@ -96,7 +96,7 @@ const readingTime = computed(() => {
     (#151821) that is noticeably lighter than pitch-black so text and elements
     retain clear contrast and layering.
   -->
-  <div class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200">
+  <div class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100 transition-colors duration-200">
 
     <!-- Loading spinner -->
     <div v-if="pending" class="min-h-screen flex items-center justify-center">
@@ -153,21 +153,6 @@ const readingTime = computed(() => {
           class="relative z-10 container mx-auto px-6 max-w-4xl w-full pb-10"
           :class="image ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
         >
-          <!-- Back link -->
-          <NuxtLink
-            to="/stories"
-            class="
-              inline-flex items-center gap-2 mb-6
-              font-brand font-black text-[10px] uppercase tracking-widest
-              transition-opacity duration-150 opacity-70 hover:opacity-100
-            "
-            :class="image ? 'text-white' : 'text-gray-500 dark:text-gray-400'"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            {{ t("stories.backToStories") }}
-          </NuxtLink>
 
           <!-- Title -->
           <h1
@@ -206,8 +191,8 @@ const readingTime = computed(() => {
       <section
         class="
           py-16 sm:py-20
-          bg-white dark:bg-[#1a1e2b]
-          border-t border-gray-100 dark:border-[#252a3a]
+          bg-white dark:bg-[#262b3d]
+          border-t border-gray-100 dark:border-[#333a52]
         "
       >
         <div class="container mx-auto px-6 max-w-4xl">
@@ -240,7 +225,7 @@ const readingTime = computed(() => {
                   to="/stories"
                   class="hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
                 >
-                  {{ t("stories.backToStories") }} →
+                  ←{{ t("stories.backToStories") }}
                 </NuxtLink>
               </div>
             </div>

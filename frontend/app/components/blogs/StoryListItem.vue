@@ -68,11 +68,21 @@ const placeholderGradient = computed(() =>
   <article
     class="
       group flex overflow-hidden rounded-lg border transition-all duration-150
-      bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300
-      dark:bg-[#1e2130]/60 dark:border-[#2e3347] dark:hover:bg-[#252839]/70 dark:hover:border-[#3a4060]
-      shadow-sm hover:shadow-md dark:shadow-none
+      bg-white border-gray-200 hover:border-purple-400/60
+      dark:bg-[#1e2130]/60 dark:border-[#2e3347] dark:hover:border-purple-500/50
+      shadow-sm hover:shadow-md hover:shadow-purple-500/10 dark:shadow-none
+      relative
     "
   >
+    <!-- Purple left accent bar — slides in on hover -->
+    <div
+      class="
+        absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg
+        bg-purple-500 opacity-0 group-hover:opacity-100
+        transition-opacity duration-150
+      "
+      aria-hidden="true"
+    />
     <!-- Thumbnail -->
     <div
       class="w-28 sm:w-36 shrink-0 relative overflow-hidden"
@@ -101,7 +111,8 @@ const placeholderGradient = computed(() =>
           class="
             font-brand font-black text-sm sm:text-base uppercase tracking-tight
             leading-snug mb-1 line-clamp-2
-            group-hover:underline underline-offset-2 decoration-1
+            group-hover:text-purple-500 dark:group-hover:text-purple-400
+            transition-colors duration-150
             text-gray-900 dark:text-gray-100
           "
         >

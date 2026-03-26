@@ -16,7 +16,7 @@
 -->
 
 <script lang="ts" setup>
-const { t, locale } = useI18n();
+const { t, locale, setLocale } = useI18n();
 
 const isDark = ref(false);
 
@@ -50,17 +50,14 @@ watch(isDark, () => {
 function applyTheme() {
   const html = document.documentElement;
 
-  if (isDark.value) {
+ if (isDark.value) {
     html.classList.add("dark");
-
-    // Override the Tailwind CSS variable colour tokens with lighter dark values.
-    // Tailwind HSL format: "<h> <s>% <l>%"
-    html.style.setProperty("--background", "228 17% 10%");   // #151821
-    html.style.setProperty("--foreground", "220 13% 91%");   // off-white
-    html.style.setProperty("--muted", "228 17% 15%");        // #1e2130
-    html.style.setProperty("--muted-foreground", "220 10% 55%");
-    html.style.setProperty("--border", "228 17% 22%");       // #2e3347
-    html.style.setProperty("--card", "228 17% 13%");
+    html.style.setProperty("--background", "228 17% 18%");   
+    html.style.setProperty("--foreground", "220 13% 95%");   
+    html.style.setProperty("--muted", "228 17% 24%");        
+    html.style.setProperty("--muted-foreground", "220 10% 65%");
+    html.style.setProperty("--border", "228 17% 30%");       
+    html.style.setProperty("--card", "228 17% 20%");
   } else {
     html.classList.remove("dark");
 
@@ -82,7 +79,8 @@ function toggleDarkMode() {
 }
 
 function toggleLanguage() {
-  locale.value = locale.value === "nl" ? "en" : "nl";
+  const nextLang = locale.value === "nl" ? "en" : "nl";
+  setLocale(nextLang);
 }
 </script>
 
