@@ -8,7 +8,7 @@
  * Features a dynamic responsive design that adapts based on the user's role.
  */
 
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ROUTES } from '~/utils/routes'
 import { Sun, Moon, LogOut, Menu, X } from 'lucide-vue-next'
 
@@ -23,6 +23,8 @@ const isAdmin = isLoggedIn
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
 const isMenuOpen = ref(false) // Controls the mobile/tablet hamburger menu
+const isVisible = ref(true)
+const lastScrollPosition = ref(0)
 
 const navItems = [
   { label: 'home', route: ROUTES.home.base },
@@ -47,10 +49,38 @@ const handleLogout = async () => {
     logout()
   }
 }
+
+// Smart sticky logic: hide on scroll down, show on scroll up
+
+const handleScroll = () => {
+  const currentScroll = window.scrollY
+
+  if (currentScroll < 50) {
+    isVisible.value = true
+  } else {
+    isVisible.value = currentScroll < lastScrollPosition.value
+  }
+
+  lastScrollPosition.value = currentScroll
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  // Sync theme state with DOM on mount
+  if (document.documentElement.classList.contains('dark')) {
+    isDark.value = true
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <template>
-  <header class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-colors duration-300">
+  <header :class="{ '-translate-y-full': !isVisible && !isMenuOpen }"
+          class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-all duration-300 transform"
+  >
     <div
       class="mx-auto grid max-w-[1400px] grid-cols-3 items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
