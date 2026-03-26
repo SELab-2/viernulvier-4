@@ -109,40 +109,59 @@ import {
 
 // list of all exports: (this way only need to import this file.)
 export {
+  // Production Schemas.
   ProductionSchema,
   ProductionViewSchema,
   CreateProductionSchema,
   UpdateProductionSchema,
   FilterProductionSchema,
+
+  // Event Schemas.
   EventSchema,
   CreateEventSchema,
   UpdateEventSchema,
   FilterEventSchema,
+
+  // Blog Schemas.
   BlogSchema,
   BlogViewSchema,
   UpdateBlogSchema,
   CreateBlogSchema,
+
+  // Tag Schemas.
   TagSchema,
   TagViewSchema,
   CreateTagSchema,
   UpdateTagSchema,
+
+  // Location Schemas.
   LocationSchema,
   LocationViewSchema,
   CreateLocationSchema,
   UpdateLocationSchema,
+
+  // Auth Schemas.
   CreateAccountSchema,
   PublicAccountSchema,
   UpdateAccountSchema,
   ApiKeySchema,
   VerifyApiKeySchema,
+
+  // Price Schemas.
   PriceSchema,
   PriceViewSchema,
   CreatePriceSchema,
   UpdatePriceSchema,
+
+  // Pagination Schemas.
   PaginationFilterSchema,
+
+  // Language Schemas.
   LanguageQuerySchema,
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
+
+  // Media Schemas.
   MediaGallerySchema,
   MediaItemSchema,
   MediaCropSchema,
@@ -154,40 +173,59 @@ export {
   UpdatedMediaGallerySchema,
 };
 export type {
+  // Production Types.
   Production,
   ProductionView,
   CreateProduction,
   UpdateProduction,
   FilterProduction,
+
+  // Event Types.
   Event,
   CreateEvent,
   UpdateEvent,
   FilterEvent,
+
+  // Tag Types.
   Tag,
   TagView,
   CreateTag,
   UpdateTag,
+
+  // Blog Types.
   Blog,
   BlogView,
   CreateBlog,
   UpdateBlog,
+
+  // Location Types.
   Location,
   LocationView,
   CreateLocation,
   UpdateLocation,
+
+  // Auth Types.
   UpdateAccount,
   PublicAccount,
   CreateAccount,
   ApiKey,
   VerifyApiKey,
+
+  // Price Types.
   Price,
   PriceView,
   CreatePrice,
   UpdatePrice,
+
+  // Pagination Types.
   PaginationFilter,
+  PaginatedResponse, // This has no schema because it doesn't need one.
+
+  // Language Types.
   Language,
   LanguageQuery,
-  PaginatedResponse,
+
+  // Media Types.
   MediaGallery,
   MediaItem,
   MediaCrop,
