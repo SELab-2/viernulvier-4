@@ -5,7 +5,8 @@ import {
   MediaCropDto,
   MediaItemDto,
   PaginationFilterDto,
-  UpdateMediaItemDto,
+  ModifyMediaItemDto,
+  ReplaceMediaItemDto,
 } from "../../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -57,9 +58,8 @@ export class MediaItemService {
    */
   async replaceItem(
     itemId: number,
-    replaceItem: MediaItemDto,
+    replaceItem: ReplaceMediaItemDto,
   ): Promise<MediaItemDto> {
-    replaceItem.id = itemId; // Make sure the ID is correct.
     return await this.mediaDbService.updateItem(itemId, replaceItem);
   }
 
@@ -71,7 +71,7 @@ export class MediaItemService {
    */
   async modifyItem(
     itemId: number,
-    modifyItem: UpdateMediaItemDto,
+    modifyItem: ModifyMediaItemDto,
   ): Promise<MediaItemDto> {
     const existingItem: MediaItemDto =
       await this.mediaDbService.getItemById(itemId);

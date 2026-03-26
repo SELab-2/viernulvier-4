@@ -32,15 +32,17 @@ import {
   TagViewSchema,
   UpdateAccountSchema,
   UpdateBlogSchema,
-  UpdatedMediaCropSchema,
-  UpdatedMediaGallerySchema,
-  UpdatedMediaItemSchema,
+  ModifyMediaCropSchema,
+  ModifyMediaGallerySchema,
+  ModifyMediaItemSchema,
   UpdateEventSchema,
   UpdateLocationSchema,
   UpdatePriceSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
+  ReplaceMediaItemSchema,
+  ReplaceMediaCropSchema,
 } from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
@@ -102,13 +104,15 @@ export class MediaGalleryDto extends createZodDto(MediaGallerySchema) {}
 export class CreateMediaGalleryDto extends createZodDto(
   CreateMediaGallerySchema,
 ) {}
-export class UpdateMediaGalleryDto extends createZodDto(
-  UpdatedMediaGallerySchema,
+export class ModifyMediaGalleryDto extends createZodDto(
+  ModifyMediaGallerySchema,
 ) {}
 export class MediaItemDto extends createZodDto(MediaItemSchema) {}
 export class MediaItemViewDto extends createZodDto(MediaItemViewSchema) {}
 export class CreateMediaItemDto extends createZodDto(CreateMediaItemSchema) {}
-export class UpdateMediaItemDto extends createZodDto(UpdatedMediaItemSchema) {}
+export class ModifyMediaItemDto extends createZodDto(ModifyMediaItemSchema) {}
+export class ReplaceMediaItemDto extends createZodDto(ReplaceMediaItemSchema) {}
 export class MediaCropDto extends createZodDto(MediaCropSchema) {}
 export class CreateMediaCropDto extends createZodDto(CreateMediaCropSchema) {}
-export class UpdateMediaCropDto extends createZodDto(UpdatedMediaCropSchema) {}
+export class ModifyMediaCropDto extends createZodDto(ModifyMediaCropSchema) {}
+export class ReplaceMediaCropDto extends createZodDto(ReplaceMediaCropSchema) {}

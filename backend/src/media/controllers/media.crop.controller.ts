@@ -15,16 +15,17 @@ import { MediaCropService } from "../services/media.crop.service";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateMediaCropSchema,
-  MediaCropSchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdatedMediaCropSchema,
+  ModifyMediaCropSchema,
+  ReplaceMediaCropSchema,
 } from "@repo/common";
 import {
   CreateMediaCropDto,
   MediaCropDto,
   PaginationFilterDto,
-  UpdateMediaCropDto,
+  ModifyMediaCropDto,
+  ReplaceMediaCropDto,
 } from "../../dto/dto";
 import {
   ApiBody,
@@ -103,12 +104,13 @@ export class MediaCropController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing media crop." })
-  @ApiBody({ type: MediaCropDto })
+  @ApiBody({ type: ReplaceMediaCropDto })
   @ApiOkResponse({ type: MediaCropDto, description: "Replaced crop." })
   @Put(":cropId")
   async replaceCrop(
     @Param("cropId", ParseIntPipe) cropId: number,
-    @Body(new ZodValidationPipe(MediaCropSchema)) replaceCrop: MediaCropDto,
+    @Body(new ZodValidationPipe(ReplaceMediaCropSchema))
+    replaceCrop: ReplaceMediaCropDto,
   ): Promise<MediaCropDto> {
     return await this.mediaCropService.replaceCrop(cropId, replaceCrop);
   }
@@ -122,13 +124,13 @@ export class MediaCropController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing media crop." })
-  @ApiBody({ type: UpdateMediaCropDto })
+  @ApiBody({ type: ModifyMediaCropDto })
   @ApiOkResponse({ type: MediaCropDto, description: "Modified crop." })
   @Patch(":cropId")
   async modifyCrop(
     @Param("cropId", ParseIntPipe) cropId: number,
-    @Body(new ZodValidationPipe(UpdatedMediaCropSchema))
-    modifyCrop: UpdateMediaCropDto,
+    @Body(new ZodValidationPipe(ModifyMediaCropSchema))
+    modifyCrop: ModifyMediaCropDto,
   ): Promise<MediaCropDto> {
     return await this.mediaCropService.modifyCrop(cropId, modifyCrop);
   }

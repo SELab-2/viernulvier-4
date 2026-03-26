@@ -5,7 +5,8 @@ import {
   CreateMediaCropDto,
   MediaCropDto,
   PaginationFilterDto,
-  UpdateMediaCropDto,
+  ModifyMediaCropDto,
+  ReplaceMediaCropDto,
 } from "../../dto/dto";
 
 /**
@@ -53,9 +54,8 @@ export class MediaCropService {
    */
   async replaceCrop(
     cropId: number,
-    replaceCrop: MediaCropDto,
+    replaceCrop: ReplaceMediaCropDto,
   ): Promise<MediaCropDto> {
-    replaceCrop.id = cropId;
     return await this.mediaDbService.updateCrop(cropId, replaceCrop);
   }
 
@@ -67,7 +67,7 @@ export class MediaCropService {
    */
   async modifyCrop(
     cropId: number,
-    modifyCrop: UpdateMediaCropDto,
+    modifyCrop: ModifyMediaCropDto,
   ): Promise<MediaCropDto> {
     const existingCrop: MediaCropDto =
       await this.mediaDbService.getCropById(cropId);
