@@ -65,8 +65,10 @@ import {
   PriceSchema,
   PriceView,
   PriceViewSchema,
-  UpdatePrice,
-  UpdatePriceSchema,
+  ReplacePrice,
+  ReplacePriceSchema,
+  ModifyPrice,
+  ModifyPriceSchema,
 } from "./objects/prices";
 import {
   CreateProduction,
@@ -157,7 +159,8 @@ export {
   PriceSchema,
   PriceViewSchema,
   CreatePriceSchema,
-  UpdatePriceSchema,
+  ModifyPriceSchema,
+  ReplacePriceSchema,
 
   // Pagination Schemas.
   PaginationFilterSchema,
@@ -223,7 +226,8 @@ export type {
   Price,
   PriceView,
   CreatePrice,
-  UpdatePrice,
+  ModifyPrice,
+  ReplacePrice,
 
   // Pagination Types.
   PaginationFilter,

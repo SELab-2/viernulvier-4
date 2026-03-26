@@ -5,7 +5,8 @@ import {
   CreatePriceDto,
   PaginationFilterDto,
   PriceDto,
-  UpdatePriceDto,
+  ModifyPriceDto,
+  ReplacePriceDto,
 } from "../dto/dto";
 import { ApiKeyGuard } from "../auth/authGuard";
 
@@ -104,15 +105,41 @@ describe("PriceService", () => {
     });
   });
 
-  describe("updatePrice", () => {
-    it("should call updatePrice on the db service and return the updated price", async () => {
-      const updateDto: UpdatePriceDto = {
+  describe("replacePrice", () => {
+    it("should call replacePrice on the db service and return the updated price", async () => {
+      const updateDto: ReplacePriceDto = {
+        price: 25.0,
+        name: {
+          en: "test",
+          nl: "test",
+        },
+      };
+      const updatedPrice = {
+        ...mockPrice,
+        price: 25.0,
+        name: {
+          en: "test",
+          nl: "test",
+        },
+      };
+      mockPriceDatabaseService.updatePrice.mockResolvedValue(updatedPrice);
+
+      const result = await service.modifyPrice(1, updateDto);
+
+      expect(dbService.updatePrice).toHaveBeenCalledWith(1, updateDto);
+      expect(result).toEqual(updatedPrice);
+    });
+  });
+
+  describe("modifyPrice", () => {
+    it("should call modifyPrice on the db service and return the updated price", async () => {
+      const updateDto: ModifyPriceDto = {
         price: 25.0,
       };
       const updatedPrice = { ...mockPrice, price: 25.0 };
       mockPriceDatabaseService.updatePrice.mockResolvedValue(updatedPrice);
 
-      const result = await service.updatePrice(1, updateDto);
+      const result = await service.modifyPrice(1, updateDto);
 
       expect(dbService.updatePrice).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(updatedPrice);

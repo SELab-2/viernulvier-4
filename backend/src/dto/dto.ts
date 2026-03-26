@@ -37,11 +37,12 @@ import {
   UpdatedMediaItemSchema,
   ModifyEventSchema,
   ModifyLocationSchema,
-  UpdatePriceSchema,
+  ModifyPriceSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
   ReplaceEventSchema,
+  ReplacePriceSchema,
 } from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
@@ -83,7 +84,8 @@ export class ModifyLocationDto extends createZodDto(ModifyLocationSchema) {}
 export class PriceDto extends createZodDto(PriceSchema) {}
 export class PriceViewDto extends createZodDto(PriceViewSchema) {}
 export class CreatePriceDto extends createZodDto(CreatePriceSchema) {}
-export class UpdatePriceDto extends createZodDto(UpdatePriceSchema) {}
+export class ModifyPriceDto extends createZodDto(ModifyPriceSchema) {}
+export class ReplacePriceDto extends createZodDto(ReplacePriceSchema) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
