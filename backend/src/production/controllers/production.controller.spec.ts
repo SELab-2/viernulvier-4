@@ -10,7 +10,11 @@ import {
   LanguageQueryDto,
 } from "../../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
-import { FilterProductionSchema } from "@repo/common";
+import {
+  FilterProductionSchema,
+  LanguageQuerySchema,
+  PaginationFilterSchema,
+} from "@repo/common";
 import { ResourceGoneException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
@@ -97,24 +101,36 @@ describe("ProductionController", () => {
 
   describe("getAllProductions", () => {
     it("should return an array of flattened productions", async () => {
-      const filters = FilterProductionSchema.parse({ lang: "en" });
+      const productionFilters = FilterProductionSchema.parse({});
+      const paginationFilters = PaginationFilterSchema.parse({});
+      const langQuery = LanguageQuerySchema.parse({ lang: "en" });
 
       jest
         .spyOn(languageService, "flattenByLanguage")
         .mockReturnValue(mockProductionViews);
 
-      const result = await controller.getAllProductions(filters);
+      const result = await controller.getAllProductions(
+        langQuery,
+        paginationFilters,
+        productionFilters,
+      );
 
-      expect(service.getAllProductions).toHaveBeenCalledWith(filters);
+      expect(service.getAllProductions).toHaveBeenCalledWith(
+        productionFilters,
+        paginationFilters,
+      );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         mockProductions,
-        filters.lang,
+        langQuery.lang,
       );
       expect(result).toEqual(mockProductionViews);
     });
 
     it("should return empty array when no productions exist", async () => {
-      const filters = FilterProductionSchema.parse({ lang: "en" });
+      const productionFilters = FilterProductionSchema.parse({});
+      const paginationFilters = PaginationFilterSchema.parse({});
+      const langQuery = LanguageQuerySchema.parse({ lang: "en" });
+
       jest.spyOn(service, "getAllProductions").mockResolvedValueOnce({
         page: 0,
         limit: 20,
@@ -128,7 +144,11 @@ describe("ProductionController", () => {
         objects: [],
       });
 
-      const result = await controller.getAllProductions(filters);
+      const result = await controller.getAllProductions(
+        langQuery,
+        paginationFilters,
+        productionFilters,
+      );
 
       expect(result).toEqual({
         page: 0,

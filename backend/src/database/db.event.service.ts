@@ -6,10 +6,15 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
+  PaginationFilterDto,
   PriceDto,
   UpdateEventDto,
 } from "../dto/dto";
-import { FilterEventSchema, PaginatedResponse } from "@repo/common";
+import {
+  FilterEventSchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+} from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -24,6 +29,7 @@ export class EventDatabaseService {
   async getEventById(eventId: number): Promise<EventDto> {
     const events: PaginatedResponse<EventDto> = await this.getEvents(
       FilterEventSchema.parse({ id: eventId }),
+      PaginationFilterSchema.parse({}),
     );
     const event: EventDto[] = events.objects;
     if (event.length === 0)
@@ -36,13 +42,14 @@ export class EventDatabaseService {
 
   /**
    * Generic get function for events.
-   * @param filters gives the freedom to define the filters of the search you want.
+   * @param eventFilters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All events for the given filters.
    */
   async getEvents(
-    filters: FilterEventDto,
+    eventFilters: FilterEventDto,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<EventDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
@@ -50,45 +57,45 @@ export class EventDatabaseService {
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.
-    if (filters.date) {
+    if (eventFilters.date) {
       conditions.push(`DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i}`);
-      values.push(filters.date);
+      values.push(eventFilters.date);
       i++;
     }
 
     // Filter by given date lying between starttime and endtime (inclusive)
-    if (filters.date_between) {
+    if (eventFilters.date_between) {
       // Use explicit timestamp comparison to include time component
       conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(filters.date_between);
+      values.push(eventFilters.date_between);
       i++;
     }
 
     // Filter events whose starttime is before the provided date
-    if (filters.date_before) {
+    if (eventFilters.date_before) {
       conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(filters.date_before);
+      values.push(eventFilters.date_before);
       i++;
     }
 
     // Filter events whose endtime is after the provided date
-    if (filters.date_after) {
+    if (eventFilters.date_after) {
       conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(filters.date_after);
+      values.push(eventFilters.date_after);
       i++;
     }
 
     // Filer by id
-    if (filters.id) {
+    if (eventFilters.id) {
       conditions.push(`e.id = $${i}`);
-      values.push(filters.id);
+      values.push(eventFilters.id);
       i++;
     }
 
     // Filter by p_id
-    if (filters.production_id) {
+    if (eventFilters.production_id) {
       conditions.push(`p.id = $${i}`);
-      values.push(filters.production_id);
+      values.push(eventFilters.production_id);
       i++;
     }
 
@@ -100,15 +107,15 @@ export class EventDatabaseService {
 
     // pagination
     let paginationClause = "";
-    if (filters.limit > 0) {
-      const offset = filters.page * filters.limit;
+    if (paginationFilters.limit > 0) {
+      const offset = paginationFilters.page * paginationFilters.limit;
 
       paginationClause = `
       LIMIT $${i}
       OFFSET $${i + 1}
     `;
 
-      values.push(filters.limit);
+      values.push(paginationFilters.limit);
       values.push(offset);
     }
 
@@ -127,7 +134,7 @@ export class EventDatabaseService {
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
-      ORDER BY e.starttime 
+      ORDER BY e.starttime ${paginationFilters.descending ? "DESC" : "ASC"}
         ${paginationClause}
         `;
 
@@ -140,8 +147,8 @@ export class EventDatabaseService {
     ]);
 
     return {
-      page: filters.page,
-      limit: filters.limit,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects,
     };

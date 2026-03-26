@@ -53,6 +53,19 @@
   --radius: 0.625rem;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
+
+  /* Accent color for tags */
+  --accent: #8224e3;
+
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --card-border: rgba(0, 0, 0, 0.1);
+  --card-hover: #f9f9fb;
+
+  /* Colours used in the gradient placeholder */
+  --thumbnail-bg: #ffffff;
+  --thumbnail-icon: #ffffff;
 }
 
 /* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
@@ -83,6 +96,13 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
+  --color-accent: var(--accent);
+  --color-thumbnail-bg: var(--thumbnail-bg);
+  --color-thumbnail-icon: var(--thumbnail-icon);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

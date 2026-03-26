@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -21,7 +20,6 @@ import {
   PaginationFilterSchema,
   UpdateBlogSchema,
 } from "@repo/common";
-import { ZodValidationPipe } from "../common/pipes/zod.validation.pipe";
 import {
   BlogDto,
   BlogViewDto,
@@ -42,6 +40,7 @@ import {
   ApiOkAnyOf,
   ApiOkPaginatedResponseAnyOf,
 } from "../common/decorators/api.ok";
+import { ZodValidationPipe } from "nestjs-zod";
 
 @Controller("blogs")
 export class BlogController {
@@ -52,24 +51,19 @@ export class BlogController {
 
   /**
    * Responds to a GET to "/blogs"
-   * @param lang is the language filter
    * @param paginationFilter is the pagination params
-   * @param descending Whether the list of blogs will be descending in date.
+   * @param lang is the language filter
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })
   @ApiOkPaginatedResponseAnyOf(BlogDto, BlogViewDto)
   @Get()
   async getAllBlogs(
-    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
-    @Query("descending", ParseBoolPipe) descending: boolean,
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
   ): Promise<PaginatedResponse<BlogDto | BlogViewDto>> {
-    const result = await this.blogService.getAllBlogs(
-      paginationFilter,
-      descending,
-    );
+    const result = await this.blogService.getAllBlogs(paginationFilter);
     return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
       result,
       lang.lang,

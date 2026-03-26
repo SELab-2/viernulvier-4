@@ -1,6 +1,12 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { BlogDto, CreateBlogDto, UpdateBlogDto } from "../dto/dto";
+import {
+  BlogDto,
+  CreateBlogDto,
+  MediaGalleryDto,
+  PaginationFilterDto,
+  UpdateBlogDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -27,6 +33,7 @@ export class BlogDatabaseService {
     if (result.length === 0) {
       throw new ResourceGoneException(`Blog with ID ${id} not found`);
     }
+
     return result[0];
   }
 
@@ -38,15 +45,13 @@ export class BlogDatabaseService {
    * @returns blogs
    */
   async getBlogs(
-    amount: number = 0,
-    page: number = 0,
-    descending: boolean = true,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<BlogDto>> {
-    const offset = page * amount;
+    const offset = paginationFilters.page * paginationFilters.limit;
     const countResult = await this.db.query<{ count: string }>(
       `SELECT COUNT(*) as count FROM blogs`,
     );
-    if (amount === 0) {
+    if (paginationFilters.limit === 0) {
       const query = `
       SELECT id, 
              titel, 
@@ -54,14 +59,17 @@ export class BlogDatabaseService {
              created_at,
              updated_at
       FROM blogs
-      ORDER BY created_at ${descending ? "DESC" : "ASC"}
+      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
       `;
 
       return {
-        limit: amount,
-        page: page,
+        limit: paginationFilters.limit,
+        page: paginationFilters.page,
         totalItems: parseInt(countResult[0].count),
-        objects: await this.db.query<BlogDto>(query, [amount, offset]),
+        objects: await this.db.query<BlogDto>(query, [
+          paginationFilters.limit,
+          offset,
+        ]),
       };
     }
 
@@ -72,15 +80,18 @@ export class BlogDatabaseService {
            created_at,
            updated_at
     FROM blogs
-    ORDER BY created_at ${descending ? "DESC" : "ASC"}
+    ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
     LIMIT $1 OFFSET $2
     `;
 
     return {
-      limit: amount,
-      page: page,
+      limit: paginationFilters.limit,
+      page: paginationFilters.page,
       totalItems: parseInt(countResult[0].count),
-      objects: await this.db.query<BlogDto>(query, [amount, offset]),
+      objects: await this.db.query<BlogDto>(query, [
+        paginationFilters.limit,
+        offset,
+      ]),
     };
   }
 
@@ -186,5 +197,61 @@ export class BlogDatabaseService {
     }
   }
 
-  // insert extra functions here if desired.
+  /**
+   * Gets media gallery linked to a given blog.
+   * @param blog_id The ID of the blog you want.
+   * @returns List of MediaGalleryDto linked to the blog.
+   */
+  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto> {
+    const query = `
+      SELECT mg.id, mg.name, mg.created_at, mg.updated_at
+      FROM media_gallery mg
+      INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
+      WHERE bmg.blog_id = $1
+      ORDER BY mg.id
+    `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, [blog_id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Blog with ID ${blog_id} has no media gallery`,
+      );
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given blog.
+   * @param blog_id The ID of the blog to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   * @returns void
+   */
+  async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
+    const query = `
+    INSERT INTO blog_media_gallery (blog_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given blog.
+   * @param blog_id The ID of the blog.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromBlog(
+    blog_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM blog_media_gallery
+    WHERE blog_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
 }

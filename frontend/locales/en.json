@@ -9,6 +9,10 @@
   "searchbar": {
     "placeholder": "Search..."
   },
+  "baseform": {
+    "submitbutton": "Submit",
+    "resetbutton": "Reset"
+  },
   "hero": {
     "title": "Archive",
     "label": "Arts Centre Ghent — Archive",

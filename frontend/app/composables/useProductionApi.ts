@@ -10,8 +10,16 @@ import type {
   BlogView,
   Language,
   PaginatedResponse,
+  PaginationFilter,
+  LanguageQuery,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+
+interface ProductionListOptions {
+  productionFilters?: FilterProduction;
+  paginationFilters?: PaginationFilter;
+  languageFilters?: LanguageQuery;
+}
 
 /**
  * Composable for production endpoints, including their related tags and blogs.
@@ -24,10 +32,28 @@ export function useProductionApi() {
   const { get, post, put, patch, del } = useApi();
 
   /** GET /productions — returns a paginated list of productions, optionally filtered. */
-  const getAll = (filters?: Partial<FilterProduction>) => {
-    const query = filters
-      ? "?" + new URLSearchParams(filters as Record<string, string>).toString()
-      : "";
+  const getAll = ({
+    productionFilters,
+    paginationFilters,
+    languageFilters,
+  }: ProductionListOptions = {}) => {
+    const params = {
+      ...productionFilters,
+      ...paginationFilters,
+      ...languageFilters,
+    };
+
+    const cleanParams = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(params).filter(([_, value]) => value != null),
+    );
+
+    const queryString = new URLSearchParams(
+      cleanParams as Record<string, string>,
+    ).toString();
+
+    const query = queryString ? `?${queryString}` : "";
+
     return get<PaginatedResponse<Production | ProductionView>>(
       `${API_ROUTES.productions.base}${query}`,
     );
