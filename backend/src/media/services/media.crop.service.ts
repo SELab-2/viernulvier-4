@@ -1,12 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
-import {
-  CreateMediaCropDto,
-  MediaCropDto,
-  PaginationFilterDto,
-  UpdateMediaCropDto,
-} from "../../dto/dto";
+import { CreateMediaCropDto, MediaCropDto, PaginationFilterDto, UpdateMediaCropDto, } from "../../dto/dto";
 
 /**
  * Defines the connection between controller and database service
@@ -42,6 +37,7 @@ export class MediaCropService {
    * @returns The newly created crop.
    */
   async createCrop(createCrop: CreateMediaCropDto): Promise<MediaCropDto> {
+    // TODO add functionality to auto create photos too. (perhaps a boolean to make this optional too?)
     return await this.mediaDbService.createCrop(createCrop);
   }
 
