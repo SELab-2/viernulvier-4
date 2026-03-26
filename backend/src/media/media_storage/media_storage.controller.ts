@@ -1,7 +1,16 @@
-import { Body, Controller, Delete, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Post, UploadedFile, UseGuards, UseInterceptors, } from "@nestjs/common";
 import { MediaStorageService } from "./media_storage.service";
-import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 /**
  * Defines all media storage related endpoints
@@ -30,26 +39,31 @@ export class MediaStorageController {
 
   /**
    * Responds to a POST to "media/storage"
-   * @param body The URL and buffer data of the media we want to save.
+   * @param url The URL where we want to save the media.
+   * @param file The uploaded file.
    * @returns The URL of the saved media.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Save media to a given URL." })
+  @ApiConsumes("multipart/form-data")
   @ApiBody({
     schema: {
+      type: "object",
       properties: {
         url: { type: "string" },
-        buffer: { type: "string", format: "binary" },
+        file: { type: "string", format: "binary" },
       },
     },
   })
   @ApiCreatedResponse({ description: "Saved media, returns the URL." })
+  @UseInterceptors(FileInterceptor("file"))
   @Post()
   async saveMedia(
-    @Body() body: { url: string; buffer: Buffer },
+    @Body("url") url: string,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<string> {
-    return await this.mediaStorageService.saveMedia(body.url, body.buffer);
+    return await this.mediaStorageService.saveMedia(url, file.buffer);
   }
 
   /**
