@@ -5,6 +5,8 @@
     - id: An optional identifier used to pick a consistent gradient.
     - size: The size of the placeholder, can be 'sm', 'md', 'lg', or a custom number.
     - showIcon: A boolean to determine whether to show the thumbnail icon.
+    - showBorder: Whether to show the border. Defaults to true.
+    - rounded: Whether to apply rounded corners. Defaults to true.
 -->
 
 <script setup lang="ts">
@@ -14,15 +16,26 @@ import { pickPlaceholderGradient } from '../utils/constants'
 const props = defineProps<{
   id?: number,
   size?: 'sm' | 'md' | 'lg' | number,
-  showIcon?: boolean
+  showIcon?: boolean,
+  showBorder?: boolean,
+  rounded?: boolean,
 }>()
 
 const gradient = computed(() => pickPlaceholderGradient(props.id))
+
 const containerClass = computed(() => {
-  const base = 'rounded-lg overflow-hidden flex items-center justify-center border border-card-border'
-  if (props.size === 'sm') return `${base} w-32 h-20`
-  if (props.size === 'lg') return `${base} w-72 h-48`
-  return `${base} w-48 h-32`
+  const showBorder = props.showBorder !== false  // default true
+  const rounded = props.rounded !== false         // default true
+
+  const parts = ['overflow-hidden flex items-center justify-center']
+  if (rounded) parts.push('rounded-lg')
+  if (showBorder) parts.push('border border-card-border')
+
+  if (props.size === 'sm') parts.push('w-32 h-20')
+  else if (props.size === 'lg') parts.push('w-72 h-48')
+  else parts.push('w-48 h-32')
+
+  return parts.join(' ')
 })
 </script>
 

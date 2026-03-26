@@ -80,19 +80,6 @@
   --ring: oklch(0.439 0 0);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-
-  /* Accent color for tags */
-  --accent: #8224e3;
-
-  /* Card — slightly lighter than background so cards lift off the page */
-  --card: oklch(0.22 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --card-border: oklch(0.3 0 0);
-  --card-hover: oklch(0.25 0 0);
-
-  /* Colours used in the gradient placeholder */
-  --thumbnail-bg: oklch(0.35 0 0);
-  --thumbnail-icon: oklch(0.75 0 0);
 }
 
 /* ─── Tailwind theme mapping ────────────────────────────────────────────────
@@ -162,4 +149,30 @@
    ---------------------------------------------------------------------- */
 .font-brand {
   font-family: 'ABCMonumentGrotesk', sans-serif;
+}
+
+/* ─── Shared Components ─────────────────────────────────────────────────────
+   Reusable UI elements for the application.
+   Ensures consistent button styles across different sections.
+   ---------------------------------------------------------------------- */
+
+@layer components {
+  /* Standard outlined button (used in Header, filters, etc.) */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-[var(--foreground)] bg-transparent px-[21px] py-[7px] text-[11px] font-black text-[var(--foreground)] transition-all uppercase cursor-pointer outline-none;
+  }
+
+  .btn-outline:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  /* Red button for critical actions (e.g., Logout) */
+  .btn-danger {
+    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors uppercase cursor-pointer;
+  }
+
+  .btn-danger:hover {
+    @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
 }
