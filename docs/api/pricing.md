@@ -11,7 +11,7 @@
 
 ### [PUT] `/prices`
 Updates a price (ID in body).
-- **Security:** `apiKey` required | **Body:** `UpdatePriceDto`
+- **Security:** `apiKey` required | **Body:** `ModifyPriceDto`
 
 ### [DELETE] `/prices/:priceId`
 - **Security:** `apiKey` required

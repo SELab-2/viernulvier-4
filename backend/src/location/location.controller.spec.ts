@@ -8,7 +8,7 @@ import {
   LocationDto,
   LocationViewDto,
   PaginationFilterDto,
-  UpdateLocationDto,
+  ModifyLocationDto,
 } from "../dto/dto";
 import { ApiKeyGuard } from "../auth/authGuard";
 
@@ -44,7 +44,7 @@ describe("LocationController", () => {
     getLocations: jest.fn().mockResolvedValue(mockLocationArray),
     getLocationById: jest.fn().mockResolvedValue(mockLocation),
     createLocation: jest.fn().mockResolvedValue(mockLocation),
-    updateLocation: jest.fn().mockResolvedValue(mockLocation),
+    modifyLocation: jest.fn().mockResolvedValue(mockLocation),
     deleteLocation: jest.fn().mockResolvedValue(undefined),
   };
 
@@ -141,13 +141,13 @@ describe("LocationController", () => {
 
   describe("updateLocation", () => {
     it("should update and return the location", async () => {
-      const dto: UpdateLocationDto = {
+      const dto: ModifyLocationDto = {
         location: { en: "Updated Park", nl: "Bijgewerkt park" },
       };
-      const result = await controller.updateLocation(1, dto);
+      const result = await controller.modifyLocation(1, dto);
 
       expect(result).toEqual(mockLocation);
-      expect(service.updateLocation).toHaveBeenCalledWith(1, dto);
+      expect(service.modifyLocation).toHaveBeenCalledWith(1, dto);
     });
   });
 

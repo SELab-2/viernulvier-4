@@ -7,7 +7,7 @@
  */
 export const ROUTES = {
   home: {
-    base: "/home"
+    base: "/"
   },
   productions: {
     base: "/productions",

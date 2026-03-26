@@ -8,7 +8,7 @@ import {
   CreateBlogDto,
   LanguageQueryDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ModifyBlogDto,
 } from "../../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 
@@ -181,7 +181,7 @@ describe("BlogController", () => {
   describe("modifyBlog", () => {
     it("should modify and return the updated blog", async () => {
       const blogId = 1;
-      const updateDto: UpdateBlogDto = {
+      const updateDto: ModifyBlogDto = {
         titel: {
           en: "Updated titel",
           nl: "Bijgewerkte titel",

@@ -20,6 +20,8 @@
     "test": {
       "outputs": [],
       "inputs": [
+        "app/**",
+        "tests/**",
         "src/**",
         "test/**",
         "vitest.config.ts",
@@ -31,6 +33,8 @@
     "test:coverage": {
       "outputs": [],
       "inputs": [
+        "app/**",
+        "tests/**",
         "src/**",
         "test/**",
         "vitest.config.ts",

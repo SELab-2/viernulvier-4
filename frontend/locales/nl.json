@@ -1,6 +1,17 @@
 {
+  "nav": {
+    "home": "home",
+    "archive": "archief",
+    "stories": "verhalen",
+    "prints": "drukwerk",
+    "logout": "uitloggen"
+  },
   "searchbar": {
     "placeholder": "Zoek..."
+  },
+  "baseform": {
+    "submitbutton": "Indienen",
+    "resetbutton": "Herstellen"
   },
   "hero": {
     "title": "Archief",

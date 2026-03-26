@@ -24,7 +24,7 @@ Replaces an entire event object.
 ### [PATCH] `/events/:eventId`
 Updates specific fields of an existing event.
 - **Security:** `apiKey` required.
-- **Body:** `UpdateEvent`
+- **Body:** `ModifyEvent`
 - **Returns:** `Event`
 
 ### [DELETE] `/events/:eventId`

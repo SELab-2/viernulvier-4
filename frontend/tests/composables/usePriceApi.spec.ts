@@ -5,12 +5,14 @@ const mockGet = vi.fn();
 const mockPost = vi.fn();
 const mockPatch = vi.fn();
 const mockDel = vi.fn();
+const mockPut = vi.fn();
 
 vi.mock("~/composables/useApi", () => ({
   useApi: () => ({
     get: mockGet,
     post: mockPost,
     patch: mockPatch,
+    put: mockPut,
     del: mockDel,
   }),
 }));
@@ -67,7 +69,7 @@ describe("usePriceApi", () => {
     expect(mockPost).toHaveBeenCalledWith("/prices", body);
   });
 
-  it("replace calls PATCH /prices/:priceId with body", () => {
+  it("replace calls PUT /prices/:priceId with body", () => {
     const { replace } = usePriceApi();
     const body = {
       id: 1,
@@ -75,6 +77,16 @@ describe("usePriceApi", () => {
       name: { nl: "Aangepast", en: "Updated" },
     };
     replace(1, body);
+    expect(mockPut).toHaveBeenCalledWith("/prices/1", body);
+  });
+
+  it("modify calls PATCH /prices/:priceId with body", () => {
+    const { modify } = usePriceApi();
+    const body = {
+      id: 1,
+      name: { nl: "Aangepast", en: "Updated" },
+    };
+    modify(1, body);
     expect(mockPatch).toHaveBeenCalledWith("/prices/1", body);
   });
 

@@ -6,9 +6,8 @@ import {
   type EventDto,
   type LocationDto,
   type PriceDto,
-  type UpdateEventDto,
+  type ModifyEventDto,
 } from "../dto/dto";
-import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterEventSchema, PaginationFilterSchema } from "@repo/common";
 
@@ -205,40 +204,25 @@ describe("EventService", () => {
       expect(dbService.updateEvent).toHaveBeenCalledWith(1, mockEvent);
       expect(result).toEqual(mockEvent);
     });
-
-    it("should throw BadRequestException if url id and body id do not match", async () => {
-      await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
-        "ID in the URL must match ID in the body.",
-      );
-    });
   });
 
   describe("modifyEvent", () => {
-    it("should fetch, merge, and update the event correctly", async () => {
-      const patchData: UpdateEventDto = {
+    it("should update the event accordingly", async () => {
+      const patchData: ModifyEventDto = {
         starttime: "2026-03-06T23:08:45.328Z",
       };
-      const expectedMergedEvent: EventDto = {
+      const resultData: EventDto = {
         ...mockEvent,
         starttime: "2026-03-06T23:08:45.328Z",
         id: 1,
       };
 
-      jest
-        .spyOn(dbService, "updateEvent")
-        .mockResolvedValueOnce(expectedMergedEvent);
+      jest.spyOn(dbService, "updateEvent").mockResolvedValueOnce(resultData);
 
       const result = await service.modifyEvent(1, patchData);
 
-      expect(dbService.getEventById).toHaveBeenCalledWith(1);
-      expect(dbService.updateEvent).toHaveBeenCalledWith(
-        1,
-        expectedMergedEvent,
-      );
-      expect(result).toEqual(expectedMergedEvent);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(1, patchData);
+      expect(result).toEqual(resultData);
     });
   });
 

@@ -6,7 +6,7 @@ import {
   CreateProductionDto,
   ProductionDto,
   ProductionViewDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
   LanguageQueryDto,
 } from "../../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
@@ -205,7 +205,7 @@ describe("ProductionController", () => {
 
   describe("modifyProduction", () => {
     it("should modify and return the production", async () => {
-      const patchData: UpdateProductionDto = {
+      const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       const patchedProduction = {
@@ -223,7 +223,7 @@ describe("ProductionController", () => {
     });
 
     it("should throw a ResourceGoneException (410) if trying to modify a non-existent production", async () => {
-      const patchData: UpdateProductionDto = {
+      const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       jest

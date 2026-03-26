@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   BlogDto,
   CreateProductionDto,
@@ -6,8 +6,9 @@ import {
   MediaGalleryDto,
   PaginationFilterDto,
   ProductionDto,
+  ReplaceProductionDto,
   TagDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
@@ -49,19 +50,17 @@ export class ProductionService {
   /**
    * Replaces a ProductionDto in the database and returns the updated one.
    * @param id The ID of the production.
-   * @param production The ProductionDto Object itself.
+   * @param replaceProduction The ProductionDto Object itself.
    * @returns The newly updated ProductionDto.
    */
   async replaceProduction(
     id: number,
-    production: ProductionDto,
+    replaceProduction: ReplaceProductionDto,
   ): Promise<ProductionDto> {
-    if (id !== production.id)
-      throw new BadRequestException("ID in the URL must match ID in the body.");
-
-    // * NOTE: Using Upsert here will make sure that
-    // * if the production does not yet exist it is created instead.
-    return await this.productionDBService.upsertProduction(production);
+    return await this.productionDBService.updateProduction(
+      id,
+      replaceProduction,
+    );
   }
 
   /**
@@ -72,21 +71,9 @@ export class ProductionService {
    */
   async modifyProduction(
     id: number,
-    patchData: UpdateProductionDto,
+    patchData: ModifyProductionDto,
   ): Promise<ProductionDto> {
-    const existingProduction: ProductionDto =
-      await this.productionDBService.getProductionById(id);
-
-    const mergedProduction: ProductionDto = {
-      ...existingProduction,
-      ...patchData,
-      id,
-    };
-
-    return await this.productionDBService.updateProduction(
-      id,
-      mergedProduction,
-    );
+    return await this.productionDBService.updateProduction(id, patchData);
   }
 
   /**

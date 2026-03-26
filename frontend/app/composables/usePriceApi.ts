@@ -2,11 +2,12 @@ import type {
   Price,
   PriceView,
   CreatePrice,
-  UpdatePrice,
+  ModifyPrice,
   Language,
   PaginationFilter,
   PaginatedResponse,
   LanguageQuery,
+  ReplacePrice,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
@@ -23,7 +24,7 @@ interface PriceListOptions {
  * the full localized object (Price). Without a lang, the raw localized object is returned.
  */
 export function usePriceApi() {
-  const { get, post, patch, del } = useApi();
+  const { get, post, put, patch, del } = useApi();
 
   /** GET /prices — returns a paginated list of prices. */
   const getAll = ({
@@ -62,13 +63,19 @@ export function usePriceApi() {
     post<Price, CreatePrice>(API_ROUTES.prices.base, body);
 
   /**
-   * PATCH /prices/:priceId — fully replaces an existing price.
+   * PUT /prices/:priceId - replaces an existing price.
    */
-  const replace = (priceId: number, body: UpdatePrice) =>
-    patch<Price, UpdatePrice>(API_ROUTES.prices.byId(priceId), body);
+  const replace = (priceId: number, body: ReplacePrice) =>
+    put<Price, ReplacePrice>(API_ROUTES.prices.byId(priceId), body);
+
+  /**
+   * PATCH /prices/:priceId — modifies an existing price.
+   */
+  const modify = (priceId: number, body: ModifyPrice) =>
+    patch<Price, ModifyPrice>(API_ROUTES.prices.byId(priceId), body);
 
   /** DELETE /prices/:priceId — deletes a price. */
   const remove = (priceId: number) => del(API_ROUTES.prices.byId(priceId));
 
-  return { getAll, getById, create, replace, remove };
+  return { getAll, getById, create, replace, modify, remove };
 }

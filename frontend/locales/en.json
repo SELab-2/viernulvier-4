@@ -1,6 +1,17 @@
 {
+  "nav": {
+    "home": "home",
+    "archive": "archive",
+    "stories": "stories",
+    "prints": "prints",
+    "logout": "logout"
+  },
   "searchbar": {
     "placeholder": "Search..."
+  },
+  "baseform": {
+    "submitbutton": "Submit",
+    "resetbutton": "Reset"
   },
   "hero": {
     "title": "Archive",

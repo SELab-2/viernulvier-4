@@ -4,7 +4,7 @@ import {
   CreateTagDto,
   PaginationFilterDto,
   TagDto,
-  UpdateTagDto,
+  ModifyTagDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -47,11 +47,11 @@ export class TagService {
   /**
    * Modifies an existing TagDto with the data provided in the body.
    * @param id The ID of the tag.
-   * @param updateTag The data we want to update.
+   * @param modifyTag The data we want to update.
    * @returns The newly updated TagDto.
    */
-  async updateTag(id: number, updateTag: UpdateTagDto): Promise<TagDto> {
-    return await this.dbTagService.updateTag(id, updateTag);
+  async modifyTag(id: number, modifyTag: ModifyTagDto): Promise<TagDto> {
+    return await this.dbTagService.updateTag(id, modifyTag);
   }
 
   /**

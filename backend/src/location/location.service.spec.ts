@@ -5,7 +5,7 @@ import {
   CreateLocationDto,
   LocationDto,
   PaginationFilterDto,
-  UpdateLocationDto,
+  ModifyLocationDto,
 } from "../dto/dto";
 
 describe("LocationService", () => {
@@ -87,10 +87,10 @@ describe("LocationService", () => {
 
   describe("updateLocation", () => {
     it("should update a location in the database", async () => {
-      const dto: UpdateLocationDto = {
+      const dto: ModifyLocationDto = {
         location: { en: "Updated Park", nl: "Bijgewerkt park" },
       };
-      const result = await service.updateLocation(1, dto);
+      const result = await service.modifyLocation(1, dto);
       expect(result).toEqual(mockLocation);
       expect(dbService.updateLocation).toHaveBeenCalledWith(1, dto);
     });

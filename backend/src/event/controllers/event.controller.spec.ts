@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { EventController } from "./event.controller";
 import EventService from "../event.service";
-import type { CreateEventDto, EventDto, UpdateEventDto } from "../../dto/dto";
+import type { CreateEventDto, EventDto, ModifyEventDto } from "../../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
 import { FilterEventSchema } from "@repo/common";
@@ -137,7 +137,7 @@ describe("EventController", () => {
 
   describe("modifyEvent", () => {
     it("should partially update and return the event", async () => {
-      const patchData: UpdateEventDto = {
+      const patchData: ModifyEventDto = {
         starttime: "2026-03-06T23:08:45.328Z",
       };
       const expectedEvent: EventDto = {
@@ -154,7 +154,7 @@ describe("EventController", () => {
     });
 
     it("should throw a NotFoundException if event to modify does not exist", async () => {
-      const patchData: UpdateEventDto = {
+      const patchData: ModifyEventDto = {
         starttime: "2026-03-06T23:08:45.328Z",
       };
 
