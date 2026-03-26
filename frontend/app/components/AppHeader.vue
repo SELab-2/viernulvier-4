@@ -1,11 +1,12 @@
 <script setup>
 /**
- * Header Component handles:
- * - Navigation
+ * Header Component
+ * * Handles:
+ * - Responsive Navigation (Desktop horizontal, Mobile hamburger)
  * - Localization (EN / NL)
  * - Theme switching (Dark / Light)
  * - Admin-specific actions (Logout functionality)
- * Features a dynamic responsive design that adapts based on the user's role.
+ * - Sticky visibility logic (Hide on scroll down, show on scroll up)
  */
 
 import { ref, onMounted, onUnmounted, watch} from 'vue'
@@ -18,14 +19,14 @@ import logoWhite from '~/assets/logo_white.svg'
 const { isLoggedIn, logout } = useAuth()
 
 // Determines if the header should render the admin view (logged-in state)
-const isAdmin = ref(true)
+const isAdmin = isLoggedIn
 
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
 const isMenuOpen = ref(false) // Controls the mobile/tablet hamburger menu
-const isVisible = ref(true)
-const lastScrollPosition = ref(0)
-let isInitialLoad = true
+const isVisible = ref(true) // Tracks visibility for the smart-sticky behavior
+const lastScrollPosition = ref(0) // Used to calculate scroll direction (delta)
+let isInitialLoad = true // Prevents header "jump" on first page load
 const route = useRoute()
 
 const navItems = [
@@ -35,8 +36,14 @@ const navItems = [
   { label: 'prints', route: ROUTES.prints.base },
 ]
 
+/**
+ * Toggles between available locales
+ */
 const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
+/**
+ * Manages Dark Mode by toggling the '.dark' class on the root HTML element
+ */
 const toggleDark = () => {
   isDark.value = !isDark.value
   document.documentElement.classList.toggle('dark', isDark.value)
@@ -52,7 +59,12 @@ const handleLogout = async () => {
   }
 }
 
-// Smart sticky logic: hide on scroll down, show on scroll up
+/**
+ * Smart Sticky Logic
+ * Hides header when scrolling down to maximize content space.
+ * Reveals header when scrolling up for quick navigation access.
+ * Uses a 10px threshold to prevent flickering.
+ */
 
 const handleScroll = () => {
   const currentScroll = window.scrollY
@@ -64,18 +76,26 @@ const handleScroll = () => {
     return
   }
 
+  // Always show at the top of the page
   if (currentScroll < 50) {
     isVisible.value = true
   }
+
+  // Scrolled down more than 10px
   else if (scrollDelta > 10) {
     isVisible.value = false
   }
+
+  // Scrolled up more than 10px
   else if (scrollDelta < -10) {
     isVisible.value = true
   }
   lastScrollPosition.value = currentScroll
 }
 
+/**
+ * Resets header to visible state (e.g., after navigation)
+ */
 const resetHeader = () => {
   isVisible.value = true
   isInitialLoad = true
@@ -84,9 +104,20 @@ const resetHeader = () => {
   }, 100)
 }
 
+// Watch for route changes to ensure header is visible on new pages
 watch(() => route.fullPath, () => {
   resetHeader()
 })
+
+/**
+ * Force closes mobile menu on window resize to prevent
+ * layout glitches when moving from mobile to desktop view.
+ */
+const handleResize = () => {
+  if (window.innerWidth >= 1024) {
+    isMenuOpen.value = false
+  }
+}
 
 onMounted(() => {
   lastScrollPosition.value = window.scrollY
@@ -97,10 +128,15 @@ onMounted(() => {
   if (document.documentElement.classList.contains('dark')) {
     isDark.value = true
   }
+
+  window.addEventListener('resize', handleResize)
+  handleResize()
+
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 
@@ -120,7 +156,7 @@ onUnmounted(() => {
             :to="item.route"
             class="nav-item"
           >
-            {{ t('nav.' + item.label).toUpperCase() }}
+            {{ t('nav.' + item.label)}}
           </NuxtLink>
         </nav>
 
@@ -168,14 +204,14 @@ onUnmounted(() => {
           @click="handleLogout"
           class="hidden md:flex btn-danger">
           <LogOut :size="16" />
-          <span class="hidden xl:inline">{{ t('nav.logout').toUpperCase() }}</span>
+          <span class="hidden xl:inline">{{ t('nav.logout') }}</span>
         </button>
       </div>
     </div>
 
     <!-- Mobile hamburger menu -->
     <div v-if="isMenuOpen"
-         class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl">
+         class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl">
       <nav class="flex flex-col gap-6">
 
         <template v-if="!isAdmin">
@@ -186,7 +222,7 @@ onUnmounted(() => {
             @click="isMenuOpen = false"
             class="nav-item text-lg"
           >
-            {{ t(`nav.${item.label}`).toUpperCase() }}
+            {{ t(`nav.${item.label}`) }}
           </NuxtLink>
         </template>
 
@@ -211,7 +247,7 @@ onUnmounted(() => {
             class="btn-danger"
           >
             <LogOut :size="16" />
-            {{ t('nav.logout').toUpperCase() }}
+            {{ t('nav.logout')}}
           </button>
         </div>
       </nav>
@@ -221,7 +257,7 @@ onUnmounted(() => {
 
 <style scoped>
 .nav-item {
-  @apply no-underline text-[var(--muted-foreground)] font-[900] text-[12px] tracking-[2px] transition-colors hover:text-[var(--foreground)];
+  @apply no-underline text-[var(--muted-foreground)] font-[900] text-[12px] tracking-[2px] transition-colors hover:text-[var(--foreground)] uppercase;
 }
 
 .nav-item.router-link-active {

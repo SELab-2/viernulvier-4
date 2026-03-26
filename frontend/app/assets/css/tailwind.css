@@ -137,21 +137,9 @@
    ---------------------------------------------------------------------- */
 
 @layer components {
+  /* Standard outlined button (used in Header, filters, etc.) */
   .btn-outline {
-    background: none;
-    border: 2px solid var(--foreground);
-    color: var(--foreground);
-    border-radius: 0.375rem;
-    padding: 7px 21px;
-    font-size: 11px;
-    font-weight: 900;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-transform: uppercase;
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-[var(--foreground)] bg-transparent px-[21px] py-[7px] text-[11px] font-black text-[var(--foreground)] transition-all uppercase cursor-pointer outline-none;
   }
 
   .btn-outline:hover {
@@ -161,7 +149,7 @@
 
   /* Red button for critical actions (e.g., Logout) */
   .btn-danger {
-    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors;
+    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors uppercase cursor-pointer;
   }
 
   .btn-danger:hover {
