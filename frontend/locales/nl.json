@@ -1,6 +1,5 @@
 {
-  "_comment": "Dutch translations for the VIERNULVIER archive frontend.",
-   "searchbar": {
+  "searchbar": {
     "placeholder": "Zoek..."
   },
   "hero": {
@@ -45,8 +44,8 @@
   "stories": {
     "locale": "nl-BE",
     "searchPlaceholder": "Zoeken...",
-    "sortNewest": "Nieuw → Oud",
-    "sortOldest": "Oud → Nieuw",
+    "sortNewest": "Nieuw naar Oud",
+    "sortOldest": "Oud naar Nieuw",
     "results": "resultaten",
     "retry": "Opnieuw proberen",
     "loading": "Laden...",

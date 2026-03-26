@@ -1,5 +1,4 @@
 {
-  "_comment": "English translations for the VIERNULVIER archive frontend.",
   "searchbar": {
     "placeholder": "Search..."
   },
@@ -45,8 +44,8 @@
   "stories": {
     "locale": "en-GB",
     "searchPlaceholder": "Search...",
-    "sortNewest": "New → Old",
-    "sortOldest": "Old → New",
+    "sortNewest": "New to Old",
+    "sortOldest": "Old to New",
     "results": "results",
     "retry": "Try again",
     "loading": "Loading...",
