@@ -17,7 +17,7 @@ Creates a new location entry.
 ### [PATCH] `/locations`
 Updates an existing location. Note: The ID must be provided within the request body.
 - **Security:** `apiKey` required.
-- **Body:** `UpdateLocation`
+- **Body:** `ModifyLocation`
 - **Returns:** `Location`
 
 ### [DELETE] `/locations/:locationId`

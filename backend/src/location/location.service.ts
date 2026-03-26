@@ -4,7 +4,7 @@ import {
   CreateLocationDto,
   LocationDto,
   PaginationFilterDto,
-  UpdateLocationDto,
+  ModifyLocationDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -55,9 +55,9 @@ export class LocationService {
    * @param updateLocation The Location we want to update.
    * @returns The updated Location.
    */
-  async updateLocation(
+  async modifyLocation(
     locationId: number,
-    updateLocation: UpdateLocationDto,
+    updateLocation: ModifyLocationDto,
   ): Promise<LocationDto> {
     return await this.locationDbService.updateLocation(
       locationId,

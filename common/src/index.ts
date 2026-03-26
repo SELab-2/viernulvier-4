@@ -55,8 +55,8 @@ import {
   LocationSchema,
   LocationView,
   LocationViewSchema,
-  UpdateLocation,
-  UpdateLocationSchema,
+  ModifyLocation,
+  ModifyLocationSchema,
 } from "./objects/locations";
 import {
   CreatePrice,
@@ -144,7 +144,7 @@ export {
   LocationSchema,
   LocationViewSchema,
   CreateLocationSchema,
-  UpdateLocationSchema,
+  ModifyLocationSchema,
 
   // Auth Schemas.
   CreateAccountSchema,
@@ -210,7 +210,7 @@ export type {
   Location,
   LocationView,
   CreateLocation,
-  UpdateLocation,
+  ModifyLocation,
 
   // Auth Types.
   UpdateAccount,

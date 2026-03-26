@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateLocationDto, LocationDto, UpdateLocationDto } from "../dto/dto";
+import { CreateLocationDto, LocationDto, ModifyLocationDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -101,13 +101,13 @@ export class LocationDatabaseService {
 
   /**
    * Update function for locations. Updates the location in the database.
-   * @param location must be of the type "UpdateLocation", gives the freedom to define only what needs to be updated.
+   * @param location must be of the type "ModifyLocation", gives the freedom to define only what needs to be updated.
    * The id field in the location MUST be defined.
    * @returns the updated location if successful.
    */
   async updateLocation(
     locationId: number,
-    location: UpdateLocationDto,
+    location: ModifyLocationDto,
   ): Promise<LocationDto> {
     const fields: string[] = [];
     const values: any[] = [];

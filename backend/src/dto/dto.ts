@@ -36,7 +36,7 @@ import {
   UpdatedMediaGallerySchema,
   UpdatedMediaItemSchema,
   ModifyEventSchema,
-  UpdateLocationSchema,
+  ModifyLocationSchema,
   UpdatePriceSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
@@ -77,7 +77,7 @@ export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
 export class LocationDto extends createZodDto(LocationSchema) {}
 export class LocationViewDto extends createZodDto(LocationViewSchema) {}
 export class CreateLocationDto extends createZodDto(CreateLocationSchema) {}
-export class UpdateLocationDto extends createZodDto(UpdateLocationSchema) {}
+export class ModifyLocationDto extends createZodDto(ModifyLocationSchema) {}
 
 // Price Wrappers
 export class PriceDto extends createZodDto(PriceSchema) {}
