@@ -173,16 +173,16 @@ export class CSVFileParser {
     }
 
     let doorsAt: string | null = null;
-    if (row.DoorsAt) {
-      const doorsAtDate = new Date(row.DoorsAt);
+    if (row.Doors_At) {
+      const doorsAtDate = new Date(row.Doors_At);
       if (!isNaN(doorsAtDate.getTime()) && doorsAtDate < starttimeDate) {
         doorsAt = doorsAtDate.toISOString();
       }
     }
 
     let intermissionAt: string | null = null;
-    if (row.IntermissionAt) {
-      const intermissionAtDate = new Date(row.IntermissionAt);
+    if (row.Intermission_At) {
+      const intermissionAtDate = new Date(row.Intermission_At);
       if (!isNaN(intermissionAtDate.getTime())) {
         intermissionAt = intermissionAtDate.toISOString();
       }
