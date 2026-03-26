@@ -18,7 +18,7 @@ import logoWhite from '~/assets/logo_white.svg'
 const { isLoggedIn, logout } = useAuth()
 
 // Determines if the header should render the admin view (logged-in state)
-const isAdmin = isLoggedIn
+const isAdmin = ref(true)
 
 const { t, locale, setLocale } = useI18n()
 const isDark = ref(false)
@@ -166,7 +166,7 @@ onUnmounted(() => {
         <button
           v-if="isAdmin"
           @click="handleLogout"
-          class="hidden md:flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white hover:bg-[var(--foreground)] hover:border-[var(--foreground)] transition-colors">
+          class="hidden md:flex btn-danger">
           <LogOut :size="16" />
           <span class="hidden xl:inline">{{ t('nav.logout').toUpperCase() }}</span>
         </button>
@@ -208,7 +208,7 @@ onUnmounted(() => {
           <button
             v-if="isAdmin"
             @click="handleLogout"
-            class="flex items-center gap-2 rounded-md bg-rose-600 px-[21px] py-[7px] text-[11px] font-black text-white hover:bg-[var(--foreground)] transition-colors"
+            class="btn-danger"
           >
             <LogOut :size="16" />
             {{ t('nav.logout').toUpperCase() }}
@@ -228,21 +228,4 @@ onUnmounted(() => {
   @apply text-[var(--foreground)] underline underline-offset-8 decoration-[3px];
 }
 
-.btn-outline {
-  background: none;
-  border: 2px solid var(--foreground);
-  color: var(--foreground);
-  border-radius: 0.375rem;
-  padding: 7px 21px;
-  font-size: 11px;
-  font-weight: 900;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.btn-outline:hover {
-  background: var(--foreground);
-  color: var(--background);
-}
 </style>

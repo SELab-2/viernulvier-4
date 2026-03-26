@@ -130,3 +130,41 @@
 .font-brand {
   font-family: 'ABCMonumentGrotesk', sans-serif;
 }
+
+/* ─── Shared Components ─────────────────────────────────────────────────────
+   Reusable UI elements for the application.
+   Ensures consistent button styles across different sections.
+   ---------------------------------------------------------------------- */
+
+@layer components {
+  .btn-outline {
+    background: none;
+    border: 2px solid var(--foreground);
+    color: var(--foreground);
+    border-radius: 0.375rem;
+    padding: 7px 21px;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+  }
+
+  .btn-outline:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  /* Red button for critical actions (e.g., Logout) */
+  .btn-danger {
+    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors;
+  }
+
+  .btn-danger:hover {
+    @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
+}
