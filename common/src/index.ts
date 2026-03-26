@@ -31,8 +31,10 @@ import {
   EventSchema,
   FilterEvent,
   FilterEventSchema,
-  UpdateEvent,
-  UpdateEventSchema,
+  ReplaceEvent,
+  ReplaceEventSchema,
+  ModifyEvent,
+  ModifyEventSchema,
 } from "./objects/events";
 import {
   PaginatedResponse,
@@ -121,7 +123,8 @@ export {
   // Event Schemas.
   EventSchema,
   CreateEventSchema,
-  UpdateEventSchema,
+  ModifyEventSchema,
+  ReplaceEventSchema,
   FilterEventSchema,
 
   // Blog Schemas.
@@ -186,7 +189,8 @@ export type {
   // Event Types.
   Event,
   CreateEvent,
-  UpdateEvent,
+  ModifyEvent,
+  ReplaceEvent,
   FilterEvent,
 
   // Tag Types.

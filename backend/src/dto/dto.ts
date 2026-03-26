@@ -35,12 +35,13 @@ import {
   UpdatedMediaCropSchema,
   UpdatedMediaGallerySchema,
   UpdatedMediaItemSchema,
-  UpdateEventSchema,
+  ModifyEventSchema,
   UpdateLocationSchema,
   UpdatePriceSchema,
   UpdateProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
+  ReplaceEventSchema,
 } from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
@@ -55,7 +56,8 @@ export class FilterProductionDto extends createZodDto(FilterProductionSchema) {}
 // Event Wrappers
 export class EventDto extends createZodDto(EventSchema) {}
 export class CreateEventDto extends createZodDto(CreateEventSchema) {}
-export class UpdateEventDto extends createZodDto(UpdateEventSchema) {}
+export class ModifyEventDto extends createZodDto(ModifyEventSchema) {}
+export class ReplaceEventDto extends createZodDto(ReplaceEventSchema) {}
 export class FilterEventDto extends createZodDto(FilterEventSchema) {}
 
 // Blog Wrappers

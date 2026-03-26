@@ -905,13 +905,6 @@ describe("EventController (e2e)", () => {
         .expect(mockEvent);
     });
 
-    it("should return 400 when URL id and body id do not match", () => {
-      return request(app.getHttpServer())
-        .put("/events/2")
-        .send(mockEvent)
-        .expect(400);
-    });
-
     it("should return 400 when id is not a number", () => {
       return request(app.getHttpServer())
         .put("/events/abc")
