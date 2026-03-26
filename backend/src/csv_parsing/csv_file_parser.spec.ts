@@ -117,6 +117,8 @@ describe("CSVFileParser", () => {
         Production: "7",
         Location_NL: "Grote Zaal",
         Location_EN: "Main Hall",
+        Doors_At: "2024-03-15 18:30:00",
+        Intermission_At: "2024-03-15 20:00:00",
       };
 
       const result = CSVFileParser.transformEventRow(row);
@@ -126,8 +128,8 @@ describe("CSVFileParser", () => {
         endtime: new Date("2024-03-15 21:00:00").toISOString(),
         production_id: 7,
         location: { en: "Main Hall", nl: "Grote Zaal" },
-        doors_at: null,
-        intermission_at: null,
+        doors_at: new Date("2024-03-15 18:30:00").toISOString(),
+        intermission_at: new Date("2024-03-15 20:00:00").toISOString(),
         legacy_id: "csv-42",
       });
     });
@@ -140,6 +142,8 @@ describe("CSVFileParser", () => {
         Production: "5",
         Location_NL: "",
         Location_EN: "",
+        Doors_At: "",
+        Intermission_At: "",
       };
 
       const result = CSVFileParser.transformEventRow(row);
