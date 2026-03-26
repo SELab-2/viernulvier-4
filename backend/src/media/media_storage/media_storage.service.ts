@@ -10,7 +10,8 @@ interface MediaStorage {
 
 class LocalMediaStorage implements MediaStorage {
   private readonly baseDir = path.join(process.cwd(), "assets/media"); // dev assets folder
-  private readonly baseUrl = "http://localhost:3000/media_dev"; // dev communication interface.
+  private readonly baseUrl =
+    process.env.MEDIA_BASE_URL ?? "http://127.0.0.1/photos"; //base url of the server hosting the media.
 
   /**
    * This function saves a piece of media to the media storage
