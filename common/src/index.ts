@@ -117,7 +117,7 @@ import {
 
 // list of all exports: (this way only need to import this file.)
 export {
-  // Production Schemas.
+  // Production Schemas. (production.ts)
   ProductionSchema,
   ProductionViewSchema,
   CreateProductionSchema,
@@ -125,55 +125,55 @@ export {
   ReplaceProductionSchema,
   FilterProductionSchema,
 
-  // Event Schemas.
+  // Event Schemas. (events.ts)
   EventSchema,
   CreateEventSchema,
   ModifyEventSchema,
   ReplaceEventSchema,
   FilterEventSchema,
 
-  // Blog Schemas.
+  // Blog Schemas. (blogs.ts)
   BlogSchema,
   BlogViewSchema,
   ModifyBlogSchema,
   CreateBlogSchema,
   ReplaceBlogSchema,
 
-  // Tag Schemas.
+  // Tag Schemas. (tags.ts)
   TagSchema,
   TagViewSchema,
   CreateTagSchema,
   ModifyTagSchema,
 
-  // Location Schemas.
+  // Location Schemas. (locations.ts)
   LocationSchema,
   LocationViewSchema,
   CreateLocationSchema,
   ModifyLocationSchema,
 
-  // Auth Schemas.
+  // Auth Schemas. (accounts.ts + api.keys.ts)
   CreateAccountSchema,
   PublicAccountSchema,
   UpdateAccountSchema,
   ApiKeySchema,
   VerifyApiKeySchema,
 
-  // Price Schemas.
+  // Price Schemas. (prices.ts)
   PriceSchema,
   PriceViewSchema,
   CreatePriceSchema,
   ModifyPriceSchema,
   ReplacePriceSchema,
 
-  // Pagination Schemas.
+  // Pagination Schemas. (pagination.ts)
   PaginationFilterSchema,
 
-  // Language Schemas.
+  // Language Schemas. (language.ts)
   LanguageQuerySchema,
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
 
-  // Media Schemas.
+  // Media Schemas. (media.ts)
   MediaGallerySchema,
   MediaItemSchema,
   MediaCropSchema,
@@ -185,7 +185,7 @@ export {
   UpdatedMediaGallerySchema,
 };
 export type {
-  // Production Types.
+  // Production Types. (productions.ts)
   Production,
   ProductionView,
   CreateProduction,
@@ -193,55 +193,55 @@ export type {
   ReplaceProduction,
   FilterProduction,
 
-  // Event Types.
+  // Event Types. (events.ts)
   Event,
   CreateEvent,
   ModifyEvent,
   ReplaceEvent,
   FilterEvent,
 
-  // Tag Types.
+  // Tag Types. (tags.ts)
   Tag,
   TagView,
   CreateTag,
   ModifyTag,
 
-  // Blog Types.
+  // Blog Types. (blogs.ts)
   Blog,
   BlogView,
   CreateBlog,
   ModifyBlog,
   ReplaceBlog,
 
-  // Location Types.
+  // Location Types. (locations.ts)
   Location,
   LocationView,
   CreateLocation,
   ModifyLocation,
 
-  // Auth Types.
+  // Auth Types. (accounts.ts + api.keys.ts)
   UpdateAccount,
   PublicAccount,
   CreateAccount,
   ApiKey,
   VerifyApiKey,
 
-  // Price Types.
+  // Price Types. (prices.ts)
   Price,
   PriceView,
   CreatePrice,
   ModifyPrice,
   ReplacePrice,
 
-  // Pagination Types.
+  // Pagination Types. (pagination.ts)
   PaginationFilter,
   PaginatedResponse, // This has no schema because it doesn't need one.
 
-  // Language Types.
+  // Language Types. (language.ts)
   Language,
   LanguageQuery,
 
-  // Media Types.
+  // Media Types. (media.ts)
   MediaGallery,
   MediaItem,
   MediaCrop,
