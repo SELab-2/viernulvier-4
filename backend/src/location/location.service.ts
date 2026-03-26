@@ -52,16 +52,16 @@ export class LocationService {
   /**
    * Updates an existing Location.
    * @param locationId The ID of the Location.
-   * @param updateLocation The Location we want to update.
+   * @param modifyLocation The Location we want to update.
    * @returns The updated Location.
    */
   async modifyLocation(
     locationId: number,
-    updateLocation: ModifyLocationDto,
+    modifyLocation: ModifyLocationDto,
   ): Promise<LocationDto> {
     return await this.locationDbService.updateLocation(
       locationId,
-      updateLocation,
+      modifyLocation,
     );
   }
 
