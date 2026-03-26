@@ -8,7 +8,8 @@ import {
   MediaGalleryDto,
   ProductionDto,
   TagDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
+  ReplaceProductionDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import {
@@ -423,13 +424,13 @@ export class ProductionDatabaseService {
   /**
    * Update function for productions. Updates the production in the database.
    * note: this function can be used to update/add all of a certain language to a prod.
-   * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
+   * @param production must be of the type "ModifyProduction" or "ReplaceProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
   async updateProduction(
     productionId: number,
-    production: UpdateProductionDto,
+    production: ModifyProductionDto | ReplaceProductionDto,
   ): Promise<ProductionDto> {
     const fields: string[] = [];
     const values: any[] = [];

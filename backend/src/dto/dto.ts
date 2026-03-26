@@ -38,11 +38,12 @@ import {
   ModifyEventSchema,
   ModifyLocationSchema,
   ModifyPriceSchema,
-  UpdateProductionSchema,
+  ModifyProductionSchema,
   UpdateTagSchema,
   VerifyApiKeySchema,
   ReplaceEventSchema,
   ReplacePriceSchema,
+  ReplaceProductionSchema,
 } from "@repo/common";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
@@ -51,7 +52,10 @@ import { createZodDto } from "nestjs-zod";
 export class ProductionDto extends createZodDto(ProductionSchema) {}
 export class ProductionViewDto extends createZodDto(ProductionViewSchema) {}
 export class CreateProductionDto extends createZodDto(CreateProductionSchema) {}
-export class UpdateProductionDto extends createZodDto(UpdateProductionSchema) {}
+export class ModifyProductionDto extends createZodDto(ModifyProductionSchema) {}
+export class ReplaceProductionDto extends createZodDto(
+  ReplaceProductionSchema,
+) {}
 export class FilterProductionDto extends createZodDto(FilterProductionSchema) {}
 
 // Event Wrappers

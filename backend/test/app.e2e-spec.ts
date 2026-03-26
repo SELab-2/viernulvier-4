@@ -594,13 +594,6 @@ describe("ProductionController (e2e)", () => {
         .expect(mockProduction);
     });
 
-    it("should return 400 when URL id and body id do not match", () => {
-      return request(app.getHttpServer())
-        .put("/productions/2")
-        .send(mockProduction)
-        .expect(400);
-    });
-
     it("should return 400 when id is not a number", () => {
       return request(app.getHttpServer())
         .put("/productions/abc")

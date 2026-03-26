@@ -79,8 +79,10 @@ import {
   ProductionSchema,
   ProductionView,
   ProductionViewSchema,
-  UpdateProduction,
-  UpdateProductionSchema,
+  ReplaceProduction,
+  ReplaceProductionSchema,
+  ModifyProduction,
+  ModifyProductionSchema,
 } from "./objects/productions";
 import {
   CreateTag,
@@ -119,7 +121,8 @@ export {
   ProductionSchema,
   ProductionViewSchema,
   CreateProductionSchema,
-  UpdateProductionSchema,
+  ModifyProductionSchema,
+  ReplaceProductionSchema,
   FilterProductionSchema,
 
   // Event Schemas.
@@ -186,7 +189,8 @@ export type {
   Production,
   ProductionView,
   CreateProduction,
-  UpdateProduction,
+  ModifyProduction,
+  ReplaceProduction,
   FilterProduction,
 
   // Event Types.
