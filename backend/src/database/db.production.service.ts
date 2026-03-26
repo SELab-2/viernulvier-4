@@ -359,69 +359,6 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * UNSAFE version of createProduction. Will override if a Production
-   * already exists with the same ID.
-   * @param production The production object that we want to insert.
-   * @returns That same production object but returned from the Database.
-   */
-  async upsertProduction(production: ProductionDto): Promise<ProductionDto> {
-    const query = `
-      INSERT INTO productions (
-        titel,
-        description1,
-        description2,
-        artist,
-        tagline,
-        credits,
-        performer_type,
-        attendance_mode
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      ON CONFLICT (id)
-      DO UPDATE SET
-        titel = EXCLUDED.titel,
-        description1 = EXCLUDED.description1,
-        description2 = EXCLUDED.description2,
-        artist = EXCLUDED.artist,
-        tagline = EXCLUDED.tagline,
-        credits = EXCLUDED.credits,
-        performer_type = EXCLUDED.performer_type,
-        attendance_mode = EXCLUDED.attendance_mode
-        RETURNING
-          id,
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          created_at,
-          updated_at,
-          performer_type,
-          attendance_mode
-      `;
-
-    const values = [
-      production.titel,
-      production.description1,
-      production.description2,
-      production.artist,
-      production.tagline,
-      production.credits,
-      production.performer_type ?? null,
-      production.attendance_mode ?? null,
-    ];
-
-    const result = await this.db.query<ProductionDto>(query, values);
-
-    if (!result.length) {
-      throw new Error("Failed to insert Production.");
-    }
-
-    return result[0];
-  }
-
-  /**
    * Update function for productions. Updates the production in the database.
    * note: this function can be used to update/add all of a certain language to a prod.
    * @param production must be of the type "ModifyProduction" or "ReplaceProduction", gives the freedom to define only what needs to be updated.
