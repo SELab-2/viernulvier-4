@@ -8,8 +8,11 @@ interface MediaStorage {
   delete(url: string): Promise<void>;
 }
 
+/**
+ * This handles all functionality in terms of media storage.
+ */
 class LocalMediaStorage implements MediaStorage {
-  private readonly baseDir = path.join(process.cwd(), "assets/media"); // dev assets folder
+  private readonly baseDir = path.join(process.cwd(), "../assets/media"); // dev assets folder
   private readonly baseUrl =
     process.env.MEDIA_BASE_URL ?? "http://127.0.0.1/photos"; //base url of the server hosting the media.
 

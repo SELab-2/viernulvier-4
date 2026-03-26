@@ -8,9 +8,10 @@ import { MediaItemController } from "./controllers/media.item.controller";
 import { LanguageModule } from "../util/language/LanguageModule";
 import { MediaCropService } from "./services/media.crop.service";
 import { MediaCropController } from "./controllers/media.crop.controller";
+import { MediaStorageModule } from "./media_storage/media_storage.module";
 
 @Module({
-  imports: [DbModule, LoggerModule, LanguageModule],
+  imports: [DbModule, LoggerModule, LanguageModule, MediaStorageModule],
   providers: [MediaGalleryService, MediaItemService, MediaCropService],
   controllers: [
     MediaGalleryController,
