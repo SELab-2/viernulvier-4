@@ -8,7 +8,7 @@
  * Features a dynamic responsive design that adapts based on the user's role.
  */
 
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch} from 'vue'
 import { ROUTES } from '~/utils/routes'
 import { Sun, Moon, LogOut, Menu, X } from 'lucide-vue-next'
 
@@ -25,6 +25,8 @@ const isDark = ref(false)
 const isMenuOpen = ref(false) // Controls the mobile/tablet hamburger menu
 const isVisible = ref(true)
 const lastScrollPosition = ref(0)
+let isInitialLoad = true
+const route = useRoute()
 
 const navItems = [
   { label: 'home', route: ROUTES.home.base },
@@ -54,19 +56,44 @@ const handleLogout = async () => {
 
 const handleScroll = () => {
   const currentScroll = window.scrollY
+  const scrollDelta = currentScroll - lastScrollPosition.value
+
+  if (isInitialLoad) {
+    isVisible.value = true
+    lastScrollPosition.value = currentScroll
+    return
+  }
 
   if (currentScroll < 50) {
     isVisible.value = true
-  } else {
-    isVisible.value = currentScroll < lastScrollPosition.value
   }
-
+  else if (scrollDelta > 10) {
+    isVisible.value = false
+  }
+  else if (scrollDelta < -10) {
+    isVisible.value = true
+  }
   lastScrollPosition.value = currentScroll
 }
 
+const resetHeader = () => {
+  isVisible.value = true
+  isInitialLoad = true
+  setTimeout(() => {
+    isInitialLoad = false
+  }, 100)
+}
+
+watch(() => route.fullPath, () => {
+  resetHeader()
+})
+
 onMounted(() => {
+  lastScrollPosition.value = window.scrollY
+  resetHeader()
+
   window.addEventListener('scroll', handleScroll)
-  // Sync theme state with DOM on mount
+
   if (document.documentElement.classList.contains('dark')) {
     isDark.value = true
   }
@@ -79,7 +106,7 @@ onUnmounted(() => {
 
 <template>
   <header :class="{ '-translate-y-full': !isVisible && !isMenuOpen }"
-          class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-all duration-300 transform"
+          class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu"
   >
     <div
       class="mx-auto grid max-w-[1400px] grid-cols-3 items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
