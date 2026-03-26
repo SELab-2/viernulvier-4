@@ -91,8 +91,8 @@ import {
   TagSchema,
   TagView,
   TagViewSchema,
-  UpdateTag,
-  UpdateTagSchema,
+  ModifyTag,
+  ModifyTagSchema,
 } from "./objects/tags";
 import {
   CreateMediaCrop,
@@ -143,7 +143,7 @@ export {
   TagSchema,
   TagViewSchema,
   CreateTagSchema,
-  UpdateTagSchema,
+  ModifyTagSchema,
 
   // Location Schemas.
   LocationSchema,
@@ -204,7 +204,7 @@ export type {
   Tag,
   TagView,
   CreateTag,
-  UpdateTag,
+  ModifyTag,
 
   // Blog Types.
   Blog,

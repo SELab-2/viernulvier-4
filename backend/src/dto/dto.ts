@@ -39,7 +39,7 @@ import {
   ModifyLocationSchema,
   ModifyPriceSchema,
   ModifyProductionSchema,
-  UpdateTagSchema,
+  ModifyTagSchema,
   VerifyApiKeySchema,
   ReplaceEventSchema,
   ReplacePriceSchema,
@@ -76,7 +76,7 @@ export class ReplaceBlogDto extends createZodDto(ReplaceBlogSchema) {}
 export class TagDto extends createZodDto(TagSchema) {}
 export class TagViewDto extends createZodDto(TagViewSchema) {}
 export class CreateTagDto extends createZodDto(CreateTagSchema) {}
-export class UpdateTagDto extends createZodDto(UpdateTagSchema) {}
+export class ModifyTagDto extends createZodDto(ModifyTagSchema) {}
 
 // Location Wrappers
 export class LocationDto extends createZodDto(LocationSchema) {}

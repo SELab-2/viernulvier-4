@@ -17,7 +17,7 @@ Creates a new tag.
 ### [PATCH] `/tags/:tagId`
 Updates an existing tag's metadata.
 - **Security:** `apiKey` required.
-- **Body:** `UpdateTag`
+- **Body:** `ModifyTag`
 - **Returns:** `Tag`
 
 ### [DELETE] `/tags/:tagId`
