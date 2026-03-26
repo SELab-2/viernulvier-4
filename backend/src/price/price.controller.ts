@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
   UsePipes,
@@ -18,7 +19,8 @@ import {
   PaginationFilterDto,
   PriceDto,
   PriceViewDto,
-  UpdatePriceDto,
+  ModifyPriceDto,
+  ReplacePriceDto,
 } from "../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
@@ -26,7 +28,8 @@ import {
   LanguageQuerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdatePriceSchema,
+  ModifyPriceSchema,
+  ReplacePriceSchema,
 } from "@repo/common";
 import {
   ApiBody,
@@ -104,21 +107,42 @@ export class PriceController {
   }
 
   /**
+   * Responds to a PUT to "/prices/:priceId"
+   * @param priceId The ID of the price.
+   * @param replacePrice The object to replace the price with.
+   * @returns The resulting price.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Replaces an existing Price object." })
+  @ApiBody({ type: ReplacePriceDto })
+  @ApiOkResponse({ type: PriceDto, description: "Replaced Price." })
+  @Put(":priceId")
+  async replacePrice(
+    @Param("priceId", ParseIntPipe) priceId: number,
+    @Body(new ZodValidationPipe(ReplacePriceSchema))
+    replacePrice: ReplacePriceDto,
+  ): Promise<PriceDto> {
+    return await this.priceService.replacePrice(priceId, replacePrice);
+  }
+
+  /**
    * Responds to a PUT to "/prices".
-   * @param updatePrice The Price we want to update.
+   * @param priceId The ID of the Price.
+   * @param modifyPrice The Price we want to update.
    * @returns The newly updated Price.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Updates an existing Price object." })
-  @ApiBody({ type: UpdatePriceDto })
+  @ApiBody({ type: ModifyPriceDto })
   @ApiOkResponse({ type: PriceDto, description: "Updated Price." })
   @Patch(":priceId")
-  async updatePrice(
+  async modifyPrice(
     @Param("priceId", ParseIntPipe) priceId: number,
-    @Body(new ZodValidationPipe(UpdatePriceSchema)) updatePrice: UpdatePriceDto,
+    @Body(new ZodValidationPipe(ModifyPriceSchema)) modifyPrice: ModifyPriceDto,
   ): Promise<PriceDto> {
-    return await this.priceService.updatePrice(priceId, updatePrice);
+    return await this.priceService.modifyPrice(priceId, modifyPrice);
   }
 
   /**

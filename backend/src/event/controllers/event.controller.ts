@@ -15,11 +15,11 @@ import {
 import EventService from "../event.service";
 import {
   CreateEventSchema,
-  EventSchema,
   FilterEventSchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdateEventSchema,
+  ReplaceEventSchema,
+  ModifyEventSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import {
@@ -27,7 +27,8 @@ import {
   EventDto,
   FilterEventDto,
   PaginationFilterDto,
-  UpdateEventDto,
+  ReplaceEventDto,
+  ModifyEventDto,
 } from "../../dto/dto";
 import {
   ApiBody,
@@ -81,18 +82,18 @@ export class EventController {
   /**
    * Responds to a PUT to "/events/:eventId".
    * @param eventId ID in the URL of the request.
-   * @param event The parsed EventDto object.
+   * @param event The parsed ReplaceEvent object.
    * @returns The updated EventDto object.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing Event." })
-  @ApiBody({ type: EventDto })
+  @ApiBody({ type: ReplaceEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event replaced." })
   @Put(":eventId")
   async replaceEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
-    @Body(new ZodValidationPipe(EventSchema)) event: EventDto,
+    @Body(new ZodValidationPipe(ReplaceEventSchema)) event: ReplaceEventDto,
   ): Promise<EventDto> {
     return await this.eventService.replaceEvent(eventId, event);
   }
@@ -106,12 +107,12 @@ export class EventController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Event." })
-  @ApiBody({ type: UpdateEventDto })
+  @ApiBody({ type: ModifyEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event modified." })
   @Patch(":eventId")
   async modifyEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
-    @Body(new ZodValidationPipe(UpdateEventSchema)) patchData: UpdateEventDto,
+    @Body(new ZodValidationPipe(ModifyEventSchema)) patchData: ModifyEventDto,
   ): Promise<EventDto> {
     return await this.eventService.modifyEvent(eventId, patchData);
   }

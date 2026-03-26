@@ -13,12 +13,12 @@ import {
 } from "@nestjs/common";
 import { BlogService } from "./blog.service";
 import {
-  BlogSchema,
   CreateBlogSchema,
   LanguageQuerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdateBlogSchema,
+  ReplaceBlogSchema,
+  ModifyBlogSchema,
 } from "@repo/common";
 import {
   BlogDto,
@@ -26,7 +26,8 @@ import {
   CreateBlogDto,
   LanguageQueryDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ReplaceBlogDto,
+  ModifyBlogDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -114,12 +115,12 @@ export class BlogController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing blog." })
-  @ApiBody({ type: UpdateBlogDto })
+  @ApiBody({ type: ReplaceBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Replaced Blog." })
   @Put(":blogId")
   async replaceBlog(
     @Param("blogId", ParseIntPipe) blogId: number,
-    @Body(new ZodValidationPipe(BlogSchema)) blog: UpdateBlogDto,
+    @Body(new ZodValidationPipe(ReplaceBlogSchema)) blog: ReplaceBlogDto,
   ): Promise<BlogDto> {
     return await this.blogService.replaceBlog(blogId, blog);
   }
@@ -133,12 +134,12 @@ export class BlogController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing blog." })
-  @ApiBody({ type: UpdateBlogDto })
+  @ApiBody({ type: ModifyBlogDto })
   @ApiOkResponse({ type: BlogDto, description: "Modified Blog." })
   @Patch(":blogId")
   async modifyBlog(
     @Param("blogId", ParseIntPipe) blogId: number,
-    @Body(new ZodValidationPipe(UpdateBlogSchema)) blog: UpdateBlogDto,
+    @Body(new ZodValidationPipe(ModifyBlogSchema)) blog: ModifyBlogDto,
   ): Promise<BlogDto> {
     return await this.blogService.modifyBlog(blogId, blog);
   }

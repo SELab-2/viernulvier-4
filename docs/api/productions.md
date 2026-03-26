@@ -23,7 +23,7 @@ Replaces an entire production object.
 ### [PATCH] `/productions/:productionId`
 Updates specific fields of an existing production.
 - **Security:** `apiKey` required.
-- **Body:** `UpdateProduction`
+- **Body:** `ModifyProduction`
 
 ### [DELETE] `/productions/:productionId`
 Permanently deletes a production.

@@ -2,7 +2,7 @@ import type {
   Production,
   ProductionView,
   CreateProduction,
-  UpdateProduction,
+  ModifyProduction,
   FilterProduction,
   Tag,
   TagView,
@@ -12,6 +12,7 @@ import type {
   PaginatedResponse,
   PaginationFilter,
   LanguageQuery,
+  ReplaceProduction,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
@@ -72,15 +73,15 @@ export function useProductionApi() {
     post<Production, CreateProduction>(API_ROUTES.productions.base, body);
 
   /** PUT /productions/:productionId — fully replaces an existing production. */
-  const replace = (productionId: number, body: Production) =>
-    put<Production, Production>(
+  const replace = (productionId: number, body: ReplaceProduction) =>
+    put<Production, ReplaceProduction>(
       API_ROUTES.productions.byId(productionId),
       body,
     );
 
   /** PATCH /productions/:productionId — partially updates an existing production. */
-  const modify = (productionId: number, body: UpdateProduction) =>
-    patch<Production, UpdateProduction>(
+  const modify = (productionId: number, body: ModifyProduction) =>
+    patch<Production, ModifyProduction>(
       API_ROUTES.productions.byId(productionId),
       body,
     );

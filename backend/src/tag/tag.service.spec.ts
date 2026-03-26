@@ -6,7 +6,7 @@ import {
   CreateTagDto,
   PaginationFilterDto,
   TagDto,
-  UpdateTagDto,
+  ModifyTagDto,
 } from "../dto/dto";
 
 describe("TagService", () => {
@@ -101,10 +101,10 @@ describe("TagService", () => {
 
   describe("updateTag", () => {
     it("should successfully update and return the tag", async () => {
-      const updateDto: UpdateTagDto = {
+      const updateDto: ModifyTagDto = {
         tag: { en: "Updated", nl: "Bijgewerkt" },
       };
-      const result = await service.updateTag(1, updateDto);
+      const result = await service.modifyTag(1, updateDto);
       expect(dbService.updateTag).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(mockTag);
     });
