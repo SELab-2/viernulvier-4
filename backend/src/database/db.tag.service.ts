@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTagDto, TagDto, UpdateTagDto } from "../dto/dto";
+import { CreateTagDto, TagDto, ModifyTagDto } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -99,11 +99,11 @@ export class TagDatabaseService {
 
   /**
    * Update function for tags. Updates the tag in the database.
-   * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
+   * @param tag must be of the type "ModifyTag", gives the freedom to define only what needs to be updated.
    * The id field in the tag MUST be defined.
    * @returns the updated tag if successful.
    */
-  async updateTag(tagId: number, tag: UpdateTagDto): Promise<TagDto> {
+  async updateTag(tagId: number, tag: ModifyTagDto): Promise<TagDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;

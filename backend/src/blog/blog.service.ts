@@ -5,7 +5,8 @@ import {
   CreateBlogDto,
   MediaGalleryDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ReplaceBlogDto,
+  ModifyBlogDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -48,7 +49,7 @@ export class BlogService {
    * @param blog The Blog object we want to replace the existing Blog with.
    * @returns The newly replaced Blog.
    */
-  async replaceBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
+  async replaceBlog(id: number, blog: ReplaceBlogDto): Promise<BlogDto> {
     return await this.blogDbService.updateBlog(id, blog);
   }
 
@@ -58,7 +59,7 @@ export class BlogService {
    * @param blog The Partial Blog object we want to use to modify.
    * @returns The newly modified Blog.
    */
-  async modifyBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
+  async modifyBlog(id: number, blog: ModifyBlogDto): Promise<BlogDto> {
     return await this.blogDbService.updateBlog(id, blog);
   }
 

@@ -1,7 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
-import { CreateMediaCropDto, MediaCropDto, PaginationFilterDto, UpdateMediaCropDto, } from "../../dto/dto";
+import {
+  CreateMediaCropDto,
+  MediaCropDto,
+  PaginationFilterDto,
+  ModifyMediaCropDto,
+  ReplaceMediaCropDto,
+} from "../../dto/dto";
 
 /**
  * Defines the connection between controller and database service
@@ -49,9 +55,8 @@ export class MediaCropService {
    */
   async replaceCrop(
     cropId: number,
-    replaceCrop: MediaCropDto,
+    replaceCrop: ReplaceMediaCropDto,
   ): Promise<MediaCropDto> {
-    replaceCrop.id = cropId;
     return await this.mediaDbService.updateCrop(cropId, replaceCrop);
   }
 
@@ -63,7 +68,7 @@ export class MediaCropService {
    */
   async modifyCrop(
     cropId: number,
-    modifyCrop: UpdateMediaCropDto,
+    modifyCrop: ModifyMediaCropDto,
   ): Promise<MediaCropDto> {
     const existingCrop: MediaCropDto =
       await this.mediaDbService.getCropById(cropId);

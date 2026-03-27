@@ -15,10 +15,10 @@ import { MediaItemService } from "../services/media.item.service";
 import {
   CreateMediaItemSchema,
   LanguageQuerySchema,
-  MediaItemSchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdatedMediaItemSchema,
+  ModifyMediaItemSchema,
+  ReplaceMediaItemSchema,
 } from "@repo/common";
 import {
   CreateMediaItemDto,
@@ -27,7 +27,8 @@ import {
   MediaItemDto,
   MediaItemViewDto,
   PaginationFilterDto,
-  UpdateMediaItemDto,
+  ModifyMediaItemDto,
+  ReplaceMediaItemDto,
 } from "../../dto/dto";
 import { LanguageService } from "../../util/language/language.service";
 import { ZodValidationPipe } from "nestjs-zod";
@@ -125,12 +126,13 @@ export class MediaItemController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replace an existing media item." })
-  @ApiBody({ type: MediaItemDto })
+  @ApiBody({ type: ReplaceMediaItemDto })
   @ApiOkResponse({ type: MediaItemDto, description: "Item replaced." })
   @Put(":itemId")
   async replaceItem(
     @Param("itemId", ParseIntPipe) itemId: number,
-    @Body(new ZodValidationPipe(MediaItemSchema)) replaceItem: MediaItemDto,
+    @Body(new ZodValidationPipe(ReplaceMediaItemSchema))
+    replaceItem: ReplaceMediaItemDto,
   ): Promise<MediaItemDto> {
     return await this.mediaItemService.replaceItem(itemId, replaceItem);
   }
@@ -144,13 +146,13 @@ export class MediaItemController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing media item." })
-  @ApiBody({ type: UpdateMediaItemDto })
+  @ApiBody({ type: ModifyMediaItemDto })
   @ApiOkResponse({ type: MediaItemDto, description: "Item modified." })
   @Patch(":itemId")
   async modifyItem(
     @Param("itemId", ParseIntPipe) itemId: number,
-    @Body(new ZodValidationPipe(UpdatedMediaItemSchema))
-    modifyItem: UpdateMediaItemDto,
+    @Body(new ZodValidationPipe(ModifyMediaItemSchema))
+    modifyItem: ModifyMediaItemDto,
   ): Promise<MediaItemDto> {
     return await this.mediaItemService.modifyItem(itemId, modifyItem);
   }

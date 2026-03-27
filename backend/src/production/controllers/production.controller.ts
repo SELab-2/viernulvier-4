@@ -19,8 +19,8 @@ import {
   LanguageQuerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  ProductionSchema,
-  UpdateProductionSchema,
+  ReplaceProductionSchema,
+  ModifyProductionSchema,
 } from "@repo/common";
 import {
   CreateProductionDto,
@@ -29,7 +29,8 @@ import {
   PaginationFilterDto,
   ProductionDto,
   ProductionViewDto,
-  UpdateProductionDto,
+  ReplaceProductionDto,
+  ModifyProductionDto,
 } from "../../dto/dto";
 import {
   ApiBody,
@@ -108,7 +109,7 @@ export class ProductionController {
   /**
    * Responds to a PUT to "/productions/:productionId".
    * @param productionId The ID in the URL.
-   * @param production The parsed ProductionDto object.
+   * @param replaceProduction The parsed ProductionDto object.
    * @returns The newly updated ProductionDto.
    */
   @UseGuards(ApiKeyGuard)
@@ -119,30 +120,31 @@ export class ProductionController {
   @Put(":productionId")
   async replaceProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Body(new ZodValidationPipe(ProductionSchema)) production: ProductionDto,
+    @Body(new ZodValidationPipe(ReplaceProductionSchema))
+    replaceProduction: ReplaceProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionService.replaceProduction(
       productionId,
-      production,
+      replaceProduction,
     );
   }
 
   /**
    * Responds to a PATCH to "/productions/:productionId".
    * @param productionId The ID in the URL.
-   * @param patchData The parsed UpdateProductionDto object.
+   * @param patchData The parsed ModifyProductionDto object.
    * @returns The newly updated ProductionDto.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Production." })
-  @ApiBody({ type: UpdateProductionDto })
+  @ApiBody({ type: ModifyProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production Modified." })
   @Patch(":productionId")
   async modifyProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Body(new ZodValidationPipe(UpdateProductionSchema))
-    patchData: UpdateProductionDto,
+    @Body(new ZodValidationPipe(ModifyProductionSchema))
+    patchData: ModifyProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionService.modifyProduction(
       productionId,

@@ -4,7 +4,8 @@ import {
   CreatePriceDto,
   PaginationFilterDto,
   PriceDto,
-  UpdatePriceDto,
+  ModifyPriceDto,
+  ReplacePriceDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -44,16 +45,29 @@ export class PriceService {
   }
 
   /**
+   * Replaces an existing Price in the database.
+   * @param priceId The ID of the price.
+   * @param replacePrice The object to replace the price with.
+   * @returns The newly replaced object.
+   */
+  async replacePrice(
+    priceId: number,
+    replacePrice: ReplacePriceDto,
+  ): Promise<PriceDto> {
+    return await this.priceDbService.updatePrice(priceId, replacePrice);
+  }
+
+  /**
    * Updates an existing Price in the database.
    * @param priceId The ID of the price.
-   * @param updatePrice The needed values to update the Price.
+   * @param modifyPrice The needed values to update the Price.
    * @returns The newly updated Price object.
    */
-  async updatePrice(
+  async modifyPrice(
     priceId: number,
-    updatePrice: UpdatePriceDto,
+    modifyPrice: ModifyPriceDto,
   ): Promise<PriceDto> {
-    return await this.priceDbService.updatePrice(priceId, updatePrice);
+    return await this.priceDbService.updatePrice(priceId, modifyPrice);
   }
 
   /**

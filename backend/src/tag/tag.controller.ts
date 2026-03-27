@@ -17,7 +17,7 @@ import {
   PaginationFilterDto,
   TagDto,
   TagViewDto,
-  UpdateTagDto,
+  ModifyTagDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -32,7 +32,7 @@ import {
   LanguageQuerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdateTagSchema,
+  ModifyTagSchema,
 } from "@repo/common";
 import {
   ApiOkAnyOf,
@@ -106,20 +106,20 @@ export class TagController {
   /**
    * Responds to a PATCH to "/tags/:tagId".
    * @param tagId The ID in the URL.
-   * @param updateTag The parsed UpdateTagDto object.
+   * @param modifyTag The parsed ModifyTagDto object.
    * @returns The newly updated TagDto.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Tag." })
-  @ApiBody({ type: UpdateTagDto })
+  @ApiBody({ type: ModifyTagDto })
   @ApiOkResponse({ type: TagDto, description: "Tag Modified." })
   @Patch(":tagId")
-  async updateTag(
+  async modifyTag(
     @Param("tagId", ParseIntPipe) tagId: number,
-    @Body(new ZodValidationPipe(UpdateTagSchema)) updateTag: UpdateTagDto,
+    @Body(new ZodValidationPipe(ModifyTagSchema)) modifyTag: ModifyTagDto,
   ): Promise<TagDto> {
-    return await this.tagService.updateTag(tagId, updateTag);
+    return await this.tagService.modifyTag(tagId, modifyTag);
   }
 
   /**

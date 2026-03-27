@@ -5,7 +5,8 @@ import {
   CreateBlogDto,
   MediaGalleryDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ReplaceBlogDto,
+  ModifyBlogDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
@@ -132,11 +133,14 @@ export class BlogDatabaseService {
 
   /**
    * Update function for blogs. Updates the blog in the database.
-   * @param blog must be of the type "UpdateBlog", gives the freedom to define only what needs to be updated.
-   * The id field in the blog MUST be defined.
+   * @param blogId The ID of the blog.
+   * @param blog must be of the type "ModifyBlog" or "ReplaceBlog", gives the freedom to define only what needs to be updated.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blogId: number, blog: UpdateBlogDto): Promise<BlogDto> {
+  async updateBlog(
+    blogId: number,
+    blog: ModifyBlogDto | ReplaceBlogDto,
+  ): Promise<BlogDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;

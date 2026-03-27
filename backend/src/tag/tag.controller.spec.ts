@@ -8,7 +8,7 @@ import {
   PaginationFilterDto,
   TagDto,
   TagViewDto,
-  UpdateTagDto,
+  ModifyTagDto,
 } from "../dto/dto";
 import { NotFoundException } from "@nestjs/common";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
@@ -55,7 +55,7 @@ describe("TagController", () => {
             getAllTags: jest.fn().mockResolvedValue(mockTags),
             getTagById: jest.fn().mockResolvedValue(mockTag),
             createTag: jest.fn().mockResolvedValue(mockTag),
-            updateTag: jest.fn().mockResolvedValue(mockTag),
+            modifyTag: jest.fn().mockResolvedValue(mockTag),
             deleteTag: jest.fn().mockResolvedValue({ message: "Success" }),
           },
         },
@@ -148,12 +148,12 @@ describe("TagController", () => {
     });
   });
 
-  describe("updateTag", () => {
+  describe("modifyTag", () => {
     it("should update and return the tag", async () => {
-      const dto: UpdateTagDto = { tag: { en: "Updated", nl: "Bijgewerkt" } };
-      const result = await controller.updateTag(1, dto);
+      const dto: ModifyTagDto = { tag: { en: "Updated", nl: "Bijgewerkt" } };
+      const result = await controller.modifyTag(1, dto);
 
-      expect(service.updateTag).toHaveBeenCalledWith(1, dto);
+      expect(service.modifyTag).toHaveBeenCalledWith(1, dto);
       expect(result).toEqual(mockTag);
     });
   });

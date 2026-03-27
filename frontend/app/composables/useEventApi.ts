@@ -1,7 +1,7 @@
 import type {
   Event,
   CreateEvent,
-  UpdateEvent,
+  ModifyEvent,
   FilterEvent,
   Location,
   LocationView,
@@ -10,6 +10,7 @@ import type {
   PriceView,
   PaginatedResponse,
   PaginationFilter,
+  ReplaceEvent,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
@@ -58,12 +59,12 @@ export function useEventApi() {
     post<Event, CreateEvent>(API_ROUTES.events.base, body);
 
   /** PUT /events/:eventId — fully replaces an existing event. */
-  const replace = (eventId: number, body: Event) =>
-    put<Event, Event>(API_ROUTES.events.byId(eventId), body);
+  const replace = (eventId: number, body: ReplaceEvent) =>
+    put<Event, ReplaceEvent>(API_ROUTES.events.byId(eventId), body);
 
   /** PATCH /events/:eventId — partially updates an existing event. */
-  const modify = (eventId: number, body: UpdateEvent) =>
-    patch<Event, UpdateEvent>(API_ROUTES.events.byId(eventId), body);
+  const modify = (eventId: number, body: ModifyEvent) =>
+    patch<Event, ModifyEvent>(API_ROUTES.events.byId(eventId), body);
 
   /** DELETE /events/:eventId — deletes an event. */
   const remove = (eventId: number) => del(API_ROUTES.events.byId(eventId));

@@ -2,7 +2,7 @@ import type {
   Location,
   LocationView,
   CreateLocation,
-  UpdateLocation,
+  ModifyLocation,
   Language,
   PaginationFilter,
   PaginatedResponse,
@@ -64,8 +64,8 @@ export function useLocationApi() {
     post<Location, CreateLocation>(API_ROUTES.locations.base, body);
 
   /** PATCH /locations — updates an existing location. */
-  const modify = (locationId: number, body: UpdateLocation) =>
-    patch<Location, UpdateLocation>(
+  const modify = (locationId: number, body: ModifyLocation) =>
+    patch<Location, ModifyLocation>(
       API_ROUTES.locations.byId(locationId),
       body,
     );

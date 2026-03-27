@@ -8,8 +8,10 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   PaginationFilterDto,
-  UpdateMediaCropDto,
-  UpdateMediaItemDto,
+  ModifyMediaCropDto,
+  ModifyMediaItemDto,
+  ReplaceMediaCropDto,
+  ReplaceMediaItemDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
@@ -252,7 +254,7 @@ export class MediaDatabaseService {
    */
   async updateItem(
     itemId: number,
-    item: UpdateMediaItemDto,
+    item: ModifyMediaItemDto | ReplaceMediaItemDto,
   ): Promise<MediaItemDto> {
     const fields: string[] = [];
     const values: any[] = [];
@@ -478,7 +480,7 @@ export class MediaDatabaseService {
    */
   async updateCrop(
     cropId: number,
-    crop: UpdateMediaCropDto,
+    crop: ModifyMediaCropDto | ReplaceMediaCropDto,
   ): Promise<MediaCropDto> {
     const fields: string[] = [];
     const values: any[] = [];
