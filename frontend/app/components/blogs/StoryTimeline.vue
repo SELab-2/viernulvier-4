@@ -1,27 +1,3 @@
-<!--
-  components/blogs/StoryTimeline.vue
-  ====================================
-  This file implements the main timeline layout for the stories overview page.
-  It groups the incoming blog posts first by year, then passes each year group
-  to StoryYearSection which further splits them by month.
-
-  Structure
-  ---------
-  1. StoryNav  – vertical year-dot sidebar, always visible on every screen
-                 size (narrow on mobile, slightly wider on sm+).  Clicking a
-                 dot smooth-scrolls to that year.
-  2. StoryYearSection (one per year) – year heading + month groups + cards.
-
-  There is no separate mobile pill strip; the sidebar handles all screen sizes.
-
-  Active-year tracking
-  --------------------
-  An IntersectionObserver watches each year <section> element.  When a section
-  enters the upper third of the viewport its year becomes "active" in StoryNav.
-  The observer is re-attached whenever `allYears` changes (i.e. after a new
-  page of stories is appended by the infinite-scroll loader in the parent).
--->
-
 <script lang="ts" setup>
 import type { Blog, BlogView } from "@repo/common";
 import StoryNav from "~/components/blogs/StoryNav.vue";
@@ -30,23 +6,50 @@ import StoryYearSection from "~/components/blogs/StoryYearSection.vue";
 const props = defineProps<{
   stories: Array<Blog | BlogView>;
   sortOrder: "newest" | "oldest";
+  searchQuery?: string;         
 }>();
 
 const emit = defineEmits<{
   (e: "story-click", story: Blog | BlogView): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
-// ── Group stories by year ────────────────────────────────────────────────────
+// Filter
+const filteredStories = computed(() => {
+  const q = props.searchQuery?.trim().toLowerCase();
+  if (!q) return props.stories;
+
+  return props.stories.filter((s) => {
+    const raw = s.titel;
+    const title =
+      typeof raw === "string"
+        ? raw
+        : (raw as any)?.[locale.value] ?? (raw as any)?.nl ?? (raw as any)?.en ?? "";
+
+    const desc = (s as any).description;
+    const descText =
+      !desc
+        ? ""
+        : typeof desc === "string"
+          ? desc
+          : (desc as any)?.[locale.value] ?? (desc as any)?.nl ?? (desc as any)?.en ?? "";
+
+    return (
+      title.toLowerCase().includes(q) ||
+      descText.toLowerCase().includes(q)
+    );
+  });
+});
+
+// Group stories by year 
 const grouped = computed(() => {
   const map = new Map<string, Array<Blog | BlogView>>();
-  for (const s of props.stories) {
+  for (const s of filteredStories.value) {
     const year = new Date(s.created_at ?? 0).getFullYear().toString();
     if (!map.has(year)) map.set(year, []);
     map.get(year)!.push(s);
   }
-  // Sort years according to the current sort direction.
   const years = [...map.keys()].sort((a, b) =>
     props.sortOrder === "oldest"
       ? parseInt(a) - parseInt(b)
@@ -57,50 +60,44 @@ const grouped = computed(() => {
 
 const allYears = computed(() => grouped.value.map((g) => g.year));
 
-// ── Active-year tracking via IntersectionObserver ───────────────────────────
+// Active-year tracking via IntersectionObserver
 const activeYear = ref<string>("");
 let yearObserver: IntersectionObserver | null = null;
 
 const attachObserver = () => {
   yearObserver?.disconnect();
-
   yearObserver = new IntersectionObserver(
     (entries) => {
-      // Pick the topmost section that is currently intersecting the viewport.
       const visible = entries
         .filter((e) => e.isIntersecting)
         .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
       const first = visible[0];
-      if (first) {
-        activeYear.value = first.target.id.replace("story-year-", "");
-      }
+      if (first) activeYear.value = first.target.id.replace("story-year-", "");
     },
-    // rootMargin keeps the active highlight stable: trigger when the section
-    // is in the top ~30% of the viewport. Aangepast naar -120px vanwege de nieuwe padding.
     { rootMargin: "-120px 0px -70% 0px", threshold: 0 },
   );
-
   for (const year of allYears.value) {
     const el = document.getElementById(`story-year-${year}`);
     if (el) yearObserver.observe(el);
   }
-
-  // Default to the first year until the observer fires.
-  if (!activeYear.value && allYears.value[0]) {
-    activeYear.value = allYears.value[0];
-  }
+  if (!activeYear.value && allYears.value[0]) activeYear.value = allYears.value[0];
 };
 
-// Re-attach whenever the year list grows (infinite-scroll appends).
 watch(allYears, async () => {
   await nextTick();
   attachObserver();
 }, { immediate: false });
 
+// Reset activeYear
+watch(allYears, (years) => {
+  if (years.length && !years.includes(activeYear.value)) {
+    activeYear.value = years[0] ?? "";
+  }
+});
+
 onMounted(() => nextTick(attachObserver));
 onUnmounted(() => yearObserver?.disconnect());
 
-/** Smooth-scroll to a year section and immediately mark it active. */
 const scrollToYear = (year: string) => {
   const el = document.getElementById(`story-year-${year}`);
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -111,7 +108,6 @@ const scrollToYear = (year: string) => {
 <template>
   <div>
     <div class="flex gap-4 sm:gap-6 pt-8">
-
       <StoryNav
         :years="allYears"
         :active-year="activeYear"
@@ -119,13 +115,12 @@ const scrollToYear = (year: string) => {
       />
 
       <div class="flex-1 min-w-0">
-
         <div v-if="grouped.length === 0" class="py-24 text-center">
           <p class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2">
-            {{ t("stories.noStories") }}
+            {{ searchQuery?.trim() ? t("stories.noResults") : t("stories.noStories") }}
           </p>
           <p class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
-            {{ t("stories.noStoriesDesc") }}
+            {{ searchQuery?.trim() ? t("stories.noResultsDesc") : t("stories.noStoriesDesc") }}
           </p>
         </div>
 
@@ -139,7 +134,6 @@ const scrollToYear = (year: string) => {
             @story-click="emit('story-click', $event)"
           />
         </div>
-
       </div>
     </div>
   </div>

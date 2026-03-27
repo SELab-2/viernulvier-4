@@ -398,3 +398,29 @@
   .blog-year-label { font-size: 1.75rem; }
   .blog-month-label { font-size: 8px; }
 }
+
+/* ─── Shared Components ─────────────────────────────────────────────────────
+   Reusable UI elements for the application.
+   Ensures consistent button styles across different sections.
+   ---------------------------------------------------------------------- */
+
+@layer components {
+  /* Standard outlined button (used in Header, filters, etc.) */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-[var(--foreground)] bg-transparent px-[21px] py-[7px] text-[11px] font-black text-[var(--foreground)] transition-all uppercase cursor-pointer outline-none;
+  }
+
+  .btn-outline:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  /* Red button for critical actions (e.g., Logout) */
+  .btn-danger {
+    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors uppercase cursor-pointer;
+  }
+
+  .btn-danger:hover {
+    @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
+}
