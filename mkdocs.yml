@@ -42,6 +42,7 @@ nav:
       - Database: server/database.md
       - Backend: server/backend.md
       - Frontend: server/frontend.md
+      - Media: server/media.md
   - Nest Modules:
       - Overview: modules/index.md
       - Feature Modules:
