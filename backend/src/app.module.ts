@@ -12,6 +12,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { LoggerModule } from "./util/logger/logger.module";
 import { LanguageModule } from "./util/language/LanguageModule";
 import { ScraperModule } from "./util/scraper/scraper.module";
+import { ParserModule } from "./parser/parser.module";
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ScraperModule } from "./util/scraper/scraper.module";
     LoggerModule,
     LanguageModule,
     ScraperModule,
+    ParserModule,
   ],
   controllers: [AppController],
 })
