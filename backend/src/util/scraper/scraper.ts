@@ -74,7 +74,7 @@ export class ScraperEngine {
         this.scrapeMany("/api/v1/productions?page=1", after_date),
         this.scrapeMany("/api/v1/events?page=1", after_date),
         this.scrapeMany("/api/v1/events/prices?page=1", after_date),
-        this.scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00+00:00"),
+        this.scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00.000Z"),
         this.scrapeMany("/api/v1/genres?page=1", after_date),
         this.scrapeMany("/api/v1/halls?page=1", after_date),
       ]);

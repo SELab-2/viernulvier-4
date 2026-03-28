@@ -33,22 +33,23 @@ export class ScraperService implements OnApplicationBootstrap {
       return;
     }
 
-    this.logger.log("Running initial CSV injection...");
-    this.csvInjectionService
-      .injectOldCsvData()
-      .then(() => {
-        this.logger.log(
-          "Initial CSV injection finished successfully.",
-          "ScraperService",
-        );
-      })
-      .catch((err) => {
-        this.logger.error(
-          "Initial CSV injection failed",
-          (err as Error).stack,
-          "ScraperService",
-        );
-      });
+    // TODO: Re-enable the CSV injection.
+    // this.logger.log("Running initial CSV injection...");
+    // this.csvInjectionService
+    //   .injectOldCsvData()
+    //   .then(() => {
+    //     this.logger.log(
+    //       "Initial CSV injection finished successfully.",
+    //       "ScraperService",
+    //     );
+    //   })
+    //   .catch((err) => {
+    //     this.logger.error(
+    //       "Initial CSV injection failed",
+    //       (err as Error).stack,
+    //       "ScraperService",
+    //     );
+    //   });
 
     this.logger.log("Running initial scrape...");
     this.runner

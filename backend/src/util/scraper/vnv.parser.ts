@@ -37,6 +37,7 @@ export interface vnvProduction {
   info: vnvLocal;
   events: string[]; // Contains the legacy IDs of the Events.
   genres: string[]; // Contains the legacy IDs of the Genres.
+  galleryId: string; // Contains the legacy ID of the Gallery.
 }
 
 /**
@@ -81,6 +82,7 @@ function parseVnvProduction(object: Record<string, any>): vnvProduction {
     info: (object.info as vnvLocal) || { en: "N/A", nl: "N/A" },
     events: events,
     genres: genres,
+    galleryId: extractIdFromUri(object["media_gallery"] as string) || "",
   };
 }
 

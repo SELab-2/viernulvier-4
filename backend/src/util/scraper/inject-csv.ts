@@ -103,6 +103,7 @@ function toOldCsvProduction(
     info: production.credits ?? { en: "N/A", nl: "N/A" },
     events: [],
     genres: tagsForProduction.map((t) => `csv-${t}`),
+    galleryId: "",
   };
 }
 
@@ -180,6 +181,7 @@ function toCsvProduction(row: {
     info: production.credits ?? { en: "N/A", nl: "N/A" },
     events: [],
     genres: [],
+    galleryId: "",
   };
 }
 
