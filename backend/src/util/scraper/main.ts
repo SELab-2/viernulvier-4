@@ -31,7 +31,7 @@ export class ScraperRunner {
       await this.scraperEngine.scrape(formattedDate);
 
     // TODO: Remove debug prints.
-    console.log(scrapeResults.items);
+    //console.log(scrapeResults.items);
 
     this.logger.debug("Inserting Scraped Data...");
 

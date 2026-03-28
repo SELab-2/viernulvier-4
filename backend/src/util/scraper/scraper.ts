@@ -20,6 +20,7 @@ import { LanguageService } from "../language/language.service";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import Bottleneck from "bottleneck";
+import { CROP_NAMES, CropName } from "@repo/common/src/objects/media";
 
 /**
  * The Base of the VNV API.
@@ -90,7 +91,7 @@ export class ScraperEngine {
     this.logger.debug("Starting Scraper...");
 
     // TODO: Remove dummy date when actual scraping begins.
-    const dummyDate: string = "2026-03-15T00:00:00.000Z";
+    const dummyDate: string = "2026-03-20T00:00:00.000Z";
 
     const [
       productions,
@@ -101,6 +102,7 @@ export class ScraperEngine {
       halls,
       galleries,
       items,
+      crops,
     ] = await Promise.all([
       this.scrapeMany("/api/v1/productions?page=1", after_date),
       this.scrapeMany("/api/v1/events?page=1", after_date),
@@ -110,14 +112,22 @@ export class ScraperEngine {
       this.scrapeMany("/api/v1/halls?page=1", after_date),
       this.scrapeMany("/api/v1/media/galleries?page=1", dummyDate),
       this.scrapeMany("/api/v1/media/items?page=1", dummyDate),
+      this.scrapeMany("/api/v1/media/items/crops?page=1", dummyDate),
     ]);
+
+    // TODO: Remove Debug prints
+    console.log(crops);
 
     this.logger.log("Fixing items...");
     const fixedItems = await this.fixItems(items);
     this.logger.log("Fixed items!");
 
+    this.logger.log("Sifting crops...");
+    const siftedCrops = this.siftCrops(crops);
+    this.logger.log("Sifted crops!");
+
     // TODO: Remove Debug prints
-    //console.log(fixedItems);
+    console.log(siftedCrops);
 
     const priceDictionary = new Map<string, object>();
     for (const price of prices) {
@@ -235,6 +245,7 @@ export class ScraperEngine {
    * This means we have to individually fetch each item again after fetching
    * the whole list. That's what this function does.
    * @param items The currently fetched items, to be extended with crops.
+   * @returns The fixed raw item objects.
    */
   private async fixItems(
     items: Record<string, any>[],
@@ -244,5 +255,15 @@ export class ScraperEngine {
     });
 
     return await Promise.all(fetchPromises);
+  }
+
+  /**
+   * Filters out all crops that we don't need and only leaves the
+   * ones we'll use in the archive.
+   * @param crops The complete list of crops.
+   * @returns The list of crops that we need.
+   */
+  private siftCrops(crops: Record<string, any>[]): Record<string, any>[] {
+    return crops.filter((crop) => CROP_NAMES.includes(crop.name as CropName));
   }
 }
