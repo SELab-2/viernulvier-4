@@ -197,9 +197,7 @@ export class UtilsDbConnection {
    * @param vnvProduction The vnvProduction we want to add.
    * @returns T/F Whether the change went through or not.
    */
-  async insertProduction(
-    vnvProduction: vnvProduction,
-  ): Promise<Production> {
+  async insertProduction(vnvProduction: vnvProduction): Promise<Production> {
     const query = `
       INSERT INTO productions (
         titel, description1, description2, artist, 
@@ -420,10 +418,7 @@ export class UtilsDbConnection {
    * @param locationId The Location ID.
    * @returns T/F Whether it Failed or not.
    */
-  async linkLocation(
-    eventId: number,
-    locationId: number,
-  ): Promise<boolean> {
+  async linkLocation(eventId: number, locationId: number): Promise<boolean> {
     const query = `
       INSERT INTO event_locations (event_id, location_id)
       VALUES ($1, $2)

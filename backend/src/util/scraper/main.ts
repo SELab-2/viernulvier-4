@@ -30,6 +30,9 @@ export class ScraperRunner {
     const scrapeResults: ScrapeResult =
       await this.scraperEngine.scrape(formattedDate);
 
+    // TODO: Remove debug prints.
+    console.log(scrapeResults.galleries);
+
     this.logger.debug("Inserting Scraped Data...");
 
     // We can bundle the adding of tags, locations and prices.

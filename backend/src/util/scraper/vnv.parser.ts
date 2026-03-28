@@ -269,3 +269,49 @@ function parseVnvPrice(object: Record<string, any>): vnvPrice {
     name: name,
   };
 }
+
+/**
+ * Galleries
+ */
+
+/**
+ * Parsed interface for a Media Gallery.
+ */
+export interface vnvGallery {
+  legacy_id: string;
+  type: string; // Always going to be "default"
+  name: string;
+  created_at: string;
+  updated_at: string;
+  items: string[]; // Legacy ids of the items linked to this gallery.
+}
+
+/**
+ * Parses raw objects into vnvGallery objects.
+ * @param galleries The list of raw scraped objects.
+ * @returns The list of parsed vnvGallery objects.
+ */
+export function parseGalleries(galleries: object[]): vnvGallery[] {
+  return galleries.map(parseVnvGallery);
+}
+
+/**
+ * Parses a single raw object to a vnvGallery.
+ * @param gallery The raw object.
+ * @returns The vnvGallery parsed object.
+ */
+function parseVnvGallery(gallery: Record<string, any>): vnvGallery {
+  const items: string[] = [];
+  for (const item of gallery.items) {
+    items.push(extractIdFromUri(item as string) || "N/A");
+  }
+
+  return {
+    legacy_id: extractIdFromUri(gallery["@id"] as string) || "",
+    type: "default",
+    name: (gallery.name as string) || "",
+    created_at: (gallery.created_at as string) || "1970-01-01T00:00:00+00:00",
+    updated_at: (gallery.updated_at as string) || "1970-01-01T00:00:00+00:00",
+    items: items,
+  };
+}

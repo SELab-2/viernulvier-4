@@ -2,11 +2,13 @@ import "dotenv/config";
 import { URLSearchParams } from "url";
 import {
   parseEvents,
+  parseGalleries,
   parseGenres,
   parseLocations,
   parsePrices,
   parseProductions,
   vnvEvent,
+  vnvGallery,
   vnvGenre,
   vnvLocation,
   vnvPrice,
@@ -53,6 +55,7 @@ export interface ScrapeResult {
   prices: vnvPrice[];
   genres: vnvGenre[];
   locations: vnvLocation[];
+  galleries: vnvGallery[];
 }
 
 @Injectable()
@@ -69,15 +72,26 @@ export class ScraperEngine {
   async scrape(after_date: string): Promise<ScrapeResult> {
     this.logger.debug("Starting Scraper...");
 
-    const [productions, events, event_prices, prices, genres, halls] =
-      await Promise.all([
-        this.scrapeMany("/api/v1/productions?page=1", after_date),
-        this.scrapeMany("/api/v1/events?page=1", after_date),
-        this.scrapeMany("/api/v1/events/prices?page=1", after_date),
-        this.scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00.000Z"),
-        this.scrapeMany("/api/v1/genres?page=1", after_date),
-        this.scrapeMany("/api/v1/halls?page=1", after_date),
-      ]);
+    // TODO: Remove dummy date when actual scraping begins.
+    const dummyDate: string = "2026-03-15T00:00:00.000Z";
+
+    const [
+      productions,
+      events,
+      event_prices,
+      prices,
+      genres,
+      halls,
+      galleries,
+    ] = await Promise.all([
+      this.scrapeMany("/api/v1/productions?page=1", after_date),
+      this.scrapeMany("/api/v1/events?page=1", after_date),
+      this.scrapeMany("/api/v1/events/prices?page=1", after_date),
+      this.scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00.000Z"),
+      this.scrapeMany("/api/v1/genres?page=1", after_date),
+      this.scrapeMany("/api/v1/halls?page=1", after_date),
+      this.scrapeMany("/api/v1/media/galleries?page=1", dummyDate),
+    ]);
 
     const priceDictionary = new Map<string, object>();
     for (const price of prices) {
@@ -92,12 +106,13 @@ export class ScraperEngine {
 
     this.logger.debug("Finished Scraper!");
 
-    const results = {
+    const results: ScrapeResult = {
       productions: parseProductions(productions),
       events: parseEvents(events),
       prices: parsePrices(event_prices),
       genres: parseGenres(genres),
       locations: parseLocations(halls),
+      galleries: parseGalleries(galleries),
     };
 
     const ls = new LanguageService(this.logger);
