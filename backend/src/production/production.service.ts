@@ -3,6 +3,7 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  MediaGalleryDto,
   PaginationFilterDto,
   ProductionDto,
   ReplaceProductionDto,
@@ -181,5 +182,46 @@ export class ProductionService {
   ): Promise<ProductionDto> {
     await this.productionDBService.removeTagFromProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
+  }
+
+  // -- Media -- //
+
+  /**
+   * Returns the media for a certain production.
+   * @param productionId The ID of the production.
+   * @returns The gallery linked with this production.
+   */
+  async getProductionMedia(productionId: number): Promise<MediaGalleryDto> {
+    return await this.productionDBService.getMediaFromProduction(productionId);
+  }
+
+  /**
+   * Links a media gallery to a production.
+   * @param productionId The ID of the production.
+   * @param galleryId The ID of the gallery.
+   */
+  async linkMediaToProduction(
+    productionId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.productionDBService.linkMediaToProduction(
+      productionId,
+      galleryId,
+    );
+  }
+
+  /**
+   * Unlinks a media gallery from a production.
+   * @param productionId The ID of the production.
+   * @param galleryId The ID of the gallery.
+   */
+  async unlinkMediaFromProduction(
+    productionId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.productionDBService.unlinkMediaFromProduction(
+      productionId,
+      galleryId,
+    );
   }
 }

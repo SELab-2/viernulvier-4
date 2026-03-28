@@ -7,8 +7,11 @@ import {
   MediaCropDto,
   MediaGalleryDto,
   MediaItemDto,
-  UpdateMediaCropDto,
-  UpdateMediaItemDto,
+  PaginationFilterDto,
+  ModifyMediaCropDto,
+  ModifyMediaItemDto,
+  ReplaceMediaCropDto,
+  ReplaceMediaItemDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
@@ -147,13 +150,34 @@ export class MediaDatabaseService {
   }
 
   /**
-   * Get all media items
+   * Get all media items paginated.
+   * @param paginationFilters The Filters regarding ordering and pagination.
    * @returns The MediaItems.
    */
-  async getAllItems(): Promise<MediaItemDto[]> {
-    const query = `SELECT * FROM media_item`;
+  async getAllItems(
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<MediaItemDto>> {
+    const query = `
+      SELECT * FROM media_item
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = `
+      SELECT COUNT(DISTINCT id) as count
+      FROM media_item;
+    `;
+    const offset = paginationFilters.page * paginationFilters.limit;
 
-    return await this.db.query<MediaItemDto>(query);
+    const [objects, countResult] = await Promise.all([
+      this.db.query<MediaItemDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery, []),
+    ]);
+
+    return {
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**
@@ -230,7 +254,7 @@ export class MediaDatabaseService {
    */
   async updateItem(
     itemId: number,
-    item: UpdateMediaItemDto,
+    item: ModifyMediaItemDto | ReplaceMediaItemDto,
   ): Promise<MediaItemDto> {
     const fields: string[] = [];
     const values: any[] = [];
@@ -386,23 +410,39 @@ export class MediaDatabaseService {
    * Get all media crops
    * @returns The MediaCrops.
    */
-  async getAllCrops(): Promise<MediaCropDto[]> {
-    const query = `SELECT * FROM media_crop`;
+  async getAllCrops(
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<MediaCropDto>> {
+    const query = `
+      SELECT * FROM media_crop
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = `
+      SELECT COUNT(DISTINCT id) as count
+      FROM media_crop;
+    `;
+    const offset = paginationFilters.page * paginationFilters.limit;
 
-    return await this.db.query<MediaCropDto>(query);
+    const [objects, countResult] = await Promise.all([
+      this.db.query<MediaCropDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery, []),
+    ]);
+
+    return {
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
+    };
   }
 
   /**
    * Create a new crop and link it to a media item.
    * @param crop Must be of type CreateMediaCropDto.
-   * @param itemId The item to link this crop to.
    * (if left empty then it will not be linked to anything)
    * @returns The created crop.
    */
-  async createCrop(
-    crop: CreateMediaCropDto,
-    itemId?: number,
-  ): Promise<MediaCropDto> {
+  async createCrop(crop: CreateMediaCropDto): Promise<MediaCropDto> {
     if (!crop.name || !crop.url) {
       throw new BadRequestException("Missing required fields");
     }
@@ -422,10 +462,10 @@ export class MediaDatabaseService {
       throw new Error("Failed to create media crop");
     }
 
-    if (itemId) {
+    if (crop.item_id) {
       await this.db.query(
         `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2)`,
-        [itemId, result[0].id],
+        [crop.item_id, result[0].id],
       );
     }
 
@@ -440,7 +480,7 @@ export class MediaDatabaseService {
    */
   async updateCrop(
     cropId: number,
-    crop: UpdateMediaCropDto,
+    crop: ModifyMediaCropDto | ReplaceMediaCropDto,
   ): Promise<MediaCropDto> {
     const fields: string[] = [];
     const values: any[] = [];

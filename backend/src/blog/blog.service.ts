@@ -3,6 +3,7 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 import {
   BlogDto,
   CreateBlogDto,
+  MediaGalleryDto,
   PaginationFilterDto,
   ReplaceBlogDto,
   ModifyBlogDto,
@@ -69,5 +70,34 @@ export class BlogService {
    */
   async deleteBlog(id: number): Promise<void> {
     return await this.blogDbService.deleteBlog(id);
+  }
+
+  // -- Media -- //
+
+  /**
+   * Fetches the media related to a blog.
+   * @param blogId The ID of the blog.
+   * @returns The media gallery.
+   */
+  async getMedia(blogId: number): Promise<MediaGalleryDto> {
+    return await this.blogDbService.getMediaFromBlog(blogId);
+  }
+
+  /**
+   * Link a media gallery to a blog.
+   * @param blogId The ID of the blog.
+   * @param galleryId The ID of the Gallery.
+   */
+  async linkMediaToBlog(blogId: number, galleryId: number): Promise<void> {
+    await this.blogDbService.linkMediaToBlog(blogId, galleryId);
+  }
+
+  /**
+   * Unlink a media gallery from a blog.
+   * @param blogId The ID of the blog.
+   * @param galleryId The ID of the Gallery.
+   */
+  async unlinkMediaFromBlog(blogId: number, galleryId: number): Promise<void> {
+    await this.blogDbService.unlinkMediaFromBlog(blogId, galleryId);
   }
 }

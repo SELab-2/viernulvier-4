@@ -28,6 +28,7 @@ export const CreateBlogSchema = MutableBlogSchema;
 export const ModifyBlogSchema = MutableBlogSchema.partial();
 export const ReplaceBlogSchema = MutableBlogSchema;
 
+// Type exports.
 export type Blog = z.infer<typeof BlogSchema>;
 export type BlogView = z.infer<typeof BlogViewSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;
