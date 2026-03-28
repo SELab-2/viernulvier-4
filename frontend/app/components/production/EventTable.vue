@@ -5,7 +5,15 @@
  *  - Scrollable when there are more than 3 events
  *
  * Usage:
- * TODO
+ * <EventTable
+ *    :events="events"
+ * />
+ *
+ * Example events: (There are 2 ways to create a date)
+ * const events: EventItem[] = [
+ *    { id: '1', date: new Date(2026, 2, 10, 19, 30), location: 'Antwerpen', price: '€ 15,00' },
+ *    { id: '2', date: new Date('2026-03-29T19:30:00'), location: 'Gent', price: '€ 12,50' }
+ * ]
  */
 import type {EventItem} from "../../types/EventItem";
 
