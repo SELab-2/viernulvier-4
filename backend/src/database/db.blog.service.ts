@@ -4,9 +4,9 @@ import {
   BlogDto,
   CreateBlogDto,
   MediaGalleryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
-  ModifyBlogDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
@@ -206,9 +206,9 @@ export class BlogDatabaseService {
    * @param blog_id The ID of the blog you want.
    * @returns List of MediaGalleryDto linked to the blog.
    */
-  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto> {
+  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto[]> {
     const query = `
-      SELECT mg.id, mg.created_at, mg.updated_at
+      SELECT mg.id, mg.name, mg.type, mg.created_at, mg.updated_at
       FROM media_gallery mg
       INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
       WHERE bmg.blog_id = $1
@@ -223,7 +223,7 @@ export class BlogDatabaseService {
       );
     }
 
-    return result[0];
+    return result;
   }
 
   /**

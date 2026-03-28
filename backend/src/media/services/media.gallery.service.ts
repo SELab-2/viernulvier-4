@@ -1,11 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse, PaginationFilter } from "@repo/common";
-import {
-  CreateMediaGalleryDto,
-  MediaGalleryDto,
-  MediaItemDto,
-} from "../../dto/dto";
+import { CreateMediaGalleryDto, MediaGalleryDto, MediaItemDto, } from "../../dto/dto";
+import { MediaGalleryDatabaseService } from "../../database/db.media_gallery.service";
 
 /**
  * Defines the connections between controller and database for
@@ -13,7 +9,7 @@ import {
  */
 @Injectable()
 export class MediaGalleryService {
-  constructor(private readonly mediaDbService: MediaDatabaseService) {}
+  constructor(private readonly mediaDbService: MediaGalleryDatabaseService) {}
 
   /**
    * Fetches a page of all galleries from the database service.

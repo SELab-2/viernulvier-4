@@ -4,12 +4,12 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginationFilterDto,
   MediaGalleryDto,
-  ProductionDto,
-  TagDto,
   ModifyProductionDto,
+  PaginationFilterDto,
+  ProductionDto,
   ReplaceProductionDto,
+  TagDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import {
@@ -541,9 +541,9 @@ export class ProductionDatabaseService {
    * @param prod_id The ID of the production you want.
    * @returns List of MediaGalleryDto linked to the production.
    */
-  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto> {
+  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto[]> {
     const query = `
-      SELECT mg.id, mg.created_at, mg.updated_at
+      SELECT mg.id, mg.name, mg.type, mg.created_at, mg.updated_at
       FROM media_gallery mg
       INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
       WHERE pmg.production_id = $1
@@ -558,7 +558,7 @@ export class ProductionDatabaseService {
       );
     }
 
-    return result[0];
+    return result;
   }
 
   /**
