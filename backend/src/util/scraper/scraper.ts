@@ -116,11 +116,9 @@ export class ScraperEngine {
     ]);
 
     // TODO: Remove Debug prints
-    console.log(crops);
+    //console.log(crops);
 
-    this.logger.log("Fixing items...");
     const fixedItems = await this.fixItems(items);
-    this.logger.log("Fixed items!");
 
     this.logger.log("Sifting crops...");
     const siftedCrops = this.siftCrops(crops);
@@ -207,11 +205,40 @@ export class ScraperEngine {
     };
     const output: object[] = [];
 
+    // Progress tracking
+    let totalItems: number = 0;
+    let processedItems: number = 0;
+    let lastLoggedPercent: number = -1;
+    const startTime: number = Date.now();
+
     while (view.next) {
       try {
         const jsonResponse = await this.fetchFromVnv(apiBase + view.next);
+
+        if (totalItems === 0) {
+          totalItems =
+            ((jsonResponse as Record<string, any>)["totalItems"] as number) ||
+            0;
+          this.logger.log(
+            `Starting scrape of ${url}. Total items to fetch: ${totalItems}.`,
+          );
+        }
+
         view = jsonResponse.view;
         output.push(...jsonResponse.member);
+        processedItems += jsonResponse.member.length;
+
+        const percent = Math.floor((processedItems / totalItems) * 100);
+
+        if (percent % 10 === 0 && percent !== lastLoggedPercent) {
+          const eta = this.calculateETA(startTime, processedItems, totalItems);
+
+          this.logger.log(
+            `[PROGRESS] ${url}: ${percent}% (${processedItems}/${totalItems}) | ETA: ${eta}`,
+          );
+
+          lastLoggedPercent = percent;
+        }
       } catch (error) {
         this.logger.error(
           `Failed to fetch page: ${view.next}`,
@@ -221,7 +248,6 @@ export class ScraperEngine {
       }
     }
 
-    this.logger.debug(`Scraped ${output.length} objects from ${url}.`);
     return output;
   }
 
@@ -250,8 +276,26 @@ export class ScraperEngine {
   private async fixItems(
     items: Record<string, any>[],
   ): Promise<Record<string, any>[]> {
+    const total: number = items.length;
+    let completed: number = 0;
+    let lastLoggedPercent: number = -1;
+    const startTime: number = Date.now();
+
     const fetchPromises = items.map(async (item) => {
-      return await this.scrapeOne(item["@id"] as string);
+      const fullItem = await this.scrapeOne(item["@id"] as string);
+
+      completed++;
+      const percent = Math.floor((completed / total) * 100);
+
+      if (percent % 10 === 0 && percent !== lastLoggedPercent) {
+        const eta = this.calculateETA(startTime, completed, total);
+        this.logger.log(
+          `[PROGRESS] Fixing items: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
+        );
+        lastLoggedPercent = percent;
+      }
+
+      return fullItem;
     });
 
     return await Promise.all(fetchPromises);
@@ -265,5 +309,31 @@ export class ScraperEngine {
    */
   private siftCrops(crops: Record<string, any>[]): Record<string, any>[] {
     return crops.filter((crop) => CROP_NAMES.includes(crop.name as CropName));
+  }
+
+  /**
+   * Calculates the ETA of a network action.
+   * @param startTime The starting time of the action.
+   * @param current The current items.
+   * @param total The total items.
+   * @returns A time string.
+   */
+  private calculateETA(
+    startTime: number,
+    current: number,
+    total: number,
+  ): string {
+    if (current === 0) return "Calculating...";
+
+    const elapsed = Date.now() - startTime; // ms spent so far
+    const msPerItem = elapsed / current;
+    const remainingItems = total - current;
+    const remainingMs = remainingItems * msPerItem;
+
+    // Convert MS to a nice string like "2m 30s"
+    const seconds = Math.floor((remainingMs / 1000) % 60);
+    const minutes = Math.floor((remainingMs / (1000 * 60)) % 60);
+
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   }
 }
