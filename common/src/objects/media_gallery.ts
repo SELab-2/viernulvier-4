@@ -27,9 +27,11 @@ const MutableMediaGallerySchema = MediaGallerySchema.omit({
 // Updating & Creating.
 export const CreateMediaGallerySchema = MutableMediaGallerySchema;
 export const ModifyMediaGallerySchema = MutableMediaGallerySchema.partial();
+export const ReplaceMediaGallerySchema = MutableMediaGallerySchema;
 
 // Type exports.
 export type MediaGallery = z.infer<typeof MediaGallerySchema>;
 export type CreateMediaGallery = z.infer<typeof CreateMediaGallerySchema>;
 export type ModifyMediaGallery = z.infer<typeof ModifyMediaGallerySchema>;
+export type ReplaceMediaGallery = z.infer<typeof ReplaceMediaGallerySchema>;
 export type GalleryType = z.infer<typeof GalleryTypeEnum>;

@@ -4,11 +4,11 @@ import {
   CreateProductionDto,
   FilterProductionDto,
   MediaGalleryDto,
+  ModifyProductionDto,
   PaginationFilterDto,
   ProductionDto,
   ReplaceProductionDto,
   TagDto,
-  ModifyProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
@@ -191,7 +191,7 @@ export class ProductionService {
    * @param productionId The ID of the production.
    * @returns The gallery linked with this production.
    */
-  async getProductionMedia(productionId: number): Promise<MediaGalleryDto> {
+  async getProductionMedia(productionId: number): Promise<MediaGalleryDto[]> {
     return await this.productionDBService.getMediaFromProduction(productionId);
   }
 

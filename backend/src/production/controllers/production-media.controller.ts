@@ -34,7 +34,7 @@ export class ProductionMediaController {
   @Get()
   async getMedia(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<MediaGalleryDto> {
+  ): Promise<MediaGalleryDto[]> {
     return await this.productionService.getProductionMedia(productionId);
   }
 

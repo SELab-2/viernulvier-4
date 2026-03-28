@@ -103,6 +103,8 @@ import {
   MediaGallerySchema,
   ModifyMediaGallery,
   ModifyMediaGallerySchema,
+  ReplaceMediaGallery,
+  ReplaceMediaGallerySchema,
 } from "./objects/media_gallery";
 import {
   CreateMediaItem,
@@ -205,6 +207,7 @@ export {
   CropNameEnum,
   ItemPositionEnum,
   GalleryTypeEnum,
+  ReplaceMediaGallerySchema,
 };
 export type {
   // Production Types. (productions.ts)
@@ -279,4 +282,5 @@ export type {
   CropName,
   ItemPosition,
   GalleryType,
+  ReplaceMediaGallery,
 };

@@ -1,6 +1,12 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateMediaGalleryDto, MediaGalleryDto, MediaItemDto, } from "../dto/dto";
+import {
+  CreateMediaGalleryDto,
+  MediaGalleryDto,
+  MediaItemDto,
+  ModifyMediaGalleryDto,
+  ReplaceMediaGalleryDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -91,6 +97,55 @@ export class MediaGalleryDatabaseService {
 
     if (result.length === 0) {
       throw new Error("Failed to create gallery");
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Updates a gallery
+   * @param galleryId is the gallery you want to update
+   * @param gallery Is the gallery object with the updates values
+   * @returns the updates gallery
+   */
+  async updateGallery(
+    galleryId: number,
+    gallery: ModifyMediaGalleryDto | ReplaceMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let index = 1;
+
+    if (gallery.name !== undefined) {
+      fields.push(`name = $${index++}`);
+      values.push(gallery.name);
+    }
+
+    if (gallery.type !== undefined) {
+      fields.push(`type = $${index++}`);
+      values.push(gallery.type);
+    }
+
+    if (fields.length === 0) {
+      throw new BadRequestException("No valid fields to update");
+    }
+
+    // Push the ID as the final value for the WHERE clause
+    values.push(galleryId);
+
+    const query = `
+    UPDATE media_gallery
+    SET ${fields.join(", ")}
+    WHERE id = $${index}
+    RETURNING id, created_at, updated_at, name, type
+  `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, values);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Failed to update media gallery with ID ${galleryId}.`,
+      );
     }
 
     return result[0];

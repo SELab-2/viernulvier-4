@@ -1,6 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { PaginatedResponse, PaginationFilter } from "@repo/common";
-import { CreateMediaGalleryDto, MediaGalleryDto, MediaItemDto, } from "../../dto/dto";
+import {
+  CreateMediaGalleryDto,
+  MediaGalleryDto,
+  MediaItemDto,
+  ModifyMediaGalleryDto,
+  ReplaceMediaGalleryDto,
+} from "../../dto/dto";
 import { MediaGalleryDatabaseService } from "../../database/db.media_gallery.service";
 
 /**
@@ -43,6 +49,19 @@ export class MediaGalleryService {
     createGallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
     return await this.mediaDbService.createGallery(createGallery);
+  }
+
+  /**
+   * Updates a media gallery object.
+   * @param galleryId is the gallery we want to update.
+   * @param gallery is the object with the updates values.
+   * @returns The updated gallery.
+   */
+  async updateGallery(
+    galleryId: number,
+    gallery: ModifyMediaGalleryDto | ReplaceMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    return await this.mediaDbService.updateGallery(galleryId, gallery);
   }
 
   /**

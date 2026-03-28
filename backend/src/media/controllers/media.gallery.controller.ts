@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -13,24 +14,21 @@ import {
 import { MediaGalleryService } from "../services/media.gallery.service";
 import {
   CreateMediaGallerySchema,
+  ModifyMediaGallerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
+  ReplaceMediaGallerySchema,
 } from "@repo/common";
 import {
   CreateMediaGalleryDto,
   MediaGalleryDto,
   MediaItemDto,
+  ModifyMediaGalleryDto,
   PaginationFilterDto,
+  ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
-import {
-  ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
 import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
@@ -90,6 +88,52 @@ export class MediaGalleryController {
     createGallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
     return await this.mediaGalleryService.createGallery(createGallery);
+  }
+
+  /**
+   * Responds to a PUT to "/media/galleries/:galleryId"
+   * @param galleryId The ID of the gallery.
+   * @param replaceGallery The gallery we want to replace with.
+   * @returns The replaced gallery.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Replaces an existing media gallery." })
+  @ApiBody({ type: ReplaceMediaGalleryDto })
+  @ApiOkResponse({ type: MediaGalleryDto, description: "Replaced gallery." })
+  @Put(":galleryId")
+  async replaceCrop(
+    @Param("galleryId", ParseIntPipe) galleryId: number,
+    @Body(new ZodValidationPipe(ReplaceMediaGallerySchema))
+    replaceGallery: ReplaceMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    return await this.mediaGalleryService.updateGallery(
+      galleryId,
+      replaceGallery,
+    );
+  }
+
+  /**
+   * Responds to a PATCH to "/media/galleries/:galleryId"
+   * @param galleryId The ID of the gallery.
+   * @param modifyGallery The partial data to modify with.
+   * @returns The modified media gallery.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Modifies an existing media gallery." })
+  @ApiBody({ type: ModifyMediaGalleryDto })
+  @ApiOkResponse({ type: MediaGalleryDto, description: "Modified gallery." })
+  @Patch(":galleryId")
+  async modifyCrop(
+    @Param("galleryId", ParseIntPipe) galleryId: number,
+    @Body(new ZodValidationPipe(ModifyMediaGallerySchema))
+    modifyGallery: ModifyMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    return await this.mediaGalleryService.updateGallery(
+      galleryId,
+      modifyGallery,
+    );
   }
 
   /**

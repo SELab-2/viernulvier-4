@@ -4,9 +4,9 @@ import {
   BlogDto,
   CreateBlogDto,
   MediaGalleryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
-  ModifyBlogDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -79,7 +79,7 @@ export class BlogService {
    * @param blogId The ID of the blog.
    * @returns The media gallery.
    */
-  async getMedia(blogId: number): Promise<MediaGalleryDto> {
+  async getMedia(blogId: number): Promise<MediaGalleryDto[]> {
     return await this.blogDbService.getMediaFromBlog(blogId);
   }
 

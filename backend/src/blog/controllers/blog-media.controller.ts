@@ -1,19 +1,6 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Put,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Delete, Get, Param, ParseIntPipe, Put, UseGuards, } from "@nestjs/common";
 import { BlogService } from "../blog.service";
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
 import { MediaGalleryDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
@@ -34,7 +21,7 @@ export class BlogMediaController {
   @Get()
   async getMedia(
     @Param("blogId", ParseIntPipe) blogId: number,
-  ): Promise<MediaGalleryDto> {
+  ): Promise<MediaGalleryDto[]> {
     return await this.blogService.getMedia(blogId);
   }
 
