@@ -16,6 +16,7 @@
  * ]
  */
 import type {EventItem} from "../../types/EventItem";
+const { t } = useI18n()
 
 interface Props {
   events: EventItem[]
@@ -60,9 +61,9 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
         <!-- Header -->
         <thead>
         <tr class="bg-foreground text-background text-[11px] uppercase tracking-widest">
-          <th class="text-left p-4">Datum & Tijd</th>
-          <th class="text-left p-4">Locatie</th>
-          <th class="text-left p-4">Prijs</th>
+          <th class="text-left p-4">{{ t('production.dateAndTime') }}</th>
+          <th class="text-left p-4">{{ t('production.location') }}</th>
+          <th class="text-left p-4">{{ t('production.price') }}</th>
         </tr>
         </thead>
 
@@ -111,7 +112,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
         v-else
         class="bg-muted border border-border rounded-lg p-4 text-[11px] text-muted-foreground"
     >
-      Deze productie bevat geen evenementen.
+      {{ t('production.noEvents') }}
     </div>
   </div>
 </template>

@@ -51,5 +51,11 @@
     "prints": "Drukwerk",
     "rights": "Alle rechten voorbehouden",
     "newsletter": "Blijf op de hoogte"
+  },
+  "production": {
+    "dateAndTime": "Datum & Tijd",
+    "location": "Locatie",
+    "price": "Prijs",
+    "noEvents": "Deze productie bevat geen evenementen."
   }
 }
