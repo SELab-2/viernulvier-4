@@ -87,7 +87,7 @@ export class MediaCropController {
     @Body(new ZodValidationPipe(CreateMediaCropSchema))
     createCrop: CreateMediaCropDto,
   ): Promise<MediaCropDto> {
-    return await this.mediaCropService.createCrop(createCrop);
+    return await this.mediaCropService.createCrop(createCrop, autoDownload);
   }
 
   /**
