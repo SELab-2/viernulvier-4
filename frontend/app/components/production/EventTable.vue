@@ -84,23 +84,19 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
                 "
             >
               <!-- Date -->
-              <td class="p-4 w-[40%]">
-                <p class="font-bold text-[12px]">
-                  {{ formatDate(event.date) }}
-                </p>
-                <p class="text-[10px] text-muted-foreground mt-1">
-                  {{ formatTime(event.date) }}
-                </p>
+              <td class="p-4 w-[40%] max-w-0">
+                <p class="font-bold text-[12px] truncate">{{ formatDate(event.date) }}</p>
+                <p class="text-[10px] text-muted-foreground mt-1 truncate">{{ formatTime(event.date) }}</p>
               </td>
 
               <!-- Location -->
-              <td class="p-4 text-[12px] w-[40%]">
-                {{ event.location }}
+              <td class="p-4 text-[12px] w-[40%] max-w-0">
+                <p class="truncate">{{ event.location }}</p>
               </td>
 
               <!-- Price -->
-              <td class="p-4 text-[12px] font-bold w-[20%]">
-                {{ event.price }}
+              <td class="p-4 text-[12px] font-bold w-[20%] max-w-0">
+                <p class="truncate">{{ event.price }}</p>
               </td>
             </tr>
           </tbody>
