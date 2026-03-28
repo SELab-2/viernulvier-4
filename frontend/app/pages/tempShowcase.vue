@@ -6,19 +6,19 @@ const events1 = [
   {
     id: '1',
     date: new Date(2026, 2, 10, 19, 30),
-    location: 'Event 1',
+    location: 'Event 1 location',
     price: '€30'
   },
   {
     id: '2',
     date: new Date(2025, 6, 7, 2, 15),
-    location: 'Event 2',
+    location: 'Event 2 location',
     price: '€25'
   },
   {
     id: '3',
     date: new Date(2026, 10, 7, 15, 20),
-    location: 'Event 3',
+    location: 'Event 3 location',
     price: '€25'
   }
 ]

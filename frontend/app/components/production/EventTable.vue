@@ -1,8 +1,7 @@
 <script setup lang="ts">/**
  * A reusable event table component, displays events belonging to a specific production in a table, includes:
- *  - time
- *  - location
- *  - price
+ *  - Time, location, price displayed per event
+ *  - Sorting of events
  *
  * Usage:
  * TODO
@@ -12,7 +11,7 @@ import type {EventItem} from "../../types/EventItem";
 interface Props {
   events: EventItem[]
 }
-defineProps<Props>()
+const props = defineProps<Props>()
 
 // function to format the date
 const formatDate = (date: Date) => {
@@ -31,7 +30,10 @@ const formatTime = (date: Date) => {
     minute: '2-digit'
   })
 }
-//TODO: sorteren?
+
+const sortedEvents = computed(() => { // function to sort the events, oldest first
+  return [...props.events].sort((a, b) => a.date.getTime() - b.date.getTime())
+})
 //TODO: wat met super veel events?
 </script>
 
@@ -59,7 +61,7 @@ const formatTime = (date: Date) => {
         <!-- Body -->
         <tbody>
         <tr
-            v-for="event in events"
+            v-for="event in sortedEvents"
             :key="event.id"
             class="
               border-t border-border
