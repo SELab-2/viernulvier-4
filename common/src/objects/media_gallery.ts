@@ -5,7 +5,7 @@
 import z from "zod";
 
 // enum for gallery type:
-export const GALLERY_TYPES = ["main", "carousel"] as const;
+export const GALLERY_TYPES = ["default", "prints"] as const;
 export const GalleryTypeEnum = z.enum(GALLERY_TYPES);
 
 // Base Gallery object.
