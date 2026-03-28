@@ -1,8 +1,10 @@
-import { Controller, Delete, Get, Param, ParseIntPipe, Put, UseGuards, } from "@nestjs/common";
+import { Controller, Delete, Get, Param, ParseEnumPipe, ParseIntPipe, Put, UseGuards, } from "@nestjs/common";
 import { BlogService } from "../blog.service";
 import { ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
 import { MediaGalleryDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import type { GalleryType } from "@repo/common";
+import { GalleryTypeEnum } from "@repo/common";
 
 @ApiTags("Blogs - Media")
 @Controller("blogs/:blogId/media")
@@ -14,6 +16,7 @@ export class BlogMediaController {
    * This endpoint only returns one singular Gallery
    * because in any case only one will be assigned to a Blog.
    * @param blogId The ID of the blog.
+   * @param type The type of media wanted.
    * @returns The media gallery associated with this blog.
    */
   @ApiOperation({ summary: "Fetches the media gallery for a blog." })
@@ -21,8 +24,9 @@ export class BlogMediaController {
   @Get()
   async getMedia(
     @Param("blogId", ParseIntPipe) blogId: number,
-  ): Promise<MediaGalleryDto[]> {
-    return await this.blogService.getMedia(blogId);
+    @Param("type", new ParseEnumPipe(GalleryTypeEnum)) type: GalleryType,
+  ): Promise<MediaGalleryDto> {
+    return await this.blogService.getMedia(blogId, type);
   }
 
   /**

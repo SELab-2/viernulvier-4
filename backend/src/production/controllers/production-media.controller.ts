@@ -3,6 +3,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseEnumPipe,
   ParseIntPipe,
   Put,
   UseGuards,
@@ -16,6 +17,7 @@ import {
 } from "@nestjs/swagger";
 import { MediaGalleryDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { type GalleryType, GalleryTypeEnum } from "@repo/common";
 
 @ApiTags("Productions - Media")
 @Controller("productions/:productionId/media")
@@ -27,6 +29,7 @@ export class ProductionMediaController {
    * This endpoint only returns one singular Gallery
    * because in any case only one will be assigned to a Production.
    * @param productionId The ID of the production to get media for.
+   * @param type is the wanted type of gallery.
    * @returns The media gallery associated to this production.
    */
   @ApiOperation({ summary: "Fetch media gallery connected to production." })
@@ -34,8 +37,9 @@ export class ProductionMediaController {
   @Get()
   async getMedia(
     @Param("productionId", ParseIntPipe) productionId: number,
-  ): Promise<MediaGalleryDto[]> {
-    return await this.productionService.getProductionMedia(productionId);
+    @Param("type", new ParseEnumPipe(GalleryTypeEnum)) type: GalleryType,
+  ): Promise<MediaGalleryDto> {
+    return await this.productionService.getProductionMedia(productionId, type);
   }
 
   /**

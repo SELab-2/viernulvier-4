@@ -14,6 +14,7 @@ import {
 import { ResourceGoneException } from "../common/exceptions";
 import {
   FilterProductionSchema,
+  GalleryType,
   PaginatedResponse,
   PaginationFilterSchema,
   SUPPORTED_LANGUAGES,
@@ -539,26 +540,31 @@ export class ProductionDatabaseService {
   /**
    * Gets media gallery linked to a given production.
    * @param prod_id The ID of the production you want.
-   * @returns List of MediaGalleryDto linked to the production.
+   * @param type is the type of media you want.
+   * @returns The MediaGallery if it exists.
    */
-  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto[]> {
+  async getMediaFromProduction(
+    prod_id: number,
+    type: GalleryType,
+  ): Promise<MediaGalleryDto> {
     const query = `
       SELECT mg.id, mg.name, mg.type, mg.created_at, mg.updated_at
       FROM media_gallery mg
       INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
-      WHERE pmg.production_id = $1
+      WHERE pmg.production_id = $1 AND mg.type = $2
       ORDER BY mg.id
+      LIMIT 1
     `;
 
-    const result = await this.db.query<MediaGalleryDto>(query, [prod_id]);
+    const result = await this.db.query<MediaGalleryDto>(query, [prod_id, type]);
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Production with ID ${prod_id} has no media gallery`,
+        `Production with ID ${prod_id} has no media gallery of the given type`,
       );
     }
 
-    return result;
+    return result[0];
   }
 
   /**

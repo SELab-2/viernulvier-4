@@ -9,7 +9,7 @@ import {
   ReplaceBlogDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { PaginatedResponse } from "@repo/common";
+import { GalleryType, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -202,28 +202,33 @@ export class BlogDatabaseService {
   }
 
   /**
-   * Gets media gallery linked to a given blog.
+   * Gets media gallery linked to a given blog with the given type.
    * @param blog_id The ID of the blog you want.
-   * @returns List of MediaGalleryDto linked to the blog.
+   * @param type The type of gallery you want.
+   * @returns The MediaGallery of given type if it exists.
    */
-  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto[]> {
+  async getMediaFromBlog(
+    blog_id: number,
+    type: GalleryType,
+  ): Promise<MediaGalleryDto> {
     const query = `
       SELECT mg.id, mg.name, mg.type, mg.created_at, mg.updated_at
       FROM media_gallery mg
       INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
-      WHERE bmg.blog_id = $1
+      WHERE bmg.blog_id = $1 AND mg.type = $2
       ORDER BY mg.id
+      LIMIT 1
     `;
 
-    const result = await this.db.query<MediaGalleryDto>(query, [blog_id]);
+    const result = await this.db.query<MediaGalleryDto>(query, [blog_id, type]);
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Blog with ID ${blog_id} has no media gallery`,
+        `Blog with ID ${blog_id} has no media gallery of the given type`,
       );
     }
 
-    return result;
+    return result[0];
   }
 
   /**
