@@ -15,6 +15,7 @@
  *    { id: '2', date: new Date('2026-03-29T19:30:00'), location: 'Gent', price: '€ 12,50' }
  * ]
  */
+
 import type {EventItem} from "../../types/EventItem";
 const { t, locale } = useI18n()
 
