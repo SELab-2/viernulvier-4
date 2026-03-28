@@ -7,25 +7,30 @@ jest.mock("fs");
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
 
-function createMockStream(rows: any[], error?: Error) {
-  const stream = new Readable({
+function createMockReadStream(rows: any[], error?: Error) {
+  const sourceStream = new Readable({
+    read() {},
+  });
+
+  const parsedStream = new Readable({
     objectMode: true,
     read() {},
   });
 
+  // Mock the pipe method to return the parsed stream
+  sourceStream.pipe = jest.fn().mockReturnValue(parsedStream);
+
   process.nextTick(() => {
     if (error) {
-      stream.emit("error", error);
+      parsedStream.emit("error", error);
       return;
     }
 
-    rows.forEach((row) => stream.emit("data", row));
-    stream.emit("end");
+    rows.forEach((row) => parsedStream.emit("data", row));
+    parsedStream.emit("end");
   });
 
-  return {
-    pipe: jest.fn().mockReturnValue(stream),
-  };
+  return sourceStream;
 }
 
 describe("CSVFileParser", () => {
@@ -42,7 +47,7 @@ describe("CSVFileParser", () => {
 
     it("should parse valid rows", async () => {
       mockedFs.createReadStream.mockReturnValue(
-        createMockStream([
+        createMockReadStream([
           { name: "John", age: "30" },
           { name: "Jane", age: "25" },
         ]) as any,
@@ -68,9 +73,33 @@ describe("CSVFileParser", () => {
       ]);
     });
 
+    it("should parse valid rows from an in-memory Buffer", async () => {
+      const csvBuffer = Buffer.from("name,age\nJohn,30\nJane,25\n", "utf8");
+
+      const schema = z.object({
+        name: z.string(),
+        age: z.number(),
+      });
+
+      const result = await CSVFileParser.parseCSVWithSchema(
+        csvBuffer,
+        schema,
+        (row) => ({
+          name: row.name,
+          age: Number(row.age),
+        }),
+      );
+
+      expect(result).toEqual([
+        { name: "John", age: 30 },
+        { name: "Jane", age: 25 },
+      ]);
+      expect(mockedFs.createReadStream).not.toHaveBeenCalled();
+    });
+
     it("should reject when stream emits error", async () => {
       mockedFs.createReadStream.mockReturnValue(
-        createMockStream([], new Error("Stream failure")) as any,
+        createMockReadStream([], new Error("Stream failure")) as any,
       );
 
       await expect(
@@ -88,6 +117,8 @@ describe("CSVFileParser", () => {
         Production: "7",
         Location_NL: "Grote Zaal",
         Location_EN: "Main Hall",
+        Doors_At: "2024-03-15 18:30:00",
+        Intermission_At: "2024-03-15 20:00:00",
       };
 
       const result = CSVFileParser.transformEventRow(row);
@@ -97,8 +128,8 @@ describe("CSVFileParser", () => {
         endtime: new Date("2024-03-15 21:00:00").toISOString(),
         production_id: 7,
         location: { en: "Main Hall", nl: "Grote Zaal" },
-        doors_at: null,
-        intermission_at: null,
+        doors_at: new Date("2024-03-15 18:30:00").toISOString(),
+        intermission_at: new Date("2024-03-15 20:00:00").toISOString(),
         legacy_id: "csv-42",
       });
     });
@@ -111,6 +142,8 @@ describe("CSVFileParser", () => {
         Production: "5",
         Location_NL: "",
         Location_EN: "",
+        Doors_At: "",
+        Intermission_At: "",
       };
 
       const result = CSVFileParser.transformEventRow(row);

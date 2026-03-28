@@ -48,6 +48,7 @@ import {
   ReplaceMediaCropSchema,
   ReplaceMediaItemSchema,
 } from "@repo/common";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
 // This file wraps the Objects into an DTO Swagger can see.
 
@@ -126,3 +127,16 @@ export class MediaCropDto extends createZodDto(MediaCropSchema) {}
 export class CreateMediaCropDto extends createZodDto(CreateMediaCropSchema) {}
 export class ModifyMediaCropDto extends createZodDto(ModifyMediaCropSchema) {}
 export class ReplaceMediaCropDto extends createZodDto(ReplaceMediaCropSchema) {}
+export class UpdateMediaCropDto extends createZodDto(UpdatedMediaCropSchema) {}
+
+// CSV Upload DTO
+export class ParserUploadCsvBodyDto {
+  @ApiProperty({ type: "string", format: "binary" })
+  file?: unknown;
+
+  @ApiPropertyOptional({
+    description:
+      "Optional fallback path on the server when no multipart file is uploaded.",
+  })
+  filePath?: string;
+}
