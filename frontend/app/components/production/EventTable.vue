@@ -16,7 +16,7 @@
  * ]
  */
 import type {EventItem} from "../../types/EventItem";
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 interface Props {
   events: EventItem[]
@@ -25,7 +25,7 @@ const props = defineProps<Props>()
 
 // function to format the date
 const formatDate = (date: Date) => {
-  return date.toLocaleDateString('nl', {
+  return date.toLocaleDateString(locale.value, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -35,7 +35,7 @@ const formatDate = (date: Date) => {
 
 // function to format the time
 const formatTime = (date: Date) => {
-  return date.toLocaleTimeString('nl', {
+  return date.toLocaleTimeString(locale.value, {
     hour: '2-digit',
     minute: '2-digit'
   })
@@ -50,7 +50,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
   <div class="m-4">
     <!-- title -->
     <h3 class="text-[12px] font-bold uppercase mb-2">
-      Evenementen
+      {{ t('production.events') }}
     </h3>
 
     <div
