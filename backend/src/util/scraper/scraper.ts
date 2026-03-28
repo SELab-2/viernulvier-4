@@ -17,18 +17,12 @@ import {
 import { LanguageService } from "../language/language.service";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
+import Bottleneck from "bottleneck";
+
 /**
  * The Base of the VNV API.
  */
 const apiBase: string = "https://www.viernulvier.gent";
-
-/**
- * A delay function we can use to wait a certain amount of time.
- * Useful when trying to avoid rate limits.
- * @param ms The amount of milliseconds we want to wait for.
- * @returns A Promise that does nothing for a set amount of time.
- */
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * The important parts of an apiResponse.
@@ -62,7 +56,28 @@ export class ScraperEngine {
   constructor(
     private readonly languageService: LanguageService,
     private readonly logger: AppLogger,
-  ) {}
+  ) {
+    // eslint-disable-next-line @typescript-eslint/require-await
+    this.limiter.on("failed", async (error: Error, jobInfo) => {
+      if (jobInfo.retryCount < 3) {
+        // Retry up to 3 times.
+        this.logger.warn(
+          `Retrying job ${jobInfo.options.id}: ${error.message}`,
+        );
+        return 2500; // Wait 2.5s before retrying.
+      } else {
+        this.logger.warn(`Abandoning job ${jobInfo.options.id}`);
+      }
+    });
+  }
+
+  /**
+   * Limiter used for scraping.
+   */
+  private readonly limiter = new Bottleneck({
+    maxConcurrent: 20, // Maximum connections open at a time.
+    minTime: 50, // Waits x ms between starts.
+  });
 
   /**
    * Scrapes the existing data we need from the VNV API.
@@ -123,16 +138,19 @@ export class ScraperEngine {
       galleries: parseGalleries(galleries),
     };
 
-    const ls = new LanguageService(this.logger);
-
     this.logger.debug("Started translating");
 
     // add translations here if you want to translate to more languages.
-    const translated_results = await ls.translateObject(results, "nl", "en");
+    const translated_results =
+      await this.languageService.translateObject<ScrapeResult>(
+        results,
+        "nl",
+        "en",
+      );
 
-    this.logger.debug("finished translating");
+    this.logger.debug("Finished translating");
 
-    return translated_results as ScrapeResult;
+    return translated_results;
   }
 
   /**
@@ -144,17 +162,20 @@ export class ScraperEngine {
     const apiKey = process.env.CLIENT_API_KEY;
     if (!apiKey) throw new Error("Forgot to set CLIENT_API_KEY in .env?");
 
-    const response = await fetch(target, {
-      method: "GET",
-      headers: {
-        accept: "application/ld+json",
-        "X-AUTH-TOKEN": `${apiKey}`,
-      },
+    return this.limiter.schedule({ id: target }, async () => {
+      const response = await fetch(target, {
+        method: "GET",
+        headers: {
+          accept: "application/ld+json",
+          "X-AUTH-TOKEN": `${apiKey}`,
+        },
+      });
+
+      if (!response.ok)
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+      return (await response.json()) as apiResponse;
     });
-
-    if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
-
-    return (await response.json()) as apiResponse;
   }
 
   /**
@@ -164,14 +185,9 @@ export class ScraperEngine {
    * @returns A list of all the scraped objects. Generically typed.
    */
   async scrapeMany(url: string, updatedAfter: string): Promise<object[]> {
-    const apiKey = process.env.CLIENT_API_KEY;
-    if (!apiKey) {
-      this.logger.error("Make sure to set CLIENT_API_KEY in .env!");
-      return [];
-    }
-
     const params = new URLSearchParams();
     params.append("updated_at[after]", updatedAfter);
+
     let view: viewState = {
       next: url + "&" + params.toString(),
     };
@@ -179,17 +195,12 @@ export class ScraperEngine {
 
     while (view.next) {
       try {
-        const target: string = apiBase + view.next;
-
-        const jsonResponse: apiResponse = await this.fetchFromVnv(target);
+        const jsonResponse = await this.fetchFromVnv(apiBase + view.next);
         view = jsonResponse.view;
-
         output.push(...jsonResponse.member);
-        await delay(100);
       } catch (error) {
-        this.logger.error("An error occurred: ", error);
-        this.logger.error("Retrying...");
-        await delay(5000); // Wait a bit longer before retrying.
+        this.logger.error(`Failed to fetch page: ${view.next}`, error);
+        break; // Triggered when all retries fail.
       }
     }
 
@@ -203,26 +214,12 @@ export class ScraperEngine {
    * @returns The object that has been scraped.
    */
   async scrapeOne(url: string): Promise<object> {
-    const apiKey = process.env.CLIENT_API_KEY;
-    if (!apiKey) {
-      this.logger.error("Make sure to set CLIENT_API_KEY in .env!");
-      return [];
-    }
-
     try {
-      const target: string = apiBase + url;
-      return await this.fetchFromVnv(target);
-    } catch (error) {
-      const isRetryable =
-        error.response?.status === 429 || error.response?.status >= 500;
-      if (isRetryable) {
-        this.logger.debug("Retrying scrapeOne...");
-        await delay(1000);
-        return await this.scrapeOne(url);
-      }
+      return await this.fetchFromVnv(apiBase + url);
+    } catch {
+      this.logger.error(`Failed scrapeOne for ${url}`);
+      return {}; // Triggered when all retries fail.
     }
-
-    return {};
   }
 
   /**
