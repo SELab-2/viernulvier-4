@@ -1,4 +1,4 @@
-import { ItemPosition } from "@repo/common";
+import { CropName, ItemPosition } from "@repo/common";
 
 /**
  * Localization of any string that needs it.
@@ -373,5 +373,40 @@ function parseVnvMediaItem(item: Record<string, any>): vnvMediaItem {
     description: (item.description as vnvLocal) || { en: "N/A", nl: "N/A" },
     title: (item.title as vnvLocal) || { en: "N/A", nl: "N/A" },
     crops: crops,
+  };
+}
+
+/**
+ * Media crops
+ */
+
+/**
+ * Parsed interface for media crops.
+ */
+export interface vnvMediaCrop {
+  legacy_id: string;
+  name: CropName;
+  url: string; // This contains the URL to the VNV host of the image. Still need to download.
+}
+
+/**
+ * Parses raw objects to vnvMediaCrop objects.
+ * @param crops The raw objects.
+ * @returns The parsed vnvMediaCrop objects.
+ */
+export function parseMediaCrops(crops: object[]): vnvMediaCrop[] {
+  return crops.map(parseVnvMediaCrop);
+}
+
+/**
+ * Parse a single raw object to a vnvMediaCrop
+ * @param crop The raw object.
+ * @returns The parsed vnvMediaCrop
+ */
+function parseVnvMediaCrop(crop: Record<string, any>): vnvMediaCrop {
+  return {
+    legacy_id: extractIdFromUri(crop["@id"] as string) || "",
+    name: (crop.name as CropName) || "",
+    url: (crop.url as string) || "",
   };
 }

@@ -5,6 +5,7 @@ import {
   parseGalleries,
   parseGenres,
   parseLocations,
+  parseMediaCrops,
   parseMediaItems,
   parsePrices,
   parseProductions,
@@ -12,6 +13,7 @@ import {
   vnvGallery,
   vnvGenre,
   vnvLocation,
+  vnvMediaCrop,
   vnvMediaItem,
   vnvPrice,
   vnvProduction,
@@ -53,6 +55,7 @@ export interface ScrapeResult {
   locations: vnvLocation[];
   galleries: vnvGallery[];
   items: vnvMediaItem[];
+  crops: vnvMediaCrop[];
 }
 
 @Injectable()
@@ -115,17 +118,9 @@ export class ScraperEngine {
       this.scrapeMany("/api/v1/media/items/crops?page=1", dummyDate),
     ]);
 
-    // TODO: Remove Debug prints
-    //console.log(crops);
-
+    // Fix the items and sift out crops that we don't need.
     const fixedItems = await this.fixItems(items);
-
-    this.logger.log("Sifting crops...");
     const siftedCrops = this.siftCrops(crops);
-    this.logger.log("Sifted crops!");
-
-    // TODO: Remove Debug prints
-    console.log(siftedCrops);
 
     const priceDictionary = new Map<string, object>();
     for (const price of prices) {
@@ -148,6 +143,7 @@ export class ScraperEngine {
       locations: parseLocations(halls),
       galleries: parseGalleries(galleries),
       items: parseMediaItems(fixedItems),
+      crops: parseMediaCrops(siftedCrops),
     };
 
     this.logger.debug("Started translating");
@@ -308,7 +304,12 @@ export class ScraperEngine {
    * @returns The list of crops that we need.
    */
   private siftCrops(crops: Record<string, any>[]): Record<string, any>[] {
-    return crops.filter((crop) => CROP_NAMES.includes(crop.name as CropName));
+    this.logger.log("Sifting crops...");
+    const filteredCrops = crops.filter((crop) =>
+      CROP_NAMES.includes(crop.name as CropName),
+    );
+    this.logger.log("Sifted crops!");
+    return filteredCrops;
   }
 
   /**
