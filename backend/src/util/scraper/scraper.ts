@@ -17,7 +17,6 @@ import {
 import { LanguageService } from "../language/language.service";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
-
 /**
  * The Base of the VNV API.
  */
@@ -83,6 +82,7 @@ export class ScraperEngine {
       genres,
       halls,
       galleries,
+      items,
     ] = await Promise.all([
       this.scrapeMany("/api/v1/productions?page=1", after_date),
       this.scrapeMany("/api/v1/events?page=1", after_date),
@@ -91,7 +91,15 @@ export class ScraperEngine {
       this.scrapeMany("/api/v1/genres?page=1", after_date),
       this.scrapeMany("/api/v1/halls?page=1", after_date),
       this.scrapeMany("/api/v1/media/galleries?page=1", dummyDate),
+      this.scrapeMany("/api/v1/media/items?page=1", dummyDate),
     ]);
+
+    this.logger.log("Fixing items...");
+    const fixedItems = await this.fixItems(items);
+    this.logger.log("Fixed items!");
+
+    // TODO: Remove Debug prints
+    console.log(fixedItems);
 
     const priceDictionary = new Map<string, object>();
     for (const price of prices) {
@@ -194,7 +202,6 @@ export class ScraperEngine {
    * @param url The URL we want to scrape from.
    * @returns The object that has been scraped.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async scrapeOne(url: string): Promise<object> {
     const apiKey = process.env.CLIENT_API_KEY;
     if (!apiKey) {
@@ -204,11 +211,34 @@ export class ScraperEngine {
 
     try {
       const target: string = apiBase + url;
-
       return await this.fetchFromVnv(target);
     } catch (error) {
-      this.logger.error("An error occurred: ", error);
-      return {};
+      const isRetryable =
+        error.response?.status === 429 || error.response?.status >= 500;
+      if (isRetryable) {
+        this.logger.debug("Retrying scrapeOne...");
+        await delay(1000);
+        return await this.scrapeOne(url);
+      }
     }
+
+    return {};
+  }
+
+  /**
+   * This function is needed because of the "crops" field missing in the paginated
+   * response from the VNV API for media items.
+   * This means we have to individually fetch each item again after fetching
+   * the whole list. That's what this function does.
+   * @param items The currently fetched items, to be extended with crops.
+   */
+  private async fixItems(
+    items: Record<string, any>[],
+  ): Promise<Record<string, any>[]> {
+    const fetchPromises = items.map(async (item) => {
+      return await this.scrapeOne(item["@id"] as string);
+    });
+
+    return await Promise.all(fetchPromises);
   }
 }
