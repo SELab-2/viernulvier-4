@@ -61,9 +61,9 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
         <!-- Header -->
         <thead>
         <tr class="bg-foreground text-background text-[11px] uppercase tracking-widest">
-          <th class="text-left p-4">{{ t('production.dateAndTime') }}</th>
-          <th class="text-left p-4">{{ t('production.location') }}</th>
-          <th class="text-left p-4">{{ t('production.price') }}</th>
+          <th class="text-left p-4 w-[40%]">{{ t('production.dateAndTime') }}</th>
+          <th class="text-left p-4 w-[40%]">{{ t('production.location') }}</th>
+          <th class="text-left p-4 w-[20%]">{{ t('production.price') }}</th>
         </tr>
         </thead>
 
@@ -83,7 +83,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
                 "
             >
               <!-- Date -->
-              <td class="p-4">
+              <td class="p-4 w-[40%]">
                 <p class="font-bold text-[12px]">
                   {{ formatDate(event.date) }}
                 </p>
@@ -93,12 +93,12 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
               </td>
 
               <!-- Location -->
-              <td class="p-4 text-[12px]">
+              <td class="p-4 text-[12px] w-[40%]">
                 {{ event.location }}
               </td>
 
               <!-- Price -->
-              <td class="p-4 text-[12px] font-bold">
+              <td class="p-4 text-[12px] font-bold w-[20%]">
                 {{ event.price }}
               </td>
             </tr>
