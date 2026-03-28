@@ -15,26 +15,19 @@ import { MediaCropService } from "../services/media.crop.service";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateMediaCropSchema,
+  ModifyMediaCropSchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  ModifyMediaCropSchema,
   ReplaceMediaCropSchema,
 } from "@repo/common";
 import {
   CreateMediaCropDto,
   MediaCropDto,
-  PaginationFilterDto,
   ModifyMediaCropDto,
+  PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import {
-  ApiBody,
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
 import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
@@ -78,6 +71,7 @@ export class MediaCropController {
   /**
    * Responds to a POST to "/media/crops"
    * @param createCrop The crop we want to create (includes the item it should be linked to)
+   * @param autoDownload indicates whether you want to download the media from the given url and save it to the server.
    * @returns The created crop.
    */
   @UseGuards(ApiKeyGuard)
@@ -89,6 +83,7 @@ export class MediaCropController {
   })
   @Post()
   async createCrop(
+    @Param("autoDownload", ParseIntPipe) autoDownload: boolean = true,
     @Body(new ZodValidationPipe(CreateMediaCropSchema))
     createCrop: CreateMediaCropDto,
   ): Promise<MediaCropDto> {
