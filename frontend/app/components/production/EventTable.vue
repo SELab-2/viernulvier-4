@@ -60,7 +60,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
       <table class="w-full">
         <!-- Header -->
         <thead>
-        <tr class="bg-foreground text-background text-[11px] uppercase tracking-widest">
+        <tr class="bg-foreground/80 dark: bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
           <th class="text-left p-4 w-[40%]">{{ t('production.dateAndTime') }}</th>
           <th class="text-left p-4 w-[40%]">{{ t('production.location') }}</th>
           <th class="text-left p-4 w-[20%]">{{ t('production.price') }}</th>
@@ -78,7 +78,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
                 :key="event.id"
                 class="
                   border-t border-border
-                  hover:bg-background
+                  hover:bg-background/60
                   transition-colors
                 "
             >
