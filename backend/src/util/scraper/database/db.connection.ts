@@ -64,6 +64,71 @@ export class UtilsDbConnection {
   }
 
   /**
+   * A generic helper to wrap batch processing with progress logging.
+   */
+  private async trackProgress<T>(
+    label: string,
+    items: T[],
+    processor: (item: T) => Promise<any>,
+  ): Promise<void> {
+    const total = items.length;
+    if (total === 0) return;
+
+    await this.pool.connect(); // Warm up the pool.
+
+    let completed = 0;
+    let lastLoggedPercent = -1;
+    const startTime = Date.now();
+
+    for (const item of items) {
+      try {
+        await processor(item);
+      } catch (error) {
+        logger.error(`Error during ${label} at item ${completed}:`, error);
+      }
+
+      completed++;
+      const percent = Math.floor((completed / total) * 100);
+
+      if (percent !== lastLoggedPercent) {
+        const eta = this.calculateETA(startTime, completed, total);
+        logger.info(
+          `[DB PROGRESS] ${label}: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
+        );
+        lastLoggedPercent = percent;
+      }
+    }
+
+    logger.info(`Finished: ${label}!`);
+  }
+
+  /**
+   * Calculates the ETA of a network action.
+   * @param startTime The starting time of the action.
+   * @param current The current items.
+   * @param total The total items.
+   * @returns A time string.
+   */
+  private calculateETA(
+    startTime: number,
+    current: number,
+    total: number,
+  ): string {
+    if (current === 0) return "Calculating...";
+
+    const elapsed = Date.now() - startTime; // ms spent so far
+    const msPerItem = elapsed / current;
+    const remainingItems = total - current;
+    const remainingMs = remainingItems * msPerItem;
+
+    // Convert MS to a nice string like "2m 30s"
+    const seconds = Math.floor((remainingMs / 1000) % 60);
+    const minutes = Math.floor((remainingMs / (1000 * 60)) % 60);
+
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  /**
    * Fetches a production by legacy id.
    * @param legacyId The production legacy id.
    * @returns The production row.
@@ -120,23 +185,9 @@ export class UtilsDbConnection {
    * @param productions The list of vnvProductions.
    */
   async insertProductions(productions: vnvProduction[]) {
-    logger.info("Inserting Productions...");
-    for (const production of productions) {
-      await this.insertProduction(production);
-    }
-    logger.info("Inserted Productions!");
-  }
-
-  /**
-   * Inserts a list of vnvGenre objects into Tags.
-   * @param genres The list of vnvGenre objects.
-   */
-  async insertTags(genres: vnvGenre[]) {
-    logger.info("Inserting Tags...");
-    for (const genre of genres) {
-      await this.insertTag(genre);
-    }
-    logger.info("Inserted Tags!");
+    await this.trackProgress("Productions", productions, (p) =>
+      this.insertProduction(p),
+    );
   }
 
   /**
@@ -144,23 +195,19 @@ export class UtilsDbConnection {
    */
 
   /**
+   * Inserts a list of vnvGenre objects into Tags.
+   * @param genres The list of vnvGenre objects.
+   */
+  async insertTags(genres: vnvGenre[]) {
+    await this.trackProgress("Tags", genres, (t) => this.insertTag(t));
+  }
+
+  /**
    * Inserts a list of vnvEvent objects into the database.
    * @param events The list of vnvEvent objects.
    */
   async insertEvents(events: vnvEvent[]) {
-    logger.info("Inserting Events...");
-    for (const event of events) {
-      try {
-        await this.insertEvent(event);
-      } catch (error) {
-        // If something errors out that means the VNV API had invalid data.
-        logger.warn(
-          `Failed to insert Event(${event.legacy_id}) - Data might be corrupted.`,
-          error,
-        );
-      }
-    }
-    logger.info("Inserted Events!");
+    await this.trackProgress("Events", events, (e) => this.insertEvent(e));
   }
 
   /**
@@ -168,11 +215,9 @@ export class UtilsDbConnection {
    * @param locations The list of vnvLocation objects.
    */
   async insertLocations(locations: vnvLocation[]) {
-    logger.info("Inserting Locations...");
-    for (const location of locations) {
-      await this.insertLocation(location);
-    }
-    logger.info("Inserted Locations!");
+    await this.trackProgress("Locations", locations, (l) =>
+      this.insertLocation(l),
+    );
   }
 
   /**
@@ -180,11 +225,7 @@ export class UtilsDbConnection {
    * @param prices The list of vnvPrice objects.
    */
   async insertPrices(prices: vnvPrice[]) {
-    logger.info("Inserting Prices...");
-    for (const price of prices) {
-      await this.insertPrice(price);
-    }
-    logger.info("Inserted Prices!");
+    await this.trackProgress("Prices", prices, (p) => this.insertPrice(p));
   }
 
   /**

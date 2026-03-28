@@ -28,6 +28,7 @@ import { CROP_NAMES, CropName } from "@repo/common/src/objects/media";
  * The Base of the VNV API.
  */
 const apiBase: string = "https://www.viernulvier.gent";
+const apiDomain: string = "/api/v1/";
 
 /**
  * The important parts of an apiResponse.
@@ -107,15 +108,15 @@ export class ScraperEngine {
       items,
       crops,
     ] = await Promise.all([
-      this.scrapeMany("/api/v1/productions?page=1", after_date),
-      this.scrapeMany("/api/v1/events?page=1", after_date),
-      this.scrapeMany("/api/v1/events/prices?page=1", after_date),
-      this.scrapeMany("/api/v1/prices?page=1", "1970-01-01T00:00:00.000Z"),
-      this.scrapeMany("/api/v1/genres?page=1", after_date),
-      this.scrapeMany("/api/v1/halls?page=1", after_date),
-      this.scrapeMany("/api/v1/media/galleries?page=1", dummyDate),
-      this.scrapeMany("/api/v1/media/items?page=1", dummyDate),
-      this.scrapeMany("/api/v1/media/items/crops?page=1", dummyDate),
+      this.scrapeMany("productions", dummyDate),
+      this.scrapeMany("events", dummyDate),
+      this.scrapeMany("events/prices", dummyDate),
+      this.scrapeMany("prices", "1970-01-01T00:00:00.000Z"),
+      this.scrapeMany("genres", dummyDate),
+      this.scrapeMany("halls", dummyDate),
+      this.scrapeMany("media/galleries", dummyDate),
+      this.scrapeMany("media/items", dummyDate),
+      this.scrapeMany("media/items/crops", dummyDate),
     ]);
 
     // Fix the items and sift out crops that we don't need.
@@ -197,7 +198,7 @@ export class ScraperEngine {
     params.append("updated_at[after]", updatedAfter);
 
     let view: viewState = {
-      next: url + "&" + params.toString(),
+      next: apiDomain + url + "?page=1&" + params.toString(),
     };
     const output: object[] = [];
 
@@ -226,7 +227,7 @@ export class ScraperEngine {
 
         const percent = Math.floor((processedItems / totalItems) * 100);
 
-        if (percent % 10 === 0 && percent !== lastLoggedPercent) {
+        if (percent !== lastLoggedPercent) {
           const eta = this.calculateETA(startTime, processedItems, totalItems);
 
           this.logger.log(
@@ -283,7 +284,7 @@ export class ScraperEngine {
       completed++;
       const percent = Math.floor((completed / total) * 100);
 
-      if (percent % 10 === 0 && percent !== lastLoggedPercent) {
+      if (percent !== lastLoggedPercent) {
         const eta = this.calculateETA(startTime, completed, total);
         this.logger.log(
           `[PROGRESS] Fixing items: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
