@@ -60,10 +60,10 @@ export class ScraperService implements OnApplicationBootstrap {
           "ScraperService",
         );
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         this.logger.error(
-          "Initial scrape failed",
-          (err as Error).stack,
+          `Initial scrape failed ${err.message}`,
+          err.stack,
           "ScraperService",
         );
       });

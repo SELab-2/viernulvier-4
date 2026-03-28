@@ -5,12 +5,14 @@ import {
   parseGalleries,
   parseGenres,
   parseLocations,
+  parseMediaItems,
   parsePrices,
   parseProductions,
   vnvEvent,
   vnvGallery,
   vnvGenre,
   vnvLocation,
+  vnvMediaItem,
   vnvPrice,
   vnvProduction,
 } from "./vnv.parser";
@@ -49,6 +51,7 @@ export interface ScrapeResult {
   genres: vnvGenre[];
   locations: vnvLocation[];
   galleries: vnvGallery[];
+  items: vnvMediaItem[];
 }
 
 @Injectable()
@@ -114,7 +117,7 @@ export class ScraperEngine {
     this.logger.log("Fixed items!");
 
     // TODO: Remove Debug prints
-    console.log(fixedItems);
+    //console.log(fixedItems);
 
     const priceDictionary = new Map<string, object>();
     for (const price of prices) {
@@ -136,6 +139,7 @@ export class ScraperEngine {
       genres: parseGenres(genres),
       locations: parseLocations(halls),
       galleries: parseGalleries(galleries),
+      items: parseMediaItems(fixedItems),
     };
 
     this.logger.debug("Started translating");
@@ -199,7 +203,10 @@ export class ScraperEngine {
         view = jsonResponse.view;
         output.push(...jsonResponse.member);
       } catch (error) {
-        this.logger.error(`Failed to fetch page: ${view.next}`, error);
+        this.logger.error(
+          `Failed to fetch page: ${view.next}`,
+          (error as Error).stack,
+        );
         break; // Triggered when all retries fail.
       }
     }

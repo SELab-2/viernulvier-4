@@ -1,3 +1,5 @@
+import { ItemPosition } from "@repo/common";
+
 /**
  * Localization of any string that needs it.
  */
@@ -313,5 +315,63 @@ function parseVnvGallery(gallery: Record<string, any>): vnvGallery {
     created_at: (gallery.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (gallery.updated_at as string) || "1970-01-01T00:00:00+00:00",
     items: items,
+  };
+}
+
+/**
+ * Media Items
+ */
+
+/**
+ * Parsed interface for media items.
+ */
+export interface vnvMediaItem {
+  legacy_id: string;
+  type: string;
+  original_filename: string;
+  position: ItemPosition;
+  width: number;
+  height: number;
+  credits: vnvLocal;
+  description: vnvLocal;
+  title: vnvLocal;
+  crops: string[]; // Legacy ids of the crops linked to this item.
+}
+
+/**
+ * Parses raw objects into vnvMediaItem objects.
+ * @param items The raw scraped objects
+ * @returns The list of vnvMediaItem objects.
+ */
+export function parseMediaItems(items: object[]): vnvMediaItem[] {
+  return items.map(parseVnvMediaItem);
+}
+
+/**
+ * Parses a single raw object into a vnvMediaItem.
+ * @param item The raw scraped object.
+ * @returns The parsed vnvMediaItem.
+ */
+function parseVnvMediaItem(item: Record<string, any>): vnvMediaItem {
+  const crops: string[] = [];
+  for (const crop of item.crops) {
+    crops.push(
+      extractIdFromUri((crop as Record<string, any>)["@id"] as string) || "N/A",
+    );
+  }
+  const posIndex: number = (item.position as number) || 1;
+  const position: ItemPosition = posIndex == 0 ? "main" : "carousel";
+
+  return {
+    legacy_id: extractIdFromUri(item["@id"] as string) || "",
+    type: (item.type as string) || "N/A",
+    original_filename: (item.original_filename as string) || "N/A",
+    position: position,
+    width: (item.width as number) || 0,
+    height: (item.height as number) || 0,
+    credits: (item.credits as vnvLocal) || { en: "N/A", nl: "N/A" },
+    description: (item.description as vnvLocal) || { en: "N/A", nl: "N/A" },
+    title: (item.title as vnvLocal) || { en: "N/A", nl: "N/A" },
+    crops: crops,
   };
 }
