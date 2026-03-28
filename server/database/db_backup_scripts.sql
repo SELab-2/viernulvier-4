@@ -206,12 +206,19 @@ CREATE TYPE crop_name AS ENUM (
     'nb_ready'
     );
 
+CREATE TYPE gallery_type AS ENUM (
+    'prints',
+    'default'
+    );
+
 CREATE TYPE "ItemPositionEnum" AS ENUM ('main', 'carousel');
 
 CREATE TABLE media_gallery
 (
     id         SERIAL PRIMARY KEY,
     legacy_id  VARCHAR(255) UNIQUE,
+    name       VARCHAR(255),
+    type       gallery_type,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

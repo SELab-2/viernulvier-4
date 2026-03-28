@@ -142,8 +142,10 @@ Table scraper_dates {
 Table media_gallery {
   id int [pk, increment]
   legacy_id varchar(255) [unique]
-  created_at timestamptz [not null, default: `now()`]
-  updated_at timestamptz [not null, default: `now()`]
+  name varchar(255)
+  type gallery_type
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
 
   indexes {
     legacy_id
@@ -161,8 +163,8 @@ Table media_item {
   credits jsonb
   description jsonb
   title jsonb
-  created_at timestamptz [not null, default: `now()`]
-  updated_at timestamptz [not null, default: `now()`]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
 
   indexes {
     legacy_id
@@ -175,8 +177,8 @@ Table media_crop {
   legacy_id varchar(255) [unique]
   name crop_name [not null]
   url text [not null]
-  created_at timestamptz [not null, default: `now()`]
-  updated_at timestamptz [not null, default: `now()`]
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp [not null, default: `now()`]
 
   indexes {
     legacy_id
