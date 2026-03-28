@@ -127,7 +127,6 @@ export class MediaCropDto extends createZodDto(MediaCropSchema) {}
 export class CreateMediaCropDto extends createZodDto(CreateMediaCropSchema) {}
 export class ModifyMediaCropDto extends createZodDto(ModifyMediaCropSchema) {}
 export class ReplaceMediaCropDto extends createZodDto(ReplaceMediaCropSchema) {}
-export class UpdateMediaCropDto extends createZodDto(UpdatedMediaCropSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {
