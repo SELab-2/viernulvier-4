@@ -2,6 +2,7 @@
  * A reusable event table component, displays events belonging to a specific production in a table, includes:
  *  - Time, location, price displayed per event
  *  - Sorting of events
+ *  - Scrollable when there are more than 3 events
  *
  * Usage:
  * TODO
@@ -34,7 +35,6 @@ const formatTime = (date: Date) => {
 const sortedEvents = computed(() => { // function to sort the events, oldest first
   return [...props.events].sort((a, b) => a.date.getTime() - b.date.getTime())
 })
-//TODO: wat met super veel events?
 </script>
 
 <template>
@@ -58,39 +58,44 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
         </tr>
         </thead>
 
-        <!-- Body -->
-        <tbody>
-        <tr
-            v-for="event in sortedEvents"
-            :key="event.id"
-            class="
-              border-t border-border
-              hover:bg-background
-              transition-colors
-            "
-        >
-          <!-- Date -->
-          <td class="p-4">
-            <p class="font-bold text-[12px]">
-              {{ formatDate(event.date) }}
-            </p>
-            <p class="text-[10px] text-muted-foreground mt-1">
-              {{ formatTime(event.date) }}
-            </p>
-          </td>
-
-          <!-- Location -->
-          <td class="p-4 text-[12px]">
-            {{ event.location }}
-          </td>
-
-          <!-- Price -->
-          <td class="p-4 text-[12px] font-bold">
-            {{ event.price }}
-          </td>
-        </tr>
-        </tbody>
       </table>
+
+      <div class="overflow-y-auto max-h-[15rem]">
+        <table class="w-full">
+        <!-- Body -->
+          <tbody>
+            <tr
+                v-for="event in sortedEvents"
+                :key="event.id"
+                class="
+                  border-t border-border
+                  hover:bg-background
+                  transition-colors
+                "
+            >
+              <!-- Date -->
+              <td class="p-4">
+                <p class="font-bold text-[12px]">
+                  {{ formatDate(event.date) }}
+                </p>
+                <p class="text-[10px] text-muted-foreground mt-1">
+                  {{ formatTime(event.date) }}
+                </p>
+              </td>
+
+              <!-- Location -->
+              <td class="p-4 text-[12px]">
+                {{ event.location }}
+              </td>
+
+              <!-- Price -->
+              <td class="p-4 text-[12px] font-bold">
+                {{ event.price }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Empty table -->
