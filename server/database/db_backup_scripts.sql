@@ -311,3 +311,26 @@ CREATE TABLE blog_media_gallery
 );
 
 CREATE INDEX idx_blog_media_gallery_gallery_id ON blog_media_gallery (gallery_id);
+
+CREATE TABLE print_items
+(
+    id          SERIAL PRIMARY KEY,
+    titel       JSONB,
+    description JSONB,
+    url         TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER trg_print_items_updated_at
+    BEFORE UPDATE
+    ON print_items
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TABLE print_item_media_gallery
+(
+    print_item_id    INT NOT NULL REFERENCES print_items (id) ON DELETE CASCADE,
+    media_gallery_id INT NOT NULL REFERENCES media_gallery (id) ON DELETE CASCADE,
+    PRIMARY KEY (print_item_id, media_gallery_id)
+);
