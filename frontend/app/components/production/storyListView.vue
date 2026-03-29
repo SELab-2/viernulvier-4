@@ -19,7 +19,7 @@ const formatDate = (date: Date) => {
 
 <template>
   <div class="m-4">
-    <!-- title -->
+    <!-- Title -->
     <h3 class="text-[12px] font-bold uppercase mb-2">
       {{ t('production.stories') }}
     </h3>
@@ -30,31 +30,28 @@ const formatDate = (date: Date) => {
     >
       <div class="overflow-y-auto max-h-[24rem]">
         <div
-            v-for="(article, index) in stories"
-            :key="article.id"
+            v-for="(story, index) in stories"
+            :key="story.id"
             class="flex items-start gap-4 p-4 hover:bg-background/60 transition-colors cursor-pointer"
             :class="{ 'border-t border-border': index !== 0 }"
         >
           <!-- Thumbnail -->
           <img
-              v-if="article.image"
-              :src="article.image"
-              :alt="article.title"
+              v-if="story.image"
+              :src="story.image"
+              :alt="story.title"
               class="w-24 h-16 object-cover rounded-md shrink-0"
           />
-          <div
-              v-else
-              class="w-24 h-16 bg-border rounded-md shrink-0"
-          />
+          <ThumbnailPlaceholder v-else :id="story.id" size="sm" :showIcon="false" :showBorder="false" />
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
-            <p class="font-bold text-[13px] truncate">{{ article.title }}</p>
+            <p class="font-bold text-[13px] truncate">{{ story.title }}</p>
             <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5 mb-1.5">
               <CalendarDays :size="10" class="shrink-0" />
-              {{ formatDate(article.date) }}
+              {{ formatDate(story.date) }}
             </p>
-            <p class="text-[11px] text-muted-foreground line-clamp-2">{{ article.description }}</p>
+            <p class="text-[11px] text-muted-foreground line-clamp-2">{{ story.description }}</p>
           </div>
         </div>
       </div>
