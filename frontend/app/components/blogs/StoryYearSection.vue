@@ -1,34 +1,9 @@
 <!--
   components/blogs/StoryYearSection.vue
   =======================================
-  This file implements one year bucket inside the timeline.
-  It receives all stories that belong to a single calendar year, groups them
-  further by month, and renders a StoryMonthGroup for each month found.
-
-  Structure
-  ---------
-  1. Year heading  – a bold year label with an accent bar, a story-count badge
-                     and a horizontal rule stretching to the right edge.
-  2. Month groups  – one StoryMonthGroup per month present in the data, sorted
-                     according to the active sortOrder prop.
-
-  Grouping
-  --------
-  Stories are grouped into "YYYY-MM" keys client-side.  The keys are then
-  sorted ascending (oldest) or descending (newest) before being passed down.
-
-  i18n
-  ----
-  The story-count badge uses locale-aware singular / plural labels via the
-  storySingular and storyPlural keys in the active locale file.
-
-  Events
-  ------
-  @story-click(story)  Bubbled up from StoryMonthGroup → StoryListItem.
-                        The parent (StoryTimeline / pages/stories/index.vue)
-                        handles the actual navigation.
+  One year bucket. Click heading to collapse/expand.
+  All decorative lines and counts use foreground (black in light mode).
 -->
-
 <script lang="ts" setup>
 import type { Blog, BlogView } from "@repo/common";
 import StoryMonthGroup from "~/components/blogs/StoryMonthGroup.vue";
@@ -45,7 +20,9 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-// ── Group stories by month ───────────────────────────────────────────────────
+const isOpen = ref(true);
+const toggle = () => { isOpen.value = !isOpen.value; };
+
 const byMonth = computed(() => {
   const map = new Map<string, Array<Blog | BlogView>>();
   for (const s of props.stories) {
@@ -60,7 +37,6 @@ const byMonth = computed(() => {
   return keys.map((key) => ({ key, stories: map.get(key)! }));
 });
 
-/** Locale-aware singular/plural story count label, e.g. "3 stories". */
 const storyCount = computed(() => {
   const n = props.stories.length;
   const word = n === 1 ? t("stories.storySingular") : t("stories.storyPlural");
@@ -69,31 +45,60 @@ const storyCount = computed(() => {
 </script>
 
 <template>
-  <!--
-    The section id is used by the IntersectionObserver in StoryTimeline to
-    track which year is currently in view and highlight the correct sidebar dot.
-  -->
   <section :id="`story-year-${year}`" class="blog-year-section">
 
-    <!-- Year heading row -->
-    <div class="blog-year-heading">
+    <!-- Year heading — full row is clickable, shows pointer cursor -->
+    <button
+      type="button"
+      class="blog-year-heading w-full text-left cursor-pointer"
+      :aria-expanded="isOpen"
+      :aria-controls="`year-body-${year}`"
+      @click="toggle"
+    >
       <div class="blog-year-accent" aria-hidden="true" />
-      <span class="blog-year-label font-brand">{{ year }}</span>
-      <div class="blog-year-badge font-brand">{{ storyCount }}</div>
-      <div class="blog-year-rule" />
-    </div>
+      <span class="blog-year-label font-brand select-none">{{ year }}</span>
 
-    <!-- Month groups stacked with generous spacing -->
-    <div class="space-y-8">
-      <StoryMonthGroup
-        v-for="month in byMonth"
-        :key="month.key"
-        :month-key="month.key"
-        :stories="month.stories"
-        :sort-order="sortOrder"
-        @story-click="emit('story-click', $event)"
-      />
-    </div>
+      <!-- Count — black -->
+      <div class="font-brand font-black text-[9px] uppercase tracking-widest text-foreground/50 shrink-0">
+        {{ storyCount }}
+      </div>
+
+      <!-- Rule — black -->
+      <div class="flex-1 h-px bg-foreground/15 mx-3" />
+
+      <!-- Chevron -->
+      <svg
+        class="w-3.5 h-3.5 shrink-0 text-foreground/40 transition-transform duration-200"
+        :class="isOpen ? 'rotate-0' : '-rotate-90'"
+        fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </button>
+
+    <!-- Collapsible content -->
+    <Transition
+      enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-all duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-show="isOpen" :id="`year-body-${year}`">
+        <div class="space-y-8 pb-10">
+          <StoryMonthGroup
+            v-for="month in byMonth"
+            :key="month.key"
+            :month-key="month.key"
+            :stories="month.stories"
+            :sort-order="sortOrder"
+            @story-click="emit('story-click', $event)"
+          />
+        </div>
+      </div>
+    </Transition>
 
   </section>
 </template>

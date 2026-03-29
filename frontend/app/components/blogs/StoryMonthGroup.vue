@@ -1,30 +1,25 @@
 <!--
   components/blogs/StoryMonthGroup.vue
   ======================================
-  This file implements one month bucket inside a year section (e.g. "January").
-  Each story card is wrapped in a <NuxtLink> so the router handles navigation
-  directly — no custom event chain is required.
-
-  Spacing
-  -------
-  Cards are separated by a visible gap (space-y-2) so they read as individual
-  items rather than a single merged block.  The gap also provides a subtle
-  visual rhythm that helps the user scan the list quickly.
+  One month bucket. Click heading to collapse/expand.
+  All lines and labels use foreground (black in light mode).
+  Pointer cursor is explicit so users know the row is clickable.
 -->
-
 <script lang="ts" setup>
 import type { Blog, BlogView } from "@repo/common";
 import StoryListItem from "~/components/blogs/StoryListItem.vue";
 
 const props = defineProps<{
-  monthKey: string;             // "YYYY-MM"
+  monthKey: string;
   stories: Array<Blog | BlogView>;
   sortOrder: "newest" | "oldest";
 }>();
 
 const { locale } = useI18n();
 
-/** Convert "YYYY-MM" into a localised month name ("January", "Januari", …). */
+const isOpen = ref(true);
+const toggle = () => { isOpen.value = !isOpen.value; };
+
 const label = computed(() => {
   const [y, m] = props.monthKey.split("-");
   const loc = locale.value === "nl" ? "nl-BE" : "en-GB";
@@ -35,32 +30,59 @@ const label = computed(() => {
 
 <template>
   <div>
-    <!-- Month heading -->
-    <div class="flex items-center gap-3 mb-3">
-      <!-- Purple dot -->
-      <div class="w-2 h-2 rounded-full bg-purple-400 shrink-0" aria-hidden="true" />
-      <!-- Month label -->
-      <span class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
+    <!-- Month heading — full row clickable, explicit pointer cursor -->
+    <button
+      type="button"
+      class="flex items-center gap-3 mb-3 w-full text-left cursor-pointer group/month"
+      :aria-expanded="isOpen"
+      @click="toggle"
+    >
+      <!-- Dot — black -->
+      <div class="w-2 h-2 rounded-full bg-foreground/40 shrink-0 transition-colors group-hover/month:bg-purple-400" aria-hidden="true" />
+
+      <!-- Month label — black -->
+      <span class="font-brand font-black text-[10px] uppercase tracking-widest text-foreground/60 group-hover/month:text-foreground transition-colors">
         {{ label }}
       </span>
-      <!-- Rule -->
-      <div class="flex-1 h-px bg-border" />
-      <!-- Count -->
-      <span class="font-brand font-black text-[9px] uppercase tracking-widest text-muted-foreground/50">
+
+      <!-- Rule — black -->
+      <div class="flex-1 h-px bg-foreground/15" />
+
+      <!-- Count — black -->
+      <span class="font-brand font-black text-[9px] uppercase tracking-widest text-foreground/40">
         {{ stories.length }}
       </span>
-    </div>
 
-    <!-- Story cards — spaced so each card is visually distinct -->
-    <div class="space-y-2">
-      <NuxtLink
-        v-for="story in stories"
-        :key="story.id"
-        :to="`/stories/${story.id}`"
-        class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-lg"
+      <!-- Chevron -->
+      <svg
+        class="w-3 h-3 shrink-0 text-foreground/30 transition-transform duration-200 ml-1"
+        :class="isOpen ? 'rotate-0' : '-rotate-90'"
+        fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+        aria-hidden="true"
       >
-        <StoryListItem :story="story" />
-      </NuxtLink>
-    </div>
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </button>
+
+    <!-- Collapsible story cards -->
+    <Transition
+      enter-active-class="transition-all duration-150 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-all duration-100 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-show="isOpen" class="space-y-2">
+        <NuxtLink
+          v-for="story in stories"
+          :key="story.id"
+          :to="`/stories/${story.id}`"
+          class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-lg"
+        >
+          <StoryListItem :story="story" />
+        </NuxtLink>
+      </div>
+    </Transition>
   </div>
 </template>

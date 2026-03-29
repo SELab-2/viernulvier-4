@@ -6,19 +6,6 @@
     - A hero banner (real image when available, gradient placeholder otherwise)
     - The post title, date and estimated reading time
     - The full post body with a decorative side rule
-
-  Dark-mode approach
-  ------------------
-  The page uses explicit colour classes rather than relying on --background
-  which can resolve to near-black in dark mode.  The body section uses a
-  lighter surface (#151821 as the overall page bg, with the article on
-  transparent so it inherits cleanly).  Text uses gray-100 / gray-300 shades
-  so there is strong contrast without being harsh white-on-black.
-
-  Routing
-  -------
-  The dynamic segment [id] is read from route.params.id.  Non-numeric IDs or
-  a null result from the API redirect to the "not found" state.
 -->
 
 <script lang="ts" setup>
@@ -36,7 +23,6 @@ const blogId = computed(() => {
   return isFinite(n) ? n : null;
 });
 
-// Fetch the blog post; useAsyncData deduplicates the request during SSR.
 const { data, pending, error } = await useAsyncData<Blog | null>(
   `blog-${blogId.value}`,
   async (): Promise<Blog | null> => {
@@ -48,7 +34,6 @@ const { data, pending, error } = await useAsyncData<Blog | null>(
 
 const blog = computed<Blog | null>(() => data.value ?? null);
 
-/** Extract the title for the active locale. */
 const title = computed(() => {
   const raw = blog.value?.titel;
   if (!raw) return "";
@@ -57,7 +42,6 @@ const title = computed(() => {
   return raw[lang] ?? raw.nl ?? raw.en ?? "";
 });
 
-/** Extract the body text for the active locale. */
 const body = computed(() => {
   const raw = blog.value?.description;
   if (!raw) return "";
@@ -66,13 +50,9 @@ const body = computed(() => {
   return raw[lang] ?? raw.nl ?? raw.en ?? "";
 });
 
-/** Real image URL from a future backend field, or null. */
 const image = computed<string | null>(() => (blog.value as any)?.image ?? null);
-
-/** Gradient banner used when no real image is available. */
 const bannerGradient = computed(() => pickPlaceholderGradient(blog.value?.id ?? 0));
 
-/** Localised date string. */
 const formattedDate = computed(() => {
   if (!blog.value?.created_at) return "";
   const loc = locale.value === "nl" ? "nl-BE" : "en-GB";
@@ -83,7 +63,6 @@ const formattedDate = computed(() => {
   });
 });
 
-/** Estimated reading time based on ~200 wpm, minimum 1 minute. */
 const readingTime = computed(() => {
   const words = body.value.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
@@ -92,9 +71,9 @@ const readingTime = computed(() => {
 
 <template>
   <!--
-    Page root: light mode uses white bg, dark mode uses a mid-dark navy
-    (#151821) that is noticeably lighter than pitch-black so text and elements
-    retain clear contrast and layering.
+    Light mode: white background.
+    Dark mode: single unified navy (#1e2230) across hero, body and footer —
+    avoids the two-tone split that made sections feel disconnected.
   -->
   <div class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100 transition-colors duration-200">
 
@@ -134,13 +113,13 @@ const readingTime = computed(() => {
         class="relative flex items-end"
         :class="image ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
       >
-        <!-- Real hero image with dark gradient overlay -->
+        <!-- Real hero image -->
         <template v-if="image">
           <img :src="image" :alt="title" class="absolute inset-0 w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </template>
 
-        <!-- Gradient placeholder when no image -->
+        <!-- Gradient placeholder -->
         <div
           v-else
           class="absolute inset-0 opacity-60"
@@ -153,7 +132,6 @@ const readingTime = computed(() => {
           class="relative z-10 container mx-auto px-6 max-w-4xl w-full pb-10"
           :class="image ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
         >
-
           <!-- Title -->
           <h1
             class="font-brand font-black uppercase tracking-tighter leading-none mb-5"
@@ -162,9 +140,9 @@ const readingTime = computed(() => {
             {{ title }}
           </h1>
 
-          <!-- Date + reading time -->
+          <!-- Meta row: date, reading time + back button -->
           <div
-            class="flex flex-wrap items-center gap-5 font-brand font-black text-[10px] uppercase tracking-widest"
+            class="flex flex-wrap items-center gap-4 font-brand font-black text-[10px] uppercase tracking-widest"
             :class="image ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'"
           >
             <span v-if="formattedDate" class="flex items-center gap-1.5">
@@ -176,25 +154,41 @@ const readingTime = computed(() => {
               </svg>
               {{ formattedDate }}
             </span>
+
             <span>{{ readingTime }} {{ t("stories.minRead") }}</span>
+
+            <!-- Divider -->
+            <span class="opacity-30" aria-hidden="true">·</span>
+
+            <!-- Back button — prominent, visually distinct from the labels -->
+            <NuxtLink
+              to="/stories"
+              class="
+                flex items-center gap-1.5 px-3 py-1.5 rounded
+                border transition-all duration-150
+                font-brand font-black text-[9px] uppercase tracking-widest
+              "
+              :class="
+                image
+                  ? 'border-white/40 text-white/90 hover:border-white hover:bg-white/20'
+                  : 'border-gray-400/60 text-gray-700 dark:border-gray-500/60 dark:text-gray-200 hover:border-gray-700 hover:bg-gray-100 dark:hover:border-gray-300 dark:hover:bg-white/10'
+              "
+            >
+              <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              {{ t("stories.backToStories") }}
+            </NuxtLink>
           </div>
         </div>
       </section>
 
       <!-- ── Body ────────────────────────────────────────────────────────── -->
       <!--
-        The body section sits on a slightly raised surface in dark mode
-        (#1a1e2b) so it reads as a distinct "content card" against the darker
-        page background.  The subtle top border anchors the transition from
-        the banner above.
+        Same bg as the page root in both light and dark mode — no separate
+        surface colour so the transition from banner to body is seamless.
       -->
-      <section
-        class="
-          py-16 sm:py-20
-          bg-white dark:bg-[#262b3d]
-          border-t border-gray-100 dark:border-[#333a52]
-        "
-      >
+      <section class="py-16 sm:py-20">
         <div class="container mx-auto px-6 max-w-4xl">
           <article class="relative max-w-3xl mx-auto">
 
@@ -211,21 +205,34 @@ const readingTime = computed(() => {
                 {{ body }}
               </p>
 
-              <!-- Footer: date + back link -->
+              <!-- Footer: date + back button (visually distinct) -->
               <div
                 class="
                   mt-20 pt-8 border-t flex items-center justify-between
-                  text-[9px] font-brand font-black uppercase tracking-widest
                   border-gray-200 dark:border-[#2e3347]
-                  text-gray-400 dark:text-gray-500
                 "
               >
-                <span>{{ formattedDate }}</span>
+                <span class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                  {{ formattedDate }}
+                </span>
+
+                <!-- Styled back button — clearly a button, not a label -->
                 <NuxtLink
                   to="/stories"
-                  class="hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+                  class="
+                    flex items-center gap-1.5 px-4 py-2 rounded
+                    border font-brand font-black text-[9px] uppercase tracking-widest
+                    transition-all duration-150
+                    border-gray-300 text-gray-600
+                    hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50
+                    dark:border-[#2e3347] dark:text-gray-400
+                    dark:hover:border-purple-500 dark:hover:text-purple-400 dark:hover:bg-purple-900/20
+                  "
                 >
-                  ←{{ t("stories.backToStories") }}
+                  <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  {{ t("stories.backToStories") }}
                 </NuxtLink>
               </div>
             </div>

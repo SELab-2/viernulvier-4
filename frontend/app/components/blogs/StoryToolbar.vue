@@ -13,10 +13,9 @@ const { t } = useI18n();
 
 <template>
   <div class="relative border-b border-border bg-background">
-    <div class="container mx-auto px-4 max-w-5xl py-3 flex items-center gap-2">
+    <div class="container mx-auto px-4 max-w-5xl py-2.5 flex items-center gap-2">
 
-      <!-- Search input -->
-      <div class="relative flex-1 max-w-xs">
+      <div class="relative flex-1">
         <svg
           class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none"
           fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"

@@ -6,7 +6,7 @@ import StoryYearSection from "~/components/blogs/StoryYearSection.vue";
 const props = defineProps<{
   stories: Array<Blog | BlogView>;
   sortOrder: "newest" | "oldest";
-  searchQuery?: string;         
+  searchQuery?: string;
 }>();
 
 const emit = defineEmits<{
@@ -42,7 +42,7 @@ const filteredStories = computed(() => {
   });
 });
 
-// Group stories by year 
+// Group stories by year
 const grouped = computed(() => {
   const map = new Map<string, Array<Blog | BlogView>>();
   for (const s of filteredStories.value) {
@@ -88,7 +88,6 @@ watch(allYears, async () => {
   attachObserver();
 }, { immediate: false });
 
-// Reset activeYear
 watch(allYears, (years) => {
   if (years.length && !years.includes(activeYear.value)) {
     activeYear.value = years[0] ?? "";
@@ -107,7 +106,12 @@ const scrollToYear = (year: string) => {
 
 <template>
   <div>
-    <div class="flex gap-4 sm:gap-6 pt-8">
+    <!--
+      items-stretch: makes the nav column grow to the full height of the
+      content column beside it, so the vertical timeline line runs all the
+      way down the page.
+    -->
+    <div class="flex items-stretch gap-4 sm:gap-6 pt-6">
       <StoryNav
         :years="allYears"
         :active-year="activeYear"
