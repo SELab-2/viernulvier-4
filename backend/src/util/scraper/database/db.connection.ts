@@ -6,7 +6,15 @@ import {
   vnvPrice,
   vnvProduction,
 } from "../vnv.parser";
-import { Production, Tag, Event, Price, Location, Blog } from "@repo/common";
+import {
+  Production,
+  Tag,
+  Event,
+  Price,
+  Location,
+  Blog,
+  MediaCrop,
+} from "@repo/common";
 import logger from "../../logger/logger";
 import { ResourceGoneException } from "../../../common/exceptions";
 import { Injectable } from "@nestjs/common";
@@ -554,5 +562,17 @@ export class UtilsDbConnection {
     );
 
     return rows.length >= 1;
+  }
+
+  async getPendingCrops(amount: number): Promise<MediaCrop[]> {
+    const pendingCrops = await this.query<MediaCrop>(
+      `
+      SELECT id, url FROM media_crop
+      WHERE url LIKE 'https://img.viernulvier.gent%'
+      LIMIT $1;
+    `,
+      [amount],
+    );
+    return pendingCrops;
   }
 }

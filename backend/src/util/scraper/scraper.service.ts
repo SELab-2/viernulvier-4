@@ -3,6 +3,7 @@ import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { ScraperRunner } from "./main";
 import { CsvInjectionService } from "./csv-injection.service";
+import { MediaStorageService } from "../../media/media_storage/media_storage.service";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -13,6 +14,7 @@ export class ScraperService implements OnApplicationBootstrap {
     private readonly logger: AppLogger,
     private readonly runner: ScraperRunner,
     private readonly csvInjectionService: CsvInjectionService,
+    private readonly mediaStorage: MediaStorageService,
   ) {}
 
   /**
@@ -97,5 +99,29 @@ export class ScraperService implements OnApplicationBootstrap {
           "ScraperService",
         );
       });
+  }
+
+  /**
+   * Image Scraping Job
+   */
+
+  private isProcessingMedia = false;
+  private readonly downloadAmount = 50;
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async processImages() {
+    if (this.isProcessingMedia) return;
+    this.isProcessingMedia = true;
+    this.logger.log("Processing Batch of Images...");
+
+    try {
+      // Find crops that still point to VNV
+      const pendingCrops = await this.runner.getPendingCrops(
+        this.downloadAmount,
+      );
+      console.log(pendingCrops);
+    } finally {
+      this.isProcessingMedia = false;
+    }
   }
 }
