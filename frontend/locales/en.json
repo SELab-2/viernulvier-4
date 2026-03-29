@@ -51,5 +51,24 @@
     "prints": "Prints",
     "rights": "All rights reserved",
     "newsletter": "Stay up to date"
+  },
+  "archive": {
+    "header_title": "Archive",
+    "header_subtitle": "Search and discover performances, concerts and events from our rich history.",
+    "showing_results": "Showing {start}–{end} of {total} results",
+    "no_results": "No productions found.",
+    "page_of": "Page {current} of {total}",
+    "prev": "Prev",
+    "next": "Next",
+    "pagination": "Pagination",
+    "first_page": "First page",
+    "last_page": "Last page",
+    "prev_page": "Previous page",
+    "next_page": "Next page",
+    "loading": "Loading…",
+    "search_placeholder": "Search archive...",
+    "filter": "Filter",
+    "view_list": "List",
+    "view_grid": "Grid"
   }
 }

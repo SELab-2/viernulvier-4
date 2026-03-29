@@ -51,5 +51,24 @@
     "prints": "Drukwerk",
     "rights": "Alle rechten voorbehouden",
     "newsletter": "Blijf op de hoogte"
+  },
+  "archive": {
+    "header_title": "Archief",
+    "header_subtitle": "Zoek en ontdek voorstellingen, concerten en evenementen uit ons rijke verleden.",
+    "showing_results": "{start}–{end} van {total} resultaten",
+    "no_results": "Geen producties gevonden.",
+    "page_of": "Pagina {current} van {total}",
+    "prev": "Vorige",
+    "next": "Volgende",
+    "pagination": "Paginering",
+    "first_page": "Eerste pagina",
+    "last_page": "Laatste pagina",
+    "prev_page": "Vorige pagina",
+    "next_page": "Volgende pagina",
+    "loading": "Laden…",
+    "search_placeholder": "Doorzoek archief...",
+    "filter": "Filter",
+    "view_list": "Lijst",
+    "view_grid": "Raster"
   }
 }

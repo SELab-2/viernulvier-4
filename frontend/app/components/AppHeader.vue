@@ -31,7 +31,7 @@ const route = useRoute()
 
 const navItems = [
   { label: 'home', route: ROUTES.home.base },
-  { label: 'archive', route: ROUTES.productions.base },
+  { label: 'archive', route: ROUTES.archive.base },
   { label: 'stories', route: ROUTES.stories.base },
   { label: 'prints', route: ROUTES.prints.base },
 ]
