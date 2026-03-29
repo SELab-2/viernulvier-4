@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "./database/db.connection";
+import { UtilsDbConnection } from "../database/db.connection";
 import {
   injectBlogsCSV,
   injectEventsCSV,

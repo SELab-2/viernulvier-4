@@ -1,12 +1,12 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import { UtilsDbConnection } from "./database/db.connection";
-import logger from "../logger/logger";
-import { AppLogger } from "../logger/logger.service";
-import { LanguageService } from "../language/language.service";
-import { OldCSVFileParser } from "../../csv_parsing/old_csv_file_parser";
-import { CSVFileParser } from "../../csv_parsing/csv_file_parser";
-import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "./vnv.parser";
+import { UtilsDbConnection } from "../database/db.connection";
+import logger from "../../logger/logger";
+import { AppLogger } from "../../logger/logger.service";
+import { LanguageService } from "../../language/language.service";
+import { OldCSVFileParser } from "../../../csv_parsing/old_csv_file_parser";
+import { CSVFileParser } from "../../../csv_parsing/csv_file_parser";
+import { vnvEvent, vnvGenre, vnvLocation, vnvProduction } from "../vnv.parser";
 import { Language } from "@repo/common";
 
 // Load DEV database env vars for script usage from root .env

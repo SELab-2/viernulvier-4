@@ -1,4 +1,4 @@
-import { ScraperEngine, ScrapeResult } from "./scraper";
+import { ScraperEngine, ScrapeResult } from "./scraper.engine";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import { UtilsDbConnection } from "./database/db.connection";
