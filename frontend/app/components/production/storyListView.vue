@@ -32,7 +32,10 @@ const formatDate = (date: Date) => {
         <div
             v-for="(story, index) in stories"
             :key="story.id"
-            class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150 cursor-pointer"
+            class="
+            flex items-center gap-4 p-4
+            rounded-xl border border-border bg-card dark:bg-muted
+            hover:border-ring hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer"
         >
           <!-- Thumbnail -->
           <img
