@@ -46,6 +46,13 @@ const formatTime = (date: Date) => {
 const sortedEvents = computed(() => { // function to sort the events, oldest first
   return [...props.events].sort((a, b) => a.date.getTime() - b.date.getTime())
 })
+
+// constants
+const headerWide = 'text-left p-4 w-[40%]'
+const headerNarrow = 'text-left p-4 w-[20%]'
+const headerIcon = 'flex items-center gap-1.5'
+const cellWide = 'p-4 text-[12px] w-[40%] max-w-0'
+const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
 </script>
 
 <template>
@@ -63,9 +70,9 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
         <!-- Header -->
         <thead>
         <tr class="bg-foreground/80 dark: bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
-          <th class="text-left p-4 w-[40%]"><span class="flex items-center gap-1.5"><CalendarDays :size="13" />{{ t('production.dateAndTime') }}</span></th>
-          <th class="text-left p-4 w-[40%]"><span class="flex items-center gap-1.5"><MapPin :size="13" />{{ t('production.location') }}</span></th>
-          <th class="text-left p-4 w-[20%]"><span class="flex items-center gap-1.5"><Euro :size="13" />{{ t('production.price') }}</span></th>
+          <th :class="headerWide"><span :class="headerIcon"><CalendarDays :size="13" />{{ t('production.dateAndTime') }}</span></th>
+          <th :class="headerWide"><span :class="headerIcon"><MapPin :size="13" />{{ t('production.location') }}</span></th>
+          <th :class="headerNarrow"><span :class="headerIcon"><Euro :size="13" />{{ t('production.price') }}</span></th>
         </tr>
         </thead>
 
@@ -85,18 +92,18 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
                 "
             >
               <!-- Date -->
-              <td class="p-4 w-[40%] max-w-0">
+              <td :class="cellWide">
                 <p class="font-bold text-[12px] truncate">{{ formatDate(event.date) }}</p>
                 <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-1 truncate"><Clock :size="10" class="shrink-0" />{{ formatTime(event.date) }}</p>
               </td>
 
               <!-- Location -->
-              <td class="p-4 text-[12px] w-[40%] max-w-0">
+              <td :class="cellWide">
                 <p class="truncate">{{ event.location }}</p>
               </td>
 
               <!-- Price -->
-              <td class="p-4 text-[12px] font-bold w-[20%] max-w-0">
+              <td :class="cellNarrow">
                 <p class="truncate">{{ event.price }}</p>
               </td>
             </tr>
