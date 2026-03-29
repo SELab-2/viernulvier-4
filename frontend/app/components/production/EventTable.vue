@@ -80,7 +80,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
                 :key="event.id"
                 class="
                   border-t border-border
-                  hover:bg-background/60
+                  hover:bg-background/70
                   transition-colors
                 "
             >
