@@ -116,6 +116,7 @@ watch(() => route.fullPath, () => {
 const handleResize = () => {
   if (window.innerWidth >= 1024) {
     isMenuOpen.value = false
+    isVisible.value = true
   }
 }
 
