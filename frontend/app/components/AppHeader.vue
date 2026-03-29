@@ -21,7 +21,7 @@ const { isLoggedIn, logout } = useAuth()
 // Determines if the header should render the admin view (logged-in state)
 const isAdmin = isLoggedIn
 
-const { t, locale, setLocale } = useI18n()
+const { t } = useI18n()
 const isDark = ref(false)
 const isMenuOpen = ref(false) // Controls the mobile/tablet hamburger menu
 const isVisible = ref(true) // Tracks visibility for the smart-sticky behavior
@@ -35,11 +35,6 @@ const navItems = [
   { label: 'stories', route: ROUTES.stories.base },
   { label: 'prints', route: ROUTES.prints.base },
 ]
-
-/**
- * Toggles between available locales
- */
-const toggleLocale = () => setLocale(locale.value === 'nl' ? 'en' : 'nl')
 
 /**
  * Manages Dark Mode by toggling the '.dark' class on the root HTML element
@@ -186,9 +181,7 @@ onUnmounted(() => {
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
 
         <div :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']" class="items-center gap-2 lg:gap-[15px]">
-          <button @click="toggleLocale" class="btn-outline">
-            {{ locale === 'nl' ? 'EN' : 'NL' }}
-          </button>
+          <LocaleSelector />
 
           <button @click="toggleDark" class="btn-outline flex items-center justify-center gap-2">
             <Sun v-if="isDark" :size="16" />
@@ -232,9 +225,7 @@ onUnmounted(() => {
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
           :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
         >
-          <button @click="toggleLocale" class="btn-outline">
-            {{ locale === 'nl' ? 'EN' : 'NL' }}
-          </button>
+          <LocaleSelector />
 
           <button @click="toggleDark" class="btn-outline flex items-center gap-2">
             <Sun v-if="isDark" :size="16" />
