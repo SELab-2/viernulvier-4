@@ -66,20 +66,16 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
         v-if="events.length"
         class="bg-muted border border-border rounded-lg overflow-hidden"
     >
-      <table class="w-full">
-        <!-- Header -->
-        <thead>
-        <tr class="bg-foreground/80 dark: bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
-          <th :class="headerWide"><span :class="headerIcon"><CalendarDays :size="13" />{{ t('production.dateAndTime') }}</span></th>
-          <th :class="headerWide"><span :class="headerIcon"><MapPin :size="13" />{{ t('production.location') }}</span></th>
-          <th :class="headerNarrow"><span :class="headerIcon"><Euro :size="13" />{{ t('production.price') }}</span></th>
-        </tr>
-        </thead>
-
-      </table>
-
-      <div class="overflow-y-auto max-h-[15rem]">
+      <div class="overflow-y-auto max-h-[20rem]">
         <table class="w-full">
+          <!-- Header -->
+          <thead class="sticky top-0">
+          <tr class="bg-foreground/80 dark:bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
+            <th :class="headerWide"><span :class="headerIcon"><CalendarDays :size="13" />{{ t('production.dateAndTime') }}</span></th>
+            <th :class="headerWide"><span :class="headerIcon"><MapPin :size="13" />{{ t('production.location') }}</span></th>
+            <th :class="headerNarrow"><span :class="headerIcon"><Euro :size="13" />{{ t('production.price') }}</span></th>
+          </tr>
+          </thead>
         <!-- Body -->
           <tbody>
             <tr
