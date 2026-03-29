@@ -51,5 +51,9 @@
     "prints": "Prints",
     "rights": "All rights reserved",
     "newsletter": "Stay up to date"
+  },
+  "production": {
+    "stories": "Stories",
+    "noStories": "This production doesn't any stories."
   }
 }
