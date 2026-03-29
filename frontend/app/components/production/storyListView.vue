@@ -26,14 +26,13 @@ const formatDate = (date: Date) => {
 
     <div
         v-if="stories.length"
-        class="bg-muted border border-border rounded-lg overflow-hidden"
+        class="flex flex-col gap-2"
     >
       <div class="overflow-y-auto max-h-[24rem]">
         <div
             v-for="(story, index) in stories"
             :key="story.id"
-            class="flex items-start gap-4 p-4 hover:bg-background/60 transition-colors cursor-pointer"
-            :class="{ 'border-t border-border': index !== 0 }"
+            class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150 cursor-pointer"
         >
           <!-- Thumbnail -->
           <img
@@ -42,7 +41,7 @@ const formatDate = (date: Date) => {
               :alt="story.title"
               class="w-24 h-16 object-cover rounded-md shrink-0"
           />
-          <ThumbnailPlaceholder v-else :id="story.id" size="sm" :showIcon="false" :showBorder="false" />
+          <ThumbnailPlaceholder v-else :id="story.id" size="sm" :showIcon="true" :showBorder="true" :rounded="true"/>
 
           <!-- Content -->
           <div class="flex-1 min-w-0">
