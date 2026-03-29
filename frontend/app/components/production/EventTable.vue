@@ -18,6 +18,7 @@
 
 import type {EventItem} from "../../types/EventItem";
 const { t, locale } = useI18n()
+import { CalendarDays, MapPin, Euro, Clock } from "lucide-vue-next";
 
 interface Props {
   events: EventItem[]
@@ -62,9 +63,9 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
         <!-- Header -->
         <thead>
         <tr class="bg-foreground/80 dark: bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
-          <th class="text-left p-4 w-[40%]">{{ t('production.dateAndTime') }}</th>
-          <th class="text-left p-4 w-[40%]">{{ t('production.location') }}</th>
-          <th class="text-left p-4 w-[20%]">{{ t('production.price') }}</th>
+          <th class="text-left p-4 w-[40%]"><span class="flex items-center gap-1.5"><CalendarDays :size="13" />{{ t('production.dateAndTime') }}</span></th>
+          <th class="text-left p-4 w-[40%]"><span class="flex items-center gap-1.5"><MapPin :size="13" />{{ t('production.location') }}</span></th>
+          <th class="text-left p-4 w-[20%]"><span class="flex items-center gap-1.5"><Euro :size="13" />{{ t('production.price') }}</span></th>
         </tr>
         </thead>
 
@@ -86,7 +87,7 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
               <!-- Date -->
               <td class="p-4 w-[40%] max-w-0">
                 <p class="font-bold text-[12px] truncate">{{ formatDate(event.date) }}</p>
-                <p class="text-[10px] text-muted-foreground mt-1 truncate">{{ formatTime(event.date) }}</p>
+                <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-1 truncate"><Clock :size="10" class="shrink-0" />{{ formatTime(event.date) }}</p>
               </td>
 
               <!-- Location -->
