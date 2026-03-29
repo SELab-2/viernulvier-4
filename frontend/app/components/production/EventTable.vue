@@ -48,9 +48,11 @@ const sortedEvents = computed(() => { // function to sort the events, oldest fir
 })
 
 // constants
+const tableBase = 'bg-muted border border-border rounded-lg'
 const headerWide = 'text-left p-4 w-[40%]'
 const headerNarrow = 'text-left p-4 w-[20%]'
 const headerIcon = 'flex items-center gap-1.5'
+const headerIconSize = 13
 const cellWide = 'p-4 text-[12px] w-[40%] max-w-0'
 const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
 </script>
@@ -64,16 +66,16 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
 
     <div
         v-if="events.length"
-        class="bg-muted border border-border rounded-lg overflow-hidden"
+        :class="[tableBase, 'overflow-hidden']"
     >
       <div class="overflow-y-auto max-h-[20rem]">
         <table class="w-full">
           <!-- Header -->
           <thead class="sticky top-0">
           <tr class="bg-foreground/80 dark:bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
-            <th :class="headerWide"><span :class="headerIcon"><CalendarDays :size="13" />{{ t('production.dateAndTime') }}</span></th>
-            <th :class="headerWide"><span :class="headerIcon"><MapPin :size="13" />{{ t('production.location') }}</span></th>
-            <th :class="headerNarrow"><span :class="headerIcon"><Euro :size="13" />{{ t('production.price') }}</span></th>
+            <th :class="headerWide"><span :class="headerIcon"><CalendarDays :size="headerIconSize" />{{ t('production.dateAndTime') }}</span></th>
+            <th :class="headerWide"><span :class="headerIcon"><MapPin :size="headerIconSize" />{{ t('production.location') }}</span></th>
+            <th :class="headerNarrow"><span :class="headerIcon"><Euro :size="headerIconSize" />{{ t('production.price') }}</span></th>
           </tr>
           </thead>
         <!-- Body -->
@@ -111,7 +113,7 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
     <!-- Empty table -->
     <div
         v-else
-        class="bg-muted border border-border rounded-lg p-4 text-[11px] text-muted-foreground"
+        :class="[tableBase, 'p-4 text-[11px] text-muted-foreground']"
     >
       {{ t('production.noEvents') }}
     </div>
