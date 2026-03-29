@@ -1,9 +1,9 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { ScraperRunner } from "./main";
-import { CsvInjectionService } from "./csv-injection.service";
 import { MediaStorageService } from "../../media/media_storage/media_storage.service";
+import { ScraperRunner } from "./scraper.runner";
+import { CsvInjectionService } from "./csv/csv-injection.service";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
