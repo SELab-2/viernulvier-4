@@ -53,6 +53,11 @@
     "newsletter": "Stay up to date"
   },
   "production": {
+    "events": "Events",
+    "dateAndTime": "Date & Time",
+    "location": "Location",
+    "price": "Price",
+    "noEvents": "This production doesn't any events.",
     "stories": "Stories",
     "noStories": "This production doesn't any stories."
   }

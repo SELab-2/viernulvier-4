@@ -53,6 +53,11 @@
     "newsletter": "Blijf op de hoogte"
   },
   "production": {
+    "events": "Evenementen",
+    "dateAndTime": "Datum & Tijd",
+    "location": "Locatie",
+    "price": "Prijs",
+    "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
     "noStories": "Deze productie bevat geen verhalen."
   }
