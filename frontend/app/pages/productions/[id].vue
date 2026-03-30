@@ -89,7 +89,7 @@ const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value
                 :key="tag.id"
                 class="bg-[var(--accent)] text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]"
               >
-                {{ tag.name }}
+                {{ tag.tag }}
               </span>
             </template>
           </div>
