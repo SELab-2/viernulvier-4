@@ -13,24 +13,24 @@ import {
 export class CsvInjectionService {
   constructor(private readonly dbConnection: UtilsDbConnection) {}
 
-  async injectProductionsCSV(filePath: string) {
-    return injectProductionsCSV(filePath, this.dbConnection);
+  async injectProductionsCSV(input: string | Buffer) {
+    return injectProductionsCSV(input, this.dbConnection);
   }
 
-  async injectEventsCSV(filePath: string) {
-    return injectEventsCSV(filePath, this.dbConnection);
+  async injectEventsCSV(input: string | Buffer) {
+    return injectEventsCSV(input, this.dbConnection);
   }
 
-  async injectTagsCSV(filePath: string) {
-    return injectTagsCSV(filePath, this.dbConnection);
+  async injectTagsCSV(input: string | Buffer) {
+    return injectTagsCSV(input, this.dbConnection);
   }
 
-  async injectBlogsCSV(filePath: string) {
-    return injectBlogsCSV(filePath, this.dbConnection);
+  async injectBlogsCSV(input: string | Buffer) {
+    return injectBlogsCSV(input, this.dbConnection);
   }
 
-  async injectPricesCSV(filePath: string) {
-    return injectPricesCSV(filePath, this.dbConnection);
+  async injectPricesCSV(input: string | Buffer) {
+    return injectPricesCSV(input, this.dbConnection);
   }
 
   async injectOldCsvData() {

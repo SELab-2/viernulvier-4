@@ -1,4 +1,5 @@
 import fs from "fs";
+import { Readable } from "stream";
 import csvParser from "csv-parser";
 import { z, string, ZodType } from "zod";
 import {
@@ -57,6 +58,9 @@ type ParsedTagRow = {
   productionIds: number[];
 };
 
+/// Type used to describe the CSV input source, can be either a file path or a buffer containing the CSV data.
+export type CsvInputSource = string | Buffer;
+
 export class CSVFileParser {
   private static toLocalizedString(
     value_nl: string,
@@ -90,7 +94,7 @@ export class CSVFileParser {
    * @returns A promise that resolves to an array of parsed and validated objects
    */
   static parseCSVWithSchema<T>(
-    filePath: string,
+    input: CsvInputSource,
     schema: ZodType<T>,
     transform: (row: Record<string, string>) => T,
   ): Promise<T[]> {
@@ -98,7 +102,12 @@ export class CSVFileParser {
       const results: T[] = [];
       let settled = false; // prevent multiple resolve/reject calls
 
-      const stream = fs.createReadStream(filePath).pipe(
+      const sourceStream =
+        typeof input === "string"
+          ? fs.createReadStream(input)
+          : Readable.from([input.toString("utf8")]); // converts buffer into a readable stream so parser can process it.
+
+      const stream = sourceStream.pipe(
         csvParser({
           strict: true, // Enable strict mode to catch parsing errors
           mapHeaders: ({ header }) => header.trim(), // Trim whitespace from headers
@@ -164,16 +173,16 @@ export class CSVFileParser {
     }
 
     let doorsAt: string | null = null;
-    if (row.DoorsAt) {
-      const doorsAtDate = new Date(row.DoorsAt);
+    if (row.Doors_At) {
+      const doorsAtDate = new Date(row.Doors_At);
       if (!isNaN(doorsAtDate.getTime()) && doorsAtDate < starttimeDate) {
         doorsAt = doorsAtDate.toISOString();
       }
     }
 
     let intermissionAt: string | null = null;
-    if (row.IntermissionAt) {
-      const intermissionAtDate = new Date(row.IntermissionAt);
+    if (row.Intermission_At) {
+      const intermissionAtDate = new Date(row.Intermission_At);
       if (!isNaN(intermissionAtDate.getTime())) {
         intermissionAt = intermissionAtDate.toISOString();
       }
@@ -354,7 +363,7 @@ export class CSVFileParser {
    * @return A promise that resolves to an array of objects containing the event DTO and their localized locations
    */
   static async parseEventsCSV(
-    filePath: string,
+    input: CsvInputSource,
   ): Promise<ParsedLocalizedEventRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateEventDto & {
@@ -362,7 +371,7 @@ export class CSVFileParser {
         legacy_id: string;
       }
     >(
-      filePath,
+      input,
       CreateEventSchema.extend({
         location: z.object({ en: string(), nl: string() }),
         legacy_id: string(),
@@ -386,12 +395,12 @@ export class CSVFileParser {
    * @return A promise that resolves to an array of objects containing the production DTO and their legacy IDs
    */
   static async parseProductionsCSV(
-    filePath: string,
+    input: CsvInputSource,
   ): Promise<ParsedProductionRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateProductionDto & { legacy_id: string }
     >(
-      filePath,
+      input,
       CreateProductionSchema.extend({ legacy_id: string() }),
       this.transformProductionRow,
     );
@@ -410,11 +419,13 @@ export class CSVFileParser {
    * @param filePath - Path to the CSV file containing prices
    * @return A promise that resolves to an array of objects containing the price DTO and the associated event ID
    */
-  static async parsePricesCSV(filePath: string): Promise<ParsedPriceRow[]> {
+  static async parsePricesCSV(
+    input: CsvInputSource,
+  ): Promise<ParsedPriceRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreatePriceDto & { event_id: number }
     >(
-      filePath,
+      input,
       CreatePriceSchema.extend({ event_id: z.number() }),
       this.transformPriceRow,
     );
@@ -430,11 +441,11 @@ export class CSVFileParser {
    * @param filePath - Path to the CSV file containing blogs
    * @return A promise that resolves to an array of objects containing the blog DTO and the associated production ID
    */
-  static async parseBlogsCSV(filePath: string): Promise<ParsedBlogRow[]> {
+  static async parseBlogsCSV(input: CsvInputSource): Promise<ParsedBlogRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateBlogDto & { production_id: number }
     >(
-      filePath,
+      input,
       CreateBlogSchema.extend({ production_id: z.number() }),
       this.transformBlogRow,
     );
@@ -450,11 +461,11 @@ export class CSVFileParser {
    * @param filePath - Path to the CSV file containing tags
    * @return A promise that resolves to an array of objects containing the tag DTO and an array of associated production IDs
    */
-  static async parseTagsCSV(filePath: string): Promise<ParsedTagRow[]> {
+  static async parseTagsCSV(input: CsvInputSource): Promise<ParsedTagRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateTagDto & { productionIds: number[] }
     >(
-      filePath,
+      input,
       CreateTagSchema.extend({ productionIds: z.number().array() }),
       this.transformTagRow,
     );

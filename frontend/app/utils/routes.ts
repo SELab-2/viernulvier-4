@@ -37,4 +37,7 @@ export const ROUTES = {
   login: {
     base: "/login",
   },
+  parser: {
+    base: "/parser",
+  },
 } as const

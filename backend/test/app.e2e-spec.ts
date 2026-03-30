@@ -17,6 +17,8 @@ import request from "supertest";
 import { ApiKeyGuard } from "../src/auth/authGuard";
 import { AppLogger } from "../src/util/logger/logger.service";
 import { ScraperService } from "../src/util/scraper/scraper.service";
+import { MediaModule } from "../src/media/media.module";
+import { MediaDatabaseService } from "../src/database/db.media.service";
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
@@ -186,6 +188,87 @@ const mockPriceDbService = () => ({
   deletePrice: jest.fn().mockResolvedValue(undefined),
 });
 
+// ==========================================
+// MOCK DATA (Media)
+// ==========================================
+
+const mockMediaCrop = {
+  id: 1,
+  name: "hd_ready",
+  url: "https://example.com/crop.jpg",
+  created_at: "2026-03-28T14:00:00.000Z",
+  updated_at: "2026-03-28T14:00:00.000Z",
+};
+
+const mockMediaItem = {
+  id: 1,
+  type: "image",
+  original_filename: "test.png",
+  position: "main",
+  width: 1920,
+  height: 1080,
+  title: { en: "Test Media", nl: "Test Media" },
+  description: { en: "Desc", nl: "Beschrijving" },
+  credits: { en: "Credits", nl: "Credits" },
+  created_at: "2026-03-28T14:00:00.000Z",
+  updated_at: "2026-03-28T14:00:00.000Z",
+};
+
+const mockMediaItemView = {
+  ...mockMediaItem,
+  title: "Test Media",
+  description: "Desc",
+  credits: "Credits",
+};
+
+const mockMediaGallery = {
+  id: 1,
+  created_at: "2026-03-28T14:00:00.000Z",
+  updated_at: "2026-03-28T14:00:00.000Z",
+};
+
+// @ts-ignore
+const paginatedResponse = (objects) => ({
+  objects,
+  totalItems: 1,
+  page: 1,
+  limit: 10,
+});
+
+// ==========================================
+// Mock DB service factory (Media)
+// ==========================================
+
+const mockMediaDbService = () => ({
+  // Crops
+  getAllCrops: jest.fn().mockResolvedValue(paginatedResponse([mockMediaCrop])),
+  getCropById: jest.fn().mockResolvedValue(mockMediaCrop),
+  createCrop: jest.fn().mockResolvedValue(mockMediaCrop),
+  updateCrop: jest.fn().mockResolvedValue(mockMediaCrop),
+  deleteCrop: jest.fn().mockResolvedValue(undefined),
+
+  // Items
+  getAllItems: jest.fn().mockResolvedValue(paginatedResponse([mockMediaItem])),
+  getItemById: jest.fn().mockResolvedValue(mockMediaItem),
+  createItem: jest.fn().mockResolvedValue(mockMediaItem),
+  updateItem: jest.fn().mockResolvedValue(mockMediaItem),
+  deleteItem: jest.fn().mockResolvedValue(undefined),
+  getCropsByItem: jest.fn().mockResolvedValue([mockMediaCrop]),
+  linkCropToItem: jest.fn().mockResolvedValue(undefined),
+  unlinkCropFromItem: jest.fn().mockResolvedValue(undefined),
+
+  // Galleries
+  getGalleries: jest
+    .fn()
+    .mockResolvedValue(paginatedResponse([mockMediaGallery])),
+  getGalleryById: jest.fn().mockResolvedValue(mockMediaGallery),
+  createGallery: jest.fn().mockResolvedValue(mockMediaGallery),
+  deleteGallery: jest.fn().mockResolvedValue(undefined),
+  getItemsByGallery: jest.fn().mockResolvedValue([mockMediaItem]),
+  linkItemToGallery: jest.fn().mockResolvedValue(undefined),
+  unlinkItemFromGallery: jest.fn().mockResolvedValue(undefined),
+});
+
 // Helper: build app with all modules
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -196,6 +279,7 @@ async function buildApp(): Promise<INestApplication> {
       TagModule,
       LocationModule,
       PriceModule,
+      MediaModule,
     ],
   })
     .overrideGuard(ApiKeyGuard)
@@ -212,6 +296,8 @@ async function buildApp(): Promise<INestApplication> {
     .useFactory({ factory: mockLocationDbService })
     .overrideProvider(PriceDatabaseService)
     .useFactory({ factory: mockPriceDbService })
+    .overrideProvider(MediaDatabaseService)
+    .useFactory({ factory: mockMediaDbService })
     .overrideProvider(AppLogger) // We override these so they don't make a fuss during testing.
     .useValue({
       log: jest.fn(),
@@ -1270,6 +1356,280 @@ describe("EventPriceController (e2e)", () => {
       return request(app.getHttpServer())
         .delete("/events/1/prices/abc")
         .expect(400);
+    });
+  });
+});
+
+// ==========================================
+// MEDIA CROP endpoints
+// ==========================================
+
+describe("MediaCropController (e2e)", () => {
+  let app: INestApplication;
+  let mediaDb: MediaDatabaseService; // Using any or MediaDatabaseService type if imported
+
+  beforeEach(async () => {
+    app = await buildApp();
+    // Adjust token if needed based on how it's exported
+    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe("GET /crops", () => {
+    it("should return 200 with a paginated list of crops", () => {
+      return request(app.getHttpServer())
+        .get("/crops?page=1&limit=10")
+        .expect(200)
+        .expect(paginatedResponse([mockMediaCrop]));
+    });
+  });
+
+  describe("GET /crops/:cropId", () => {
+    it("should return 200 with the correct crop", () => {
+      return request(app.getHttpServer())
+        .get("/crops/1")
+        .expect(200)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("POST /crops", () => {
+    it("should return 201 with the created crop", async () => {
+      const response = await request(app.getHttpServer()).post("/crops").send({
+        item_id: 1,
+        name: "hd_ready",
+        url: "https://test.com/a.jpg",
+        autoDownload: 0,
+      });
+
+      // THIS WILL TELL YOU EXACTLY WHAT IS WRONG:
+      if (response.status === 400) {
+        console.log("Validation Error:", response.body);
+      }
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual(mockMediaCrop);
+    });
+  });
+
+  describe("PUT /crops/:cropId", () => {
+    it("should return 200 with the replaced crop", () => {
+      return request(app.getHttpServer())
+        .put("/crops/1")
+        .send({ name: "mobile", url: "https://test.com/b.jpg" })
+        .expect(200)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("PATCH /crops/:cropId", () => {
+    it("should return 200 with the modified crop", () => {
+      return request(app.getHttpServer())
+        .patch("/crops/1")
+        .send({ url: "https://test.com/new.jpg" })
+        .expect(200)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("DELETE /crops/:cropId", () => {
+    it("should return 200 after deleting crop", () => {
+      return request(app.getHttpServer()).delete("/crops/1").expect(200);
+    });
+  });
+});
+
+// ==========================================
+// MEDIA ITEM endpoints
+// ==========================================
+
+describe("MediaItemController (e2e)", () => {
+  let app: INestApplication;
+  let mediaDb: MediaDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe("GET /items", () => {
+    it("should return 200 with a paginated list of flattened items", () => {
+      return request(app.getHttpServer())
+        .get("/items?lang=en")
+        .expect(200)
+        .expect(paginatedResponse([mockMediaItemView]));
+    });
+  });
+
+  describe("GET /items/:itemId", () => {
+    it("should return 200 with the correct flattened item", () => {
+      return request(app.getHttpServer())
+        .get("/items/1?lang=en")
+        .expect(200)
+        .expect(mockMediaItemView);
+    });
+  });
+
+  describe("POST /items", () => {
+    it("should return 201 with the created item", () => {
+      return request(app.getHttpServer())
+        .post("/items")
+        .send({
+          type: "image",
+          original_filename: "test.png",
+          position: "main",
+          width: 1920,
+          height: 1080,
+          title: { en: "Test Media", nl: "Test Media" },
+          description: { en: "Desc", nl: "Beschrijving" },
+          credits: { en: "Credits", nl: "Credits" },
+        })
+        .expect(201)
+        .expect(mockMediaItem);
+    });
+  });
+
+  describe("PUT /items/:itemId", () => {
+    it("should return 200 with the replaced item", () => {
+      return request(app.getHttpServer())
+        .put("/items/1")
+        .send({
+          type: "image",
+          original_filename: "test.png",
+          position: "main",
+          width: 1920,
+          height: 1080,
+          title: { en: "Test Media", nl: "Test Media" },
+          description: { en: "Desc", nl: "Beschrijving" },
+          credits: { en: "Credits", nl: "Credits" },
+        })
+        .expect(200)
+        .expect(mockMediaItem);
+    });
+  });
+
+  describe("PATCH /items/:itemId", () => {
+    it("should return 200 with the modified item", () => {
+      return request(app.getHttpServer())
+        .patch("/items/1")
+        .send({ position: "carousel" })
+        .expect(200)
+        .expect(mockMediaItem);
+    });
+  });
+
+  describe("DELETE /items/:itemId", () => {
+    it("should return 200 after deleting item", () => {
+      return request(app.getHttpServer()).delete("/items/1").expect(200);
+    });
+  });
+
+  // Relationships: Item <-> Crops
+  describe("GET /items/:itemId/crops", () => {
+    it("should return 200 with the crops of the item", () => {
+      return request(app.getHttpServer())
+        .get("/items/1/crops")
+        .expect(200)
+        .expect([mockMediaCrop]);
+    });
+  });
+
+  describe("PUT /items/:itemId/crops/:cropId", () => {
+    it("should return 200 after successfully linking crop", () => {
+      return request(app.getHttpServer()).put("/items/1/crops/2").expect(200);
+    });
+  });
+
+  describe("DELETE /items/:itemId/crops/:cropId", () => {
+    it("should return 200 after unlinking crop", () => {
+      return request(app.getHttpServer())
+        .delete("/items/1/crops/2")
+        .expect(200);
+    });
+  });
+});
+
+// ==========================================
+// MEDIA GALLERY endpoints
+// ==========================================
+
+describe("MediaGalleryController (e2e)", () => {
+  let app: INestApplication;
+  let mediaDb: MediaDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe("GET /galleries", () => {
+    it("should return 200 with a paginated list of galleries", () => {
+      return request(app.getHttpServer())
+        .get("/galleries?page=1&limit=10")
+        .expect(200)
+        .expect(paginatedResponse([mockMediaGallery]));
+    });
+  });
+
+  describe("GET /galleries/:galleryId", () => {
+    it("should return 200 with the correct gallery", () => {
+      return request(app.getHttpServer())
+        .get("/galleries/1")
+        .expect(200)
+        .expect(mockMediaGallery);
+    });
+  });
+
+  describe("POST /galleries", () => {
+    it("should return 201 with the created gallery", () => {
+      return request(app.getHttpServer())
+        .post("/galleries")
+        .send({}) // Based on schema, fields are mostly auto-generated
+        .expect(201)
+        .expect(mockMediaGallery);
+    });
+  });
+
+  describe("DELETE /galleries/:galleryId", () => {
+    it("should return 200 after deleting gallery", () => {
+      return request(app.getHttpServer()).delete("/galleries/1").expect(200);
+    });
+  });
+
+  // Relationships: Gallery <-> Items
+  describe("GET /galleries/:galleryId/items", () => {
+    it("should return 200 with items of the gallery", () => {
+      return request(app.getHttpServer())
+        .get("/galleries/1/items")
+        .expect(200)
+        .expect([mockMediaItem]);
+    });
+  });
+
+  describe("PUT /galleries/:galleryId/items/:itemId", () => {
+    it("should return 200 after linking item to gallery", () => {
+      return request(app.getHttpServer())
+        .put("/galleries/1/items/2")
+        .expect(200);
+    });
+  });
+
+  describe("DELETE /galleries/:galleryId/items/:itemId", () => {
+    it("should return 200 after unlinking item from gallery", () => {
+      return request(app.getHttpServer())
+        .delete("/galleries/1/items/2")
+        .expect(200);
     });
   });
 });

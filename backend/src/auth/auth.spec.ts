@@ -126,7 +126,7 @@ describe("AuthGuards tests", () => {
     });
 
     it("GET /productions/:id should work without API key", async () => {
-      const response = await request(app.getHttpServer())
+      await request(app.getHttpServer())
         .get("/productions/1")
         .send({})
         .expect((res) => {
@@ -348,6 +348,165 @@ describe("AuthGuards tests", () => {
 
     it("DELETE /auth/:accountId should fail without API key.", async () => {
       await request(app.getHttpServer()).delete("/auth/1").expect(401);
+    });
+  });
+
+  describe("Media Crop endpoints authentication", () => {
+    it("GET /media/crops should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/crops")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("GET /media/crops/:cropId should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/crops/1")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("POST /media/crops should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .post("/media/crops")
+        .send({})
+        .expect(401);
+    });
+
+    it("PUT /media/crops/:cropId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .put("/media/crops/1")
+        .send({})
+        .expect(401);
+    });
+
+    it("PATCH /media/crops/:cropId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .patch("/media/crops/1")
+        .send({})
+        .expect(401);
+    });
+
+    it("DELETE /media/crops/:cropId should fail without API key", async () => {
+      await request(app.getHttpServer()).delete("/media/crops/1").expect(401);
+    });
+  });
+
+  describe("Media Item endpoints authentication", () => {
+    it("GET /media/items should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/items")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("GET /media/items/:itemId should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/items/1")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("POST /media/items should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .post("/media/items")
+        .send({})
+        .expect(401);
+    });
+
+    it("PUT /media/items/:itemId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .put("/media/items/1")
+        .send({})
+        .expect(401);
+    });
+
+    it("PATCH /media/items/:itemId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .patch("/media/items/1")
+        .send({})
+        .expect(401);
+    });
+
+    it("DELETE /media/items/:itemId should fail without API key", async () => {
+      await request(app.getHttpServer()).delete("/media/items/1").expect(401);
+    });
+
+    // Item <-> Crop relationship auth
+    it("GET /media/items/:itemId/crops should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/items/1/crops")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("PUT /media/items/:itemId/crops/:cropId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .put("/media/items/1/crops/1")
+        .expect(401);
+    });
+
+    it("DELETE /media/items/:itemId/crops/:cropId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .delete("/media/items/1/crops/1")
+        .expect(401);
+    });
+  });
+
+  describe("Media Gallery endpoints authentication", () => {
+    it("GET /media/galleries should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/galleries")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("GET /media/galleries/:galleryId should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/galleries/1")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("POST /media/galleries should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .post("/media/galleries")
+        .send({})
+        .expect(401);
+    });
+
+    it("DELETE /media/galleries/:galleryId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .delete("/media/galleries/1")
+        .expect(401);
+    });
+
+    // Gallery <-> Item relationship auth
+    it("GET /media/galleries/:galleryId/items should work without API key", async () => {
+      await request(app.getHttpServer())
+        .get("/media/galleries/1/items")
+        .expect((res) => {
+          expect([200, 410]).toContain(res.status);
+        });
+    });
+
+    it("PUT /media/galleries/:galleryId/items/:itemId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .put("/media/galleries/1/items/1")
+        .expect(401);
+    });
+
+    it("DELETE /media/galleries/:galleryId/items/:itemId should fail without API key", async () => {
+      await request(app.getHttpServer())
+        .delete("/media/galleries/1/items/1")
+        .expect(401);
     });
   });
 });

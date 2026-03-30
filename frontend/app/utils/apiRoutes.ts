@@ -42,4 +42,11 @@ export const API_ROUTES = {
     base: "/prices",
     byId: (priceId: number) => `/prices/${priceId}`,
   },
+  parser: {
+    productions: "/parser/productions",
+    events: "/parser/events",
+    tags: "/parser/tags",
+    blogs: "/parser/blogs",
+    prices: "/parser/prices",
+  },
 } as const;
