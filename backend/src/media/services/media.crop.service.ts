@@ -1,13 +1,16 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,
   MediaCropDto,
-  PaginationFilterDto,
   ModifyMediaCropDto,
+  PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
+import { createHash } from "node:crypto";
+import path from "node:path";
+import { MediaStorageService } from "../media_storage/media_storage.service";
 
 /**
  * Defines the connection between controller and database service
@@ -15,7 +18,14 @@ import {
  */
 @Injectable()
 export class MediaCropService {
-  constructor(private readonly mediaDbService: MediaDatabaseService) {}
+  private readonly baseUrl = (
+    process.env.MEDIA_BASE_URL ?? "http://127.0.0.1"
+  ).replace(/\/$/, "");
+
+  constructor(
+    private readonly mediaDbService: MediaDatabaseService,
+    private readonly mediaStorageService: MediaStorageService,
+  ) {}
 
   /**
    * Fetches a paginated list of crops.
@@ -40,11 +50,57 @@ export class MediaCropService {
   /**
    * Creates a new media crop.
    * @param createCrop The crop to create.
+   * @param autoDownload Whether to automatically fetch and save the physical file. Defaults to true.
    * @returns The newly created crop.
    */
-  async createCrop(createCrop: CreateMediaCropDto): Promise<MediaCropDto> {
-    // TODO add functionality to auto create photos too. (perhaps a boolean to make this optional too?)
-    return await this.mediaDbService.createCrop(createCrop);
+  async createCrop(
+    createCrop: CreateMediaCropDto,
+    autoDownload: boolean = true,
+  ): Promise<MediaCropDto> {
+    let finalUrl = createCrop.url;
+
+    // Only attempt download if it's an external HTTP URL
+    if (
+      autoDownload &&
+      finalUrl.startsWith("http") &&
+      !finalUrl.startsWith(this.baseUrl)
+    ) {
+      try {
+        const response = await fetch(finalUrl);
+
+        const buffer = Buffer.from(await response.arrayBuffer());
+
+        // 1. Generate an MD5 hash of the actual file contents (the pixels)
+        const fileHash = createHash("md5").update(buffer).digest("hex");
+
+        // 2. Extract the file extension from the external URL (fallback to .jpg)
+        const parsedUrl = new URL(finalUrl);
+        const ext = path.extname(parsedUrl.pathname) || ".jpg";
+
+        // 3. Construct the ultimate, collision-proof file name
+        // Result looks like: "42-thumbnail-a94a8fe5ccb19ba61c4c0873d391e987.jpg"
+        const newFileName = `${createCrop.item_id}-${createCrop.name}-${fileHash}${ext}`;
+
+        // 4. Construct the clean URL for your system
+        finalUrl = `${this.baseUrl}/photos/${newFileName}`;
+
+        // 5. Save the physical file using your storage service
+        await this.mediaStorageService.saveMedia(finalUrl, buffer);
+      } catch (error) {
+        throw new BadRequestException(
+          `Could not process media URL: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    }
+
+    // Override the URL in the payload with our new local URL
+    const cropToSave = {
+      ...createCrop,
+      url: finalUrl,
+    };
+
+    // Save the record to the database
+    return await this.mediaDbService.createCrop(cropToSave);
   }
 
   /**
