@@ -54,7 +54,7 @@ const formatDate = (date: Date) => {
                 <CalendarDays :size="10" class="shrink-0" />
                 {{ formatDate(story.date) }}
               </p>
-              <p class="text-[11px] text-muted-foreground line-clamp-2">{{ story.description }}</p>
+              <p class="text-[11px] text-muted-foreground line-clamp-2 break-all">{{ story.description }}</p>
             </div>
           </div>
         </div>
