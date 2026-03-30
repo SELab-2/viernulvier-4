@@ -26,10 +26,7 @@ const { viewMode, searchQuery } = useArchiveView()
 
       <!-- View toggle -->
       <button
-        class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground transition-colors"
-        :class="viewMode === 'grid'
-      ? 'bg-foreground text-background'
-      : 'bg-transparent text-foreground hover:bg-foreground hover:text-background'"
+        class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground bg-transparent text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
         @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'"
       >
         <List v-if="viewMode === 'grid'" class="w-4 h-4" />
