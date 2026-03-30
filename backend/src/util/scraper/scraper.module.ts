@@ -15,7 +15,7 @@ import { CsvInjectionService } from "./csv/csv-injection.service";
     ScraperRunner,
     CsvInjectionService,
   ],
-  exports: [ScraperEngine, ScraperRunner, ScraperService],
   imports: [LanguageModule, LoggerModule, ScraperDbModule, MediaStorageModule],
+  exports: [ScraperEngine, ScraperRunner, ScraperService, CsvInjectionService],
 })
 export class ScraperModule {}
