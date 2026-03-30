@@ -43,6 +43,9 @@ export class ScraperRunner {
       this.dbConnection.insertCrops(scrapeResults.crops),
     ]);
 
+    // Insert Items then galleries.
+    await this.dbConnection.insertItems(scrapeResults.items);
+
     // First Productions since we need those ids for Events.
     await this.dbConnection.insertProductions(scrapeResults.productions);
     await this.dbConnection.insertEvents(scrapeResults.events);

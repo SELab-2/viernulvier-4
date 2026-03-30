@@ -55,24 +55,24 @@ export class ScraperService implements OnApplicationBootstrap {
     //     );
     //   });
 
-    await this.processImages();
+    //await this.processImages();
 
-    // this.logger.log("Running initial scrape...");
-    // this.runner
-    //   .runScraper()
-    //   .then(() => {
-    //     this.logger.log(
-    //       "Initial scrape finished successfully.",
-    //       "ScraperService",
-    //     );
-    //   })
-    //   .catch((err: Error) => {
-    //     this.logger.error(
-    //       `Initial scrape failed ${err.message}`,
-    //       err.stack,
-    //       "ScraperService",
-    //     );
-    //   });
+    this.logger.log("Running initial scrape...");
+    this.runner
+      .runScraper()
+      .then(() => {
+        this.logger.log(
+          "Initial scrape finished successfully.",
+          "ScraperService",
+        );
+      })
+      .catch((err: Error) => {
+        this.logger.error(
+          `Initial scrape failed ${err.message}`,
+          err.stack,
+          "ScraperService",
+        );
+      });
   }
 
   /**

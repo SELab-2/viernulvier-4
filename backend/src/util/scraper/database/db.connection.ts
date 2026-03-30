@@ -4,6 +4,7 @@ import {
   vnvGenre,
   vnvLocation,
   vnvMediaCrop,
+  vnvMediaItem,
   vnvPrice,
   vnvProduction,
 } from "../vnv.parser";
@@ -15,6 +16,7 @@ import {
   Location,
   Blog,
   MediaCrop,
+  MediaItem,
 } from "@repo/common";
 import logger from "../../logger/logger";
 import { ResourceGoneException } from "../../../common/exceptions";
@@ -125,45 +127,6 @@ export class UtilsDbConnection {
         client.release();
       }
     }
-  }
-
-  /**
-   * A generic helper to wrap batch processing with progress logging.
-   */
-  private async trackProgress<T>(
-    label: string,
-    items: T[],
-    processor: (item: T) => Promise<any>,
-  ): Promise<void> {
-    const total = items.length;
-    if (total === 0) return;
-
-    await this.pool.connect(); // Warm up the pool.
-
-    let completed = 0;
-    let lastLoggedPercent = -1;
-    const startTime = Date.now();
-
-    for (const item of items) {
-      try {
-        await processor(item);
-      } catch (error) {
-        logger.error(`Error during ${label} at item ${completed}:`, error);
-      }
-
-      completed++;
-      const percent = Math.floor((completed / total) * 100);
-
-      if (percent !== lastLoggedPercent) {
-        const eta = this.calculateETA(startTime, completed, total);
-        logger.info(
-          `[DB PROGRESS] ${label}: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
-        );
-        lastLoggedPercent = percent;
-      }
-    }
-
-    logger.info(`Finished: ${label}!`);
   }
 
   /**
@@ -324,6 +287,19 @@ export class UtilsDbConnection {
       crops,
       500,
       (c: vnvMediaCrop, client: PoolClient) => this.insertCrop(c, client),
+    );
+  }
+
+  /**
+   * Inserts a list of vnvMediaItem objects.
+   * @param items The list of vnvMediaItem objects.
+   */
+  async insertItems(items: vnvMediaItem[]) {
+    await this.processInBatches(
+      "Items",
+      items,
+      500,
+      (i: vnvMediaItem, client: PoolClient) => this.insertItem(i, client),
     );
   }
 
@@ -728,6 +704,105 @@ export class UtilsDbConnection {
     );
 
     return result[0];
+  }
+
+  /**
+   * Inserts a single vnvItem into the database
+   * @param item The vnvItem to insert.
+   * @param client Optional client for transactions.
+   * @returns The inserted Item.
+   */
+  async insertItem(
+    item: vnvMediaItem,
+    client?: PoolClient,
+  ): Promise<MediaItem> {
+    const query = `
+      INSERT INTO media_item (
+        legacy_id, type, original_filename, position,
+        width, height, credits, description, title
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET
+        type = EXCLUDED.type,
+        original_filename = EXCLUDED.original_filename,
+        position = EXCLUDED.position,
+        width = EXCLUDED.width,
+        height = EXCLUDED.height,
+        credits = EXCLUDED.credits,
+        description = EXCLUDED.description,
+        title = EXCLUDED.title
+      RETURNING *;
+    `;
+
+    // First upload the item.
+    const result = await this.query<MediaItem>(
+      query,
+      [
+        item.legacy_id,
+        item.type,
+        item.original_filename,
+        item.position,
+        item.width,
+        item.height,
+        item.credits,
+        item.description,
+        item.title,
+      ],
+      client,
+    );
+    const realItem: MediaItem = result[0];
+
+    // Firstly delete all previous crops.
+    await this.query(
+      `
+        DELETE FROM item_crop WHERE item_id = $1;
+      `,
+      [realItem.id],
+      client,
+    );
+
+    const crops: MediaCrop[] = await this.query<MediaCrop>(
+      `
+        SELECT * FROM media_crop
+        WHERE legacy_id = ANY($1::text[]);
+      `,
+      [item.crops],
+    );
+
+    // Link the crops.
+    for (const crop of crops) {
+      const valid: boolean = await this.linkCrop(realItem.id, crop.id, client);
+      if (!valid)
+        logger.warn(`Failed to link Crop(${crop.id}) to Item(${realItem.id}).`);
+    }
+
+    return realItem;
+  }
+
+  /**
+   * Links a Crop to an Item.
+   * @param itemId Item id.
+   * @param cropId Crop id.
+   * @returns T/F Whether the link was created.
+   */
+  async linkCrop(
+    itemId: number,
+    cropId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
+    const rows = await this.query(
+      `
+        INSERT INTO item_crop (item_id, crop_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `,
+      [itemId, cropId],
+      client,
+    );
+
+    return rows.length >= 1;
   }
 
   /**
