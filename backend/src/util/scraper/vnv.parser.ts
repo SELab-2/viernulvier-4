@@ -10,10 +10,12 @@ export interface vnvLocal {
 
 /**
  * Helps to extract an ID from an URI.
+ * Returns null if there was no uri or if no Id could be extracted.
  * @param uri The URI we want to get the ID from.
  * @returns The ID.
  */
-function extractIdFromUri(uri: string): string | null {
+function extractIdFromUri(uri: string | undefined | null): string | null {
+  if (!uri) return null;
   const extractedId = uri.replace(/\/$/, "").split("/").pop();
   return extractedId || null;
 }
