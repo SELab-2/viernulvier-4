@@ -73,5 +73,11 @@
     "page_label": "Pagina",
     "of_pages": "van {total}",
     "total_results": "{total} resultaten"
+  "production": {
+    "events": "Evenementen",
+    "dateAndTime": "Datum & Tijd",
+    "location": "Locatie",
+    "price": "Prijs",
+    "noEvents": "Deze productie bevat geen evenementen."
   }
 }
