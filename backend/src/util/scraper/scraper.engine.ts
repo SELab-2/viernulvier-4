@@ -95,9 +95,6 @@ export class ScraperEngine {
   async scrape(after_date: string): Promise<ScrapeResult> {
     this.logger.debug("Starting Scraper...");
 
-    // TODO: Remove dummy date when actual scraping begins.
-    const dummyDate: string = "2026-03-20T00:00:00.000Z";
-
     const [
       productions,
       events,
@@ -109,15 +106,15 @@ export class ScraperEngine {
       items,
       crops,
     ] = await Promise.all([
-      this.scrapeMany("productions", dummyDate),
-      this.scrapeMany("events", dummyDate),
-      this.scrapeMany("events/prices", dummyDate),
+      this.scrapeMany("productions", after_date),
+      this.scrapeMany("events", after_date),
+      this.scrapeMany("events/prices", after_date),
       this.scrapeMany("prices", "1970-01-01T00:00:00.000Z"),
-      this.scrapeMany("genres", dummyDate),
-      this.scrapeMany("halls", dummyDate),
-      this.scrapeMany("media/galleries", dummyDate),
-      this.scrapeMany("media/items", dummyDate),
-      this.scrapeMany("media/items/crops", dummyDate),
+      this.scrapeMany("genres", after_date),
+      this.scrapeMany("halls", after_date),
+      this.scrapeMany("media/galleries", after_date),
+      this.scrapeMany("media/items", after_date),
+      this.scrapeMany("media/items/crops", after_date),
     ]);
 
     // Fix the items and sift out crops that we don't need.
