@@ -1,23 +1,30 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { ChevronDown, Check } from 'lucide-vue-next'
 
 const { locale, locales, setLocale } = useI18n()
 const isOpen = ref(false)
 const dropdownRef = ref(null)
 
+/**
+ * Normalizes the locales array into a simple list of strings.
+ */
 const normalizedLocales = computed(() => {
   return locales.value.map(loc => typeof loc === 'string' ? loc : loc.code)
 })
 
-// Close dropdown when clicking on something else
+/**
+ * Closes the dropdown if a click occurs outside the component.
+ */
 const closeDropdown = (e) => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
     isOpen.value = false
   }
 }
 
-// Close when 'esc'
+/**
+ * Closes the dropdown when the 'Escape' key is pressed.
+ */
 const handleEscape = (e) => {
   if (e.key === 'Escape') {
     isOpen.value = false
@@ -34,6 +41,9 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleEscape)
 })
 
+/**
+ * Updates the app locale and closes the menu.
+ */
 const handleLocaleChange = (code) => {
   setLocale(code)
   isOpen.value = false
