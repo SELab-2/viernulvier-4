@@ -6,9 +6,8 @@ import type { ProductionView, PaginatedResponse } from '@repo/common'
 import { useArchiveView } from '../../composables/useArchiveView'
 import ProductionGridViewItem from '../productionGridViewItem.vue'
 import ProductionListViewItem from '../productionListViewItem.vue'
-import ArchivePagination from './ArchivePagination.vue'
 
-const { viewMode, searchQuery } = useArchiveView()
+const { viewMode, searchQuery, currentPage, totalPages, loading } = useArchiveView()
 const { getAll } = useProductionApi()
 const { t, locale } = useI18n()
 
@@ -16,13 +15,10 @@ const PAGE_SIZE = 15
 
 const productions = ref<ProductionView[]>([])
 const totalItems = ref(0)
-const currentPage = ref(1)
-const loading = ref(false)
 const error = ref<string | null>(null)
 
-const totalPages = computed(() => Math.max(1, Math.ceil(totalItems.value / PAGE_SIZE)))
-const startItem  = computed(() => (currentPage.value - 1) * PAGE_SIZE + 1)
-const endItem    = computed(() => Math.min(currentPage.value * PAGE_SIZE, totalItems.value))
+const startItem = computed(() => (currentPage.value - 1) * PAGE_SIZE + 1)
+const endItem   = computed(() => Math.min(currentPage.value * PAGE_SIZE, totalItems.value))
 
 async function loadPage(page: number) {
   loading.value = true
@@ -37,6 +33,7 @@ async function loadPage(page: number) {
       const data = resp.data as PaginatedResponse<ProductionView>
       productions.value = data.objects
       totalItems.value  = data.totalItems
+      totalPages.value  = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE))
     } else {
       error.value = resp.error ?? 'Failed to load productions'
     }
@@ -46,12 +43,6 @@ async function loadPage(page: number) {
   } finally {
     loading.value = false
   }
-}
-
-function goToPage(page: number) {
-  if (page < 1 || page > totalPages.value || page === currentPage.value || loading.value) return
-  currentPage.value = page
-  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
@@ -70,21 +61,14 @@ watch(searchQuery, () => {
 
 <template>
   <section class="w-full bg-background">
-    <div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="max-w-5xl mx-auto px-4 py-6">
 
-      <!-- Results label row -->
-      <div class="flex items-center justify-between mb-6 h-6">
-        <p v-if="!loading && totalItems > 0" class="text-sm text-muted-foreground">
-          {{ t('archive.showing_results', { start: startItem, end: endItem, total: totalItems }) }}
+      <!-- Results count -->
+      <div class="flex items-center justify-end mb-6">
+        <p v-if="!loading && totalItems > 0" class="font-brand text-2xl font-black text-foreground">
+          {{ t('archive.total_results', { total: totalItems }) }}
         </p>
-        <p v-else-if="!loading && totalItems === 0 && !error" class="text-sm text-muted-foreground">
-          {{ t('archive.no_results') }}
-        </p>
-        <div v-else-if="loading" class="h-4 w-48 bg-muted rounded animate-pulse" />
-
-        <p v-if="!loading && totalPages > 1" class="text-sm text-muted-foreground">
-          {{ t('archive.page_of', { current: currentPage, total: totalPages }) }}
-        </p>
+        <div v-else-if="loading" class="h-7 w-36 bg-muted rounded animate-pulse" />
       </div>
 
       <!-- Error state -->
@@ -137,14 +121,6 @@ watch(searchQuery, () => {
           :productionView="production"
         />
       </div>
-
-      <!-- Pagination -->
-      <ArchivePagination
-        :currentPage="currentPage"
-        :totalPages="totalPages"
-        :loading="loading"
-        @go-to-page="goToPage"
-      />
 
     </div>
   </section>

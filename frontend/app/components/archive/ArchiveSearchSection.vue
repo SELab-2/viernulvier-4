@@ -20,16 +20,16 @@ const { viewMode, searchQuery } = useArchiveView()
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 my-4">
 
         <!-- Filter button -->
-        <button class="btn-outline">
+        <button class="btn-outline h-12 px-4">
           {{ t('archive.filter') }}
         </button>
 
         <!-- View mode toggle -->
         <button
-          class="w-9 h-9 flex items-center justify-center rounded-md border-2 border-foreground transition-colors"
+          class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground transition-colors"
           :class="viewMode === 'grid' ? 'bg-foreground text-background' : 'bg-transparent text-foreground hover:bg-foreground hover:text-background'"
           :aria-label="viewMode === 'grid' ? t('archive.view_list') : t('archive.view_grid')"
           @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'"

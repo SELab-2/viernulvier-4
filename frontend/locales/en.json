@@ -69,6 +69,9 @@
     "search_placeholder": "Search archive...",
     "filter": "Filter",
     "view_list": "List",
-    "view_grid": "Grid"
+    "view_grid": "Grid",
+    "page_label": "Page",
+    "of_pages": "of {total}",
+    "total_results": "{total} results"
   }
 }

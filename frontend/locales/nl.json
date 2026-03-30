@@ -69,6 +69,9 @@
     "search_placeholder": "Doorzoek archief...",
     "filter": "Filter",
     "view_list": "Lijst",
-    "view_grid": "Raster"
+    "view_grid": "Raster",
+    "page_label": "Pagina",
+    "of_pages": "van {total}",
+    "total_results": "{total} resultaten"
   }
 }

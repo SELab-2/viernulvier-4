@@ -7,6 +7,7 @@
     <ArchiveHeader/>
     <ArchiveSearchSection/>
     <ArchiveBody/>
+    <ArchivePagination/>
   </div>
 </template>
 
