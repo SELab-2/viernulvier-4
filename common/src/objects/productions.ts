@@ -1,10 +1,10 @@
 import { z } from "zod";
 import {
-  LanguageEnum,
   LocalizedStringNullableSchema,
   LocalizedStringSchema,
 } from "./language";
 
+// Base Production object.
 export const ProductionSchema = z.object({
   id: z.number(),
   titel: LocalizedStringSchema,
@@ -17,8 +17,10 @@ export const ProductionSchema = z.object({
   attendance_mode: z.string().nullable(),
   created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
   updated_at: z.iso.datetime().nullable(), // TODO here too.
-  legacy_id: z.string().nullable(),
+  // Legacy ID is omitted here because the API doesn't use it.
 });
+
+// Localized Production object.
 export const ProductionViewSchema = ProductionSchema.extend({
   titel: z.string(),
   description1: z.string(),
@@ -27,15 +29,21 @@ export const ProductionViewSchema = ProductionSchema.extend({
   credits: z.string().nullable(),
   artist: z.string().nullable(),
 });
-export const CreateProductionSchema = ProductionSchema.omit({
+
+// Omits read-only fields.
+const MutableProductionSchema = ProductionSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
 });
-export const UpdateProductionSchema = ProductionSchema.partial();
 
+// Updating & Creating.
+export const CreateProductionSchema = MutableProductionSchema;
+export const ModifyProductionSchema = MutableProductionSchema.partial();
+export const ReplaceProductionSchema = MutableProductionSchema;
+
+// Filtering.
 export const FilterProductionSchema = z.object({
-  lang: LanguageEnum.optional(),
   titel: z.string().optional(),
   id: z.coerce.number().optional(),
   tag_ids: z
@@ -51,15 +59,15 @@ export const FilterProductionSchema = z.object({
   date_between: z.iso.date().optional(),
   date_before: z.iso.date().optional(),
   date_after: z.iso.date().optional(),
-  page: z.coerce.number().min(0).default(0),
-  limit: z.coerce.number().min(1).max(100).default(20),
   artist: z.string().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
 });
 
+// Type exports.
 export type Production = z.infer<typeof ProductionSchema>;
 export type ProductionView = z.infer<typeof ProductionViewSchema>;
 export type CreateProduction = z.infer<typeof CreateProductionSchema>;
-export type UpdateProduction = z.infer<typeof UpdateProductionSchema>;
+export type ModifyProduction = z.infer<typeof ModifyProductionSchema>;
+export type ReplaceProduction = z.infer<typeof ReplaceProductionSchema>;
 export type FilterProduction = z.infer<typeof FilterProductionSchema>;

@@ -19,8 +19,10 @@ import {
   BlogViewSchema,
   CreateBlog,
   CreateBlogSchema,
-  UpdateBlog,
-  UpdateBlogSchema,
+  ReplaceBlog,
+  ReplaceBlogSchema,
+  ModifyBlog,
+  ModifyBlogSchema,
 } from "./objects/blogs";
 import {
   CreateEvent,
@@ -29,15 +31,16 @@ import {
   EventSchema,
   FilterEvent,
   FilterEventSchema,
-  UpdateEvent,
-  UpdateEventSchema,
+  ReplaceEvent,
+  ReplaceEventSchema,
+  ModifyEvent,
+  ModifyEventSchema,
 } from "./objects/events";
 import {
   PaginatedResponse,
-  PaginatedResponseSchema,
   PaginationFilter,
   PaginationFilterSchema,
-} from "./objects/extra";
+} from "./objects/pagination";
 import {
   DEFAULT_LANGUAGE,
   Language,
@@ -52,8 +55,8 @@ import {
   LocationSchema,
   LocationView,
   LocationViewSchema,
-  UpdateLocation,
-  UpdateLocationSchema,
+  ModifyLocation,
+  ModifyLocationSchema,
 } from "./objects/locations";
 import {
   CreatePrice,
@@ -62,8 +65,10 @@ import {
   PriceSchema,
   PriceView,
   PriceViewSchema,
-  UpdatePrice,
-  UpdatePriceSchema,
+  ReplacePrice,
+  ReplacePriceSchema,
+  ModifyPrice,
+  ModifyPriceSchema,
 } from "./objects/prices";
 import {
   CreateProduction,
@@ -74,8 +79,10 @@ import {
   ProductionSchema,
   ProductionView,
   ProductionViewSchema,
-  UpdateProduction,
-  UpdateProductionSchema,
+  ReplaceProduction,
+  ReplaceProductionSchema,
+  ModifyProduction,
+  ModifyProductionSchema,
 } from "./objects/productions";
 import {
   CreateTag,
@@ -84,81 +91,184 @@ import {
   TagSchema,
   TagView,
   TagViewSchema,
-  UpdateTag,
-  UpdateTagSchema,
+  ModifyTag,
+  ModifyTagSchema,
 } from "./objects/tags";
+import {
+  CreateMediaCrop,
+  CreateMediaCropSchema,
+  CreateMediaGallery,
+  CreateMediaGallerySchema,
+  CreateMediaItem,
+  CreateMediaItemSchema,
+  CropName,
+  CropNameEnum,
+  ItemPosition,
+  ItemPositionEnum,
+  MediaCrop,
+  MediaCropSchema,
+  MediaGallery,
+  MediaGallerySchema,
+  MediaItem,
+  MediaItemSchema,
+  MediaItemView,
+  MediaItemViewSchema,
+  ModifyMediaCrop,
+  ModifyMediaCropSchema,
+  ModifyMediaGallery,
+  ModifyMediaGallerySchema,
+  ModifyMediaItem,
+  ModifyMediaItemSchema,
+  ReplaceMediaCrop,
+  ReplaceMediaCropSchema,
+  ReplaceMediaItem,
+  ReplaceMediaItemSchema,
+} from "./objects/media";
 
 // list of all exports: (this way only need to import this file.)
 export {
+  // Production Schemas. (production.ts)
   ProductionSchema,
   ProductionViewSchema,
   CreateProductionSchema,
-  UpdateProductionSchema,
+  ModifyProductionSchema,
+  ReplaceProductionSchema,
   FilterProductionSchema,
+
+  // Event Schemas. (events.ts)
   EventSchema,
   CreateEventSchema,
-  UpdateEventSchema,
+  ModifyEventSchema,
+  ReplaceEventSchema,
   FilterEventSchema,
+
+  // Blog Schemas. (blogs.ts)
   BlogSchema,
   BlogViewSchema,
-  UpdateBlogSchema,
+  ModifyBlogSchema,
   CreateBlogSchema,
+  ReplaceBlogSchema,
+
+  // Tag Schemas. (tags.ts)
   TagSchema,
   TagViewSchema,
   CreateTagSchema,
-  UpdateTagSchema,
+  ModifyTagSchema,
+
+  // Location Schemas. (locations.ts)
   LocationSchema,
   LocationViewSchema,
   CreateLocationSchema,
-  UpdateLocationSchema,
+  ModifyLocationSchema,
+
+  // Auth Schemas. (accounts.ts + api.keys.ts)
   CreateAccountSchema,
   PublicAccountSchema,
   UpdateAccountSchema,
   ApiKeySchema,
   VerifyApiKeySchema,
+
+  // Price Schemas. (prices.ts)
   PriceSchema,
   PriceViewSchema,
   CreatePriceSchema,
-  UpdatePriceSchema,
+  ModifyPriceSchema,
+  ReplacePriceSchema,
+
+  // Pagination Schemas. (pagination.ts)
   PaginationFilterSchema,
+
+  // Language Schemas. (language.ts)
   LanguageQuerySchema,
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
-  PaginatedResponseSchema,
+
+  // Media Schemas. (media.ts)
+  MediaGallerySchema,
+  MediaItemSchema,
+  MediaItemViewSchema,
+  MediaCropSchema,
+  CreateMediaCropSchema,
+  CreateMediaGallerySchema,
+  CreateMediaItemSchema,
+  ModifyMediaCropSchema,
+  ModifyMediaItemSchema,
+  ModifyMediaGallerySchema,
+  ReplaceMediaCropSchema,
+  ReplaceMediaItemSchema,
+  CropNameEnum,
+  ItemPositionEnum,
 };
 export type {
+  // Production Types. (productions.ts)
   Production,
   ProductionView,
   CreateProduction,
-  UpdateProduction,
+  ModifyProduction,
+  ReplaceProduction,
   FilterProduction,
+
+  // Event Types. (events.ts)
   Event,
   CreateEvent,
-  UpdateEvent,
+  ModifyEvent,
+  ReplaceEvent,
   FilterEvent,
+
+  // Tag Types. (tags.ts)
   Tag,
   TagView,
   CreateTag,
-  UpdateTag,
+  ModifyTag,
+
+  // Blog Types. (blogs.ts)
   Blog,
   BlogView,
   CreateBlog,
-  UpdateBlog,
+  ModifyBlog,
+  ReplaceBlog,
+
+  // Location Types. (locations.ts)
   Location,
   LocationView,
   CreateLocation,
-  UpdateLocation,
+  ModifyLocation,
+
+  // Auth Types. (accounts.ts + api.keys.ts)
   UpdateAccount,
   PublicAccount,
   CreateAccount,
   ApiKey,
   VerifyApiKey,
+
+  // Price Types. (prices.ts)
   Price,
   PriceView,
   CreatePrice,
-  UpdatePrice,
+  ModifyPrice,
+  ReplacePrice,
+
+  // Pagination Types. (pagination.ts)
   PaginationFilter,
+  PaginatedResponse, // This has no schema because it doesn't need one.
+
+  // Language Types. (language.ts)
   Language,
   LanguageQuery,
-  PaginatedResponse,
+
+  // Media Types. (media.ts)
+  MediaGallery,
+  MediaItem,
+  MediaItemView,
+  MediaCrop,
+  CreateMediaCrop,
+  CreateMediaGallery,
+  CreateMediaItem,
+  ModifyMediaItem,
+  ModifyMediaGallery,
+  ModifyMediaCrop,
+  ReplaceMediaCrop,
+  ReplaceMediaItem,
+  CropName,
+  ItemPosition,
 };

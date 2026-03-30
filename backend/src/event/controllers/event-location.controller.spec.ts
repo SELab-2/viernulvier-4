@@ -19,7 +19,6 @@ describe("EventLocationController", () => {
     },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   // What we expect the LanguageService to return after flattening
@@ -28,7 +27,6 @@ describe("EventLocationController", () => {
     location: "Citadel Park",
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   const mockEventId = 42;

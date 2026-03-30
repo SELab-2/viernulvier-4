@@ -2,7 +2,7 @@
 
 ### [GET] `/locations`
 Retrieves a list of all registered venues and locations.
-- **Returns:** Array of `Location`
+- **Returns:** `PaginatedResponse<Location | LocationView>` a [paginated](../pagination/index.md) list of locations or location views.
 
 ### [GET] `/locations/:locationId`
 Retrieves a specific location by its ID.
@@ -17,7 +17,7 @@ Creates a new location entry.
 ### [PATCH] `/locations`
 Updates an existing location. Note: The ID must be provided within the request body.
 - **Security:** `apiKey` required.
-- **Body:** `UpdateLocation`
+- **Body:** `ModifyLocation`
 - **Returns:** `Location`
 
 ### [DELETE] `/locations/:locationId`

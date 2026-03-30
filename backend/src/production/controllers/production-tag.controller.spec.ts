@@ -26,7 +26,6 @@ describe("ProductionTagController", () => {
     description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: { en: "fixing", nl: "repareren" },
     artist: { en: "the", nl: "de" },
     credits: { en: "tests :-)", nl: "testen :-)" },
@@ -40,7 +39,6 @@ describe("ProductionTagController", () => {
       tag: { en: "Drama", nl: "Drama" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
-      legacy_id: "str",
     },
   ];
 
@@ -50,7 +48,6 @@ describe("ProductionTagController", () => {
       tag: "Drama",
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
-      legacy_id: "str",
     },
   ];
 

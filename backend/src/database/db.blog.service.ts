@@ -3,10 +3,13 @@ import { DbService } from "./db.service";
 import {
   BlogDto,
   CreateBlogDto,
-  PaginatedBlogDto,
-  UpdateBlogDto,
+  MediaGalleryDto,
+  PaginationFilterDto,
+  ReplaceBlogDto,
+  ModifyBlogDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -31,6 +34,7 @@ export class BlogDatabaseService {
     if (result.length === 0) {
       throw new ResourceGoneException(`Blog with ID ${id} not found`);
     }
+
     return result[0];
   }
 
@@ -38,17 +42,17 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
    * @param page page index (starts at 0)
+   * @param descending Whether the dates should be sorted descending or ascending.
    * @returns blogs
    */
   async getBlogs(
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<PaginatedBlogDto> {
-    const offset = page * amount;
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<BlogDto>> {
+    const offset = paginationFilters.page * paginationFilters.limit;
     const countResult = await this.db.query<{ count: string }>(
       `SELECT COUNT(*) as count FROM blogs`,
     );
-    if (amount === 0) {
+    if (paginationFilters.limit === 0) {
       const query = `
       SELECT id, 
              titel, 
@@ -56,14 +60,17 @@ export class BlogDatabaseService {
              created_at,
              updated_at
       FROM blogs
-      ORDER BY id
+      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
       `;
 
       return {
-        limit: amount,
-        page: page,
+        limit: paginationFilters.limit,
+        page: paginationFilters.page,
         totalItems: parseInt(countResult[0].count),
-        objects: await this.db.query<BlogDto>(query, [amount, offset]),
+        objects: await this.db.query<BlogDto>(query, [
+          paginationFilters.limit,
+          offset,
+        ]),
       };
     }
 
@@ -74,15 +81,18 @@ export class BlogDatabaseService {
            created_at,
            updated_at
     FROM blogs
-    ORDER BY id
+    ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
     LIMIT $1 OFFSET $2
     `;
 
     return {
-      limit: amount,
-      page: page,
+      limit: paginationFilters.limit,
+      page: paginationFilters.page,
       totalItems: parseInt(countResult[0].count),
-      objects: await this.db.query<BlogDto>(query, [amount, offset]),
+      objects: await this.db.query<BlogDto>(query, [
+        paginationFilters.limit,
+        offset,
+      ]),
     };
   }
 
@@ -123,15 +133,14 @@ export class BlogDatabaseService {
 
   /**
    * Update function for blogs. Updates the blog in the database.
-   * @param blog must be of the type "UpdateBlog", gives the freedom to define only what needs to be updated.
-   * The id field in the blog MUST be defined.
+   * @param blogId The ID of the blog.
+   * @param blog must be of the type "ModifyBlog" or "ReplaceBlog", gives the freedom to define only what needs to be updated.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
-    if (!blog.id) {
-      throw new BadRequestException("Blog id is required for update");
-    }
-
+  async updateBlog(
+    blogId: number,
+    blog: ModifyBlogDto | ReplaceBlogDto,
+  ): Promise<BlogDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -152,7 +161,7 @@ export class BlogDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(blog.id);
+    values.push(blogId);
 
     const query = `
       UPDATE blogs
@@ -170,7 +179,7 @@ export class BlogDatabaseService {
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Cannot update: Blog ${blog.id} not found`,
+        `Cannot update: Blog ${blogId} not found`,
       );
     }
 
@@ -192,5 +201,61 @@ export class BlogDatabaseService {
     }
   }
 
-  // insert extra functions here if desired.
+  /**
+   * Gets media gallery linked to a given blog.
+   * @param blog_id The ID of the blog you want.
+   * @returns List of MediaGalleryDto linked to the blog.
+   */
+  async getMediaFromBlog(blog_id: number): Promise<MediaGalleryDto> {
+    const query = `
+      SELECT mg.id, mg.created_at, mg.updated_at
+      FROM media_gallery mg
+      INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
+      WHERE bmg.blog_id = $1
+      ORDER BY mg.id
+    `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, [blog_id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Blog with ID ${blog_id} has no media gallery`,
+      );
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given blog.
+   * @param blog_id The ID of the blog to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   * @returns void
+   */
+  async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
+    const query = `
+    INSERT INTO blog_media_gallery (blog_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given blog.
+   * @param blog_id The ID of the blog.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromBlog(
+    blog_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM blog_media_gallery
+    WHERE blog_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
 }

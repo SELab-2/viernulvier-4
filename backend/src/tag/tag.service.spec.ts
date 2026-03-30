@@ -1,12 +1,12 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { TagService } from "./tag.service";
 import { TagDatabaseService } from "../database/db.tag.service";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import {
   CreateTagDto,
   PaginationFilterDto,
   TagDto,
-  UpdateTagDto,
+  ModifyTagDto,
 } from "../dto/dto";
 
 describe("TagService", () => {
@@ -22,7 +22,6 @@ describe("TagService", () => {
     },
     created_at: "2024-01-15T19:00:00.000Z",
     updated_at: "2024-01-15T19:00:00.000Z",
-    legacy_id: null,
   };
 
   const filter: PaginationFilterDto = {
@@ -61,7 +60,6 @@ describe("TagService", () => {
     it("should create and return a new tag", async () => {
       const createDto: CreateTagDto = {
         tag: { en: "NewTag", nl: "NieuweTag" },
-        legacy_id: null,
       };
       const result = await service.createTag(createDto);
       expect(dbService.createTag).toHaveBeenCalledWith(createDto);
@@ -103,22 +101,12 @@ describe("TagService", () => {
 
   describe("updateTag", () => {
     it("should successfully update and return the tag", async () => {
-      const updateDto: UpdateTagDto = {
+      const updateDto: ModifyTagDto = {
         tag: { en: "Updated", nl: "Bijgewerkt" },
       };
-      const result = await service.updateTag(1, updateDto);
-      expect(dbService.updateTag).toHaveBeenCalledWith(updateDto);
+      const result = await service.modifyTag(1, updateDto);
+      expect(dbService.updateTag).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(mockTag);
-    });
-
-    it("should throw BadRequestException if url id and body id do not match", async () => {
-      const mismatchDto: UpdateTagDto = {
-        id: 2,
-        tag: { en: "Mismatch", nl: "Mismatch" },
-      };
-      await expect(service.updateTag(1, mismatchDto)).rejects.toThrow(
-        BadRequestException,
-      );
     });
   });
 

@@ -6,11 +6,15 @@ import {
   CreateProductionDto,
   ProductionDto,
   ProductionViewDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
   LanguageQueryDto,
 } from "../../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
-import { FilterProductionSchema } from "@repo/common";
+import {
+  FilterProductionSchema,
+  LanguageQuerySchema,
+  PaginationFilterSchema,
+} from "@repo/common";
 import { ResourceGoneException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
@@ -28,7 +32,6 @@ describe("ProductionController", () => {
     description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: { en: "fixing", nl: "repareren" },
     artist: { en: "the", nl: "de" },
     credits: { en: "tests :-)", nl: "testen :-)" },
@@ -43,7 +46,6 @@ describe("ProductionController", () => {
     description2: "With great actors",
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: "fixing",
     artist: "the",
     credits: "tests :-)",
@@ -99,30 +101,61 @@ describe("ProductionController", () => {
 
   describe("getAllProductions", () => {
     it("should return an array of flattened productions", async () => {
-      const filters = FilterProductionSchema.parse({ lang: "en" });
+      const productionFilters = FilterProductionSchema.parse({});
+      const paginationFilters = PaginationFilterSchema.parse({});
+      const langQuery = LanguageQuerySchema.parse({ lang: "en" });
 
       jest
         .spyOn(languageService, "flattenByLanguage")
         .mockReturnValue(mockProductionViews);
 
-      const result = await controller.getAllProductions(filters);
+      const result = await controller.getAllProductions(
+        langQuery,
+        paginationFilters,
+        productionFilters,
+      );
 
-      expect(service.getAllProductions).toHaveBeenCalledWith(filters);
+      expect(service.getAllProductions).toHaveBeenCalledWith(
+        productionFilters,
+        paginationFilters,
+      );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         mockProductions,
-        filters.lang,
+        langQuery.lang,
       );
       expect(result).toEqual(mockProductionViews);
     });
 
     it("should return empty array when no productions exist", async () => {
-      const filters = FilterProductionSchema.parse({ lang: "en" });
-      jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue([]);
+      const productionFilters = FilterProductionSchema.parse({});
+      const paginationFilters = PaginationFilterSchema.parse({});
+      const langQuery = LanguageQuerySchema.parse({ lang: "en" });
 
-      const result = await controller.getAllProductions(filters);
+      jest.spyOn(service, "getAllProductions").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
+      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
 
-      expect(result).toEqual([]);
+      const result = await controller.getAllProductions(
+        langQuery,
+        paginationFilters,
+        productionFilters,
+      );
+
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
   });
 
@@ -172,7 +205,7 @@ describe("ProductionController", () => {
 
   describe("modifyProduction", () => {
     it("should modify and return the production", async () => {
-      const patchData: UpdateProductionDto = {
+      const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       const patchedProduction = {
@@ -190,7 +223,7 @@ describe("ProductionController", () => {
     });
 
     it("should throw a ResourceGoneException (410) if trying to modify a non-existent production", async () => {
-      const patchData: UpdateProductionDto = {
+      const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       jest
@@ -232,7 +265,6 @@ describe("ProductionController", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },
@@ -265,7 +297,6 @@ describe("ProductionController", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },

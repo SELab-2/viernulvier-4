@@ -1,0 +1,68 @@
+name: Deploy Preview
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy preview
+        run: |
+          PR=${{ github.event.pull_request.number }}
+          export NUXT_BASE="/previews/$PR/"
+          PR_PATH="/home/selab2/project/previews/$PR"
+          PORT="30$PR"
+
+          mkdir -p $PR_PATH
+          rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
+
+          cd $PR_PATH
+          python3 -m pip install mkdocs-material
+          python3 -m mkdocs build
+
+          mkdir -p frontend/public
+          rm -rf frontend/public/docs
+          mv site frontend/public/docs
+
+          cd $PR_PATH/frontend
+          npm install
+
+          NUXT_API_BASE="https://sel2-4.ugent.be/api" \
+          npm run build
+
+          pm2 delete preview-$PR || true
+          PORT=$PORT pm2 start .output/server/index.mjs --name preview-$PR
+          pm2 save
+
+      - name: Post preview link
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            🚀 **Preview Build succesfully deployed!**
+
+            📱 **Website Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+            📚 **Docs Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+          comment_tag: preview_link

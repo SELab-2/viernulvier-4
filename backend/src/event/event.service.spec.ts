@@ -1,16 +1,15 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import EventService from "./event.service";
 import { EventDatabaseService } from "../database/db.event.service";
-import type {
-  CreateEventDto,
-  EventDto,
-  LocationDto,
-  PriceDto,
-  UpdateEventDto,
+import {
+  type CreateEventDto,
+  type EventDto,
+  type LocationDto,
+  type PriceDto,
+  type ModifyEventDto,
 } from "../dto/dto";
-import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { FilterEventSchema } from "@repo/common";
+import { FilterEventSchema, PaginationFilterSchema } from "@repo/common";
 
 describe("EventService", () => {
   let service: EventService;
@@ -25,7 +24,6 @@ describe("EventService", () => {
     intermission_at: "2024-01-15T19:00:00Z",
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: "str",
   };
 
   // Updated Location to use LocalizedStringSchema
@@ -37,7 +35,6 @@ describe("EventService", () => {
     },
     created_at: "2025-06-01T22:00:00.000Z",
     updated_at: "2025-06-01T22:00:00.000Z",
-    legacy_id: "str",
   };
 
   // Updated Blog to use LocalizedStringSchema (even if it's just mocked for db configuration)
@@ -66,7 +63,6 @@ describe("EventService", () => {
       },
       created_at: "2024-01-15T19:00:00Z",
       updated_at: "2024-01-15T19:00:00Z",
-      legacy_id: null,
     },
   ];
 
@@ -116,25 +112,46 @@ describe("EventService", () => {
 
   describe("getAllEvents", () => {
     it("should return all events from database", async () => {
-      const result = await service.getAllEvents(FilterEventSchema.parse({}));
+      const result = await service.getAllEvents(
+        FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
       expect(result).toEqual(mockEvents);
       expect(dbService.getEvents).toHaveBeenCalledWith(
         FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
     });
 
     it("should call dbService.getEvents with empty filter", async () => {
-      await service.getAllEvents(FilterEventSchema.parse({}));
+      await service.getAllEvents(
+        FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
       expect(dbService.getEvents).toHaveBeenCalledWith(
         FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
       expect(dbService.getEvents).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no events exist", async () => {
-      jest.spyOn(dbService, "getEvents").mockResolvedValueOnce([]);
-      const result = await service.getAllEvents(FilterEventSchema.parse({}));
-      expect(result).toEqual([]);
+      jest.spyOn(dbService, "getEvents").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
+      const result = await service.getAllEvents(
+        FilterEventSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+      );
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
 
     it("should handle database errors", async () => {
@@ -142,7 +159,10 @@ describe("EventService", () => {
         .spyOn(dbService, "getEvents")
         .mockRejectedValueOnce(new Error("Database error"));
       await expect(
-        service.getAllEvents(FilterEventSchema.parse({})),
+        service.getAllEvents(
+          FilterEventSchema.parse({}),
+          PaginationFilterSchema.parse({}),
+        ),
       ).rejects.toThrow("Database error");
     });
   });
@@ -181,40 +201,28 @@ describe("EventService", () => {
   describe("replaceEvent", () => {
     it("should successfully replace and return the event", async () => {
       const result = await service.replaceEvent(1, mockEvent);
-      expect(dbService.updateEvent).toHaveBeenCalledWith(mockEvent);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(1, mockEvent);
       expect(result).toEqual(mockEvent);
-    });
-
-    it("should throw BadRequestException if url id and body id do not match", async () => {
-      await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(service.replaceEvent(2, mockEvent)).rejects.toThrow(
-        "ID in the URL must match ID in the body.",
-      );
     });
   });
 
   describe("modifyEvent", () => {
-    it("should fetch, merge, and update the event correctly", async () => {
-      const patchData: UpdateEventDto = {
+    it("should update the event accordingly", async () => {
+      const patchData: ModifyEventDto = {
         starttime: "2026-03-06T23:08:45.328Z",
       };
-      const expectedMergedEvent: EventDto = {
+      const resultData: EventDto = {
         ...mockEvent,
         starttime: "2026-03-06T23:08:45.328Z",
         id: 1,
       };
 
-      jest
-        .spyOn(dbService, "updateEvent")
-        .mockResolvedValueOnce(expectedMergedEvent);
+      jest.spyOn(dbService, "updateEvent").mockResolvedValueOnce(resultData);
 
       const result = await service.modifyEvent(1, patchData);
 
-      expect(dbService.getEventById).toHaveBeenCalledWith(1);
-      expect(dbService.updateEvent).toHaveBeenCalledWith(expectedMergedEvent);
-      expect(result).toEqual(expectedMergedEvent);
+      expect(dbService.updateEvent).toHaveBeenCalledWith(1, patchData);
+      expect(result).toEqual(resultData);
     });
   });
 
@@ -244,7 +252,6 @@ describe("EventService", () => {
         production_id: 1,
         doors_at: "2024-01-15T19:00:00Z",
         intermission_at: "2024-01-15T19:00:00Z",
-        legacy_id: "str",
       };
 
       const createdEvent: EventDto = {
@@ -269,7 +276,6 @@ describe("EventService", () => {
         production_id: 1,
         doors_at: "2024-01-15T19:00:00Z",
         intermission_at: "2024-01-15T19:00:00Z",
-        legacy_id: "str",
       };
 
       jest

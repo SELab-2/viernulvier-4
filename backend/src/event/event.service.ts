@@ -1,14 +1,16 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
   LocationDto,
-  PaginatedEventDto,
+  PaginationFilterDto,
   PriceDto,
-  UpdateEventDto,
+  ReplaceEventDto,
+  ModifyEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class EventService {
@@ -16,11 +18,15 @@ export class EventService {
 
   /**
    * Fetches all EventDto objects from the DBService
-   * @param filters The Filters to be applied to the query.
+   * @param eventFilters The Filters to be applied to the query.
+   * @param paginationFilters Filters to do with pagination and ordering.
    * @returns All EventDto objects.
    */
-  async getAllEvents(filters: FilterEventDto): Promise<PaginatedEventDto> {
-    return await this.eventDBService.getEvents(filters);
+  async getAllEvents(
+    eventFilters: FilterEventDto,
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<EventDto>> {
+    return await this.eventDBService.getEvents(eventFilters, paginationFilters);
   }
 
   /**
@@ -39,11 +45,8 @@ export class EventService {
    * @param event The event delivered through the request body.
    * @returns The updated EventDto object.
    */
-  async replaceEvent(id: number, event: EventDto): Promise<EventDto> {
-    if (id !== event.id)
-      throw new BadRequestException("ID in the URL must match ID in the body.");
-
-    return await this.eventDBService.updateEvent(event);
+  async replaceEvent(id: number, event: ReplaceEventDto): Promise<EventDto> {
+    return await this.eventDBService.updateEvent(id, event);
   }
 
   /**
@@ -52,16 +55,8 @@ export class EventService {
    * @param patchData The partial EventDto object used to update the data in the DB.
    * @returns The updated EventDto object.
    */
-  async modifyEvent(id: number, patchData: UpdateEventDto): Promise<EventDto> {
-    const existingEvent: EventDto = await this.eventDBService.getEventById(id);
-
-    const mergedEvent: EventDto = {
-      ...existingEvent,
-      ...patchData,
-      id, // Force ID.
-    };
-
-    return await this.eventDBService.updateEvent(mergedEvent);
+  async modifyEvent(id: number, patchData: ModifyEventDto): Promise<EventDto> {
+    return await this.eventDBService.updateEvent(id, patchData);
   }
 
   /**

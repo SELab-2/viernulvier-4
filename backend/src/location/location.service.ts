@@ -3,10 +3,10 @@ import { LocationDatabaseService } from "../database/db.location.service";
 import {
   CreateLocationDto,
   LocationDto,
-  PaginatedLocationDto,
   PaginationFilterDto,
-  UpdateLocationDto,
+  ModifyLocationDto,
 } from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 /**
  * Handles Core functionality for Locations.
@@ -31,7 +31,7 @@ export class LocationService {
    */
   async getLocations(
     PaginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedLocationDto> {
+  ): Promise<PaginatedResponse<LocationDto>> {
     return await this.locationDbService.getLocations(
       PaginationFilter.limit,
       PaginationFilter.page,
@@ -51,13 +51,18 @@ export class LocationService {
 
   /**
    * Updates an existing Location.
-   * @param updateLocation The Location we want to update.
+   * @param locationId The ID of the Location.
+   * @param modifyLocation The Location we want to update.
    * @returns The updated Location.
    */
-  async updateLocation(
-    updateLocation: UpdateLocationDto,
+  async modifyLocation(
+    locationId: number,
+    modifyLocation: ModifyLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationDbService.updateLocation(updateLocation);
+    return await this.locationDbService.updateLocation(
+      locationId,
+      modifyLocation,
+    );
   }
 
   /**

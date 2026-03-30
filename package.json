@@ -15,7 +15,8 @@
     "start:dev": "turbo start:dev",
     "test": "turbo test",
     "test:coverage": "turbo test:coverage",
-    "scraper:reset": "turbo scraper:reset"
+    "scraper:reset": "turbo scraper:reset",
+    "scraper:inject:structured:test": "turbo scraper:inject:structured:test"
   },
   "repository": {
     "type": "git",
@@ -46,12 +47,8 @@
     "typescript-eslint": "^8.20.0"
   },
   "dependencies": {
-    "@nestjs/schedule": "^6.1.1",
     "argon2": "^0.44.0",
-    "csv-parser": "^3.2.0",
     "dotenv": "^17.3.1",
-    "pg": "^8.18.0",
-    "sanitize-html": "^2.17.1",
-    "winston": "^3.19.0"
+    "sanitize-html": "^2.17.1"
   }
 }

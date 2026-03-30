@@ -64,7 +64,7 @@ function parseVnvProduction(object: Record<string, any>): vnvProduction {
     genres.push(extractIdFromUri(genreUrl as string) || "");
   }
 
-  const production: vnvProduction = {
+  return {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
@@ -82,8 +82,6 @@ function parseVnvProduction(object: Record<string, any>): vnvProduction {
     events: events,
     genres: genres,
   };
-
-  return production;
 }
 
 /**
@@ -163,7 +161,7 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
     prices.push(extractIdFromUri(price as string) || "N/A");
   }
 
-  const event: vnvEvent = {
+  return {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
     production_id:
       extractIdFromUri(
@@ -179,8 +177,6 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
     location: extractIdFromUri(object.hall as string) || "N/A",
     prices: prices,
   };
-
-  return event;
 }
 
 /**

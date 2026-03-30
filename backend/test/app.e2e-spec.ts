@@ -17,6 +17,8 @@ import request from "supertest";
 import { ApiKeyGuard } from "../src/auth/authGuard";
 import { AppLogger } from "../src/util/logger/logger.service";
 import { ScraperService } from "../src/util/scraper/scraper.service";
+import { MediaModule } from "../src/media/media.module";
+import { MediaDatabaseService } from "../src/database/db.media.service";
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
@@ -54,7 +56,6 @@ const mockBlog2View = {
 const mockTag = {
   id: 1,
   tag: { en: "Drama", nl: "Drama" },
-  legacy_id: "Test Legacy",
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -63,7 +64,6 @@ const mockTagView = { ...mockTag, tag: "Drama" };
 const mockTag2 = {
   id: 2,
   tag: { en: "Comedy", nl: "Komedie" },
-  legacy_id: null,
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -81,7 +81,6 @@ const mockProduction = {
   attendance_mode: "string",
   created_at: "2026-03-07T16:58:08.701Z",
   updated_at: "2026-03-07T16:58:08.701Z",
-  legacy_id: "string",
 };
 const mockProductionView = {
   ...mockProduction,
@@ -99,7 +98,6 @@ const mockEvent = {
   endtime: "2025-01-01T22:00:00.000Z",
   doors_at: "2025-06-01T22:00:00.000Z",
   intermission_at: "2025-06-01T22:00:00.000Z",
-  legacy_id: "string",
   created_at: "2026-03-07T00:00:00.000Z",
   updated_at: "2026-03-07T00:00:00.000Z",
   production_id: 1,
@@ -108,7 +106,6 @@ const mockEvent = {
 const mockLocation = {
   id: 1,
   location: { en: "Main Stage", nl: "Hoofdpodium" },
-  legacy_id: "Test Legacy",
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -118,7 +115,6 @@ const mockPrice = {
   id: 1,
   price: 15.5,
   name: { en: "Early Bird", nl: "Vroege Vogel" },
-  legacy_id: "Test Legacy",
   created_at: "2025-06-01T22:00:00.000Z",
   updated_at: "2025-06-01T22:00:00.000Z",
 };
@@ -192,6 +188,86 @@ const mockPriceDbService = () => ({
   deletePrice: jest.fn().mockResolvedValue(undefined),
 });
 
+// ==========================================
+// MOCK DATA (Media)
+// ==========================================
+
+const mockMediaCrop = {
+  id: 1,
+  name: "hd_ready",
+  url: "https://example.com/crop.jpg",
+  created_at: "2026-03-28T14:00:00.000Z",
+  updated_at: "2026-03-28T14:00:00.000Z",
+};
+
+const mockMediaItem = {
+  id: 1,
+  type: "image",
+  original_filename: "test.png",
+  position: "main",
+  width: 1920,
+  height: 1080,
+  title: { en: "Test Media", nl: "Test Media" },
+  description: { en: "Desc", nl: "Beschrijving" },
+  credits: { en: "Credits", nl: "Credits" },
+  created_at: "2026-03-28T14:00:00.000Z",
+  updated_at: "2026-03-28T14:00:00.000Z",
+};
+
+const mockMediaItemView = {
+  ...mockMediaItem,
+  title: "Test Media",
+  description: "Desc",
+  credits: "Credits",
+};
+
+const mockMediaGallery = {
+  id: 1,
+  created_at: "2026-03-28T14:00:00.000Z",
+  updated_at: "2026-03-28T14:00:00.000Z",
+};
+
+const paginatedResponse = (objects) => ({
+  objects,
+  totalItems: 1,
+  page: 1,
+  limit: 10,
+});
+
+// ==========================================
+// Mock DB service factory (Media)
+// ==========================================
+
+const mockMediaDbService = () => ({
+  // Crops
+  getAllCrops: jest.fn().mockResolvedValue(paginatedResponse([mockMediaCrop])),
+  getCropById: jest.fn().mockResolvedValue(mockMediaCrop),
+  createCrop: jest.fn().mockResolvedValue(mockMediaCrop),
+  updateCrop: jest.fn().mockResolvedValue(mockMediaCrop),
+  deleteCrop: jest.fn().mockResolvedValue(undefined),
+
+  // Items
+  getAllItems: jest.fn().mockResolvedValue(paginatedResponse([mockMediaItem])),
+  getItemById: jest.fn().mockResolvedValue(mockMediaItem),
+  createItem: jest.fn().mockResolvedValue(mockMediaItem),
+  updateItem: jest.fn().mockResolvedValue(mockMediaItem),
+  deleteItem: jest.fn().mockResolvedValue(undefined),
+  getCropsByItem: jest.fn().mockResolvedValue([mockMediaCrop]),
+  linkCropToItem: jest.fn().mockResolvedValue(undefined),
+  unlinkCropFromItem: jest.fn().mockResolvedValue(undefined),
+
+  // Galleries
+  getGalleries: jest
+    .fn()
+    .mockResolvedValue(paginatedResponse([mockMediaGallery])),
+  getGalleryById: jest.fn().mockResolvedValue(mockMediaGallery),
+  createGallery: jest.fn().mockResolvedValue(mockMediaGallery),
+  deleteGallery: jest.fn().mockResolvedValue(undefined),
+  getItemsByGallery: jest.fn().mockResolvedValue([mockMediaItem]),
+  linkItemToGallery: jest.fn().mockResolvedValue(undefined),
+  unlinkItemFromGallery: jest.fn().mockResolvedValue(undefined),
+});
+
 // Helper: build app with all modules
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -202,6 +278,7 @@ async function buildApp(): Promise<INestApplication> {
       TagModule,
       LocationModule,
       PriceModule,
+      MediaModule,
     ],
   })
     .overrideGuard(ApiKeyGuard)
@@ -218,6 +295,8 @@ async function buildApp(): Promise<INestApplication> {
     .useFactory({ factory: mockLocationDbService })
     .overrideProvider(PriceDatabaseService)
     .useFactory({ factory: mockPriceDbService })
+    .overrideProvider(MediaDatabaseService)
+    .useFactory({ factory: mockMediaDbService })
     .overrideProvider(AppLogger) // We override these so they don't make a fuss during testing.
     .useValue({
       log: jest.fn(),
@@ -259,20 +338,21 @@ describe("BlogController (e2e)", () => {
   describe("GET /blogs", () => {
     it("should return 200 with an array of flattened blogs", () => {
       return request(app.getHttpServer())
-        .get("/blogs?lang=en")
+        .get("/blogs?lang=en&descending=true")
         .expect(200)
         .expect([mockBlogView, mockBlog2View]);
     });
 
     it("should call blogDb.getBlogs()", async () => {
-      await request(app.getHttpServer()).get("/blogs?lang=en");
+      await request(app.getHttpServer()).get("/blogs?lang=en&descending=true");
       expect(blogDb.getBlogs).toHaveBeenCalled();
     });
 
     it("should return 200 with an empty array when no blogs exist", async () => {
+      // @ts-ignore
       jest.spyOn(blogDb, "getBlogs").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
-        .get("/blogs?lang=en")
+        .get("/blogs?lang=en&descending=true")
         .expect(200)
         .expect([]);
     });
@@ -337,13 +417,6 @@ describe("BlogController (e2e)", () => {
         .send(mockBlog)
         .expect(200)
         .expect(mockBlog);
-    });
-
-    it("should return 400 when URL id and body id do not match", () => {
-      return request(app.getHttpServer())
-        .put("/blogs/2")
-        .send(mockBlog)
-        .expect(400);
     });
 
     it("should return 400 when id param is not a number", () => {
@@ -420,6 +493,7 @@ describe("TagController (e2e)", () => {
     });
 
     it("should return 200 with empty array when no tags exist", async () => {
+      // @ts-ignore
       jest.spyOn(tagDb, "getTags").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
         .get("/tags?lang=en")
@@ -449,7 +523,6 @@ describe("TagController (e2e)", () => {
   describe("POST /tags", () => {
     const createPayload = {
       tag: { en: "Thriller", nl: "Thriller" },
-      legacy_id: "test",
     };
 
     it("should return 201 with the created tag", () => {
@@ -477,13 +550,6 @@ describe("TagController (e2e)", () => {
         .send({ tag: { en: "Thriller", nl: "Thriller" } })
         .expect(200)
         .expect(mockTag);
-    });
-
-    it("should return 400 when body id does not match URL id", () => {
-      return request(app.getHttpServer())
-        .patch("/tags/1")
-        .send({ id: 99, tag: { en: "Other", nl: "Ander" } })
-        .expect(400);
     });
 
     it("should return 400 when id is not a number", () => {
@@ -542,6 +608,7 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should return 200 with empty array when no productions exist", async () => {
+      // @ts-ignore
       jest.spyOn(productionDb, "getProductions").mockResolvedValueOnce([]);
       return request(app.getHttpServer())
         .get("/productions?lang=en")
@@ -573,7 +640,6 @@ describe("ProductionController (e2e)", () => {
       titel: { en: "New Production", nl: "Nieuwe Productie" },
       description1: { en: "Desc 1", nl: "Beschrijving 1" },
       description2: { en: "Desc 2", nl: "Beschrijving 2" },
-      legacy_id: "etst",
       attendance_mode: "etst",
       performer_type: "etst",
       tagline: { en: "test", nl: "test" },
@@ -611,13 +677,6 @@ describe("ProductionController (e2e)", () => {
         .send(mockProduction)
         .expect(200)
         .expect(mockProduction);
-    });
-
-    it("should return 400 when URL id and body id do not match", () => {
-      return request(app.getHttpServer())
-        .put("/productions/2")
-        .send(mockProduction)
-        .expect(400);
     });
 
     it("should return 400 when id is not a number", () => {
@@ -868,6 +927,7 @@ describe("EventController (e2e)", () => {
     });
 
     it("should return 200 with empty array when no events exist", async () => {
+      // @ts-ignore
       jest.spyOn(eventDb, "getEvents").mockResolvedValueOnce([]);
       return request(app.getHttpServer()).get("/events").expect(200).expect([]);
     });
@@ -896,7 +956,6 @@ describe("EventController (e2e)", () => {
       starttime: "2025-06-01T19:00:00.000Z",
       endtime: "2025-06-01T22:00:00.000Z",
       production_id: 1,
-      legacy_id: "1",
       doors_at: "2025-06-01T22:00:00.000Z",
       intermission_at: "2025-06-01T22:00:00.000Z",
     };
@@ -922,13 +981,6 @@ describe("EventController (e2e)", () => {
         .send(mockEvent)
         .expect(200)
         .expect(mockEvent);
-    });
-
-    it("should return 400 when URL id and body id do not match", () => {
-      return request(app.getHttpServer())
-        .put("/events/2")
-        .send(mockEvent)
-        .expect(400);
     });
 
     it("should return 400 when id is not a number", () => {
@@ -1032,14 +1084,14 @@ describe("LocationController (e2e)", () => {
     });
   });
 
-  describe("PATCH /locations", () => {
+  describe("PATCH /locations/:locationId", () => {
     it("should return 200 with the updated location", () => {
       const updatePayload = {
         id: 1,
         location: { en: "Updated Stage", nl: "Bijgewerkt podium" },
       };
       return request(app.getHttpServer())
-        .patch("/locations")
+        .patch("/locations/1")
         .send(updatePayload)
         .expect(200)
         .expect(mockLocation);
@@ -1074,66 +1126,66 @@ describe("EventLocationController (e2e)", () => {
     await app.close();
   });
 
-  describe("GET /events/:eventId/locations", () => {
+  describe("GET /events/:eventId/location", () => {
     it("should return 200 with the flattened location of the event", () => {
       return request(app.getHttpServer())
-        .get("/events/1/locations?lang=en")
+        .get("/events/1/location?lang=en")
         .expect(200)
         .expect(mockLocationView);
     });
 
     it("should call eventDb.getLocationOfEvent with the correct id", async () => {
-      await request(app.getHttpServer()).get("/events/1/locations?lang=en");
+      await request(app.getHttpServer()).get("/events/1/location?lang=en");
       expect(eventDb.getLocationOfEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
       return request(app.getHttpServer())
-        .get("/events/abc/locations")
+        .get("/events/abc/location")
         .expect(400);
     });
   });
 
-  describe("PUT /events/:eventId/locations/:locationId", () => {
+  describe("PUT /events/:eventId/location/:locationId", () => {
     it("should return 200 after successfully linking", () => {
       return request(app.getHttpServer())
-        .put("/events/1/locations/2")
+        .put("/events/1/location/2")
         .expect(200);
     });
 
     it("should call eventDb.linkEventToLocation with correct ids", async () => {
-      await request(app.getHttpServer()).put("/events/1/locations/2");
+      await request(app.getHttpServer()).put("/events/1/location/2");
       expect(eventDb.linkEventToLocation).toHaveBeenCalledWith(1, 2);
     });
 
     it("should return 400 when eventId is not a number", () => {
       return request(app.getHttpServer())
-        .put("/events/abc/locations/1")
+        .put("/events/abc/location/1")
         .expect(400);
     });
 
     it("should return 400 when locationId is not a number", () => {
       return request(app.getHttpServer())
-        .put("/events/1/locations/abc")
+        .put("/events/1/location/abc")
         .expect(400);
     });
   });
 
-  describe("DELETE /events/:eventId/locations", () => {
+  describe("DELETE /events/:eventId/location", () => {
     it("should return 200 after unlinking", () => {
       return request(app.getHttpServer())
-        .delete("/events/1/locations")
+        .delete("/events/1/location")
         .expect(200);
     });
 
     it("should call eventDb.deleteLocationFromEvent with the eventId", async () => {
-      await request(app.getHttpServer()).delete("/events/1/locations");
+      await request(app.getHttpServer()).delete("/events/1/location");
       expect(eventDb.deleteLocationFromEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
       return request(app.getHttpServer())
-        .delete("/events/abc/locations")
+        .delete("/events/abc/location")
         .expect(400);
     });
   });
@@ -1193,7 +1245,7 @@ describe("PriceController (e2e)", () => {
     });
   });
 
-  describe("PUT /prices", () => {
+  describe("PATCH /prices/:priceId", () => {
     it("should return 200 with the updated price", () => {
       const updatePayload = {
         id: 1,
@@ -1201,7 +1253,7 @@ describe("PriceController (e2e)", () => {
         name: { en: "Updated", nl: "Bijgewerkt" },
       };
       return request(app.getHttpServer())
-        .put("/prices")
+        .patch("/prices/1")
         .send(updatePayload)
         .expect(200)
         .expect(mockPrice);
@@ -1303,6 +1355,271 @@ describe("EventPriceController (e2e)", () => {
       return request(app.getHttpServer())
         .delete("/events/1/prices/abc")
         .expect(400);
+    });
+  });
+});
+
+// ==========================================
+// MEDIA CROP endpoints
+// ==========================================
+
+describe("MediaCropController (e2e)", () => {
+  let app: INestApplication;
+  let mediaDb: MediaDatabaseService; // Using any or MediaDatabaseService type if imported
+
+  beforeEach(async () => {
+    app = await buildApp();
+    // Adjust token if needed based on how it's exported
+    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe("GET /crops", () => {
+    it("should return 200 with a paginated list of crops", () => {
+      return request(app.getHttpServer())
+        .get("/crops?page=1&limit=10")
+        .expect(200)
+        .expect(paginatedResponse([mockMediaCrop]));
+    });
+  });
+
+  describe("GET /crops/:cropId", () => {
+    it("should return 200 with the correct crop", () => {
+      return request(app.getHttpServer())
+        .get("/crops/1")
+        .expect(200)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("POST /crops", () => {
+    it("should return 201 with the created crop", () => {
+      return request(app.getHttpServer())
+        .post("/crops")
+        .send({ item_id: 1, name: "hd_ready", url: "https://test.com/a.jpg" })
+        .expect(201)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("PUT /crops/:cropId", () => {
+    it("should return 200 with the replaced crop", () => {
+      return request(app.getHttpServer())
+        .put("/crops/1")
+        .send({ name: "mobile", url: "https://test.com/b.jpg" })
+        .expect(200)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("PATCH /crops/:cropId", () => {
+    it("should return 200 with the modified crop", () => {
+      return request(app.getHttpServer())
+        .patch("/crops/1")
+        .send({ url: "https://test.com/new.jpg" })
+        .expect(200)
+        .expect(mockMediaCrop);
+    });
+  });
+
+  describe("DELETE /crops/:cropId", () => {
+    it("should return 200 after deleting crop", () => {
+      return request(app.getHttpServer()).delete("/crops/1").expect(200);
+    });
+  });
+});
+
+// ==========================================
+// MEDIA ITEM endpoints
+// ==========================================
+
+describe("MediaItemController (e2e)", () => {
+  let app: INestApplication;
+  let mediaDb: MediaDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe("GET /items", () => {
+    it("should return 200 with a paginated list of flattened items", () => {
+      return request(app.getHttpServer())
+        .get("/items?lang=en")
+        .expect(200)
+        .expect(paginatedResponse([mockMediaItemView]));
+    });
+  });
+
+  describe("GET /items/:itemId", () => {
+    it("should return 200 with the correct flattened item", () => {
+      return request(app.getHttpServer())
+        .get("/items/1?lang=en")
+        .expect(200)
+        .expect(mockMediaItemView);
+    });
+  });
+
+  describe("POST /items", () => {
+    it("should return 201 with the created item", () => {
+      return request(app.getHttpServer())
+        .post("/items")
+        .send({
+          type: "image",
+          original_filename: "test.png",
+          position: "main",
+          width: 1920,
+          height: 1080,
+          title: { en: "Test Media", nl: "Test Media" },
+          description: { en: "Desc", nl: "Beschrijving" },
+          credits: { en: "Credits", nl: "Credits" },
+        })
+        .expect(201)
+        .expect(mockMediaItem);
+    });
+  });
+
+  describe("PUT /items/:itemId", () => {
+    it("should return 200 with the replaced item", () => {
+      return request(app.getHttpServer())
+        .put("/items/1")
+        .send({
+          type: "image",
+          original_filename: "test.png",
+          position: "main",
+          width: 1920,
+          height: 1080,
+          title: { en: "Test Media", nl: "Test Media" },
+          description: { en: "Desc", nl: "Beschrijving" },
+          credits: { en: "Credits", nl: "Credits" },
+        })
+        .expect(200)
+        .expect(mockMediaItem);
+    });
+  });
+
+  describe("PATCH /items/:itemId", () => {
+    it("should return 200 with the modified item", () => {
+      return request(app.getHttpServer())
+        .patch("/items/1")
+        .send({ position: "carousel" })
+        .expect(200)
+        .expect(mockMediaItem);
+    });
+  });
+
+  describe("DELETE /items/:itemId", () => {
+    it("should return 200 after deleting item", () => {
+      return request(app.getHttpServer()).delete("/items/1").expect(200);
+    });
+  });
+
+  // Relationships: Item <-> Crops
+  describe("GET /items/:itemId/crops", () => {
+    it("should return 200 with the crops of the item", () => {
+      return request(app.getHttpServer())
+        .get("/items/1/crops")
+        .expect(200)
+        .expect([mockMediaCrop]);
+    });
+  });
+
+  describe("PUT /items/:itemId/crops/:cropId", () => {
+    it("should return 200 after successfully linking crop", () => {
+      return request(app.getHttpServer()).put("/items/1/crops/2").expect(200);
+    });
+  });
+
+  describe("DELETE /items/:itemId/crops/:cropId", () => {
+    it("should return 200 after unlinking crop", () => {
+      return request(app.getHttpServer())
+        .delete("/items/1/crops/2")
+        .expect(200);
+    });
+  });
+});
+
+// ==========================================
+// MEDIA GALLERY endpoints
+// ==========================================
+
+describe("MediaGalleryController (e2e)", () => {
+  let app: INestApplication;
+  let mediaDb: MediaDatabaseService;
+
+  beforeEach(async () => {
+    app = await buildApp();
+    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe("GET /galleries", () => {
+    it("should return 200 with a paginated list of galleries", () => {
+      return request(app.getHttpServer())
+        .get("/galleries?page=1&limit=10")
+        .expect(200)
+        .expect(paginatedResponse([mockMediaGallery]));
+    });
+  });
+
+  describe("GET /galleries/:galleryId", () => {
+    it("should return 200 with the correct gallery", () => {
+      return request(app.getHttpServer())
+        .get("/galleries/1")
+        .expect(200)
+        .expect(mockMediaGallery);
+    });
+  });
+
+  describe("POST /galleries", () => {
+    it("should return 201 with the created gallery", () => {
+      return request(app.getHttpServer())
+        .post("/galleries")
+        .send({}) // Based on schema, fields are mostly auto-generated
+        .expect(201)
+        .expect(mockMediaGallery);
+    });
+  });
+
+  describe("DELETE /galleries/:galleryId", () => {
+    it("should return 200 after deleting gallery", () => {
+      return request(app.getHttpServer()).delete("/galleries/1").expect(200);
+    });
+  });
+
+  // Relationships: Gallery <-> Items
+  describe("GET /galleries/:galleryId/items", () => {
+    it("should return 200 with items of the gallery", () => {
+      return request(app.getHttpServer())
+        .get("/galleries/1/items")
+        .expect(200)
+        .expect([mockMediaItem]);
+    });
+  });
+
+  describe("PUT /galleries/:galleryId/items/:itemId", () => {
+    it("should return 200 after linking item to gallery", () => {
+      return request(app.getHttpServer())
+        .put("/galleries/1/items/2")
+        .expect(200);
+    });
+  });
+
+  describe("DELETE /galleries/:galleryId/items/:itemId", () => {
+    it("should return 200 after unlinking item from gallery", () => {
+      return request(app.getHttpServer())
+        .delete("/galleries/1/items/2")
+        .expect(200);
     });
   });
 });

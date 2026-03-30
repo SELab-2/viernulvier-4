@@ -4,13 +4,20 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginatedProductionDto,
+  PaginationFilterDto,
+  MediaGalleryDto,
   ProductionDto,
   TagDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
+  ReplaceProductionDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { FilterProductionSchema, SUPPORTED_LANGUAGES } from "@repo/common";
+import {
+  FilterProductionSchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -22,9 +29,11 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: PaginatedProductionDto = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
-    );
+    const productions: PaginatedResponse<ProductionDto> =
+      await this.getProductions(
+        FilterProductionSchema.parse({ id: id }),
+        PaginationFilterSchema.parse({}),
+      );
 
     const production = productions.objects;
     if (production.length === 0)
@@ -51,7 +60,6 @@ export class ProductionDatabaseService {
       const query = `
       SELECT t.id,
              t.tag,
-             t.legacy_id,
              t.created_at,
              t.updated_at
       FROM tags t
@@ -68,8 +76,7 @@ export class ProductionDatabaseService {
       SELECT t.id,
              t.tag,
              t.created_at,
-             t.updated_at,
-             t.legacy_id
+             t.updated_at
       FROM tags t
       JOIN production_tag pt ON t.id = pt.tag_id
       WHERE pt.production_id = $1
@@ -113,8 +120,7 @@ export class ProductionDatabaseService {
              b.titel,
              b.description,
              b.created_at,
-             b.updated_at,
-             b.legacy_id
+             b.updated_at
       FROM blogs b
       JOIN production_blogs pb ON b.id = pb.blog_id
       WHERE pb.production_id = $1
@@ -126,14 +132,16 @@ export class ProductionDatabaseService {
 
   /**
    * Generic get function for productions.
-   * @param filters gives the freedom to define the filters of the search you want.
+   * @param productionFilters gives the freedom to define the filters of the search you want.
+   * @param paginationFilters Filters to do with pagination and ordering.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
    */
   async getProductions(
-    filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto> {
+    productionFilters: FilterProductionDto,
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<ProductionDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
@@ -142,92 +150,92 @@ export class ProductionDatabaseService {
     // TODO: Rewrite this filter since it would not work anymore under the new location structure.
 
     // Filter by event date (start or end date)
-    if (filters.date) {
+    if (productionFilters.date) {
       conditions.push(`(DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i})`);
-      values.push(filters.date);
+      values.push(productionFilters.date);
       i++;
     }
 
     // Filter by given date lying between starttime and endtime (inclusive)
-    if (filters.date_between) {
+    if (productionFilters.date_between) {
       // Use explicit timestamp comparison to include time component
       conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(filters.date_between);
+      values.push(productionFilters.date_between);
       i++;
     }
 
     // Filter events whose starttime is before the provided date
-    if (filters.date_before) {
+    if (productionFilters.date_before) {
       conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(filters.date_before);
+      values.push(productionFilters.date_before);
       i++;
     }
 
     // Filter events whose endtime is after the provided date
-    if (filters.date_after) {
+    if (productionFilters.date_after) {
       conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(filters.date_after);
+      values.push(productionFilters.date_after);
       i++;
     }
 
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
     // For all supported languages.
-    if (filters.titel) {
+    if (productionFilters.titel) {
       const titelClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `p.titel->>'${lang}' ILIKE $${i}`,
       );
 
       conditions.push(`(${titelClauses.join(" OR ")})`);
-      values.push(`%${filters.titel}%`);
+      values.push(`%${productionFilters.titel}%`);
       i++;
     }
 
     // Will look anywhere in the artist field for what was searched.
     // This checks all supported languages.
-    if (filters.artist) {
+    if (productionFilters.artist) {
       const artistClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `p.artist->>'${lang}' ILIKE $${i}`,
       );
 
       conditions.push(`(${artistClauses.join(" OR ")})`);
-      values.push(`%${filters.artist}%`);
+      values.push(`%${productionFilters.artist}%`);
       i++;
     }
 
     // Filter by performance_type
-    if (filters.performer_type) {
+    if (productionFilters.performer_type) {
       conditions.push(`p.performer_type = $${i}`);
-      values.push(`%${filters.performer_type}%`);
+      values.push(`%${productionFilters.performer_type}%`);
       i++;
     }
 
     // Filter by attendance_mode
-    if (filters.attendance_mode) {
+    if (productionFilters.attendance_mode) {
       conditions.push(`p.attendance_mode = $${i}`);
-      values.push(`%${filters.attendance_mode}%`);
+      values.push(`%${productionFilters.attendance_mode}%`);
       i++;
     }
 
     // Filter by id
-    if (filters.id) {
+    if (productionFilters.id) {
       conditions.push(`p.id = $${i}`);
-      values.push(filters.id);
+      values.push(productionFilters.id);
       i++;
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
-    if (filters.tag_ids && filters.tag_ids.length > 0) {
+    if (productionFilters.tag_ids && productionFilters.tag_ids.length > 0) {
       conditions.push(`
         p.id IN (
           SELECT production_id 
           FROM production_tag 
           WHERE tag_id = ANY($${i}::int[])
           GROUP BY production_id 
-          HAVING COUNT(DISTINCT tag_id) = ${filters.tag_ids.length}
+          HAVING COUNT(DISTINCT tag_id) = ${productionFilters.tag_ids.length}
         )
       `);
-      values.push(filters.tag_ids);
+      values.push(productionFilters.tag_ids);
       i++;
     }
 
@@ -237,6 +245,7 @@ export class ProductionDatabaseService {
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     // count query uses same filters but no pagination
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
     SELECT COUNT(DISTINCT p.id) as count
@@ -246,16 +255,17 @@ export class ProductionDatabaseService {
   `;
 
     let paginationClause = "";
-    if (filters.limit > 0) {
-      const offset = filters.page * filters.limit;
+    if (paginationFilters.limit > 0) {
+      const offset = paginationFilters.page * paginationFilters.limit;
       paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
-      values.push(filters.limit);
+      values.push(paginationFilters.limit);
       values.push(offset);
       i += 2;
     }
 
+    // The Ordered by the first held event of the production.
     const query = `
-    SELECT DISTINCT
+    SELECT
       p.id,
       p.titel,
       p.description1,
@@ -265,13 +275,14 @@ export class ProductionDatabaseService {
       p.credits,
       p.created_at,
       p.updated_at,
-      p.legacy_id,
       p.performer_type,
       p.attendance_mode
     FROM productions p
       LEFT JOIN events e ON e.production_id = p.id
     ${whereClause}
-    ORDER BY p.id
+    GROUP BY
+      p.id
+    ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
     ${paginationClause}
   `;
 
@@ -281,8 +292,8 @@ export class ProductionDatabaseService {
     ]);
 
     return {
-      page: filters.page,
-      limit: filters.limit,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects,
     };
@@ -309,11 +320,10 @@ export class ProductionDatabaseService {
           artist,
           tagline,
           credits,
-          legacy_id,
           performer_type,
           attendance_mode
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
       RETURNING
           id,
           titel,
@@ -324,7 +334,6 @@ export class ProductionDatabaseService {
           credits,
           created_at,
           updated_at,
-          legacy_id,
           performer_type,
           attendance_mode;
       `;
@@ -336,7 +345,6 @@ export class ProductionDatabaseService {
       production.artist,
       production.tagline,
       production.credits,
-      production.legacy_id,
       production.performer_type,
       production.attendance_mode,
     ];
@@ -351,86 +359,16 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * UNSAFE version of createProduction. Will override if a Production
-   * already exists with the same ID.
-   * @param production The production object that we want to insert.
-   * @returns That same production object but returned from the Database.
-   */
-  async upsertProduction(production: ProductionDto): Promise<ProductionDto> {
-    const query = `
-      INSERT INTO productions (
-        titel,
-        description1,
-        description2,
-        artist,
-        tagline,
-        credits,
-        legacy_id,
-        performer_type,
-        attendance_mode
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      ON CONFLICT (id)
-      DO UPDATE SET
-        titel = EXCLUDED.titel,
-        description1 = EXCLUDED.description1,
-        description2 = EXCLUDED.description2,
-        artist = EXCLUDED.artist,
-        tagline = EXCLUDED.tagline,
-        credits = EXCLUDED.credits,
-        legacy_id = EXCLUDED.legacy_id,
-        performer_type = EXCLUDED.performer_type,
-        attendance_mode = EXCLUDED.attendance_mode
-        RETURNING
-          id,
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          created_at,
-          updated_at,
-          legacy_id,
-          performer_type,
-          attendance_mode
-      `;
-
-    const values = [
-      production.titel,
-      production.description1,
-      production.description2,
-      production.artist,
-      production.tagline,
-      production.credits,
-      production.legacy_id ?? null,
-      production.performer_type ?? null,
-      production.attendance_mode ?? null,
-    ];
-
-    const result = await this.db.query<ProductionDto>(query, values);
-
-    if (!result.length) {
-      throw new Error("Failed to insert Production.");
-    }
-
-    return result[0];
-  }
-
-  /**
    * Update function for productions. Updates the production in the database.
    * note: this function can be used to update/add all of a certain language to a prod.
-   * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
+   * @param production must be of the type "ModifyProduction" or "ReplaceProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
   async updateProduction(
-    production: UpdateProductionDto,
+    productionId: number,
+    production: ModifyProductionDto | ReplaceProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.id) {
-      throw new BadRequestException("Production id is required for update");
-    }
-
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -453,11 +391,6 @@ export class ProductionDatabaseService {
       }
     }
 
-    if (production.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(production.legacy_id);
-    }
-
     if (production.performer_type !== undefined) {
       fields.push(`performer_type = $${index++}`);
       values.push(production.performer_type);
@@ -472,7 +405,7 @@ export class ProductionDatabaseService {
       throw new BadRequestException("No fields provided to update");
     }
 
-    values.push(production.id);
+    values.push(productionId);
     const query = `
       UPDATE productions
       SET ${fields.join(", ")}
@@ -487,7 +420,6 @@ export class ProductionDatabaseService {
         credits,
         created_at,
         updated_at,
-        legacy_id,
         performer_type,
         attendance_mode;
     `;
@@ -602,5 +534,65 @@ export class ProductionDatabaseService {
         "Cannot delete: Tag-Production link not found",
       );
     }
+  }
+
+  /**
+   * Gets media gallery linked to a given production.
+   * @param prod_id The ID of the production you want.
+   * @returns List of MediaGalleryDto linked to the production.
+   */
+  async getMediaFromProduction(prod_id: number): Promise<MediaGalleryDto> {
+    const query = `
+      SELECT mg.id, mg.created_at, mg.updated_at
+      FROM media_gallery mg
+      INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
+      WHERE pmg.production_id = $1
+      ORDER BY mg.id
+    `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, [prod_id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Production with ID ${prod_id} has no media gallery`,
+      );
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given production.
+   * @param prod_id The ID of the production to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   */
+  async linkMediaToProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    INSERT INTO production_media_gallery (production_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given production.
+   * @param prod_id The ID of the production.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM production_media_gallery
+    WHERE production_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
   }
 }

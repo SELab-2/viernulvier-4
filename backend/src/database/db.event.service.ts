@@ -6,11 +6,16 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
-  PaginatedEventDto,
+  PaginationFilterDto,
   PriceDto,
-  UpdateEventDto,
+  ReplaceEventDto,
+  ModifyEventDto,
 } from "../dto/dto";
-import { FilterEventSchema } from "@repo/common";
+import {
+  FilterEventSchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+} from "@repo/common";
 
 @Injectable()
 export class EventDatabaseService {
@@ -23,8 +28,9 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(eventId: number): Promise<EventDto> {
-    const events: PaginatedEventDto = await this.getEvents(
+    const events: PaginatedResponse<EventDto> = await this.getEvents(
       FilterEventSchema.parse({ id: eventId }),
+      PaginationFilterSchema.parse({}),
     );
     const event: EventDto[] = events.objects;
     if (event.length === 0)
@@ -37,57 +43,60 @@ export class EventDatabaseService {
 
   /**
    * Generic get function for events.
-   * @param filters gives the freedom to define the filters of the search you want.
+   * @param eventFilters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All events for the given filters.
    */
-  async getEvents(filters: FilterEventDto): Promise<PaginatedEventDto> {
+  async getEvents(
+    eventFilters: FilterEventDto,
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<EventDto>> {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.
-    if (filters.date) {
+    if (eventFilters.date) {
       conditions.push(`DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i}`);
-      values.push(filters.date);
+      values.push(eventFilters.date);
       i++;
     }
 
     // Filter by given date lying between starttime and endtime (inclusive)
-    if (filters.date_between) {
+    if (eventFilters.date_between) {
       // Use explicit timestamp comparison to include time component
       conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(filters.date_between);
+      values.push(eventFilters.date_between);
       i++;
     }
 
     // Filter events whose starttime is before the provided date
-    if (filters.date_before) {
+    if (eventFilters.date_before) {
       conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(filters.date_before);
+      values.push(eventFilters.date_before);
       i++;
     }
 
     // Filter events whose endtime is after the provided date
-    if (filters.date_after) {
+    if (eventFilters.date_after) {
       conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(filters.date_after);
+      values.push(eventFilters.date_after);
       i++;
     }
 
     // Filer by id
-    if (filters.id) {
+    if (eventFilters.id) {
       conditions.push(`e.id = $${i}`);
-      values.push(filters.id);
+      values.push(eventFilters.id);
       i++;
     }
 
     // Filter by p_id
-    if (filters.production_id) {
+    if (eventFilters.production_id) {
       conditions.push(`p.id = $${i}`);
-      values.push(filters.production_id);
+      values.push(eventFilters.production_id);
       i++;
     }
 
@@ -99,15 +108,15 @@ export class EventDatabaseService {
 
     // pagination
     let paginationClause = "";
-    if (filters.limit > 0) {
-      const offset = filters.page * filters.limit;
+    if (paginationFilters.limit > 0) {
+      const offset = paginationFilters.page * paginationFilters.limit;
 
       paginationClause = `
       LIMIT $${i}
       OFFSET $${i + 1}
     `;
 
-      values.push(filters.limit);
+      values.push(paginationFilters.limit);
       values.push(offset);
     }
 
@@ -122,11 +131,11 @@ export class EventDatabaseService {
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id, e.legacy_id, e.created_at, e.updated_at
+      SELECT e.id, e.starttime, e.endtime, e.production_id, e.created_at, e.updated_at
       FROM events e
         JOIN productions p ON e.production_id = p.id
           ${whereClause}
-      ORDER BY e.starttime 
+      ORDER BY e.starttime ${paginationFilters.descending ? "DESC" : "ASC"}
         ${paginationClause}
         `;
 
@@ -139,8 +148,8 @@ export class EventDatabaseService {
     ]);
 
     return {
-      page: filters.page,
-      limit: filters.limit,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects,
     };
@@ -158,15 +167,17 @@ export class EventDatabaseService {
     }
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at, legacy_id)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at, legacy_id
+      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at
     `;
 
     const result = await this.db.query<EventDto>(query, [
       event.starttime,
       event.endtime,
       event.production_id,
+      event.intermission_at,
+      event.doors_at,
     ]);
 
     // Validate output
@@ -179,15 +190,14 @@ export class EventDatabaseService {
 
   /**
    * Update function for events. Updates the event in the database.
-   * @param event must be of the type "UpdateEvent", gives the freedom to define only what needs to be updated.
+   * @param event must be of the type "ModifyEvent", gives the freedom to define only what needs to be updated.
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
-  async updateEvent(event: UpdateEventDto): Promise<EventDto> {
-    if (!event.id) {
-      throw new Error("Event id is required for update");
-    }
-
+  async updateEvent(
+    eventId: number,
+    event: ModifyEventDto | ReplaceEventDto,
+  ): Promise<EventDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;
@@ -221,14 +231,14 @@ export class EventDatabaseService {
       throw new Error("No fields provided to update");
     }
 
-    values.push(event.id);
+    values.push(eventId);
 
     // ignore error on "RETURNING", query is correct.
     const query = `
     UPDATE events
     SET ${fields.join(", ")}
     WHERE id = $${index}
-    RETURNING *;
+    RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at;
     `;
 
     const result = await this.db.query<EventDto>(query, values);
@@ -265,7 +275,7 @@ export class EventDatabaseService {
    */
   async getLocationOfEvent(id: number): Promise<LocationDto> {
     const query = `
-    SELECT l.id, l.location, l.legacy_id, l.created_at, l.updated_at
+    SELECT l.id, l.location, l.created_at, l.updated_at
     FROM locations l
     INNER JOIN event_locations el ON el.location_id = l.id
     WHERE el.event_id = $1
@@ -342,8 +352,7 @@ export class EventDatabaseService {
              p.created_at,
              p.updated_at,
              p.price,
-             p.name,
-             p.legacy_id
+             p.name
       FROM prices p
       JOIN event_prices ep ON ep.price_id = p.id
       WHERE ep.event_id = $1
@@ -359,8 +368,7 @@ export class EventDatabaseService {
            p.price,
            p.name,
            p.created_at,
-           p.updated_at,
-           p.legacy_id
+           p.updated_at
     FROM prices p
     INNER JOIN event_prices ep ON ep.price_id = p.id
     WHERE ep.event_id = $1
