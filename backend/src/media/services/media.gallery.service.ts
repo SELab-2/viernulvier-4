@@ -7,7 +7,7 @@ import {
   ModifyMediaGalleryDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
-import { MediaGalleryDatabaseService } from "../../database/db.media_gallery.service";
+import { MediaGalleryDatabaseService } from "../../database/media/db.media_gallery.service";
 
 /**
  * Defines the connections between controller and database for

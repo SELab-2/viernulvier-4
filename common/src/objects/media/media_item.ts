@@ -3,7 +3,7 @@
  */
 
 import z from "zod";
-import { LocalizedStringSchema } from "./language";
+import { LocalizedStringSchema } from "../language";
 
 // All positions an ITEM can be in.
 export const ITEM_POSITIONS = ["main", "carousel"] as const;

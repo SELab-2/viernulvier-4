@@ -105,7 +105,7 @@ import {
   ModifyMediaGallerySchema,
   ReplaceMediaGallery,
   ReplaceMediaGallerySchema,
-} from "./objects/media_gallery";
+} from "./objects/media/media_gallery";
 import {
   CreateMediaItem,
   CreateMediaItemSchema,
@@ -119,7 +119,7 @@ import {
   ModifyMediaItemSchema,
   ReplaceMediaItem,
   ReplaceMediaItemSchema,
-} from "./objects/media_item";
+} from "./objects/media/media_item";
 import {
   CreateMediaCrop,
   CreateMediaCropSchema,
@@ -131,7 +131,7 @@ import {
   ModifyMediaCropSchema,
   ReplaceMediaCrop,
   ReplaceMediaCropSchema,
-} from "./objects/media_crop";
+} from "./objects/media/media_crop";
 
 // list of all exports: (this way only need to import this file.)
 export {
