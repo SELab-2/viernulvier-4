@@ -1,10 +1,14 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { ChevronDown } from 'lucide-vue-next'
+import { ChevronDown, Check } from 'lucide-vue-next'
 
 const { locale, locales, setLocale } = useI18n()
 const isOpen = ref(false)
 const dropdownRef = ref(null)
+
+const normalizedLocales = computed(() => {
+  return locales.value.map(loc => typeof loc === 'string' ? loc : loc.code)
+})
 
 // Close dropdown when clicking on something else
 const closeDropdown = (e) => {
@@ -13,7 +17,7 @@ const closeDropdown = (e) => {
   }
 }
 
-// Close when 'Escape'
+// Close when 'esc'
 const handleEscape = (e) => {
   if (e.key === 'Escape') {
     isOpen.value = false
@@ -67,17 +71,20 @@ const handleLocaleChange = (code) => {
       >
         <div class="py-1">
           <button
-            v-for="loc in locales"
-            :key="typeof loc === 'string' ? loc : loc.code"
-            @click="handleLocaleChange(typeof loc === 'string' ? loc : loc.code)"
-            class="flex w-full items-center px-4 py-2 text-[11px] font-black uppercase transition-colors outline-none"
-            :class="[
-              (typeof loc === 'string' ? loc : loc.code) === locale
-                ? 'text-[var(--accent)] hover:bg-[var(--foreground)] hover:text-[var(--accent)]'
-                : 'text-[var(--foreground)] hover:bg-[var(--foreground)] hover:text-[var(--background)]'
-            ]"
+            v-for="loc in normalizedLocales"
+            :key="loc"
+            @click="handleLocaleChange(loc)"
+            class="flex w-full items-center justify-between px-4 py-2 text-[11px] font-black uppercase transition-colors outline-none hover:bg-[var(--foreground)] hover:text-[var(--background)]"
+            :class="loc === locale ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'"
           >
-            {{ (typeof loc === 'string' ? loc : loc.code).toUpperCase() }}
+            <span>{{ loc.toUpperCase() }}</span>
+
+            <Check
+              v-if="loc === locale"
+              :size="14"
+              stroke-width="3"
+              class="ml-2"
+            />
           </button>
         </div>
       </div>
