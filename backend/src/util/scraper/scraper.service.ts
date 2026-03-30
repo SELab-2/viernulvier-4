@@ -6,7 +6,6 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { buffer } from "node:stream/consumers";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -55,6 +54,8 @@ export class ScraperService implements OnApplicationBootstrap {
     //       "ScraperService",
     //     );
     //   });
+
+    await this.processImages();
 
     // this.logger.log("Running initial scrape...");
     // this.runner
@@ -113,61 +114,58 @@ export class ScraperService implements OnApplicationBootstrap {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async processImages() {
-    if (this.isProcessingMedia) {
-      this.logger.log("Still processing previous Crop Batch.");
-      return;
-    }
+    if (this.isProcessingMedia) return;
 
     // Start processing.
     this.isProcessingMedia = true;
-    let processedCrops: number = 0;
-    let totalLeft: number = 0;
     this.logger.log(
       `[PROCESSING] Attempting to process Batch of ${this.downloadAmount} Images...`,
     );
 
     try {
-      // Find crops that still point to VNV
-      const pendingCrops = await this.runner.getPendingCrops(
+      const { batch, totalLeft } = await this.runner.getPendingCrops(
         this.downloadAmount,
       );
-      totalLeft = pendingCrops.totalLeft;
+      if (batch.length === 0) return;
 
-      for (const crop of pendingCrops.batch) {
-        try {
+      // Process all 50 images in parallel
+      const results = await Promise.allSettled(
+        batch.map(async (crop) => {
           const imageData = await this.getImageBuffer(crop.url);
-          const fileHash = createHash("md5").update(imageData).digest("hex");
-          const ext = path.extname(crop.url) || ".jpg";
-          const newFileName = `${crop.id}-${crop.name}-${fileHash}${ext}`;
-          const finalUrl: string = `${process.env.MEDIA_BASE_URL}/photos/${newFileName}`;
 
-          // Save the image on archive.
-          const url: string = await this.mediaStorage.saveMedia(
+          // Hashing & Filename logic
+          const fileHash = createHash("md5").update(imageData).digest("hex");
+          const ext = path.extname(new URL(crop.url).pathname) || ".jpg"; // Cleaner ext extraction
+          const newFileName = `${crop.id}-${crop.name}-${fileHash}${ext}`;
+          const finalUrl = `${process.env.MEDIA_BASE_URL}/photos/${newFileName}`;
+
+          // Save & Update
+          const savedUrl = await this.mediaStorage.saveMedia(
             finalUrl,
             imageData,
           );
+          await this.runner.updatePendingCrop(crop.id, savedUrl);
 
-          // Update the crop.
-          const updatedCrop = await this.runner.updatePendingCrop(crop.id, url);
+          return crop.id;
+        }),
+      );
 
-          // Check whether the crop was updated correctly.
-          if (url !== updatedCrop.url)
-            throw new Error("Failed to update crop URL.");
+      const successCount = results.filter(
+        (r) => r.status === "fulfilled",
+      ).length;
+      const failCount = results.length - successCount;
 
-          processedCrops++;
-        } catch (error) {
-          this.logger.error(
-            `Failed to process crop ${crop.id}: ${(error as Error).message}`,
-          );
-        }
-      }
+      this.logger.log(
+        `[BATCH FINISHED] Success: ${successCount}, Failed: ${failCount}. Approx ${totalLeft} left.`,
+      );
+    } catch (globalError) {
+      this.logger.error(
+        "Global Batch Failure:",
+        (globalError as Error).message,
+      );
     } finally {
       this.isProcessingMedia = false;
     }
-
-    this.logger.log(`
-      [PROCESSING] Processed ${processedCrops}. ${totalLeft} left...
-    `);
   }
 
   /**
