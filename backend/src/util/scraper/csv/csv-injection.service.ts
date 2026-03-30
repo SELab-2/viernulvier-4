@@ -1,39 +1,35 @@
 import { Injectable } from "@nestjs/common";
 import { UtilsDbConnection } from "../database/db.connection";
-import {
-  injectBlogsCSV,
-  injectEventsCSV,
-  injectOldCsvData,
-  injectPricesCSV,
-  injectProductionsCSV,
-  injectTagsCSV,
-} from "./inject-csv";
+import { InjectCsvEngine } from "./inject-csv.engine";
 
 @Injectable()
 export class CsvInjectionService {
-  constructor(private readonly dbConnection: UtilsDbConnection) {}
+  constructor(
+    private readonly dbConnection: UtilsDbConnection,
+    private readonly engine: InjectCsvEngine,
+  ) {}
 
   async injectProductionsCSV(input: string | Buffer) {
-    return injectProductionsCSV(input, this.dbConnection);
+    return this.engine.injectProductionsCSV(input);
   }
 
   async injectEventsCSV(input: string | Buffer) {
-    return injectEventsCSV(input, this.dbConnection);
+    return this.engine.injectEventsCSV(input);
   }
 
   async injectTagsCSV(input: string | Buffer) {
-    return injectTagsCSV(input, this.dbConnection);
+    return this.engine.injectTagsCSV(input);
   }
 
   async injectBlogsCSV(input: string | Buffer) {
-    return injectBlogsCSV(input, this.dbConnection);
+    return this.engine.injectBlogsCSV(input);
   }
 
   async injectPricesCSV(input: string | Buffer) {
-    return injectPricesCSV(input, this.dbConnection);
+    return this.engine.injectPricesCSV(input);
   }
 
   async injectOldCsvData() {
-    return injectOldCsvData(this.dbConnection);
+    return this.engine.injectOldCsvData();
   }
 }

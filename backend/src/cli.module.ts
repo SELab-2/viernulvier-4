@@ -3,6 +3,9 @@ import { UtilsDbConnection } from "./util/scraper/database/db.connection";
 import { ResetDbCommand } from "./util/scraper/reset-db.command";
 import { ConfigModule } from "@nestjs/config";
 import { AppLogger } from "./util/logger/logger.service";
+import { InjectStructuredCsvTest } from "./util/scraper/csv/inject-structured-test.command";
+import { InjectCsvEngine } from "./util/scraper/csv/inject-csv.engine";
+import { LanguageService } from "./util/language/language.service";
 
 @Module({
   imports: [
@@ -11,6 +14,13 @@ import { AppLogger } from "./util/logger/logger.service";
       envFilePath: "../.env",
     }),
   ],
-  providers: [UtilsDbConnection, ResetDbCommand, AppLogger],
+  providers: [
+    UtilsDbConnection,
+    ResetDbCommand,
+    AppLogger,
+    InjectStructuredCsvTest,
+    InjectCsvEngine,
+    LanguageService,
+  ],
 })
 export class CliModule {}
