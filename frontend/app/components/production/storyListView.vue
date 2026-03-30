@@ -15,6 +15,11 @@ const formatDate = (date: Date) => {
     day: "numeric",
   });
 };
+
+// constants
+const cardBase = 'flex items-center gap-4 p-4 rounded-xl border border-border bg-card'
+const cardHover = 'hover:border-ring hover:bg-card-hover hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer'
+const thumbnailClass = 'w-24 h-16 object-cover rounded-md shrink-0'
 </script>
 
 <template>
@@ -33,17 +38,14 @@ const formatDate = (date: Date) => {
           <div
               v-for="story in stories"
               :key="story.id"
-              class="
-              flex items-center gap-4 p-4
-              rounded-xl border border-border bg-card
-              hover:border-ring hover:bg-card-hover hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer"
+              :class="[cardBase, cardHover]"
           >
             <!-- Thumbnail -->
             <img
                 v-if="story.image"
                 :src="story.image"
                 :alt="story.title"
-                class="w-24 h-16 object-cover rounded-md shrink-0"
+                :class="thumbnailClass"
             />
             <ThumbnailPlaceholder v-else :id="story.id" size="md" :showIcon="true" :showBorder="true" :rounded="true"/>
 
