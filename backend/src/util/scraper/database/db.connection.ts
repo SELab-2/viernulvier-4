@@ -23,6 +23,7 @@ import {
 import logger from "../../logger/logger";
 import { ResourceGoneException } from "../../../common/exceptions";
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -50,13 +51,13 @@ export class UtilsDbConnection implements OnModuleDestroy {
    * The Pool to the database, used to execute queries.
    */
   private pool: Pool;
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.pool = new Pool({
-      user: process.env.DB_USER_DEV,
-      host: process.env.DB_HOST_DEV,
-      database: process.env.DB_NAME_DEV,
-      password: process.env.DB_PASSWORD_DEV,
-      port: Number(process.env.DB_PORT_DEV),
+      user: this.configService.get<string>("DB_USER_DEV"),
+      host: this.configService.get<string>("DB_HOST_DEV"),
+      database: this.configService.get<string>("DB_NAME_DEV"),
+      password: this.configService.get<string>("DB_PASSWORD_DEV"),
+      port: Number(this.configService.get<string>("DB_PORT_DEV")),
     });
   }
 
@@ -981,13 +982,13 @@ export class UtilsDbConnection implements OnModuleDestroy {
   async getPendingCrops(amount: number): Promise<PendingCrops> {
     const cropsQuery = `
       SELECT id, name, url, created_at, updated_at FROM media_crop
-      WHERE url NOT LIKE '${process.env.MEDIA_BASE_URL}%'
+      WHERE url NOT LIKE '${this.configService.get<string>("MEDIA_BASE_URL")}%'
       ORDER BY random()
       LIMIT $1;
     `;
     const countQuery = `
       SELECT COUNT(*) as count FROM media_crop
-      WHERE url NOT LIKE '${process.env.MEDIA_BASE_URL}%';
+      WHERE url NOT LIKE '${this.configService.get<string>("MEDIA_BASE_URL")}%';
     `;
 
     const [batch, totalLeft] = await Promise.all([

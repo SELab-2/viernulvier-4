@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { URLSearchParams } from "url";
 import {
   parseEvents,
@@ -23,6 +22,7 @@ import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import Bottleneck from "bottleneck";
 import { CROP_NAMES, CropName } from "@repo/common/src/objects/media";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * The Base of the VNV API.
@@ -64,6 +64,7 @@ export class ScraperEngine {
   constructor(
     private readonly languageService: LanguageService,
     private readonly logger: AppLogger,
+    private readonly configService: ConfigService,
   ) {
     // eslint-disable-next-line @typescript-eslint/require-await
     this.limiter.on("failed", async (error: Error, jobInfo) => {
@@ -168,7 +169,7 @@ export class ScraperEngine {
    * @returns The apiResponse for that URL.
    */
   async fetchFromVnv(target: string): Promise<apiResponse> {
-    const apiKey = process.env.CLIENT_API_KEY;
+    const apiKey = this.configService.get<string>("CLIENT_API_KEY");
     if (!apiKey) throw new Error("Forgot to set CLIENT_API_KEY in .env?");
 
     return this.limiter.schedule({ id: target }, async () => {

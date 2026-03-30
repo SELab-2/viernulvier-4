@@ -4,8 +4,8 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { MediaStorageService } from "../../media/media_storage/media_storage.service";
 import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
-import { createHash } from "node:crypto";
 import path from "node:path";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -17,13 +17,14 @@ export class ScraperService implements OnApplicationBootstrap {
     private readonly runner: ScraperRunner,
     private readonly csvInjectionService: CsvInjectionService,
     private readonly mediaStorage: MediaStorageService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
    * Checks whether the Scraper is currently enabled.
    */
   private get isScraperEnabled(): boolean {
-    return process.env.ENABLE_SCRAPER === "true";
+    return this.configService.get<string>("ENABLE_SCRAPER", "false") === "true";
   }
 
   /**
@@ -127,16 +128,21 @@ export class ScraperService implements OnApplicationBootstrap {
         this.downloadAmount,
       );
       if (batch.length === 0) return;
+      const mediaBase = this.configService.get<string>("MEDIA_BASE_URL");
+      if (!mediaBase)
+        throw Error("Forgot to set MEDIA_BASE_URL .env variable?");
 
       // Process all 50 images in parallel
       const results = await Promise.allSettled(
         batch.map(async (crop) => {
           const imageData = await this.getImageBuffer(crop.url);
-          // Hashing & Filename logic
-          const fileHash = createHash("md5").update(imageData).digest("hex");
-          const ext = path.extname(new URL(crop.url).pathname) || ".jpg"; // Cleaner ext extraction
-          const newFileName = `${crop.id}-${crop.name}-${fileHash}${ext}`;
-          const finalUrl = `${process.env.MEDIA_BASE_URL}/photos/${newFileName}`;
+
+          // Filename logic.
+          // We name the file based on the crop's ID and NAME.
+          // NOTE: No hashing because it would cause strays.
+          const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
+          const newFileName = `${crop.id}-${crop.name}${ext}`;
+          const finalUrl = `${mediaBase}/photos/${newFileName}`;
 
           // Save & Update
           const savedUrl = await this.mediaStorage.saveMedia(
