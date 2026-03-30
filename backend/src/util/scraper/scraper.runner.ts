@@ -1,8 +1,7 @@
 import { ScraperEngine, ScrapeResult } from "./scraper.engine";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
-import { UtilsDbConnection } from "./database/db.connection";
-import { MediaCrop } from "@repo/common";
+import { PendingCrops, UtilsDbConnection } from "./database/db.connection";
 
 @Injectable()
 export class ScraperRunner {
@@ -59,9 +58,9 @@ export class ScraperRunner {
   /**
    * Returns a list of crops where the images haven't been downloaded for.
    * @param amount The amount of crops to fetch.
-   * @returns The list of crops with length amount or less.
+   * @returns The list of crops with length amount or less together with total remaining.
    */
-  async getPendingCrops(amount: number): Promise<MediaCrop[]> {
+  async getPendingCrops(amount: number): Promise<PendingCrops> {
     return await this.dbConnection.getPendingCrops(amount);
   }
 }

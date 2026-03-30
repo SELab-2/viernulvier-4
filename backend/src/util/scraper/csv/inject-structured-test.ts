@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
-import logger from "../logger/logger";
+import logger from "../../logger/logger";
 import {
   injectBlogsCSV,
   injectEventsCSV,

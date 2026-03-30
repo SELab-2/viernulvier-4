@@ -33,6 +33,12 @@ import { Injectable } from "@nestjs/common";
  *           sure there can be no confusions between the two and so they can't
  *           hinder each other either.
  */
+
+export interface PendingCrops {
+  batch: MediaCrop[];
+  totalLeft: number;
+}
+
 @Injectable()
 export class UtilsDbConnection {
   /**
@@ -564,15 +570,32 @@ export class UtilsDbConnection {
     return rows.length >= 1;
   }
 
-  async getPendingCrops(amount: number): Promise<MediaCrop[]> {
-    const pendingCrops = await this.query<MediaCrop>(
-      `
+  /**
+   * Returns a list of non-downloaded crops.
+   * This list is of length "amount" and randomly sorted each time.
+   * @param amount The amount of crops to fetch.
+   * @returns The list of crops of max amount and the total remaining pending crops.
+   */
+  async getPendingCrops(amount: number): Promise<PendingCrops> {
+    const cropsQuery = `
       SELECT id, url FROM media_crop
-      WHERE url LIKE 'https://img.viernulvier.gent%'
+      WHERE url NOT LIKE '${process.env.MEDIA_BASE_URL}%'
+      ORDER BY random()
       LIMIT $1;
-    `,
-      [amount],
-    );
-    return pendingCrops;
+    `;
+    const countQuery = `
+      SELECT COUNT(*) as count FROM media_crop
+      WHERE url NOT LIKE '${process.env.MEDIA_BASE_URL}%';
+    `;
+
+    const [batch, totalLeft] = await Promise.all([
+      this.query<MediaCrop>(cropsQuery, [amount]),
+      this.query<{ count: string }>(countQuery, []),
+    ]);
+
+    return {
+      batch,
+      totalLeft: parseInt(totalLeft[0].count),
+    };
   }
 }
