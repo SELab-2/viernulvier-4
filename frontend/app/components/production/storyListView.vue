@@ -26,6 +26,7 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+// function to format the date
 const formatDate = (date: Date) => {
   return date.toLocaleDateString(locale.value, {
     year: "numeric",
