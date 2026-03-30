@@ -3,6 +3,7 @@ import {
   vnvEvent,
   vnvGenre,
   vnvLocation,
+  vnvMediaCrop,
   vnvPrice,
   vnvProduction,
 } from "../vnv.parser";
@@ -310,6 +311,19 @@ export class UtilsDbConnection {
       prices,
       500,
       (p: vnvPrice, client: PoolClient) => this.insertPrice(p, client),
+    );
+  }
+
+  /**
+   * Inserts a list of vnvMediaCrop objects.
+   * @param crops The list of vnvMediaCrop objects.
+   */
+  async insertCrops(crops: vnvMediaCrop[]) {
+    await this.processInBatches(
+      "Crops",
+      crops,
+      500,
+      (c: vnvMediaCrop, client: PoolClient) => this.insertCrop(c, client),
     );
   }
 
@@ -682,6 +696,41 @@ export class UtilsDbConnection {
   }
 
   /**
+   * Media
+   */
+
+  /**
+   * Inserts a vnvCrop into the database.
+   * @param crop The vnvCrop object.
+   * @param client The optional client to do transactions with.
+   * @returns The inserted crop.
+   */
+  async insertCrop(
+    crop: vnvMediaCrop,
+    client?: PoolClient,
+  ): Promise<MediaCrop> {
+    const query = `
+      INSERT INTO media_crop (
+        legacy_id, name, url
+      )
+      VALUES ($1, $2, $3)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET
+        name = EXCLUDED.name,
+        url = EXCLUDED.url
+      RETURNING *;
+    `;
+
+    const result = await this.query<MediaCrop>(
+      query,
+      [crop.legacy_id, crop.name, crop.url],
+      client,
+    );
+
+    return result[0];
+  }
+
+  /**
    * Returns a list of non-downloaded crops.
    * This list is of length "amount" and randomly sorted each time.
    * @param amount The amount of crops to fetch.
@@ -689,7 +738,7 @@ export class UtilsDbConnection {
    */
   async getPendingCrops(amount: number): Promise<PendingCrops> {
     const cropsQuery = `
-      SELECT id, url FROM media_crop
+      SELECT id, name, url, created_at, updated_at FROM media_crop
       WHERE url NOT LIKE '${process.env.MEDIA_BASE_URL}%'
       ORDER BY random()
       LIMIT $1;
@@ -720,7 +769,7 @@ export class UtilsDbConnection {
     const updateCropQuery = `
       UPDATE media_crop
       SET url = $1
-      WHERE id = $2;
+      WHERE id = $2
       RETURNING id, name, url, created_at, updated_at;
     `;
 

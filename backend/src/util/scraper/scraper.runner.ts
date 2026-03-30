@@ -40,6 +40,7 @@ export class ScraperRunner {
       this.dbConnection.insertTags(scrapeResults.genres),
       this.dbConnection.insertPrices(scrapeResults.prices),
       this.dbConnection.insertLocations(scrapeResults.locations),
+      this.dbConnection.insertCrops(scrapeResults.crops),
     ]);
 
     // First Productions since we need those ids for Events.

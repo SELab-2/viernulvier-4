@@ -55,22 +55,24 @@ export class ScraperService implements OnApplicationBootstrap {
     //     );
     //   });
 
-    this.logger.log("Running initial scrape...");
-    this.runner
-      .runScraper()
-      .then(() => {
-        this.logger.log(
-          "Initial scrape finished successfully.",
-          "ScraperService",
-        );
-      })
-      .catch((err: Error) => {
-        this.logger.error(
-          `Initial scrape failed ${err.message}`,
-          err.stack,
-          "ScraperService",
-        );
-      });
+    await this.processImages();
+
+    // this.logger.log("Running initial scrape...");
+    // this.runner
+    //   .runScraper()
+    //   .then(() => {
+    //     this.logger.log(
+    //       "Initial scrape finished successfully.",
+    //       "ScraperService",
+    //     );
+    //   })
+    //   .catch((err: Error) => {
+    //     this.logger.error(
+    //       `Initial scrape failed ${err.message}`,
+    //       err.stack,
+    //       "ScraperService",
+    //     );
+    //   });
   }
 
   /**
@@ -130,7 +132,6 @@ export class ScraperService implements OnApplicationBootstrap {
       const results = await Promise.allSettled(
         batch.map(async (crop) => {
           const imageData = await this.getImageBuffer(crop.url);
-
           // Hashing & Filename logic
           const fileHash = createHash("md5").update(imageData).digest("hex");
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg"; // Cleaner ext extraction
