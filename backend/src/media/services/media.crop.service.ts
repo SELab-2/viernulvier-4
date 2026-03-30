@@ -55,7 +55,7 @@ export class MediaCropService {
    */
   async createCrop(
     createCrop: CreateMediaCropDto,
-    autoDownload: boolean = true,
+    autoDownload: boolean = false,
   ): Promise<MediaCropDto> {
     let finalUrl = createCrop.url;
 

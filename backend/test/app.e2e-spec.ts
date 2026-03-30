@@ -1396,12 +1396,21 @@ describe("MediaCropController (e2e)", () => {
   });
 
   describe("POST /crops", () => {
-    it("should return 201 with the created crop", () => {
-      return request(app.getHttpServer())
-        .post("/crops")
-        .send({ item_id: 1, name: "hd_ready", url: "https://test.com/a.jpg" })
-        .expect(201)
-        .expect(mockMediaCrop);
+    it("should return 201 with the created crop", async () => {
+      const response = await request(app.getHttpServer()).post("/crops").send({
+        item_id: 1,
+        name: "hd_ready",
+        url: "https://test.com/a.jpg",
+        autoDownload: 0,
+      });
+
+      // THIS WILL TELL YOU EXACTLY WHAT IS WRONG:
+      if (response.status === 400) {
+        console.log("Validation Error:", response.body);
+      }
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual(mockMediaCrop);
     });
   });
 

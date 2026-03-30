@@ -83,9 +83,9 @@ export class MediaCropController {
   })
   @Post()
   async createCrop(
-    @Param("autoDownload", ParseIntPipe) autoDownload: boolean = true,
     @Body(new ZodValidationPipe(CreateMediaCropSchema))
     createCrop: CreateMediaCropDto,
+    @Body("autoDownload", ParseIntPipe) autoDownload: boolean = false,
   ): Promise<MediaCropDto> {
     return await this.mediaCropService.createCrop(createCrop, autoDownload);
   }
