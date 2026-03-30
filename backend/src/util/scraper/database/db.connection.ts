@@ -598,4 +598,26 @@ export class UtilsDbConnection {
       totalLeft: parseInt(totalLeft[0].count),
     };
   }
+
+  /**
+   * Updates a crop with the processed URL.
+   * @param crop_id The crop ID.
+   * @param url The URL to insert into the crop.
+   * @returns The updated crop.
+   */
+  async updateCropWithOwnUrl(crop_id: number, url: string): Promise<MediaCrop> {
+    const updateCropQuery = `
+      UPDATE media_crop
+      SET url = $1
+      WHERE id = $2;
+      RETURNING id, name, url, created_at, updated_at;
+    `;
+
+    const crops: MediaCrop[] = await this.query<MediaCrop>(updateCropQuery, [
+      url,
+      crop_id,
+    ]);
+
+    return crops[0];
+  }
 }

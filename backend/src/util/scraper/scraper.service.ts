@@ -4,6 +4,9 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { MediaStorageService } from "../../media/media_storage/media_storage.service";
 import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
+import { createHash } from "node:crypto";
+import path from "node:path";
+import { buffer } from "node:stream/consumers";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -128,12 +131,30 @@ export class ScraperService implements OnApplicationBootstrap {
       const pendingCrops = await this.runner.getPendingCrops(
         this.downloadAmount,
       );
-      processedCrops = pendingCrops.batch.length;
       totalLeft = pendingCrops.totalLeft;
 
       for (const crop of pendingCrops.batch) {
         try {
           const imageData = await this.getImageBuffer(crop.url);
+          const fileHash = createHash("md5").update(imageData).digest("hex");
+          const ext = path.extname(crop.url) || ".jpg";
+          const newFileName = `${crop.id}-${crop.name}-${fileHash}${ext}`;
+          const finalUrl: string = `${process.env.MEDIA_BASE_URL}/photos/${newFileName}`;
+
+          // Save the image on archive.
+          const url: string = await this.mediaStorage.saveMedia(
+            finalUrl,
+            imageData,
+          );
+
+          // Update the crop.
+          const updatedCrop = await this.runner.updatePendingCrop(crop.id, url);
+
+          // Check whether the crop was updated correctly.
+          if (url !== updatedCrop.url)
+            throw new Error("Failed to update crop URL.");
+
+          processedCrops++;
         } catch (error) {
           this.logger.error(
             `Failed to process crop ${crop.id}: ${(error as Error).message}`,

@@ -2,6 +2,7 @@ import { ScraperEngine, ScrapeResult } from "./scraper.engine";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import { PendingCrops, UtilsDbConnection } from "./database/db.connection";
+import { MediaCrop } from "@repo/common";
 
 @Injectable()
 export class ScraperRunner {
@@ -62,5 +63,15 @@ export class ScraperRunner {
    */
   async getPendingCrops(amount: number): Promise<PendingCrops> {
     return await this.dbConnection.getPendingCrops(amount);
+  }
+
+  /**
+   * Updates a crop with a new archive url.
+   * @param cropId The ID of the crop.
+   * @param url The URL to update it with.
+   * @returns The updated crop.
+   */
+  async updatePendingCrop(cropId: number, url: string): Promise<MediaCrop> {
+    return await this.dbConnection.updateCropWithOwnUrl(cropId, url);
   }
 }
