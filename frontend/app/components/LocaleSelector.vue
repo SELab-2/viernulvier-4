@@ -84,7 +84,7 @@ const handleLocaleChange = (code) => {
             v-for="loc in normalizedLocales"
             :key="loc"
             @click="handleLocaleChange(loc)"
-            class="flex w-full items-center justify-between px-4 py-2 text-[11px] font-black uppercase transition-colors outline-none hover:bg-[var(--foreground)] hover:text-[var(--background)]"
+            class="flex w-full items-center justify-between px-4 py-2 text-[11px] font-black uppercase transition-colors outline-none hover:text-[var(--accent)]"
             :class="loc === locale ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'"
           >
             <span>{{ loc.toUpperCase() }}</span>
