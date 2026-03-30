@@ -64,7 +64,7 @@ const formatDate = (date: Date) => {
     <!-- Empty state -->
     <div
         v-else
-        class="bg-muted border border-border rounded-lg p-4 text-[11px] text-muted-foreground"
+        class="rounded-xl border border-border bg-card dark:bg-muted p-4 text-[12px] text-foreground/60"
     >
       {{ t('production.noStories') }}
     </div>
