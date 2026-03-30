@@ -73,6 +73,7 @@
     "page_label": "Pagina",
     "of_pages": "van {total}",
     "total_results": "{total} resultaten"
+  },
   "production": {
     "events": "Evenementen",
     "dateAndTime": "Datum & Tijd",

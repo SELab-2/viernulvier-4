@@ -73,6 +73,7 @@
     "page_label": "Page",
     "of_pages": "of {total}",
     "total_results": "{total} results"
+  },
   "production": {
     "events": "Events",
     "dateAndTime": "Date & Time",
