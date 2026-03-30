@@ -1,4 +1,21 @@
 <script setup lang="ts">
+/**
+ * A reusable story list component, displays stories belonging to a specific production, includes:
+ *  - Title, date and description displayed per story
+ *  - Sorting of stories
+ *  - Scrollable when there are more than 3 stories
+ *
+ * Usage:
+ * <ProductionStories
+ *    :stories="stories"
+ * />
+ *
+ * Example stories: (There are 2 ways to create a date)
+ * const stories: StoryItem[] = [
+ *    { id: '1', title: 'Rehearsal day 1', date: new Date(2026, 2, 10), description: 'First rehearsal of the season.', image: '/img/story1.jpg' },
+ *    { id: '2', title: 'Opening night', date: new Date('2026-03-29T19:30:00'), description: 'A sold-out opening night.', image: null }
+ * ]
+ */
 import type {StoryItem} from "../../types/StoryItem";
 const { t, locale } = useI18n()
 import { CalendarDays } from "lucide-vue-next";
