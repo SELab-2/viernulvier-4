@@ -28,9 +28,16 @@ export const CreateBlogSchema = MutableBlogSchema;
 export const ModifyBlogSchema = MutableBlogSchema.partial();
 export const ReplaceBlogSchema = MutableBlogSchema;
 
+// Filtering.
+export const FilterBlogSchema = z.object({
+  after: z.iso.date().optional(),
+  before: z.iso.date().optional(),
+});
+
 // Type exports.
 export type Blog = z.infer<typeof BlogSchema>;
 export type BlogView = z.infer<typeof BlogViewSchema>;
 export type CreateBlog = z.infer<typeof CreateBlogSchema>;
 export type ModifyBlog = z.infer<typeof ModifyBlogSchema>;
 export type ReplaceBlog = z.infer<typeof ReplaceBlogSchema>;
+export type FilterBlog = z.infer<typeof FilterBlogSchema>;

@@ -7,6 +7,7 @@ import {
   PaginationFilterDto,
   ReplaceBlogDto,
   ModifyBlogDto,
+  FilterBlogDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -21,8 +22,9 @@ export class BlogService {
    */
   async getAllBlogs(
     paginationFilters: PaginationFilterDto,
+    blogFilters: FilterBlogDto,
   ): Promise<PaginatedResponse<BlogDto>> {
-    return await this.blogDbService.getBlogs(paginationFilters);
+    return await this.blogDbService.getBlogs(paginationFilters, blogFilters);
   }
 
   /**
