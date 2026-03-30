@@ -2,6 +2,12 @@
 
 The backend comes with a built-in scheduled scraper that automatically syncs data from the [VierNulVier API](https://www.viernulvier.gent/api) into our database archive. Specifically, it pulls productions, events, genres, prices and halls.
 
+For CSV import documentation, see the CSV Parser section:
+
+- [CSV Parser Overview](../csv-parser/index.md)
+- [Old Data Parser](../csv-parser/old-data-parser.md)
+- [New Structured Parser](../csv-parser/new-data-parser.md)
+
 ## Technical Details
 
 To avoid pulling the entire dataset every time, the scraper performs a **delta sync**. 

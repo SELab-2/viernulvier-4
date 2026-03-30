@@ -34,6 +34,10 @@ nav:
       - Frontend: testing/frontend.md
   - Scraping:
       - Overview: scraping/index.md
+  - CSV Parser:
+      - Overview: csv-parser/index.md
+      - Old Data Parser: csv-parser/old-data-parser.md
+      - New Structured Parser: csv-parser/new-data-parser.md
   - Logging:
       - Overview: logging/index.md
   - Translation:
