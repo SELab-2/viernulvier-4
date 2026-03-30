@@ -16,6 +16,7 @@
  *    { id: '2', title: 'Opening night', date: new Date('2026-03-29T19:30:00'), description: 'A sold-out opening night.', image: null }
  * ]
  */
+
 import type {StoryItem} from "../../types/StoryItem";
 const { t, locale } = useI18n()
 import { CalendarDays } from "lucide-vue-next";
@@ -23,7 +24,7 @@ import { CalendarDays } from "lucide-vue-next";
 interface Props {
   stories: StoryItem[];
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString(locale.value, {
@@ -32,6 +33,10 @@ const formatDate = (date: Date) => {
     day: "numeric",
   });
 };
+
+const sortedStories = computed(() => { // function to sort the stories, oldest first
+  return [...props.stories].sort((a, b) => a.date.getTime() - b.date.getTime())
+})
 
 // constants
 const cardBase = 'flex items-center gap-4 p-4 rounded-xl border border-border bg-card'
@@ -53,7 +58,7 @@ const thumbnailClass = 'w-24 h-16 object-cover rounded-md shrink-0'
       <div class="overflow-y-auto max-h-[35rem]">
         <div class="flex flex-col gap-2">
           <div
-              v-for="story in stories"
+              v-for="story in sortedStories"
               :key="story.id"
               :class="[cardBase, cardHover]"
           >
