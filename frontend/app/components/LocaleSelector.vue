@@ -13,8 +13,22 @@ const closeDropdown = (e) => {
   }
 }
 
-onMounted(() => window.addEventListener('click', closeDropdown))
-onUnmounted(() => window.removeEventListener('click', closeDropdown))
+// Close when 'Escape'
+const handleEscape = (e) => {
+  if (e.key === 'Escape') {
+    isOpen.value = false
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('click', closeDropdown)
+  window.addEventListener('keydown', handleEscape)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', closeDropdown)
+  window.removeEventListener('keydown', handleEscape)
+})
 
 const handleLocaleChange = (code) => {
   setLocale(code)
