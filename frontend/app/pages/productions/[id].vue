@@ -46,6 +46,15 @@ const isValid = (val: any) => {
 
 const image = computed(() => (production.value as any)?.image ?? null)
 const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0))
+
+const cleanText = (text: string | null | undefined) => {
+  if (!text) return ""
+
+  return text
+    .replace(/\\/g, '')
+    .replace(/(\r?\n){3,}/g, '\n\n')
+    .trim()
+}
 </script>
 
 <template>
@@ -89,14 +98,16 @@ const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
 
         <div class="lg:col-span-8">
-          <h2 class="text-3xl lg:text-4xl font-black uppercase mb-10 tracking-tight">Beschrijving</h2>
+          <h2 class="text-3xl lg:text-4xl font-black uppercase mb-10 tracking-tight">
+            Beschrijving
+          </h2>
 
           <div class="text-lg lg:text-xl leading-relaxed opacity-80 font-brand whitespace-pre-line text-gray-800 dark:text-gray-200">
-            {{ production.description1 }}
+            {{ cleanText(production.description1) }}
           </div>
 
           <div v-if="isValid(production.description2)" class="mt-12 p-6 border-l-2 border-gray-100 dark:border-gray-800 italic opacity-70 text-base lg:text-lg whitespace-pre-line">
-            {{ production.description2 }}
+            {{ cleanText(production.description2) }}
           </div>
         </div>
 
