@@ -13,7 +13,7 @@ const mockLogger = {
   debug: jest.fn(),
 };
 
-jest.mock("../../csv_parsing/csv_file_parser", () => ({
+jest.mock("../../../csv_parsing/csv_file_parser", () => ({
   CSVFileParser: {
     parseProductionsCSV: (...args: unknown[]) =>
       mockParseProductionsCSV(...args),
@@ -24,13 +24,13 @@ jest.mock("../../csv_parsing/csv_file_parser", () => ({
   },
 }));
 
-jest.mock("./database/db.connection", () => ({
+jest.mock("../database/db.connection", () => ({
   UtilsDbConnection: function () {
     return mockDbConnectionCtor();
   },
 }));
 
-jest.mock("../logger/logger", () => ({
+jest.mock("../../logger/logger", () => ({
   __esModule: true,
   default: mockLogger,
 }));

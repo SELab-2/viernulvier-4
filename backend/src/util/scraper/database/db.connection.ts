@@ -1,6 +1,7 @@
 import { Pool, PoolClient, QueryResultRow } from "pg";
 import {
   vnvEvent,
+  vnvGallery,
   vnvGenre,
   vnvLocation,
   vnvMediaCrop,
@@ -17,10 +18,11 @@ import {
   Blog,
   MediaCrop,
   MediaItem,
+  MediaGallery,
 } from "@repo/common";
 import logger from "../../logger/logger";
 import { ResourceGoneException } from "../../../common/exceptions";
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleDestroy } from "@nestjs/common";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -43,7 +45,7 @@ export interface PendingCrops {
 }
 
 @Injectable()
-export class UtilsDbConnection {
+export class UtilsDbConnection implements OnModuleDestroy {
   /**
    * The Pool to the database, used to execute queries.
    */
@@ -56,6 +58,13 @@ export class UtilsDbConnection {
       password: process.env.DB_PASSWORD_DEV,
       port: Number(process.env.DB_PORT_DEV),
     });
+  }
+
+  /**
+   * Automatically destroy the database connection on stop.
+   */
+  async onModuleDestroy() {
+    await this.pool.end();
   }
 
   /**
@@ -304,6 +313,19 @@ export class UtilsDbConnection {
   }
 
   /**
+   * Inserts a list of vnvGallery objects.
+   * @param galleries The list of vnvGallery objects.
+   */
+  async insertGalleries(galleries: vnvGallery[]) {
+    await this.processInBatches(
+      "Galleries",
+      galleries,
+      500,
+      (g: vnvGallery, client: PoolClient) => this.insertGallery(g, client),
+    );
+  }
+
+  /**
    * Events
    */
 
@@ -371,12 +393,40 @@ export class UtilsDbConnection {
         WHERE legacy_id = ANY($1::text[]);
       `,
       [vnvProduction.genres],
+      client,
     );
     for (const tag of tags) {
       const valid: boolean = await this.linkTag(production.id, tag.id, client);
       if (!valid)
         logger.warn(
           `Failed to link Tag(${tag.id}) to Production(${production.id}).`,
+        );
+    }
+
+    // Then we unlink the gallery.
+    await this.query(
+      `
+        DELETE FROM production_media_gallery WHERE production_id = $1;
+      `,
+      [production.id],
+      client,
+    );
+    const galleries: MediaGallery[] = await this.query<MediaGallery>(
+      `
+        SELECT * FROM media_gallery
+        WHERE legacy_id = $1;
+      `,
+      [vnvProduction.galleryId],
+      client,
+    );
+
+    // And we link it.
+    if (galleries.length) {
+      const gallery: MediaGallery = galleries[0];
+      const valid = await this.linkGallery(gallery.id, production.id, client);
+      if (!valid)
+        logger.warn(
+          `Failed to link Gallery(${gallery.id}) to Production(${production.id}).`,
         );
     }
 
@@ -426,6 +476,31 @@ export class UtilsDbConnection {
 
     const output = await this.query(query, [productionId, tagId], client);
     return output.length >= 1;
+  }
+
+  /**
+   * Links a Gallery to a Production.
+   * @param galleryId Item id.
+   * @param productionId Crop id.
+   * @returns T/F Whether the link was created.
+   */
+  async linkGallery(
+    galleryId: number,
+    productionId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
+    const rows = await this.query(
+      `
+        INSERT INTO production_media_gallery (production_id, gallery_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `,
+      [productionId, galleryId],
+      client,
+    );
+
+    return rows.length >= 1;
   }
 
   /**
@@ -517,16 +592,19 @@ export class UtilsDbConnection {
       [vnvEvent.location],
       client,
     );
-    const location: Location = locations[0];
-    const valid: boolean = await this.linkLocation(
-      event.id,
-      location.id,
-      client,
-    );
-    if (!valid)
-      logger.warn(
-        `Failed to link Location(${location.id}) to Event(${event.id}).`,
+
+    if (locations.length) {
+      const location: Location = locations[0];
+      const valid: boolean = await this.linkLocation(
+        event.id,
+        location.id,
+        client,
       );
+      if (!valid)
+        logger.warn(
+          `Failed to link Location(${location.id}) to Event(${event.id}).`,
+        );
+    }
   }
 
   /**
@@ -768,6 +846,7 @@ export class UtilsDbConnection {
         WHERE legacy_id = ANY($1::text[]);
       `,
       [item.crops],
+      client,
     );
 
     // Link the crops.
@@ -799,6 +878,94 @@ export class UtilsDbConnection {
         RETURNING *;
       `,
       [itemId, cropId],
+      client,
+    );
+
+    return rows.length >= 1;
+  }
+
+  /**
+   * Insert a vnvGallery into the database.
+   * @param gallery The gallery in question.
+   * @param client The client for batching and transactions.
+   * @returns The inserted Gallery.
+   */
+  async insertGallery(
+    gallery: vnvGallery,
+    client?: PoolClient,
+  ): Promise<MediaGallery> {
+    const query = `
+      INSERT INTO media_gallery (
+        legacy_id, name, type
+      )
+      VALUES ($1, $2, $3)
+      ON CONFLICT (legacy_id)
+      DO UPDATE SET
+        name = EXCLUDED.name,
+        type = EXCLUDED.type
+      RETURNING *;
+    `;
+
+    const result = await this.query<MediaGallery>(
+      query,
+      [gallery.legacy_id, gallery.name, gallery.type],
+      client,
+    );
+    const realGallery: MediaGallery = result[0];
+
+    // Firstly delete all previous items.
+    await this.query(
+      `
+        DELETE FROM gallery_item WHERE gallery_id = $1;
+      `,
+      [realGallery.id],
+      client,
+    );
+
+    const items: MediaItem[] = await this.query<MediaItem>(
+      `
+        SELECT * FROM media_item
+        WHERE legacy_id = ANY($1::text[]);
+      `,
+      [gallery.items],
+      client,
+    );
+
+    // Link the items.
+    for (const item of items) {
+      const valid: boolean = await this.linkItem(
+        realGallery.id,
+        item.id,
+        client,
+      );
+      if (!valid)
+        logger.warn(
+          `Failed to link Item(${item.id}) to Gallery(${realGallery.id}).`,
+        );
+    }
+
+    return realGallery;
+  }
+
+  /**
+   * Links a Item to a Gallery.
+   * @param galleryId Item id.
+   * @param itemId Crop id.
+   * @returns T/F Whether the link was created.
+   */
+  async linkItem(
+    galleryId: number,
+    itemId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
+    const rows = await this.query(
+      `
+        INSERT INTO gallery_item (gallery_id, item_id)
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *;
+      `,
+      [galleryId, itemId],
       client,
     );
 

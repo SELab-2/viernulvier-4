@@ -33,9 +33,7 @@ export class ScraperRunner {
 
     this.logger.debug("Inserting Scraped Data...");
 
-    // We can bundle the adding of tags, locations and prices.
-    // We need to insert these BEFORE the Productions and Events
-    // because we need them to already be in the database when linking them up.
+    // We can bundle the adding of tags, locations, prices and crops.
     await Promise.all([
       this.dbConnection.insertTags(scrapeResults.genres),
       this.dbConnection.insertPrices(scrapeResults.prices),
@@ -43,8 +41,9 @@ export class ScraperRunner {
       this.dbConnection.insertCrops(scrapeResults.crops),
     ]);
 
-    // Insert Items then galleries.
+    // Insert Items then galleries. We can then link the previous crops.
     await this.dbConnection.insertItems(scrapeResults.items);
+    await this.dbConnection.insertGalleries(scrapeResults.galleries);
 
     // First Productions since we need those ids for Events.
     await this.dbConnection.insertProductions(scrapeResults.productions);

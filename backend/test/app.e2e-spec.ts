@@ -1419,7 +1419,7 @@ describe("MediaCropController (e2e)", () => {
     it("should return 200 with the replaced crop", () => {
       return request(app.getHttpServer())
         .put("/crops/1")
-        .send({ name: "mobile", url: "https://test.com/b.jpg" })
+        .send({ name: "hd_ready", url: "https://test.com/b.jpg" })
         .expect(200)
         .expect(mockMediaCrop);
     });
