@@ -35,8 +35,8 @@ const formatDate = (date: Date) => {
               :key="story.id"
               class="
               flex items-center gap-4 p-4
-              rounded-xl border border-border bg-card dark:bg-muted
-              hover:border-ring hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer"
+              rounded-xl border border-border bg-card
+              hover:border-ring hover:bg-card-hover hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer"
           >
             <!-- Thumbnail -->
             <img
