@@ -18,7 +18,7 @@
     "test:coverage": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "scraper:reset": "tsx ./src/util/scraper/reset.ts",
+    "db:reset": "ts-node -r tsconfig-paths/register ./src/cli.ts db:reset",
     "scraper:inject:structured:test": "tsx ./src/util/scraper/inject-structured-test.ts"
   },
   "dependencies": {
@@ -35,6 +35,7 @@
     "csv-parser": "^3.2.0",
     "deepl-node": "^1.24.0",
     "dotenv": "^17.3.1",
+    "nest-commander": "^3.20.1",
     "nestjs-zod": "^5.1.1",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
