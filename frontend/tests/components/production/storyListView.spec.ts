@@ -48,7 +48,7 @@ describe("ProductionStories", () => {
     });
 
     it("renders a card for each story", () => {
-        expect(wrapper.findAll("[data-story]").length).toBe(stories.length);
+        expect(wrapper.findAll("[data-testid=data-story]").length).toBe(stories.length);
     });
 
     it("renders title and description for each story", () => {
@@ -72,7 +72,7 @@ describe("ProductionStories", () => {
     });
 
     it("sorts stories oldest first", () => {
-        const cards = wrapper.findAll("[data-story]");
+        const cards = wrapper.findAll("[data-testid=data-story]");
         const firstCard = cards[0].text();
         const lastCard = cards[cards.length - 1].text();
         expect(firstCard).toContain("Titel 1"); // oldest story

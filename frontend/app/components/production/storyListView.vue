@@ -61,8 +61,9 @@ const thumbnailClass = 'w-24 h-16 object-cover rounded-md shrink-0'
           <div
               v-for="story in sortedStories"
               :key="story.id"
+              data-testid="data-story"
               :class="[cardBase, cardHover]"
-          >
+          > <!-- testid to make it easier for testing -->
             <!-- Thumbnail -->
             <img
                 v-if="story.image"
