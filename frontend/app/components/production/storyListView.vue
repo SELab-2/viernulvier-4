@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type {StoryItem} from "../../types/StoryItem";
 const { t, locale } = useI18n()
-import { CalendarDays, MapPin, Euro, Clock } from "lucide-vue-next";
+import { CalendarDays } from "lucide-vue-next";
 
 interface Props {
   stories: StoryItem[];
 }
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString(locale.value, {
@@ -31,7 +31,7 @@ const formatDate = (date: Date) => {
       <div class="overflow-y-auto max-h-[35rem]">
         <div class="flex flex-col gap-2">
           <div
-              v-for="(story, index) in stories"
+              v-for="story in stories"
               :key="story.id"
               class="
               flex items-center gap-4 p-4
