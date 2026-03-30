@@ -1,12 +1,14 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
+  MediaGalleryDto,
   PaginationFilterDto,
   ProductionDto,
+  ReplaceProductionDto,
   TagDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
@@ -48,19 +50,17 @@ export class ProductionService {
   /**
    * Replaces a ProductionDto in the database and returns the updated one.
    * @param id The ID of the production.
-   * @param production The ProductionDto Object itself.
+   * @param replaceProduction The ProductionDto Object itself.
    * @returns The newly updated ProductionDto.
    */
   async replaceProduction(
     id: number,
-    production: ProductionDto,
+    replaceProduction: ReplaceProductionDto,
   ): Promise<ProductionDto> {
-    if (id !== production.id)
-      throw new BadRequestException("ID in the URL must match ID in the body.");
-
-    // * NOTE: Using Upsert here will make sure that
-    // * if the production does not yet exist it is created instead.
-    return await this.productionDBService.upsertProduction(production);
+    return await this.productionDBService.updateProduction(
+      id,
+      replaceProduction,
+    );
   }
 
   /**
@@ -71,21 +71,9 @@ export class ProductionService {
    */
   async modifyProduction(
     id: number,
-    patchData: UpdateProductionDto,
+    patchData: ModifyProductionDto,
   ): Promise<ProductionDto> {
-    const existingProduction: ProductionDto =
-      await this.productionDBService.getProductionById(id);
-
-    const mergedProduction: ProductionDto = {
-      ...existingProduction,
-      ...patchData,
-      id,
-    };
-
-    return await this.productionDBService.updateProduction(
-      id,
-      mergedProduction,
-    );
+    return await this.productionDBService.updateProduction(id, patchData);
   }
 
   /**
@@ -194,5 +182,46 @@ export class ProductionService {
   ): Promise<ProductionDto> {
     await this.productionDBService.removeTagFromProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
+  }
+
+  // -- Media -- //
+
+  /**
+   * Returns the media for a certain production.
+   * @param productionId The ID of the production.
+   * @returns The gallery linked with this production.
+   */
+  async getProductionMedia(productionId: number): Promise<MediaGalleryDto> {
+    return await this.productionDBService.getMediaFromProduction(productionId);
+  }
+
+  /**
+   * Links a media gallery to a production.
+   * @param productionId The ID of the production.
+   * @param galleryId The ID of the gallery.
+   */
+  async linkMediaToProduction(
+    productionId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.productionDBService.linkMediaToProduction(
+      productionId,
+      galleryId,
+    );
+  }
+
+  /**
+   * Unlinks a media gallery from a production.
+   * @param productionId The ID of the production.
+   * @param galleryId The ID of the gallery.
+   */
+  async unlinkMediaFromProduction(
+    productionId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.productionDBService.unlinkMediaFromProduction(
+      productionId,
+      galleryId,
+    );
   }
 }

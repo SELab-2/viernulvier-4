@@ -1,16 +1,17 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { BlogController } from "./blog.controller";
-import { BlogService } from "./blog.service";
-import { LanguageService } from "../util/language/language.service";
+import { BlogService } from "../blog.service";
+import { LanguageService } from "../../util/language/language.service";
 import {
   BlogDto,
   BlogViewDto,
   CreateBlogDto,
   LanguageQueryDto,
   PaginationFilterDto,
-  UpdateBlogDto,
-} from "../dto/dto";
-import { ApiKeyGuard, SuperApiKeyGuard } from "../auth/authGuard";
+  ModifyBlogDto,
+} from "../../dto/dto";
+import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
+import { FilterBlog } from "@repo/common";
 
 describe("BlogController", () => {
   let controller: BlogController;
@@ -107,11 +108,16 @@ describe("BlogController", () => {
       const rawBlogs = [mockBlog];
       const flattenedBlogs = [mockBlogView];
       const langQuery: LanguageQueryDto = { lang: "en" };
+      const blogFilters: FilterBlog = {};
 
       mockBlogService.getAllBlogs.mockResolvedValue(rawBlogs);
       mockLanguageService.flattenByLanguage.mockReturnValue(flattenedBlogs);
 
-      const result = await controller.getAllBlogs(filter, langQuery);
+      const result = await controller.getAllBlogs(
+        filter,
+        langQuery,
+        blogFilters,
+      );
 
       expect(result).toEqual(flattenedBlogs);
       expect(blogService.getAllBlogs).toHaveBeenCalledTimes(1);
@@ -181,7 +187,7 @@ describe("BlogController", () => {
   describe("modifyBlog", () => {
     it("should modify and return the updated blog", async () => {
       const blogId = 1;
-      const updateDto: UpdateBlogDto = {
+      const updateDto: ModifyBlogDto = {
         titel: {
           en: "Updated titel",
           nl: "Bijgewerkte titel",

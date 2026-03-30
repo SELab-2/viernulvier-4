@@ -18,7 +18,7 @@ import {
   LocationDto,
   LocationViewDto,
   PaginationFilterDto,
-  UpdateLocationDto,
+  ModifyLocationDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -33,7 +33,7 @@ import {
   LanguageQuerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  UpdateLocationSchema,
+  ModifyLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
@@ -108,26 +108,26 @@ export class LocationController {
   /**
    * Responds to a PATCH to "/locations/:locationId"
    * @param locationId The ID of the Location in the URL.
-   * @param updateLocation The Location we want to update.
+   * @param modifyLocation The Location we want to update.
    * @returns The newly updated Location.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Updates an existing Location." })
-  @ApiBody({ type: UpdateLocationDto })
+  @ApiBody({ type: ModifyLocationDto })
   @ApiOkResponse({
     type: LocationDto,
     description: "The Location was updated.",
   })
   @Patch(":locationId")
-  async updateLocation(
+  async modifyLocation(
     @Param("locationId", ParseIntPipe) locationId: number,
-    @Body(new ZodValidationPipe(UpdateLocationSchema))
-    updateLocation: UpdateLocationDto,
+    @Body(new ZodValidationPipe(ModifyLocationSchema))
+    modifyLocation: ModifyLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationService.updateLocation(
+    return await this.locationService.modifyLocation(
       locationId,
-      updateLocation,
+      modifyLocation,
     );
   }
 

@@ -8,7 +8,8 @@ import {
   LocationDto,
   PaginationFilterDto,
   PriceDto,
-  UpdateEventDto,
+  ReplaceEventDto,
+  ModifyEventDto,
 } from "../dto/dto";
 import {
   FilterEventSchema,
@@ -189,11 +190,14 @@ export class EventDatabaseService {
 
   /**
    * Update function for events. Updates the event in the database.
-   * @param event must be of the type "UpdateEvent", gives the freedom to define only what needs to be updated.
+   * @param event must be of the type "ModifyEvent", gives the freedom to define only what needs to be updated.
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
-  async updateEvent(eventId: number, event: UpdateEventDto): Promise<EventDto> {
+  async updateEvent(
+    eventId: number,
+    event: ModifyEventDto | ReplaceEventDto,
+  ): Promise<EventDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;

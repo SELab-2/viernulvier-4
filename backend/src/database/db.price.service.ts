@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreatePriceDto, PriceDto, UpdatePriceDto } from "../dto/dto";
+import {
+  CreatePriceDto,
+  PriceDto,
+  ModifyPriceDto,
+  ReplacePriceDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
@@ -97,11 +102,14 @@ export class PriceDatabaseService {
 
   /**
    * Update function for price. Updates the price in the database.
-   * @param price must be of the type "UpdatePrice", gives the freedom to define only what needs to be updated.
+   * @param price must be of the type "ModifyPrice" or "ReplacePrice", gives the freedom to define only what needs to be updated.
    * The id field in the price MUST be defined.
    * @returns the updated price if successful.
    */
-  async updatePrice(priceId: number, price: UpdatePriceDto): Promise<PriceDto> {
+  async updatePrice(
+    priceId: number,
+    price: ModifyPriceDto | ReplacePriceDto,
+  ): Promise<PriceDto> {
     const fields: string[] = [];
     const values: any[] = [];
     let index = 1;

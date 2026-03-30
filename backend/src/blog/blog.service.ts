@@ -3,8 +3,11 @@ import { BlogDatabaseService } from "../database/db.blog.service";
 import {
   BlogDto,
   CreateBlogDto,
+  MediaGalleryDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ReplaceBlogDto,
+  ModifyBlogDto,
+  FilterBlogDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -15,12 +18,14 @@ export class BlogService {
   /**
    * Gets all Blogs from the DatabaseService.
    * @param paginationFilters Filters for pagination and ordering.
+   * @param blogFilters Filters for blog dates.
    * @returns A list of all Blog objects.
    */
   async getAllBlogs(
     paginationFilters: PaginationFilterDto,
+    blogFilters: FilterBlogDto,
   ): Promise<PaginatedResponse<BlogDto>> {
-    return await this.blogDbService.getBlogs(paginationFilters);
+    return await this.blogDbService.getBlogs(paginationFilters, blogFilters);
   }
 
   /**
@@ -47,7 +52,7 @@ export class BlogService {
    * @param blog The Blog object we want to replace the existing Blog with.
    * @returns The newly replaced Blog.
    */
-  async replaceBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
+  async replaceBlog(id: number, blog: ReplaceBlogDto): Promise<BlogDto> {
     return await this.blogDbService.updateBlog(id, blog);
   }
 
@@ -57,7 +62,7 @@ export class BlogService {
    * @param blog The Partial Blog object we want to use to modify.
    * @returns The newly modified Blog.
    */
-  async modifyBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
+  async modifyBlog(id: number, blog: ModifyBlogDto): Promise<BlogDto> {
     return await this.blogDbService.updateBlog(id, blog);
   }
 
@@ -68,5 +73,34 @@ export class BlogService {
    */
   async deleteBlog(id: number): Promise<void> {
     return await this.blogDbService.deleteBlog(id);
+  }
+
+  // -- Media -- //
+
+  /**
+   * Fetches the media related to a blog.
+   * @param blogId The ID of the blog.
+   * @returns The media gallery.
+   */
+  async getMedia(blogId: number): Promise<MediaGalleryDto> {
+    return await this.blogDbService.getMediaFromBlog(blogId);
+  }
+
+  /**
+   * Link a media gallery to a blog.
+   * @param blogId The ID of the blog.
+   * @param galleryId The ID of the Gallery.
+   */
+  async linkMediaToBlog(blogId: number, galleryId: number): Promise<void> {
+    await this.blogDbService.linkMediaToBlog(blogId, galleryId);
+  }
+
+  /**
+   * Unlink a media gallery from a blog.
+   * @param blogId The ID of the blog.
+   * @param galleryId The ID of the Gallery.
+   */
+  async unlinkMediaFromBlog(blogId: number, galleryId: number): Promise<void> {
+    await this.blogDbService.unlinkMediaFromBlog(blogId, galleryId);
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   CreateEventDto,
   EventDto,
@@ -6,7 +6,8 @@ import {
   LocationDto,
   PaginationFilterDto,
   PriceDto,
-  UpdateEventDto,
+  ReplaceEventDto,
+  ModifyEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
 import { PaginatedResponse } from "@repo/common";
@@ -44,10 +45,7 @@ export class EventService {
    * @param event The event delivered through the request body.
    * @returns The updated EventDto object.
    */
-  async replaceEvent(id: number, event: EventDto): Promise<EventDto> {
-    if (id !== event.id)
-      throw new BadRequestException("ID in the URL must match ID in the body.");
-
+  async replaceEvent(id: number, event: ReplaceEventDto): Promise<EventDto> {
     return await this.eventDBService.updateEvent(id, event);
   }
 
@@ -57,16 +55,8 @@ export class EventService {
    * @param patchData The partial EventDto object used to update the data in the DB.
    * @returns The updated EventDto object.
    */
-  async modifyEvent(id: number, patchData: UpdateEventDto): Promise<EventDto> {
-    const existingEvent: EventDto = await this.eventDBService.getEventById(id);
-
-    const mergedEvent: EventDto = {
-      ...existingEvent,
-      ...patchData,
-      id, // Force ID.
-    };
-
-    return await this.eventDBService.updateEvent(id, mergedEvent);
+  async modifyEvent(id: number, patchData: ModifyEventDto): Promise<EventDto> {
+    return await this.eventDBService.updateEvent(id, patchData);
   }
 
   /**

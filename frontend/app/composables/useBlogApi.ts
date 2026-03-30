@@ -2,17 +2,20 @@ import type {
   Blog,
   BlogView,
   CreateBlog,
-  UpdateBlog,
+  ModifyBlog,
   Language,
   PaginationFilter,
   PaginatedResponse,
   LanguageQuery,
+  ReplaceBlog,
+  FilterBlog,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 interface BlogListOptions {
   paginationFilters?: PaginationFilter;
   languageFilters?: LanguageQuery;
+  blogFilters?: FilterBlog;
 }
 
 /**
@@ -29,10 +32,12 @@ export function useBlogApi() {
   const getAll = ({
     paginationFilters,
     languageFilters,
+    blogFilters,
   }: BlogListOptions = {}) => {
     const params = {
       ...paginationFilters,
       ...languageFilters,
+      ...blogFilters,
     };
 
     const cleanParams = Object.fromEntries(
@@ -62,12 +67,12 @@ export function useBlogApi() {
     post<Blog, CreateBlog>(API_ROUTES.blogs.base, body);
 
   /** PUT /blogs/:blogId — fully replaces an existing blog. */
-  const replace = (blogId: number, body: Blog) =>
-    put<Blog, Blog>(API_ROUTES.blogs.byId(blogId), body);
+  const replace = (blogId: number, body: ReplaceBlog) =>
+    put<Blog, ReplaceBlog>(API_ROUTES.blogs.byId(blogId), body);
 
   /** PATCH /blogs/:blogId — partially updates an existing blog. */
-  const modify = (blogId: number, body: UpdateBlog) =>
-    patch<Blog, UpdateBlog>(API_ROUTES.blogs.byId(blogId), body);
+  const modify = (blogId: number, body: ModifyBlog) =>
+    patch<Blog, ModifyBlog>(API_ROUTES.blogs.byId(blogId), body);
 
   /** DELETE /blogs/:blogId — deletes a blog. */
   const remove = (blogId: number) => del(API_ROUTES.blogs.byId(blogId));

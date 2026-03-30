@@ -76,5 +76,12 @@
   "baseform": {
     "submitbutton": "Indienen",
     "resetbutton": "Herstellen"
+  },
+  "production": {
+    "events": "Evenementen",
+    "dateAndTime": "Datum & Tijd",
+    "location": "Locatie",
+    "price": "Prijs",
+    "noEvents": "Deze productie bevat geen evenementen."
   }
 }

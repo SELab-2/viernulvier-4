@@ -6,6 +6,7 @@ import { ProductionBlogController } from "./controllers/production-blog.controll
 import { ProductionTagController } from "./controllers/production-tag.controller";
 import { LanguageModule } from "../util/language/LanguageModule";
 import { LoggerModule } from "../util/logger/logger.module";
+import { ProductionMediaController } from "./controllers/production-media.controller";
 
 @Module({
   providers: [ProductionService],
@@ -13,6 +14,7 @@ import { LoggerModule } from "../util/logger/logger.module";
     ProductionController,
     ProductionBlogController,
     ProductionTagController,
+    ProductionMediaController,
   ],
   imports: [DbModule, LanguageModule, LoggerModule],
 })

@@ -2,7 +2,7 @@ import type {
   Tag,
   TagView,
   CreateTag,
-  UpdateTag,
+  ModifyTag,
   Language,
   PaginationFilter,
   PaginatedResponse,
@@ -62,8 +62,8 @@ export function useTagApi() {
     post<Tag, CreateTag>(API_ROUTES.tags.base, body);
 
   /** PATCH /tags/:tagId — updates an existing tag. */
-  const modify = (tagId: number, body: UpdateTag) =>
-    patch<Tag, UpdateTag>(API_ROUTES.tags.byId(tagId), body);
+  const modify = (tagId: number, body: ModifyTag) =>
+    patch<Tag, ModifyTag>(API_ROUTES.tags.byId(tagId), body);
 
   /** DELETE /tags/:tagId — deletes a tag. */
   const remove = (tagId: number) => del(API_ROUTES.tags.byId(tagId));
