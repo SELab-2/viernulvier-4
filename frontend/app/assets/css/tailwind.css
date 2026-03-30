@@ -80,6 +80,19 @@
   --ring: oklch(0.439 0 0);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
+
+  /* Accent color for tags */
+  --accent: #8224e3;
+
+  /* Card — slightly lighter than background so cards lift off the page */
+  --card: oklch(0.22 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --card-border: oklch(0.3 0 0);
+  --card-hover: oklch(0.25 0 0);
+
+  /* Colours used in the gradient placeholder */
+  --thumbnail-bg: oklch(0.35 0 0);
+  --thumbnail-icon: oklch(0.75 0 0);
 }
 
 /* ─── Tailwind theme mapping ────────────────────────────────────────────────

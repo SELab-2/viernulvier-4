@@ -8,9 +8,9 @@ const { viewMode, searchQuery } = useArchiveView()
 
 <template>
   <section class="w-full border-b border-border bg-background">
-    <div class="max-w-5xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+    <div class="max-w-5xl mx-auto px-4 py-6 flex items-center gap-4">
 
-      <!-- Searchbar -->
+      <!-- Search -->
       <div class="flex-1">
         <SearchBar
           v-model="searchQuery"
@@ -19,26 +19,22 @@ const { viewMode, searchQuery } = useArchiveView()
         />
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-2 my-4">
+      <!-- Filter -->
+      <button class="btn-outline h-12 px-4">
+        {{ t('archive.filter') }}
+      </button>
 
-        <!-- Filter button -->
-        <button class="btn-outline h-12 px-4">
-          {{ t('archive.filter') }}
-        </button>
-
-        <!-- View mode toggle -->
-        <button
-          class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground transition-colors"
-          :class="viewMode === 'grid' ? 'bg-foreground text-background' : 'bg-transparent text-foreground hover:bg-foreground hover:text-background'"
-          :aria-label="viewMode === 'grid' ? t('archive.view_list') : t('archive.view_grid')"
-          @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'"
-        >
-          <List v-if="viewMode === 'grid'" class="w-4 h-4" />
-          <LayoutGrid v-else class="w-4 h-4" />
-        </button>
-
-      </div>
+      <!-- View toggle -->
+      <button
+        class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground transition-colors"
+        :class="viewMode === 'grid'
+      ? 'bg-foreground text-background'
+      : 'bg-transparent text-foreground hover:bg-foreground hover:text-background'"
+        @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'"
+      >
+        <List v-if="viewMode === 'grid'" class="w-4 h-4" />
+        <LayoutGrid v-else class="w-4 h-4" />
+      </button>
 
     </div>
   </section>

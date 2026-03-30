@@ -95,7 +95,7 @@ const submit = () => { // handles input when pressing enter
 </script>
 
 <template>
-  <div class="search-bar m-4">
+  <div class="search-bar">
     <!-- Optional label -->
     <label v-if="props.label" :for="props.id" class="text-[12px] font-bold uppercase text-muted-foreground mb-1 block">
       {{ props.label }} <span v-if="props.required" class="text-red-500">*</span>
