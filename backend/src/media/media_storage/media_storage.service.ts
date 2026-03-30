@@ -10,6 +10,7 @@ interface MediaStorage {
 
 /**
  * This handles all functionality in terms of media storage.
+ * note: this is also used to fetch prints or pdf files.
  */
 class LocalMediaStorage implements MediaStorage {
   private readonly baseDir = path.join(process.cwd(), "../assets/media"); // dev assets folder
