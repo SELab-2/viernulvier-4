@@ -1,4 +1,4 @@
-import { Pool, QueryResultRow } from "pg";
+import { Pool, PoolClient, QueryResultRow } from "pg";
 import {
   vnvEvent,
   vnvGenre,
@@ -64,9 +64,11 @@ export class UtilsDbConnection {
   async query<T extends QueryResultRow = any>(
     query: string,
     params?: any[],
+    client?: PoolClient,
   ): Promise<T[]> {
+    const runner: PoolClient | Pool = client || this.pool;
     try {
-      const res = await this.pool.query<T>(query, params);
+      const res = await runner.query<T>(query, params);
       return res.rows;
     } catch (error) {
       logger.error(
@@ -74,6 +76,53 @@ export class UtilsDbConnection {
         error,
       );
       throw error; // Let the caller know it failed!
+    }
+  }
+
+  private async processInBatches<T>(
+    label: string,
+    items: T[],
+    batchSize: number,
+    processor: (item: T, client: any) => Promise<any>,
+  ): Promise<void> {
+    const total = items.length;
+    if (total === 0) return;
+
+    const startTime = Date.now();
+    let completed = 0;
+
+    for (let i = 0; i < total; i += batchSize) {
+      const chunk = items.slice(i, i + batchSize);
+
+      // 1. Get a dedicated client from the pool
+      const client = await this.pool.connect();
+
+      try {
+        await client.query("BEGIN");
+
+        for (const item of chunk) {
+          await processor(item, client);
+          completed++;
+        }
+
+        await client.query("COMMIT");
+
+        // Progress Log
+        const percent = Math.floor((completed / total) * 100);
+        const eta = this.calculateETA(startTime, completed, total);
+        logger.info(
+          `[BATCH DB] ${label}: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
+        );
+      } catch (error) {
+        await client.query("ROLLBACK");
+        logger.error(
+          `[BATCH ERROR] Failed at index ${i}. Batch rolled back.`,
+          error,
+        );
+        throw error; // Stop the whole scraper if the DB is failing
+      } finally {
+        client.release();
+      }
     }
   }
 
@@ -199,8 +248,12 @@ export class UtilsDbConnection {
    * @param productions The list of vnvProductions.
    */
   async insertProductions(productions: vnvProduction[]) {
-    await this.trackProgress("Productions", productions, (p) =>
-      this.insertProduction(p),
+    await this.processInBatches(
+      "Productions",
+      productions,
+      500,
+      (p: vnvProduction, client: PoolClient) =>
+        this.insertProduction(p, client),
     );
   }
 
@@ -213,7 +266,12 @@ export class UtilsDbConnection {
    * @param genres The list of vnvGenre objects.
    */
   async insertTags(genres: vnvGenre[]) {
-    await this.trackProgress("Tags", genres, (t) => this.insertTag(t));
+    await this.processInBatches(
+      "Tags",
+      genres,
+      500,
+      (g: vnvGenre, client: PoolClient) => this.insertTag(g, client),
+    );
   }
 
   /**
@@ -221,7 +279,12 @@ export class UtilsDbConnection {
    * @param events The list of vnvEvent objects.
    */
   async insertEvents(events: vnvEvent[]) {
-    await this.trackProgress("Events", events, (e) => this.insertEvent(e));
+    await this.processInBatches(
+      "Events",
+      events,
+      500,
+      (e: vnvEvent, client: PoolClient) => this.insertEvent(e, client),
+    );
   }
 
   /**
@@ -229,8 +292,11 @@ export class UtilsDbConnection {
    * @param locations The list of vnvLocation objects.
    */
   async insertLocations(locations: vnvLocation[]) {
-    await this.trackProgress("Locations", locations, (l) =>
-      this.insertLocation(l),
+    await this.processInBatches(
+      "Locations",
+      locations,
+      500,
+      (l: vnvLocation, client: PoolClient) => this.insertLocation(l, client),
     );
   }
 
@@ -239,7 +305,12 @@ export class UtilsDbConnection {
    * @param prices The list of vnvPrice objects.
    */
   async insertPrices(prices: vnvPrice[]) {
-    await this.trackProgress("Prices", prices, (p) => this.insertPrice(p));
+    await this.processInBatches(
+      "Prices",
+      prices,
+      500,
+      (p: vnvPrice, client: PoolClient) => this.insertPrice(p, client),
+    );
   }
 
   /**
@@ -252,7 +323,10 @@ export class UtilsDbConnection {
    * @param vnvProduction The vnvProduction we want to add.
    * @returns T/F Whether the change went through or not.
    */
-  async insertProduction(vnvProduction: vnvProduction): Promise<Production> {
+  async insertProduction(
+    vnvProduction: vnvProduction,
+    client?: PoolClient,
+  ): Promise<Production> {
     const query = `
       INSERT INTO productions (
         titel, description1, description2, artist, 
@@ -284,7 +358,11 @@ export class UtilsDbConnection {
       vnvProduction.attendance_mode,
     ];
 
-    const output: Production[] = await this.query<Production>(query, values);
+    const output: Production[] = await this.query<Production>(
+      query,
+      values,
+      client,
+    );
     const production: Production = output[0];
 
     // First we unlink all current tags.
@@ -293,6 +371,7 @@ export class UtilsDbConnection {
         DELETE FROM production_tag WHERE production_id = $1;
       `,
       [production.id],
+      client,
     );
 
     // Now we have to link the tags.
@@ -304,7 +383,7 @@ export class UtilsDbConnection {
       [vnvProduction.genres],
     );
     for (const tag of tags) {
-      const valid: boolean = await this.linkTag(production.id, tag.id);
+      const valid: boolean = await this.linkTag(production.id, tag.id, client);
       if (!valid)
         logger.warn(
           `Failed to link Tag(${tag.id}) to Production(${production.id}).`,
@@ -320,7 +399,7 @@ export class UtilsDbConnection {
    * @param genre The vnvGenre that is to be turned into a Tag.
    * @returns The ID of the Tag.
    */
-  async insertTag(genre: vnvGenre): Promise<number> {
+  async insertTag(genre: vnvGenre, client?: PoolClient): Promise<number> {
     const query = `
       INSERT INTO tags (tag, legacy_id)
       VALUES ($1, $2)
@@ -329,7 +408,7 @@ export class UtilsDbConnection {
       RETURNING *;
     `;
     const values = [genre.name, genre.legacy_id];
-    const output: Tag[] = await this.query<Tag>(query, values);
+    const output: Tag[] = await this.query<Tag>(query, values, client);
     return output[0].id;
   }
 
@@ -343,7 +422,11 @@ export class UtilsDbConnection {
    * @param tagId The ID of the Tag.
    * @returns T/F Whether the link was created.
    */
-  async linkTag(productionId: number, tagId: number): Promise<boolean> {
+  async linkTag(
+    productionId: number,
+    tagId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
     const query = `
       INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
@@ -351,7 +434,7 @@ export class UtilsDbConnection {
       RETURNING *;
     `;
 
-    const output = await this.query(query, [productionId, tagId]);
+    const output = await this.query(query, [productionId, tagId], client);
     return output.length >= 1;
   }
 
@@ -361,10 +444,11 @@ export class UtilsDbConnection {
    * @param vnvEvent The particular vnvEvent.
    * @returns Nothing.
    */
-  async insertEvent(vnvEvent: vnvEvent) {
+  async insertEvent(vnvEvent: vnvEvent, client?: PoolClient) {
     const productions: Production[] = await this.query<Production>(
       `SELECT * from productions WHERE legacy_id = $1;`,
       [vnvEvent.production_id],
+      client,
     );
 
     if (productions.length === 0) {
@@ -399,7 +483,7 @@ export class UtilsDbConnection {
       vnvEvent.legacy_id,
     ];
 
-    const output: Event[] = await this.query<Event>(query, values);
+    const output: Event[] = await this.query<Event>(query, values, client);
     const event: Event = output[0];
 
     // We first unlink the existing Prices so we can replace the links.
@@ -408,6 +492,7 @@ export class UtilsDbConnection {
         DELETE FROM event_prices WHERE event_id = $1;
       `,
       [event.id],
+      client,
     );
 
     // Now we link the correct prices again.
@@ -417,9 +502,10 @@ export class UtilsDbConnection {
         WHERE legacy_id = ANY($1::text[]);
       `,
       [vnvEvent.prices],
+      client,
     );
     for (const price of prices) {
-      const valid: boolean = await this.linkPrice(event.id, price.id);
+      const valid: boolean = await this.linkPrice(event.id, price.id, client);
       if (!valid)
         logger.warn(`Failed to link Price(${price.id}) to Event(${event.id}).`);
     }
@@ -430,6 +516,7 @@ export class UtilsDbConnection {
         DELETE FROM event_locations WHERE event_id = $1;
       `,
       [event.id],
+      client,
     );
     // We also need to link the Event location.
     const locations: Location[] = await this.query<Location>(
@@ -438,9 +525,14 @@ export class UtilsDbConnection {
         WHERE legacy_id = $1;
       `,
       [vnvEvent.location],
+      client,
     );
     const location: Location = locations[0];
-    const valid: boolean = await this.linkLocation(event.id, location.id);
+    const valid: boolean = await this.linkLocation(
+      event.id,
+      location.id,
+      client,
+    );
     if (!valid)
       logger.warn(
         `Failed to link Location(${location.id}) to Event(${event.id}).`,
@@ -452,7 +544,7 @@ export class UtilsDbConnection {
    * @param location The location we want inserted.
    * @returns Nothing.
    */
-  async insertLocation(location: vnvLocation) {
+  async insertLocation(location: vnvLocation, client?: PoolClient) {
     const query = `
       INSERT INTO locations (location, legacy_id)
       VALUES ($1, $2)
@@ -460,7 +552,11 @@ export class UtilsDbConnection {
       DO UPDATE SET location = EXCLUDED.location
       RETURNING *;
     `;
-    await this.query<Location>(query, [location.name, location.legacy_id]);
+    await this.query<Location>(
+      query,
+      [location.name, location.legacy_id],
+      client,
+    );
   }
 
   /**
@@ -473,7 +569,11 @@ export class UtilsDbConnection {
    * @param locationId The Location ID.
    * @returns T/F Whether it Failed or not.
    */
-  async linkLocation(eventId: number, locationId: number): Promise<boolean> {
+  async linkLocation(
+    eventId: number,
+    locationId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
     const query = `
       INSERT INTO event_locations (event_id, location_id)
       VALUES ($1, $2)
@@ -481,7 +581,7 @@ export class UtilsDbConnection {
       RETURNING *;
     `;
 
-    const output = await this.query(query, [eventId, locationId]);
+    const output = await this.query(query, [eventId, locationId], client);
     return output.length >= 1;
   }
 
@@ -490,7 +590,7 @@ export class UtilsDbConnection {
    * @param price The vnvPrice object we want inserted.
    * @returns Nothing.
    */
-  async insertPrice(price: vnvPrice): Promise<Price> {
+  async insertPrice(price: vnvPrice, client?: PoolClient): Promise<Price> {
     const query = `
       INSERT INTO prices (name, price, legacy_id)
       VALUES ($1, $2, $3)
@@ -498,11 +598,11 @@ export class UtilsDbConnection {
       DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price
       RETURNING *;
     `;
-    const rows = await this.query<Price>(query, [
-      price.name,
-      price.amount,
-      price.legacy_id,
-    ]);
+    const rows = await this.query<Price>(
+      query,
+      [price.name, price.amount, price.legacy_id],
+      client,
+    );
     return rows[0];
   }
 
@@ -512,7 +612,11 @@ export class UtilsDbConnection {
    * @param priceId The Price ID.
    * @returns T/F Whether it Failed or not.
    */
-  async linkPrice(eventId: number, priceId: number): Promise<boolean> {
+  async linkPrice(
+    eventId: number,
+    priceId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
     const query = `
       INSERT INTO event_prices (event_id, price_id)
       VALUES ($1, $2)
@@ -520,7 +624,7 @@ export class UtilsDbConnection {
       RETURNING *;
     `;
 
-    const output = await this.query(query, [eventId, priceId]);
+    const output = await this.query(query, [eventId, priceId], client);
     return output.length >= 1;
   }
 
@@ -537,6 +641,7 @@ export class UtilsDbConnection {
   async insertBlog(
     titel: { en: string; nl: string },
     description: { en: string; nl: string },
+    client?: PoolClient,
   ): Promise<Blog> {
     const rows = await this.query<Blog>(
       `
@@ -545,6 +650,7 @@ export class UtilsDbConnection {
         RETURNING *;
       `,
       [titel, description],
+      client,
     );
 
     return rows[0];
@@ -556,7 +662,11 @@ export class UtilsDbConnection {
    * @param blogId Blog id.
    * @returns T/F Whether the link was created.
    */
-  async linkBlog(productionId: number, blogId: number): Promise<boolean> {
+  async linkBlog(
+    productionId: number,
+    blogId: number,
+    client?: PoolClient,
+  ): Promise<boolean> {
     const rows = await this.query(
       `
         INSERT INTO production_blogs (production_id, blog_id)
@@ -565,6 +675,7 @@ export class UtilsDbConnection {
         RETURNING *;
       `,
       [productionId, blogId],
+      client,
     );
 
     return rows.length >= 1;
