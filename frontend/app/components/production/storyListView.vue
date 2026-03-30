@@ -28,32 +28,34 @@ const formatDate = (date: Date) => {
         v-if="stories.length"
         class="flex flex-col gap-2"
     >
-      <div class="overflow-y-auto max-h-[24rem]">
-        <div
-            v-for="(story, index) in stories"
-            :key="story.id"
-            class="
-            flex items-center gap-4 p-4
-            rounded-xl border border-border bg-card dark:bg-muted
-            hover:border-ring hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer"
-        >
-          <!-- Thumbnail -->
-          <img
-              v-if="story.image"
-              :src="story.image"
-              :alt="story.title"
-              class="w-24 h-16 object-cover rounded-md shrink-0"
-          />
-          <ThumbnailPlaceholder v-else :id="story.id" size="sm" :showIcon="true" :showBorder="true" :rounded="true"/>
+      <div class="overflow-y-auto max-h-[35rem]">
+        <div class="flex flex-col gap-2">
+          <div
+              v-for="(story, index) in stories"
+              :key="story.id"
+              class="
+              flex items-center gap-4 p-4
+              rounded-xl border border-border bg-card dark:bg-muted
+              hover:border-ring hover:shadow-sm transition-colors transition-shadow duration-150 cursor-pointer"
+          >
+            <!-- Thumbnail -->
+            <img
+                v-if="story.image"
+                :src="story.image"
+                :alt="story.title"
+                class="w-24 h-16 object-cover rounded-md shrink-0"
+            />
+            <ThumbnailPlaceholder v-else :id="story.id" size="md" :showIcon="true" :showBorder="true" :rounded="true"/>
 
-          <!-- Content -->
-          <div class="flex-1 min-w-0">
-            <p class="font-bold text-[13px] truncate">{{ story.title }}</p>
-            <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5 mb-1.5">
-              <CalendarDays :size="10" class="shrink-0" />
-              {{ formatDate(story.date) }}
-            </p>
-            <p class="text-[11px] text-muted-foreground line-clamp-2">{{ story.description }}</p>
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <p class="font-bold text-[13px] truncate">{{ story.title }}</p>
+              <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5 mb-1.5">
+                <CalendarDays :size="10" class="shrink-0" />
+                {{ formatDate(story.date) }}
+              </p>
+              <p class="text-[11px] text-muted-foreground line-clamp-2">{{ story.description }}</p>
+            </div>
           </div>
         </div>
       </div>
