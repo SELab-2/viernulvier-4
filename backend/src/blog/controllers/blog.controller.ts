@@ -56,6 +56,7 @@ export class BlogController {
    * Responds to a GET to "/blogs"
    * @param paginationFilter is the pagination params
    * @param lang is the language filter
+   * @param blogFilters The filters for blog dates.
    * @returns A list of all Blog objects.
    */
   @ApiOperation({ summary: "Returns all blogs." })

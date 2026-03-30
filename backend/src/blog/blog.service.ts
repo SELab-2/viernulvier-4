@@ -18,6 +18,7 @@ export class BlogService {
   /**
    * Gets all Blogs from the DatabaseService.
    * @param paginationFilters Filters for pagination and ordering.
+   * @param blogFilters Filters for blog dates.
    * @returns A list of all Blog objects.
    */
   async getAllBlogs(
