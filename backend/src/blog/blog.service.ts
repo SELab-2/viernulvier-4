@@ -7,6 +7,7 @@ import {
   ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
+  FilterBlogDto,
 } from "../dto/dto";
 import { GalleryType, PaginatedResponse } from "@repo/common";
 
@@ -17,12 +18,14 @@ export class BlogService {
   /**
    * Gets all Blogs from the DatabaseService.
    * @param paginationFilters Filters for pagination and ordering.
+   * @param blogFilters Filters for blog dates.
    * @returns A list of all Blog objects.
    */
   async getAllBlogs(
     paginationFilters: PaginationFilterDto,
+    blogFilters: FilterBlogDto,
   ): Promise<PaginatedResponse<BlogDto>> {
-    return await this.blogDbService.getBlogs(paginationFilters);
+    return await this.blogDbService.getBlogs(paginationFilters, blogFilters);
   }
 
   /**

@@ -7,6 +7,7 @@ import {
   PaginationFilterDto,
   ModifyBlogDto,
 } from "../dto/dto";
+import { FilterBlog } from "@repo/common";
 
 describe("BlogService", () => {
   let service: BlogService;
@@ -71,9 +72,10 @@ describe("BlogService", () => {
   describe("getAllBlogs", () => {
     it("should return an array of blogs", async () => {
       const expectedBlogs = [mockBlog];
+      const blogFilters: FilterBlog = {};
       mockBlogDbService.getBlogs.mockResolvedValue(expectedBlogs);
 
-      const result = await service.getAllBlogs(filter);
+      const result = await service.getAllBlogs(filter, blogFilters);
 
       expect(result).toEqual(expectedBlogs);
       expect(blogDbService.getBlogs).toHaveBeenCalledTimes(1);

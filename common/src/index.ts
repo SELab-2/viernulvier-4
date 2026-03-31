@@ -23,6 +23,8 @@ import {
   ModifyBlogSchema,
   ReplaceBlog,
   ReplaceBlogSchema,
+  FilterBlog,
+  FilterBlogSchema,
 } from "./objects/blogs";
 import {
   CreateEvent,
@@ -156,6 +158,7 @@ export {
   ModifyBlogSchema,
   CreateBlogSchema,
   ReplaceBlogSchema,
+  FilterBlogSchema,
 
   // Tag Schemas. (tags.ts)
   TagSchema,
@@ -237,6 +240,7 @@ export type {
   CreateBlog,
   ModifyBlog,
   ReplaceBlog,
+  FilterBlog,
 
   // Location Types. (locations.ts)
   Location,
