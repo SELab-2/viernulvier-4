@@ -28,6 +28,13 @@ export class ScraperService implements OnApplicationBootstrap {
   }
 
   /**
+   * Checks whether the Scraper should download unprocessed media.
+   */
+  private get doDownloadMedia(): boolean {
+    return this.configService.get<string>("DOWNLOAD_MEDIA", "false") === "true";
+  }
+
+  /**
    * Ran when the app first starts, runs an initial scrape.
    * @returns Nothing.
    */
@@ -112,7 +119,7 @@ export class ScraperService implements OnApplicationBootstrap {
 
   @Cron(CronExpression.EVERY_MINUTE)
   async processImages() {
-    if (this.isProcessingMedia) return;
+    if (this.isProcessingMedia || !this.doDownloadMedia) return;
 
     // Start processing.
     this.isProcessingMedia = true;

@@ -24,10 +24,6 @@ import Bottleneck from "bottleneck";
 import { CROP_NAMES, CropName } from "@repo/common/src/objects/media";
 import { ConfigService } from "@nestjs/config";
 
-/**
- * The Base of the VNV API.
- */
-const apiBase: string = "https://www.viernulvier.gent";
 const apiDomain: string = "/api/v1/";
 
 /**
@@ -78,7 +74,17 @@ export class ScraperEngine {
         this.logger.warn(`Abandoning job ${jobInfo.options.id}`);
       }
     });
+
+    this.apiBase = this.configService.get<string>(
+      "MEDIA_API_URL",
+      "https://www.viernulvier.gent",
+    );
   }
+
+  /**
+   * The Base of the VNV API.
+   */
+  private readonly apiBase: string;
 
   /**
    * Limiter used for scraping.
@@ -208,7 +214,7 @@ export class ScraperEngine {
 
     while (view.next) {
       try {
-        const jsonResponse = await this.fetchFromVnv(apiBase + view.next);
+        const jsonResponse = await this.fetchFromVnv(this.apiBase + view.next);
 
         if (totalItems === 0) {
           totalItems =
@@ -253,7 +259,7 @@ export class ScraperEngine {
    */
   async scrapeOne(url: string): Promise<object> {
     try {
-      return await this.fetchFromVnv(apiBase + url);
+      return await this.fetchFromVnv(this.apiBase + url);
     } catch {
       this.logger.error(`Failed scrapeOne for ${url}`);
       return {}; // Triggered when all retries fail.
