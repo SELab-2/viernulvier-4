@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+//TODO: tagline eerst?
+import { ref, computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
 
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const { getById, getTags } = useProductionApi()
+
+const isExpanded = ref(false)
+const CHARACTER_LIMIT = 800
 
 const productionId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
@@ -41,10 +45,10 @@ const { data: tags } = await useAsyncData<TagView[]>(
 const isValid = (val: any) => {
   if (!val) return false
   const s = String(val).trim().toUpperCase()
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N"
+  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
 }
 
-const image = computed(() => (production.value as any)?.image ?? null) //TODO
+const image = computed(() => (production.value as any)?.image ?? null) //TODO verander! voeg iets toe in useProduction?
 const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0))
 
 const cleanText = (text: string | null | undefined) => {
@@ -55,6 +59,17 @@ const cleanText = (text: string | null | undefined) => {
     .replace(/(\r?\n){3,}/g, '\n\n')
     .trim()
 }
+
+const fullDescription = computed(() => cleanText(production.value?.description1))
+
+const displayedDescription = computed(() => {
+  if (isExpanded.value || fullDescription.value.length <= CHARACTER_LIMIT) {
+    return fullDescription.value
+  }
+  return fullDescription.value.slice(0, CHARACTER_LIMIT) + '...'
+})
+
+const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT)
 </script>
 
 <template>
@@ -69,8 +84,9 @@ const cleanText = (text: string | null | undefined) => {
 
       <div class="relative z-10 mx-auto w-full max-w-[1400px] px-6 lg:px-12 2xl:px-[120px] pb-16 text-white">
         <div class="flex items-center gap-4 mb-8">
-          <NuxtLink to="/archive" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors">
-            <ChevronLeft :size="14" stroke-width="3" /> Terug
+          <NuxtLink to="/productions" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors">
+            <ChevronLeft :size="14" stroke-width="3" />
+            {{ t('general.back')}}
           </NuxtLink>
           <span v-if="isValid(production.performer_type)" class="bg-white text-black px-2 py-1 text-[10px] font-black uppercase rounded-sm">
             {{ production.performer_type }}
@@ -78,7 +94,7 @@ const cleanText = (text: string | null | undefined) => {
         </div>
 
         <div class="max-w-4xl">
-          <h1 class="text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic">
+          <h1 class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic">
             {{ production.titel }}
           </h1>
           <p v-if="isValid(production.artist) && production.artist !== production.titel" class="text-2xl lg:text-3xl font-medium opacity-90">
@@ -103,13 +119,21 @@ const cleanText = (text: string | null | undefined) => {
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
 
         <div class="lg:col-span-8">
-          <h2 class="text-3xl lg:text-4xl font-black uppercase mb-10 tracking-tight">
-            Beschrijving
+          <h2 ref="descriptionRef" class="text-3xl lg:text-4xl font-black uppercase mb-10 tracking-tight">
+            {{ t('production.description') }}
           </h2>
 
           <div class="text-lg lg:text-xl leading-relaxed opacity-80 font-brand whitespace-pre-line text-gray-800 dark:text-gray-200">
-            {{ cleanText(production.description1) }}
+            {{ displayedDescription }}
           </div>
+
+          <button
+            v-if="isLongDescription"
+            @click="isExpanded = !isExpanded"
+            class="mt-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+          >
+            {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
+          </button>
 
           <div v-if="isValid(production.description2)" class="mt-12 p-6 border-l-2 border-gray-100 dark:border-gray-800 italic opacity-70 text-base lg:text-lg whitespace-pre-line">
             {{ cleanText(production.description2) }}
@@ -118,12 +142,16 @@ const cleanText = (text: string | null | undefined) => {
 
         <aside class="lg:col-span-4 space-y-10">
           <div v-if="isValid(production.tagline)" class="pb-6 border-b border-gray-100 dark:border-gray-800">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">Tagline</h4>
+            <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">
+              {{ t('production.tagline')}}
+            </h4>
             <p class="text-xl font-bold italic leading-tight uppercase">{{ production.tagline }}</p>
           </div>
 
           <div v-if="isValid(production.credits)">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">Credits</h4>
+            <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">
+              {{ t('production.credits')}}
+            </h4>
             <div class="text-sm leading-relaxed opacity-80 whitespace-pre-line">
               {{ production.credits }}
             </div>
