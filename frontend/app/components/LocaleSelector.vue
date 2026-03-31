@@ -31,14 +31,22 @@ const handleEscape = (e) => {
   }
 }
 
+const handleResize = () => {
+  if (isOpen.value) {
+    isOpen.value = false
+  }
+}
+
 onMounted(() => {
   window.addEventListener('click', closeDropdown)
   window.addEventListener('keydown', handleEscape)
+  window.addEventListener('resize', handleResize)
 })
 
 onUnmounted(() => {
   window.removeEventListener('click', closeDropdown)
   window.removeEventListener('keydown', handleEscape)
+  window.removeEventListener('resize', handleResize)
 })
 
 /**
