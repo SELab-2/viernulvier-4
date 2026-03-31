@@ -23,6 +23,7 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { FileInterceptor } from "@nestjs/platform-express";
+import path from "node:path";
 
 /**
  * Defines all media storage related endpoints
