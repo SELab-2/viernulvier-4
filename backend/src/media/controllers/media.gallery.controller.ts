@@ -102,7 +102,7 @@ export class MediaGalleryController {
   @ApiBody({ type: ReplaceMediaGalleryDto })
   @ApiOkResponse({ type: MediaGalleryDto, description: "Replaced gallery." })
   @Put(":galleryId")
-  async replaceCrop(
+  async replaceGallery(
     @Param("galleryId", ParseIntPipe) galleryId: number,
     @Body(new ZodValidationPipe(ReplaceMediaGallerySchema))
     replaceGallery: ReplaceMediaGalleryDto,
@@ -125,7 +125,7 @@ export class MediaGalleryController {
   @ApiBody({ type: ModifyMediaGalleryDto })
   @ApiOkResponse({ type: MediaGalleryDto, description: "Modified gallery." })
   @Patch(":galleryId")
-  async modifyCrop(
+  async modifyGallery(
     @Param("galleryId", ParseIntPipe) galleryId: number,
     @Body(new ZodValidationPipe(ModifyMediaGallerySchema))
     modifyGallery: ModifyMediaGalleryDto,

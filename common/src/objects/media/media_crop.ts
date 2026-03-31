@@ -39,6 +39,7 @@ export const CreateMediaCropSchema = MutableMediaCropSchema.extend({
 export const ModifyMediaCropSchema = MutableMediaCropSchema.partial();
 export const ReplaceMediaCropSchema = MutableMediaCropSchema;
 
+// Type exports.
 export type MediaCrop = z.infer<typeof MediaCropSchema>;
 export type CreateMediaCrop = z.infer<typeof CreateMediaCropSchema>;
 export type ModifyMediaCrop = z.infer<typeof ModifyMediaCropSchema>;

@@ -9,7 +9,7 @@ import {
   ReplaceMediaItemDto,
 } from "../../dto/dto";
 import { ResourceGoneException } from "../../common/exceptions";
-import { PaginatedResponse } from "common/src/objects/pagination";
+import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 
 @Injectable()
 export class MediaItemDatabaseService {

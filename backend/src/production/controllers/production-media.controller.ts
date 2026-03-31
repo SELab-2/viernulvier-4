@@ -6,6 +6,7 @@ import {
   ParseEnumPipe,
   ParseIntPipe,
   Put,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
@@ -37,7 +38,7 @@ export class ProductionMediaController {
   @Get()
   async getMedia(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Param("type", new ParseEnumPipe(GalleryTypeEnum)) type: GalleryType,
+    @Query("type", new ParseEnumPipe(GalleryTypeEnum)) type: GalleryType,
   ): Promise<MediaGalleryDto> {
     return await this.productionService.getProductionMedia(productionId, type);
   }

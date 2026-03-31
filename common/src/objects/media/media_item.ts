@@ -31,6 +31,7 @@ export const MediaItemViewSchema = MediaItemSchema.extend({
   credits: z.string(),
 });
 
+// Omits read-only fields
 const MutableMediaItemSchema = MediaItemSchema.omit({
   id: true,
   created_at: true,
