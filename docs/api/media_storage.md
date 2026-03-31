@@ -1,11 +1,12 @@
 # Media Storage API
 
-### [POST] `/media/storage/fetch`
+### [GET] `/media/storage/fetch`
 
-Retrieves media from a given URL. Uses POST instead of GET to allow passing a request body.
+Retrieves media from a given URL.
 
-- **Body:** `{ url: string }`
-- **Returns:** Media as a `Buffer`.
+- **Query Parameter:** `url` (string) - The URL of the media you want to fetch. **Note:** This must be URL-encoded by
+  the client (e.g., using `encodeURIComponent()`).
+- **Returns:** A binary file stream (the physical media file, ready to be viewed or downloaded by the browser).
 
 ### [POST] `/media/storage`
 
