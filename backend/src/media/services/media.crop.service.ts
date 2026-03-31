@@ -7,7 +7,7 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { MediaCropDatabaseService } from "../../database/db.media_crop.service";
+import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 
 /**
  * Defines the connection between controller and database service

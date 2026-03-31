@@ -8,10 +8,10 @@ import { LocationDatabaseService } from "./db.location.service";
 import { ApiKeyDatabaseService } from "./db.apiKey.service";
 import { AccountDatabaseService } from "./db.account.service";
 import { PriceDatabaseService } from "./db.price.service";
-import { MediaGalleryDatabaseService } from "./db.media_gallery.service";
-import { MediaItemDatabaseService } from "./db.media_item.service";
-import { MediaCropDatabaseService } from "./db.media_crop.service";
 import { PrintItemDatabaseService } from "./db.print_item.service";
+import { MediaGalleryDatabaseService } from "./media/db.media_gallery.service";
+import { MediaItemDatabaseService } from "./media/db.media_item.service";
+import { MediaCropDatabaseService } from "./media/db.media_crop.service";
 
 @Module({
   imports: [],

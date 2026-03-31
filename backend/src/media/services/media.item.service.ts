@@ -8,7 +8,7 @@ import {
   ReplaceMediaItemDto,
 } from "../../dto/dto";
 import { PaginatedResponse } from "@repo/common";
-import { MediaItemDatabaseService } from "../../database/db.media_item.service";
+import { MediaItemDatabaseService } from "../../database/media/db.media_item.service";
 
 /**
  * Defines the connection between controller and database service

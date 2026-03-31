@@ -53,6 +53,7 @@ import {
   TagViewSchema,
   UpdateAccountSchema,
   VerifyApiKeySchema,
+  FilterBlogSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -81,6 +82,7 @@ export class BlogViewDto extends createZodDto(BlogViewSchema) {}
 export class CreateBlogDto extends createZodDto(CreateBlogSchema) {}
 export class ModifyBlogDto extends createZodDto(ModifyBlogSchema) {}
 export class ReplaceBlogDto extends createZodDto(ReplaceBlogSchema) {}
+export class FilterBlogDto extends createZodDto(FilterBlogSchema) {}
 
 // Tag Wrappers
 export class TagDto extends createZodDto(TagSchema) {}

@@ -3,7 +3,7 @@
  */
 
 import z from "zod";
-import { LocalizedStringSchema } from "./language";
+import { LocalizedStringSchema } from "../language";
 
 // All positions an ITEM can be in.
 export const ITEM_POSITIONS = ["main", "carousel"] as const;
@@ -31,6 +31,7 @@ export const MediaItemViewSchema = MediaItemSchema.extend({
   credits: z.string(),
 });
 
+// Omits read-only fields
 const MutableMediaItemSchema = MediaItemSchema.omit({
   id: true,
   created_at: true,

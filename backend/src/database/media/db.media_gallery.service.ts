@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { DbService } from "./db.service";
+import { DbService } from "../db.service";
 import {
   CreateMediaGalleryDto,
   MediaGalleryDto,
@@ -7,8 +7,8 @@ import {
   ModifyMediaGalleryDto,
   PrintItemDto,
   ReplaceMediaGalleryDto,
-} from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
+} from "../../dto/dto";
+import { ResourceGoneException } from "../../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
