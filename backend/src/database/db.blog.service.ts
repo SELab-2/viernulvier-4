@@ -7,6 +7,7 @@ import {
   PaginationFilterDto,
   ReplaceBlogDto,
   ModifyBlogDto,
+  FilterBlogDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common";
@@ -40,59 +41,74 @@ export class BlogDatabaseService {
 
   /**
    * Get blogs with pagination
-   * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
-   * @param page page index (starts at 0)
-   * @param descending Whether the dates should be sorted descending or ascending.
+   * @param paginationFilters Filters for pagination and ordering.
+   * @param blogFilters Filters for blogs.
    * @returns blogs
    */
   async getBlogs(
     paginationFilters: PaginationFilterDto,
+    blogFilters: FilterBlogDto,
   ): Promise<PaginatedResponse<BlogDto>> {
-    const offset = paginationFilters.page * paginationFilters.limit;
-    const countResult = await this.db.query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM blogs`,
-    );
-    if (paginationFilters.limit === 0) {
-      const query = `
-      SELECT id, 
-             titel, 
-             description,
-             created_at,
-             updated_at
-      FROM blogs
-      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
-      `;
+    const conditions: string[] = [];
+    const values: any[] = [];
+    let i = 1;
 
-      return {
-        limit: paginationFilters.limit,
-        page: paginationFilters.page,
-        totalItems: parseInt(countResult[0].count),
-        objects: await this.db.query<BlogDto>(query, [
-          paginationFilters.limit,
-          offset,
-        ]),
-      };
+    // Filter blogs that were created before.
+    if (blogFilters.before) {
+      conditions.push(`created_at < $${i}::timestamp`);
+      values.push(blogFilters.before);
+      i++;
     }
 
-    const query = `
-    SELECT id,
-           titel,
-           description,
-           created_at,
-           updated_at
-    FROM blogs
-    ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
-    LIMIT $1 OFFSET $2
+    // Filter blogs that were created after.
+    if (blogFilters.after) {
+      conditions.push(`created_at > $${i}::timestamp`);
+      values.push(blogFilters.after);
+      i++;
+    }
+
+    const whereClause =
+      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const filterValues = [...values];
+
+    // Apply pagination.
+    let paginationClause = "";
+    if (paginationFilters.limit > 0) {
+      const offset = paginationFilters.page * paginationFilters.limit;
+      paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
+      values.push(paginationFilters.limit);
+      values.push(offset);
+      i += 2;
+    }
+
+    const countQuery = `
+      SELECT COUNT(*) as count FROM blogs
+      ${whereClause};
     `;
+    const query = `
+      SELECT id,
+            titel,
+            description,
+            created_at,
+            updated_at
+      FROM blogs
+      ${whereClause}
+      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
+      ${paginationClause};
+    `;
+
+    // Fetch count and objects.
+    const [objects, countResult] = await Promise.all([
+      this.db.query<BlogDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
+    ]);
 
     return {
       limit: paginationFilters.limit,
       page: paginationFilters.page,
       totalItems: parseInt(countResult[0].count),
-      objects: await this.db.query<BlogDto>(query, [
-        paginationFilters.limit,
-        offset,
-      ]),
+      objects: objects,
     };
   }
 
