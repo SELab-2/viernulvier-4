@@ -3,6 +3,7 @@ import { MediaStorageController } from "./media_storage.controller";
 import { MediaStorageService } from "./service/media_storage.service";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { Readable } from "stream";
+import { StreamableFile } from "@nestjs/common";
 
 describe("MediaStorageController", () => {
   let controller: MediaStorageController;
@@ -56,12 +57,12 @@ describe("MediaStorageController", () => {
   });
 
   describe("getMedia", () => {
-    it("should return a buffer for the given URL", async () => {
-      const result = await controller.getMedia({ url: mockUrl });
-
-      expect(result).toEqual(mockBuffer);
+    it("should return the media for the given URL", async () => {
+      // 1. Pass the raw string instead of an object!
+      const result = await controller.getMedia(mockUrl);
       expect(service.getMedia).toHaveBeenCalledWith(mockUrl);
       expect(service.getMedia).toHaveBeenCalledTimes(1);
+      expect(result).toBeInstanceOf(StreamableFile);
     });
   });
 
