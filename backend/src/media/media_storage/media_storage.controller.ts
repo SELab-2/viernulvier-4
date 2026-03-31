@@ -51,8 +51,37 @@ export class MediaStorageController {
   async getMedia(@Query("url") url: string): Promise<StreamableFile> {
     const buffer = await this.mediaStorageService.getMedia(url);
 
+    let contentType: string;
+    const parsedUrl = new URL(url);
+    const filename = path.basename(parsedUrl.pathname);
+    const ext = path.extname(parsedUrl.pathname);
+    switch (ext) {
+      case ".jpg":
+      case ".jpeg":
+        contentType = "image/jpeg";
+        break;
+      case ".png":
+        contentType = "image/png";
+        break;
+      case ".gif":
+        contentType = "image/gif";
+        break;
+      case ".webp":
+        contentType = "image/webp";
+        break;
+      case ".pdf":
+        contentType = "application/pdf";
+        break;
+      default:
+        contentType = "application/octet-stream";
+        break;
+    }
+
     // return a file so this way we can actually see the file in swagger.
-    return new StreamableFile(buffer);
+    return new StreamableFile(buffer, {
+      type: contentType,
+      disposition: `attachment: filename="${filename}"`,
+    });
   }
 
   /**
