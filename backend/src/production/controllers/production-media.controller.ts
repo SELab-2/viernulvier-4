@@ -13,6 +13,7 @@ import { ProductionService } from "../production.service";
 import {
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
@@ -35,6 +36,11 @@ export class ProductionMediaController {
    */
   @ApiOperation({ summary: "Fetch media gallery connected to production." })
   @ApiOkResponse({ type: MediaGalleryDto, description: "Gallery found." })
+  @ApiQuery({
+    name: "type",
+    enum: GalleryTypeEnum.enum,
+    description: "The type of media wanted.",
+  })
   @Get()
   async getMedia(
     @Param("productionId", ParseIntPipe) productionId: number,
