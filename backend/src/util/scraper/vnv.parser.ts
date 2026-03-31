@@ -21,6 +21,18 @@ function extractIdFromUri(uri: string | undefined | null): string | null {
 }
 
 /**
+ * Sanitize a single date so the DB can accept it.
+ * @param dateStr The string of the date or undefined.
+ * @returns The sanitized date value.
+ */
+function sanitizeDate(dateStr: string | undefined): string {
+  if (!dateStr || dateStr.startsWith("0000")) {
+    return "1970-01-01T00:00:00+00:00";
+  }
+  return dateStr;
+}
+
+/**
  * Production
  */
 
@@ -175,11 +187,15 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
       ) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
-    starts_at: (object.starts_at as string) || "1970-01-01T00:00:00+00:00",
-    ends_at: (object.ends_at as string) || "1970-01-01T00:00:00+00:00",
+    starts_at:
+      sanitizeDate(object.starts_at as string) || "1970-01-01T00:00:00+00:00",
+    ends_at:
+      sanitizeDate(object.ends_at as string) || "1970-01-01T00:00:00+00:00",
     intermission_at:
-      (object.intermission_at as string) || "1970-01-01T00:00:00+00:00",
-    doors_at: (object.doors_at as string) || "1970-01-01T00:00:00+00:00",
+      sanitizeDate(object.intermission_at as string) ||
+      "1970-01-01T00:00:00+00:00",
+    doors_at:
+      sanitizeDate(object.doors_at as string) || "1970-01-01T00:00:00+00:00",
     location: extractIdFromUri(object.hall as string) || "N/A",
     prices: prices,
   };
