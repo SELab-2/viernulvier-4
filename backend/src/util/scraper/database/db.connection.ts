@@ -983,12 +983,14 @@ export class UtilsDbConnection implements OnModuleDestroy {
     const cropsQuery = `
       SELECT id, name, url, created_at, updated_at FROM media_crop
       WHERE url NOT LIKE '${this.configService.get<string>("MEDIA_BASE_URL")}%'
+        AND trim(url) != ''
       ORDER BY random()
       LIMIT $1;
     `;
     const countQuery = `
       SELECT COUNT(*) as count FROM media_crop
-      WHERE url NOT LIKE '${this.configService.get<string>("MEDIA_BASE_URL")}%';
+      WHERE url NOT LIKE '${this.configService.get<string>("MEDIA_BASE_URL")}%'
+        AND trim(url) != '';
     `;
 
     const [batch, totalLeft] = await Promise.all([

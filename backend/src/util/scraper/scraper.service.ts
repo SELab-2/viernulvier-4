@@ -156,6 +156,17 @@ export class ScraperService implements OnApplicationBootstrap {
         (r) => r.status === "fulfilled",
       ).length;
       const failCount = results.length - successCount;
+      const failedItems = results.filter((r) => r.status === "rejected");
+      if (failCount > 0) {
+        failedItems.forEach((failure, index) => {
+          const failedCrop = batch[index];
+
+          this.logger.error(
+            `[IMAGE FAILURE]: Crop ${failedCrop.id} failed. ` +
+              `URL: "${failedCrop.url}" | Reason: ${failure.reason}`,
+          );
+        });
+      }
 
       this.logger.log(
         `[BATCH FINISHED] Success: ${successCount}, Failed: ${failCount}. Approx ${totalLeft} left.`,
