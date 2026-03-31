@@ -1,5 +1,6 @@
 import {
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -44,7 +45,12 @@ export class ProductionMediaController {
   @Get()
   async getMedia(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Query("type", new ParseEnumPipe(GalleryTypeEnum)) type: GalleryType,
+    @Query(
+      "type",
+      new DefaultValuePipe("default"),
+      new ParseEnumPipe(GalleryTypeEnum.enum),
+    )
+    type: GalleryType,
   ): Promise<MediaGalleryDto> {
     return await this.productionService.getProductionMedia(productionId, type);
   }
