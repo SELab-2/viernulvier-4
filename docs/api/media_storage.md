@@ -13,6 +13,7 @@ Saves media to a given URL.
 
 - **Security:** `apiKey` required.
 - **Body:** `multipart/form-data` with `url: string` and `file: binary`
+- note: the URL must be of the type of your MEDIA_BASE_URL param or else you will get bad request errors.
 - **Returns:** `string` — the URL of the saved media.
 
 ### [DELETE] `/media/storage`

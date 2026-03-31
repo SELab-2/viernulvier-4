@@ -73,7 +73,7 @@ export class MediaCropService {
         // concat new url.
         const parsedUrl = new URL(createCrop.url);
         const ext = path.extname(parsedUrl.pathname) || ".jpg";
-        const newFileName = `${savedCrop.id}${ext}`;
+        const newFileName = `${savedCrop.id}-${savedCrop.name}${ext}`;
         const finalUrl = `${this.baseUrl}/photos/${newFileName}`;
 
         // save the photo + update the db.

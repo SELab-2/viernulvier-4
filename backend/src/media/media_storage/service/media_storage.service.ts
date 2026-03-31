@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { MediaStorage } from "./storage.interface";
-import { LocalMediaStorage } from "./local_media_storage.service";
-import { RemoteMediaStorage } from "./remote_media_storage.service";
+import { LocalMediaStorage } from "./local_media_storage";
+import { RemoteMediaStorage } from "./remote_media_storage";
 
 @Injectable()
 export class MediaStorageService {
