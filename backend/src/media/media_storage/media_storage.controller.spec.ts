@@ -1,6 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { MediaStorageController } from "./media_storage.controller";
-import { MediaStorageService } from "./media_storage.service";
+import { MediaStorageService } from "./service/media_storage.service";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { Readable } from "stream";
 

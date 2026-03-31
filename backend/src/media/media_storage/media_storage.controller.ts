@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Post, UploadedFile, UseGuards, UseInterceptors, } from "@nestjs/common";
-import { MediaStorageService } from "./media_storage.service";
+import { MediaStorageService } from "./service/media_storage.service";
 import {
   ApiBody,
   ApiConsumes,

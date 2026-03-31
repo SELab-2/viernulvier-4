@@ -9,7 +9,7 @@ import {
   ReplaceMediaCropDto,
 } from "../../dto/dto";
 import path from "node:path";
-import { MediaStorageService } from "../media_storage/media_storage.service";
+import { MediaStorageService } from "../media_storage/service/media_storage.service";
 
 /**
  * Defines the connection between controller and database service

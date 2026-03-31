@@ -10,7 +10,7 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { MediaStorageService } from "../media_storage/media_storage.service";
+import { MediaStorageService } from "../media_storage/service/media_storage.service";
 
 describe("MediaCropService", () => {
   let service: MediaCropService;
