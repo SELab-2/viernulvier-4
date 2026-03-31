@@ -5,6 +5,7 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   ModifyMediaGalleryDto,
+  PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
@@ -78,6 +79,21 @@ export class MediaGalleryDatabaseService {
       totalItems: parseInt(countResult[0].count),
       objects: galleries,
     };
+  }
+
+  /**
+   * Get all print items belonging to a media gallery.
+   * @param galleryId The gallery to fetch print items for.
+   * @returns List of print items.
+   */
+  async getPrintItemsByGallery(galleryId: number): Promise<PrintItemDto[]> {
+    const query = `
+      SELECT pi.id, pi.titel, pi.description, pi.url, pi.created_at, pi.updated_at
+      FROM print_item pi
+      INNER JOIN print_item_media_gallery pimg ON pimg.print_item_id = pi.id
+      WHERE pimg.media_gallery_id = $1
+    `;
+    return this.db.query<PrintItemDto>(query, [galleryId]);
   }
 
   /**
