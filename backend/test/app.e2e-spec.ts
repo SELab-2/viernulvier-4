@@ -18,7 +18,9 @@ import { ApiKeyGuard } from "../src/auth/authGuard";
 import { AppLogger } from "../src/util/logger/logger.service";
 import { ScraperService } from "../src/util/scraper/scraper.service";
 import { MediaModule } from "../src/media/media.module";
-import { MediaDatabaseService } from "../src/database/db.media.service";
+import { MediaCropDatabaseService } from "../src/database/media/db.media_crop.service";
+import { MediaItemDatabaseService } from "../src/database/media/db.media_item.service";
+import { MediaGalleryDatabaseService } from "../src/database/media/db.media_gallery.service";
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
@@ -227,6 +229,7 @@ const mockMediaGallery = {
   updated_at: "2026-03-28T14:00:00.000Z",
 };
 
+// @ts-ignore
 const paginatedResponse = (objects) => ({
   objects,
   totalItems: 1,
@@ -238,14 +241,16 @@ const paginatedResponse = (objects) => ({
 // Mock DB service factory (Media)
 // ==========================================
 
-const mockMediaDbService = () => ({
+const mockMediaCropsDbService = () => ({
   // Crops
   getAllCrops: jest.fn().mockResolvedValue(paginatedResponse([mockMediaCrop])),
   getCropById: jest.fn().mockResolvedValue(mockMediaCrop),
   createCrop: jest.fn().mockResolvedValue(mockMediaCrop),
   updateCrop: jest.fn().mockResolvedValue(mockMediaCrop),
   deleteCrop: jest.fn().mockResolvedValue(undefined),
+});
 
+const mockMediaItemsDbService = () => ({
   // Items
   getAllItems: jest.fn().mockResolvedValue(paginatedResponse([mockMediaItem])),
   getItemById: jest.fn().mockResolvedValue(mockMediaItem),
@@ -255,13 +260,16 @@ const mockMediaDbService = () => ({
   getCropsByItem: jest.fn().mockResolvedValue([mockMediaCrop]),
   linkCropToItem: jest.fn().mockResolvedValue(undefined),
   unlinkCropFromItem: jest.fn().mockResolvedValue(undefined),
+});
 
+const mockMediaGalleryDbService = () => ({
   // Galleries
   getGalleries: jest
     .fn()
     .mockResolvedValue(paginatedResponse([mockMediaGallery])),
   getGalleryById: jest.fn().mockResolvedValue(mockMediaGallery),
   createGallery: jest.fn().mockResolvedValue(mockMediaGallery),
+  updateGallery: jest.fn().mockResolvedValue(mockMediaGallery),
   deleteGallery: jest.fn().mockResolvedValue(undefined),
   getItemsByGallery: jest.fn().mockResolvedValue([mockMediaItem]),
   linkItemToGallery: jest.fn().mockResolvedValue(undefined),
@@ -295,8 +303,12 @@ async function buildApp(): Promise<INestApplication> {
     .useFactory({ factory: mockLocationDbService })
     .overrideProvider(PriceDatabaseService)
     .useFactory({ factory: mockPriceDbService })
-    .overrideProvider(MediaDatabaseService)
-    .useFactory({ factory: mockMediaDbService })
+    .overrideProvider(MediaItemDatabaseService)
+    .useFactory({ factory: mockMediaItemsDbService })
+    .overrideProvider(MediaGalleryDatabaseService)
+    .useFactory({ factory: mockMediaGalleryDbService })
+    .overrideProvider(MediaCropDatabaseService)
+    .useFactory({ factory: mockMediaCropsDbService })
     .overrideProvider(AppLogger) // We override these so they don't make a fuss during testing.
     .useValue({
       log: jest.fn(),
@@ -1365,12 +1377,12 @@ describe("EventPriceController (e2e)", () => {
 
 describe("MediaCropController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaDatabaseService; // Using any or MediaDatabaseService type if imported
+  let mediaDb: MediaCropDatabaseService; // Using any or MediaDatabaseService type if imported
 
   beforeEach(async () => {
     app = await buildApp();
     // Adjust token if needed based on how it's exported
-    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+    mediaDb = app.get<MediaCropDatabaseService>(MediaCropDatabaseService);
   });
 
   afterEach(async () => {
@@ -1438,11 +1450,11 @@ describe("MediaCropController (e2e)", () => {
 
 describe("MediaItemController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaDatabaseService;
+  let mediaDb: MediaItemDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();
-    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+    mediaDb = app.get<MediaItemDatabaseService>(MediaItemDatabaseService);
   });
 
   afterEach(async () => {
@@ -1552,11 +1564,11 @@ describe("MediaItemController (e2e)", () => {
 
 describe("MediaGalleryController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaDatabaseService;
+  let mediaDb: MediaGalleryDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();
-    mediaDb = app.get<MediaDatabaseService>(MediaDatabaseService);
+    mediaDb = app.get<MediaGalleryDatabaseService>(MediaGalleryDatabaseService);
   });
 
   afterEach(async () => {
@@ -1585,8 +1597,28 @@ describe("MediaGalleryController (e2e)", () => {
     it("should return 201 with the created gallery", () => {
       return request(app.getHttpServer())
         .post("/galleries")
-        .send({}) // Based on schema, fields are mostly auto-generated
+        .send({ name: "hi", type: "default" })
         .expect(201)
+        .expect(mockMediaGallery);
+    });
+  });
+
+  describe("PUT /galleries/:galleryId", () => {
+    it("should return 200 with the replaced gallery", () => {
+      return request(app.getHttpServer())
+        .put("/galleries/1")
+        .send({ name: "completely replaced gallery", type: "default" })
+        .expect(200)
+        .expect(mockMediaGallery);
+    });
+  });
+
+  describe("PATCH /galleries/:galleryId", () => {
+    it("should return 200 with the modified gallery", () => {
+      return request(app.getHttpServer())
+        .patch("/galleries/1")
+        .send({ name: "just updated the name" })
+        .expect(200)
         .expect(mockMediaGallery);
     });
   });
