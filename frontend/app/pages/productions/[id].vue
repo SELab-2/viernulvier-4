@@ -41,10 +41,10 @@ const { data: tags } = await useAsyncData<TagView[]>(
 const isValid = (val: any) => {
   if (!val) return false
   const s = String(val).trim().toUpperCase()
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED"
+  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N"
 }
 
-const image = computed(() => (production.value as any)?.image ?? null)
+const image = computed(() => (production.value as any)?.image ?? null) //TODO
 const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0))
 
 const cleanText = (text: string | null | undefined) => {
@@ -86,10 +86,15 @@ const cleanText = (text: string | null | undefined) => {
           </p>
         </div>
 
-        <div v-if="tags?.length" class="flex flex-wrap gap-3 mt-8">
-          <span v-for="tag in tags" :key="tag.id" class="bg-[var(--accent)] text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]">
-            {{ tag.tag }}
-          </span>
+        <div v-if="tags?.some(t => isValid(t.tag))" class="flex flex-wrap gap-3 mt-8">
+          <template v-for="tag in tags" :key="tag.id">
+            <span
+              v-if="isValid(tag.tag)"
+              class="bg-[var(--accent)] text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]"
+            >
+              {{ tag.tag }}
+            </span>
+          </template>
         </div>
       </div>
     </section>
