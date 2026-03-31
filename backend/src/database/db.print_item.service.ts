@@ -123,7 +123,7 @@ export class PrintItemDatabaseService {
     itemId: number,
     item: ModifyPrintItemDto | ReplacePrintItemDto,
     ): Promise<PrintItemDto> {
-        cosnt fields: string[] = [];
+        const fields: string[] = [];
         const values: any[] = [];
         let index = 1;
 

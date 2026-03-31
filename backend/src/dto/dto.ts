@@ -34,6 +34,11 @@ import {
   PaginationFilterSchema,
   PriceSchema,
   PriceViewSchema,
+  PrintItemSchema,
+  PrintItemViewSchema,
+  CreatePrintItemSchema,
+  ModifyPrintItemSchema,
+  ReplacePrintItemSchema,
   ProductionSchema,
   ProductionViewSchema,
   PublicAccountSchema,
@@ -131,6 +136,13 @@ export class MediaCropDto extends createZodDto(MediaCropSchema) {}
 export class CreateMediaCropDto extends createZodDto(CreateMediaCropSchema) {}
 export class ModifyMediaCropDto extends createZodDto(ModifyMediaCropSchema) {}
 export class ReplaceMediaCropDto extends createZodDto(ReplaceMediaCropSchema) {}
+
+// Prints
+export class PrintItemDto extends createZodDto(PrintItemSchema) {}
+export class PrintItemViewDto extends createZodDto(PrintItemViewSchema) {}
+export class CreatePrintItemDto extends createZodDto(CreatePrintItemSchema) {}
+export class ModifyPrintItemDto extends createZodDto(ModifyPrintItemSchema) {}
+export class ReplacePrintItemDto extends createZodDto(ReplacePrintItemSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {

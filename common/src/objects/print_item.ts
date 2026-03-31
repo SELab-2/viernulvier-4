@@ -36,6 +36,6 @@ export const ReplacePrintItemSchema = MutablePrintItemSchema;
 
 export type PrintItem = z.infer<typeof PrintItemSchema>;
 export type PrintItemView = z.infer<typeof PrintItemViewSchema>;
-export type CreatePrintItemDto = z.infer<typeof CreatePrintItemSchema>;
-export type ModifyPrintItemDto = z.infer<typeof ModifyPrintItemSchema>;
-export type ReplacePrintItemDto = z.infer<typeof ReplacePrintItemSchema>;
+export type CreatePrintItem = z.infer<typeof CreatePrintItemSchema>;
+export type ModifyPrintItem = z.infer<typeof ModifyPrintItemSchema>;
+export type ReplacePrintItem = z.infer<typeof ReplacePrintItemSchema>;

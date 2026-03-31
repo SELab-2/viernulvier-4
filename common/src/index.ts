@@ -71,6 +71,18 @@ import {
   ReplacePriceSchema,
 } from "./objects/prices";
 import {
+  PrintItem,
+  PrintItemSchema,
+  PrintItemView,
+  PrintItemViewSchema,
+  CreatePrintItem,
+  CreatePrintItemSchema,
+  ModifyPrintItem,
+  ModifyPrintItemSchema,
+  ReplacePrintItem,
+  ReplacePrintItemSchema,
+} from "./objects/print_item";
+import {
   CreateProduction,
   CreateProductionSchema,
   FilterProduction,
@@ -208,6 +220,13 @@ export {
   ItemPositionEnum,
   GalleryTypeEnum,
   ReplaceMediaGallerySchema,
+
+  // Print Schemas. (print_*.ts)
+  PrintItemSchema,
+  PrintItemViewSchema,
+  CreatePrintItemSchema,
+  ModifyPrintItemSchema,
+  ReplacePrintItemSchema,
 };
 export type {
   // Production Types. (productions.ts)
@@ -283,4 +302,11 @@ export type {
   ItemPosition,
   GalleryType,
   ReplaceMediaGallery,
+
+  // Print Types. (print_*.ts)
+  PrintItem,
+  PrintItemView,
+  CreatePrintItem,
+  ModifyPrintItem,
+  ReplacePrintItem,
 };
