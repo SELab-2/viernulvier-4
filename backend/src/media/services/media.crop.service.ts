@@ -10,6 +10,7 @@ import {
 } from "../../dto/dto";
 import path from "node:path";
 import { MediaStorageService } from "../media_storage/service/media_storage.service";
+import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 
 /**
  * Defines the connection between controller and database service
@@ -22,7 +23,7 @@ export class MediaCropService {
   ).replace(/\/$/, "");
 
   constructor(
-    private readonly mediaDbService: MediaDatabaseService,
+    private readonly mediaDbService: MediaCropDatabaseService,
     private readonly mediaStorageService: MediaStorageService,
   ) {}
 

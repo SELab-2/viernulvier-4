@@ -1,7 +1,7 @@
 // media.crop.service.spec.ts
 import { Test, TestingModule } from "@nestjs/testing";
 import { MediaCropService } from "./media.crop.service";
-import { MediaDatabaseService } from "../../database/db.media.service";
+import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,
@@ -38,7 +38,7 @@ describe("MediaCropService", () => {
       providers: [
         MediaCropService,
         {
-          provide: MediaDatabaseService,
+          provide: MediaCropDatabaseService,
           useValue: mockMediaDbService,
         },
         {
@@ -49,7 +49,7 @@ describe("MediaCropService", () => {
     }).compile();
 
     service = module.get<MediaCropService>(MediaCropService);
-    mediaDbService = module.get(MediaDatabaseService);
+    mediaDbService = module.get(MediaCropDatabaseService);
   });
 
   it("should be defined", () => {
