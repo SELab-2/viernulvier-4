@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { BadRequestException } from "@nestjs/common";
 import { ParserController } from "./parser.controller";
-import { CsvInjectionService } from "../util/scraper/csv-injection.service";
+import { CsvInjectionService } from "../util/scraper/csv/csv-injection.service";
 import { ApiKeyGuard } from "../auth/authGuard";
 
 describe("ParserController", () => {

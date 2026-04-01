@@ -5,3 +5,6 @@ coverage
 logs
 .idea
 .vscode
+
+# Ignores the media
+assets/media/photos

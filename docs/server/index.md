@@ -83,7 +83,7 @@ You can also write your own config if preferred. The provided one includes:
 
 - **API** – LAN-only, accessible under `/api`
 - **Frontend** – served over HTTP and HTTPS under `/archive`
-- **Admin page** – IP-locked to LAN, accessible under `/admin`
+- **Media hosting** - served over HTTP and HTTPS under `/photos`
 - **Root redirect** – `/` automatically redirects to `/archive`
 
 ### HTTPS / SSL
