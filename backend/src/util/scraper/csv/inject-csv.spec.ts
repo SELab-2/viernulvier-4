@@ -1,19 +1,12 @@
+import { InjectCsvEngine } from "./inject-csv.engine";
+
 const mockParseProductionsCSV = jest.fn();
 const mockParseEventsCSV = jest.fn();
 const mockParseTagsCSV = jest.fn();
 const mockParseBlogsCSV = jest.fn();
 const mockParsePricesCSV = jest.fn();
 
-const mockDbConnectionCtor = jest.fn();
-
-const mockLogger = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-};
-
-jest.mock("../../csv_parsing/csv_file_parser", () => ({
+jest.mock("../../../csv_parsing/csv_file_parser", () => ({
   CSVFileParser: {
     parseProductionsCSV: (...args: unknown[]) =>
       mockParseProductionsCSV(...args),
@@ -24,43 +17,29 @@ jest.mock("../../csv_parsing/csv_file_parser", () => ({
   },
 }));
 
-jest.mock("./database/db.connection", () => ({
-  UtilsDbConnection: function () {
-    return mockDbConnectionCtor();
+// We still mock the global logger since it is imported directly in the file
+jest.mock("../../logger/logger", () => ({
+  __esModule: true,
+  default: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
-jest.mock("../logger/logger", () => ({
-  __esModule: true,
-  default: mockLogger,
-}));
-
-import {
-  injectBlogsCSV,
-  injectEventsCSV,
-  injectPricesCSV,
-  injectProductionsCSV,
-  injectTagsCSV,
-} from "./inject-csv";
-
 describe("inject-csv structured importers", () => {
-  let dbMock: {
-    insertProductions: jest.Mock;
-    insertLocations: jest.Mock;
-    insertEvents: jest.Mock;
-    insertTag: jest.Mock;
-    getProductionByLegacyId: jest.Mock;
-    linkTag: jest.Mock;
-    insertBlog: jest.Mock;
-    linkBlog: jest.Mock;
-    getEventByLegacyId: jest.Mock;
-    insertPrice: jest.Mock;
-    linkPrice: jest.Mock;
-  };
+  let dbMock: any;
+  let languageServiceMock: any;
+  let appLoggerMock: any;
+  let configServiceMock: any;
+
+  let engine: InjectCsvEngine;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // 1. Setup the Database Mock
     dbMock = {
       insertProductions: jest.fn().mockResolvedValue(undefined),
       insertLocations: jest.fn().mockResolvedValue(undefined),
@@ -75,7 +54,30 @@ describe("inject-csv structured importers", () => {
       linkPrice: jest.fn().mockResolvedValue(true),
     };
 
-    mockDbConnectionCtor.mockImplementation(() => dbMock);
+    // 2. Setup the LanguageService Mock (Just pass the data through unchanged)
+    languageServiceMock = {
+      translateObject: jest.fn().mockImplementation(async (data) => data),
+    };
+
+    // 3. Setup AppLogger and ConfigService Mocks
+    appLoggerMock = {
+      log: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    };
+
+    configServiceMock = {
+      get: jest.fn(),
+    };
+
+    // 4. Instantiate the class with the mocked dependencies
+    engine = new InjectCsvEngine(
+      dbMock,
+      appLoggerMock,
+      configServiceMock,
+      languageServiceMock,
+    );
   });
 
   it("injectProductionsCSV parses and inserts transformed productions", async () => {
@@ -95,7 +97,7 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    await injectProductionsCSV("/tmp/productions.csv");
+    await engine.injectProductionsCSV("/tmp/productions.csv");
 
     expect(mockParseProductionsCSV).toHaveBeenCalledWith(
       "/tmp/productions.csv",
@@ -139,7 +141,7 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    await injectEventsCSV("/tmp/events.csv");
+    await engine.injectEventsCSV("/tmp/events.csv");
 
     expect(mockParseEventsCSV).toHaveBeenCalledWith("/tmp/events.csv");
 
@@ -178,7 +180,7 @@ describe("inject-csv structured importers", () => {
       .mockResolvedValueOnce({ id: 11 })
       .mockRejectedValueOnce(new Error("missing"));
 
-    await injectTagsCSV("/tmp/tags.csv");
+    await engine.injectTagsCSV("/tmp/tags.csv");
 
     expect(dbMock.insertTag).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -195,7 +197,7 @@ describe("inject-csv structured importers", () => {
 
     expect(dbMock.linkTag).toHaveBeenCalledTimes(1);
     expect(dbMock.linkTag).toHaveBeenCalledWith(11, 500);
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(appLoggerMock.warn).toHaveBeenCalled();
   });
 
   it("injectBlogsCSV inserts blog and links only existing productions", async () => {
@@ -214,12 +216,12 @@ describe("inject-csv structured importers", () => {
       .mockResolvedValueOnce({ id: 21 })
       .mockRejectedValueOnce(new Error("missing"));
 
-    await injectBlogsCSV("/tmp/blogs.csv");
+    await engine.injectBlogsCSV("/tmp/blogs.csv");
 
     expect(dbMock.insertBlog).toHaveBeenCalledWith("News", "Some text");
     expect(dbMock.linkBlog).toHaveBeenCalledTimes(1);
     expect(dbMock.linkBlog).toHaveBeenCalledWith(21, 99);
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(appLoggerMock.warn).toHaveBeenCalled();
   });
 
   it("injectPricesCSV inserts price and links only existing events", async () => {
@@ -244,7 +246,7 @@ describe("inject-csv structured importers", () => {
       .mockResolvedValueOnce({ id: 8 })
       .mockRejectedValueOnce(new Error("missing"));
 
-    await injectPricesCSV("/tmp/prices.csv");
+    await engine.injectPricesCSV("/tmp/prices.csv");
 
     expect(dbMock.insertPrice).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -255,6 +257,6 @@ describe("inject-csv structured importers", () => {
 
     expect(dbMock.linkPrice).toHaveBeenCalledTimes(1);
     expect(dbMock.linkPrice).toHaveBeenCalledWith(8, 66);
-    expect(mockLogger.warn).toHaveBeenCalled();
+    expect(appLoggerMock.warn).toHaveBeenCalled();
   });
 });

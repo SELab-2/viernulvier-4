@@ -1,3 +1,5 @@
+import { CropName, ItemPosition } from "@repo/common";
+
 /**
  * Localization of any string that needs it.
  */
@@ -8,12 +10,26 @@ export interface vnvLocal {
 
 /**
  * Helps to extract an ID from an URI.
+ * Returns null if there was no uri or if no Id could be extracted.
  * @param uri The URI we want to get the ID from.
  * @returns The ID.
  */
-function extractIdFromUri(uri: string): string | null {
+function extractIdFromUri(uri: string | undefined | null): string | null {
+  if (!uri) return null;
   const extractedId = uri.replace(/\/$/, "").split("/").pop();
   return extractedId || null;
+}
+
+/**
+ * Sanitize a single date so the DB can accept it.
+ * @param dateStr The string of the date or undefined.
+ * @returns The sanitized date value.
+ */
+function sanitizeDate(dateStr: string | undefined): string {
+  if (!dateStr || dateStr.startsWith("0000")) {
+    return "1970-01-01T00:00:00+00:00";
+  }
+  return dateStr;
 }
 
 /**
@@ -37,6 +53,7 @@ export interface vnvProduction {
   info: vnvLocal;
   events: string[]; // Contains the legacy IDs of the Events.
   genres: string[]; // Contains the legacy IDs of the Genres.
+  galleryId: string; // Contains the legacy ID of the Gallery.
 }
 
 /**
@@ -81,6 +98,7 @@ function parseVnvProduction(object: Record<string, any>): vnvProduction {
     info: (object.info as vnvLocal) || { en: "N/A", nl: "N/A" },
     events: events,
     genres: genres,
+    galleryId: extractIdFromUri(object["media_gallery"] as string) || "",
   };
 }
 
@@ -169,11 +187,15 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
       ) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
-    starts_at: (object.starts_at as string) || "1970-01-01T00:00:00+00:00",
-    ends_at: (object.ends_at as string) || "1970-01-01T00:00:00+00:00",
+    starts_at:
+      sanitizeDate(object.starts_at as string) || "1970-01-01T00:00:00+00:00",
+    ends_at:
+      sanitizeDate(object.ends_at as string) || "1970-01-01T00:00:00+00:00",
     intermission_at:
-      (object.intermission_at as string) || "1970-01-01T00:00:00+00:00",
-    doors_at: (object.doors_at as string) || "1970-01-01T00:00:00+00:00",
+      sanitizeDate(object.intermission_at as string) ||
+      "1970-01-01T00:00:00+00:00",
+    doors_at:
+      sanitizeDate(object.doors_at as string) || "1970-01-01T00:00:00+00:00",
     location: extractIdFromUri(object.hall as string) || "N/A",
     prices: prices,
   };
@@ -265,5 +287,144 @@ function parseVnvPrice(object: Record<string, any>): vnvPrice {
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
     amount: (object.amount as number) || null,
     name: name,
+  };
+}
+
+/**
+ * Galleries
+ */
+
+/**
+ * Parsed interface for a Media Gallery.
+ */
+export interface vnvGallery {
+  legacy_id: string;
+  type: string; // Always going to be "default"
+  name: string;
+  created_at: string;
+  updated_at: string;
+  items: string[]; // Legacy ids of the items linked to this gallery.
+}
+
+/**
+ * Parses raw objects into vnvGallery objects.
+ * @param galleries The list of raw scraped objects.
+ * @returns The list of parsed vnvGallery objects.
+ */
+export function parseGalleries(galleries: object[]): vnvGallery[] {
+  return galleries.map(parseVnvGallery);
+}
+
+/**
+ * Parses a single raw object to a vnvGallery.
+ * @param gallery The raw object.
+ * @returns The vnvGallery parsed object.
+ */
+function parseVnvGallery(gallery: Record<string, any>): vnvGallery {
+  const items: string[] = [];
+  for (const item of gallery.items) {
+    items.push(extractIdFromUri(item as string) || "N/A");
+  }
+
+  return {
+    legacy_id: extractIdFromUri(gallery["@id"] as string) || "",
+    type: "default",
+    name: (gallery.name as string) || "",
+    created_at: (gallery.created_at as string) || "1970-01-01T00:00:00+00:00",
+    updated_at: (gallery.updated_at as string) || "1970-01-01T00:00:00+00:00",
+    items: items,
+  };
+}
+
+/**
+ * Media Items
+ */
+
+/**
+ * Parsed interface for media items.
+ */
+export interface vnvMediaItem {
+  legacy_id: string;
+  type: string;
+  original_filename: string;
+  position: ItemPosition;
+  width: number;
+  height: number;
+  credits: vnvLocal;
+  description: vnvLocal;
+  title: vnvLocal;
+  crops: string[]; // Legacy ids of the crops linked to this item.
+}
+
+/**
+ * Parses raw objects into vnvMediaItem objects.
+ * @param items The raw scraped objects
+ * @returns The list of vnvMediaItem objects.
+ */
+export function parseMediaItems(items: object[]): vnvMediaItem[] {
+  return items.map(parseVnvMediaItem);
+}
+
+/**
+ * Parses a single raw object into a vnvMediaItem.
+ * @param item The raw scraped object.
+ * @returns The parsed vnvMediaItem.
+ */
+function parseVnvMediaItem(item: Record<string, any>): vnvMediaItem {
+  const crops: string[] = [];
+  for (const crop of item.crops) {
+    crops.push(
+      extractIdFromUri((crop as Record<string, any>)["@id"] as string) || "N/A",
+    );
+  }
+  const posIndex: number = (item.position as number) || 1;
+  const position: ItemPosition = posIndex == 0 ? "main" : "carousel";
+
+  return {
+    legacy_id: extractIdFromUri(item["@id"] as string) || "",
+    type: (item.type as string) || "N/A",
+    original_filename: (item.original_filename as string) || "N/A",
+    position: position,
+    width: (item.width as number) || 0,
+    height: (item.height as number) || 0,
+    credits: (item.credits as vnvLocal) || { en: "N/A", nl: "N/A" },
+    description: (item.description as vnvLocal) || { en: "N/A", nl: "N/A" },
+    title: (item.title as vnvLocal) || { en: "N/A", nl: "N/A" },
+    crops: crops,
+  };
+}
+
+/**
+ * Media crops
+ */
+
+/**
+ * Parsed interface for media crops.
+ */
+export interface vnvMediaCrop {
+  legacy_id: string;
+  name: CropName;
+  url: string; // This contains the URL to the VNV host of the image. Still need to download.
+}
+
+/**
+ * Parses raw objects to vnvMediaCrop objects.
+ * @param crops The raw objects.
+ * @returns The parsed vnvMediaCrop objects.
+ */
+export function parseMediaCrops(crops: object[]): vnvMediaCrop[] {
+  return crops.map(parseVnvMediaCrop);
+}
+
+/**
+ * Parse a single raw object to a vnvMediaCrop
+ * @param crop The raw object.
+ * @returns The parsed vnvMediaCrop
+ */
+function parseVnvMediaCrop(crop: Record<string, any>): vnvMediaCrop {
+  return {
+    legacy_id: extractIdFromUri(crop["@id"] as string) || "",
+    name: (crop.name as CropName) || "",
+    url: (crop.url as string) || "",
   };
 }

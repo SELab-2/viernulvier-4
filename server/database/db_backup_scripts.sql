@@ -199,12 +199,12 @@ CREATE TABLE scraper_dates
 
 CREATE TYPE crop_name AS ENUM (
     'hd_ready',
+    'hd_ready_square',
+    'hd_ready_portrait',
     'FE3_header',
-    'thumbnail',
-    'og_image',
-    'mobile',
-    'nb_ready'
-    );
+    'FE3_2by1',
+    'FE3_grid'
+);
 
 CREATE TYPE gallery_type AS ENUM (
     'prints',
