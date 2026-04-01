@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,
@@ -7,6 +8,8 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
+import path from "node:path";
+import { MediaStorageService } from "../media_storage/service/media_storage.service";
 import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 
 /**
@@ -15,7 +18,14 @@ import { MediaCropDatabaseService } from "../../database/media/db.media_crop.ser
  */
 @Injectable()
 export class MediaCropService {
-  constructor(private readonly mediaDbService: MediaCropDatabaseService) {}
+  private readonly baseUrl = (
+    process.env.MEDIA_BASE_URL ?? "http://127.0.0.1"
+  ).replace(/\/$/, "");
+
+  constructor(
+    private readonly mediaDbService: MediaCropDatabaseService,
+    private readonly mediaStorageService: MediaStorageService,
+  ) {}
 
   /**
    * Fetches a paginated list of crops.
@@ -40,10 +50,48 @@ export class MediaCropService {
   /**
    * Creates a new media crop.
    * @param createCrop The crop to create.
-   * @returns The newly created crop.
+   * @param autoDownload Whether to automatically fetch and save the physical file. Defaults to false.
+   * @returns The newly created (and potentially updated) crop.
    */
-  async createCrop(createCrop: CreateMediaCropDto): Promise<MediaCropDto> {
-    return await this.mediaDbService.createCrop(createCrop);
+  async createCrop(
+    createCrop: CreateMediaCropDto,
+    autoDownload: boolean = false,
+  ): Promise<MediaCropDto> {
+    // first save the crop in the db -> need it for its id.
+    let savedCrop = await this.mediaDbService.createCrop(createCrop);
+
+    // if we want to download it: download the photo, give it a new url and update that url in the db.
+    if (
+      autoDownload &&
+      createCrop.url.startsWith("http") &&
+      !createCrop.url.startsWith(this.baseUrl)
+    ) {
+      try {
+        // fetch the photo
+        const response = await fetch(createCrop.url);
+        const buffer = Buffer.from(await response.arrayBuffer());
+
+        // concat new url.
+        const parsedUrl = new URL(createCrop.url);
+        const ext = path.extname(parsedUrl.pathname) || ".jpg";
+        const newFileName = `${savedCrop.id}-${savedCrop.name}${ext}`;
+        const finalUrl = `${this.baseUrl}/photos/${newFileName}`;
+
+        // save the photo + update the db.
+        await this.mediaStorageService.saveMedia(finalUrl, buffer);
+        savedCrop = await this.mediaDbService.updateCrop(savedCrop.id, {
+          url: finalUrl,
+        });
+      } catch (error) {
+        // Note: If this fails, the DB record still exists but retains the external URL.
+        // in this case it is important to know that you will most likely have to manually download and update if you wish to try.
+        throw new BadRequestException(
+          `Could not process media URL: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+      }
+    }
+
+    return savedCrop;
   }
 
   /**
