@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,

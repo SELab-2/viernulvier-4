@@ -14,7 +14,7 @@ import { MediaStorageService } from "../media_storage/service/media_storage.serv
 
 describe("MediaCropService", () => {
   let service: MediaCropService;
-  let mediaDbService: jest.Mocked<MediaDatabaseService>;
+  let mediaDbService: jest.Mocked<MediaCropDatabaseService>;
   const mockMediaStorageService = jest.mocked<MediaStorageService>;
 
   const mockCrop: MediaCropDto = {
