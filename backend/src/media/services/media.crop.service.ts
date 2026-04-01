@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,
@@ -9,7 +8,8 @@ import {
   ReplaceMediaCropDto,
 } from "../../dto/dto";
 import path from "node:path";
-import { MediaStorageService } from "../media_storage/media_storage.service";
+import { MediaStorageService } from "../media_storage/service/media_storage.service";
+import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 
 /**
  * Defines the connection between controller and database service
@@ -22,7 +22,7 @@ export class MediaCropService {
   ).replace(/\/$/, "");
 
   constructor(
-    private readonly mediaDbService: MediaDatabaseService,
+    private readonly mediaDbService: MediaCropDatabaseService,
     private readonly mediaStorageService: MediaStorageService,
   ) {}
 
@@ -73,7 +73,7 @@ export class MediaCropService {
         // concat new url.
         const parsedUrl = new URL(createCrop.url);
         const ext = path.extname(parsedUrl.pathname) || ".jpg";
-        const newFileName = `${savedCrop.id}${ext}`;
+        const newFileName = `${savedCrop.id}-${savedCrop.name}${ext}`;
         const finalUrl = `${this.baseUrl}/photos/${newFileName}`;
 
         // save the photo + update the db.

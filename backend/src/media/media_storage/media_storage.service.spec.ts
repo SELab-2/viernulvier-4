@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { MediaStorageService } from "./media_storage.service";
+import { MediaStorageService } from "./service/media_storage.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import * as fs from "fs";
 

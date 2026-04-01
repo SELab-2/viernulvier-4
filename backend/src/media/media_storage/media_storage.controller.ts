@@ -1,16 +1,29 @@
-import { Body, Controller, Delete, Post, UploadedFile, UseGuards, UseInterceptors, } from "@nestjs/common";
-import { MediaStorageService } from "./media_storage.service";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Query,
+  StreamableFile,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { MediaStorageService } from "./service/media_storage.service";
 import {
   ApiBody,
   ApiConsumes,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { FileInterceptor } from "@nestjs/platform-express";
+import path from "node:path";
 
 /**
  * Defines all media storage related endpoints
@@ -24,17 +37,52 @@ export class MediaStorageController {
   constructor(private readonly mediaStorageService: MediaStorageService) {}
 
   /**
-   * Responds to a POST to "media/storage/fetch"
-   * @param body The URL of the media we want to fetch.
-   * @returns The media as a buffer.
-   * note: done like this, although weird, to allow having a body in the request which GET does not allow.
+   * Responds to a GET to "media/storage/fetch"
+   * @param url The URL of the media we want to fetch.
+   * @returns The media as a downloadable/viewable file stream.
    */
   @ApiOperation({ summary: "Fetch media from a given URL." })
-  @ApiBody({ schema: { properties: { url: { type: "string" } } } })
+  @ApiQuery({
+    name: "url",
+    type: "string",
+    description: "The URL of the media (must be URL-encoded on the frontend)",
+  })
   @ApiOkResponse({ description: "Found media." })
-  @Post("fetch")
-  async getMedia(@Body() body: { url: string }): Promise<Buffer> {
-    return await this.mediaStorageService.getMedia(body.url);
+  @Get("fetch")
+  async getMedia(@Query("url") url: string): Promise<StreamableFile> {
+    const buffer = await this.mediaStorageService.getMedia(url);
+
+    let contentType: string;
+    const parsedUrl = new URL(url);
+    const filename = path.basename(parsedUrl.pathname);
+    const ext = path.extname(parsedUrl.pathname);
+    switch (ext) {
+      case ".jpg":
+      case ".jpeg":
+        contentType = "image/jpeg";
+        break;
+      case ".png":
+        contentType = "image/png";
+        break;
+      case ".gif":
+        contentType = "image/gif";
+        break;
+      case ".webp":
+        contentType = "image/webp";
+        break;
+      case ".pdf":
+        contentType = "application/pdf";
+        break;
+      default:
+        contentType = "application/octet-stream";
+        break;
+    }
+
+    // return a file so this way we can actually see the file in swagger.
+    return new StreamableFile(buffer, {
+      type: contentType,
+      disposition: `attachment: filename="${filename}"`,
+    });
   }
 
   /**
