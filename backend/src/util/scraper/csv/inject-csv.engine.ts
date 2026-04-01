@@ -359,13 +359,22 @@ export class InjectCsvEngine {
       await OldCSVFileParser.parseOldProductionsCSV(productionsFile);
     const parsedEvents = await OldCSVFileParser.parseOldEventsCSV(eventsFile);
 
+    // Build a fast lookup from production legacy id to tag names.
+    const tagsByProductionLegacyId = new Map<string, string[]>();
+    for (const link of productionTagLinks) {
+      const existingTags = tagsByProductionLegacyId.get(link.legacyId);
+      if (existingTags) {
+        existingTags.push(link.tagName);
+      } else {
+        tagsByProductionLegacyId.set(link.legacyId, [link.tagName]);
+      }
+    }
+
     const csvTags: vnvGenre[] = tags.map(toOldCsvTag);
     const csvProductions: vnvProduction[] = productions.map((production) =>
       toOldCsvProduction(
         production,
-        productionTagLinks
-          .filter((link) => link.legacyId === (production.legacy_id ?? ""))
-          .map((link) => link.tagName),
+        tagsByProductionLegacyId.get(production.legacy_id ?? "") ?? [],
       ),
     );
 
