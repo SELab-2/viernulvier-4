@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../backend/">
+        <link rel="prev" href="../frontend/">
       
       
-        <link rel="next" href="../media/">
+        <link rel="next" href="../../modules/">
       
       
         
@@ -23,7 +23,7 @@
     
     
       
-        <title>Frontend - VierNulVier Archive Documentation</title>
+        <title>Media - VierNulVier Archive Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#frontend-deployment-details" class="md-skip">
+        <a href="#media-storage" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Frontend
+              Media
             
           </span>
         </div>
@@ -1515,6 +1515,34 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../frontend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1524,6 +1552,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -1532,7 +1562,7 @@
   <span class="md-ellipsis">
     
   
-    Frontend
+    Media
   
 
     
@@ -1550,7 +1580,7 @@
   <span class="md-ellipsis">
     
   
-    Frontend
+    Media
   
 
     
@@ -1566,6 +1596,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1574,13 +1606,119 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#frontend-deployment-details" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Frontend Deployment Details
+        Overview
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Production">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#static-asset-serving-maints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Static Asset Serving (main.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mediastorageservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MediaStorageService
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MediaStorageService">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1588,34 +1726,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../media/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Media
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2144,6 +2254,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2152,13 +2264,119 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#frontend-deployment-details" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Frontend Deployment Details
+        Overview
       
     </span>
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Production">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Development
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#static-asset-serving-maints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Static Asset Serving (main.ts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mediastorageservice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MediaStorageService
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="MediaStorageService">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2179,58 +2397,94 @@
 
 
 
-  <h1>Frontend</h1>
-
-<h2 id="frontend-deployment-details">Frontend Deployment Details</h2>
-<p>The frontend is configured in the same <code>ecosystem.config.js</code> file as the backend. In most cases, this is the only thing
-you need to update for the frontend to work.</p>
-<p>Locate the frontend entry and update <code>cwd</code> to the absolute path of the <code>frontend</code> folder on your server, and set
-<code>NUXT_API_BASE</code> to your domain:</p>
-<pre><code class="language-js">{
-  name: &quot;frontend&quot;,
-    script
-:
-  &quot;.output/server/index.mjs&quot;,
-    cwd
-:
-  &quot;/absolute/path/to/project/frontend&quot;,
-    env
-:
-  {
-    PORT: 3001,
-      NUXT_API_BASE
-  :
-    &quot;https://your-domain.com/api&quot;,
-      NUXT_BASE
-  :
-    &quot;/archive/&quot;,
-  }
-,
-}
-,
+<h1 id="media-storage">Media Storage</h1>
+<h2 id="overview">Overview</h2>
+<p>Media files (images, videos, etc.) are served statically via <strong>Nginx</strong> in production. In development, the NestJS backend
+serves them directly from a local folder instead.</p>
+<p>The <code>MediaStorageService</code> abstracts this difference — callers always work with full URLs and never need to know where
+the files actually live.</p>
+<hr />
+<h2 id="production">Production</h2>
+<p>In production, Nginx serves media files from <code>/var/www/photos</code> on the server.</p>
+<h3 id="how-it-works">How It Works</h3>
+<ul>
+<li>The backend saves files to <code>/var/www/photos</code> (via HTTP PUT to itself on <code>127.0.0.1</code>)</li>
+<li>Nginx serves them publicly at <code>https://sel2-4.ugent.be/photos/&lt;path&gt;</code></li>
+<li>Only requests from <code>127.0.0.1</code> (the backend itself) can PUT or DELETE files</li>
+<li>The full URL is stored in the database, e.g. <code>https://sel2-4.ugent.be/photos/1/foto.jpg</code></li>
+</ul>
+<h3 id="directory-structure">Directory Structure</h3>
+<p>Subdirectories are supported and must be created by the backend before saving:</p>
+<pre><code>/var/www/photos/
+├── 1/
+│   ├── foto.jpg
+│   └── video.mp4
+└── 2/
+    └── foto.jpg
 </code></pre>
+<hr />
+<h2 id="development">Development</h2>
+<p>In development, there is no Nginx. Instead, NestJS serves the files itself as static assets from <code>assets/media/</code> inside
+the project directory.</p>
+<h3 id="how-it-works_1">How It Works</h3>
+<p>The <code>LocalMediaStorage</code> class strips the dev base URL from any incoming URL to get the relative file path, then
+reads/writes directly on disk:</p>
+<pre><code>URL:       http://127.0.0.1:3000/photos/1/foto.jpg
+Strip:     http://127.0.0.1:3000/photos
+Remaining: /1/foto.jpg
+Full path: &lt;project_root&gt;/assets/media/1/foto.jpg
+</code></pre>
+<p>This means the same URL format is used everywhere — the service just resolves it differently depending on the
+environment.</p>
+<h3 id="static-asset-serving-maints">Static Asset Serving (main.ts)</h3>
+<pre><code class="language-typescript">if (process.env.NODE_ENV === &quot;development&quot;) {
+  app.useStaticAssets(path.join(process.cwd(), &quot;assets/media&quot;), {
+    prefix: &quot;/media_dev&quot;,
+  });
+}
+</code></pre>
+<hr />
+<h2 id="mediastorageservice">MediaStorageService</h2>
+<p>The service picks the correct storage backend at startup based on <code>NODE_ENV</code>:</p>
+<pre><code class="language-typescript">constructor()
+{
+  this.storage = process.env.NODE_ENV === &quot;development&quot;
+    ? new LocalMediaStorage()   // reads/writes assets/media on disk
+    : new RemoteMediaStorage(); // PUT/GET/DELETE via HTTP to Nginx
+}
+</code></pre>
+<h3 id="environment-variables">Environment Variables</h3>
 <table>
 <thead>
 <tr>
 <th>Variable</th>
 <th>Description</th>
+<th>Default (dev)</th>
+<th>Default (prod)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>PORT</code></td>
-<td>Port the frontend runs on — default is <code>3001</code></td>
-</tr>
-<tr>
-<td><code>NUXT_API_BASE</code></td>
-<td>Full URL to the backend API — must match your domain and Nginx config</td>
-</tr>
-<tr>
-<td><code>NUXT_BASE</code></td>
-<td>Base path the frontend is served from — default is <code>/archive/</code></td>
+<td><code>MEDIA_BASE_URL</code></td>
+<td>Base URL used to build media URLs</td>
+<td><code>http://127.0.0.1:3000/photos</code></td>
+<td><code>https://sel2-4.ugent.be/photos</code></td>
 </tr>
 </tbody>
 </table>
+<p>Set these in your <code>.env</code> files:</p>
+<pre><code class="language-bash"># .env.development
+MEDIA_BASE_URL=http://127.0.0.1:3000/media_dev
+
+# .env.production
+MEDIA_BASE_URL=https://sel2-4.ugent.be/photos
+</code></pre>
+<blockquote>
+<p><strong>Important:</strong> Always use <code>npm run start:dev</code> for development. Running <code>npm run start:prod</code> locally will use
+<code>RemoteMediaStorage</code> and attempt HTTP calls to the production server.</p>
+<p><strong>Note:</strong> when asking a photo for dev env from the database with the productionURL, please note that that photo must
+be available under the assets/media file or else it will not be found.</p>
+</blockquote>
 
 
 

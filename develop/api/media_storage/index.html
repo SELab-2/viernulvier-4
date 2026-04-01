@@ -9,10 +9,10 @@
       
       
       
-        <link rel="prev" href="../backend/">
+        <link rel="prev" href="../pricing/">
       
       
-        <link rel="next" href="../media/">
+        <link rel="next" href="../../schemas/">
       
       
         
@@ -23,7 +23,7 @@
     
     
       
-        <title>Frontend - VierNulVier Archive Documentation</title>
+        <title>Media Storage - VierNulVier Archive Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#frontend-deployment-details" class="md-skip">
+        <a href="#media-storage-api" class="md-skip">
           Skip to content
         </a>
       
@@ -104,7 +104,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Frontend
+              Media Storage
             
           </span>
         </div>
@@ -444,18 +444,20 @@
       
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -476,7 +478,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
@@ -494,7 +496,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -522,7 +524,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/events/" class="md-nav__link">
+      <a href="../events/" class="md-nav__link">
         
   
   
@@ -550,7 +552,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/productions/" class="md-nav__link">
+      <a href="../productions/" class="md-nav__link">
         
   
   
@@ -578,7 +580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/blogs/" class="md-nav__link">
+      <a href="../blogs/" class="md-nav__link">
         
   
   
@@ -606,7 +608,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/tags/" class="md-nav__link">
+      <a href="../tags/" class="md-nav__link">
         
   
   
@@ -634,7 +636,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/locations/" class="md-nav__link">
+      <a href="../locations/" class="md-nav__link">
         
   
   
@@ -662,7 +664,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../api/pricing/" class="md-nav__link">
+      <a href="../pricing/" class="md-nav__link">
         
   
   
@@ -687,10 +689,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../api/media_storage/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Media Storage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -706,6 +735,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#get-mediastoragefetch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [GET] /media/storage/fetch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-mediastorage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [POST] /media/storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete-mediastorage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [DELETE] /media/storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1382,20 +1464,18 @@
       
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
         
           
           <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
@@ -1416,7 +1496,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_11">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1434,7 +1514,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../server/" class="md-nav__link">
         
   
   
@@ -1462,7 +1542,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../database/" class="md-nav__link">
+      <a href="../../server/database/" class="md-nav__link">
         
   
   
@@ -1490,7 +1570,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../backend/" class="md-nav__link">
+      <a href="../../server/backend/" class="md-nav__link">
         
   
   
@@ -1515,35 +1595,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Frontend
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../server/frontend/" class="md-nav__link">
         
   
   
@@ -1559,35 +1614,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#frontend-deployment-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Frontend Deployment Details
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1600,7 +1626,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../media/" class="md-nav__link">
+      <a href="../../server/media/" class="md-nav__link">
         
   
   
@@ -2144,6 +2170,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2152,10 +2180,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#frontend-deployment-details" class="md-nav__link">
+  <a href="#get-mediastoragefetch" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Frontend Deployment Details
+        [GET] /media/storage/fetch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-mediastorage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [POST] /media/storage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete-mediastorage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        [DELETE] /media/storage
       
     </span>
   </a>
@@ -2179,58 +2229,28 @@
 
 
 
-  <h1>Frontend</h1>
-
-<h2 id="frontend-deployment-details">Frontend Deployment Details</h2>
-<p>The frontend is configured in the same <code>ecosystem.config.js</code> file as the backend. In most cases, this is the only thing
-you need to update for the frontend to work.</p>
-<p>Locate the frontend entry and update <code>cwd</code> to the absolute path of the <code>frontend</code> folder on your server, and set
-<code>NUXT_API_BASE</code> to your domain:</p>
-<pre><code class="language-js">{
-  name: &quot;frontend&quot;,
-    script
-:
-  &quot;.output/server/index.mjs&quot;,
-    cwd
-:
-  &quot;/absolute/path/to/project/frontend&quot;,
-    env
-:
-  {
-    PORT: 3001,
-      NUXT_API_BASE
-  :
-    &quot;https://your-domain.com/api&quot;,
-      NUXT_BASE
-  :
-    &quot;/archive/&quot;,
-  }
-,
-}
-,
-</code></pre>
-<table>
-<thead>
-<tr>
-<th>Variable</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>PORT</code></td>
-<td>Port the frontend runs on — default is <code>3001</code></td>
-</tr>
-<tr>
-<td><code>NUXT_API_BASE</code></td>
-<td>Full URL to the backend API — must match your domain and Nginx config</td>
-</tr>
-<tr>
-<td><code>NUXT_BASE</code></td>
-<td>Base path the frontend is served from — default is <code>/archive/</code></td>
-</tr>
-</tbody>
-</table>
+<h1 id="media-storage-api">Media Storage API</h1>
+<h3 id="get-mediastoragefetch">[GET] <code>/media/storage/fetch</code></h3>
+<p>Retrieves media from a given URL.</p>
+<ul>
+<li><strong>Query Parameter:</strong> <code>url</code> (string) - The URL of the media you want to fetch. <strong>Note:</strong> This must be URL-encoded by
+  the client (e.g., using <code>encodeURIComponent()</code>).</li>
+<li><strong>Returns:</strong> A binary file stream (the physical media file, ready to be viewed or downloaded by the browser).</li>
+</ul>
+<h3 id="post-mediastorage">[POST] <code>/media/storage</code></h3>
+<p>Saves media to a given URL.</p>
+<ul>
+<li><strong>Security:</strong> <code>apiKey</code> required.</li>
+<li><strong>Body:</strong> <code>multipart/form-data</code> with <code>url: string</code> and <code>file: binary</code></li>
+<li>note: the URL must be of the type of your MEDIA_BASE_URL param or else you will get bad request errors.</li>
+<li><strong>Returns:</strong> <code>string</code> — the URL of the saved media.</li>
+</ul>
+<h3 id="delete-mediastorage">[DELETE] <code>/media/storage</code></h3>
+<p>Deletes media at a given URL.</p>
+<ul>
+<li><strong>Security:</strong> <code>apiKey</code> required.</li>
+<li><strong>Body:</strong> <code>{ url: string }</code></li>
+</ul>
 
 
 
