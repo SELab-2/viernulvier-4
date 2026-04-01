@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,
   MediaCropDto,
-  PaginationFilterDto,
   ModifyMediaCropDto,
+  PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
+import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 
 /**
  * Defines the connection between controller and database service
@@ -15,7 +15,7 @@ import {
  */
 @Injectable()
 export class MediaCropService {
-  constructor(private readonly mediaDbService: MediaDatabaseService) {}
+  constructor(private readonly mediaDbService: MediaCropDatabaseService) {}
 
   /**
    * Fetches a paginated list of crops.

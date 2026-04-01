@@ -1,14 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { MediaDatabaseService } from "../../database/db.media.service";
 import {
   CreateMediaItemDto,
   MediaCropDto,
   MediaItemDto,
-  PaginationFilterDto,
   ModifyMediaItemDto,
+  PaginationFilterDto,
   ReplaceMediaItemDto,
 } from "../../dto/dto";
 import { PaginatedResponse } from "@repo/common";
+import { MediaItemDatabaseService } from "../../database/media/db.media_item.service";
 
 /**
  * Defines the connection between controller and database service
@@ -16,7 +16,7 @@ import { PaginatedResponse } from "@repo/common";
  */
 @Injectable()
 export class MediaItemService {
-  constructor(private readonly mediaDbService: MediaDatabaseService) {}
+  constructor(private readonly mediaDbService: MediaItemDatabaseService) {}
 
   /**
    * Fetches all media items in paginated lists.

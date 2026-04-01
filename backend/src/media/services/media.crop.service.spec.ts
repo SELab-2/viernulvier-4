@@ -1,19 +1,19 @@
 // media.crop.service.spec.ts
 import { Test, TestingModule } from "@nestjs/testing";
 import { MediaCropService } from "./media.crop.service";
-import { MediaDatabaseService } from "../../database/db.media.service";
+import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaCropDto,
   MediaCropDto,
   ModifyMediaCropDto,
-  ReplaceMediaCropDto,
   PaginationFilterDto,
+  ReplaceMediaCropDto,
 } from "../../dto/dto";
 
 describe("MediaCropService", () => {
   let service: MediaCropService;
-  let mediaDbService: jest.Mocked<MediaDatabaseService>;
+  let mediaDbService: jest.Mocked<MediaCropDatabaseService>;
 
   const mockCrop: MediaCropDto = {
     id: 1,
@@ -36,14 +36,14 @@ describe("MediaCropService", () => {
       providers: [
         MediaCropService,
         {
-          provide: MediaDatabaseService,
+          provide: MediaCropDatabaseService,
           useValue: mockMediaDbService,
         },
       ],
     }).compile();
 
     service = module.get<MediaCropService>(MediaCropService);
-    mediaDbService = module.get(MediaDatabaseService);
+    mediaDbService = module.get(MediaCropDatabaseService);
   });
 
   it("should be defined", () => {
