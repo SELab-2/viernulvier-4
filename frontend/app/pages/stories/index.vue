@@ -1,31 +1,28 @@
 <script lang="ts" setup>
-import type { Blog, BlogView, PaginatedResponse } from "@repo/common";
+import type { BlogView, PaginatedResponse } from "@repo/common";
 import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
 import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { getAll } = useBlogApi();
 
-// ── Sort / filter / search state ─────────────────────────────────────────────
-const sortOrder   = ref<"newest" | "oldest">("newest");
-const showFilter  = ref(false);
-const searchQuery = ref("");                              // ← nieuw
+const sortOrder      = ref<"newest" | "oldest">("newest");
+const selectedYear   = ref<string | null>(null);
+const availableYears = ref<string[]>([]);
 
-// ── Pagination state ─────────────────────────────────────────────────────────
-const LIMIT        = 20;
-const page         = ref(0);
-const totalItems   = ref(0);
-const stories      = ref<Array<Blog | BlogView>>([]);
-const pending      = ref(false);
+const LIMIT         = 20;
+const page          = ref(0);
+const totalItems    = ref(0);
+const stories       = ref<BlogView[]>([]);
+const pending       = ref(false);
 const isLoadingMore = ref(false);
-const fetchError   = ref<Error | null>(null);
+const fetchError    = ref<Error | null>(null);
 
 const hasMore = computed(() => stories.value.length < totalItems.value);
 
-// ── Response normaliser ──────────────────────────────────────────────────────
-const unwrap = (result: unknown): PaginatedResponse<Blog | BlogView> | null => {
+const unwrap = (result: unknown): PaginatedResponse<BlogView> | null => {
   if (!result) return null;
   const r = result as any;
   if (r?.data && "objects" in r.data) return r.data;
@@ -33,12 +30,36 @@ const unwrap = (result: unknown): PaginatedResponse<Blog | BlogView> | null => {
   return null;
 };
 
-// ── Fetch ────────────────────────────────────────────────────────────────────
+/**
+ * Two cheap requests (limit=1 each) to discover the full year range without
+ * loading all stories. The nav is populated immediately on mount.
+ */
+const discoverYears = async () => {
+  try {
+    const lang = locale.value as "nl" | "en";
+    const [rawDesc, rawAsc] = await Promise.all([
+      getAll({ paginationFilters: { limit: 1, page: 0, descending: true  }, languageFilters: { lang } }),
+      getAll({ paginationFilters: { limit: 1, page: 0, descending: false }, languageFilters: { lang } }),
+    ]);
+    const newest = unwrap(rawDesc as unknown)?.objects[0];
+    const oldest = unwrap(rawAsc  as unknown)?.objects[0];
+    const ny = newest?.created_at ? new Date(newest.created_at).getFullYear() : null;
+    const oy = oldest?.created_at ? new Date(oldest.created_at).getFullYear() : null;
+    if (ny && oy) {
+      const yrs: string[] = [];
+      for (let y = ny; y >= oy; y--) yrs.push(String(y));
+      availableYears.value = yrs;
+    }
+  } catch {
+    /* silent – nav will be empty but the page still works */
+  }
+};
+
 const fetchPage = async (reset = false) => {
   if (reset) {
-    page.value = 0;
-    stories.value = [];
-    pending.value = true;
+    page.value       = 0;
+    stories.value    = [];
+    pending.value    = true;
     fetchError.value = null;
   } else {
     if (isLoadingMore.value || !hasMore.value) return;
@@ -46,26 +67,47 @@ const fetchPage = async (reset = false) => {
   }
 
   try {
+    const lang = locale.value as "nl" | "en";
+    const y    = selectedYear.value !== null ? parseInt(selectedYear.value) : null;
+
     const raw = await getAll({
-      paginationFilters: { limit: LIMIT, page: page.value, descending: true },
+      paginationFilters: {
+        limit:      LIMIT,
+        page:       page.value,
+        descending: sortOrder.value === "newest",
+      },
+      languageFilters: { lang },
+      ...(y !== null
+        ? { blogFilters: { after: `${y}-01-01`, before: `${y + 1}-01-01` } }
+        : {}),
     });
-    const paged = unwrap(raw);
+
+    const paged = unwrap(raw as unknown);
     totalItems.value = paged?.totalItems ?? 0;
-    const items = paged?.objects ?? [];
+    const items = (paged?.objects ?? []) as BlogView[];
     if (reset) stories.value = items;
-    else stories.value.push(...items);
+    else        stories.value.push(...items);
   } catch (e) {
     fetchError.value = e as Error;
   } finally {
-    pending.value = false;
+    pending.value       = false;
     isLoadingMore.value = false;
   }
 };
 
-watch(sortOrder, () => fetchPage(true));
-onMounted(() => fetchPage(true));
+/** Toggle: click selected year → clear filter; click other year → activate filter. */
+const onYearSelect = (year: string) => {
+  selectedYear.value = selectedYear.value === year ? null : year;
+};
 
-// ── Infinite-scroll sentinel ─────────────────────────────────────────────────
+watch([sortOrder, selectedYear, locale], () => fetchPage(true));
+
+onMounted(async () => {
+  await discoverYears();
+  fetchPage(true);
+});
+
+// ── Infinite-scroll sentinel ──────────────────────────────────────────────
 const sentinel = ref<HTMLElement | null>(null);
 let io: IntersectionObserver | null = null;
 
@@ -92,13 +134,7 @@ onUnmounted(() => io?.disconnect());
 
     <StoriesHeader />
 
-    <StoryToolbar
-      v-model:sort-order="sortOrder"
-      v-model:show-filter="showFilter"
-      v-model:search-query="searchQuery"
-      :total-items="totalItems"
-      :loaded="stories.length"
-    />
+    <StoryToolbar v-model:sort-order="sortOrder" />
 
     <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
 
@@ -123,7 +159,9 @@ onUnmounted(() => io?.disconnect());
         <StoryTimeline
           :stories="stories"
           :sort-order="sortOrder"
-          :search-query="searchQuery"
+          :available-years="availableYears"
+          :selected-year="selectedYear"
+          @year-select="onYearSelect"
         />
 
         <div ref="sentinel" class="h-1" aria-hidden="true" />

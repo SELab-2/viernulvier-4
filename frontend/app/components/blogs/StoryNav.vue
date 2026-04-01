@@ -3,31 +3,27 @@
   ==============================
   Vertical year-navigation sidebar.
 
-  Core idea
-  ---------
-  The sticky inner wrapper fills the available viewport height (from below
-  the header to the bottom of the screen). The dots are spread evenly inside
-  that space using flex + justify-between. When there are more years than fit
-  at the minimum spacing (MIN_ITEM_H), the list becomes scrollable and dots
-  use MIN_ITEM_H spacing instead.
+  Clicking a year emits "year-click". The parent toggles the backend year
+  filter (before/after) — the nav itself does not scroll or fetch anything.
 
-  The full-height line is on the <nav> element (absolute top-0 bottom-0),
-  completely separate from the dot list, so it always runs the full page.
+  When `selectedYear` is set a small ring highlights the filtered dot so
+  the user knows they are viewing a filtered result set. Clicking that dot
+  again clears the filter (handled by the parent toggle logic).
 -->
 <script lang="ts" setup>
 const props = defineProps<{
   years: string[];
   activeYear: string;
+  /** The year currently being filtered on, or null for "all years". */
+  selectedYear?: string | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "scroll-to", year: string): void;
+  (e: "year-click", year: string): void;
 }>();
 
-// Minimum px between dot centres when the list is scrollable
 const MIN_ITEM_H = 52;
 
-// ── Header height (for sticky offset + available height calculation) ────────
 const headerH = ref(0);
 let headerRo: ResizeObserver | null = null;
 
@@ -36,21 +32,13 @@ const measureHeader = () => {
   if (h) headerH.value = h.offsetHeight;
 };
 
-// ── Available viewport height for the dot list ─────────────────────────────
 const viewportH = ref(0);
 const updateViewportH = () => { viewportH.value = window.innerHeight; };
 
-// Available height = viewport minus header minus small padding
 const availableH = computed(() => Math.max(100, viewportH.value - headerH.value - 32));
-
-// How many dots fit at MIN_ITEM_H spacing?
-const maxFit = computed(() => Math.floor(availableH.value / MIN_ITEM_H));
-
-// Do we need to scroll the dot list?
+const maxFit     = computed(() => Math.floor(availableH.value / MIN_ITEM_H));
 const needsScroll = computed(() => props.years.length > maxFit.value);
 
-// When not scrollable: spread dots evenly across availableH
-// When scrollable: each dot gets MIN_ITEM_H, list scrolls
 const itemH = computed(() => {
   if (!needsScroll.value && props.years.length > 1) {
     return availableH.value / props.years.length;
@@ -59,9 +47,7 @@ const itemH = computed(() => {
 });
 
 const dotListH = computed(() =>
-  needsScroll.value
-    ? maxFit.value * MIN_ITEM_H   // visible window height
-    : availableH.value,           // full available height
+  needsScroll.value ? maxFit.value * MIN_ITEM_H : availableH.value,
 );
 
 onMounted(() => {
@@ -87,7 +73,6 @@ onMounted(() => {
 });
 onUnmounted(() => headerRo?.disconnect());
 
-// ── Inner dot-list scroll ──────────────────────────────────────────────────
 const dotListEl      = ref<HTMLElement | null>(null);
 const innerScrollTop = ref(0);
 const innerScrollMax = ref(0);
@@ -117,10 +102,9 @@ watch(needsScroll, async () => {
   if (el) innerScrollMax.value = el.scrollHeight - el.clientHeight;
 });
 
-// Auto-scroll active year into the visible dot window
 watch(() => props.activeYear, async (year) => {
   await nextTick();
-  if (!needsScroll.value) return; // no scrolling needed when all fit
+  if (!needsScroll.value) return;
   const el = dotListEl.value;
   if (!el || !year) return;
   const idx = props.years.indexOf(year);
@@ -136,31 +120,24 @@ watch(() => props.activeYear, async (year) => {
     class="w-14 sm:w-16 shrink-0 self-stretch relative"
     aria-label="Year navigation"
   >
-    <!-- Full-height line — always spans the entire nav column -->
+    <!-- Full-height line -->
     <div
       class="absolute inset-y-0 w-px bg-foreground/20 pointer-events-none z-0"
       style="left: calc(50% - 0.5px);"
       aria-hidden="true"
     />
 
-    <!--
-      Sticky wrapper — stays in the viewport as user scrolls.
-      top = header offsetHeight (immune to translate animation).
-      No overflow:hidden here — that breaks position:sticky.
-    -->
     <div
       class="sticky self-start z-10"
       :style="{ top: `${headerH}px` }"
     >
       <div class="flex gap-1">
-
         <div class="relative flex-1">
 
-          <!-- Fade top (only when scrollable and scrolled down) -->
+          <!-- Fade top -->
           <div
             v-if="canScrollUp"
-            class="absolute top-0 inset-x-0 h-8 z-10 pointer-events-none
-                   bg-gradient-to-b from-background to-transparent"
+            class="absolute top-0 inset-x-0 h-8 z-10 pointer-events-none bg-gradient-to-b from-background to-transparent"
             aria-hidden="true"
           />
 
@@ -172,10 +149,6 @@ watch(() => props.activeYear, async (year) => {
             style="scrollbar-width: none;"
             @scroll="onDotListScroll"
           >
-            <!--
-              When not scrollable: justify-between spreads dots evenly.
-              When scrollable: fixed itemH per dot, scrolls naturally.
-            -->
             <div
               class="flex flex-col items-center h-full"
               :class="needsScroll ? '' : 'justify-between'"
@@ -183,29 +156,34 @@ watch(() => props.activeYear, async (year) => {
               <button
                 v-for="year in years"
                 :key="year"
-                class="relative flex flex-col items-center justify-center w-full
-                       cursor-pointer focus-visible:outline-none
-                       focus-visible:ring-2 focus-visible:ring-purple-400 rounded
-                       shrink-0"
+                class="relative flex flex-col items-center justify-center w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded shrink-0"
                 :style="needsScroll ? { height: `${MIN_ITEM_H}px` } : {}"
-                :aria-label="`Scroll to ${year}`"
+                :aria-label="`Filter to ${year}`"
+                :aria-pressed="selectedYear === year"
                 :aria-current="activeYear === year ? 'true' : undefined"
-                @click="emit('scroll-to', year)"
+                @click="emit('year-click', year)"
               >
-                <!-- Dot -->
+                <!--
+                  Dot visual:
+                  - active (scroll position or filtered): purple fill + glow
+                  - selectedYear (filter active): extra ring to indicate filter state
+                  - default: border only
+                -->
                 <div
-                  class="w-4 h-4 rounded-full border-2 relative z-10
-                         transition-all duration-200"
-                  :class="
+                  class="w-4 h-4 rounded-full border-2 relative z-10 transition-all duration-200"
+                  :class="[
                     activeYear === year
                       ? 'bg-purple-500 border-purple-500 scale-125 shadow-[0_0_8px_2px_rgba(168,85,247,0.45)]'
-                      : 'bg-background border-foreground/40 hover:border-purple-400'
-                  "
+                      : 'bg-background border-foreground/40 hover:border-purple-400',
+                    selectedYear === year && selectedYear !== null
+                      ? 'ring-2 ring-purple-400/50 ring-offset-1 ring-offset-background'
+                      : '',
+                  ]"
                 />
+
                 <!-- Year label -->
                 <span
-                  class="mt-1 font-brand font-black text-[9px] uppercase tracking-widest
-                         select-none leading-none pointer-events-none"
+                  class="mt-1 font-brand font-black text-[9px] uppercase tracking-widest select-none leading-none pointer-events-none"
                   :class="activeYear === year ? 'text-purple-500' : 'text-foreground/40'"
                 >
                   {{ year }}
@@ -217,8 +195,7 @@ watch(() => props.activeYear, async (year) => {
           <!-- Fade bottom -->
           <div
             v-if="canScrollDown"
-            class="absolute bottom-0 inset-x-0 h-8 z-10 pointer-events-none
-                   bg-gradient-to-t from-background to-transparent"
+            class="absolute bottom-0 inset-x-0 h-8 z-10 pointer-events-none bg-gradient-to-t from-background to-transparent"
             aria-hidden="true"
           />
         </div>
@@ -231,8 +208,7 @@ watch(() => props.activeYear, async (year) => {
           aria-hidden="true"
         >
           <div
-            class="absolute left-0 right-0 rounded-full bg-purple-500/60
-                   transition-all duration-150"
+            class="absolute left-0 right-0 rounded-full bg-purple-500/60 transition-all duration-150"
             :style="{ top: `${thumbTop}%`, height: `${thumbH}%` }"
           />
         </div>

@@ -1,57 +1,43 @@
 <!--
   pages/blog/[id].vue
   =====================
-  This file implements the individual blog post detail page.
-  It fetches the blog post by ID from the backend API, then renders:
-    - A hero banner (real image when available, gradient placeholder otherwise)
-    - The post title, date and estimated reading time
-    - The full post body with a decorative side rule
+  Fetches a single blog post by ID with the current locale so the backend
+  returns a flat BlogView.
 -->
-
 <script lang="ts" setup>
-import type { Blog } from "@repo/common";
+import type { BlogView } from "@repo/common";
 import { pickPlaceholderGradient } from "~/utils/constants";
+import { ROUTES } from "~/utils/routes";
+const route = useRoute();
 
 const { t, locale } = useI18n();
-const route = useRoute();
-const { getById } = useBlogApi();
-
-/** Parse the route parameter to a numeric id, or null if invalid. */
 const blogId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
   const n = parseInt(raw ?? "", 10);
   return isFinite(n) ? n : null;
 });
+const { getById } = useBlogApi();
 
-const { data, pending, error } = await useAsyncData<Blog | null>(
+// Re-run when locale changes so the content switches language automatically.
+const { data, pending, error, refresh } = await useAsyncData<BlogView | null>(
   `blog-${blogId.value}`,
-  async (): Promise<Blog | null> => {
+  async (): Promise<BlogView | null> => {
     if (blogId.value === null) return null;
-    const res = await getById(blogId.value) as any;
-    return (res?.data ?? res) as Blog;
+    const res = await getById(blogId.value, locale.value as "nl" | "en") as any;
+    return (res?.data ?? res) as BlogView;
   },
 );
 
-const blog = computed<Blog | null>(() => data.value ?? null);
+watch(locale, () => refresh());
 
-const title = computed(() => {
-  const raw = blog.value?.titel;
-  if (!raw) return "";
-  if (typeof raw === "string") return raw;
-  const lang = locale.value as "nl" | "en";
-  return raw[lang] ?? raw.nl ?? raw.en ?? "";
-});
+const blog = computed<BlogView | null>(() => data.value ?? null);
 
-const body = computed(() => {
-  const raw = blog.value?.description;
-  if (!raw) return "";
-  if (typeof raw === "string") return raw;
-  const lang = locale.value as "nl" | "en";
-  return raw[lang] ?? raw.nl ?? raw.en ?? "";
-});
+// BlogView fields are already flat strings — no locale branching needed.
+const title = computed(() => (blog.value as any)?.titel ?? "");
+const body  = computed(() => (blog.value as any)?.description ?? "");
 
-const image = computed<string | null>(() => (blog.value as any)?.image ?? null);
-const bannerGradient = computed(() => pickPlaceholderGradient(blog.value?.id ?? 0));
+const image          = computed<string | null>(() => (blog.value as any)?.image ?? null);
+const bannerGradient = computed(() => pickPlaceholderGradient((blog.value as any)?.id ?? 0));
 
 const formattedDate = computed(() => {
   if (!blog.value?.created_at) return "";
@@ -70,21 +56,14 @@ const readingTime = computed(() => {
 </script>
 
 <template>
-  <!--
-    Light mode: white background.
-    Dark mode: single unified navy (#1e2230) across hero, body and footer —
-    avoids the two-tone split that made sections feel disconnected.
-  -->
   <div class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100 transition-colors duration-200">
 
-    <!-- Loading spinner -->
     <div v-if="pending" class="min-h-screen flex items-center justify-center">
       <svg class="w-6 h-6 animate-spin text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
     </div>
 
-    <!-- Not found / error state -->
     <div
       v-else-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
@@ -93,33 +72,25 @@ const readingTime = computed(() => {
         {{ t("stories.notFound") }}
       </p>
       <NuxtLink
-        to="/stories"
-        class="
-          font-brand font-black text-[10px] uppercase tracking-widest
-          border px-5 py-3 transition-all
-          border-gray-300 text-gray-500 hover:border-gray-700 hover:text-gray-900
-          dark:border-[#2e3347] dark:text-gray-400 dark:hover:border-gray-400 dark:hover:text-gray-100
-        "
+        :to="ROUTES.stories.base"
+        class="font-brand font-black text-[10px] uppercase tracking-widest border px-5 py-3 transition-all border-gray-300 text-gray-500 hover:border-gray-700 hover:text-gray-900 dark:border-[#2e3347] dark:text-gray-400 dark:hover:border-gray-400 dark:hover:text-gray-100"
       >
         ← {{ t("stories.backToStories") }}
       </NuxtLink>
     </div>
 
-    <!-- Blog content -->
     <template v-else>
 
-      <!-- ── Hero banner ─────────────────────────────────────────────────── -->
+      <!-- ── Hero banner ──────────────────────────────────────────────── -->
       <section
         class="relative flex items-end"
         :class="image ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
       >
-        <!-- Real hero image -->
         <template v-if="image">
           <img :src="image" :alt="title" class="absolute inset-0 w-full h-full object-cover" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </template>
 
-        <!-- Gradient placeholder -->
         <div
           v-else
           class="absolute inset-0 opacity-60"
@@ -127,12 +98,10 @@ const readingTime = computed(() => {
           aria-hidden="true"
         />
 
-        <!-- Title + meta overlaid on the banner -->
         <div
           class="relative z-10 container mx-auto px-6 max-w-4xl w-full pb-10"
           :class="image ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
         >
-          <!-- Title -->
           <h1
             class="font-brand font-black uppercase tracking-tighter leading-none mb-5"
             :class="image ? 'text-4xl md:text-6xl' : 'text-3xl md:text-5xl'"
@@ -140,7 +109,6 @@ const readingTime = computed(() => {
             {{ title }}
           </h1>
 
-          <!-- Meta row: date, reading time + back button -->
           <div
             class="flex flex-wrap items-center gap-4 font-brand font-black text-[10px] uppercase tracking-widest"
             :class="image ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'"
@@ -157,22 +125,14 @@ const readingTime = computed(() => {
 
             <span>{{ readingTime }} {{ t("stories.minRead") }}</span>
 
-            <!-- Divider -->
             <span class="opacity-30" aria-hidden="true">·</span>
 
-            <!-- Back button — prominent, visually distinct from the labels -->
             <NuxtLink
-              to="/stories"
-              class="
-                flex items-center gap-1.5 px-3 py-1.5 rounded
-                border transition-all duration-150
-                font-brand font-black text-[9px] uppercase tracking-widest
-              "
-              :class="
-                image
-                  ? 'border-white/40 text-white/90 hover:border-white hover:bg-white/20'
-                  : 'border-gray-400/60 text-gray-700 dark:border-gray-500/60 dark:text-gray-200 hover:border-gray-700 hover:bg-gray-100 dark:hover:border-gray-300 dark:hover:bg-white/10'
-              "
+             :to="ROUTES.stories.base"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all duration-150 font-brand font-black text-[9px] uppercase tracking-widest"
+              :class="image
+                ? 'border-white/40 text-white/90 hover:border-white hover:bg-white/20'
+                : 'border-gray-400/60 text-gray-700 dark:border-gray-500/60 dark:text-gray-200 hover:border-gray-700 hover:bg-gray-100 dark:hover:border-gray-300 dark:hover:bg-white/10'"
             >
               <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                 <polyline points="15 18 9 12 15 6" />
@@ -183,16 +143,11 @@ const readingTime = computed(() => {
         </div>
       </section>
 
-      <!-- ── Body ────────────────────────────────────────────────────────── -->
-      <!--
-        Same bg as the page root in both light and dark mode — no separate
-        surface colour so the transition from banner to body is seamless.
-      -->
+      <!-- ── Body ────────────────────────────────────────────────────── -->
       <section class="py-16 sm:py-20">
         <div class="container mx-auto px-6 max-w-4xl">
           <article class="relative max-w-3xl mx-auto">
 
-            <!-- Decorative left rule (desktop only) -->
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
               style="background: linear-gradient(to bottom, transparent, #9333ea, transparent)"
@@ -200,34 +155,18 @@ const readingTime = computed(() => {
             />
 
             <div class="md:pl-10">
-              <!-- Post body text -->
               <p class="text-base leading-8 whitespace-pre-line text-gray-700 dark:text-gray-300">
                 {{ body }}
               </p>
 
-              <!-- Footer: date + back button (visually distinct) -->
-              <div
-                class="
-                  mt-20 pt-8 border-t flex items-center justify-between
-                  border-gray-200 dark:border-[#2e3347]
-                "
-              >
+              <div class="mt-20 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]">
                 <span class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500">
                   {{ formattedDate }}
                 </span>
 
-                <!-- Styled back button — clearly a button, not a label -->
                 <NuxtLink
-                  to="/stories"
-                  class="
-                    flex items-center gap-1.5 px-4 py-2 rounded
-                    border font-brand font-black text-[9px] uppercase tracking-widest
-                    transition-all duration-150
-                    border-gray-300 text-gray-600
-                    hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50
-                    dark:border-[#2e3347] dark:text-gray-400
-                    dark:hover:border-purple-500 dark:hover:text-purple-400 dark:hover:bg-purple-900/20
-                  "
+                  :to="ROUTES.stories.base"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded border font-brand font-black text-[9px] uppercase tracking-widest transition-all duration-150 border-gray-300 text-gray-600 hover:border-purple-400 hover:text-purple-600 hover:bg-purple-50 dark:border-[#2e3347] dark:text-gray-400 dark:hover:border-purple-500 dark:hover:text-purple-400 dark:hover:bg-purple-900/20"
                 >
                   <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                     <polyline points="15 18 9 12 15 6" />

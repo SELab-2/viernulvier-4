@@ -2,16 +2,14 @@
   components/blogs/StoryMonthGroup.vue
   ======================================
   One month bucket. Click heading to collapse/expand.
-  All lines and labels use foreground (black in light mode).
-  Pointer cursor is explicit so users know the row is clickable.
 -->
 <script lang="ts" setup>
-import type { Blog, BlogView } from "@repo/common";
+import type { BlogView } from "@repo/common";
 import StoryListItem from "~/components/blogs/StoryListItem.vue";
 
 const props = defineProps<{
   monthKey: string;
-  stories: Array<Blog | BlogView>;
+  stories: BlogView[];
   sortOrder: "newest" | "oldest";
 }>();
 
@@ -30,30 +28,24 @@ const label = computed(() => {
 
 <template>
   <div>
-    <!-- Month heading — full row clickable, explicit pointer cursor -->
     <button
       type="button"
       class="flex items-center gap-3 mb-3 w-full text-left cursor-pointer group/month"
       :aria-expanded="isOpen"
       @click="toggle"
     >
-      <!-- Dot — black -->
       <div class="w-2 h-2 rounded-full bg-foreground/40 shrink-0 transition-colors group-hover/month:bg-purple-400" aria-hidden="true" />
 
-      <!-- Month label — black -->
       <span class="font-brand font-black text-[10px] uppercase tracking-widest text-foreground/60 group-hover/month:text-foreground transition-colors">
         {{ label }}
       </span>
 
-      <!-- Rule — black -->
       <div class="flex-1 h-px bg-foreground/15" />
 
-      <!-- Count — black -->
       <span class="font-brand font-black text-[9px] uppercase tracking-widest text-foreground/40">
         {{ stories.length }}
       </span>
 
-      <!-- Chevron -->
       <svg
         class="w-3 h-3 shrink-0 text-foreground/30 transition-transform duration-200 ml-1"
         :class="isOpen ? 'rotate-0' : '-rotate-90'"
@@ -64,7 +56,6 @@ const label = computed(() => {
       </svg>
     </button>
 
-    <!-- Collapsible story cards -->
     <Transition
       enter-active-class="transition-all duration-150 ease-out"
       enter-from-class="opacity-0"
@@ -76,8 +67,8 @@ const label = computed(() => {
       <div v-show="isOpen" class="space-y-2">
         <NuxtLink
           v-for="story in stories"
-          :key="story.id"
-          :to="`/stories/${story.id}`"
+          :key="(story as any).id"
+          :to="ROUTES.stories.byId((story as any).id)"
           class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-lg"
         >
           <StoryListItem :story="story" />

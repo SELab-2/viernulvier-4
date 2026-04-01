@@ -1,130 +1,104 @@
 <script lang="ts" setup>
-import type { Blog, BlogView } from "@repo/common";
+import type { BlogView } from "@repo/common";
 import StoryNav from "~/components/blogs/StoryNav.vue";
 import StoryYearSection from "~/components/blogs/StoryYearSection.vue";
 
 const props = defineProps<{
-  stories: Array<Blog | BlogView>;
+  stories: BlogView[];
   sortOrder: "newest" | "oldest";
-  searchQuery?: string;
+  /** Full year range, discovered via two cheap API calls on the parent. */
+  availableYears: string[];
+  /** Currently filtered year, or null for "all years". */
+  selectedYear: string | null;
 }>();
 
 const emit = defineEmits<{
-  (e: "story-click", story: Blog | BlogView): void;
+  (e: "year-select", year: string): void;
 }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
-// Filter
-const filteredStories = computed(() => {
-  const q = props.searchQuery?.trim().toLowerCase();
-  if (!q) return props.stories;
-
-  return props.stories.filter((s) => {
-    const raw = s.titel;
-    const title =
-      typeof raw === "string"
-        ? raw
-        : (raw as any)?.[locale.value] ?? (raw as any)?.nl ?? (raw as any)?.en ?? "";
-
-    const desc = (s as any).description;
-    const descText =
-      !desc
-        ? ""
-        : typeof desc === "string"
-          ? desc
-          : (desc as any)?.[locale.value] ?? (desc as any)?.nl ?? (desc as any)?.en ?? "";
-
-    return (
-      title.toLowerCase().includes(q) ||
-      descText.toLowerCase().includes(q)
-    );
-  });
-});
-
-// Group stories by year
+// Group by year — backend already returns stories in the correct order,
+// so we just bucket them without re-sorting.
 const grouped = computed(() => {
-  const map = new Map<string, Array<Blog | BlogView>>();
-  for (const s of filteredStories.value) {
+  const map = new Map<string, BlogView[]>();
+  for (const s of props.stories) {
     const year = new Date(s.created_at ?? 0).getFullYear().toString();
     if (!map.has(year)) map.set(year, []);
     map.get(year)!.push(s);
   }
-  const years = [...map.keys()].sort((a, b) =>
-    props.sortOrder === "oldest"
-      ? parseInt(a) - parseInt(b)
-      : parseInt(b) - parseInt(a),
-  );
-  return years.map((year) => ({ year, stories: map.get(year)! }));
+  return [...map.keys()].map((year) => ({ year, stories: map.get(year)! }));
 });
 
-const allYears = computed(() => grouped.value.map((g) => g.year));
-
-// Active-year tracking via IntersectionObserver
+// Active year for the nav highlight — tracks scroll position when showing
+// all years, or is pinned to selectedYear when a filter is active.
 const activeYear = ref<string>("");
 let yearObserver: IntersectionObserver | null = null;
 
 const attachObserver = () => {
   yearObserver?.disconnect();
+
+  // When filtering, the nav dot is always pinned to the selected year.
+  if (props.selectedYear) {
+    activeYear.value = props.selectedYear;
+    return;
+  }
+
   yearObserver = new IntersectionObserver(
     (entries) => {
       const visible = entries
         .filter((e) => e.isIntersecting)
         .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-      const first = visible[0];
-      if (first) activeYear.value = first.target.id.replace("story-year-", "");
+      if (visible[0]) activeYear.value = visible[0].target.id.replace("story-year-", "");
     },
     { rootMargin: "-120px 0px -70% 0px", threshold: 0 },
   );
-  for (const year of allYears.value) {
+
+  for (const { year } of grouped.value) {
     const el = document.getElementById(`story-year-${year}`);
     if (el) yearObserver.observe(el);
   }
-  if (!activeYear.value && allYears.value[0]) activeYear.value = allYears.value[0];
+  if (!activeYear.value && grouped.value[0]) {
+    activeYear.value = grouped.value[0].year;
+  }
 };
 
-watch(allYears, async () => {
+watch(
+  () => props.selectedYear,
+  async (y) => {
+    if (y) activeYear.value = y;
+    await nextTick();
+    attachObserver();
+  },
+  { immediate: true },
+);
+
+watch(grouped, async () => {
   await nextTick();
   attachObserver();
-}, { immediate: false });
-
-watch(allYears, (years) => {
-  if (years.length && !years.includes(activeYear.value)) {
-    activeYear.value = years[0] ?? "";
-  }
 });
 
 onMounted(() => nextTick(attachObserver));
 onUnmounted(() => yearObserver?.disconnect());
-
-const scrollToYear = (year: string) => {
-  const el = document.getElementById(`story-year-${year}`);
-  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  activeYear.value = year;
-};
 </script>
 
 <template>
   <div>
-    <!--
-      items-stretch: makes the nav column grow to the full height of the
-      content column beside it, so the vertical timeline line runs all the
-      way down the page.
-    -->
     <div class="flex items-stretch gap-4 sm:gap-6 pt-6">
       <StoryNav
-        :years="allYears"
+        :years="availableYears"
         :active-year="activeYear"
-        @scroll-to="scrollToYear"
+        :selected-year="selectedYear"
+        @year-click="emit('year-select', $event)"
       />
 
       <div class="flex-1 min-w-0">
         <div v-if="grouped.length === 0" class="py-24 text-center">
           <p class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2">
-            {{ searchQuery?.trim() ? t("stories.noResults") : t("stories.noStories") }}
+            {{ t("stories.noStories") }}
           </p>
           <p class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
-            {{ searchQuery?.trim() ? t("stories.noResultsDesc") : t("stories.noStoriesDesc") }}
+            {{ t("stories.noStoriesDesc") }}
           </p>
         </div>
 
@@ -135,7 +109,6 @@ const scrollToYear = (year: string) => {
             :year="group.year"
             :stories="group.stories"
             :sort-order="sortOrder"
-            @story-click="emit('story-click', $event)"
           />
         </div>
       </div>
