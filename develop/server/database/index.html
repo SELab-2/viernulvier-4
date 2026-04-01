@@ -2370,6 +2370,8 @@ tables.</p>
 <code>title</code>, <code>description</code> and <code>credits</code>.</p>
 <p><strong><code>media_crop</code></strong> – A cropped variant of a media item, identified by a <code>crop_name</code> enum (<code>hd_ready</code>, <code>FE3_header</code>,
 <code>thumbnail</code>, <code>og_image</code>, <code>mobile</code>, <code>nb_ready</code>) and a <code>url</code>. Linked to items via <code>item_crop</code>.</p>
+<p><strong><code>print_items</code></strong> – A standalone media representation for printable items, storing a multilingual <code>titel</code> and
+<code>description</code> (JSONB), alongside a specific <code>url</code>. Linked to media galleries via <code>print_item_media_gallery</code>.</p>
 <hr />
 <h3 id="junction-tables">Junction Tables</h3>
 <table>
@@ -2426,6 +2428,11 @@ tables.</p>
 <td><code>blogs</code> ↔ <code>media_gallery</code></td>
 <td>Yes</td>
 </tr>
+<tr>
+<td><code>print_item_media_gallery</code></td>
+<td><code>print_items</code> ↔ <code>media_gallery</code></td>
+<td>Yes</td>
+</tr>
 </tbody>
 </table>
 <p>All junction tables use composite primary keys.</p>
@@ -2446,7 +2453,9 @@ permissions. Linked to accounts via <code>account_api_keys</code>.</p>
      ├──&lt; production_blogs          &gt;── blogs
      └──&lt; production_media_gallery  &gt;── media_gallery ──&lt; gallery_item &gt;── media_item ──&lt; item_crop &gt;── media_crop
 
-blogs ──&lt; blog_media_gallery &gt;── media_gallery
+blogs ──────&lt; blog_media_gallery &gt;────── media_gallery
+
+print_items ──&lt; print_item_media_gallery &gt;── media_gallery
 
 accounts ──&lt; account_api_keys &gt;── api_keys
 </code></pre>
