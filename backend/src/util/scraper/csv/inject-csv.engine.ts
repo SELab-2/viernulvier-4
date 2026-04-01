@@ -12,7 +12,7 @@ import { Language } from "@repo/common";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../../util/logger/logger.service";
-import { ResourceGoneException } from "src/common/exceptions";
+import { ResourceGoneException } from "../../../common/exceptions";
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
 const TRANSLATION_LANG_FROM: Language = "nl";
