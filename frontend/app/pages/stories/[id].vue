@@ -6,19 +6,21 @@
 -->
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
-import { pickPlaceholderGradient } from "~/utils/constants";
+import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { ROUTES } from "~/utils/routes";
-const route = useRoute();
 
+const route = useRoute();
 const { t, locale } = useI18n();
+
 const blogId = computed(() => {
   const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
   const n = parseInt(raw ?? "", 10);
   return isFinite(n) ? n : null;
 });
+
 const { getById } = useBlogApi();
 
-// Re-run when locale changes so the content switches language automatically.
 const { data, pending, error, refresh } = await useAsyncData<BlogView | null>(
   `blog-${blogId.value}`,
   async (): Promise<BlogView | null> => {
@@ -32,22 +34,8 @@ watch(locale, () => refresh());
 
 const blog = computed<BlogView | null>(() => data.value ?? null);
 
-// BlogView fields are already flat strings — no locale branching needed.
-const title = computed(() => (blog.value as any)?.titel ?? "");
-const body  = computed(() => (blog.value as any)?.description ?? "");
-
-const image          = computed<string | null>(() => (blog.value as any)?.image ?? null);
-const bannerGradient = computed(() => pickPlaceholderGradient((blog.value as any)?.id ?? 0));
-
-const formattedDate = computed(() => {
-  if (!blog.value?.created_at) return "";
-  const loc = locale.value === "nl" ? "nl-BE" : "en-GB";
-  return new Date(blog.value.created_at).toLocaleDateString(loc, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-});
+const { title, description: body, image, formattedDate, placeholderGradient: bannerGradient } =
+  useBlogStory(blog);
 
 const readingTime = computed(() => {
   const words = body.value.split(/\s+/).filter(Boolean).length;
@@ -128,7 +116,7 @@ const readingTime = computed(() => {
             <span class="opacity-30" aria-hidden="true">·</span>
 
             <NuxtLink
-             :to="ROUTES.stories.base"
+              :to="ROUTES.stories.base"
               class="flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all duration-150 font-brand font-black text-[9px] uppercase tracking-widest"
               :class="image
                 ? 'border-white/40 text-white/90 hover:border-white hover:bg-white/20'

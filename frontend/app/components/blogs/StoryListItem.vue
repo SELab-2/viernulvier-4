@@ -6,30 +6,12 @@
 -->
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
-import { pickPlaceholderGradient } from "~/utils/constants";
+import { useBlogStory } from "~/composables/blogs/useBlogStory";
 
-const props = defineProps<{
-  story: BlogView;
-}>();
+const props = defineProps<{ story: BlogView }>();
 
-const { locale } = useI18n();
-
-// BlogView fields are flat strings — no locale fallback logic needed.
-const title       = computed(() => (props.story as any).titel       ?? "—");
-const description = computed(() => (props.story as any).description ?? "");
-
-const formattedDate = computed(() => {
-  if (!(props.story as any).created_at) return "";
-  const loc = locale.value === "nl" ? "nl-BE" : "en-GB";
-  return new Date((props.story as any).created_at).toLocaleDateString(loc, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-});
-
-const image               = computed<string | null>(() => (props.story as any)?.image ?? null);
-const placeholderGradient = computed(() => pickPlaceholderGradient((props.story as any).id ?? 0));
+const { title, description, image, formattedDate, placeholderGradient } =
+  useBlogStory(computed(() => props.story));
 </script>
 
 <template>
@@ -68,10 +50,7 @@ const placeholderGradient = computed(() => pickPlaceholderGradient((props.story 
           {{ title }}
         </h3>
 
-        <p
-          v-if="description"
-          class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400"
-        >
+        <p v-if="description" class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400">
           {{ description }}
         </p>
       </div>

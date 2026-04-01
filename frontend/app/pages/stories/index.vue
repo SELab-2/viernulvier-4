@@ -1,9 +1,24 @@
+<!--
+  pages/stories/index.vue
+  =====================
+  This file implements the main stories overview page.
+
+  It is responsible for:
+  - Discovering the full year range via two lightweight API calls so the
+    sidebar year-navigation (StoryNav) is populated immediately on mount.
+  - Fetching paginated stories with optional year filtering and sort order,
+    appending pages as the user scrolls (infinite-scroll via IntersectionObserver).
+  - Exposing sort order and year filter controls to the toolbar and timeline.
+  - Rendering the appropriate state: loading skeleton, error with retry, or
+    the live StoryTimeline with its infinite-scroll sentinel.
+-->
 <script lang="ts" setup>
 import type { BlogView, PaginatedResponse } from "@repo/common";
 import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
 import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
+import { useBlogApi } from "~/composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n();
 const { getAll } = useBlogApi();

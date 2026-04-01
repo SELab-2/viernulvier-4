@@ -2,11 +2,6 @@
   components/blogs/StoriesHeader.vue
   ------------------------------------
   Minimal sticky top bar for the stories section.
-
-  The language toggle and dark-mode toggle that previously lived here have been
-  removed: both controls are already present in the global Header component,
-  and they share state via the useTheme() composable + useI18n(), so there
-  is no need to duplicate them here.
 -->
 
 <script lang="ts" setup>

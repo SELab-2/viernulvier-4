@@ -6,6 +6,7 @@
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
 import StoryListItem from "~/components/blogs/StoryListItem.vue";
+import { formatMonthLabel } from "~/utils/formatters";
 
 const props = defineProps<{
   monthKey: string;
@@ -18,12 +19,7 @@ const { locale } = useI18n();
 const isOpen = ref(true);
 const toggle = () => { isOpen.value = !isOpen.value; };
 
-const label = computed(() => {
-  const [y, m] = props.monthKey.split("-");
-  const loc = locale.value === "nl" ? "nl-BE" : "en-GB";
-  return new Date(parseInt(y ?? "2000"), parseInt(m ?? "1") - 1, 1)
-    .toLocaleDateString(loc, { month: "long" });
-});
+const label = computed(() => formatMonthLabel(props.monthKey, locale.value));
 </script>
 
 <template>
