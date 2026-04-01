@@ -1,7 +1,7 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { MediaStorageService } from "../../media/media_storage/media_storage.service";
+import { MediaStorageService } from "../../media/media_storage/service/media_storage.service";
 import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";

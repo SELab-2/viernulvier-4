@@ -21,7 +21,10 @@ import { LanguageService } from "../language/language.service";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import Bottleneck from "bottleneck";
-import { CROP_NAMES, CropName } from "@repo/common/src/objects/media";
+import {
+  CROP_NAMES,
+  CropName,
+} from "@repo/common/src/objects/media/media_crop";
 import { ConfigService } from "@nestjs/config";
 
 const apiDomain: string = "/api/v1/";
