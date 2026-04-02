@@ -195,7 +195,14 @@ export class ScraperService implements OnApplicationBootstrap {
    * @returns The Buffer.
    */
   private async getImageBuffer(url: string): Promise<Buffer> {
-    const response = await fetch(url);
+    const apiKey = this.configService.get<string>("CLIENT_API_KEY");
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "X-AUTH-TOKEN": `${apiKey}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch images: ${response.statusText}`);
