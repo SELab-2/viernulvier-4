@@ -197,11 +197,33 @@ export class ScraperService implements OnApplicationBootstrap {
   private async getImageBuffer(url: string): Promise<Buffer> {
     const apiKey = this.configService.get<string>("CLIENT_API_KEY");
 
+    const browserHeaders = new Headers({
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      "X-AUTH-TOKEN": `${apiKey}`,
+
+      // Tell the server we specifically want an image, falling back to anything
+      Accept:
+        "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+
+      // Modern browser fingerprinting headers (Highly effective against WAFs)
+      "Sec-Ch-Ua":
+        '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+      "Sec-Ch-Ua-Mobile": "?0",
+      "Sec-Ch-Ua-Platform": '"Windows"',
+      "Sec-Fetch-Dest": "image",
+      "Sec-Fetch-Mode": "no-cors",
+      "Sec-Fetch-Site": "cross-site",
+
+      // Optional: If you suspect hotlink protection, spoof the Referer.
+      // Try setting this to the target's own homepage, or a generic search engine.
+      Referer: "https://www.google.com/",
+    });
+
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "X-AUTH-TOKEN": `${apiKey}`,
-      },
+      headers: browserHeaders,
     });
 
     if (!response.ok) {
