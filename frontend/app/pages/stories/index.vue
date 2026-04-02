@@ -19,6 +19,7 @@ import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import ScrollToTop from "~/components/blogs/ScrollToTop.vue";
 
 const { t, locale } = useI18n();
 const { getAll } = useBlogApi();
@@ -26,6 +27,7 @@ const { getAll } = useBlogApi();
 const sortOrder      = ref<"newest" | "oldest">("newest");
 const selectedYear   = ref<string | null>(null);
 const availableYears = ref<string[]>([]);
+const searchQuery    = ref<string>(""); 
 
 const LIMIT         = 20;
 const page          = ref(0);
@@ -92,9 +94,10 @@ const fetchPage = async (reset = false) => {
         descending: sortOrder.value === "newest",
       },
       languageFilters: { lang },
-      ...(y !== null
-        ? { blogFilters: { after: `${y}-01-01`, before: `${y + 1}-01-01` } }
-        : {}),
+      blogFilters: {
+        ...(y !== null ? { after: `${y}-01-01`, before: `${y + 1}-01-01` } : {}),
+        ...(searchQuery.value ? { title: searchQuery.value } : {}), 
+      },
     });
 
     const paged = unwrap(raw as unknown);
@@ -115,7 +118,7 @@ const onYearSelect = (year: string) => {
   selectedYear.value = selectedYear.value === year ? null : year;
 };
 
-watch([sortOrder, selectedYear, locale], () => fetchPage(true));
+watch([sortOrder, selectedYear, searchQuery, locale], () => fetchPage(true));
 
 onMounted(async () => {
   await discoverYears();
@@ -149,8 +152,11 @@ onUnmounted(() => io?.disconnect());
 
     <StoriesHeader />
 
-    <StoryToolbar v-model:sort-order="sortOrder" />
-
+    <StoryToolbar
+          v-model:sort-order="sortOrder"
+          :story-titles="[]"
+          @update:search="searchQuery = $event" 
+    />
     <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
 
       <StorySkeleton v-if="pending" />
@@ -200,5 +206,6 @@ onUnmounted(() => io?.disconnect());
       </template>
 
     </main>
+    <ScrollToTop />
   </div>
 </template>

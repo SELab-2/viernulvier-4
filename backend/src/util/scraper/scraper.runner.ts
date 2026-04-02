@@ -1,7 +1,8 @@
-import { ScraperEngine, ScrapeResult } from "./scraper";
+import { ScraperEngine, ScrapeResult } from "./scraper.engine";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
-import { UtilsDbConnection } from "./database/db.connection";
+import { PendingCrops, UtilsDbConnection } from "./database/db.connection";
+import { MediaCrop } from "@repo/common";
 
 @Injectable()
 export class ScraperRunner {
@@ -32,14 +33,17 @@ export class ScraperRunner {
 
     this.logger.debug("Inserting Scraped Data...");
 
-    // We can bundle the adding of tags, locations and prices.
-    // We need to insert these BEFORE the Productions and Events
-    // because we need them to already be in the database when linking them up.
+    // We can bundle the adding of tags, locations, prices and crops.
     await Promise.all([
       this.dbConnection.insertTags(scrapeResults.genres),
       this.dbConnection.insertPrices(scrapeResults.prices),
       this.dbConnection.insertLocations(scrapeResults.locations),
+      this.dbConnection.insertCrops(scrapeResults.crops),
     ]);
+
+    // Insert Items then galleries. We can then link the previous crops.
+    await this.dbConnection.insertItems(scrapeResults.items);
+    await this.dbConnection.insertGalleries(scrapeResults.galleries);
 
     // First Productions since we need those ids for Events.
     await this.dbConnection.insertProductions(scrapeResults.productions);
@@ -53,5 +57,24 @@ export class ScraperRunner {
     );
 
     this.logger.debug("Insertion Finished!");
+  }
+
+  /**
+   * Returns a list of crops where the images haven't been downloaded for.
+   * @param amount The amount of crops to fetch.
+   * @returns The list of crops with length amount or less together with total remaining.
+   */
+  async getPendingCrops(amount: number): Promise<PendingCrops> {
+    return await this.dbConnection.getPendingCrops(amount);
+  }
+
+  /**
+   * Updates a crop with a new archive url.
+   * @param cropId The ID of the crop.
+   * @param url The URL to update it with.
+   * @returns The updated crop.
+   */
+  async updatePendingCrop(cropId: number, url: string): Promise<MediaCrop> {
+    return await this.dbConnection.updateCropWithOwnUrl(cropId, url);
   }
 }

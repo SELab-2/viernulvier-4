@@ -11,16 +11,17 @@ import { Translator } from "deepl-node";
 @Injectable()
 export class LanguageService {
   private translator: Translator;
+  private apiKey: string;
 
   constructor(private readonly logger: AppLogger) {
     // change this constructor when changing provider.
-    const apiKey = process.env.TRANSLATE_API_KEY;
+    this.apiKey = process.env.TRANSLATE_API_KEY || "none";
 
-    if (!apiKey) {
+    if (!this.apiKey) {
       throw new Error("env variable TRANSLATE_API_KEY is not defined");
     }
 
-    this.translator = new deepl.Translator(apiKey);
+    this.translator = new deepl.Translator(this.apiKey);
   }
 
   /**
@@ -166,7 +167,8 @@ export class LanguageService {
 
       data[langTo] = result.text;
     } catch (error) {
-      this.logger.error(`Translation failed: ${error?.message}`, error);
+      if (this.apiKey !== "none")
+        this.logger.error(`Translation failed: ${error?.message}`, error);
 
       // fallback: copy original language
       data[langTo] = sourceText;

@@ -5,8 +5,7 @@
  * Handles:
  * - Responsive Navigation (Desktop horizontal, Mobile hamburger)
  * - Localization (EN / NL)
- * - Theme switching (Dark / Light)  ← now via useTheme() composable so every
- *   page that also reads useTheme() stays in sync automatically.
+ * - Theme switching (Dark / Light) — local ref, persisted in localStorage
  * - Admin-specific actions (Logout functionality)
  * - Sticky visibility logic (Hide on scroll down, show on scroll up)
  */
@@ -21,13 +20,27 @@ import logoWhite from "~/assets/logo_white.svg";
 const { isLoggedIn, logout } = useAuth();
 const isAdmin = isLoggedIn;
 
-const { t, locale, setLocale } = useI18n();
+const { t } = useI18n();
 
-// ── Dark mode — shared across the whole app via the composable ───────────────
-const { isDark, toggle: toggleDark, init: initDark } = useTheme();
+// ── Dark mode ────────────────────────────────────────────────────────────────
+const isDark = ref(false);
 
-// ── Locale ───────────────────────────────────────────────────────────────────
-const toggleLocale = () => setLocale(locale.value === "nl" ? "en" : "nl");
+const applyTheme = (dark) => {
+  document.documentElement.classList.toggle("dark", dark);
+  localStorage.setItem("theme", dark ? "dark" : "light");
+};
+
+const toggleDark = () => {
+  isDark.value = !isDark.value;
+  applyTheme(isDark.value);
+};
+
+const initDark = () => {
+  const stored = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  isDark.value = stored ? stored === "dark" : prefersDark;
+  applyTheme(isDark.value);
+};
 
 // ── Mobile menu ──────────────────────────────────────────────────────────────
 const isMenuOpen = ref(false);
@@ -86,18 +99,14 @@ watch(
 const handleResize = () => {
   if (window.innerWidth >= 1024) {
     isMenuOpen.value = false;
+    isVisible.value = true;
   }
 };
 
 onMounted(() => {
   lastScrollPosition.value = window.scrollY;
   resetHeader();
-
-  // Initialise dark mode from localStorage / OS preference.
-  // Only the Header (root layout) calls init(); every other component just
-  // reads `isDark` from the shared composable.
   initDark();
-
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("resize", handleResize);
   handleResize();
@@ -169,16 +178,9 @@ const navItems = [
       <!-- ── Right: locale + dark-mode + logout ─────────────────────────── -->
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
 
-        <div
-          :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']"
-          class="items-center gap-2 lg:gap-[15px]"
-        >
-          <!-- Locale toggle -->
-          <button class="btn-outline" @click="toggleLocale">
-            {{ locale === "nl" ? "EN" : "NL" }}
-          </button>
+        <div :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']" class="items-center gap-2 lg:gap-[15px]">
+          <LocaleSelector />
 
-          <!-- Dark / light toggle -->
           <button
             class="btn-outline flex items-center justify-center gap-2"
             @click="toggleDark"
@@ -191,7 +193,6 @@ const navItems = [
           </button>
         </div>
 
-        <!-- Admin-only logout -->
         <button
           v-if="isAdmin"
           class="hidden md:flex btn-danger"
@@ -223,14 +224,11 @@ const navItems = [
           </NuxtLink>
         </template>
 
-        <!-- Locale + dark-mode + logout — only visible when collapsed -->
         <div
           :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
         >
-          <button class="btn-outline" @click="toggleLocale">
-            {{ locale === "nl" ? "EN" : "NL" }}
-          </button>
+          <LocaleSelector />
 
           <button
             class="btn-outline flex items-center gap-2"
