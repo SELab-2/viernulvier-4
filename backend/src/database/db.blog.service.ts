@@ -10,7 +10,11 @@ import {
   FilterBlogDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { GalleryType, PaginatedResponse } from "@repo/common";
+import {
+  GalleryType,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -52,6 +56,18 @@ export class BlogDatabaseService {
     const conditions: string[] = [];
     const values: any[] = [];
     let i = 1;
+
+    // Title filter
+    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    if (blogFilters.title) {
+      const titelClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `titel->>'${lang}' ILIKE $${i}`,
+      );
+
+      conditions.push(`(${titelClauses.join(" OR ")})`);
+      values.push(`%${blogFilters.title}%`);
+      i++;
+    }
 
     // Filter blogs that were created before.
     if (blogFilters.before) {

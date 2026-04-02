@@ -30,6 +30,7 @@ export const ReplaceBlogSchema = MutableBlogSchema;
 
 // Filtering.
 export const FilterBlogSchema = z.object({
+  title: z.string().optional(),
   after: z.iso.date().optional(),
   before: z.iso.date().optional(),
 });
