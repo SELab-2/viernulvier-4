@@ -7,7 +7,7 @@ import {
   UseInterceptors,
   BadRequestException,
 } from "@nestjs/common";
-import { CsvInjectionService } from "../util/scraper/csv-injection.service";
+import { CsvInjectionService } from "../util/scraper/csv/csv-injection.service";
 import {
   ApiBody,
   ApiConsumes,

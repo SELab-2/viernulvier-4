@@ -4,12 +4,12 @@ import {
   BlogDto,
   CreateBlogDto,
   MediaGalleryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
-  ModifyBlogDto,
   FilterBlogDto,
 } from "../dto/dto";
-import { PaginatedResponse } from "@repo/common";
+import { GalleryType, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogService {
@@ -80,10 +80,11 @@ export class BlogService {
   /**
    * Fetches the media related to a blog.
    * @param blogId The ID of the blog.
+   * @param type is the type of gallery wanted.
    * @returns The media gallery.
    */
-  async getMedia(blogId: number): Promise<MediaGalleryDto> {
-    return await this.blogDbService.getMediaFromBlog(blogId);
+  async getMedia(blogId: number, type: GalleryType): Promise<MediaGalleryDto> {
+    return await this.blogDbService.getMediaFromBlog(blogId, type);
   }
 
   /**

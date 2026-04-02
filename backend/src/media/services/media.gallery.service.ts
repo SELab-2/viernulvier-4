@@ -1,11 +1,13 @@
 import { Injectable } from "@nestjs/common";
-import { MediaDatabaseService } from "../../database/db.media.service";
 import { PaginatedResponse, PaginationFilter } from "@repo/common";
 import {
   CreateMediaGalleryDto,
   MediaGalleryDto,
   MediaItemDto,
+  ModifyMediaGalleryDto,
+  ReplaceMediaGalleryDto,
 } from "../../dto/dto";
+import { MediaGalleryDatabaseService } from "../../database/media/db.media_gallery.service";
 
 /**
  * Defines the connections between controller and database for
@@ -13,7 +15,7 @@ import {
  */
 @Injectable()
 export class MediaGalleryService {
-  constructor(private readonly mediaDbService: MediaDatabaseService) {}
+  constructor(private readonly mediaDbService: MediaGalleryDatabaseService) {}
 
   /**
    * Fetches a page of all galleries from the database service.
@@ -47,6 +49,19 @@ export class MediaGalleryService {
     createGallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
     return await this.mediaDbService.createGallery(createGallery);
+  }
+
+  /**
+   * Updates a media gallery object.
+   * @param galleryId is the gallery we want to update.
+   * @param gallery is the object with the updates values.
+   * @returns The updated gallery.
+   */
+  async updateGallery(
+    galleryId: number,
+    gallery: ModifyMediaGalleryDto | ReplaceMediaGalleryDto,
+  ): Promise<MediaGalleryDto> {
+    return await this.mediaDbService.updateGallery(galleryId, gallery);
   }
 
   /**
