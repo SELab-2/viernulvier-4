@@ -379,8 +379,14 @@ export class InjectCsvEngine {
   }
 
   async injectOldCsvData() {
-    const productionsFile = "../common/res/productions_output.csv";
-    const eventsFile = "../common/res/events_voorstellingen.csv";
+    const productionsFile = this.configService.get<string>(
+      "OLD_CSV_PRODUCTIONS_FILE",
+      "../common/res/productions_output.csv",
+    );
+    const eventsFile = this.configService.get<string>(
+      "OLD_CSV_EVENTS_FILE",
+      "../common/res/events_voorstellingen.csv",
+    );
 
     this.logger.log("Parsing CSV files...");
     const { productions, tags, productionTagLinks } =
