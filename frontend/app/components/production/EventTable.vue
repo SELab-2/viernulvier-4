@@ -16,14 +16,9 @@
  * ]
  */
 
-import type { Event, LocationView, PriceView } from "@repo/common";
+import type { EventWithDetails } from "../../types/EventWithDetails";
 const { t, locale } = useI18n()
 import { CalendarDays, MapPin, Euro, Clock } from "lucide-vue-next";
-
-type EventWithDetails = Event & { // combining info from tables into one single type
-  locations: LocationView[];
-  prices: PriceView[];
-}
 
 interface Props {
   events: EventWithDetails[]

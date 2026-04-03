@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import EventTable from "../components/production/EventTable.vue";
-import type { Event, LocationView, PriceView } from "@repo/common";
-
-type EventWithDetails = Event & {
-  locations: LocationView[];
-  prices: PriceView[];
-}
+import type { LocationView, PriceView } from "@repo/common";
+import type { EventWithDetails } from "../types/EventWithDetails";
 
 const mockLocation = (name: string): LocationView => ({
   id: 1, location: name, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'

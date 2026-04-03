@@ -2,12 +2,9 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import EventTable from "../../../app/components/production/EventTable.vue";
-import type { Event, LocationView, PriceView } from "@repo/common";
+import type { LocationView, PriceView } from "@repo/common";
+import type { EventWithDetails } from "../../../app/types/EventWithDetails";
 
-type EventWithDetails = Event & {
-    locations: LocationView[];
-    prices: PriceView[];
-}
 
 const i18n = createI18n({
     locale: "nl",
