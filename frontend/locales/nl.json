@@ -59,8 +59,6 @@
     "noStories": "Geen verhalen",
     "noStoriesDesc": "Er zijn momenteel geen verhalen beschikbaar.",
     "notFound": "Verhaal niet gevonden",
-    "storySingular": "verhaal",
-    "storyPlural": "verhalen",
     "ariaShow": "Toon",
     "ariaHide": "Verberg",
     "loadMore": "Meer laden",
@@ -71,7 +69,9 @@
     "title": "Verhalen",
     "changeLanguage": "Wijzig taal",
     "lightMode": "Lichte modus",
-    "darkMode": "Donkere modus"
+    "darkMode": "Donkere modus",
+    "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF."
+
   },
   "baseform": {
     "submitbutton": "Indienen",

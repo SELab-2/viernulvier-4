@@ -97,24 +97,26 @@ const readingTime = computed(() => {
             {{ title }}
           </h1>
 
+          <!-- replace the metadata flex row in the hero section -->
           <div
-            class="flex flex-wrap items-center gap-4 font-brand font-black text-[10px] uppercase tracking-widest"
+            class="flex flex-wrap items-center justify-between gap-4 font-brand font-black text-[10px] uppercase tracking-widest"
             :class="image ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'"
           >
-            <span v-if="formattedDate" class="flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              {{ formattedDate }}
-            </span>
+            <!-- Left: date + reading time -->
+            <div class="flex items-center gap-4">
+              <span v-if="formattedDate" class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                {{ formattedDate }}
+              </span>
+              <span>{{ readingTime }} {{ t("stories.minRead") }}</span>
+            </div>
 
-            <span>{{ readingTime }} {{ t("stories.minRead") }}</span>
-
-            <span class="opacity-30" aria-hidden="true">·</span>
-
+            <!-- Right: back button -->
             <NuxtLink
               :to="ROUTES.stories.base"
               class="flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all duration-150 font-brand font-black text-[9px] uppercase tracking-widest"

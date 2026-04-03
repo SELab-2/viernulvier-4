@@ -33,11 +33,6 @@ const byMonth = computed(() => {
   return keys.map((key) => ({ key, stories: map.get(key)! }));
 });
 
-const storyCount = computed(() => {
-  const n = props.stories.length;
-  const word = n === 1 ? t("stories.storySingular") : t("stories.storyPlural");
-  return `${n} ${word}`;
-});
 </script>
 
 <template>
@@ -52,10 +47,6 @@ const storyCount = computed(() => {
     >
       <div class="blog-year-accent" aria-hidden="true" />
       <span class="blog-year-label font-brand select-none">{{ year }}</span>
-
-      <div class="font-brand font-black text-[9px] uppercase tracking-widest text-foreground/50 shrink-0">
-        {{ storyCount }}
-      </div>
 
       <div class="flex-1 h-px bg-foreground/15 mx-3" />
 

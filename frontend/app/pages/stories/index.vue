@@ -4,10 +4,6 @@
   This file implements the main stories overview page.
 
   It is responsible for:
-  - Discovering the full year range via two lightweight API calls so the
-    sidebar year-navigation (StoryNav) is populated immediately on mount.
-  - Fetching paginated stories with optional year filtering and sort order,
-    appending pages as the user scrolls (infinite-scroll via IntersectionObserver).
   - Exposing sort order and year filter controls to the toolbar and timeline.
   - Rendering the appropriate state: loading skeleton, error with retry, or
     the live StoryTimeline with its infinite-scroll sentinel.
@@ -18,16 +14,14 @@ import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
 import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
-import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import ScrollToTop from "~/components/blogs/ScrollToTop.vue";
+import { useBlogApi } from "~/composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n();
 const { getAll } = useBlogApi();
 
-const sortOrder      = ref<"newest" | "oldest">("newest");
-const selectedYear   = ref<string | null>(null);
-const availableYears = ref<string[]>([]);
-const searchQuery    = ref<string>(""); 
+const sortOrder    = ref<"newest" | "oldest">("newest");
+const searchQuery  = ref("");
 
 const LIMIT         = 20;
 const page          = ref(0);
@@ -47,31 +41,6 @@ const unwrap = (result: unknown): PaginatedResponse<BlogView> | null => {
   return null;
 };
 
-/**
- * Two cheap requests (limit=1 each) to discover the full year range without
- * loading all stories. The nav is populated immediately on mount.
- */
-const discoverYears = async () => {
-  try {
-    const lang = locale.value as "nl" | "en";
-    const [rawDesc, rawAsc] = await Promise.all([
-      getAll({ paginationFilters: { limit: 1, page: 0, descending: true  }, languageFilters: { lang } }),
-      getAll({ paginationFilters: { limit: 1, page: 0, descending: false }, languageFilters: { lang } }),
-    ]);
-    const newest = unwrap(rawDesc as unknown)?.objects[0];
-    const oldest = unwrap(rawAsc  as unknown)?.objects[0];
-    const ny = newest?.created_at ? new Date(newest.created_at).getFullYear() : null;
-    const oy = oldest?.created_at ? new Date(oldest.created_at).getFullYear() : null;
-    if (ny && oy) {
-      const yrs: string[] = [];
-      for (let y = ny; y >= oy; y--) yrs.push(String(y));
-      availableYears.value = yrs;
-    }
-  } catch {
-    /* silent – nav will be empty but the page still works */
-  }
-};
-
 const fetchPage = async (reset = false) => {
   if (reset) {
     page.value       = 0;
@@ -85,8 +54,6 @@ const fetchPage = async (reset = false) => {
 
   try {
     const lang = locale.value as "nl" | "en";
-    const y    = selectedYear.value !== null ? parseInt(selectedYear.value) : null;
-
     const raw = await getAll({
       paginationFilters: {
         limit:      LIMIT,
@@ -95,8 +62,7 @@ const fetchPage = async (reset = false) => {
       },
       languageFilters: { lang },
       blogFilters: {
-        ...(y !== null ? { after: `${y}-01-01`, before: `${y + 1}-01-01` } : {}),
-        ...(searchQuery.value ? { title: searchQuery.value } : {}), 
+        ...(searchQuery.value ? { title: searchQuery.value } : {}),
       },
     });
 
@@ -113,17 +79,8 @@ const fetchPage = async (reset = false) => {
   }
 };
 
-/** Toggle: click selected year → clear filter; click other year → activate filter. */
-const onYearSelect = (year: string) => {
-  selectedYear.value = selectedYear.value === year ? null : year;
-};
-
-watch([sortOrder, selectedYear, searchQuery, locale], () => fetchPage(true));
-
-onMounted(async () => {
-  await discoverYears();
-  fetchPage(true);
-});
+watch([sortOrder, searchQuery, locale], () => fetchPage(true));
+onMounted(() => fetchPage(true));
 
 // ── Infinite-scroll sentinel ──────────────────────────────────────────────
 const sentinel = ref<HTMLElement | null>(null);
@@ -153,18 +110,17 @@ onUnmounted(() => io?.disconnect());
     <StoriesHeader />
 
     <StoryToolbar
-          v-model:sort-order="sortOrder"
-          :story-titles="[]"
-          @update:search="searchQuery = $event" 
+      v-model:sort-order="sortOrder"
+      :story-titles="[]"
+      @update:search="searchQuery = $event"
     />
+
     <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
 
       <StorySkeleton v-if="pending" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
-        <p class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20">
-          Error
-        </p>
+        <p class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20">Error</p>
         <p class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400">
           {{ fetchError.message }}
         </p>
@@ -180,9 +136,6 @@ onUnmounted(() => io?.disconnect());
         <StoryTimeline
           :stories="stories"
           :sort-order="sortOrder"
-          :available-years="availableYears"
-          :selected-year="selectedYear"
-          @year-select="onYearSelect"
         />
 
         <div ref="sentinel" class="h-1" aria-hidden="true" />
@@ -194,14 +147,6 @@ onUnmounted(() => io?.disconnect());
           <span class="font-brand font-black text-[10px] uppercase tracking-widest">
             {{ t("stories.loading") }}
           </span>
-        </div>
-
-        <div v-else-if="!hasMore && stories.length > 0" class="flex items-center gap-4 py-10">
-          <div class="flex-1 h-px bg-border" />
-          <span class="font-brand font-black text-[9px] uppercase tracking-widest text-muted-foreground shrink-0">
-            {{ stories.length }} {{ t("stories.results") }}
-          </span>
-          <div class="flex-1 h-px bg-border" />
         </div>
       </template>
 

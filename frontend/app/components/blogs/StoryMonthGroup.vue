@@ -38,10 +38,6 @@ const label = computed(() => formatMonthLabel(props.monthKey, locale.value));
 
       <div class="flex-1 h-px bg-foreground/15" />
 
-      <span class="font-brand font-black text-[9px] uppercase tracking-widest text-foreground/40">
-        {{ stories.length }}
-      </span>
-
       <svg
         class="w-3 h-3 shrink-0 text-foreground/30 transition-transform duration-200 ml-1"
         :class="isOpen ? 'rotate-0' : '-rotate-90'"

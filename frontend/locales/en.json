@@ -59,8 +59,6 @@
     "noStories": "No stories",
     "noStoriesDesc": "There are no stories available at this time.",
     "notFound": "Story not found",
-    "storySingular": "story",
-    "storyPlural": "stories",
     "ariaShow": "Show",
     "ariaHide": "Hide",
     "loadMore": "Load more",
@@ -71,7 +69,8 @@
     "title": "Stories",
     "changeLanguage": "Change language",
     "lightMode": "Light mode",
-    "darkMode": "Dark mode"
+    "darkMode": "Dark mode",
+    "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE."
   },
   "baseform": {
     "submitbutton": "Submit",
