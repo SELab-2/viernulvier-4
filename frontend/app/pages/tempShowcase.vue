@@ -1,67 +1,37 @@
 <script setup lang="ts">
 import EventTable from "../components/production/EventTable.vue";
-import type {EventItem} from "../types/EventItem";
+import type { Event, LocationView, PriceView } from "@repo/common";
+
+type EventWithDetails = Event & {
+  locations: LocationView[];
+  prices: PriceView[];
+}
+
+const mockLocation = (name: string): LocationView => ({
+  id: 1, location: name, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
+})
+
+const mockPrice = (amount: number): PriceView => ({
+  id: 1, price: amount, name: 'Volwassenen', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
+})
+
+const base = { endtime: null, doors_at: null, intermission_at: null, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z', production_id: 1 }
 
 const events1 = [ // 3 events
-  {
-    id: '1',
-    date: new Date(2026, 2, 10, 19, 30),
-    location: 'Event 1 location',
-    price: '€30'
-  },
-  {
-    id: '2',
-    date: new Date(2025, 6, 7, 2, 15),
-    location: 'Event 2 location',
-    price: '€25'
-  },
-  {
-    id: '3',
-    date: new Date(2026, 10, 7, 15, 20),
-    location: 'Event 3 location',
-    price: '€25'
-  }
+  { ...base, id: 1, starttime: '2026-02-10T19:30:00Z', locations: [mockLocation('Event 1 location')], prices: [mockPrice(30)] },
+  { ...base, id: 2, starttime: '2025-06-07T02:15:00Z', locations: [mockLocation('Event 2 location')], prices: [mockPrice(25)] },
+  { ...base, id: 3, starttime: '2026-10-07T15:20:00Z', locations: [mockLocation('Event 3 location')], prices: [mockPrice(25)] },
 ]
 
-const events2: EventItem[] = [] // no events
+const events2: EventWithDetails[] = [] // no events
 
 const events3 = [ // more than 3 events
-  {
-    id: '1',
-    date: new Date(2026, 2, 10, 19, 30),
-    location: 'Event 1 location',
-    price: '€30'
-  },
-  {
-    id: '2',
-    date: new Date(2025, 6, 7, 2, 15),
-    location: 'Event 2 location',
-    price: '€25'
-  },
-  {
-    id: '3',
-    date: new Date(2026, 10, 7, 15, 20),
-    location: 'Event 3 location',
-    price: '€25'
-  },
-  {
-    id: '4',
-    date: new Date(2026, 2, 10, 19, 30),
-    location: 'Event 4 location',
-    price: '€30'
-  },
-  {
-    id: '5',
-    date: new Date(2025, 6, 7, 2, 15),
-    location: 'Event 5 location',
-    price: '€25'
-  },
-  {
-    id: '6',
-    date: new Date(2026, 10, 7, 15, 20),
-    location: 'LOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOONG LOCATIOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOON',
-    price: '€25'
-  }
+  { ...base, id: 1, starttime: '2026-02-10T19:30:00Z', locations: [mockLocation('Event 1 location')], prices: [mockPrice(30)] },
+  { ...base, id: 2, starttime: '2025-06-07T02:15:00Z', locations: [mockLocation('Event 2 location')], prices: [mockPrice(25)] },
+  { ...base, id: 3, starttime: '2026-10-07T15:20:00Z', locations: [mockLocation('Event 3 location')], prices: [mockPrice(25)] },
+  { ...base, id: 4, starttime: '2026-02-10T19:30:00Z', locations: [mockLocation('Event 1 location')], prices: [mockPrice(30)] },
+  { ...base, id: 5, starttime: '2025-06-07T02:15:00Z', locations: [mockLocation('Event 2 location')], prices: [mockPrice(25)] },
+  { ...base, id: 6, starttime: '2026-10-07T15:20:00Z', locations: [mockLocation('Event 3 location')], prices: [mockPrice(25)] },
 ]
 </script>
 
