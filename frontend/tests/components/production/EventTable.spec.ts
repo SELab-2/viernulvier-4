@@ -2,7 +2,12 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import EventTable from "../../../app/components/production/EventTable.vue";
-import type { EventItem } from "../../../app/types/EventItem";
+import type { Event, LocationView, PriceView } from "@repo/common";
+
+type EventWithDetails = Event & {
+    locations: LocationView[];
+    prices: PriceView[];
+}
 
 const i18n = createI18n({
     locale: "nl",
@@ -28,11 +33,21 @@ const i18n = createI18n({
     },
 });
 
-const events: EventItem[] = [
-    { id: "1", date: new Date(2026, 2, 10, 19, 30), location: "Antwerpen", price: "€15,00" },
-    { id: "2", date: new Date(2026, 2, 29, 20, 0), location: "Gent", price: "€12,50" },
-    { id: "3", date: new Date(2026, 3, 5, 18, 15), location: "Brussel", price: "€10,00" },
-    { id: "4", date: new Date(2026, 3, 12, 20, 45), location: "Leuven", price: "€8,00" },
+const base = { endtime: null, doors_at: null, intermission_at: null, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z', production_id: 1 }
+
+const mockLocation = (name: string): LocationView => ({
+    id: 1, location: name, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
+})
+
+const mockPrice = (amount: number): PriceView => ({
+    id: 1, price: amount, name: 'Volwassenen', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
+})
+
+const events: EventWithDetails[] = [
+    { ...base, id: 1, starttime: '2026-03-10T19:30:00Z', locations: [mockLocation('Antwerpen')], prices: [mockPrice(15)] },
+    { ...base, id: 2, starttime: '2026-03-29T20:00:00Z', locations: [mockLocation('Gent')], prices: [mockPrice(12.50)] },
+    { ...base, id: 3, starttime: '2026-04-05T18:15:00Z', locations: [mockLocation('Brussel')], prices: [mockPrice(10)] },
+    { ...base, id: 4, starttime: '2026-04-12T20:45:00Z', locations: [mockLocation('Leuven')], prices: [mockPrice(8)] },
 ];
 
 describe("EventTable", () => {
