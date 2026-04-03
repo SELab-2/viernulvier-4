@@ -2,15 +2,23 @@ import { MediaStorage } from "./storage.interface";
 import path from "node:path";
 import fs from "fs";
 import { NotFoundException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * This handles all functionality in terms of media storage.
  * note: this is also used to fetch prints or pdf files.
  */
 export class LocalMediaStorage implements MediaStorage {
+  constructor(private readonly configService: ConfigService) {}
+
   private readonly baseDir = path.join(process.cwd(), "../assets/media"); // dev assets folder
-  private readonly baseUrl =
-    process.env.MEDIA_BASE_URL ?? "http://127.0.0.1/photos"; //base url of the server hosting the media.
+
+  private get baseUrl() {
+    return this.configService.get<string>(
+      "MEDIA_BASE_URL",
+      "http://127.0.0.1/photos",
+    );
+  }
 
   /**
    * This function saves a piece of media to the media storage

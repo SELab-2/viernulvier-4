@@ -8,41 +8,34 @@ jest.mock("fs");
 
 describe("MediaStorageService", () => {
   let service: MediaStorageService;
-  let configService: ConfigService;
 
   const mockUrl = "http://127.0.0.1/photos/image.png";
   const mockBuffer = Buffer.from("mock-image-data");
 
-  // 1. Create the mock config service
-  const mockConfigService = {
-    get: jest.fn(),
-  };
-
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks(); // Safely clean up fetch spies
   });
 
+  // ==========================================
+  // LOCAL STORAGE SUITE (DEVELOPMENT)
+  // ==========================================
   describe("LocalMediaStorage (development)", () => {
     beforeEach(async () => {
-      // 2. Set the mock to return "development" for this suite
-      mockConfigService.get.mockImplementation((key: string) => {
-        if (key === "NODE_ENV") return "development";
-        return null;
-      });
-
       const module: TestingModule = await Test.createTestingModule({
         providers: [
           MediaStorageService,
-          // 3. Provide the mock ConfigService
           {
             provide: ConfigService,
-            useValue: mockConfigService,
+            // INLINE MOCK: 100% guaranteed to return 'development' for this suite
+            useValue: {
+              get: jest.fn().mockReturnValue("development"),
+            },
           },
         ],
       }).compile();
 
       service = module.get<MediaStorageService>(MediaStorageService);
-      configService = module.get<ConfigService>(ConfigService);
     });
 
     describe("saveMedia", () => {
@@ -105,35 +98,36 @@ describe("MediaStorageService", () => {
     });
   });
 
+  // ==========================================
+  // REMOTE STORAGE SUITE (PRODUCTION)
+  // ==========================================
   describe("RemoteMediaStorage (production)", () => {
     beforeEach(async () => {
-      // 4. Set the mock to return "production" for this suite
-      mockConfigService.get.mockImplementation((key: string) => {
-        if (key === "NODE_ENV") return "production";
-        return null;
-      });
-
       const module: TestingModule = await Test.createTestingModule({
         providers: [
           MediaStorageService,
           {
             provide: ConfigService,
-            useValue: mockConfigService,
+            // INLINE MOCK: 100% guaranteed to return 'production' for this suite
+            useValue: {
+              get: jest.fn().mockReturnValue("production"),
+            },
           },
         ],
       }).compile();
 
       service = module.get<MediaStorageService>(MediaStorageService);
-      configService = module.get<ConfigService>(ConfigService);
     });
 
     describe("saveMedia", () => {
       it("should PUT the buffer to the URL and return it", async () => {
-        global.fetch = jest.fn().mockResolvedValue({ ok: true });
+        jest.spyOn(global, "fetch").mockResolvedValue({
+          ok: true,
+        } as Response);
 
         const result = await service.saveMedia(mockUrl, mockBuffer);
 
-        expect(fetch).toHaveBeenCalledWith(mockUrl, {
+        expect(global.fetch).toHaveBeenCalledWith(mockUrl, {
           method: "PUT",
           body: mockBuffer.buffer,
         });
@@ -141,9 +135,10 @@ describe("MediaStorageService", () => {
       });
 
       it("should throw BadRequestException when the response is not ok", async () => {
-        global.fetch = jest
-          .fn()
-          .mockResolvedValue({ ok: false, statusText: "Bad Request" });
+        jest.spyOn(global, "fetch").mockResolvedValue({
+          ok: false,
+          statusText: "Bad Request",
+        } as Response);
 
         await expect(service.saveMedia(mockUrl, mockBuffer)).rejects.toThrow(
           BadRequestException,
@@ -157,20 +152,23 @@ describe("MediaStorageService", () => {
           mockBuffer.byteOffset,
           mockBuffer.byteOffset + mockBuffer.byteLength,
         );
-        global.fetch = jest.fn().mockResolvedValue({
+        jest.spyOn(global, "fetch").mockResolvedValue({
           ok: true,
           status: 200,
           arrayBuffer: jest.fn().mockResolvedValue(arrayBuffer),
-        });
+        } as unknown as Response);
 
         const result = await service.getMedia(mockUrl);
 
-        expect(fetch).toHaveBeenCalledWith(mockUrl);
+        expect(global.fetch).toHaveBeenCalledWith(mockUrl);
         expect(result).toEqual(mockBuffer);
       });
 
       it("should throw NotFoundException on 404", async () => {
-        global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404 });
+        jest.spyOn(global, "fetch").mockResolvedValue({
+          ok: false,
+          status: 404,
+        } as Response);
 
         await expect(service.getMedia(mockUrl)).rejects.toThrow(
           NotFoundException,
@@ -178,11 +176,11 @@ describe("MediaStorageService", () => {
       });
 
       it("should throw BadRequestException on other non-ok responses", async () => {
-        global.fetch = jest.fn().mockResolvedValue({
+        jest.spyOn(global, "fetch").mockResolvedValue({
           ok: false,
           status: 500,
           statusText: "Server Error",
-        });
+        } as Response);
 
         await expect(service.getMedia(mockUrl)).rejects.toThrow(
           BadRequestException,
@@ -192,17 +190,22 @@ describe("MediaStorageService", () => {
 
     describe("deleteMedia", () => {
       it("should DELETE the media at the given URL", async () => {
-        global.fetch = jest.fn().mockResolvedValue({ ok: true });
+        jest.spyOn(global, "fetch").mockResolvedValue({
+          ok: true,
+        } as Response);
 
         await service.deleteMedia(mockUrl);
 
-        expect(fetch).toHaveBeenCalledWith(mockUrl, { method: "DELETE" });
+        expect(global.fetch).toHaveBeenCalledWith(mockUrl, {
+          method: "DELETE",
+        });
       });
 
       it("should throw an error when the response is not ok", async () => {
-        global.fetch = jest
-          .fn()
-          .mockResolvedValue({ ok: false, statusText: "Not Found" });
+        jest.spyOn(global, "fetch").mockResolvedValue({
+          ok: false,
+          statusText: "Not Found",
+        } as Response);
 
         await expect(service.deleteMedia(mockUrl)).rejects.toThrow(Error);
       });
