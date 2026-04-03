@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import ProductionStories from "../../../app/components/production/storyListView.vue";
-import type { StoryItem } from "../../../app/types/StoryItem";
+import type { BlogView } from "@repo/common";
 
 const i18n = createI18n({
     locale: "nl",
@@ -22,11 +22,11 @@ const i18n = createI18n({
     },
 });
 
-const stories: StoryItem[] = [
-    { id: 1, title: "Titel 1", date: new Date(2026, 2, 10), description: "description 1", image: null },
-    { id: 2, title: "Titel 2", date: new Date(2026, 2, 29), description: "description 2", image: null },
-    { id: 3, title: "Titel 3", date: new Date(2026, 3, 5), description: "description 3", image: null },
-    { id: 4, title: "Titel 4", date: new Date(2026, 3, 12), description: "description 4", image: null },
+const stories: BlogView[] = [
+    { id: 1, titel: "Titel 1", created_at: "2026-02-10T00:00:00Z", updated_at: "2026-02-10T00:00:00Z", description: "description 1" },
+    { id: 2, titel: "Titel 2", created_at: "2026-02-29T00:00:00Z", updated_at: "2026-02-29T00:00:00Z", description: "description 2" },
+    { id: 3, titel: "Titel 3", created_at: "2026-03-05T00:00:00Z", updated_at: "2026-03-05T00:00:00Z", description: "description 3" },
+    { id: 4, titel: "Titel 4", created_at: "2026-03-12T00:00:00Z", updated_at: "2026-03-12T00:00:00Z", description: "description 4" },
 ];
 
 describe("ProductionStories", () => {
