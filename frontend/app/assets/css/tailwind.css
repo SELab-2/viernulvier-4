@@ -1,3 +1,4 @@
+<<<<<<< feature/general_stories
 @import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
@@ -423,4 +424,223 @@
   .btn-danger:hover {
     @apply bg-[var(--foreground)] border-[var(--foreground)];
   }
+=======
+/**
+ * tailwind.css
+ *
+ * Global stylesheet for the VIERNULVIER archive frontend.
+ *
+ * This file is responsible for:
+ * - Importing Tailwind CSS
+ * - Registering the dark mode variant (class-based via `.dark` on <html>)
+ * - Loading the ABCMonumentGrotesk brand font (Heavy + Regular weights)
+ * - Defining CSS custom properties (design tokens) for both light and dark mode
+ * - Exposing those tokens to Tailwind via @theme inline
+ * - Applying base styles to body and html
+ * - Defining the .dropcap utility used in article/about section intros
+ * - Defining the .font-brand utility class for the brand font
+ *
+ * Font files are stored in /public/fonts/.
+ * Dark mode is toggled by adding/removing the `dark` class on <html>.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ABCMonumentGrotesk — the official VIERNULVIER brand font.
+   Font files live in /public/fonts/ */
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('/fonts/ABCMonumentGrotesk-Heavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABCMonumentGrotesk';
+  src: url('/fonts/ABCMonumentGrotesk-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Design tokens: light mode ────────────────────────────────────────────── */
+:root {
+  --font-size: 16px;
+
+  /* Base */
+  --background: #ffffff;
+  --foreground: #0f172a;
+
+  /* Primary */
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+
+  /* Muted / subtle UI */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  /* Borders */
+  --border: #e2e8f0;
+
+  /* Focus ring (accent-tinted) */
+  --ring: rgba(130, 36, 227, 0.35);
+
+  --radius: 0.625rem;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* accent  */
+  --accent: #8224e3;
+  --accent-hover: #6d1fcc;
+  --accent-light: #f3e8ff;
+  --accent-foreground: #ffffff;
+
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --card-border: #e2e8f0;
+  --card-hover: #f8fafc;
+
+  /* Colours used in the gradient placeholder */
+  --thumbnail-bg: #ffffff;
+  --thumbnail-icon: #ffffff;
+}
+
+/* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
+.dark {
+  /* Base */
+  --background: #0b0f19;
+  --foreground: #e5e7eb;
+
+  /* Primary */
+  --primary: #e5e7eb;
+  --primary-foreground: #0b0f19;
+
+  /* Muted surfaces */
+  --muted: #111827;
+  --muted-foreground: #9ca3af;
+
+  /* Borders */
+  --border: #1f2937;
+
+  /* Focus ring (accent-tinted) */
+  --ring: rgba(130, 36, 227, 0.4);
+
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* Accent */
+  --accent: #8224e3;
+  --accent-hover: #9333ea;
+  --accent-light: rgba(130, 36, 227, 0.15);
+  --accent-foreground: #ffffff;
+
+  /* Card */
+  --card: #111827;
+  --card-foreground: #e5e7eb;
+  --card-border: #1f2937;
+  --card-hover: #1a2333;
+
+  /* Thumbnail / placeholders */
+  --thumbnail-bg: #1f2937;
+  --thumbnail-icon: #6b7280;
+}
+
+/* ─── Tailwind theme mapping ────────────────────────────────────────────────
+   Maps the CSS custom properties above to Tailwind utility classes so that
+   e.g. `bg-background`, `text-foreground`, `border-border` etc. work out
+   of the box.
+   ---------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
+  --color-accent: var(--accent);
+  --color-thumbnail-bg: var(--thumbnail-bg);
+  --color-thumbnail-icon: var(--thumbnail-icon);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Make ABCMonumentGrotesk available as font-brand in Tailwind */
+  --font-brand: 'ABCMonumentGrotesk', sans-serif;
+}
+
+/* ─── Base layer ────────────────────────────────────────────────────────────
+   Applied to every element and the body/html root.
+   ---------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+}
+
+/* ─── Drop cap ──────────────────────────────────────────────────────────────
+   Apply the `.dropcap` class to the first <p> of an article or section intro
+   to render an oversized first letter (editorial style).
+   Used in: HomeAbout.vue
+   ---------------------------------------------------------------------- */
+.dropcap::first-letter {
+  float: left;
+  font-size: 4.5rem;
+  line-height: 0.75;
+  font-weight: 700;
+  margin-right: 0.5rem;
+  margin-top: -0.6rem;
+}
+
+/* ─── Brand font utility ────────────────────────────────────────────────────
+   Convenience class for applying the ABCMonumentGrotesk font directly
+   without going through Tailwind's font-brand utility.
+   ---------------------------------------------------------------------- */
+.font-brand {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
+}
+
+/* ─── Shared Components ─────────────────────────────────────────────────────
+   Reusable UI elements for the application.
+   Ensures consistent button styles across different sections.
+   ---------------------------------------------------------------------- */
+
+@layer components {
+  /* Standard outlined button (used in Header, filters, etc.) */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-[var(--foreground)] bg-transparent px-[21px] py-[7px] text-[11px] font-black text-[var(--foreground)] transition-all uppercase cursor-pointer outline-none;
+  }
+
+  .btn-outline:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  /* Red button for critical actions (e.g., Logout) */
+  .btn-danger {
+    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors uppercase cursor-pointer;
+  }
+
+  .btn-danger:hover {
+    @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
+>>>>>>> develop
 }

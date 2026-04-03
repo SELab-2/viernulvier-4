@@ -12,6 +12,7 @@ import { Language } from "@repo/common";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../../util/logger/logger.service";
+import { ResourceGoneException } from "../../../common/exceptions";
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
 const TRANSLATION_LANG_FROM: Language = "nl";
@@ -267,10 +268,19 @@ export class InjectCsvEngine {
           const production =
             await this.dbConnection.getProductionByLegacyId(productionLegacyId);
           await this.dbConnection.linkTag(production.id, tagId);
-        } catch {
-          this.logger.warn(
-            `Skipping tag link; production not found for ${productionLegacyId}`,
+        } catch (error) {
+          if (error instanceof ResourceGoneException) {
+            this.logger.warn(
+              `Skipping tag link; production not found for ${productionLegacyId}`,
+            );
+            continue;
+          }
+
+          this.logger.error(
+            `Unexpected error while linking tag to production ${productionLegacyId}`,
+            error,
           );
+          continue;
         }
       }
     }
@@ -303,10 +313,19 @@ export class InjectCsvEngine {
         );
 
         await this.dbConnection.linkBlog(production.id, blog.id);
-      } catch {
-        this.logger.warn(
-          `Skipping blog link; production not found for ${productionLegacyId}`,
+      } catch (error) {
+        if (error instanceof ResourceGoneException) {
+          this.logger.warn(
+            `Skipping blog link; production not found for ${productionLegacyId}`,
+          );
+          continue;
+        }
+
+        this.logger.error(
+          `Unexpected error while linking blog to production ${productionLegacyId}`,
+          error,
         );
+        continue;
       }
     }
 
@@ -340,10 +359,19 @@ export class InjectCsvEngine {
         });
 
         await this.dbConnection.linkPrice(event.id, price.id);
-      } catch {
-        this.logger.warn(
-          `Skipping price link; event not found for ${eventLegacyId}`,
+      } catch (error) {
+        if (error instanceof ResourceGoneException) {
+          this.logger.warn(
+            `Skipping price link; event not found for ${eventLegacyId}`,
+          );
+          continue;
+        }
+
+        this.logger.error(
+          `Unexpected error while linking price to event ${eventLegacyId}`,
+          error,
         );
+        continue;
       }
     }
 
@@ -351,21 +379,36 @@ export class InjectCsvEngine {
   }
 
   async injectOldCsvData() {
-    const productionsFile = "../common/res/productions_output.csv";
-    const eventsFile = "../common/res/events_voorstellingen.csv";
+    const productionsFile = this.configService.get<string>(
+      "OLD_CSV_PRODUCTIONS_FILE",
+      "../common/res/productions_output.csv",
+    );
+    const eventsFile = this.configService.get<string>(
+      "OLD_CSV_EVENTS_FILE",
+      "../common/res/events_voorstellingen.csv",
+    );
 
     this.logger.log("Parsing CSV files...");
     const { productions, tags, productionTagLinks } =
       await OldCSVFileParser.parseOldProductionsCSV(productionsFile);
     const parsedEvents = await OldCSVFileParser.parseOldEventsCSV(eventsFile);
 
+    // Build a fast lookup from production legacy id to tag names.
+    const tagsByProductionLegacyId = new Map<string, string[]>();
+    for (const link of productionTagLinks) {
+      const existingTags = tagsByProductionLegacyId.get(link.legacyId);
+      if (existingTags) {
+        existingTags.push(link.tagName);
+      } else {
+        tagsByProductionLegacyId.set(link.legacyId, [link.tagName]);
+      }
+    }
+
     const csvTags: vnvGenre[] = tags.map(toOldCsvTag);
     const csvProductions: vnvProduction[] = productions.map((production) =>
       toOldCsvProduction(
         production,
-        productionTagLinks
-          .filter((link) => link.legacyId === (production.legacy_id ?? ""))
-          .map((link) => link.tagName),
+        tagsByProductionLegacyId.get(production.legacy_id ?? "") ?? [],
       ),
     );
 
