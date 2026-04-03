@@ -1,7 +1,7 @@
 <script setup lang="ts">/**
  * A reusable event table component, displays events belonging to a specific production in a table, includes:
  *  - Time, location, price displayed per event
- *  - Sorting of events
+ *  - Sorting of events (oldest first)
  *  - Scrollable when there are more than 3 events
  *
  * Usage:
@@ -9,10 +9,10 @@
  *    :events="events"
  * />
  *
- * Example events: (There are 2 ways to create a date)
- * const events: EventItem[] = [
- *    { id: '1', date: new Date(2026, 2, 10, 19, 30), location: 'Antwerpen', price: '€ 15,00' },
- *    { id: '2', date: new Date('2026-03-29T19:30:00'), location: 'Gent', price: '€ 12,50' }
+ * Example events:
+ * const events: EventWithDetails[] = [
+ *    { id: 1, starttime: '2026-03-10T19:30:00Z', endtime: null, doors_at: null, intermission_at: null, created_at: '2026-03-10T00:00:00Z', updated_at: '2026-03-10T00:00:00Z', production_id: 1, locations: [{ id: 1, location: 'Antwerpen', created_at: '2026-03-10T00:00:00Z', updated_at: '2026-03-10T00:00:00Z' }], prices: [{ id: 1, price: 15.00, name: 'Volwassenen', created_at: '2026-03-10T00:00:00Z', updated_at: '2026-03-10T00:00:00Z' }] },
+ *    { id: 2, starttime: '2026-03-29T19:30:00Z', endtime: null, doors_at: null, intermission_at: null, created_at: '2026-03-29T00:00:00Z', updated_at: '2026-03-29T00:00:00Z', production_id: 1, locations: [{ id: 2, location: 'Gent', created_at: '2026-03-29T00:00:00Z', updated_at: '2026-03-29T00:00:00Z' }], prices: [{ id: 2, price: 12.50, name: 'Volwassenen', created_at: '2026-03-29T00:00:00Z', updated_at: '2026-03-29T00:00:00Z' }] }
  * ]
  */
 
