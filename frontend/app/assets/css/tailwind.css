@@ -144,11 +144,7 @@
   --blog-accent-text:    #CECBF6;
 }
 
-/* ─── Tailwind theme mapping ────────────────────────────────────────────────
-   Maps the CSS custom properties above to Tailwind utility classes so that
-   e.g. `bg-background`, `text-foreground`, `border-border` etc. work out
-   of the box.
-   ---------------------------------------------------------------------- */
+/* ── Tailwind theme mapping ──────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -169,33 +165,21 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
-  /* Make ABCMonumentGrotesk available as font-brand in Tailwind */
   --font-brand: 'ABCMonumentGrotesk', sans-serif;
 }
 
-/* ─── Base layer ────────────────────────────────────────────────────────────
-   Applied to every element and the body/html root.
-   ---------------------------------------------------------------------- */
+/* ── Base ────────────────────────────────────────────────────────── */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  html {
-    font-size: var(--font-size);
-  }
+  * { @apply border-border outline-ring/50; }
+  body { @apply bg-background text-foreground; }
+  html { font-size: var(--font-size); }
 }
 
-/* ─── Drop cap ──────────────────────────────────────────────────────────────
-   Apply the `.dropcap` class to the first <p> of an article or section intro
-   to render an oversized first letter (editorial style).
-   Used in: HomeAbout.vue
-   ---------------------------------------------------------------------- */
+/* ── Utilities ───────────────────────────────────────────────────── */
+.font-brand {
+  font-family: 'ABCMonumentGrotesk', sans-serif;
+}
+
 .dropcap::first-letter {
   float: left;
   font-size: 4.5rem;
@@ -205,12 +189,180 @@
   margin-top: -0.6rem;
 }
 
-/* ─── Brand font utility ────────────────────────────────────────────────────
-   Convenience class for applying the ABCMonumentGrotesk font directly
-   without going through Tailwind's font-brand utility.
-   ---------------------------------------------------------------------- */
-.font-brand {
-  font-family: 'ABCMonumentGrotesk', sans-serif;
+/* ── Story card dark-mode surfaces ───────────────────────────────── */
+.story-card {
+  background-color: var(--story-card);
+  border-color: var(--story-card-border);
+}
+.story-card:hover {
+  background-color: var(--story-card-hover);
+}
+
+/* ── Blog timeline ───────────────────────────────────────────────── */
+
+/* Year section separator */
+.blog-year-section + .blog-year-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Year heading row */
+.blog-year-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.blog-year-accent {
+  width: 4px;
+  height: 2rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, var(--blog-purple-strong), var(--blog-purple-soft));
+}
+
+.blog-year-label {
+  font-size: 2.25rem;
+  font-weight: 900;
+  font-family: var(--font-brand, 'ABCMonumentGrotesk', sans-serif);
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--blog-accent-text);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.blog-year-label:hover { opacity: 0.65; }
+
+.blog-year-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+
+.blog-year-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--blog-purple-pale);
+  opacity: 0.5;
+}
+
+/* Month heading row */
+.blog-month-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-month-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: var(--blog-month-dot);
+}
+
+.blog-month-label {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blog-year-rule);
+  flex-shrink: 0;
+}
+
+.blog-month-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--blog-purple-ghost);
+}
+
+.blog-month-count {
+  font-size: 8px;
+  font-weight: 900;
+  color: var(--blog-purple-soft);
+}
+
+/* Story card group */
+.blog-story-group {
+  border: 1px solid var(--blog-purple-ghost);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.blog-story-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--blog-purple-ghost);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: background-color 0.1s;
+}
+.blog-story-btn:last-child { border-bottom: none; }
+.blog-story-btn:hover { background-color: var(--card-hover); }
+.blog-story-btn:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--blog-purple-strong);
+}
+
+/* Month group spacing */
+.blog-month-group + .blog-month-group {
+  margin-top: 2rem;
+}
+
+/* ── Mobile year pills ───────────────────────────────────────────── */
+
+.blog-mobile-pill {
+  flex-shrink: 0;
+  height: 1.75rem;
+  padding: 0 0.75rem;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.blog-mobile-pill:hover {
+  border-color: var(--blog-purple-mid);
+  color: var(--blog-purple-mid);
+}
+.blog-mobile-pill--active {
+  background: var(--blog-purple-strong);
+  border-color: var(--blog-purple-strong);
+  color: #ffffff;
+}
+
+/* ── Blog page background ────────────────────────────────────────── */
+.blog-page {
+  background: var(--background);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .blog-year-label { font-size: 1.75rem; }
+  .blog-month-label { font-size: 8px; }
 }
 
 /* ─── Shared Components ─────────────────────────────────────────────────────
