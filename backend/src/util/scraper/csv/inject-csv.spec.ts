@@ -1,4 +1,5 @@
 import { InjectCsvEngine } from "./inject-csv.engine";
+import { ResourceGoneException } from "../../../common/exceptions";
 
 const mockParseProductionsCSV = jest.fn();
 const mockParseEventsCSV = jest.fn();
@@ -178,7 +179,7 @@ describe("inject-csv structured importers", () => {
 
     dbMock.getProductionByLegacyId
       .mockResolvedValueOnce({ id: 11 })
-      .mockRejectedValueOnce(new Error("missing"));
+      .mockRejectedValueOnce(new ResourceGoneException("missing"));
 
     await engine.injectTagsCSV("/tmp/tags.csv");
 
@@ -214,7 +215,7 @@ describe("inject-csv structured importers", () => {
 
     dbMock.getProductionByLegacyId
       .mockResolvedValueOnce({ id: 21 })
-      .mockRejectedValueOnce(new Error("missing"));
+      .mockRejectedValueOnce(new ResourceGoneException("missing"));
 
     await engine.injectBlogsCSV("/tmp/blogs.csv");
 
@@ -244,7 +245,7 @@ describe("inject-csv structured importers", () => {
 
     dbMock.getEventByLegacyId
       .mockResolvedValueOnce({ id: 8 })
-      .mockRejectedValueOnce(new Error("missing"));
+      .mockRejectedValueOnce(new ResourceGoneException("missing"));
 
     await engine.injectPricesCSV("/tmp/prices.csv");
 
