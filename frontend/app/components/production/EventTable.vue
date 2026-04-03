@@ -2,7 +2,7 @@
 /**
  * A reusable event table component, displays events belonging to a specific production in a table, includes:
  *  - Time, location, price displayed per event
- *  - Sorting of events
+ *  - Sorting of events (oldest first)
  *  - Scrollable when there are more than 3 events
  *
  * Usage:

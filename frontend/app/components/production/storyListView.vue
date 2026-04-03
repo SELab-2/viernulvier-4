@@ -2,7 +2,7 @@
 /**
  * A reusable story list component, displays stories belonging to a specific production, includes:
  *  - Title, date and description displayed per story
- *  - Sorting of stories
+ *  - Sorting of stories (oldest first)
  *  - Scrollable when there are more than 3 stories
  *
  * Usage:
@@ -10,10 +10,10 @@
  *    :stories="stories"
  * />
  *
- * Example stories: (There are 2 ways to create a date)
- * const stories: StoryItem[] = [
- *    { id: '1', title: 'Rehearsal day 1', date: new Date(2026, 2, 10), description: 'First rehearsal of the season.', image: '/img/story1.jpg' },
- *    { id: '2', title: 'Opening night', date: new Date('2026-03-29T19:30:00'), description: 'A sold-out opening night.', image: null }
+ * Example stories:
+ * const stories: BlogView[] = [
+ *    { id: 1, titel: 'Rehearsal day 1', description: 'First rehearsal of the season.', created_at: '2026-03-10T00:00:00Z', updated_at: '2026-03-10T00:00:00Z' },
+ *    { id: 2, titel: 'Opening night', description: 'A sold-out opening night.', created_at: '2026-03-29T19:30:00Z', updated_at: '2026-03-29T19:30:00Z' }
  * ]
  */
 
@@ -43,7 +43,7 @@ const sortedStories = computed(() => // function to sort the stories, oldest fir
         v-if="stories.length"
         class="flex flex-col gap-2"
     >
-      <div v-if="stories.length" class="overflow-y-auto max-h-[35rem]">
+      <div v-if="stories.length" class="overflow-y-auto max-h-[25rem]">
         <div class="flex flex-col gap-2">
           <BlogsStoryListItem
               v-for="story in sortedStories"
