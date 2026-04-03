@@ -2,14 +2,21 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { MediaStorageService } from "./service/media_storage.service";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import * as fs from "fs";
+import { ConfigService } from "@nestjs/config";
 
 jest.mock("fs");
 
 describe("MediaStorageService", () => {
   let service: MediaStorageService;
+  let configService: ConfigService;
 
   const mockUrl = "http://127.0.0.1/photos/image.png";
   const mockBuffer = Buffer.from("mock-image-data");
+
+  // 1. Create the mock config service
+  const mockConfigService = {
+    get: jest.fn(),
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -17,13 +24,25 @@ describe("MediaStorageService", () => {
 
   describe("LocalMediaStorage (development)", () => {
     beforeEach(async () => {
-      process.env.NODE_ENV = "development";
+      // 2. Set the mock to return "development" for this suite
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === "NODE_ENV") return "development";
+        return null;
+      });
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MediaStorageService],
+        providers: [
+          MediaStorageService,
+          // 3. Provide the mock ConfigService
+          {
+            provide: ConfigService,
+            useValue: mockConfigService,
+          },
+        ],
       }).compile();
 
       service = module.get<MediaStorageService>(MediaStorageService);
+      configService = module.get<ConfigService>(ConfigService);
     });
 
     describe("saveMedia", () => {
@@ -88,13 +107,24 @@ describe("MediaStorageService", () => {
 
   describe("RemoteMediaStorage (production)", () => {
     beforeEach(async () => {
-      process.env.NODE_ENV = "production";
+      // 4. Set the mock to return "production" for this suite
+      mockConfigService.get.mockImplementation((key: string) => {
+        if (key === "NODE_ENV") return "production";
+        return null;
+      });
 
       const module: TestingModule = await Test.createTestingModule({
-        providers: [MediaStorageService],
+        providers: [
+          MediaStorageService,
+          {
+            provide: ConfigService,
+            useValue: mockConfigService,
+          },
+        ],
       }).compile();
 
       service = module.get<MediaStorageService>(MediaStorageService);
+      configService = module.get<ConfigService>(ConfigService);
     });
 
     describe("saveMedia", () => {
