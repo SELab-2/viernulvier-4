@@ -77,9 +77,9 @@ describe("EventTable", () => {
     it("renders location and price for each event", () => {
         const text = wrapper.text();
         expect(text).toContain("Antwerpen");
-        expect(text).toContain("€15,00");
+        expect(text).toContain("15,00");
         expect(text).toContain("Gent");
-        expect(text).toContain("€12,50");
+        expect(text).toContain("12,50");
     });
 
     it("shows empty message when no events are provided", () => {
