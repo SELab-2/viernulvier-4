@@ -10,7 +10,7 @@ import type {
   ReplaceBlog,
   FilterBlog,
 } from "@repo/common";
-import { API_ROUTES } from "../utils/apiRoutes";
+import { API_ROUTES } from "~/utils/apiRoutes";
 
 interface BlogListOptions {
   paginationFilters?: PaginationFilter;
