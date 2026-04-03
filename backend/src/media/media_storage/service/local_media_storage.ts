@@ -27,6 +27,7 @@ export class LocalMediaStorage implements MediaStorage {
    * @returns the url if successful
    * note: this is the dev impl and will save to the assets/media folder instead.
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async save(url: string, buffer: Buffer): Promise<string> {
     const filePath = path.join(this.baseDir, url.replace(this.baseUrl, ""));
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -40,6 +41,7 @@ export class LocalMediaStorage implements MediaStorage {
    * @returns the media if it exists.
    * note: this is the dev impl and will fetch from the assets/media folder instead.
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async get(url: string): Promise<Buffer> {
     const filePath = path.join(this.baseDir, url.replace(this.baseUrl, ""));
     if (!fs.existsSync(filePath))
@@ -52,6 +54,7 @@ export class LocalMediaStorage implements MediaStorage {
    * @param url is the url (including base) you want to delete the media from
    * note: this is the dev impl and will delete from assets/media.
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   async delete(url: string): Promise<void> {
     const filePath = path.join(this.baseDir, url.replace(this.baseUrl, ""));
     if (!fs.existsSync(filePath))
