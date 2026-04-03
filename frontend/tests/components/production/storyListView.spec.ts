@@ -24,7 +24,7 @@ const i18n = createI18n({
 
 const stories: BlogView[] = [
     { id: 1, titel: "Titel 1", created_at: "2026-02-10T00:00:00Z", updated_at: "2026-02-10T00:00:00Z", description: "description 1" },
-    { id: 2, titel: "Titel 2", created_at: "2026-02-29T00:00:00Z", updated_at: "2026-02-29T00:00:00Z", description: "description 2" },
+    { id: 2, titel: "Titel 2", created_at: "2026-02-28T00:00:00Z", updated_at: "2026-02-28T00:00:00Z", description: "description 2" },
     { id: 3, titel: "Titel 3", created_at: "2026-03-05T00:00:00Z", updated_at: "2026-03-05T00:00:00Z", description: "description 3" },
     { id: 4, titel: "Titel 4", created_at: "2026-03-12T00:00:00Z", updated_at: "2026-03-12T00:00:00Z", description: "description 4" },
 ];
