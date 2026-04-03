@@ -16,18 +16,23 @@
  * ]
  */
 
-import type {EventItem} from "../../types/EventItem";
+import type { Event, LocationView, PriceView } from "@repo/common";
 const { t, locale } = useI18n()
 import { CalendarDays, MapPin, Euro, Clock } from "lucide-vue-next";
 
+type EventWithDetails = Event & { // combining info from tables into one single type
+  locations: LocationView[];
+  prices: PriceView[];
+}
+
 interface Props {
-  events: EventItem[]
+  events: EventWithDetails[]
 }
 const props = defineProps<Props>()
 
 // function to format the date
-const formatDate = (date: Date) => {
-  return date.toLocaleDateString(locale.value, {
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString(locale.value, {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
@@ -36,16 +41,23 @@ const formatDate = (date: Date) => {
 }
 
 // function to format the time
-const formatTime = (date: Date) => {
-  return date.toLocaleTimeString(locale.value, {
+const formatTime = (dateStr: string) => {
+  return new Date(dateStr).toLocaleTimeString(locale.value, {
     hour: '2-digit',
     minute: '2-digit'
   })
 }
 
-const sortedEvents = computed(() => { // function to sort the events, oldest first
-  return [...props.events].sort((a, b) => a.date.getTime() - b.date.getTime())
-})
+// function to format the price
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'EUR' }).format(price)
+}
+
+const sortedEvents = computed(() =>
+    [...props.events].sort( // function to sort the events, oldest first
+        (a, b) => new Date(a.starttime).getTime() - new Date(b.starttime).getTime()
+    )
+)
 
 // constants
 const tableBase = 'bg-muted border border-border rounded-lg'
@@ -91,18 +103,20 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
             >
               <!-- Date -->
               <td :class="cellWide">
-                <p class="font-bold text-[12px] truncate">{{ formatDate(event.date) }}</p>
-                <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-1 truncate"><Clock :size="10" class="shrink-0" />{{ formatTime(event.date) }}</p>
+                <p class="font-bold text-[12px] truncate">{{ formatDate(event.starttime) }}</p>
+                <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-1 truncate"><Clock :size="10" class="shrink-0" />{{ formatTime(event.starttime) }}</p>
               </td>
 
               <!-- Location -->
               <td :class="cellWide">
-                <p class="truncate">{{ event.location }}</p>
+                <p class="truncate">{{ event.locations.map(l => l.location).join(', ') || '-' }}</p>
               </td>
 
               <!-- Price -->
               <td :class="cellNarrow">
-                <p class="truncate">{{ event.price }}</p>
+                <p v-for="p in event.prices" :key="p.id" class="truncate">
+                  {{ p.name }} {{ formatPrice(p.price) }}
+                </p>
               </td>
             </tr>
           </tbody>
