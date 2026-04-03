@@ -55,9 +55,8 @@ const sortedEvents = computed(() =>
 )
 
 // constants
-const tableBase = 'bg-muted border border-border rounded-lg'
-const headerWide = 'text-left p-4 w-[40%]'
-const headerNarrow = 'text-left p-4 w-[20%]'
+const headerWide = 'text-left p-4 w-[40%] align-middle'
+const headerNarrow = 'text-left p-4 w-[20%] align-middle'
 const headerIcon = 'flex items-center gap-1.5'
 const headerIconSize = 13
 const cellWide = 'p-4 text-[12px] w-[40%] max-w-0'
@@ -66,52 +65,52 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
 
 <template>
   <div class="m-4">
-    <!-- title -->
+    <!-- Title -->
     <h3 class="text-[12px] font-bold uppercase mb-2">
       {{ t('production.events') }}
     </h3>
 
     <div
         v-if="events.length"
-        :class="[tableBase, 'overflow-hidden']"
-    >
+        class="overflow-hidden rounded-lg border border-border">
       <div class="overflow-y-auto max-h-[20rem]">
         <table class="w-full">
           <!-- Header -->
-          <thead class="sticky top-0">
-          <tr class="bg-foreground/80 dark:bg-foreground/60 text-background text-[11px] uppercase tracking-widest">
+          <thead class="sticky top-0 z-10">
+          <tr class="bg-foreground/90 dark:bg-background text-background dark:text-foreground text-[11px] font-brand font-black uppercase tracking-widest align-middle">
             <th :class="headerWide"><span :class="headerIcon"><CalendarDays :size="headerIconSize" />{{ t('production.dateAndTime') }}</span></th>
             <th :class="headerWide"><span :class="headerIcon"><MapPin :size="headerIconSize" />{{ t('production.location') }}</span></th>
             <th :class="headerNarrow"><span :class="headerIcon"><Euro :size="headerIconSize" />{{ t('production.price') }}</span></th>
           </tr>
           </thead>
+
         <!-- Body -->
           <tbody>
             <tr
                 v-for="event in sortedEvents"
                 :key="event.id"
-                class="
-                  border-t border-border
-                  hover:bg-background/70
-                  transition-colors
-                "
+                class="group relative border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
             >
+
               <!-- Date -->
-              <td :class="cellWide">
-                <p class="font-bold text-[12px] truncate">{{ formatDate(event.starttime) }}</p>
-                <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-1 truncate"><Clock :size="10" class="shrink-0" />{{ formatTime(event.starttime) }}</p>
+              <td :class="cellWide" class="relative">
+                <div class="absolute left-0 top-0 bottom-0 w-[3px] bg-accent opacity-0 group-hover:opacity-100 transition-opacity duration-150" aria-hidden="true" />
+                <p class="font-brand font-black text-[12px] uppercase tracking-tight truncate group-hover:text-accent transition-colors duration-150">{{ formatDate(event.starttime) }}</p>
+                <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5 truncate"><Clock :size="10" class="shrink-0" />{{ formatTime(event.starttime) }}</p>
               </td>
 
               <!-- Location -->
               <td :class="cellWide">
-                <p class="truncate">{{ event.locations.map(l => l.location).join(', ') || '-' }}</p>
+                <p class= "text-[12px] truncate">{{ event.locations.map(l => l.location).join(', ') || '-' }}</p>
               </td>
 
               <!-- Price -->
               <td :class="cellNarrow">
-                <p v-for="p in event.prices" :key="p.id" class="truncate">
-                  {{ p.name }} {{ formatPrice(p.price) }}
+                <p v-for="p in event.prices" :key="p.id" class="text-[12px] truncate">
+                  <span class="text-muted-foreground text-[10px]">{{ p.name }}</span><br/>
+                  <span class="font-brand font-black">{{ formatPrice(p.price) }}</span>
                 </p>
+                <p v-if="!event.prices.length" class="text-[12px] text-muted-foreground">—</p>
               </td>
             </tr>
           </tbody>
@@ -122,7 +121,7 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
     <!-- Empty table -->
     <div
         v-else
-        :class="[tableBase, 'p-4 text-[11px] text-muted-foreground']"
+        class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"
     >
       {{ t('production.noEvents') }}
     </div>
