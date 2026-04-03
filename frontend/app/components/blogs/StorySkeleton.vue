@@ -1,7 +1,7 @@
 <!--
   components/blogs/StorySkeleton.vue
   ====================================
-  Animated loading skeleton voor de eerste page fetch.
+  Animated loading skeleton for the first page fetch.
 -->
 <template>
   <div class="space-y-12" aria-busy="true" aria-label="Loading stories">

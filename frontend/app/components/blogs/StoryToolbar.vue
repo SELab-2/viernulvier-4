@@ -34,7 +34,6 @@ watch(searchQuery, (val) => emit("update:search", val));
           :limit="6"
           :scroll-limit="4"
           :placeholder="t('stories.searchPlaceholder')"
-          class="!m-0 !h-full [&>input]:!h-full [&>div]:!h-full"
         />
       </div>
 

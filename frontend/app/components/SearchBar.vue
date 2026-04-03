@@ -95,13 +95,13 @@ const submit = () => { // handles input when pressing enter
 </script>
 
 <template>
-  <div class="search-bar m-4">
+  <div class="search-bar h-full">
     <!-- Optional label -->
     <label v-if="props.label" :for="props.id" class="text-[12px] font-bold uppercase text-muted-foreground mb-1 block">
       {{ props.label }} <span v-if="props.required" class="text-red-500">*</span>
     </label>
 
-    <div class="relative">
+    <div class="relative h-full">
       <!-- Search input based on internalQuery -->
       <input
           ref="inputRef"
@@ -115,7 +115,7 @@ const submit = () => { // handles input when pressing enter
           @keydown.enter="submit"
           class="
           pl-12 pr-10 bg-muted border border-border
-          h-12 font-bold uppercase text-[10px]
+          h-full font-bold uppercase text-[10px]
           tracking-widest rounded-lg w-full outline-none
           transition-colors duration-150
           hover:border-foreground/20 hover:bg-muted/70
