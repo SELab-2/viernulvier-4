@@ -8,12 +8,14 @@ import type {
   PaginatedResponse,
   LanguageQuery,
   ReplaceBlog,
+  FilterBlog,
 } from "@repo/common";
-import { API_ROUTES } from "../utils/apiRoutes";
+import { API_ROUTES } from "~/utils/apiRoutes";
 
 interface BlogListOptions {
   paginationFilters?: PaginationFilter;
   languageFilters?: LanguageQuery;
+  blogFilters?: FilterBlog;
 }
 
 /**
@@ -30,10 +32,12 @@ export function useBlogApi() {
   const getAll = ({
     paginationFilters,
     languageFilters,
+    blogFilters,
   }: BlogListOptions = {}) => {
     const params = {
       ...paginationFilters,
       ...languageFilters,
+      ...blogFilters,
     };
 
     const cleanParams = Object.fromEntries(

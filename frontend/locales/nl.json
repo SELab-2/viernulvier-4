@@ -9,10 +9,6 @@
   "searchbar": {
     "placeholder": "Zoek..."
   },
-  "baseform": {
-    "submitbutton": "Indienen",
-    "resetbutton": "Herstellen"
-  },
   "hero": {
     "title": "Archief",
     "label": "Kunstencentrum Gent — Archief",
@@ -51,6 +47,35 @@
     "prints": "Drukwerk",
     "rights": "Alle rechten voorbehouden",
     "newsletter": "Blijf op de hoogte"
+  },
+  "stories": {
+    "locale": "nl-BE",
+    "searchPlaceholder": "Zoeken...",
+    "sortNewest": "Nieuw naar Oud",
+    "sortOldest": "Oud naar Nieuw",
+    "results": "resultaten",
+    "retry": "Opnieuw proberen",
+    "loading": "Laden...",
+    "noStories": "Geen verhalen",
+    "noStoriesDesc": "Er zijn momenteel geen verhalen beschikbaar.",
+    "notFound": "Verhaal niet gevonden",
+    "ariaShow": "Toon",
+    "ariaHide": "Verberg",
+    "loadMore": "Meer laden",
+    "remaining": "resterend",
+    "backToStories": "Terug naar verhalen",
+    "minRead": "min. lezen",
+    "now": "nu",
+    "title": "Verhalen",
+    "changeLanguage": "Wijzig taal",
+    "lightMode": "Lichte modus",
+    "darkMode": "Donkere modus",
+    "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF."
+
+  },
+  "baseform": {
+    "submitbutton": "Indienen",
+    "resetbutton": "Herstellen"
   },
   "production": {
     "events": "Evenementen",

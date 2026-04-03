@@ -56,21 +56,25 @@ tables.
 **`media_crop`** – A cropped variant of a media item, identified by a `crop_name` enum (`hd_ready`, `FE3_header`,
 `thumbnail`, `og_image`, `mobile`, `nb_ready`) and a `url`. Linked to items via `item_crop`.
 
+**`print_items`** – A standalone media representation for printable items, storing a multilingual `titel` and
+`description` (JSONB), alongside a specific `url`. Linked to media galleries via `print_item_media_gallery`.
+
 ---
 
 ### Junction Tables
 
-| Table                      | Joins                           | Cascade Delete |
-|----------------------------|---------------------------------|----------------|
-| `event_locations`          | `events` ↔ `locations`          | Yes            |
-| `event_prices`             | `events` ↔ `prices`             | Yes            |
-| `production_tag`           | `productions` ↔ `tags`          | Yes            |
-| `production_blogs`         | `productions` ↔ `blogs`         | Yes            |
-| `account_api_keys`         | `accounts` ↔ `api_keys`         | Yes            |
-| `gallery_item`             | `media_gallery` ↔ `media_item`  | Yes            |
-| `item_crop`                | `media_item` ↔ `media_crop`     | Yes            |
-| `production_media_gallery` | `productions` ↔ `media_gallery` | Yes            |
-| `blog_media_gallery`       | `blogs` ↔ `media_gallery`       | Yes            |
+| Table                      | Joins                            | Cascade Delete |
+|----------------------------|----------------------------------|----------------|
+| `event_locations`          | `events` ↔ `locations`           | Yes            |
+| `event_prices`             | `events` ↔ `prices`              | Yes            |
+| `production_tag`           | `productions` ↔ `tags`           | Yes            |
+| `production_blogs`         | `productions` ↔ `blogs`          | Yes            |
+| `account_api_keys`         | `accounts` ↔ `api_keys`          | Yes            |
+| `gallery_item`             | `media_gallery` ↔ `media_item`   | Yes            |
+| `item_crop`                | `media_item` ↔ `media_crop`      | Yes            |
+| `production_media_gallery` | `productions` ↔ `media_gallery`  | Yes            |
+| `blog_media_gallery`       | `blogs` ↔ `media_gallery`        | Yes            |
+| `print_item_media_gallery` | `print_items` ↔ `media_gallery`	 | Yes            |
 
 All junction tables use composite primary keys.
 
@@ -101,7 +105,9 @@ productions ──< events ──< event_locations >── locations
      ├──< production_blogs          >── blogs
      └──< production_media_gallery  >── media_gallery ──< gallery_item >── media_item ──< item_crop >── media_crop
 
-blogs ──< blog_media_gallery >── media_gallery
+blogs ──────< blog_media_gallery >────── media_gallery
+
+print_items ──< print_item_media_gallery >── media_gallery
 
 accounts ──< account_api_keys >── api_keys
 ```

@@ -1,7 +1,8 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "tasks": {
-    "scraper:reset": {},
+    "scraper:inject:structured:test": {},
+    "db:reset": {},
     "build": {
       "outputs": ["dist/**"]
     },

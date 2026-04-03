@@ -23,6 +23,7 @@ nav:
       - Tags: api/tags.md
       - Locations: api/locations.md
       - Pricing: api/pricing.md
+      - Media Storage: api/media_storage.md
   - Data Schemas:
       - Overview: schemas/index.md
       - Core Entities: schemas/entities.md
@@ -46,6 +47,7 @@ nav:
       - Database: server/database.md
       - Backend: server/backend.md
       - Frontend: server/frontend.md
+      - Media: server/media.md
   - Nest Modules:
       - Overview: modules/index.md
       - Feature Modules:

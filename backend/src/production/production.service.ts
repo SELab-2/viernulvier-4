@@ -4,15 +4,15 @@ import {
   CreateProductionDto,
   FilterProductionDto,
   MediaGalleryDto,
+  ModifyProductionDto,
   PaginationFilterDto,
   ProductionDto,
   ReplaceProductionDto,
   TagDto,
-  ModifyProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { PaginatedResponse } from "@repo/common";
+import { GalleryType, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class ProductionService {
@@ -189,10 +189,17 @@ export class ProductionService {
   /**
    * Returns the media for a certain production.
    * @param productionId The ID of the production.
+   * @param type is the wanted gallery type.
    * @returns The gallery linked with this production.
    */
-  async getProductionMedia(productionId: number): Promise<MediaGalleryDto> {
-    return await this.productionDBService.getMediaFromProduction(productionId);
+  async getProductionMedia(
+    productionId: number,
+    type: GalleryType,
+  ): Promise<MediaGalleryDto> {
+    return await this.productionDBService.getMediaFromProduction(
+      productionId,
+      type,
+    );
   }
 
   /**
