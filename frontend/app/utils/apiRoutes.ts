@@ -14,17 +14,21 @@ export const API_ROUTES = {
     base: "/productions",
     byId: (productionId: number) => `/productions/${productionId}`,
     tags: (productionId: number) => `/productions/${productionId}/tags`,
-    tagById: (productionId: number, tagId: number) => `/productions/${productionId}/tags/${tagId}`,
+    tagById: (productionId: number, tagId: number) =>
+      `/productions/${productionId}/tags/${tagId}`,
     blogs: (productionId: number) => `/productions/${productionId}/blogs`,
-    blogById: (productionId: number, blogId: number) => `/productions/${productionId}/blogs/${blogId}`,
+    blogById: (productionId: number, blogId: number) =>
+      `/productions/${productionId}/blogs/${blogId}`,
   },
   events: {
     base: "/events",
     byId: (eventId: number) => `/events/${eventId}`,
     locations: (eventId: number) => `/events/${eventId}/location`,
-    locationById: (eventId: number, locationId: number) => `/events/${eventId}/location/${locationId}`,
+    locationById: (eventId: number, locationId: number) =>
+      `/events/${eventId}/location/${locationId}`,
     prices: (eventId: number) => `/events/${eventId}/prices`,
-    priceById: (eventId: number, priceId: number) => `/events/${eventId}/prices/${priceId}`,
+    priceById: (eventId: number, priceId: number) =>
+      `/events/${eventId}/prices/${priceId}`,
   },
   blogs: {
     base: "/blogs",
@@ -48,5 +52,23 @@ export const API_ROUTES = {
     tags: "/parser/tags",
     blogs: "/parser/blogs",
     prices: "/parser/prices",
+  },
+  galleries: {
+    base: "/media/galleries",
+    byId: (galleryId: number) => `/media/galleries/${galleryId}`,
+    items: (galleryId: number) => `/media/galleries/${galleryId}/items`,
+    itemLink: (galleryId: number, itemId: number) =>
+      `/media/galleries/${galleryId}/items/${itemId}`,
+  },
+  items: {
+    base: "/media/items",
+    byId: (itemId: number) => `/media/items/${itemId}`,
+    crops: (itemId: number) => `/media/items/${itemId}/crops`,
+    cropLink: (itemId: number, cropId: number) =>
+      `/media/items/${itemId}/crops/${cropId}`,
+  },
+  crops: {
+    base: "/media/crops",
+    byId: (cropId: number) => `/media/crops/${cropId}`,
   },
 } as const;
