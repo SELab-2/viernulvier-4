@@ -98,7 +98,7 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
             class="group flex flex-col cursor-pointer"
         >
           <!-- Thumbnail -->
-          <div class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4]">
+          <div class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150">
             <img
                 v-if="file.image"
                 :src="file.image"
@@ -116,7 +116,7 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
 
           <!-- File info -->
           <div class="mt-2">
-            <p :class="fileLabel">{{ file.name }}</p>
+            <p :class="[fileLabel, 'group-hover:text-accent transition-colors duration-150']">{{ file.name }}</p>
             <div class="flex items-center gap-2 mt-1">
               <span
                   :class="[fileLabel, 'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground']"

@@ -18,7 +18,7 @@ const sortedFiles = computed(() => // oldest first
 )
 
 // constants
-const rowBase = "flex items-c+enter gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
+const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
 </script>
 
 <template>
@@ -37,7 +37,7 @@ const rowBase = "flex items-c+enter gap-4 px-4 py-3 border-t border-border bg-ca
 
         <!-- File info -->
         <div class="flex-1 min-w-0">
-          <p class="text-[13px] font-bold truncate">{{ file.name }}</p>
+          <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">{{ file.name }}</p>
           <p class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
             <span v-if="file.year">{{ file.year }}</span>
           </p>
