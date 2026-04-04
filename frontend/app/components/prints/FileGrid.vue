@@ -4,7 +4,6 @@
  *  - Collapsible section with title and file count (chevron toggle)
  *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
  *  - Max 2 rows before a "show more" button appears (if there are more files)
- *  - Sorting of files (oldest first)
  *  - Thumbnail placeholders
  *
  * Usage:
@@ -57,11 +56,9 @@ const initialMax = computed(() => currentCols.value * 2) // max items there can 
 const isOpen = ref(true); // for toggling the whole category section  (chevrons)
 const isExpanded = ref(false); // show more/less
 const toggle = () => isOpen.value = !isOpen.value; // for toggling the whole category section  (chevrons)
-const sortedFiles = computed(() => // oldest first
-    [...props.files].sort((a, b) => (a.year ?? 0) - (b.year ?? 0))
-)
+
 const visibleFiles = computed(() => // visible files depend on if the show more button is pressed or not
-    isExpanded.value ? sortedFiles.value : sortedFiles.value.slice(0, initialMax.value)
+    isExpanded.value ? props.files : props.files.slice(0, initialMax.value)
 )
 const remaining = computed(() => props.files.length - initialMax.value) // amount of non-visible files
 const hasMore = computed(() => props.files.length > initialMax.value) // if a "show more"- button is needed
