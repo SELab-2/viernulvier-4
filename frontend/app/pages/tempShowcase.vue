@@ -1,48 +1,228 @@
 <script setup lang="ts">
-import EventTable from "../components/production/EventTable.vue";
-import type { LocationView, PriceView } from "@repo/common";
 import type { EventWithDetails } from "../types/EventWithDetails";
 
-const mockLocation = (name: string): LocationView => ({
-  id: 1, location: name, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
-})
+definePageMeta({
+  path: "/tempShowcase",
+});
 
-const mockPrice = (amount: number): PriceView => ({
-  id: 1, price: amount, name: 'Volwassenen', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z'
-})
+interface MockProduction {
+  id: number;
+  title: string;
+}
 
-const base = { endtime: null, doors_at: null, intermission_at: null, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z', production_id: 1 }
+type EventListItem = EventWithDetails & {
+  productionTitle: string;
+};
 
-const events1 = [ // 3 events
-  { ...base, id: 1, starttime: '2026-02-10T19:30:00Z', locations: [mockLocation('Event 1 location')], prices: [mockPrice(30)] },
-  { ...base, id: 2, starttime: '2025-06-07T02:15:00Z', locations: [mockLocation('Event 2 location')], prices: [mockPrice(25)] },
-  { ...base, id: 3, starttime: '2026-10-07T15:20:00Z', locations: [mockLocation('Event 3 location')], prices: [mockPrice(25)] },
-]
+const { locale } = useI18n();
 
-const events2: EventWithDetails[] = [] // no events
+const mockProductions: MockProduction[] = [
+  { id: 1, title: "Bodies of Light" },
+  { id: 2, title: "Night Shift Reverie" },
+  { id: 3, title: "Archive of Echoes" },
+];
 
-const events3 = [ // more than 3 events
-  { ...base, id: 1, starttime: '2026-02-10T19:30:00Z', locations: [mockLocation('Event 1 location')], prices: [mockPrice(30)] },
-  { ...base, id: 2, starttime: '2025-06-07T02:15:00Z', locations: [mockLocation('Event 2 location')], prices: [mockPrice(25)] },
-  { ...base, id: 3, starttime: '2026-10-07T15:20:00Z', locations: [mockLocation('Event 3 location')], prices: [mockPrice(25)] },
-  { ...base, id: 4, starttime: '2026-02-10T19:30:00Z', locations: [mockLocation('Event 1 location')], prices: [mockPrice(30)] },
-  { ...base, id: 5, starttime: '2025-06-07T02:15:00Z', locations: [mockLocation('Event 2 location')], prices: [mockPrice(25)] },
-  { ...base, id: 6, starttime: '2026-10-07T15:20:00Z', locations: [mockLocation('Event 3 location')], prices: [mockPrice(25)] },
-]
+const mockEvents = ref<EventWithDetails[]>([
+  {
+    id: 101,
+    production_id: 1,
+    starttime: "2026-06-10T19:30:00",
+    endtime: null,
+    doors_at: null,
+    intermission_at: null,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-01T00:00:00.000Z",
+    locations: [
+      {
+        id: 1,
+        location: "De Vooruit, Gent",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    prices: [
+      {
+        id: 1,
+        price: 18,
+        name: "Standard",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+  },
+  {
+    id: 102,
+    production_id: 2,
+    starttime: "2026-06-12T20:00:00",
+    endtime: null,
+    doors_at: null,
+    intermission_at: null,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-01T00:00:00.000Z",
+    locations: [
+      {
+        id: 2,
+        location: "KVS, Brussel",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    prices: [
+      {
+        id: 2,
+        price: 16,
+        name: "Standard",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+  },
+  {
+    id: 103,
+    production_id: 1,
+    starttime: "2026-06-20T19:00:00",
+    endtime: null,
+    doors_at: null,
+    intermission_at: null,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-01T00:00:00.000Z",
+    locations: [
+      {
+        id: 3,
+        location: "Stadsschouwburg, Antwerpen",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    prices: [
+      {
+        id: 3,
+        price: 21,
+        name: "Premium",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+  },
+  {
+    id: 104,
+    production_id: 3,
+    starttime: "2026-07-02T20:30:00",
+    endtime: null,
+    doors_at: null,
+    intermission_at: null,
+    created_at: "2026-01-01T00:00:00.000Z",
+    updated_at: "2026-01-01T00:00:00.000Z",
+    locations: [
+      {
+        id: 4,
+        location: "Muziekcentrum, Brugge",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    prices: [
+      {
+        id: 4,
+        price: 14,
+        name: "Standard",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+  },
+]);
+
+const search = ref("");
+
+const listEvents = computed<EventListItem[]>(() => {
+  return mockEvents.value.map((event) => {
+    const productionTitle =
+      mockProductions.find((p) => p.id === event.production_id)?.title ??
+      "Unknown Production";
+
+    return {
+      ...event,
+      productionTitle,
+    };
+  });
+});
+
+const filteredEvents = computed(() => {
+  const query = search.value.trim().toLowerCase();
+  if (!query) return listEvents.value;
+
+  return listEvents.value.filter((event) => {
+    const venue = event.locations[0]?.location ?? "";
+    const priceText = event.prices[0]
+      ? `${event.prices[0].name} eur ${event.prices[0].price}`
+      : "";
+
+    return (
+      event.productionTitle.toLowerCase().includes(query) ||
+      venue.toLowerCase().includes(query) ||
+      priceText.toLowerCase().includes(query)
+    );
+  });
+});
+
+const actionMessage = ref("");
+
+const onEdit = (eventId: number | string) => {
+  actionMessage.value = `Edit clicked for event #${eventId}`;
+};
+
+const onDelete = (payload: { id: number | string; title: string }) => {
+  mockEvents.value = mockEvents.value.filter(
+    (event) => event.id !== payload.id,
+  );
+  actionMessage.value = `Deleted event #${payload.id} (${payload.title})`;
+};
 </script>
 
 <template>
-  <div class="p-8">
-    <EventTable :events="events1" />
-  </div>
-  <div class="p-8">
-    <EventTable :events="events2" />
-  </div>
-  <div class="p-8">
-    <EventTable :events="events3" />
-  </div>
+  <section class="min-h-[70vh] py-12 px-4">
+    <div class="max-w-4xl mx-auto space-y-6">
+      <header class="space-y-2">
+        <h1 class="text-3xl font-bold tracking-tight">TempShowcase</h1>
+        <p class="text-sm text-muted-foreground">
+          Reusable event list view with mock data, filter, edit action, and
+          delete action.
+        </p>
+      </header>
+
+      <div class="rounded-xl border border-border bg-muted/40 p-4 sm:p-5">
+        <label
+          for="temp-event-search"
+          class="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2"
+        >
+          {{ locale === "nl" ? "Filter events" : "Filter events" }}
+        </label>
+        <input
+          id="temp-event-search"
+          v-model="search"
+          type="text"
+          :placeholder="
+            locale === 'nl'
+              ? 'Zoek op productie, locatie of prijs'
+              : 'Search by production, venue, or price'
+          "
+          class="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground/30"
+        />
+      </div>
+
+      <p
+        v-if="actionMessage"
+        class="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+      >
+        {{ actionMessage }}
+      </p>
+
+      <EventListView
+        :events="filteredEvents"
+        @edit="onEdit"
+        @delete="onDelete"
+      />
+    </div>
+  </section>
 </template>
-
-<style scoped>
-
-</style>
