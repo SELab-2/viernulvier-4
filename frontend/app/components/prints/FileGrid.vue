@@ -12,11 +12,39 @@ interface Props {
   category: string;
   files: ProductionFile[];
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 const { t } = useI18n();
 
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
+const handleResize = () => {
+  windowWidth.value = window.innerWidth
+}
+onMounted(() => {
+  window.addEventListener('resize', handleResize)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
+
+const currentCols = computed(() => {
+  if (windowWidth.value >= 1024) return 4  // lg:grid-cols-4
+  if (windowWidth.value >= 640) return 3   // sm:grid-cols-3
+  return 2                                  // grid-cols-2
+})
+
+const initialMax = computed(() => currentCols.value * 2) // 2 rows
+
 const isOpen = ref(true);
+const isExpanded = ref(false);
 const toggle = () => isOpen.value = !isOpen.value;
+const sortedFiles = computed(() => // oldest first
+    [...props.files].sort((a, b) => (a.year ?? 0) - (b.year ?? 0))
+)
+const visibleFiles = computed(() =>
+    isExpanded.value ? sortedFiles.value : sortedFiles.value.slice(0, initialMax.value)
+)
+const remaining = computed(() => props.files.length - initialMax.value)
+const hasMore = computed(() => props.files.length > initialMax.value) // if a "show more"- button is needed
 
 //constants
 const chevron = "shrink-0 text-muted-foreground"
@@ -41,7 +69,7 @@ const fileLabel = "text-[11px] font-bold uppercase truncate"
     <div v-if="isOpen && files.length">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         <div
-            v-for="file in files"
+            v-for="file in visibleFiles"
             :key="file.id"
             class="group flex flex-col cursor-pointer"
         >
@@ -76,7 +104,13 @@ const fileLabel = "text-[11px] font-bold uppercase truncate"
         </div>
       </div>
     </div>
-
+    <!-- Show more/less button -->
+    <button v-if="hasMore || isExpanded"
+            class="mt-4 w-full rounded-lg border border-border bg-card py-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:border-ring hover:text-foreground transition-colors duration-150 cursor-pointer text-center"
+            @click="isExpanded = !isExpanded">
+      <span v-if="!isExpanded">{{ t('production.showMore') }} ({{ remaining }} {{ t('production.remaining') }})</span>
+      <span v-else>{{ t('production.showLess') }}</span>
+    </button>
     <!-- No files (empty) -->
     <div
         v-else-if="!files.length"

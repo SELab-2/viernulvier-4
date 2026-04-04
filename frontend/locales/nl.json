@@ -84,6 +84,9 @@
     "price": "Prijs",
     "noEvents": "Deze productie bevat geen evenementen.",
     "files": "Bestanden",
-    "noFiles": "Deze categorie bevat geen bestanden."
+    "noFiles": "Deze categorie bevat geen bestanden.",
+    "showMore": "Meer tonen",
+    "showLess": "Minder tonen",
+    "remaining": "resterend"
   }
 }

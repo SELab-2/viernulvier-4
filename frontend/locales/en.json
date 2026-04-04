@@ -83,7 +83,10 @@
     "price": "Price",
     "noEvents": "This production doesn't any events.",
     "files": "Files",
-    "noFiles": "This category doesn't contain any files."
+    "noFiles": "This category doesn't contain any files.",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "remaining": "remaining"
   }
 }
 

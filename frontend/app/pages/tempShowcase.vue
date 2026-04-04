@@ -3,6 +3,8 @@ const files1 = [
   { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
   { id: 2, name: 'AFFICHE-VIDEODROOM-2025.PDF', year: 2025, image: null },
   { id: 3, name: 'AFFICHE-DE-GRAAL-2025.PDF', year: 2024, image: null },
+  { id: 4, name: 'AFFICHE-04.JPG', year: 2025, image: null },
+  { id: 5, name: 'AFFICHE-05.JPG', year: 2026, image: null },
 ]
 
 const files2 = [
@@ -11,6 +13,12 @@ const files2 = [
   { id: 6, name: 'BROCHURE-03.JPG', year: 2025, image: null },
   { id: 7, name: 'BROCHURE-04.JPG', year: 2027, image: null },
   { id: 8, name: 'BROCHURE-05.JPG', year: 2025, image: null },
+  { id: 9, name: 'BROCHURE-06.JPG', year: 2025, image: null },
+  { id: 10, name: 'BROCHURE-07.JPG', year: 2028, image: null },
+  { id: 11, name: 'BROCHURE-08.JPG', year: 2025, image: null },
+  { id: 12, name: 'BROCHURE-09.JPG', year: 2025, image: null },
+  { id: 13, name: 'BROCHURE-10.JPG', year: 2025, image: null },
+  { id: 14, name: 'BROCHURE-11.JPG', year: 2025, image: null },
 ]
 
 const files3: never[] = [] // no files
