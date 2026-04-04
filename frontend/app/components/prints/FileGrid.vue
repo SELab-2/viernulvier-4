@@ -26,29 +26,33 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-const currentCols = computed(() => {
+const currentCols = computed(() => { // how many items there are currently in a row
   if (windowWidth.value >= 1024) return 4  // lg:grid-cols-4
   if (windowWidth.value >= 640) return 3   // sm:grid-cols-3
   return 2                                  // grid-cols-2
 })
 
-const initialMax = computed(() => currentCols.value * 2) // 2 rows
+const initialMax = computed(() => currentCols.value * 2) // max items there can be in 2 rows
 
-const isOpen = ref(true);
-const isExpanded = ref(false);
-const toggle = () => isOpen.value = !isOpen.value;
+const isOpen = ref(true); // for toggling the whole category section  (chevrons)
+const isExpanded = ref(false); // show more/less
+const toggle = () => isOpen.value = !isOpen.value; // for toggling the whole category section  (chevrons)
 const sortedFiles = computed(() => // oldest first
     [...props.files].sort((a, b) => (a.year ?? 0) - (b.year ?? 0))
 )
-const visibleFiles = computed(() =>
+const visibleFiles = computed(() => // visible files depend on if the show more button is pressed or not
     isExpanded.value ? sortedFiles.value : sortedFiles.value.slice(0, initialMax.value)
 )
-const remaining = computed(() => props.files.length - initialMax.value)
+const remaining = computed(() => props.files.length - initialMax.value) // amount of non visible files
 const hasMore = computed(() => props.files.length > initialMax.value) // if a "show more"- button is needed
 
 //constants
 const chevron = "shrink-0 text-muted-foreground"
 const fileLabel = "text-[11px] font-bold uppercase truncate"
+const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3 " +
+    "text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center " +
+    "hover:border-ring hover:text-foreground " +
+    "transition-colors duration-150 cursor-pointer"
 </script>
 
 <template>
@@ -106,7 +110,7 @@ const fileLabel = "text-[11px] font-bold uppercase truncate"
     </div>
     <!-- Show more/less button -->
     <button v-if="hasMore || isExpanded"
-            class="mt-4 w-full rounded-lg border border-border bg-card py-3 text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:border-ring hover:text-foreground transition-colors duration-150 cursor-pointer text-center"
+            :class="showMoreButton"
             @click="isExpanded = !isExpanded">
       <span v-if="!isExpanded">{{ t('production.showMore') }} ({{ remaining }} {{ t('production.remaining') }})</span>
       <span v-else>{{ t('production.showLess') }}</span>
