@@ -26,7 +26,7 @@ const toggle = () => isOpen.value = !isOpen.value;
         class="w-full flex items-center gap-3 mb-3 group cursor-pointer"
         @click="toggle"
     >
-      <span class="text-[12px] font-bold uppercase shrink-0">{{ category }}</span>
+      <span class="text-[20px] font-bold uppercase shrink-0">{{ category }}</span>
       <span class="text-[11px] text-muted-foreground shrink-0">{{ files.length }} bestanden</span>
       <span class="flex-1 h-px bg-border" />
       <ChevronUp v-if="isOpen" :size="14" class="shrink-0 text-muted-foreground" />
@@ -50,12 +50,11 @@ const toggle = () => isOpen.value = !isOpen.value;
                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <ThumbnailPlaceholder
-                v-else
                 :id="file.id"
+                size="fill"
                 :show-icon="true"
                 :show-border="false"
                 :rounded="false"
-                class="absolute inset-0 w-full h-full"
             />
           </div>
 
