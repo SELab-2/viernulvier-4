@@ -71,4 +71,7 @@ export const API_ROUTES = {
     base: "/media/crops",
     byId: (cropId: number) => `/media/crops/${cropId}`,
   },
+  storage: {
+    base: "/media/storage",
+  },
 } as const;

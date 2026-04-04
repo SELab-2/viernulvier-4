@@ -121,10 +121,9 @@ export class MediaStorageController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Delete media at a given URL." })
-  @ApiBody({ schema: { properties: { url: { type: "string" } } } })
   @ApiOkResponse({ description: "Deleted media." })
   @Delete()
-  async deleteMedia(@Body() body: { url: string }): Promise<void> {
-    await this.mediaStorageService.deleteMedia(body.url);
+  async deleteMedia(@Query("url") url: string): Promise<void> {
+    await this.mediaStorageService.deleteMedia(url);
   }
 }
