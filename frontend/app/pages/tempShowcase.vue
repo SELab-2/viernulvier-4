@@ -1,0 +1,32 @@
+<script setup lang="ts">
+const files1 = [
+  { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
+  { id: 2, name: 'AFFICHE-VIDEODROOM-2025.PDF', year: 2025, image: null },
+  { id: 3, name: 'AFFICHE-DE-GRAAL-2025.PDF', year: 2024, image: null },
+]
+
+const files2 = [
+  { id: 4, name: 'BROCHURE-01.JPG', year: 2025, image: null },
+  { id: 5, name: 'BROCHURE-02.JPG', year: 2026, image: null },
+  { id: 6, name: 'BROCHURE-03.JPG', year: 2025, image: null },
+  { id: 7, name: 'BROCHURE-04.JPG', year: 2027, image: null },
+  { id: 8, name: 'BROCHURE-05.JPG', year: 2025, image: null },
+]
+
+const files3: never[] = [] // no files
+</script>
+
+<template>
+  <div class="p-8">
+    <PrintsFileGrid category="Affiche" :files="files1" />
+  </div>
+  <div class="p-8">
+    <PrintsFileGrid category="Brochure" :files="files2" />
+  </div>
+  <div class="p-8">
+    <PrintsFileGrid category="Dit is leeg" :files="files3" />
+  </div>
+</template>
+
+<style scoped>
+</style>
