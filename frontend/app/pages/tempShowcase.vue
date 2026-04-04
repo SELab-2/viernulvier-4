@@ -36,15 +36,14 @@ const files3: never[] = [] // no files
     <PrintsFileGrid category="Dit is leeg" :files="files3" />
   </div>
 
-  <h1>Listview showcase (I think this will be used for admin side so no category?):</h1>
   <div class="p-8">
-    <PrintsFileList :files="files1" />
+    <PrintsFileList category="Affiche" :files="files1" />
   </div>
   <div class="p-8">
-    <PrintsFileList :files="files2" />
+    <PrintsFileList category="Brochure" :files="files2" />
   </div>
   <div class="p-8">
-    <PrintsFileList :files="files3" />
+    <PrintsFileList category="Leeg" :files="files3" />
   </div>
 </template>
 

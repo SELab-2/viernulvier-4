@@ -8,6 +8,7 @@ interface PrintsFile { //TODO replace this with actual object later
 }
 
 interface Props {
+  category: string;
   files: PrintsFile[];
 }
 const props = defineProps<Props>();
@@ -39,7 +40,7 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
         <div class="flex-1 min-w-0">
           <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">{{ file.name }}</p>
           <p class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
-            <span v-if="file.year">{{ file.year }}</span>
+            {{ category }}<span v-if="file.year"> • {{ file.year }}</span>
           </p>
         </div>
       </div>
