@@ -174,4 +174,36 @@ export class PrintItemDatabaseService {
             throw new ResourceGoneException(`Cannot delete: Print Item ${id} not found.`);
         }
     }
+
+    /**
+   * Link an existing print item to an existing gallery.
+   * Silently does nothing if the link already exists (ON CONFLICT DO NOTHING).
+   * @param galleryId The gallery to link to.
+   * @param printItemId The print item to link.
+   */
+  async linkPrintItemToGallery(galleryId: number, printItemId: number): Promise<void> {
+    const query = `
+      INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id) 
+      VALUES ($1, $2) 
+      ON CONFLICT DO NOTHING
+    `;
+    await this.db.query(query, [galleryId, printItemId]);
+  }
+
+  /**
+   * Unlink a print item from a gallery. Does not delete the print item itself.
+   * Silently does nothing if the link doesn't exist.
+   * @param galleryId The gallery to unlink from.
+   * @param printItemId The print item to unlink.
+   */
+  async unlinkPrintItemFromGallery(
+    galleryId: number,
+    printItemId: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM print_item_media_gallery 
+      WHERE media_gallery_id = $1 AND print_item_id = $2
+    `;
+    await this.db.query(query, [galleryId, printItemId]);
+  }
 }
