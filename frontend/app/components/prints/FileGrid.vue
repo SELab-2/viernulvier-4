@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ChevronUp, ChevronDown } from "lucide-vue-next";
 
-interface ProductionFile { //TODO replace this with object later
+interface ProductionFile { //TODO replace this with actual object later
   id: number;
   name: string;
   year?: number;
@@ -17,6 +17,10 @@ const { t } = useI18n();
 
 const isOpen = ref(true);
 const toggle = () => isOpen.value = !isOpen.value;
+
+//constants
+const chevron = "shrink-0 text-muted-foreground"
+const fileLabel = "text-[11px] font-bold uppercase truncate"
 </script>
 
 <template>
@@ -27,10 +31,10 @@ const toggle = () => isOpen.value = !isOpen.value;
         @click="toggle"
     >
       <span class="text-[20px] font-bold uppercase shrink-0">{{ category }}</span>
-      <span class="text-[11px] text-muted-foreground shrink-0">{{ files.length }} bestanden</span>
+      <span class="text-[11px] text-muted-foreground shrink-0">{{ files.length }} {{ t('production.files') }}</span>
       <span class="flex-1 h-px bg-border" />
-      <ChevronUp v-if="isOpen" :size="14" class="shrink-0 text-muted-foreground" />
-      <ChevronDown v-else :size="14" class="shrink-0 text-muted-foreground" />
+      <ChevronUp v-if="isOpen" :size="14" :class="chevron" />
+      <ChevronDown v-else :size="14" :class="chevron" />
     </button>
 
     <!-- Grid -->
@@ -60,21 +64,20 @@ const toggle = () => isOpen.value = !isOpen.value;
 
           <!-- File info -->
           <div class="mt-2">
-            <p class="text-[11px] font-bold uppercase truncate">{{ file.name }}</p>
+            <p :class="fileLabel">{{ file.name }}</p>
             <div class="flex items-center gap-2 mt-1">
               <span
-                  class="text-[9px] font-bold uppercase tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground"
-              >
-                {{ category }}
+                  :class="[fileLabel, 'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground']"
+              >{{ category }}
               </span>
-              <span v-if="file.year" class="text-[9px] text-muted-foreground ml-auto">{{ file.year }}</span>
+              <span v-if="file.year" class="text-[11px] text-muted-foreground ml-auto">{{ file.year }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Empty state -->
+    <!-- No files (empty) -->
     <div
         v-else-if="!files.length"
         class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"

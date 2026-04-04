@@ -82,6 +82,7 @@
     "location": "Location",
     "price": "Price",
     "noEvents": "This production doesn't any events.",
+    "files": "Files",
     "noFiles": "This category doesn't contain any files."
   }
 }
