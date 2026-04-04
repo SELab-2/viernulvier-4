@@ -8,20 +8,20 @@
  *  - Thumbnail placeholders
  *
  * Usage:
- * <ProductionFileGrid
+ * <PrintsFileGrid
  *    category="Affiche"
  *    :files="files"
  * />
  *
  * Example files:
- * const files: ProductionFile[] = [
+ * const files: PrintsFile[] = [
  *    { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
  *    { id: 2, name: 'AFFICHE-VIDEODROOM-2024.PDF', year: 2024, image: null },
  * ]
  */
 import { ChevronUp, ChevronDown } from "lucide-vue-next";
 
-interface ProductionFile { //TODO replace this with actual object later
+interface PrintsFile { //TODO replace this with actual object later
   id: number;
   name: string;
   year?: number;
@@ -30,7 +30,7 @@ interface ProductionFile { //TODO replace this with actual object later
 
 interface Props {
   category: string;
-  files: ProductionFile[];
+  files: PrintsFile[];
 }
 const props = defineProps<Props>();
 const { t } = useI18n();
@@ -63,7 +63,7 @@ const sortedFiles = computed(() => // oldest first
 const visibleFiles = computed(() => // visible files depend on if the show more button is pressed or not
     isExpanded.value ? sortedFiles.value : sortedFiles.value.slice(0, initialMax.value)
 )
-const remaining = computed(() => props.files.length - initialMax.value) // amount of non visible files
+const remaining = computed(() => props.files.length - initialMax.value) // amount of non-visible files
 const hasMore = computed(() => props.files.length > initialMax.value) // if a "show more"- button is needed
 
 //constants
@@ -83,7 +83,7 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
         @click="toggle"
     >
       <span class="text-[20px] font-bold uppercase shrink-0">{{ category }}</span>
-      <span class="text-[11px] text-muted-foreground shrink-0">{{ files.length }} {{ t('production.files') }}</span>
+      <span class="text-[11px] text-muted-foreground shrink-0">{{ files.length }} {{ t('prints.files') }}</span>
       <span class="flex-1 h-px bg-border" />
       <ChevronUp v-if="isOpen" :size="14" :class="chevron" />
       <ChevronDown v-else :size="14" :class="chevron" />
@@ -132,15 +132,15 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
     <button v-if="hasMore || isExpanded"
             :class="showMoreButton"
             @click="isExpanded = !isExpanded">
-      <span v-if="!isExpanded">{{ t('production.showMore') }} ({{ remaining }} {{ t('production.remaining') }})</span>
-      <span v-else>{{ t('production.showLess') }}</span>
+      <span v-if="!isExpanded">{{ t('prints.showMore') }} ({{ remaining }} {{ t('prints.remaining') }})</span>
+      <span v-else>{{ t('prints.showLess') }}</span>
     </button>
     <!-- No files (empty) -->
     <div
         v-else-if="!files.length"
         class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"
     >
-      {{ t('production.noFiles') }}
+      {{ t('prints.noFiles') }}
     </div>
   </div>
 </template>
