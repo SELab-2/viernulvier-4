@@ -1,4 +1,22 @@
 <script setup lang="ts">
+/**
+ * A reusable file list component, displays files in a simple list, includes:
+ *  - File name, category and date displayed per file //TODO atm only year is displayed bc no actual data yet
+ *  - Sorting of files (oldest first)
+ *
+ * Usage:
+ * <PrintsFileList
+ *    category="Affiche"
+ *    :files="files"
+ * />
+ *
+ * Example files:
+ * const files: PrintsFile[] = [
+ *    { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
+ *    { id: 2, name: 'AFFICHE-VIDEODROOM-2024.PDF', year: 2024, image: null },
+ * ]
+ */
+
 import { FileText } from "lucide-vue-next";
 interface PrintsFile { //TODO replace this with actual object later
   id: number;
