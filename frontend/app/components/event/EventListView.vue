@@ -18,12 +18,23 @@ const emit = defineEmits<{
   (e: "delete", payload: { id: Id; title: string }): void;
 }>();
 
-const { locale, t } = useI18n();
+const { t, locale } = useI18n();
 
-const formatDateTime = (input: string | Date) => {
-  const value = input instanceof Date ? input : new Date(input);
-  if (Number.isNaN(value.getTime())) return "Invalid date";
-  return value.toLocaleString(locale.value);
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString(locale.value, {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const formatTime = (dateStr: string) => {
+  return new Date(dateStr).toLocaleTimeString(locale.value, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 };
 
 const getVenue = (event: EventWithDetails) => {
@@ -56,7 +67,8 @@ const onDelete = (item: EventListItem) => {
           {{ item.productionTitle || "Unknown Production" }}
         </h3>
         <p class="text-xs text-gray-500 uppercase tracking-widest truncate">
-          {{ getVenue(item) }} - {{ formatDateTime(item.starttime) }}
+          {{ getVenue(item) }} - {{ formatDate(item.starttime) }},
+          {{ formatTime(item.starttime) }}
         </p>
         <p class="text-xs font-bold mt-1">
           {{ t("eventlist.price") }}: {{ getPrice(item) }}
