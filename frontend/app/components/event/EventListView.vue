@@ -37,6 +37,13 @@ const formatTime = (dateStr: string) => {
   });
 };
 
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat(locale.value, {
+    style: "currency",
+    currency: "EUR",
+  }).format(price);
+};
+
 const getVenue = (event: EventWithDetails) => {
   return event.locations[0]?.location ?? "Unknown Venue";
 };
@@ -44,7 +51,7 @@ const getVenue = (event: EventWithDetails) => {
 const getPrice = (event: EventWithDetails) => {
   const mainPrice = event.prices[0];
   if (!mainPrice) return "-";
-  return `${mainPrice.name}: EUR ${mainPrice.price}`;
+  return `${mainPrice.name}: ${formatPrice(mainPrice.price)}`;
 };
 
 const onDelete = (item: EventListItem) => {
