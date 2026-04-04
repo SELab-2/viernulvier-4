@@ -10,8 +10,6 @@ type EventListItem = EventWithDetails & {
 
 interface Props {
   events: EventListItem[];
-  emptyText?: string;
-  priceLabel?: string;
 }
 
 const props = defineProps<Props>();
@@ -20,17 +18,7 @@ const emit = defineEmits<{
   (e: "delete", payload: { id: Id; title: string }): void;
 }>();
 
-const { locale } = useI18n();
-
-const resolvedEmptyText = computed(() => {
-  if (props.emptyText) return props.emptyText;
-  return locale.value === "nl" ? "Geen events gevonden" : "No events found";
-});
-
-const resolvedPriceLabel = computed(() => {
-  if (props.priceLabel) return props.priceLabel;
-  return locale.value === "nl" ? "Prijs" : "Price";
-});
+const { locale, t } = useI18n();
 
 const formatDateTime = (input: string | Date) => {
   const value = input instanceof Date ? input : new Date(input);
@@ -71,7 +59,7 @@ const onDelete = (item: EventListItem) => {
           {{ getVenue(item) }} - {{ formatDateTime(item.starttime) }}
         </p>
         <p class="text-xs font-bold mt-1">
-          {{ resolvedPriceLabel }}: {{ getPrice(item) }}
+          {{ t("eventlist.price") }}: {{ getPrice(item) }}
         </p>
       </div>
 
@@ -79,7 +67,7 @@ const onDelete = (item: EventListItem) => {
         <button
           type="button"
           class="w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          :aria-label="locale === 'nl' ? 'Bewerk' : 'Edit'"
+          :aria-label="t('eventlist.edit')"
           @click="emit('edit', item.id)"
         >
           <Edit2 class="w-5 h-5" />
@@ -88,7 +76,7 @@ const onDelete = (item: EventListItem) => {
         <button
           type="button"
           class="w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
-          :aria-label="locale === 'nl' ? 'Wis' : 'Delete'"
+          :aria-label="t('eventlist.delete')"
           @click="onDelete(item)"
         >
           <Trash2 class="w-5 h-5 text-red-600" />
@@ -100,7 +88,7 @@ const onDelete = (item: EventListItem) => {
       v-if="events.length === 0"
       class="text-center text-gray-500 dark:text-gray-400"
     >
-      {{ resolvedEmptyText }}
+      {{ t("eventlist.noEventsFound") }}
     </p>
   </div>
 </template>

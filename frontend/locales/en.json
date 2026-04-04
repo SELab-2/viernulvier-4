@@ -82,6 +82,11 @@
     "location": "Location",
     "price": "Price",
     "noEvents": "This production doesn't contain any events."
+  },
+  "eventlist": {
+    "noEventsFound": "No events found",
+    "price": "Price",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }
-

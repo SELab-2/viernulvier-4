@@ -71,7 +71,6 @@
     "lightMode": "Lichte modus",
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF."
-
   },
   "baseform": {
     "submitbutton": "Indienen",
@@ -83,5 +82,11 @@
     "location": "Locatie",
     "price": "Prijs",
     "noEvents": "Deze productie bevat geen evenementen."
+  },
+  "eventlist": {
+    "noEventsFound": "Geen evenementen gevonden",
+    "price": "Prijs",
+    "edit": "Bewerk",
+    "delete": "Verwijder"
   }
 }
