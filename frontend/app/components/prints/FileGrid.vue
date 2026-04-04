@@ -140,7 +140,7 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
         v-else-if="!files.length"
         class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"
     >
-      {{ t('prints.noFiles') }}
+      {{ t('prints.noFilesCat') }}
     </div>
   </div>
 </template>

@@ -9,7 +9,8 @@ const i18n = createI18n({
         nl: {
             "prints": {
                 files: "Bestanden",
-                noFiles: "Deze categorie bevat geen bestanden.",
+                noFilesCat: "Deze categorie bevat geen bestanden.",
+                noFiles: "Geen bestanden beschikbaar.",
                 showMore: "Meer tonen",
                 showLess: "Minder tonen",
                 remaining: "resterend"
@@ -18,7 +19,8 @@ const i18n = createI18n({
         en: {
             "prints": {
                 files: "Files",
-                noFiles: "This category doesn't contain any files.",
+                noFilesCat: "This category doesn't contain any files.",
+                noFiles: "No files available.",
                 showMore: "Show more",
                 showLess: "Show less",
                 remaining: "remaining"

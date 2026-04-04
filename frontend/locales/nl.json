@@ -86,7 +86,8 @@
   },
   "prints": {
     "files": "Bestanden",
-    "noFiles": "Deze categorie bevat geen bestanden.",
+    "noFilesCat": "Deze categorie bevat geen bestanden.",
+    "noFiles": "Geen bestanden beschikbaar.",
     "showMore": "Meer tonen",
     "showLess": "Minder tonen",
     "remaining": "resterend"
