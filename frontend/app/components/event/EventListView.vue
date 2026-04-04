@@ -48,10 +48,11 @@ const getVenue = (event: EventWithDetails) => {
   return event.locations[0]?.location ?? "Unknown Venue";
 };
 
-const getPrice = (event: EventWithDetails) => {
-  const mainPrice = event.prices[0];
-  if (!mainPrice) return "-";
-  return `${mainPrice.name}: ${formatPrice(mainPrice.price)}`;
+const getPricesText = (event: EventWithDetails) => {
+  if (!event.prices.length) return "-";
+  return event.prices
+    .map((price) => `${price.name}: ${formatPrice(price.price)}`)
+    .join(" | ");
 };
 
 const onDelete = (item: EventListItem) => {
@@ -78,7 +79,7 @@ const onDelete = (item: EventListItem) => {
           {{ formatTime(item.starttime) }}
         </p>
         <p class="text-xs font-bold mt-1">
-          {{ t("eventlist.price") }}: {{ getPrice(item) }}
+          {{ t("eventlist.price") }}: {{ getPricesText(item) }}
         </p>
       </div>
 

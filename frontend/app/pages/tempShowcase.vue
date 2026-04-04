@@ -75,6 +75,20 @@ const mockEvents = ref<EventWithDetails[]>([
         created_at: "2026-01-01T00:00:00.000Z",
         updated_at: "2026-01-01T00:00:00.000Z",
       },
+      {
+        id: 22,
+        price: 12,
+        name: "Student",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        id: 23,
+        price: 10,
+        name: "Kansentarief",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      },
     ],
   },
   {
@@ -154,9 +168,9 @@ const filteredEvents = computed(() => {
 
   return listEvents.value.filter((event) => {
     const venue = event.locations[0]?.location ?? "";
-    const priceText = event.prices[0]
-      ? `${event.prices[0].name} eur ${event.prices[0].price}`
-      : "";
+    const priceText = event.prices
+      .map((price) => `${price.name} eur ${price.price}`)
+      .join(" ");
 
     return (
       event.productionTitle.toLowerCase().includes(query) ||
