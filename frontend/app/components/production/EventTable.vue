@@ -103,7 +103,7 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
 
               <!-- Location -->
               <td :class="cellWide">
-                <p class= "text-[12px] truncate">{{ event.location }}</p>
+                <p class= "text-[12px] truncate">{{ event.location?.location || '-' }}</p>
               </td>
 
               <!-- Price -->
