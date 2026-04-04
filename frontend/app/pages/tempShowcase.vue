@@ -32,14 +32,12 @@ const mockEvents = ref<EventWithDetails[]>([
     intermission_at: null,
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
-    locations: [
-      {
-        id: 1,
-        location: "De Vooruit, Gent",
-        created_at: "2026-01-01T00:00:00.000Z",
-        updated_at: "2026-01-01T00:00:00.000Z",
-      },
-    ],
+    location: {
+      id: 1,
+      location: "De Vooruit, Gent",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
     prices: [
       {
         id: 1,
@@ -59,14 +57,12 @@ const mockEvents = ref<EventWithDetails[]>([
     intermission_at: null,
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
-    locations: [
-      {
-        id: 2,
-        location: "KVS, Brussel",
-        created_at: "2026-01-01T00:00:00.000Z",
-        updated_at: "2026-01-01T00:00:00.000Z",
-      },
-    ],
+    location: {
+      id: 2,
+      location: "KVS, Brussel",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
     prices: [
       {
         id: 2,
@@ -100,14 +96,12 @@ const mockEvents = ref<EventWithDetails[]>([
     intermission_at: null,
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
-    locations: [
-      {
-        id: 3,
-        location: "Stadsschouwburg, Antwerpen",
-        created_at: "2026-01-01T00:00:00.000Z",
-        updated_at: "2026-01-01T00:00:00.000Z",
-      },
-    ],
+    location: {
+      id: 3,
+      location: "Stadsschouwburg, Antwerpen",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
     prices: [
       {
         id: 3,
@@ -127,14 +121,12 @@ const mockEvents = ref<EventWithDetails[]>([
     intermission_at: null,
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
-    locations: [
-      {
-        id: 4,
-        location: "Muziekcentrum, Brugge",
-        created_at: "2026-01-01T00:00:00.000Z",
-        updated_at: "2026-01-01T00:00:00.000Z",
-      },
-    ],
+    location: {
+      id: 4,
+      location: "Muziekcentrum, Brugge",
+      created_at: "2026-01-01T00:00:00.000Z",
+      updated_at: "2026-01-01T00:00:00.000Z",
+    },
     prices: [
       {
         id: 4,
@@ -167,7 +159,7 @@ const filteredEvents = computed(() => {
   if (!query) return listEvents.value;
 
   return listEvents.value.filter((event) => {
-    const venue = event.locations[0]?.location ?? "";
+    const venue = event.location?.location ?? "";
     const priceText = event.prices
       .map((price) => `${price.name} eur ${price.price}`)
       .join(" ");

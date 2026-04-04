@@ -76,7 +76,7 @@ const onEdit = (event: EventListItem) => {
           {{ item.productionTitle || "Unknown Production" }}
         </h3>
         <p class="text-xs text-gray-500 uppercase tracking-widest truncate">
-          {{ item.locations[0]?.location }} - {{ formatDate(item.starttime) }},
+          {{ item.location.location }} - {{ formatDate(item.starttime) }},
           {{ formatTime(item.starttime) }}
         </p>
         <p class="text-xs font-bold mt-1">
