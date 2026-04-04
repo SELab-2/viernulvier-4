@@ -1,62 +1,58 @@
-// media.crop.service.spec.ts
 import { Test, TestingModule } from "@nestjs/testing";
-import { MediaCropService } from "../../media/services/media.crop.service";
-import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
-import { PaginatedResponse } from "@repo/common";
-import {
-  CreateMediaCropDto,
-  MediaCropDto,
-  ModifyMediaCropDto,
-  PaginationFilterDto,
-  ReplaceMediaCropDto,
-} from "../../dto/dto";
-import { MediaStorageService } from "../../media/media_storage/service/media_storage.service";
-import { ConfigService } from "@nestjs/config"; // <-- 1. Import ConfigService
+import { LanguageService } from "./language.service";
+import { Language } from "@repo/common";
+import { AppLogger } from "../logger/logger.service";
+import { ConfigService } from "@nestjs/config";
 
-describe("MediaCropService", () => {
-  let service: MediaCropService;
-  let mediaDbService: jest.Mocked<MediaCropDatabaseService>;
-  const mockMediaStorageService = jest.mocked<MediaStorageService>;
+// --- Interfaces for Testing ---
+interface LocalizedText {
+  en?: string;
+  nl?: string;
+}
 
-  const mockCrop: MediaCropDto = {
-    id: 1,
-    name: "hd_ready",
-    url: "https://example.com/crop.jpg",
-    created_at: "2026-03-28T14:00:00.000Z",
-    updated_at: "2026-03-28T14:00:00.000Z",
-  };
+interface MockEntity {
+  id?: number;
+  titel?: LocalizedText;
+  description?: LocalizedText;
+  tag?: LocalizedText;
+  is_active?: boolean;
+  created_at?: Date;
+  tags?: string[];
+  empty_field?: null;
+}
 
-  // 2. Create the mock ConfigService
-  const mockConfigService = {
-    get: jest.fn((key: string) => {
-      // Provide default fallbacks for your test environment here
-      if (key === "NODE_ENV") return "development";
-      if (key === "MEDIA_BASE_URL") return "http://127.0.0.1/photos";
-      return null;
-    }),
-  };
+interface MockEntityView {
+  id?: number;
+  titel?: string | null;
+  description?: string | null;
+  tag?: string | null;
+  is_active?: boolean;
+  created_at?: Date;
+  tags?: string[];
+  empty_field?: null;
+}
+// ------------------------------
+
+describe("LanguageService", () => {
+  let service: LanguageService;
 
   beforeEach(async () => {
-    const mockMediaDbService = {
-      getAllCrops: jest.fn(),
-      getCropById: jest.fn(),
-      createCrop: jest.fn(),
-      updateCrop: jest.fn(),
-      deleteCrop: jest.fn(),
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue("development"),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        MediaCropService,
+        LanguageService,
         {
-          provide: MediaCropDatabaseService,
-          useValue: mockMediaDbService,
+          provide: AppLogger,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+          },
         },
-        {
-          provide: MediaStorageService,
-          useValue: mockMediaStorageService,
-        },
-        // 3. Inject the mock ConfigService into the testing module
         {
           provide: ConfigService,
           useValue: mockConfigService,
@@ -64,126 +60,123 @@ describe("MediaCropService", () => {
       ],
     }).compile();
 
-    service = module.get<MediaCropService>(MediaCropService);
-    mediaDbService = module.get(MediaCropDatabaseService);
+    service = module.get<LanguageService>(LanguageService);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
+  describe("Initialization", () => {
+    it("should be defined", () => {
+      expect(service).toBeDefined();
+    });
   });
 
-  it("should be defined", () => {
-    expect(service).toBeDefined();
-  });
+  describe("flattenByLanguage", () => {
+    // --- Edge Cases & Early Returns ---
 
-  describe("getCrops", () => {
-    it("should return a paginated list of crops", async () => {
-      const paginationFilters: PaginationFilterDto = {
-        page: 1,
-        limit: 10,
-        descending: true,
-      };
-      const expectedResponse: PaginatedResponse<MediaCropDto> = {
-        objects: [mockCrop],
-        totalItems: 1,
-        page: 1,
-        limit: 10,
-      };
+    it("should return the original data if data is null or undefined", () => {
+      expect(
+        service.flattenByLanguage<null>(null, "en" as Language),
+      ).toBeNull();
+      expect(
+        service.flattenByLanguage<undefined>(undefined, "en" as Language),
+      ).toBeUndefined();
+    });
 
-      mediaDbService.getAllCrops.mockResolvedValue(expectedResponse);
-
-      const result = await service.getCrops(paginationFilters);
-
-      expect(mediaDbService.getAllCrops).toHaveBeenCalledWith(
-        paginationFilters,
+    it("should return the original data if no language is provided", () => {
+      const data: MockEntity = { titel: { en: "Hello", nl: "Hallo" } };
+      expect(service.flattenByLanguage<MockEntity>(data, undefined)).toEqual(
+        data,
       );
-      expect(result).toEqual(expectedResponse);
     });
-  });
 
-  describe("getCropById", () => {
-    it("should return a single crop", async () => {
-      mediaDbService.getCropById.mockResolvedValue(mockCrop);
+    // --- Object Flattening ---
 
-      const result = await service.getCropById(1);
-
-      expect(mediaDbService.getCropById).toHaveBeenCalledWith(1);
-      expect(result).toEqual(mockCrop);
-    });
-  });
-
-  describe("createCrop", () => {
-    it("should create and return a new crop", async () => {
-      const createCropDto: CreateMediaCropDto = {
-        name: "thumbnail",
-        url: "https://example.com/thumb.jpg",
-        item_id: 42,
-      };
-      mediaDbService.createCrop.mockResolvedValue(mockCrop);
-
-      const result = await service.createCrop(createCropDto);
-
-      expect(mediaDbService.createCrop).toHaveBeenCalledWith(createCropDto);
-      expect(result).toEqual(mockCrop);
-    });
-  });
-
-  describe("replaceCrop", () => {
-    it("should replace and return the crop", async () => {
-      const replaceCropDto: ReplaceMediaCropDto = {
-        name: "mobile",
-        url: "https://example.com/mobile.jpg",
-      };
-      mediaDbService.updateCrop.mockResolvedValue(mockCrop);
-
-      const result = await service.replaceCrop(1, replaceCropDto);
-
-      expect(mediaDbService.updateCrop).toHaveBeenCalledWith(1, replaceCropDto);
-      expect(result).toEqual(mockCrop);
-    });
-  });
-
-  describe("modifyCrop", () => {
-    it("should fetch the existing crop, merge modifications, and update", async () => {
-      const existingCrop: MediaCropDto = {
+    it("should properly flatten an object containing localized strings", () => {
+      const data: MockEntity = {
         id: 1,
-        name: "hd_ready",
-        url: "https://example.com/old.jpg",
-        created_at: "2026-03-28T14:00:00.000Z",
-        updated_at: "2026-03-28T14:00:00.000Z",
+        titel: { en: "English Title", nl: "Nederlandse Titel" },
+        description: { en: "English Desc", nl: "Nederlandse Desc" },
+        is_active: true,
       };
 
-      const modifyCropDto: ModifyMediaCropDto = {
-        url: "https://example.com/new.jpg",
-      };
-
-      const expectedMergedCrop: MediaCropDto = {
-        ...existingCrop,
-        ...modifyCropDto,
+      const expectedEn: MockEntityView = {
         id: 1,
+        titel: "English Title",
+        description: "English Desc",
+        is_active: true,
       };
 
-      mediaDbService.getCropById.mockResolvedValue(existingCrop);
-      mediaDbService.updateCrop.mockResolvedValue(expectedMergedCrop);
+      const expectedNl: MockEntityView = {
+        id: 1,
+        titel: "Nederlandse Titel",
+        description: "Nederlandse Desc",
+        is_active: true,
+      };
 
-      const result = await service.modifyCrop(1, modifyCropDto);
+      expect(
+        service.flattenByLanguage<MockEntityView>(data, "en" as Language),
+      ).toEqual(expectedEn);
+      expect(
+        service.flattenByLanguage<MockEntityView>(data, "nl" as Language),
+      ).toEqual(expectedNl);
+    });
 
-      expect(mediaDbService.getCropById).toHaveBeenCalledWith(1);
-      expect(mediaDbService.updateCrop).toHaveBeenCalledWith(
-        1,
-        expectedMergedCrop,
+    it("should set the property to null if the requested language is missing", () => {
+      const data: MockEntity = {
+        id: 1,
+        titel: { nl: "Alleen Nederlands" }, // 'en' is missing
+      };
+
+      const expectedEn: MockEntityView = {
+        id: 1,
+        titel: null, // Fallback behavior defined in your service
+      };
+
+      expect(
+        service.flattenByLanguage<MockEntityView>(data, "en" as Language),
+      ).toEqual(expectedEn);
+    });
+
+    // --- Array Flattening ---
+
+    it("should recursively flatten an array of objects", () => {
+      const data: MockEntity[] = [
+        { id: 1, tag: { en: "Action", nl: "Actie" } },
+        { id: 2, tag: { en: "Drama", nl: "Drama" } },
+      ];
+
+      const expectedEn: MockEntityView[] = [
+        { id: 1, tag: "Action" },
+        { id: 2, tag: "Drama" },
+      ];
+
+      expect(
+        service.flattenByLanguage<MockEntityView[]>(data, "en" as Language),
+      ).toEqual(expectedEn);
+    });
+
+    // --- Data Type Preservation ---
+
+    it("should not mutate Date objects, arrays, or null values inside the payload", () => {
+      const testDate = new Date("2026-03-08T00:00:00.000Z");
+      const data: MockEntity = {
+        id: 1,
+        titel: { en: "Title", nl: "Titel" },
+        created_at: testDate, // Date object
+        tags: ["tag1", "tag2"], // Array
+        empty_field: null, // Null value
+      };
+
+      const result = service.flattenByLanguage<MockEntityView>(
+        data,
+        "en" as Language,
       );
-      expect(result).toEqual(expectedMergedCrop);
-    });
-  });
 
-  describe("deleteCrop", () => {
-    it("should delete the crop", async () => {
-      mediaDbService.deleteCrop.mockResolvedValue(undefined);
-
-      await service.deleteCrop(1);
-
-      expect(mediaDbService.deleteCrop).toHaveBeenCalledWith(1);
+      expect(result.titel).toBe("Title");
+      expect(result.created_at).toBeInstanceOf(Date);
+      expect(result.created_at).toEqual(testDate);
+      expect(Array.isArray(result.tags)).toBe(true);
+      expect(result.tags).toEqual(["tag1", "tag2"]);
+      expect(result.empty_field).toBeNull();
     });
   });
 });
