@@ -2,7 +2,6 @@
 /**
  * A reusable story list component, displays stories belonging to a specific production, includes:
  *  - Title, date and description displayed per story
- *  - Sorting of stories (oldest first)
  *  - Scrollable when there are more than 3 stories
  *
  * Usage:
@@ -24,12 +23,6 @@ interface Props {
   stories: BlogView[];
 }
 const props = defineProps<Props>();
-
-const sortedStories = computed(() => // function to sort the stories, oldest first
-    [...props.stories].sort(
-        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    )
-);
 </script>
 
 <template>
@@ -46,7 +39,7 @@ const sortedStories = computed(() => // function to sort the stories, oldest fir
       <div v-if="stories.length" class="overflow-y-auto max-h-[25rem]">
         <div class="flex flex-col gap-2">
           <BlogsStoryListItem
-              v-for="story in sortedStories"
+              v-for="story in stories"
               :key="story.id"
               :story="story"
               data-testid="data-story"

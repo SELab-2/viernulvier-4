@@ -70,12 +70,4 @@ describe("ProductionStories", () => {
     it("does not show empty message when stories are provided", () => {
         expect(wrapper.text()).not.toContain("Deze productie bevat geen verhalen.");
     });
-
-    it("sorts stories oldest first", () => {
-        const cards = wrapper.findAll("[data-testid=data-story]");
-        const firstCard = cards[0].text();
-        const lastCard = cards[cards.length - 1].text();
-        expect(firstCard).toContain("Titel 1"); // oldest story
-        expect(lastCard).toContain("Titel 4"); // newest story
-    });
 });
