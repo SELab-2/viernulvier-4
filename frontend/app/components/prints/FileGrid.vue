@@ -1,4 +1,24 @@
 <script setup lang="ts">
+/**
+ * A reusable file grid component, displays files belonging to a specific category, includes:
+ *  - Collapsible section with title and file count (chevron toggle)
+ *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
+ *  - Max 2 rows before a "show more" button appears (if there are more files)
+ *  - Sorting of files (oldest first)
+ *  - Thumbnail placeholders
+ *
+ * Usage:
+ * <ProductionFileGrid
+ *    category="Affiche"
+ *    :files="files"
+ * />
+ *
+ * Example files:
+ * const files: ProductionFile[] = [
+ *    { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
+ *    { id: 2, name: 'AFFICHE-VIDEODROOM-2024.PDF', year: 2024, image: null },
+ * ]
+ */
 import { ChevronUp, ChevronDown } from "lucide-vue-next";
 
 interface ProductionFile { //TODO replace this with actual object later
