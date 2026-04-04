@@ -62,14 +62,15 @@ describe("PrintsFileGrid", () => {
 
     it("renders file names", () => {
         const text = wrapper.text();
-        expect(text).toContain("AFFICHE-1.PDF");
-        expect(text).toContain("AFFICHE-2.PDF");
-        expect(text).toContain("AFFICHE-3.PDF");
-        expect(text).toContain("AFFICHE-4.PDF");
-        expect(text).toContain("AFFICHE-5.PDF");
-        expect(text).toContain("AFFICHE-6.PDF");
-        expect(text).toContain("AFFICHE-7.PDF");
+        expect(text).toContain("AFFICHE-9.PDF");
         expect(text).toContain("AFFICHE-8.PDF");
+        expect(text).toContain("AFFICHE-7.PDF");
+        expect(text).toContain("AFFICHE-6.PDF");
+        expect(text).toContain("AFFICHE-5.PDF");
+        expect(text).toContain("AFFICHE-4.PDF");
+        expect(text).toContain("AFFICHE-3.PDF");
+        expect(text).toContain("AFFICHE-2.PDF");
+        expect(text).not.toContain("AFFICHE-1.PDF");
     });
 
     it("shows empty message when no files are provided", () => {
@@ -99,13 +100,13 @@ describe("PrintsFileGrid", () => {
     it("sorts files oldest first", () => {
         const text = wrapper.text();
         const idx2017 = text.indexOf("2017");
-        const idx2025 = text.indexOf("2025");
+        const idx2025 = text.indexOf("2024");
         expect(idx2017).toBeLessThan(idx2025); // oldest appears first
     });
 
     it("toggles section visibility when header is clicked", async () => {
-        expect(wrapper.text()).toContain("AFFICHE-1.PDF");
+        expect(wrapper.text()).toContain("AFFICHE-9.PDF");
         await wrapper.find("button").trigger("click");
-        expect(wrapper.text()).not.toContain("AFFICHE-1.PDF");
+        expect(wrapper.text()).not.toContain("AFFICHE-9.PDF");
     });
 });

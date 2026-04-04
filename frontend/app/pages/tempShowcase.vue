@@ -25,6 +25,7 @@ const files3: never[] = [] // no files
 </script>
 
 <template>
+  <h1>Gridview showcase:</h1>
   <div class="p-8">
     <PrintsFileGrid category="Affiche" :files="files1" />
   </div>
@@ -34,6 +35,8 @@ const files3: never[] = [] // no files
   <div class="p-8">
     <PrintsFileGrid category="Dit is leeg" :files="files3" />
   </div>
+
+  <h1>Listview showcase:</h1>
 </template>
 
 <style scoped>
