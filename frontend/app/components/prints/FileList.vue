@@ -2,7 +2,6 @@
 /**
  * A reusable file list component, displays files in a simple list, includes:
  *  - File name, category and date displayed per file //TODO atm only year is displayed bc no actual data yet
- *  - Sorting of files (oldest first)
  *
  * Usage:
  * <PrintsFileList
@@ -32,10 +31,6 @@ interface Props {
 const props = defineProps<Props>();
 const { t } = useI18n();
 
-const sortedFiles = computed(() => // oldest first
-    [...props.files].sort((a, b) => (a.year ?? 0) - (b.year ?? 0))
-)
-
 // constants
 const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
 </script>
@@ -45,7 +40,7 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
     <!-- List -->
     <div v-if="files.length" class="rounded-lg border border-border overflow-hidden">
       <div
-          v-for="file in sortedFiles"
+          v-for="file in props.files"
           :key="file.id"
           :class="rowBase"
       >
