@@ -70,7 +70,33 @@
     "changeLanguage": "Change language",
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
-    "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE."
+    "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
+    "calendar": {
+      "toggle": "Date",
+      "filtered": "Filtered",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "clear": "Clear",
+      "apply": "Apply",
+      "today": "Today",
+      "oldest": "Oldest",
+      "date": "Date",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "from": "From",
+      "to": "To",
+      "dateHint": "DD/MM/YYYY",
+      "datePlaceholder": "e.g. 15/03/2023",
+      "fromPlaceholder": "01/01/2023",
+      "toPlaceholder": "31/12/2023",
+      "invalidDate": "Invalid date",
+      "mode": {
+        "single": "Date",
+        "range": "Range",
+        "date-to-now": "Until now",
+        "oldest": "Oldest"
+      }
+    }
   },
   "baseform": {
     "submitbutton": "Submit",
