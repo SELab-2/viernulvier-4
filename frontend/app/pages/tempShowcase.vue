@@ -182,8 +182,8 @@ const filteredEvents = computed(() => {
 
 const actionMessage = ref("");
 
-const onEdit = (eventId: number | string) => {
-  actionMessage.value = `Edit clicked for event #${eventId}`;
+const onEdit = (event: EventListItem) => {
+  actionMessage.value = `Edit clicked for event #${event.id}`;
 };
 
 const onDelete = (payload: { id: number | string; title: string }) => {

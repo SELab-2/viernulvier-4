@@ -14,7 +14,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  (e: "edit", eventId: Id): void;
+  (e: "edit", event: EventListItem): void;
   (e: "delete", payload: { id: Id; title: string }): void;
 }>();
 
@@ -44,10 +44,6 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-const getVenue = (event: EventWithDetails) => {
-  return event.locations[0]?.location ?? "Unknown Venue";
-};
-
 const getPricesText = (event: EventWithDetails) => {
   if (!event.prices.length) return "-";
   return event.prices
@@ -60,6 +56,11 @@ const onDelete = (item: EventListItem) => {
     id: item.id,
     title: item.productionTitle || "Unknown Production",
   });
+};
+
+const onEdit = (event: EventListItem) => {
+  emit("edit", event);
+  navigateTo(`/admin/events/edit/${event.id}`);
 };
 </script>
 
@@ -75,7 +76,7 @@ const onDelete = (item: EventListItem) => {
           {{ item.productionTitle || "Unknown Production" }}
         </h3>
         <p class="text-xs text-gray-500 uppercase tracking-widest truncate">
-          {{ getVenue(item) }} - {{ formatDate(item.starttime) }},
+          {{ item.locations[0]?.location }} - {{ formatDate(item.starttime) }},
           {{ formatTime(item.starttime) }}
         </p>
         <p class="text-xs font-bold mt-1">
@@ -88,7 +89,7 @@ const onDelete = (item: EventListItem) => {
           type="button"
           class="w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           :aria-label="t('eventlist.edit')"
-          @click="emit('edit', item.id)"
+          @click="onEdit(item)"
         >
           <Edit2 class="w-5 h-5" />
         </button>
