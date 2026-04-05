@@ -63,12 +63,14 @@ watch(searchQuery, () => {
   <section class="w-full bg-background">
     <div class="max-w-5xl mx-auto px-4 py-6">
 
-      <!-- Results count -->
-      <div class="flex items-center justify-end mb-6">
+      <!-- Results count + pagination -->
+      <div class="flex items-center justify-between mb-6">
         <p v-if="!loading && totalItems > 0" class="font-brand text-2xl font-black text-foreground">
           {{ t('archive.total_results', { total: totalItems }) }}
         </p>
         <div v-else-if="loading" class="h-7 w-36 bg-muted rounded animate-pulse" />
+
+        <ArchivePagination />
       </div>
 
       <!-- Error state -->
