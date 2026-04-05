@@ -73,7 +73,7 @@ export class PrintItemController {
 ): Promise<PaginatedResponse<PrintItemDto | PrintItemViewDto>> {
     return this.ls.flattenByLanguage<
         PaginatedResponse<PrintItemDto | PrintItemViewDto>
-    >(this.printItemService.getPrintItems(paginationFilter), lang.lang);
+    >(await this.printItemService.getPrintItems(paginationFilter), lang.lang);
   }
 
   /**
