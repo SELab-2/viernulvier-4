@@ -93,8 +93,8 @@
       "mode": {
         "single": "Date",
         "range": "Range",
-        "after-selected": "After selected",
-        "before-selected": "Before selected"
+        "after-selected": "After ...",
+        "before-selected": "Before ..."
       }
     }
   },

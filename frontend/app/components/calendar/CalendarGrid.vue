@@ -11,18 +11,19 @@ defineProps<{
   days:     Array<{ iso: string; day: number } | null>;
   weekdays: string[];
   /** Day-state classifiers passed from parent */
-  isSelected:    (iso: string) => boolean;
-  isRangeStart:  (iso: string) => boolean;
-  isRangeEnd:    (iso: string) => boolean;
-  isInRange:     (iso: string) => boolean;
-  isToday:       (iso: string) => boolean;
-  isFuture:      (iso: string) => boolean;
+  isSelected:     (iso: string) => boolean;
+  isRangeStart:   (iso: string) => boolean;
+  isRangeEnd:     (iso: string) => boolean;
+  isInRange:      (iso: string) => boolean;
+  isToday:        (iso: string) => boolean;
+  isFuture:       (iso: string) => boolean;
+  isRangeCapLeft: (iso: string) => boolean; 
 }>();
 
 const emit = defineEmits<{
   (e: "click-day",  iso: string): void;
   (e: "hover-day",  iso: string): void;
-  (e: "leave-day"               ): void;
+  (e: "leave-day"              ): void;
 }>();
 </script>
 
@@ -43,12 +44,13 @@ const emit = defineEmits<{
             'cal-cell',
             'cal-cell--day',
             {
-              'cal-cell--today':       isToday(cell.iso),
-              'cal-cell--selected':    isSelected(cell.iso),
-              'cal-cell--in-range':    isInRange(cell.iso),
-              'cal-cell--range-start': isRangeStart(cell.iso),
-              'cal-cell--range-end':   isRangeEnd(cell.iso),
-              'cal-cell--future':      isFuture(cell.iso),
+              'cal-cell--today':          isToday(cell.iso),
+              'cal-cell--selected':       isSelected(cell.iso),
+              'cal-cell--in-range':       isInRange(cell.iso),
+              'cal-cell--range-start':    isRangeStart(cell.iso),
+              'cal-cell--range-end':      isRangeEnd(cell.iso),
+              'cal-cell--future':         isFuture(cell.iso),
+              'cal-cell--range-cap-left': isRangeCapLeft(cell.iso),
             },
           ]"
           :disabled="isFuture(cell.iso)"

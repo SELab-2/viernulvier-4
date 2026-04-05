@@ -93,8 +93,8 @@
       "mode": {
         "single": "Datum",
         "range": "Bereik",
-        "after-selected": "Na geselecteerde",
-        "before-selected": "Voor geselecteerde"
+        "after-selected": "Na ...",
+        "before-selected": "Voor ..."
       }
     }
 

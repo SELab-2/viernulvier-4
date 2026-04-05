@@ -722,6 +722,11 @@
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
+
+.cal-cell--range-cap-left {
+  border-radius: 4px 0 0 4px;
+}
+
 .cal-clear:hover { border-color: var(--foreground); color: var(--foreground); }
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */

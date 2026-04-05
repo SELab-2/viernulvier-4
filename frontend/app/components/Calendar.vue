@@ -201,11 +201,8 @@ function isRangeStart(iso: string): boolean {
     return iso === anchor.value;
   }
   if (mode.value === "after-selected") return iso === anchor.value;
-  if (mode.value === "before-selected" && props.oldestDate && selected.value) {
-    if (iso === props.oldestDate) return true;
-    if (props.oldestDate < viewportStart.value)
-      return iso === viewportStart.value;
-  }
+  if (mode.value === "before-selected" && props.oldestDate && selected.value)
+    return iso === props.oldestDate; 
   return false;
 }
 
@@ -217,6 +214,21 @@ function isRangeEnd(iso: string): boolean {
   }
   if (mode.value === "after-selected")  return iso === todayIso.value;
   if (mode.value === "before-selected") return iso === selected.value;
+  return false;
+}
+
+function isRangeCapLeft(iso: string): boolean {
+  if (iso !== viewportStart.value) return false;
+
+  if (mode.value === "range" && anchor.value && selected.value) {
+    const [start] = sorted(anchor.value, selected.value);
+    return start < viewportStart.value;
+  }
+  if (mode.value === "after-selected" && anchor.value)
+    return anchor.value < viewportStart.value;
+  if (mode.value === "before-selected" && props.oldestDate && selected.value)
+    return props.oldestDate < viewportStart.value;
+
   return false;
 }
 
@@ -378,6 +390,7 @@ watch(filter, (val) => emit("update:filter", val), { deep: true });
       :is-in-range="isInRange"
       :is-today="isToday"
       :is-future="isFuture"
+      :is-range-cap-left="isRangeCapLeft"
       :prev-label="t('stories.calendar.prevMonth')"
       :next-label="t('stories.calendar.nextMonth')"
       @click-day="clickDay"

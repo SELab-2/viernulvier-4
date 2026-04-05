@@ -22,6 +22,7 @@ defineProps<{
   isInRange:    (iso: string) => boolean;
   isToday:      (iso: string) => boolean;
   isFuture:     (iso: string) => boolean;
+  isRangeCapLeft: (iso: string) => boolean;
   prevLabel:    string;
   nextLabel:    string;
 }>();
@@ -55,6 +56,7 @@ const emit = defineEmits<{
       :is-in-range="isInRange"
       :is-today="isToday"
       :is-future="isFuture"
+      :is-range-cap-left="isRangeCapLeft"
       @click-day="(iso) => emit('click-day', iso)"
       @hover-day="(iso) => emit('hover-day', iso)"
       @leave-day="emit('leave-day')"
@@ -72,6 +74,7 @@ const emit = defineEmits<{
       :is-in-range="isInRange"
       :is-today="isToday"
       :is-future="isFuture"
+      :is-range-cap-left="isRangeCapLeft"
       @click-day="(iso) => emit('click-day', iso)"
       @hover-day="(iso) => emit('hover-day', iso)"
       @leave-day="emit('leave-day')"
