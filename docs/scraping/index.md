@@ -59,4 +59,4 @@ After you've run the reset script you can run the scraper again to fetch all dat
 
 #### Error Handling
 
-If the VierNulVier API is unreachable or the key is invalid, the scraper will log an error to the log file (specified with the `LOGGER_PATH` environment variable) and will gracefully abort without crashing the main application. It will attempt to scrape again at the next scheduled interval.
+If the VierNulVier API is unreachable or the key is invalid, the scraper will [log an error to the log file](../logging/index.md) and will gracefully abort without crashing the main application. It will attempt to scrape again at the next scheduled interval.
