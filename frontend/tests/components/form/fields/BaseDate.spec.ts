@@ -2,6 +2,15 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import BaseDate from "../../../../app/components/form/fields/BaseDate.vue";
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t:      (key: string) => key,
+    locale: { value: "nl" },
+  }),
+  createI18n: vi.fn(),
+}));
+
+
 describe("BaseDate", () => {
     let wrapper: ReturnType<typeof mount>;
 

@@ -12,13 +12,6 @@ vi.mock("#app", async (importOriginal) => {
   }
 });
 
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
-    t:      (key: string) => key,
-    locale: { value: "nl" },
-  }),
-  createI18n: vi.fn(),
-}));
 
 const mockFetch = vi.fn();
 vi.stubGlobal("$fetch", mockFetch);
