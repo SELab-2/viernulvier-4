@@ -11,7 +11,7 @@ import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 
 @Injectable()
-export class PrintItemDatabaseService {
+export class PrintDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
