@@ -1,20 +1,20 @@
 // media.item.service.spec.ts
 import { Test, TestingModule } from "@nestjs/testing";
 import { MediaItemService } from "./media.item.service";
-import { MediaDatabaseService } from "../../database/db.media.service";
+import { MediaItemDatabaseService } from "../../database/media/db.media_item.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaItemDto,
+  MediaCropDto,
   MediaItemDto,
   ModifyMediaItemDto,
-  ReplaceMediaItemDto,
   PaginationFilterDto,
-  MediaCropDto,
+  ReplaceMediaItemDto,
 } from "../../dto/dto";
 
 describe("MediaItemService", () => {
   let service: MediaItemService;
-  let mediaDbService: jest.Mocked<MediaDatabaseService>;
+  let mediaDbService: jest.Mocked<MediaItemDatabaseService>;
 
   const mockItem: MediaItemDto = {
     id: 1,
@@ -54,14 +54,14 @@ describe("MediaItemService", () => {
       providers: [
         MediaItemService,
         {
-          provide: MediaDatabaseService,
+          provide: MediaItemDatabaseService,
           useValue: mockMediaDbService,
         },
       ],
     }).compile();
 
     service = module.get<MediaItemService>(MediaItemService);
-    mediaDbService = module.get(MediaDatabaseService);
+    mediaDbService = module.get(MediaItemDatabaseService);
   });
 
   it("should be defined", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useBlogApi } from "../../app/composables/useBlogApi";
+import { useBlogApi } from "../../app/composables/blogs/useBlogApi";
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();

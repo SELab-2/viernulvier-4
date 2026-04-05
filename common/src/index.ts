@@ -19,10 +19,10 @@ import {
   BlogViewSchema,
   CreateBlog,
   CreateBlogSchema,
-  ReplaceBlog,
-  ReplaceBlogSchema,
   ModifyBlog,
   ModifyBlogSchema,
+  ReplaceBlog,
+  ReplaceBlogSchema,
   FilterBlog,
   FilterBlogSchema,
 } from "./objects/blogs";
@@ -33,10 +33,10 @@ import {
   EventSchema,
   FilterEvent,
   FilterEventSchema,
-  ReplaceEvent,
-  ReplaceEventSchema,
   ModifyEvent,
   ModifyEventSchema,
+  ReplaceEvent,
+  ReplaceEventSchema,
 } from "./objects/events";
 import {
   PaginatedResponse,
@@ -63,69 +63,77 @@ import {
 import {
   CreatePrice,
   CreatePriceSchema,
+  ModifyPrice,
+  ModifyPriceSchema,
   Price,
   PriceSchema,
   PriceView,
   PriceViewSchema,
   ReplacePrice,
   ReplacePriceSchema,
-  ModifyPrice,
-  ModifyPriceSchema,
 } from "./objects/prices";
 import {
   CreateProduction,
   CreateProductionSchema,
   FilterProduction,
   FilterProductionSchema,
+  ModifyProduction,
+  ModifyProductionSchema,
   Production,
   ProductionSchema,
   ProductionView,
   ProductionViewSchema,
   ReplaceProduction,
   ReplaceProductionSchema,
-  ModifyProduction,
-  ModifyProductionSchema,
 } from "./objects/productions";
 import {
   CreateTag,
   CreateTagSchema,
+  ModifyTag,
+  ModifyTagSchema,
   Tag,
   TagSchema,
   TagView,
   TagViewSchema,
-  ModifyTag,
-  ModifyTagSchema,
 } from "./objects/tags";
 import {
-  CreateMediaCrop,
-  CreateMediaCropSchema,
   CreateMediaGallery,
   CreateMediaGallerySchema,
-  CreateMediaItem,
-  CreateMediaItemSchema,
-  CropName,
-  CropNameEnum,
-  ItemPosition,
-  ItemPositionEnum,
-  MediaCrop,
-  MediaCropSchema,
+  GalleryType,
+  GalleryTypeEnum,
   MediaGallery,
   MediaGallerySchema,
+  ModifyMediaGallery,
+  ModifyMediaGallerySchema,
+  ReplaceMediaGallery,
+  ReplaceMediaGallerySchema,
+} from "./objects/media/media_gallery";
+import {
+  CreateMediaItem,
+  CreateMediaItemSchema,
+  ItemPosition,
+  ItemPositionEnum,
   MediaItem,
   MediaItemSchema,
   MediaItemView,
   MediaItemViewSchema,
-  ModifyMediaCrop,
-  ModifyMediaCropSchema,
-  ModifyMediaGallery,
-  ModifyMediaGallerySchema,
   ModifyMediaItem,
   ModifyMediaItemSchema,
-  ReplaceMediaCrop,
-  ReplaceMediaCropSchema,
   ReplaceMediaItem,
   ReplaceMediaItemSchema,
-} from "./objects/media";
+} from "./objects/media/media_item";
+import {
+  CreateMediaCrop,
+  CreateMediaCropSchema,
+  CropName,
+  CropNameEnum,
+  MediaCrop,
+  MediaCropSchema,
+  ModifyMediaCrop,
+  ModifyMediaCropSchema,
+  ReplaceMediaCrop,
+  ReplaceMediaCropSchema,
+} from "./objects/media/media_crop";
 
 // list of all exports: (this way only need to import this file.)
 export {
@@ -186,7 +194,7 @@ export {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
 
-  // Media Schemas. (media.ts)
+  // Media Schemas. (media_*.ts)
   MediaGallerySchema,
   MediaItemSchema,
   MediaItemViewSchema,
@@ -201,6 +209,8 @@ export {
   ReplaceMediaItemSchema,
   CropNameEnum,
   ItemPositionEnum,
+  GalleryTypeEnum,
+  ReplaceMediaGallerySchema,
 };
 export type {
   // Production Types. (productions.ts)
@@ -260,7 +270,7 @@ export type {
   Language,
   LanguageQuery,
 
-  // Media Types. (media.ts)
+  // Media Types. (media_*.ts)
   MediaGallery,
   MediaItem,
   MediaItemView,
@@ -275,4 +285,6 @@ export type {
   ReplaceMediaItem,
   CropName,
   ItemPosition,
+  GalleryType,
+  ReplaceMediaGallery,
 };
