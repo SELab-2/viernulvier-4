@@ -10,8 +10,9 @@ import {
   Put,
   Query,
   UseGuards,
+  UsePipes,
 } from "@nestjs/common";
-import { PrintService } from '../database/db.print.service';
+import { PrintItemService } from './print_item.service';
 import {
     CreatePrintItemSchema,
     LanguageQuerySchema,
@@ -21,11 +22,11 @@ import {
     ReplacePrintItemSchema,
 } from "@repo/common";
 import {
-  PrintDto,
+  PrintItemDto,
   LanguageQueryDto,
-  CreatePrintDto,
-  ModifyPrintDto,
-  ReplacePrintDto,
+  CreatePrintItemDto,
+  ModifyPrintItemDto,
+  ReplacePrintItemDto,
   PaginationFilterDto,
   PrintItemViewDto,
 } from '../dto/dto';
@@ -50,9 +51,9 @@ import { ApiKeyGuard } from "../auth/authGuard";
  */
 @ApiTags("Prints - Items")
 @Controller("items")
-export class PrintController {
+export class PrintItemController {
   constructor(
-    private readonly printService: PrintService,
+    private readonly printItemService: PrintItemService,
     private readonly ls: LanguageService,
   ) {}
 
@@ -62,106 +63,106 @@ export class PrintController {
    * @param lang The Language Query.
    * @returns A paginated list of print items.
    */
-  @ApiOperation({ summary: "Fetch a paginated list of prints." })
-  @ApiOkPaginatedResponseAnyOf(PrintDto, PrintViewDto)
+  @ApiOperation({ summary: "Fetch a paginated list of print items." })
+  @ApiOkPaginatedResponseAnyOf(PrintItemDto, PrintItemViewDto)
   @Get()
-  async getPrints(
+  async getPrintItems(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-): Promise<PaginatedResponse<PrintDto | PrintViewDto>> {
+): Promise<PaginatedResponse<PrintItemDto | PrintItemViewDto>> {
     return this.ls.flattenByLanguage<
-        PaginatedResponse<PrintDto | PrintViewDto>
-    >(this.printService.getPrints(paginationFilter), lang.lang);
+        PaginatedResponse<PrintItemDto | PrintItemViewDto>
+    >(this.printItemService.getPrintItems(paginationFilter), lang.lang);
   }
 
   /**
-   * Responds to a GET to "/prints/:printId".
-   * @param printId The ID of the print item we want to fetch.
+   * Responds to a GET to "/prints/:printItemId".
+   * @param printItemId The ID of the print item we want to fetch.
    * @param lang The Language Query.
-   * @returns The specific Print if it exists.
+   * @returns The specific print item if it exists.
    */
   @ApiOperation({ summary: "Fetches a specific print item."})
-  @ApiOkAnyOf(PrintDto, PrintViewDto)
-  @Get(':printId')
-  async getPrintById(
-    @Param('printId', ParseIntPipe) printId: number
+  @ApiOkAnyOf(PrintItemDto, PrintItemViewDto)
+  @Get(':printItemId')
+  async getPrintItemById(
+    @Param('printItemId', ParseIntPipe) printItemId: number,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-): Promise<PrintDto | PrintViewDto>    {
-    return this.ls.flattenByLanguage<PrintDto | PrintViewDto>(
-        await this.printService.getPrintById(printId),
+): Promise<PrintItemDto | PrintItemViewDto>    {
+    return this.ls.flattenByLanguage<PrintItemDto | PrintItemViewDto>(
+        await this.printItemService.getPrintItemById(printItemId),
         lang.lang,
     );
   }
 
   /**
    * Responds to a POST to "/prints".
-   * @param createPrint The Print object we want to create.
-   * @returns The newly created Price.
+   * @param createPrintItem The print item object we want to create.
+   * @returns The newly created print item.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
-  @ApiOperation({ summary: "Creates a new Print object." })
-  @ApiBody({ type: CreatePrintDto })
-  @ApiCreatedResponse({ type: PrintDto, description: "Created Print." })
-  @UsePipes(new ZodValidationPipe(CreatePrintSchema))
+  @ApiOperation({ summary: "Creates a new print item object." })
+  @ApiBody({ type: CreatePrintItemDto })
+  @ApiCreatedResponse({ type: PrintItemDto, description: "Created print item." })
+  @UsePipes(new ZodValidationPipe(CreatePrintItemSchema))
   @Post()
-  async createPrint(@Body() createPrint: CreatePrintDto): Promise<PrintDto> {
-    return await this.printService.createPrint(createPrint);
+  async createPrintItem(@Body() createPrintItem: CreatePrintItemDto): Promise<PrintItemDto> {
+    return await this.printItemService.createPrintItem(createPrintItem);
   }
 
   /**
-   * Responds to a PUT to "/prints/:printId".
-   * @param printId The ID of the print.
-   * @param replacePrint The object to replace the print with.
-   * @returns The resulting print.
+   * Responds to a PUT to "/prints/:printItemId".
+   * @param printItemId The ID of the print item.
+   * @param replacePrintItem The object to replace the print item with.
+   * @returns The resulting print item.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
-  @ApiOperation({ summary: "Replaces an existing Print object." })
-  @ApiBody({ type: ReplacePrintDto })
-  @ApiOkResponse({ type: PrintDto, description: "Replaced Print." })
-  @Put(':printId')
-  async replacePrint(
-    @Param('printId', ParseIntPipe) printId: number,
-    @Body(new ZodValidationPipe(ReplacePrintSchema))
-    replacePrint: ReplacePrintDto,
-  ): Promise<PrintDto> {
-    return this.printService.replacePrint(printId, replacePrint);
+  @ApiOperation({ summary: "Replaces an existing print item object." })
+  @ApiBody({ type: ReplacePrintItemDto })
+  @ApiOkResponse({ type: PrintItemDto, description: "Replaced print item." })
+  @Put(':printItemId')
+  async replacePrintItem(
+    @Param('printItemId', ParseIntPipe) printItemId: number,
+    @Body(new ZodValidationPipe(ReplacePrintItemSchema))
+    replacePrintItem: ReplacePrintItemDto,
+  ): Promise<PrintItemDto> {
+    return this.printItemService.replacePrintItem(printItemId, replacePrintItem);
   }
 
   /**
    * Responds to a PUT to "/prints".
-   * @param printId The ID of the Print.
-   * @param modifyPrint The Print we want to update.
-   * @returns The newly updated Print.
+   * @param printItemId The ID of the print item.
+   * @param modifyPrintItem The print item we want to update.
+   * @returns The newly updated print item.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
-  @ApiOperation({ summary: "Updates an existing Print object." })
-  @ApiBody({ type: ModifyPrintDto })
-  @ApiOkResponse({ type: PrintDto, description: "Updated Print." })
-  @Patch(':printId')
-  async modifyPrint(
-    @Param('printId', ParseIntPipe) printId: number,
-    @Body(new ZodValidationPipe(ModifyPrintSchema)) modifyPrint: ModifyPrintDto,
-  ): Promise<PrintDto> {
-    return this.printService.updateItem(printId, modifyPrint);
+  @ApiOperation({ summary: "Updates an existing print item object." })
+  @ApiBody({ type: ModifyPrintItemDto })
+  @ApiOkResponse({ type: PrintItemDto, description: "Updated print item." })
+  @Patch(':printItemId')
+  async modifyPrintItem(
+    @Param('printItemId', ParseIntPipe) printItemId: number,
+    @Body(new ZodValidationPipe(ModifyPrintItemSchema)) modifyPrintItem: ModifyPrintItemDto,
+  ): Promise<PrintItemDto> {
+    return this.printItemService.updateItem(printItemId, modifyPrintItem);
   }
 
   /**
-   * Responds to a DELETE to "/prints/:printId".
-   * @param printId The ID of the print we want to delete.
+   * Responds to a DELETE to "/prints/:printItemId".
+   * @param printItemId The ID of the print item we want to delete.
    * @returns Nothing.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
-  @ApiOperation({ summary: "Deletes an existing Print object." })
-  @ApiOkResponse({ description: "Print deleted successfully." })
-  @Delete(':printId')
-  async deletePrint(
-    @Param('printId', ParseIntPipe) printId: number,
+  @ApiOperation({ summary: "Deletes an existing print item object." })
+  @ApiOkResponse({ description: "print item deleted successfully." })
+  @Delete(':printItemId')
+  async deletePrintItem(
+    @Param('printItemId', ParseIntPipe) printItemId: number,
   ): Promise<void> {
-    await this.printService.deleteItem(printId);
+    await this.printItemService.deleteItem(printItemId);
   }
 }
