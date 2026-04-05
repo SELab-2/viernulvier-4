@@ -1,8 +1,8 @@
 <script setup lang="ts">
-//TODO: back -> naar vorige pagina!!
 import { ref, computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
+import EventTable from "../../components/production/EventTable.vue";
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -27,7 +27,7 @@ const productionId = computed(() => {
 })
 
 /** 1. Productie ophalen */
-const { data: production, pending: prodPending } = await useAsyncData<ProductionView>(
+const { data: production} = await useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null
@@ -69,17 +69,48 @@ const cleanText = (text: string | null | undefined) => {
     .replace(/\n/g, '<br />')
 }
 
-const fullDescription = computed(() => cleanText(production.value?.description1))
+
+const fullDescription = computed(() => cleanText(production.value?.description1) || "")
 
 const displayedDescription = computed(() => {
-  if (isExpanded.value || fullDescription.value.length <= CHARACTER_LIMIT) {
-    return fullDescription.value
+  const desc = fullDescription.value
+  if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
+    return desc
   }
-  return fullDescription.value.slice(0, CHARACTER_LIMIT) + '...'
+  return desc.slice(0, CHARACTER_LIMIT) + '...'
 })
 
 const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT)
 
+const { getAll: getAllEvents, getLocation, getPrices } = useEventApi()
+
+const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`, async () => {
+  if (!productionId.value) return []
+
+  const res = await getAllEvents({ eventFilters: { production_id: productionId.value } })
+  const list = res.data?.objects ?? []
+
+  if (!list.length) return []
+
+  return Promise.all(list.map(async (e) => {
+    const [locRes, priceRes] = await Promise.all([
+      getLocation(e.id, locale.value as any).catch(() => null),
+      getPrices(e.id, locale.value as any).catch(() => [])
+    ])
+
+    const locationData = (locRes as any)?.data ?? locRes
+    const pricesData = (priceRes as any)?.data ?? priceRes ?? []
+
+    return {
+      ...e,
+      location: locationData,
+      prices: Array.isArray(pricesData) ? pricesData : []
+    }
+  }))
+}, {
+  watch: [productionId, locale],
+  default: () => []
+})
 
 </script>
 
@@ -152,6 +183,10 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           >
             {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
           </button>
+
+          <div class="-mx-4">
+            <EventTable :events="events || []" />
+          </div>
 
           <div
             v-if="isValid(production.description2)"
