@@ -11,7 +11,7 @@ const { viewMode, searchQuery } = useArchiveView()
     <div class="max-w-5xl mx-auto px-4 py-6 flex items-center gap-4">
 
       <!-- Search -->
-      <div class="flex-1">
+      <div class="flex-1 h-12">
         <SearchBar
           v-model="searchQuery"
           :items="[]"
