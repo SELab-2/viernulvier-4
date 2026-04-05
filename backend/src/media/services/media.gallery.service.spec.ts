@@ -1,7 +1,7 @@
 // media.gallery.service.spec.ts
 import { Test, TestingModule } from "@nestjs/testing";
 import { MediaGalleryService } from "./media.gallery.service";
-import { MediaDatabaseService } from "../../database/db.media.service";
+import { MediaGalleryDatabaseService } from "../../database/media/db.media_gallery.service";
 import { PaginatedResponse } from "@repo/common";
 import {
   CreateMediaGalleryDto,
@@ -12,10 +12,12 @@ import {
 
 describe("MediaGalleryService", () => {
   let service: MediaGalleryService;
-  let mediaDbService: jest.Mocked<MediaDatabaseService>;
+  let mediaDbService: jest.Mocked<MediaGalleryDatabaseService>;
 
   const mockGallery: MediaGalleryDto = {
     id: 1,
+    name: "hi",
+    type: "default",
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
   };
@@ -49,14 +51,14 @@ describe("MediaGalleryService", () => {
       providers: [
         MediaGalleryService,
         {
-          provide: MediaDatabaseService,
+          provide: MediaGalleryDatabaseService,
           useValue: mockMediaDbService,
         },
       ],
     }).compile();
 
     service = module.get<MediaGalleryService>(MediaGalleryService);
-    mediaDbService = module.get(MediaDatabaseService);
+    mediaDbService = module.get(MediaGalleryDatabaseService);
   });
 
   it("should be defined", () => {
@@ -103,7 +105,10 @@ describe("MediaGalleryService", () => {
 
   describe("createGallery", () => {
     it("should create and return a new gallery", async () => {
-      const createGalleryDto: CreateMediaGalleryDto = {};
+      const createGalleryDto: CreateMediaGalleryDto = {
+        name: "hi",
+        type: "default",
+      };
       mediaDbService.createGallery.mockResolvedValue(mockGallery);
 
       const result = await service.createGallery(createGalleryDto);

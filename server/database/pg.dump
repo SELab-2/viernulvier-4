@@ -2,14 +2,15 @@
 -- PostgreSQL database dump
 --
 
-\restrict c1bfAshXJFHQEFHqLw7a7BLAW8V4hGxo00jDnvoy8UlVTjcbEdwkuzRduAUuRDJ
+\restrict 4rS0lle0YR53AmsTrQBCCS3KQRaG4kQ7dw3P4Zq8iHGpt5u14UTjPNNm2pKFRWB
 
 -- Dumped from database version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
+-- Dumped by pg_dump version 18.1
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -17,6 +18,46 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: ItemPositionEnum; Type: TYPE; Schema: public; Owner: selab2
+--
+
+CREATE TYPE public."ItemPositionEnum" AS ENUM (
+    'main',
+    'carousel'
+);
+
+
+ALTER TYPE public."ItemPositionEnum" OWNER TO selab2;
+
+--
+-- Name: crop_name; Type: TYPE; Schema: public; Owner: selab2
+--
+
+CREATE TYPE public.crop_name AS ENUM (
+    'hd_ready',
+    'FE3_header',
+    'thumbnail',
+    'og_image',
+    'mobile',
+    'nb_ready'
+);
+
+
+ALTER TYPE public.crop_name OWNER TO selab2;
+
+--
+-- Name: gallery_type; Type: TYPE; Schema: public; Owner: selab2
+--
+
+CREATE TYPE public.gallery_type AS ENUM (
+    'prints',
+    'default'
+);
+
+
+ALTER TYPE public.gallery_type OWNER TO selab2;
 
 --
 -- Name: update_updated_at(); Type: FUNCTION; Schema: public; Owner: selab2
@@ -123,6 +164,18 @@ ALTER SEQUENCE public.api_keys_id_seq OWNED BY public.api_keys.id;
 
 
 --
+-- Name: blog_media_gallery; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.blog_media_gallery (
+    blog_id integer NOT NULL,
+    gallery_id integer NOT NULL
+);
+
+
+ALTER TABLE public.blog_media_gallery OWNER TO selab2;
+
+--
 -- Name: blogs; Type: TABLE; Schema: public; Owner: selab2
 --
 
@@ -217,6 +270,30 @@ ALTER SEQUENCE public.events_id_seq OWNED BY public.events.id;
 
 
 --
+-- Name: gallery_item; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.gallery_item (
+    gallery_id integer NOT NULL,
+    item_id integer NOT NULL
+);
+
+
+ALTER TABLE public.gallery_item OWNER TO selab2;
+
+--
+-- Name: item_crop; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.item_crop (
+    item_id integer NOT NULL,
+    crop_id integer NOT NULL
+);
+
+
+ALTER TABLE public.item_crop OWNER TO selab2;
+
+--
 -- Name: locations; Type: TABLE; Schema: public; Owner: selab2
 --
 
@@ -251,6 +328,126 @@ ALTER SEQUENCE public.locations_id_seq OWNER TO selab2;
 --
 
 ALTER SEQUENCE public.locations_id_seq OWNED BY public.locations.id;
+
+
+--
+-- Name: media_crop; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.media_crop (
+    id integer NOT NULL,
+    legacy_id character varying(255),
+    url text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    name public.crop_name
+);
+
+
+ALTER TABLE public.media_crop OWNER TO selab2;
+
+--
+-- Name: media_crop_id_seq; Type: SEQUENCE; Schema: public; Owner: selab2
+--
+
+CREATE SEQUENCE public.media_crop_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.media_crop_id_seq OWNER TO selab2;
+
+--
+-- Name: media_crop_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: selab2
+--
+
+ALTER SEQUENCE public.media_crop_id_seq OWNED BY public.media_crop.id;
+
+
+--
+-- Name: media_gallery; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.media_gallery (
+    id integer NOT NULL,
+    legacy_id character varying(255),
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    name character varying(250),
+    type public.gallery_type
+);
+
+
+ALTER TABLE public.media_gallery OWNER TO selab2;
+
+--
+-- Name: media_gallery_id_seq; Type: SEQUENCE; Schema: public; Owner: selab2
+--
+
+CREATE SEQUENCE public.media_gallery_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.media_gallery_id_seq OWNER TO selab2;
+
+--
+-- Name: media_gallery_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: selab2
+--
+
+ALTER SEQUENCE public.media_gallery_id_seq OWNED BY public.media_gallery.id;
+
+
+--
+-- Name: media_item; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.media_item (
+    id integer NOT NULL,
+    legacy_id character varying(255),
+    type character varying(100) NOT NULL,
+    original_filename character varying(500) NOT NULL,
+    "position" public."ItemPositionEnum" NOT NULL,
+    width integer,
+    height integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    credits jsonb,
+    description jsonb,
+    title jsonb
+);
+
+
+ALTER TABLE public.media_item OWNER TO selab2;
+
+--
+-- Name: media_item_id_seq; Type: SEQUENCE; Schema: public; Owner: selab2
+--
+
+CREATE SEQUENCE public.media_item_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.media_item_id_seq OWNER TO selab2;
+
+--
+-- Name: media_item_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: selab2
+--
+
+ALTER SEQUENCE public.media_item_id_seq OWNED BY public.media_item.id;
 
 
 --
@@ -292,6 +489,56 @@ ALTER SEQUENCE public.prices_id_seq OWNED BY public.prices.id;
 
 
 --
+-- Name: print_item_media_gallery; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.print_item_media_gallery (
+    print_item_id integer NOT NULL,
+    media_gallery_id integer NOT NULL
+);
+
+
+ALTER TABLE public.print_item_media_gallery OWNER TO selab2;
+
+--
+-- Name: print_items; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.print_items (
+    id integer NOT NULL,
+    titel jsonb,
+    description jsonb,
+    url text,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.print_items OWNER TO selab2;
+
+--
+-- Name: print_items_id_seq; Type: SEQUENCE; Schema: public; Owner: selab2
+--
+
+CREATE SEQUENCE public.print_items_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.print_items_id_seq OWNER TO selab2;
+
+--
+-- Name: print_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: selab2
+--
+
+ALTER SEQUENCE public.print_items_id_seq OWNED BY public.print_items.id;
+
+
+--
 -- Name: production_blogs; Type: TABLE; Schema: public; Owner: selab2
 --
 
@@ -302,6 +549,18 @@ CREATE TABLE public.production_blogs (
 
 
 ALTER TABLE public.production_blogs OWNER TO selab2;
+
+--
+-- Name: production_media_gallery; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.production_media_gallery (
+    production_id integer NOT NULL,
+    gallery_id integer NOT NULL
+);
+
+
+ALTER TABLE public.production_media_gallery OWNER TO selab2;
 
 --
 -- Name: production_tag; Type: TABLE; Schema: public; Owner: selab2
@@ -451,10 +710,38 @@ ALTER TABLE ONLY public.locations ALTER COLUMN id SET DEFAULT nextval('public.lo
 
 
 --
+-- Name: media_crop id; Type: DEFAULT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_crop ALTER COLUMN id SET DEFAULT nextval('public.media_crop_id_seq'::regclass);
+
+
+--
+-- Name: media_gallery id; Type: DEFAULT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_gallery ALTER COLUMN id SET DEFAULT nextval('public.media_gallery_id_seq'::regclass);
+
+
+--
+-- Name: media_item id; Type: DEFAULT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_item ALTER COLUMN id SET DEFAULT nextval('public.media_item_id_seq'::regclass);
+
+
+--
 -- Name: prices id; Type: DEFAULT; Schema: public; Owner: selab2
 --
 
 ALTER TABLE ONLY public.prices ALTER COLUMN id SET DEFAULT nextval('public.prices_id_seq'::regclass);
+
+
+--
+-- Name: print_items id; Type: DEFAULT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.print_items ALTER COLUMN id SET DEFAULT nextval('public.print_items_id_seq'::regclass);
 
 
 --
@@ -469,186 +756,6 @@ ALTER TABLE ONLY public.productions ALTER COLUMN id SET DEFAULT nextval('public.
 --
 
 ALTER TABLE ONLY public.scraper_dates ALTER COLUMN id SET DEFAULT nextval('public.scraper_dates_id_seq'::regclass);
-
-
---
--- Data for Name: account_api_keys; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.account_api_keys (account_id, api_key_id) FROM stdin;
-1	1
-\.
-
-
---
--- Data for Name: accounts; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.accounts (id, username, password, super_admin) FROM stdin;
-1	vnv_admin	$2b$10$DHh663WKoa.Si7hXhquI0ORNbnKi0Lu0dURnFxe8hvVZ9UXZEPOwS	t
-\.
-
-
---
--- Data for Name: api_keys; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.api_keys (id, key, active, super_key) FROM stdin;
-1	118489de587dcb237ebb7ed1d90667b75d2683bcc8bec20e6df5a1dbb8692646	t	t
-2	b837a944e4303f45aefd08131f3f86eef0219a89f37564f5f17c94daf0b68693	t	f
-\.
-
-
---
--- Data for Name: blogs; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.blogs (id, titel, description, created_at, updated_at) FROM stdin;
-\.
-
-
---
--- Data for Name: event_locations; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.event_locations (event_id, location_id) FROM stdin;
-\.
-
-
---
--- Data for Name: event_prices; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.event_prices (event_id, price_id) FROM stdin;
-\.
-
-
---
--- Data for Name: events; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.events (id, starttime, endtime, production_id, doors_at, intermission_at, created_at, updated_at, legacy_id) FROM stdin;
-\.
-
-
---
--- Data for Name: locations; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.locations (id, location, created_at, updated_at, legacy_id) FROM stdin;
-\.
-
-
---
--- Data for Name: prices; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.prices (id, name, price, created_at, updated_at, legacy_id) FROM stdin;
-\.
-
-
---
--- Data for Name: production_blogs; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.production_blogs (production_id, blog_id) FROM stdin;
-\.
-
-
---
--- Data for Name: production_tag; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.production_tag (production_id, tag_id) FROM stdin;
-\.
-
-
---
--- Data for Name: productions; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.productions (titel, description1, description2, id, artist, tagline, credits, created_at, updated_at, legacy_id, performer_type, attendance_mode) FROM stdin;
-\.
-
-
---
--- Data for Name: scraper_dates; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.scraper_dates (id, date) FROM stdin;
-1	1970-01-01 00:00:00
-\.
-
-
---
--- Data for Name: tags; Type: TABLE DATA; Schema: public; Owner: selab2
---
-
-COPY public.tags (id, tag, created_at, updated_at, legacy_id) FROM stdin;
-\.
-
-
---
--- Name: accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.accounts_id_seq', 1, true);
-
-
---
--- Name: api_keys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.api_keys_id_seq', 2, true);
-
-
---
--- Name: blogs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.blogs_id_seq', 1, false);
-
-
---
--- Name: events_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.events_id_seq', 1, false);
-
-
---
--- Name: locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.locations_id_seq', 1, false);
-
-
---
--- Name: prices_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.prices_id_seq', 1, false);
-
-
---
--- Name: productions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.productions_id_seq', 1, false);
-
-
---
--- Name: scraper_dates_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.scraper_dates_id_seq', 1, true);
-
-
---
--- Name: tags_id_seq; Type: SEQUENCE SET; Schema: public; Owner: selab2
---
-
-SELECT pg_catalog.setval('public.tags_id_seq', 1, false);
 
 
 --
@@ -692,6 +799,14 @@ ALTER TABLE ONLY public.api_keys
 
 
 --
+-- Name: blog_media_gallery blog_media_gallery_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.blog_media_gallery
+    ADD CONSTRAINT blog_media_gallery_pkey PRIMARY KEY (blog_id, gallery_id);
+
+
+--
 -- Name: blogs blogs_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -732,6 +847,22 @@ ALTER TABLE ONLY public.events
 
 
 --
+-- Name: gallery_item gallery_item_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.gallery_item
+    ADD CONSTRAINT gallery_item_pkey PRIMARY KEY (gallery_id, item_id);
+
+
+--
+-- Name: item_crop item_crop_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.item_crop
+    ADD CONSTRAINT item_crop_pkey PRIMARY KEY (item_id, crop_id);
+
+
+--
 -- Name: locations locations_legacy_id_unique; Type: CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -745,6 +876,54 @@ ALTER TABLE ONLY public.locations
 
 ALTER TABLE ONLY public.locations
     ADD CONSTRAINT locations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: media_crop media_crop_legacy_id_key; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_crop
+    ADD CONSTRAINT media_crop_legacy_id_key UNIQUE (legacy_id);
+
+
+--
+-- Name: media_crop media_crop_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_crop
+    ADD CONSTRAINT media_crop_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: media_gallery media_gallery_legacy_id_key; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_gallery
+    ADD CONSTRAINT media_gallery_legacy_id_key UNIQUE (legacy_id);
+
+
+--
+-- Name: media_gallery media_gallery_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_gallery
+    ADD CONSTRAINT media_gallery_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: media_item media_item_legacy_id_key; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_item
+    ADD CONSTRAINT media_item_legacy_id_key UNIQUE (legacy_id);
+
+
+--
+-- Name: media_item media_item_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.media_item
+    ADD CONSTRAINT media_item_pkey PRIMARY KEY (id);
 
 
 --
@@ -764,11 +943,35 @@ ALTER TABLE ONLY public.prices
 
 
 --
+-- Name: print_item_media_gallery print_item_media_gallery_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.print_item_media_gallery
+    ADD CONSTRAINT print_item_media_gallery_pkey PRIMARY KEY (print_item_id, media_gallery_id);
+
+
+--
+-- Name: print_items print_items_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.print_items
+    ADD CONSTRAINT print_items_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: production_blogs production_blogs_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
 --
 
 ALTER TABLE ONLY public.production_blogs
     ADD CONSTRAINT production_blogs_pkey PRIMARY KEY (production_id, blog_id);
+
+
+--
+-- Name: production_media_gallery production_media_gallery_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.production_media_gallery
+    ADD CONSTRAINT production_media_gallery_pkey PRIMARY KEY (production_id, gallery_id);
 
 
 --
@@ -820,6 +1023,111 @@ ALTER TABLE ONLY public.tags
 
 
 --
+-- Name: idx_account_api_keys_api_key_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_account_api_keys_api_key_id ON public.account_api_keys USING btree (api_key_id);
+
+
+--
+-- Name: idx_blog_media_gallery_gallery_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_blog_media_gallery_gallery_id ON public.blog_media_gallery USING btree (gallery_id);
+
+
+--
+-- Name: idx_event_locations_location_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_event_locations_location_id ON public.event_locations USING btree (location_id);
+
+
+--
+-- Name: idx_event_prices_price_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_event_prices_price_id ON public.event_prices USING btree (price_id);
+
+
+--
+-- Name: idx_events_production_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_events_production_id ON public.events USING btree (production_id);
+
+
+--
+-- Name: idx_events_starttime; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_events_starttime ON public.events USING btree (starttime);
+
+
+--
+-- Name: idx_gallery_item_item_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_gallery_item_item_id ON public.gallery_item USING btree (item_id);
+
+
+--
+-- Name: idx_item_crop_crop_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_item_crop_crop_id ON public.item_crop USING btree (crop_id);
+
+
+--
+-- Name: idx_media_crop_legacy_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_media_crop_legacy_id ON public.media_crop USING btree (legacy_id);
+
+
+--
+-- Name: idx_media_gallery_legacy_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_media_gallery_legacy_id ON public.media_gallery USING btree (legacy_id);
+
+
+--
+-- Name: idx_media_item_legacy_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_media_item_legacy_id ON public.media_item USING btree (legacy_id);
+
+
+--
+-- Name: idx_media_item_position; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_media_item_position ON public.media_item USING btree ("position");
+
+
+--
+-- Name: idx_production_blogs_blog_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_production_blogs_blog_id ON public.production_blogs USING btree (blog_id);
+
+
+--
+-- Name: idx_production_media_gallery_gallery_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_production_media_gallery_gallery_id ON public.production_media_gallery USING btree (gallery_id);
+
+
+--
+-- Name: idx_production_tag_tag_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_production_tag_tag_id ON public.production_tag USING btree (tag_id);
+
+
+--
 -- Name: productions set_updated_at; Type: TRIGGER; Schema: public; Owner: selab2
 --
 
@@ -862,6 +1170,34 @@ CREATE TRIGGER set_updated_at_tags BEFORE UPDATE ON public.tags FOR EACH ROW EXE
 
 
 --
+-- Name: media_crop trg_media_crop_updated_at; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER trg_media_crop_updated_at BEFORE UPDATE ON public.media_crop FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: media_gallery trg_media_gallery_updated_at; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER trg_media_gallery_updated_at BEFORE UPDATE ON public.media_gallery FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: media_item trg_media_item_updated_at; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER trg_media_item_updated_at BEFORE UPDATE ON public.media_item FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: print_items trg_print_items_updated_at; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER trg_print_items_updated_at BEFORE UPDATE ON public.print_items FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
 -- Name: account_api_keys account_api_keys_account_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -875,6 +1211,22 @@ ALTER TABLE ONLY public.account_api_keys
 
 ALTER TABLE ONLY public.account_api_keys
     ADD CONSTRAINT account_api_keys_api_key_id_fkey FOREIGN KEY (api_key_id) REFERENCES public.api_keys(id) ON DELETE CASCADE;
+
+
+--
+-- Name: blog_media_gallery blog_media_gallery_blog_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.blog_media_gallery
+    ADD CONSTRAINT blog_media_gallery_blog_id_fkey FOREIGN KEY (blog_id) REFERENCES public.blogs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: blog_media_gallery blog_media_gallery_gallery_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.blog_media_gallery
+    ADD CONSTRAINT blog_media_gallery_gallery_id_fkey FOREIGN KEY (gallery_id) REFERENCES public.media_gallery(id) ON DELETE CASCADE;
 
 
 --
@@ -934,6 +1286,70 @@ ALTER TABLE ONLY public.production_blogs
 
 
 --
+-- Name: gallery_item gallery_item_gallery_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.gallery_item
+    ADD CONSTRAINT gallery_item_gallery_id_fkey FOREIGN KEY (gallery_id) REFERENCES public.media_gallery(id) ON DELETE CASCADE;
+
+
+--
+-- Name: gallery_item gallery_item_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.gallery_item
+    ADD CONSTRAINT gallery_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.media_item(id) ON DELETE CASCADE;
+
+
+--
+-- Name: item_crop item_crop_crop_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.item_crop
+    ADD CONSTRAINT item_crop_crop_id_fkey FOREIGN KEY (crop_id) REFERENCES public.media_crop(id) ON DELETE CASCADE;
+
+
+--
+-- Name: item_crop item_crop_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.item_crop
+    ADD CONSTRAINT item_crop_item_id_fkey FOREIGN KEY (item_id) REFERENCES public.media_item(id) ON DELETE CASCADE;
+
+
+--
+-- Name: print_item_media_gallery print_item_media_gallery_media_gallery_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.print_item_media_gallery
+    ADD CONSTRAINT print_item_media_gallery_media_gallery_id_fkey FOREIGN KEY (media_gallery_id) REFERENCES public.media_gallery(id) ON DELETE CASCADE;
+
+
+--
+-- Name: print_item_media_gallery print_item_media_gallery_print_item_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.print_item_media_gallery
+    ADD CONSTRAINT print_item_media_gallery_print_item_id_fkey FOREIGN KEY (print_item_id) REFERENCES public.print_items(id) ON DELETE CASCADE;
+
+
+--
+-- Name: production_media_gallery production_media_gallery_gallery_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.production_media_gallery
+    ADD CONSTRAINT production_media_gallery_gallery_id_fkey FOREIGN KEY (gallery_id) REFERENCES public.media_gallery(id) ON DELETE CASCADE;
+
+
+--
+-- Name: production_media_gallery production_media_gallery_production_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.production_media_gallery
+    ADD CONSTRAINT production_media_gallery_production_id_fkey FOREIGN KEY (production_id) REFERENCES public.productions(id) ON DELETE CASCADE;
+
+
+--
 -- Name: production_tag production_tag_production_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -953,4 +1369,4 @@ ALTER TABLE ONLY public.production_tag
 -- PostgreSQL database dump complete
 --
 
-\unrestrict c1bfAshXJFHQEFHqLw7a7BLAW8V4hGxo00jDnvoy8UlVTjcbEdwkuzRduAUuRDJ
+\unrestrict 4rS0lle0YR53AmsTrQBCCS3KQRaG4kQ7dw3P4Zq8iHGpt5u14UTjPNNm2pKFRWB

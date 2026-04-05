@@ -22,6 +22,15 @@ import {
   MediaGallerySchema,
   MediaItemSchema,
   MediaItemViewSchema,
+  ModifyBlogSchema,
+  ModifyEventSchema,
+  ModifyLocationSchema,
+  ModifyMediaCropSchema,
+  ModifyMediaGallerySchema,
+  ModifyMediaItemSchema,
+  ModifyPriceSchema,
+  ModifyProductionSchema,
+  ModifyTagSchema,
   PaginationFilterSchema,
   PriceSchema,
   PriceViewSchema,
@@ -29,24 +38,17 @@ import {
   ProductionViewSchema,
   PublicAccountSchema,
   ReplaceBlogSchema,
+  ReplaceEventSchema,
+  ReplaceMediaCropSchema,
+  ReplaceMediaGallerySchema,
+  ReplaceMediaItemSchema,
+  ReplacePriceSchema,
+  ReplaceProductionSchema,
   TagSchema,
   TagViewSchema,
   UpdateAccountSchema,
-  ModifyBlogSchema,
-  ModifyEventSchema,
-  ModifyLocationSchema,
-  ModifyPriceSchema,
-  ModifyProductionSchema,
-  ModifyTagSchema,
   VerifyApiKeySchema,
-  ReplaceEventSchema,
-  ReplacePriceSchema,
-  ReplaceProductionSchema,
-  ModifyMediaItemSchema,
-  ModifyMediaCropSchema,
-  ModifyMediaGallerySchema,
-  ReplaceMediaCropSchema,
-  ReplaceMediaItemSchema,
+  FilterBlogSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -75,6 +77,7 @@ export class BlogViewDto extends createZodDto(BlogViewSchema) {}
 export class CreateBlogDto extends createZodDto(CreateBlogSchema) {}
 export class ModifyBlogDto extends createZodDto(ModifyBlogSchema) {}
 export class ReplaceBlogDto extends createZodDto(ReplaceBlogSchema) {}
+export class FilterBlogDto extends createZodDto(FilterBlogSchema) {}
 
 // Tag Wrappers
 export class TagDto extends createZodDto(TagSchema) {}
@@ -117,6 +120,9 @@ export class CreateMediaGalleryDto extends createZodDto(
 ) {}
 export class ModifyMediaGalleryDto extends createZodDto(
   ModifyMediaGallerySchema,
+) {}
+export class ReplaceMediaGalleryDto extends createZodDto(
+  ReplaceMediaGallerySchema,
 ) {}
 export class MediaItemDto extends createZodDto(MediaItemSchema) {}
 export class MediaItemViewDto extends createZodDto(MediaItemViewSchema) {}
