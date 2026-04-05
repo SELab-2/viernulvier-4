@@ -53,11 +53,10 @@ const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value
 
 const cleanText = (text: string | null | undefined) => {
   if (!text) return ""
-
   return text
     .replace(/\\/g, '')
-    .replace(/(\r?\n){3,}/g, '\n\n')
     .trim()
+    .replace(/\n/g, '<br />')
 }
 
 const fullDescription = computed(() => cleanText(production.value?.description1))
@@ -123,9 +122,10 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
             {{ t('production.description') }}
           </h2>
 
-          <div class="text-lg lg:text-xl leading-relaxed opacity-80 font-brand whitespace-pre-line text-gray-800 dark:text-gray-200">
-            {{ displayedDescription }}
-          </div>
+          <div
+            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
+            v-html="displayedDescription"
+          ></div>
 
           <button
             v-if="isLongDescription"
@@ -135,9 +135,11 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
             {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
           </button>
 
-          <div v-if="isValid(production.description2)" class="mt-12 p-6 border-l-2 border-gray-100 dark:border-gray-800 italic opacity-70 text-base lg:text-lg whitespace-pre-line">
-            {{ cleanText(production.description2) }}
-          </div>
+          <div
+            v-if="isValid(production.description2)"
+            class="description-content mt-12 p-6 border-l-2 border-gray-100 dark:border-gray-800 italic opacity-70 text-base lg:text-lg"
+            v-html="cleanText(production.description2)"
+          ></div>
         </div>
 
         <aside class="lg:col-span-4 space-y-10">
