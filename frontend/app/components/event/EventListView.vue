@@ -51,6 +51,13 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 
+// Shared style constants
+const buttonBaseClass =
+  "w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 transition-colors";
+
+// Icon size constant
+const iconSize = 20;
+
 // function to format the date
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString(locale.value, {
@@ -129,21 +136,21 @@ const onEdit = (event: EventListItem) => {
         <!-- Edit Button -->
         <button
           type="button"
-          class="w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          :class="`${buttonBaseClass} hover:bg-gray-100 dark:hover:bg-gray-800`"
           :aria-label="t('eventlist.edit')"
           @click="onEdit(item)"
         >
-          <Edit2 class="w-5 h-5" />
+          <Edit2 :size="iconSize" />
         </button>
 
         <!-- Delete Button -->
         <button
           type="button"
-          class="w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 hover:bg-red-50 dark:hover:bg-red-900 transition-colors"
+          :class="`${buttonBaseClass} hover:bg-red-50 dark:hover:bg-red-900`"
           :aria-label="t('eventlist.delete')"
           @click="onDelete(item)"
         >
-          <Trash2 class="w-5 h-5 text-red-600" />
+          <Trash2 :size="iconSize" class="text-red-600" />
         </button>
       </div>
     </div>
