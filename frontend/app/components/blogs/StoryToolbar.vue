@@ -19,7 +19,7 @@
 -->
 <script lang="ts" setup>
 import type { FilterBlog } from "@repo/common";
-import Calendar from "~/components/Calendar.vue";
+import Calendar from "~/components/DefaultCalendar.vue";
 
 const props = defineProps<{
   storyTitles: string[];
