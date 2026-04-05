@@ -3,14 +3,14 @@
   =====================================
   Pure presentational component.
   Renders one month: label, weekday headers, and the day grid.
-  All selection logic lives in the parent (calendar.vue).
+  All selection logic lives in the parent (Calendar.vue).
 -->
 <script lang="ts" setup>
 defineProps<{
   label:    string;
   days:     Array<{ iso: string; day: number } | null>;
   weekdays: string[];
-  /** Day-state classifiers passed from parent */
+  // Day-state classifiers passed from parent
   isSelected:     (iso: string) => boolean;
   isRangeStart:   (iso: string) => boolean;
   isRangeEnd:     (iso: string) => boolean;

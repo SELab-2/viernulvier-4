@@ -12,7 +12,7 @@ export type CalMode = "single" | "range" | "after-selected" | "before-selected";
 const props = defineProps<{
   mode:        CalMode;
   oldestDate:  string;
-  /** Sync: calendar selection reflected in text fields */
+  //Sync: calendar selection reflected in text fields
   syncSingle?: string;
   syncStart?:  string;
   syncEnd?:    string;
@@ -35,7 +35,7 @@ const errorSingle = ref(false);
 const errorStart  = ref(false);
 const errorEnd    = ref(false);
 
-// ── Format helpers ────────────────────────────────────────────────────────────
+// Format helpers
 
 /** Display ISO as DD/MM/YYYY to match the placeholder hint */
 function formatForInput(iso: string): string {
@@ -43,7 +43,7 @@ function formatForInput(iso: string): string {
   return `${d}/${m}/${y}`;
 }
 
-// ── Sync: calendar → inputs ───────────────────────────────────────────────────
+// Sync: calendar → inputs 
 // When the parent reports a new calendar selection, reflect it in the text fields.
 // This overwrites whatever the user had typed, since a click is the authoritative action.
 
@@ -62,7 +62,7 @@ watch(() => props.syncEnd, (v) => {
   errorEnd.value = false;
 });
 
-// ── Timezone-safe helpers ─────────────────────────────────────────────────────
+// Timezone-safe helpers
 
 function localTodayIso(): string {
   const d  = new Date();
@@ -97,7 +97,7 @@ function parseDate(raw: string): string | null {
   return null;
 }
 
-// ── Handlers ──────────────────────────────────────────────────────────────────
+// Handlers
 
 function tryApplySingle() {
   const iso = parseDate(inputSingle.value);

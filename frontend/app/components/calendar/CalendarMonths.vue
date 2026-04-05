@@ -30,9 +30,9 @@ defineProps<{
 const emit = defineEmits<{
   (e: "click-day", iso: string): void;
   (e: "hover-day", iso: string): void;
-  (e: "leave-day"              ): void;
-  (e: "prev"                   ): void;
-  (e: "next"                   ): void;
+  (e: "leave-day"             ): void;
+  (e: "prev"                  ): void;
+  (e: "next"                  ): void;
 }>();
 </script>
 

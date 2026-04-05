@@ -36,7 +36,7 @@ const { t, locale } = useI18n();
 
 const intlLocale = computed(() => locale.value === "en" ? "en-GB" : "nl-BE");
 
-// ── Timezone-safe helpers ─────────────────────────────────────────────────────
+// Timezone-safe helpers
 
 function localIso(d: Date): string {
   const y  = d.getFullYear();
@@ -47,7 +47,7 @@ function localIso(d: Date): string {
 
 const todayIso = computed(() => localIso(new Date()));
 
-// ── State ─────────────────────────────────────────────────────────────────────
+// State
 
 const mode      = ref<CalMode>("range");
 const hoverDate = ref<string | null>(null);
@@ -59,7 +59,7 @@ const today     = new Date();
 const viewYear  = ref(today.getFullYear());
 const viewMonth = ref(today.getMonth());
 
-// ── Sync props for CalendarInputs (calendar → text fields) ────────────────────
+// Sync props for CalendarInputs (calendar → text fields) 
 // These computed values mirror the current selection into the input components.
 
 const syncSingle = computed(() =>
@@ -78,7 +78,7 @@ const syncEnd = computed(() => {
   return undefined;
 });
 
-// ── Month grid data ───────────────────────────────────────────────────────────
+// Month grid data 
 
 const rightYear     = computed(() => viewMonth.value === 11 ? viewYear.value + 1 : viewYear.value);
 const rightMonthIdx = computed(() => (viewMonth.value + 1) % 12);
@@ -117,7 +117,7 @@ const viewportStart = computed(() => {
   return `${viewYear.value}-${m}-01`;
 });
 
-// ── Filter output ─────────────────────────────────────────────────────────────
+// Filter output 
 
 const filter = computed<DateFilter>(() => {
   switch (mode.value) {
@@ -145,7 +145,7 @@ const filter = computed<DateFilter>(() => {
   }
 });
 
-// ── Summary label ─────────────────────────────────────────────────────────────
+// Summary label 
 
 const summaryLabel = computed<string>(() => {
   const fmt = (iso: string) =>
@@ -176,7 +176,7 @@ const summaryLabel = computed<string>(() => {
 
 const hasSelection = computed(() => !!(anchor.value || selected.value));
 
-// ── Day-state classifiers ─────────────────────────────────────────────────────
+//  Day-state classifiers
 
 function sorted(a: string, b: string): [string, string] {
   return a <= b ? [a, b] : [b, a];
@@ -249,7 +249,7 @@ function isInRange(iso: string): boolean {
   return !!start && !!end && iso > start && iso < end;
 }
 
-// ── Interaction ───────────────────────────────────────────────────────────────
+// Interaction 
 
 function clickDay(iso: string) {
   if (isFuture(iso)) return;
@@ -293,7 +293,7 @@ function clearFilter() {
   selecting.value = false;
 }
 
-// ── Input handlers (text → calendar) ─────────────────────────────────────────
+// Input handlers (text → calendar)
 
 function onApplySingle(iso: string) {
   selected.value = iso;
@@ -317,7 +317,7 @@ function onApplyEnd(iso: string) {
 }
 
 
-// ── Restore state from an externally held filter
+// Restore state from an externally held filter
 // Called once on mount. Figures out which mode the saved filter implies and
 // restores anchor + selected so the clear button reappears immediately.
 
