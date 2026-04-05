@@ -17,6 +17,14 @@ vi.mock("~/composables/useApi", () => ({
   }),
 }));
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t:      (key: string) => key,
+    locale: { value: "nl" },
+  }),
+  createI18n: vi.fn(),
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
 });

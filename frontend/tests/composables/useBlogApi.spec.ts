@@ -21,6 +21,14 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t:      (key: string) => key,
+    locale: { value: "nl" },
+  }),
+  createI18n: vi.fn(),
+}));
+
 describe("useBlogApi", () => {
   it("getAll calls GET /blogs", () => {
     const { getAll } = useBlogApi();

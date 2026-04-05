@@ -16,6 +16,14 @@ vi.mock("../../app/composables/useAuth", () => ({
   useAuth: () => ({ apiKey: mockApiKey }),
 }));
 
+vi.mock("vue-i18n", () => ({
+  useI18n: () => ({
+    t:      (key: string) => key,
+    locale: { value: "nl" },
+  }),
+  createI18n: vi.fn(),
+}));
+
 vi.mock("#app", async (importOriginal) => {
   const actual = await importOriginal() as Record<string, unknown>;
   return {
