@@ -1,7 +1,6 @@
 <script setup lang="ts">/**
  * A reusable event table component, displays events belonging to a specific production in a table, includes:
  *  - Time, location, price displayed per event
- *  - Sorting of events (oldest first)
  *  - Scrollable when there are more than 3 events
  *
  * Usage:
@@ -25,7 +24,7 @@ import { CalendarDays, MapPin, Euro, Clock } from "lucide-vue-next";
 interface Props {
   events: EventWithDetails[]
 }
-const props = defineProps<Props>()
+defineProps<Props>()
 
 // function to format the date
 const formatDate = (dateStr: string) => {
@@ -49,12 +48,6 @@ const formatTime = (dateStr: string) => {
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat(locale.value, { style: 'currency', currency: 'EUR' }).format(price)
 }
-
-const sortedEvents = computed(() =>
-    [...props.events].sort( // function to sort the events, oldest first
-        (a, b) => new Date(a.starttime).getTime() - new Date(b.starttime).getTime()
-    )
-)
 
 // constants
 const headerWide = 'text-left p-4 w-[40%] align-middle'
@@ -89,7 +82,7 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
         <!-- Body -->
           <tbody>
             <tr
-                v-for="event in sortedEvents"
+                v-for="event in events"
                 :key="event.id"
                 class="group relative border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
             >

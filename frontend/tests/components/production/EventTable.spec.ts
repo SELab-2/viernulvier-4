@@ -94,12 +94,4 @@ describe("EventTable", () => {
     it("does not show empty message when events are provided", () => {
         expect(wrapper.text()).not.toContain("Deze productie bevat geen evenementen.");
     });
-
-    it("sorts events oldest first", () => {
-        const rows = wrapper.findAll("tbody tr");
-        const firstRow = rows[0].text();
-        const lastRow = rows[rows.length - 1].text();
-        expect(firstRow).toContain("Antwerpen"); // oldest event
-        expect(lastRow).toContain("Leuven"); // newest event
-    });
 });
