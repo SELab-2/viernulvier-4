@@ -96,6 +96,7 @@ watch(searchQuery, (val) => emit("update:search", val));
         <div class="container mx-auto px-4 max-w-5xl py-4">
           <Calendar
             :oldest-date="oldestDate"
+            :model-filter="dateFilter"
             @update:filter="emit('update:dateFilter', $event)"
           />
         </div>

@@ -93,8 +93,8 @@
       "mode": {
         "single": "Datum",
         "range": "Bereik",
-        "date-to-now": "Tot nu",
-        "oldest": "Oudste"
+        "after-selected": "Na geselecteerde",
+        "before-selected": "Voor geselecteerde"
       }
     }
 

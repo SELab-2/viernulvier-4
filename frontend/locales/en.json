@@ -93,8 +93,8 @@
       "mode": {
         "single": "Date",
         "range": "Range",
-        "date-to-now": "Until now",
-        "oldest": "Oldest"
+        "after-selected": "After selected",
+        "before-selected": "Before selected"
       }
     }
   },

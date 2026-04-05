@@ -1,19 +1,21 @@
 <!--
   components/calendar/CalendarInputs.vue
   ========================================
-  Manual date input row. All labels via i18n (stories.calendar.*).
-
-  Security: raw user text is NEVER passed to the parent. parseDate() strips
-  everything except digits and separators, then validates the result is a real
-  calendar date (no 2023-02-31, no future dates). Only a safe YYYY-MM-DD
-  string or nothing reaches the emit.
+  Manual date input row. Synced bidirectionally with the calendar grid:
+  - Typing + Enter  → emits up to parent (parent updates calendar)
+  - Calendar click  → parent pushes syncSingle/syncStart/syncEnd props down
+                       which updates the displayed text fields
 -->
 <script lang="ts" setup>
-export type CalMode = "single" | "range" | "date-to-now" | "oldest";
+export type CalMode = "single" | "range" | "after-selected" | "before-selected";
 
 const props = defineProps<{
-  mode:       CalMode;
-  oldestDate: string;
+  mode:        CalMode;
+  oldestDate:  string;
+  /** Sync: calendar selection reflected in text fields */
+  syncSingle?: string;
+  syncStart?:  string;
+  syncEnd?:    string;
 }>();
 
 const emit = defineEmits<{
@@ -33,43 +35,69 @@ const errorSingle = ref(false);
 const errorStart  = ref(false);
 const errorEnd    = ref(false);
 
-// ─── Strict date parsing & validation ────────────────────────────────────────
+// ── Format helpers ────────────────────────────────────────────────────────────
 
-const todayIso = new Date().toISOString().slice(0, 10);
+/** Display ISO as DD/MM/YYYY to match the placeholder hint */
+function formatForInput(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
 
-/**
- * Strip all non-digit, non-separator characters first, then parse.
- * Returns a valid YYYY-MM-DD ≤ today, or null.
- */
-function parseDate(raw: string): string | null {
-  // Allow only digits and the three separator characters
-  const val = raw.replace(/[^\d\/\-\.]/g, "").trim();
+// ── Sync: calendar → inputs ───────────────────────────────────────────────────
+// When the parent reports a new calendar selection, reflect it in the text fields.
+// This overwrites whatever the user had typed, since a click is the authoritative action.
 
-  let iso: string | null = null;
+watch(() => props.syncSingle, (v) => {
+  inputSingle.value = v ? formatForInput(v) : "";
+  errorSingle.value = false;
+});
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-    iso = val;
-  } else {
-    const parts = val.split(/[\/\-\.]/);
-    if (parts.length === 3) {
-      const [d, m, y] = parts;
-      if (y && y.length === 4 && d && m)
-        iso = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-    }
-  }
+watch(() => props.syncStart, (v) => {
+  inputStart.value = v ? formatForInput(v) : "";
+  errorStart.value = false;
+});
 
-  if (!iso) return null;
+watch(() => props.syncEnd, (v) => {
+  inputEnd.value = v ? formatForInput(v) : "";
+  errorEnd.value = false;
+});
 
-  // Validate: must be a real date and not in the future
-  const date = new Date(iso);
-  if (isNaN(date.getTime()))              return null; // invalid date
-  if (date.toISOString().slice(0, 10) !== iso) return null; // day overflow (e.g. Feb 31)
-  if (iso > todayIso)                     return null; // future
+// ── Timezone-safe helpers ─────────────────────────────────────────────────────
 
+function localTodayIso(): string {
+  const d  = new Date();
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+function validateIso(iso: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
+  const date = new Date(y, m - 1, d);
+  if (
+    date.getFullYear() !== y ||
+    date.getMonth()    !== m - 1 ||
+    date.getDate()     !== d
+  ) return null;
+  if (iso > localTodayIso()) return null;
   return iso;
 }
 
-// ─── Handlers ────────────────────────────────────────────────────────────────
+function parseDate(raw: string): string | null {
+  const val = raw.replace(/[^\d\/\-\.]/g, "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return validateIso(val);
+  const parts = val.split(/[\/\-\.]/);
+  if (parts.length === 3) {
+    const [dd, mm, yyyy] = parts;
+    if (yyyy?.length === 4 && dd && mm)
+      return validateIso(`${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`);
+  }
+  return null;
+}
+
+// ── Handlers ──────────────────────────────────────────────────────────────────
 
 function tryApplySingle() {
   const iso = parseDate(inputSingle.value);
@@ -98,11 +126,12 @@ function tryApplyEnd() {
   if (iso) emit("apply-end", iso);
 }
 
-// Clear errors while typing; reset inputs on mode switch
+// Clear errors while typing
 watch(inputSingle, () => { errorSingle.value = false; });
 watch(inputStart,  () => { errorStart.value  = false; });
 watch(inputEnd,    () => { errorEnd.value    = false; });
 
+// Reset fields on mode switch
 watch(() => props.mode, () => {
   inputSingle.value = "";
   inputStart.value  = "";
@@ -155,9 +184,7 @@ watch(() => props.mode, () => {
         </div>
         <span v-if="errorStart" class="cal-input-error">{{ t("stories.calendar.invalidDate") }}</span>
       </div>
-
       <div class="cal-input-sep" aria-hidden="true">→</div>
-
       <div class="cal-input-group">
         <label class="cal-input-label">
           {{ t("stories.calendar.to") }}
@@ -177,8 +204,8 @@ watch(() => props.mode, () => {
       </div>
     </template>
 
-    <!-- Date-to-now -->
-    <template v-else-if="mode === 'date-to-now'">
+    <!-- After selected (was: date-to-now) -->
+    <template v-else-if="mode === 'after-selected'">
       <div class="cal-input-group">
         <label class="cal-input-label">
           {{ t("stories.calendar.from") }}
@@ -196,24 +223,20 @@ watch(() => props.mode, () => {
         </div>
         <span v-if="errorStart" class="cal-input-error">{{ t("stories.calendar.invalidDate") }}</span>
       </div>
-
       <div class="cal-input-sep" aria-hidden="true">→</div>
-
       <div class="cal-input-group">
         <label class="cal-input-label">{{ t("stories.calendar.endDate") }}</label>
         <div class="cal-badge">{{ t("stories.calendar.today") }}</div>
       </div>
     </template>
 
-    <!-- Oldest -->
+    <!-- Before selected (was: oldest) -->
     <template v-else>
       <div class="cal-input-group">
         <label class="cal-input-label">{{ t("stories.calendar.startDate") }}</label>
         <div class="cal-badge cal-badge--muted">{{ t("stories.calendar.oldest") }}</div>
       </div>
-
       <div class="cal-input-sep" aria-hidden="true">→</div>
-
       <div class="cal-input-group">
         <label class="cal-input-label">
           {{ t("stories.calendar.to") }}
