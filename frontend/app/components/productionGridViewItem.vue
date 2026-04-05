@@ -68,7 +68,7 @@ watch(locale, () => loadTags())
 </script>
 
 <template>
-  <NuxtLink :to="ROUTES.productions.byId(productionView.id)" class="group block">
+  <NuxtLink :to="ROUTES.archive.byId(productionView.id)" class="group block">
     <div
       class="
         flex flex-col rounded-xl border border-card-border bg-card
