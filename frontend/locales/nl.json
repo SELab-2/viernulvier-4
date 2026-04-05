@@ -87,6 +87,7 @@
     "noEventsFound": "Geen evenementen gevonden",
     "price": "Prijs",
     "edit": "Bewerk",
-    "delete": "Verwijder"
+    "delete": "Verwijder",
+    "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   }
 }

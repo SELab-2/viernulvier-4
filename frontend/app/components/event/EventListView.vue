@@ -52,6 +52,9 @@ const getPricesText = (event: EventWithDetails) => {
 };
 
 const onDelete = (item: EventListItem) => {
+  const isConfirmed = confirm(t("eventlist.confirmDelete"));
+  if (!isConfirmed) return;
+
   emit("delete", {
     id: item.id,
     title: item.productionTitle || "Unknown Production",
