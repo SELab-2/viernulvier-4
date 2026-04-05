@@ -1,5 +1,5 @@
 <!--
-  components/calendar.vue
+  components/DefaultCalendar.vue
   =======================
   Orchestrates all sub-components. Owns all state; children are presentational.
   Sync flow:
