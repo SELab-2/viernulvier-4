@@ -1,12 +1,21 @@
 <script setup lang="ts">
-//TODO: tagline eerst?
+//TODO: back -> naar vorige pagina!!
 import { ref, computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
 
 const { t, locale } = useI18n()
+const router = useRouter()
+const { getById, getTags} = useProductionApi()
 const route = useRoute()
-const { getById, getTags } = useProductionApi()
+
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/productions') // Fallback
+  }
+}
 
 const isExpanded = ref(false)
 const CHARACTER_LIMIT = 800
@@ -56,6 +65,7 @@ const cleanText = (text: string | null | undefined) => {
   return text
     .replace(/\\/g, '')
     .trim()
+    .replace(/(\r?\n){2,}/g, '\n\n')
     .replace(/\n/g, '<br />')
 }
 
@@ -69,6 +79,8 @@ const displayedDescription = computed(() => {
 })
 
 const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT)
+
+
 </script>
 
 <template>
@@ -83,10 +95,13 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 
       <div class="relative z-10 mx-auto w-full max-w-[1400px] px-6 lg:px-12 2xl:px-[120px] pb-16 text-white">
         <div class="flex items-center gap-4 mb-8">
-          <NuxtLink to="/productions" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors">
+          <button
+            @click="goBack()"
+            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors"
+          >
             <ChevronLeft :size="14" stroke-width="3" />
             {{ t('general.back')}}
-          </NuxtLink>
+          </button>
           <span v-if="isValid(production.performer_type)" class="bg-white text-black px-2 py-1 text-[10px] font-black uppercase rounded-sm">
             {{ production.performer_type }}
           </span>
@@ -118,9 +133,12 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
 
         <div class="lg:col-span-8">
-          <h2 ref="descriptionRef" class="text-3xl lg:text-4xl font-black uppercase mb-10 tracking-tight">
-            {{ t('production.description') }}
-          </h2>
+
+          <div v-if="isValid(production.tagline)" class="mb-8">
+            <p class="border-l-4 border-[var(--accent)] pl-4 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white">
+              {{ production.tagline }}
+            </p>
+          </div>
 
           <div
             class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
@@ -143,20 +161,14 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
         </div>
 
         <aside class="lg:col-span-4 space-y-10">
-          <div v-if="isValid(production.tagline)" class="pb-6 border-b border-gray-100 dark:border-gray-800">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">
-              {{ t('production.tagline')}}
-            </h4>
-            <p class="text-xl font-bold italic leading-tight uppercase">{{ production.tagline }}</p>
-          </div>
 
           <div v-if="isValid(production.credits)">
             <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">
               {{ t('production.credits')}}
             </h4>
-            <div class="text-sm leading-relaxed opacity-80 whitespace-pre-line">
-              {{ production.credits }}
-            </div>
+            <div class="text-sm leading-relaxed opacity-80"
+              v-html="production.credits"
+            ></div>
           </div>
         </aside>
       </div>

@@ -82,8 +82,6 @@
     "location": "Location",
     "price": "Price",
     "noEvents": "This production doesn't have any events.",
-    "description": "Description",
-    "tagline": "Tagline",
     "credits": "Credits"
   },
   "general": {

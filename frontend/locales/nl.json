@@ -83,8 +83,6 @@
     "location": "Locatie",
     "price": "Prijs",
     "noEvents": "Deze productie bevat geen evenementen.",
-    "description": "Beschrijving",
-    "tagline": "Tagline",
     "credits": "Credits"
   },
   "general": {
