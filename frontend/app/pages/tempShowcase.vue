@@ -14,15 +14,13 @@ type EventListItem = EventWithDetails & {
   productionTitle: string;
 };
 
-const { locale } = useI18n();
-
 const mockProductions: MockProduction[] = [
   { id: 1, title: "Bodies of Light" },
   { id: 2, title: "Night Shift Reverie" },
   { id: 3, title: "Archive of Echoes" },
 ];
 
-const mockEvents = ref<EventWithDetails[]>([
+const mockEvents: EventWithDetails[] = [
   {
     id: 101,
     production_id: 1,
@@ -137,53 +135,20 @@ const mockEvents = ref<EventWithDetails[]>([
       },
     ],
   },
-]);
+];
 
-const search = ref("");
+const listEvents: EventListItem[] = mockEvents.map((event) => {
+  const productionTitle =
+    mockProductions.find((p) => p.id === event.production_id)?.title ??
+    "Unknown Production";
 
-const listEvents = computed<EventListItem[]>(() => {
-  return mockEvents.value.map((event) => {
-    const productionTitle =
-      mockProductions.find((p) => p.id === event.production_id)?.title ??
-      "Unknown Production";
-
-    return {
-      ...event,
-      productionTitle,
-    };
-  });
+  return {
+    ...event,
+    productionTitle,
+  };
 });
 
-const filteredEvents = computed(() => {
-  const query = search.value.trim().toLowerCase();
-  if (!query) return listEvents.value;
-
-  return listEvents.value.filter((event) => {
-    const venue = event.location?.location ?? "";
-    const priceText = event.prices
-      .map((price) => `${price.name} eur ${price.price}`)
-      .join(" ");
-
-    return (
-      event.productionTitle.toLowerCase().includes(query) ||
-      venue.toLowerCase().includes(query) ||
-      priceText.toLowerCase().includes(query)
-    );
-  });
-});
-
-const actionMessage = ref("");
-
-const onEdit = (event: EventListItem) => {
-  actionMessage.value = `Edit clicked for event #${event.id}`;
-};
-
-const onDelete = (payload: { id: number | string; title: string }) => {
-  mockEvents.value = mockEvents.value.filter(
-    (event) => event.id !== payload.id,
-  );
-  actionMessage.value = `Deleted event #${payload.id} (${payload.title})`;
-};
+const emptyEvents: EventListItem[] = [];
 </script>
 
 <template>
@@ -192,43 +157,27 @@ const onDelete = (payload: { id: number | string; title: string }) => {
       <header class="space-y-2">
         <h1 class="text-3xl font-bold tracking-tight">TempShowcase</h1>
         <p class="text-sm text-muted-foreground">
-          Reusable event list view with mock data, filter, edit action, and
-          delete action.
+          Simple examples of the event list view.
         </p>
       </header>
 
-      <div class="rounded-xl border border-border bg-muted/40 p-4 sm:p-5">
-        <label
-          for="temp-event-search"
-          class="block text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2"
+      <div class="space-y-2">
+        <h2
+          class="text-sm font-bold uppercase tracking-widest text-muted-foreground"
         >
-          {{ locale === "nl" ? "Filter events" : "Filter events" }}
-        </label>
-        <input
-          id="temp-event-search"
-          v-model="search"
-          type="text"
-          :placeholder="
-            locale === 'nl'
-              ? 'Zoek op productie, locatie of prijs'
-              : 'Search by production, venue, or price'
-          "
-          class="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm outline-none focus:border-foreground/30"
-        />
+          Example with events
+        </h2>
+        <EventListView :events="listEvents" />
       </div>
 
-      <p
-        v-if="actionMessage"
-        class="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
-      >
-        {{ actionMessage }}
-      </p>
-
-      <EventListView
-        :events="filteredEvents"
-        @edit="onEdit"
-        @delete="onDelete"
-      />
+      <div class="space-y-2">
+        <h2
+          class="text-sm font-bold uppercase tracking-widest text-muted-foreground"
+        >
+          Example with 0 events
+        </h2>
+        <EventListView :events="emptyEvents" />
+      </div>
     </div>
   </section>
 </template>
