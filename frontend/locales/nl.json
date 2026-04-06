@@ -88,6 +88,8 @@
     "price": "Prijs",
     "edit": "Bewerk",
     "delete": "Verwijder",
-    "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
+    "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?",
+    "stories": "Verhalen",
+    "noStories": "Deze productie bevat geen verhalen."
   }
 }
