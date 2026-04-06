@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
 import EventTable from "../../components/production/EventTable.vue";
+import ProductionStories from "../../components/production/storyListView.vue";
+import { useBlogApi } from "../../composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -112,6 +114,24 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
   default: () => []
 })
 
+const { getAll: getAllBlogs } = useBlogApi()
+
+/** 5. Blogs (Stories) ophalen gekoppeld aan deze productie */
+const { data: stories } = await useAsyncData(
+  `prod-stories-${route.params.id}-${locale.value}`,
+  async () => {
+    if (!productionId.value) return []
+
+    const res = await getAllBlogs({
+      languageFilters: { lang: locale.value as any },
+      blogFilters: { production_id: productionId.value } as any
+    })
+
+    return (res as any)?.data?.objects ?? (res as any)?.objects ?? []
+  },
+  { watch: [productionId, locale], default: () => [] }
+)
+
 </script>
 
 <template>
@@ -124,7 +144,7 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
       <img v-if="image" :src="image" class="absolute inset-0 h-full w-full object-cover opacity-60" />
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
-      <div class="relative z-10 mx-auto w-full max-w-[1400px] px-6 lg:px-12 2xl:px-[120px] pb-16 text-white">
+      <div class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-16 text-white">
         <div class="flex items-center gap-4 mb-8">
           <button @click="goBack()" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors">
             <ChevronLeft :size="14" stroke-width="3" />
@@ -154,45 +174,39 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
       </div>
     </section>
 
-    <section class="mx-auto w-full max-w-[1400px] px-6 lg:px-12 2xl:px-[120px] py-20">
-      <div class="max-w-5xl">
+    <section class="py-20">
+      <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
 
-        <div v-if="isValid(production.tagline)" class="mb-10">
-          <p class="border-l-4 border-[var(--accent)] pl-6 text-xl lg:text-2xl font-black italic leading-relaxed text-gray-900 dark:text-white">
-            {{ production.tagline }}
-          </p>
+        <div class="max-w-4xl">
+          <div v-if="isValid(production.tagline)" class="mb-10">
+            <p class="border-l-4 border-[var(--accent)] pl-6 text-xl lg:text-2xl font-black italic leading-relaxed text-gray-900 dark:text-white">
+              {{ production.tagline }}
+            </p>
+          </div>
+
+          <div class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200" v-html="displayedDescription"></div>
+
+          <button v-if="isLongDescription" @click="isExpanded = !isExpanded" class="mt-6 mb-12 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none">
+            {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
+          </button>
         </div>
 
-        <div
-          class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
-          v-html="displayedDescription"
-        ></div>
-
-        <button
-          v-if="isLongDescription"
-          @click="isExpanded = !isExpanded"
-          class="mt-6 mb-12 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
-        >
-          {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
-        </button>
-
-        <div class="my-16 -mx-4 lg:mx-0">
+        <div class="my-16">
           <EventTable :events="events || []" />
         </div>
 
-        <div
-          v-if="isValid(production.description2)"
-          class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl"
-          v-html="cleanText(production.description2)"
-        ></div>
+        <div v-if="stories && stories.length > 0" class="my-16">
+          <h3 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">Stories</h3>
+          <ProductionStories :stories="stories" />
+        </div>
 
-        <div v-if="isValid(production.credits)" class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800">
-          <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
-            {{ t('production.credits')}}
-          </h4>
-          <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12"
-               v-html="production.credits"
-          ></div>
+        <div class="max-w-4xl">
+          <div v-if="isValid(production.description2)" class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl" v-html="cleanText(production.description2)"></div>
+
+          <div v-if="isValid(production.credits)" class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800">
+            <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">{{ t('production.credits')}}</h4>
+            <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12" v-html="production.credits"></div>
+          </div>
         </div>
 
       </div>
