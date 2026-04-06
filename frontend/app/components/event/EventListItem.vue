@@ -14,13 +14,14 @@
  *   @delete="onDelete"
  * />
  */
-import { Edit2, Trash2 } from "lucide-vue-next";
 import type { EventWithDetails } from "../../types/EventWithDetails";
 import {
   formatDateShort,
   formatTime,
   formatPrice,
 } from "../../utils/formatters";
+import EditButton from "../admin/EditButton.vue";
+import DeleteButton from "../admin/DeleteButton.vue";
 
 type EventListItem = EventWithDetails & {
   productionTitle: string;
@@ -38,20 +39,6 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
-
-// Shared style constants
-const buttonBaseClass =
-  "w-11 h-11 p-0 flex items-center justify-center rounded-md border-2 transition-colors duration-150";
-
-type ActionButtonColor = "blue" | "red";
-
-const actionButtonVariants: Record<ActionButtonColor, string> = {
-  blue: "border-blue-200 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900",
-  red: "border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900",
-};
-
-// Icon size constant
-const iconSize = 20;
 
 // function to get the price text for an event
 const getPricesText = (event: EventWithDetails) => {
@@ -89,25 +76,16 @@ const getPricesText = (event: EventWithDetails) => {
     </div>
 
     <div class="flex gap-2 ml-auto items-center">
-      <!-- Edit Button -->
-      <button
-        type="button"
-        :class="`${buttonBaseClass} ${actionButtonVariants.blue}`"
-        :aria-label="t('eventlist.edit')"
+      <EditButton
+        :label="t('eventlist.edit')"
+        :size="44"
         @click="emit('edit', item)"
-      >
-        <Edit2 :size="iconSize" />
-      </button>
-
-      <!-- Delete Button -->
-      <button
-        type="button"
-        :class="`${buttonBaseClass} ${actionButtonVariants.red}`"
-        :aria-label="t('eventlist.delete')"
+      />
+      <DeleteButton
+        :label="t('eventlist.delete')"
+        :size="44"
         @click="emit('delete', item)"
-      >
-        <Trash2 :size="iconSize" />
-      </button>
+      />
     </div>
   </div>
 </template>
