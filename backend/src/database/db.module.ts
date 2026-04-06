@@ -29,7 +29,7 @@ import { MediaCropDatabaseService } from "./media/db.media_crop.service";
     MediaGalleryDatabaseService,
     MediaItemDatabaseService,
     MediaCropDatabaseService,
-    PrintItemDatabaseService
+    PrintItemDatabaseService,
   ],
   controllers: [],
   exports: [
@@ -46,7 +46,7 @@ import { MediaCropDatabaseService } from "./media/db.media_crop.service";
     MediaGalleryDatabaseService,
     MediaItemDatabaseService,
     MediaCropDatabaseService,
-    PrintItemDatabaseService
+    PrintItemDatabaseService,
   ],
 })
 export class DbModule {}

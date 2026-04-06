@@ -187,7 +187,7 @@ function toCsvProduction(row: {
 }
 
 /**
-  * Helper to describe the CSV input source for logging purposes.
+ * Helper to describe the CSV input source for logging purposes.
  */
 function describeCsvInput(input: CsvInputSource): string {
   return typeof input === "string"
