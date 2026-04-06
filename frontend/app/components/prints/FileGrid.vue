@@ -55,14 +55,17 @@ const currentCols = computed(() => { // how many items there are currently in a 
 const initialMax = computed(() => currentCols.value * 2) // max items there can be in 2 rows
 
 const isOpen = ref(true); // for toggling the whole category section  (chevrons)
-const isExpanded = ref(false); // show more/less
-const toggle = () => isOpen.value = !isOpen.value; // for toggling the whole category section  (chevrons)
-
-const visibleFiles = computed(() => // visible files depend on if the show more button is pressed or not
-    isExpanded.value ? props.files : props.files.slice(0, initialMax.value)
+const extraRows = ref(0) // how many extra rows to show
+const visibleFiles = computed(() =>
+    props.files.slice(0, initialMax.value + (extraRows.value * currentCols.value))
 )
-const remaining = computed(() => props.files.length - initialMax.value) // amount of non-visible files
-const hasMore = computed(() => props.files.length > initialMax.value) // if a "show more"- button is needed
+const remaining = computed(() => props.files.length - (initialMax.value + extraRows.value * currentCols.value)) // amount of non-visible files
+const hasMore = computed(() => props.files.length > initialMax.value + (extraRows.value * currentCols.value)) // if a "show more"- button is needed
+
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+  extraRows.value = 0
+} // for toggling the whole category section  (chevrons)
 
 //constants
 const chevron = "shrink-0 text-muted-foreground"
@@ -145,11 +148,10 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
       </div>
     </div>
     <!-- Show more/less button -->
-    <button v-if="isOpen && (hasMore || isExpanded)"
+    <button v-if="isOpen && hasMore"
             :class="showMoreButton"
-            @click="isExpanded = !isExpanded">
-      <span v-if="!isExpanded">{{ t('prints.showMore') }} ({{ remaining }} {{ t('prints.remaining') }})</span>
-      <span v-else>{{ t('prints.showLess') }}</span>
+            @click="extraRows += 2">
+      <span>{{ t('prints.showMore') }} ({{ remaining }} {{ t('prints.remaining') }})</span>
     </button>
     <!-- No files (empty) -->
     <div
