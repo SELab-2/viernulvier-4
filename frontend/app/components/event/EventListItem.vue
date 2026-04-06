@@ -43,6 +43,11 @@ const { t, locale } = useI18n();
 const buttonBaseClass =
   "w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 transition-colors";
 
+type ActionButtonColor = "blue" | "red";
+
+const actionButtonClass = (color: ActionButtonColor) =>
+  `border-${color}-200 dark:border-${color}-800 text-${color}-600 hover:bg-${color}-50 dark:hover:bg-${color}-900`;
+
 // Icon size constant
 const iconSize = 20;
 
@@ -85,7 +90,7 @@ const getPricesText = (event: EventWithDetails) => {
       <!-- Edit Button -->
       <button
         type="button"
-        :class="`${buttonBaseClass} hover:bg-gray-100 dark:hover:bg-gray-800`"
+        :class="`${buttonBaseClass} ${actionButtonClass('blue')}`"
         :aria-label="t('eventlist.edit')"
         @click="emit('edit', item)"
       >
@@ -95,11 +100,11 @@ const getPricesText = (event: EventWithDetails) => {
       <!-- Delete Button -->
       <button
         type="button"
-        :class="`${buttonBaseClass} hover:bg-red-50 dark:hover:bg-red-900`"
+        :class="`${buttonBaseClass} ${actionButtonClass('red')}`"
         :aria-label="t('eventlist.delete')"
         @click="emit('delete', item)"
       >
-        <Trash2 :size="iconSize" class="text-red-600" />
+        <Trash2 :size="iconSize" />
       </button>
     </div>
   </div>
