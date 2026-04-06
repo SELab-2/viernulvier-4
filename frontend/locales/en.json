@@ -81,7 +81,9 @@
     "dateAndTime": "Date & Time",
     "location": "Location",
     "price": "Price",
-    "noEvents": "This production doesn't contain any events."
+    "noEvents": "This production doesn't contain any events.",
+    "stories": "Stories",
+    "noStories": "This production doesn't contain any stories."
   }
 }
 
