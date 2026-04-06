@@ -31,6 +31,7 @@ interface Props {
 const props = defineProps<Props>();
 const { t } = useI18n();
 
+const openFile = (src: string) => window.open(src, '_blank')
 // constants
 const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
 </script>
@@ -43,6 +44,7 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
           v-for="file in props.files"
           :key="file.id"
           :class="rowBase"
+          @click="file.image ? openFile(file.image) : undefined"
       >
         <!-- Icon -->
         <div class="w-9 h-9 rounded-md bg-muted flex items-center justify-center shrink-0">

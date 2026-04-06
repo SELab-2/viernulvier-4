@@ -118,7 +118,7 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
                 :src="file.image"
                 :alt="file.name"
                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                @click.stop="openFile(file.image!)"
+                @click.stop="file.image ? openFile(file.image) : undefined"
             />
             <ThumbnailPlaceholder
                 v-else

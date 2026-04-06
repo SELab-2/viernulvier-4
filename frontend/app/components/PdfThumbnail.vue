@@ -56,7 +56,7 @@ onMounted(async () => {
   }
 })
 
-const openPdf = () => window.open(props.src, '_blank') // for opening the PDF in a new browser tab
+const openPdf = () => props.src && window.open(props.src, '_blank') // for opening the PDF in a new browser tab
 </script>
 
 <template>
