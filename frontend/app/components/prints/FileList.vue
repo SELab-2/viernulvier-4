@@ -41,6 +41,9 @@ const downloadFile = (src: string, name: string) => {
 
 // constants
 const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
+const buttonBase = "p-2 rounded-md border transition-colors duration-150"
+const buttonBlue = `${buttonBase} border-blue-200 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900`
+const buttonRed = `${buttonBase} border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900`
 </script>
 
 <template>
@@ -69,13 +72,13 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
         <!-- Buttons -->
         <div class="flex items-center gap-2 shrink-0">
           <button
-              class="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150"
+              :class="buttonBlue"
               @click.stop="file.image && downloadFile(file.image, file.name)"
           >
             <Download :size="15" />
           </button>
           <button
-              class="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors duration-150"
+              :class="buttonRed"
               @click.stop="() => {}"
           >
             <Trash2 :size="15" />
