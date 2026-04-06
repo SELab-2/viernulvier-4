@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * A reusable event list component, displays events in a card-style list, includes:
- *  - Production title, location, date/time and prices per event
+ *  - Rendering one EventListItem per event (for scalability and separation of concerns)
  *  - Edit action that emits the full event and navigates to the edit route
  *  - Delete action with confirmation popup
  *  - Empty-state message when no events are available

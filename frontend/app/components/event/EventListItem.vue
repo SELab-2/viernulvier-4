@@ -1,4 +1,19 @@
 <script setup lang="ts">
+/**
+ * A reusable event list item component, displays one event card, includes:
+ *  - Production title, location, date/time and prices per event
+ *  - Edit action that emits the full event item
+ *  - Delete action that emits the full event item
+ *
+ * This component is presentational. Confirmation and navigation are handled by EventListView.
+ *
+ * Usage:
+ * <EventListItem
+ *   :item="event"
+ *   @edit="onEdit"
+ *   @delete="onDelete"
+ * />
+ */
 import { Edit2, Trash2 } from "lucide-vue-next";
 import type { EventWithDetails } from "../../types/EventWithDetails";
 import {
@@ -24,10 +39,14 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 
+// Shared style constants
 const buttonBaseClass =
   "w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 transition-colors";
+
+// Icon size constant
 const iconSize = 20;
 
+// function to get the price text for an event
 const getPricesText = (event: EventWithDetails) => {
   if (!event.prices.length) return "-";
   return event.prices
@@ -40,6 +59,7 @@ const getPricesText = (event: EventWithDetails) => {
   <div
     class="flex items-center gap-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-4"
   >
+    <!-- Event details -->
     <div class="flex-1 min-w-0">
       <h3 class="font-bold text-lg truncate">
         {{ item.productionTitle || "Unknown Production" }}
@@ -62,6 +82,7 @@ const getPricesText = (event: EventWithDetails) => {
     </div>
 
     <div class="flex gap-2 ml-auto items-center">
+      <!-- Edit Button -->
       <button
         type="button"
         :class="`${buttonBaseClass} hover:bg-gray-100 dark:hover:bg-gray-800`"
@@ -71,6 +92,7 @@ const getPricesText = (event: EventWithDetails) => {
         <Edit2 :size="iconSize" />
       </button>
 
+      <!-- Delete Button -->
       <button
         type="button"
         :class="`${buttonBaseClass} hover:bg-red-50 dark:hover:bg-red-900`"
