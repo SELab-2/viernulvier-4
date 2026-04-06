@@ -41,7 +41,7 @@ const { t, locale } = useI18n();
 
 // Shared style constants
 const buttonBaseClass =
-  "w-11 h-11 flex items-center justify-center rounded-full p-0 border-2 transition-colors";
+  "w-11 h-11 p-0 flex items-center justify-center rounded-md border-2 transition-colors duration-150";
 
 type ActionButtonColor = "blue" | "red";
 
