@@ -32,6 +32,11 @@
  */
 import { Edit2, Trash2 } from "lucide-vue-next";
 import type { EventWithDetails } from "../../types/EventWithDetails";
+import {
+  formatDateShort,
+  formatTime,
+  formatPrice,
+} from "../../utils/formatters";
 
 type Id = number | string;
 
@@ -58,38 +63,11 @@ const buttonBaseClass =
 // Icon size constant
 const iconSize = 20;
 
-// function to format the date
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString(locale.value, {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-// function to format the time
-const formatTime = (dateStr: string) => {
-  return new Date(dateStr).toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-};
-
-// function to format the price
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat(locale.value, {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
-
 // function to get the price text for an event
 const getPricesText = (event: EventWithDetails) => {
   if (!event.prices.length) return "-";
   return event.prices
-    .map((price) => `${price.name}: ${formatPrice(price.price)}`)
+    .map((price) => `${price.name}: ${formatPrice(price.price, locale.value)}`)
     .join(" | ");
 };
 
@@ -124,8 +102,16 @@ const onEdit = (event: EventListItem) => {
           {{ item.productionTitle || "Unknown Production" }}
         </h3>
         <p class="text-xs text-gray-500 uppercase tracking-widest truncate">
-          {{ item.location.location }} - {{ formatDate(item.starttime) }},
-          {{ formatTime(item.starttime) }}
+          {{ item.location.location }} -
+          {{
+            formatDateShort(item.starttime, locale, {
+              weekday: "short",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          }},
+          {{ formatTime(item.starttime, locale) }}
         </p>
         <p class="text-xs font-bold mt-1">
           {{ t("eventlist.price") }}: {{ getPricesText(item) }}

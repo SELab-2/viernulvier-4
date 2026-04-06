@@ -4,7 +4,11 @@
 export function formatDateShort(
   iso: string,
   lang: string,
-  options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" },
+  options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  },
 ): string {
   try {
     const d = new Date(iso);
@@ -14,7 +18,7 @@ export function formatDateShort(
     return "";
   }
 }
- 
+
 /** Format a month label (e.g. "January") from a "YYYY-MM" key. */
 export function formatMonthLabel(monthKey: string, lang: string): string {
   const [y, m] = monthKey.split("-");
@@ -24,14 +28,14 @@ export function formatMonthLabel(monthKey: string, lang: string): string {
     { month: "long" },
   );
 }
- 
+
 // Compute a date range from events with starttime/endtime
 export function computeDateRangeFromEvents(
   events: Array<{ starttime?: string | null; endtime?: string | null }>,
   lang: string,
 ): string {
   if (!events?.length) return "/";
- 
+
   const times: number[] = [];
   for (const e of events) {
     if (e?.starttime) {
@@ -43,18 +47,42 @@ export function computeDateRangeFromEvents(
       if (!Number.isNaN(t2)) times.push(t2);
     }
   }
- 
+
   if (!times.length) return "/";
- 
+
   const earliest = new Date(Math.min(...times));
-  const latest   = new Date(Math.max(...times));
+  const latest = new Date(Math.max(...times));
   if (earliest.toDateString() === latest.toDateString()) {
     return formatDateShort(earliest.toISOString(), lang);
   }
   return `${formatDateShort(earliest.toISOString(), lang)} — ${formatDateShort(latest.toISOString(), lang)}`;
 }
- 
+
 export function formatHTMLText(text: string | null): string {
   if (!text) return "";
   return text.replace(/\+/g, "<br>");
+}
+
+/**
+ * Format a date string to a localized time string.
+ * @param dateStr - ISO date string
+ * @param locale - Locale code (e.g., 'en-GB', 'nl-BE')
+ */
+export function formatTime(dateStr: string, locale: string): string {
+  return new Date(dateStr).toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * Format a price as a localized currency string (EUR).
+ * @param price - Price amount
+ * @param locale - Locale code (e.g., 'en-GB', 'nl-BE')
+ */
+export function formatPrice(price: number, locale: string): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+  }).format(price);
 }
