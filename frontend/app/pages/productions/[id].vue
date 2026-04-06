@@ -126,10 +126,7 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
 
       <div class="relative z-10 mx-auto w-full max-w-[1400px] px-6 lg:px-12 2xl:px-[120px] pb-16 text-white">
         <div class="flex items-center gap-4 mb-8">
-          <button
-            @click="goBack()"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors"
-          >
+          <button @click="goBack()" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors">
             <ChevronLeft :size="14" stroke-width="3" />
             {{ t('general.back')}}
           </button>
@@ -149,10 +146,7 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
 
         <div v-if="tags?.some(t => isValid(t.tag))" class="flex flex-wrap gap-3 mt-8">
           <template v-for="tag in tags" :key="tag.id">
-            <span
-              v-if="isValid(tag.tag)"
-              class="bg-[var(--accent)] text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]"
-            >
+            <span v-if="isValid(tag.tag)" class="bg-[var(--accent)] text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]">
               {{ tag.tag }}
             </span>
           </template>
@@ -161,51 +155,46 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
     </section>
 
     <section class="mx-auto w-full max-w-[1400px] px-6 lg:px-12 2xl:px-[120px] py-20">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <div class="max-w-5xl">
 
-        <div class="lg:col-span-8">
+        <div v-if="isValid(production.tagline)" class="mb-10">
+          <p class="border-l-4 border-[var(--accent)] pl-6 text-xl lg:text-2xl font-black italic leading-relaxed text-gray-900 dark:text-white">
+            {{ production.tagline }}
+          </p>
+        </div>
 
-          <div v-if="isValid(production.tagline)" class="mb-8">
-            <p class="border-l-4 border-[var(--accent)] pl-4 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white">
-              {{ production.tagline }}
-            </p>
-          </div>
+        <div
+          class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
+          v-html="displayedDescription"
+        ></div>
 
-          <div
-            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
-            v-html="displayedDescription"
-          ></div>
+        <button
+          v-if="isLongDescription"
+          @click="isExpanded = !isExpanded"
+          class="mt-6 mb-12 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+        >
+          {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
+        </button>
 
-          <button
-            v-if="isLongDescription"
-            @click="isExpanded = !isExpanded"
-            class="mt-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
-          >
-            {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
-          </button>
+        <div class="my-16 -mx-4 lg:mx-0">
+          <EventTable :events="events || []" />
+        </div>
 
-          <div class="-mx-4">
-            <EventTable :events="events || []" />
-          </div>
+        <div
+          v-if="isValid(production.description2)"
+          class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl"
+          v-html="cleanText(production.description2)"
+        ></div>
 
-          <div
-            v-if="isValid(production.description2)"
-            class="description-content mt-12 p-6 border-l-2 border-gray-100 dark:border-gray-800 italic opacity-70 text-base lg:text-lg"
-            v-html="cleanText(production.description2)"
+        <div v-if="isValid(production.credits)" class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800">
+          <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
+            {{ t('production.credits')}}
+          </h4>
+          <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12"
+               v-html="production.credits"
           ></div>
         </div>
 
-        <aside class="lg:col-span-4 space-y-10">
-
-          <div v-if="isValid(production.credits)">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-3 tracking-widest">
-              {{ t('production.credits')}}
-            </h4>
-            <div class="text-sm leading-relaxed opacity-80"
-              v-html="production.credits"
-            ></div>
-          </div>
-        </aside>
       </div>
     </section>
   </main>
