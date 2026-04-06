@@ -30,13 +30,8 @@
  *   }
  * ]
  */
-import { Edit2, Trash2 } from "lucide-vue-next";
 import type { EventWithDetails } from "../../types/EventWithDetails";
-import {
-  formatDateShort,
-  formatTime,
-  formatPrice,
-} from "../../utils/formatters";
+import EventListItem from "./EventListItem.vue";
 
 type Id = number | string;
 
@@ -48,28 +43,13 @@ interface Props {
   events: EventListItem[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const emit = defineEmits<{
   (e: "edit", event: EventListItem): void;
   (e: "delete", payload: { id: Id; title: string }): void;
 }>();
 
-const { t, locale } = useI18n();
-
-// Shared style constants
-const buttonBaseClass =
-  "w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 transition-colors";
-
-// Icon size constant
-const iconSize = 20;
-
-// function to get the price text for an event
-const getPricesText = (event: EventWithDetails) => {
-  if (!event.prices.length) return "-";
-  return event.prices
-    .map((price) => `${price.name}: ${formatPrice(price.price, locale.value)}`)
-    .join(" | ");
-};
+const { t } = useI18n();
 
 // function to handle delete action with confirmation
 const onDelete = (item: EventListItem) => {
@@ -91,55 +71,13 @@ const onEdit = (event: EventListItem) => {
 
 <template>
   <div class="space-y-4">
-    <div
+    <EventListItem
       v-for="item in events"
       :key="item.id"
-      class="flex items-center gap-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-4"
-    >
-      <!-- Event details -->
-      <div class="flex-1 min-w-0">
-        <h3 class="font-bold text-lg truncate">
-          {{ item.productionTitle || "Unknown Production" }}
-        </h3>
-        <p class="text-xs text-gray-500 uppercase tracking-widest truncate">
-          {{ item.location.location }} -
-          {{
-            formatDateShort(item.starttime, locale, {
-              weekday: "short",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          }},
-          {{ formatTime(item.starttime, locale) }}
-        </p>
-        <p class="text-xs font-bold mt-1">
-          {{ t("eventlist.price") }}: {{ getPricesText(item) }}
-        </p>
-      </div>
-
-      <div class="flex gap-2 ml-auto items-center">
-        <!-- Edit Button -->
-        <button
-          type="button"
-          :class="`${buttonBaseClass} hover:bg-gray-100 dark:hover:bg-gray-800`"
-          :aria-label="t('eventlist.edit')"
-          @click="onEdit(item)"
-        >
-          <Edit2 :size="iconSize" />
-        </button>
-
-        <!-- Delete Button -->
-        <button
-          type="button"
-          :class="`${buttonBaseClass} hover:bg-red-50 dark:hover:bg-red-900`"
-          :aria-label="t('eventlist.delete')"
-          @click="onDelete(item)"
-        >
-          <Trash2 :size="iconSize" class="text-red-600" />
-        </button>
-      </div>
-    </div>
+      :item="item"
+      @edit="onEdit"
+      @delete="onDelete"
+    />
 
     <!-- Empty list message -->
     <p

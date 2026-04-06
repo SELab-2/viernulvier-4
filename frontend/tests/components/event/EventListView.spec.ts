@@ -105,17 +105,17 @@ describe("EventListView", () => {
     expect(wrapper.findAll("button").length).toBe(events.length * 2);
   });
 
-  it("emits edit when the edit button is clicked", () => {
-    wrapper.findAll("button")[0].element.click();
+  it("emits edit when the edit button is clicked", async () => {
+    await wrapper.find('[aria-label="Edit"]').trigger("click");
 
     expect(wrapper.emitted("edit")?.[0]).toEqual([events[0]]);
   });
 
-  it("asks for confirmation before deleting", () => {
+  it("asks for confirmation before deleting", async () => {
     const confirmMock = vi.fn(() => true);
     vi.stubGlobal("confirm", confirmMock);
 
-    wrapper.findAll("button")[1].element.click();
+    await wrapper.find('[aria-label="Delete"]').trigger("click");
 
     expect(confirmMock).toHaveBeenCalledWith(
       "Are you sure you want to delete this event?",
@@ -123,6 +123,17 @@ describe("EventListView", () => {
     expect(wrapper.emitted("delete")?.[0]).toEqual([
       { id: 1, title: "Bodies of Light" },
     ]);
+  });
+
+  it("does not emit delete when confirmation is canceled", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => false),
+    );
+
+    await wrapper.find('[aria-label="Delete"]').trigger("click");
+
+    expect(wrapper.emitted("delete")).toBeUndefined();
   });
 
   it("shows the empty message when no events are provided", () => {
