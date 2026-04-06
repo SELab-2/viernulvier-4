@@ -1,8 +1,8 @@
 import { Pool, QueryResultRow } from "pg";
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleDestroy } from "@nestjs/common";
 
 @Injectable()
-export class DbService {
+export class DbService implements OnModuleDestroy {
   private pool: Pool;
 
   // to edit database params go to your .env file.
@@ -14,6 +14,13 @@ export class DbService {
       password: process.env.DB_PASSWORD_DEV,
       port: Number(process.env.DB_PORT_DEV),
     });
+  }
+
+  /**
+   * Automatically destroy the database connection on stop.
+   */
+  async onModuleDestroy() {
+    await this.pool.end();
   }
 
   /**

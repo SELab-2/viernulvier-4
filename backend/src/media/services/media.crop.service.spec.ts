@@ -10,10 +10,12 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
+import { MediaStorageService } from "../media_storage/service/media_storage.service";
 
 describe("MediaCropService", () => {
   let service: MediaCropService;
   let mediaDbService: jest.Mocked<MediaCropDatabaseService>;
+  const mockMediaStorageService = jest.mocked<MediaStorageService>;
 
   const mockCrop: MediaCropDto = {
     id: 1,
@@ -38,6 +40,10 @@ describe("MediaCropService", () => {
         {
           provide: MediaCropDatabaseService,
           useValue: mockMediaDbService,
+        },
+        {
+          provide: MediaStorageService,
+          useValue: mockMediaStorageService,
         },
       ],
     }).compile();
