@@ -4,6 +4,7 @@
  *  - Collapsible section with title and file count (chevron toggle)
  *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
  *  - Max 2 rows before a "show more" button appears (if there are more files)
+ *  - File previews, clickable files
  *  - Thumbnail placeholders
  *
  * Usage:

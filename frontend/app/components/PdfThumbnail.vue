@@ -1,4 +1,20 @@
 <script setup lang="ts">
+/**
+ * Renders a single PDF's first page as a thumbnail preview, includes:
+ *  - Renders first page of a PDF onto a <canvas> element using PDF.js
+ *  - Scales to fit the thumbnail at (at least) 2x resolution for sharpness
+ *  - Loading spinner while the PDF is being fetched and rendered
+ *  - Opens the full PDF in a new tab when clicked
+ *  - Falls back to a placeholder via the #fallback slot on error
+ *
+ * Usage:
+ * <PrintsPdfThumbnail :src="file.image">
+ *   <template #fallback>
+ *     <ThumbnailPlaceholder ... />
+ *   </template>
+ * </PrintsPdfThumbnail>
+ */
+
 import * as pdfjsLib from 'pdfjs-dist'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
@@ -45,8 +61,9 @@ const openPdf = () => window.open(props.src, '_blank') // for opening the PDF in
 
 <template>
   <div class="absolute inset-0 w-full h-full" @click.stop="openPdf">
-    <!-- Loading -->
-    <div v-if="loading" class="w-full h-full animate-pulse bg-muted" />
+    <div v-if="loading" class="w-full h-full flex items-center justify-center bg-muted">
+      <div class="w-6 h-6 rounded-full border-2 border-border border-t-foreground animate-spin" />
+    </div>
     <!-- Preview -->
     <canvas
         v-show="!loading && !error"
