@@ -16,7 +16,7 @@
  * ]
  */
 
-import { FileText } from "lucide-vue-next";
+import { FileText, Download, Trash2 } from "lucide-vue-next";
 interface PrintsFile { //TODO replace this with actual object later
   id: number;
   name: string;
@@ -32,6 +32,13 @@ const props = defineProps<Props>();
 const { t } = useI18n();
 
 const openFile = (src: string) => window.open(src, '_blank')
+const downloadFile = (src: string, name: string) => {
+  const a = document.createElement('a') // creates a temporary html <a> element
+  a.href = src
+  a.download = name
+  a.click()
+}
+
 // constants
 const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
 </script>
@@ -57,6 +64,22 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
           <p class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
             {{ category }}<span v-if="file.year"> • {{ file.year }}</span>
           </p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+              class="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-150"
+              @click.stop="file.image && downloadFile(file.image, file.name)"
+          >
+            <Download :size="15" />
+          </button>
+          <button
+              class="p-2 rounded-md text-muted-foreground hover:text-destructive hover:bg-muted transition-colors duration-150"
+              @click.stop="() => {}"
+          >
+            <Trash2 :size="15" />
+          </button>
         </div>
       </div>
     </div>
