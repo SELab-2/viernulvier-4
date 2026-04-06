@@ -41,12 +41,14 @@ const { t, locale } = useI18n();
 
 // Shared style constants
 const buttonBaseClass =
-  "w-11 h-11 flex items-center justify-center rounded-full p-0 border border-gray-200 dark:border-gray-800 transition-colors";
+  "w-11 h-11 flex items-center justify-center rounded-full p-0 border-2 transition-colors";
 
 type ActionButtonColor = "blue" | "red";
 
-const actionButtonClass = (color: ActionButtonColor) =>
-  `border-${color}-200 dark:border-${color}-800 text-${color}-600 hover:bg-${color}-50 dark:hover:bg-${color}-900`;
+const actionButtonVariants: Record<ActionButtonColor, string> = {
+  blue: "border-blue-200 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900",
+  red: "border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900",
+};
 
 // Icon size constant
 const iconSize = 20;
@@ -90,7 +92,7 @@ const getPricesText = (event: EventWithDetails) => {
       <!-- Edit Button -->
       <button
         type="button"
-        :class="`${buttonBaseClass} ${actionButtonClass('blue')}`"
+        :class="`${buttonBaseClass} ${actionButtonVariants.blue}`"
         :aria-label="t('eventlist.edit')"
         @click="emit('edit', item)"
       >
@@ -100,7 +102,7 @@ const getPricesText = (event: EventWithDetails) => {
       <!-- Delete Button -->
       <button
         type="button"
-        :class="`${buttonBaseClass} ${actionButtonClass('red')}`"
+        :class="`${buttonBaseClass} ${actionButtonVariants.red}`"
         :aria-label="t('eventlist.delete')"
         @click="emit('delete', item)"
       >
