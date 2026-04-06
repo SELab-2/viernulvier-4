@@ -96,13 +96,28 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
         >
           <!-- Thumbnail -->
           <div class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150">
+            <PdfThumbnail
+                v-if="file.image && file.name.toLowerCase().endsWith('.pdf')"
+                :src="file.image"
+            >
+              <template #fallback>
+                <ThumbnailPlaceholder
+                    :id="file.id"
+                    size="fill"
+                    :show-icon="true"
+                    :show-border="false"
+                    :rounded="false"
+                />
+              </template>
+            </PdfThumbnail>
             <img
-                v-if="file.image"
+                v-else-if="file.image"
                 :src="file.image"
                 :alt="file.name"
                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <ThumbnailPlaceholder
+                v-else
                 :id="file.id"
                 size="fill"
                 :show-icon="true"

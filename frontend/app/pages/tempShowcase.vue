@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import testPdf from '@/assets/temp.pdf'
+import testPdf2 from '@/assets/temp2.pdf'
+
 const files1 = [
-  { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
-  { id: 2, name: 'AFFICHE-VIDEODROOM-2025.PDF', year: 2025, image: null },
+  { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: testPdf }, // example PDF
+  { id: 2, name: 'AFFICHE-VIDEODROOM-2025.PDF', year: 2025, image: testPdf2 }, // example PDF
   { id: 3, name: 'AFFICHE-DE-GRAAL-2025.PDF', year: 2024, image: null },
   { id: 4, name: 'AFFICHE-04.JPG', year: 2025, image: null },
   { id: 5, name: 'AFFICHE-05.JPG', year: 2026, image: null },
