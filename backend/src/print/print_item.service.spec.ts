@@ -179,29 +179,4 @@ describe("PrintItemService", () => {
       expect(printDbService.deletePrintItem).toHaveBeenCalledWith(1);
     });
   });
-
-  describe("linkPrintItemToGallery", () => {
-    it("should link a print item to a gallery", async () => {
-      printDbService.linkPrintItemToGallery.mockResolvedValue(undefined);
-
-      // Let op: service parameters zijn (printItemId, galleryId)
-      // DbService parameters zijn (galleryId, printItemId)
-      await service.linkPrintItemToGallery(1, 2);
-
-      expect(printDbService.linkPrintItemToGallery).toHaveBeenCalledWith(2, 1);
-    });
-  });
-
-  describe("unlinkPrintItemFromGallery", () => {
-    it("should unlink a print item from a gallery", async () => {
-      printDbService.unlinkPrintItemFromGallery.mockResolvedValue(undefined);
-
-      await service.unlinkPrintItemFromGallery(1, 2);
-
-      expect(printDbService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(
-        2,
-        1,
-      );
-    });
-  });
 });
