@@ -145,7 +145,7 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
       </div>
     </div>
     <!-- Show more/less button -->
-    <button v-if="hasMore || isExpanded"
+    <button v-if="isOpen && (hasMore || isExpanded)"
             :class="showMoreButton"
             @click="isExpanded = !isExpanded">
       <span v-if="!isExpanded">{{ t('prints.showMore') }} ({{ remaining }} {{ t('prints.remaining') }})</span>
@@ -153,7 +153,7 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
     </button>
     <!-- No files (empty) -->
     <div
-        v-else-if="!files.length"
+        v-else-if="isOpen && !files.length"
         class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"
     >
       {{ t('prints.noFilesCat') }}
