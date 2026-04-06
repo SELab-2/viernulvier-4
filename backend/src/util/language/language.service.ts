@@ -3,6 +3,7 @@ import { Language } from "@repo/common";
 import { AppLogger } from "../logger/logger.service";
 import * as deepl from "deepl-node";
 import { Translator } from "deepl-node";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * This service provides functionality for working with languages in
@@ -13,9 +14,12 @@ export class LanguageService {
   private translator: Translator;
   private apiKey: string;
 
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly configService: ConfigService,
+  ) {
     // change this constructor when changing provider.
-    this.apiKey = process.env.TRANSLATE_API_KEY || "none";
+    this.apiKey = this.configService.get<string>("TRANSLATE_API_KEY", "none");
 
     if (!this.apiKey) {
       throw new Error("env variable TRANSLATE_API_KEY is not defined");
