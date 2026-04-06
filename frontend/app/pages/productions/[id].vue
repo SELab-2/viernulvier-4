@@ -1,4 +1,5 @@
 <script setup lang="ts">
+//TODO: als afbeeldingen erbij zijn -> altijd witte letters nemen. Aparte klasse in css speciaal voor als er bannergradient verwacht wordt
 import { ref, computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
@@ -138,37 +139,54 @@ const { data: stories } = await useAsyncData(
   <main v-if="production" class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100">
 
     <section
-      class="relative h-[450px] lg:h-[550px] w-full flex items-end bg-neutral-900 overflow-hidden"
-      :style="{ background: !image ? bannerGradient : '' }"
+      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden border-b-[4px]"
+      :style="{
+    background: !image ? bannerGradient : 'var(--muted)',
+    borderColor: 'var(--color-muted)'
+  }"
     >
-      <img v-if="image" :src="image" class="absolute inset-0 h-full w-full object-cover opacity-60" />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+      <img
+        v-if="image"
+        :src="image"
+        class="absolute inset-0 h-full w-full object-cover opacity-80 dark:opacity-50"
+      />
 
-      <div class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-16 text-white">
+      <div class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12">
+
         <div class="flex items-center gap-4 mb-8">
-          <button @click="goBack()" class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-[var(--accent)] transition-colors">
+          <button
+            @click="goBack()"
+            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ChevronLeft :size="14" stroke-width="3" />
-            {{ t('general.back')}}
+            {{ t('general.back') }}
           </button>
-          <span v-if="isValid(production.performer_type)" class="bg-white text-black px-2 py-1 text-[10px] font-black uppercase rounded-sm">
-            {{ production.performer_type }}
-          </span>
+
+          <span
+            v-if="isValid(production.performer_type)"
+            class="bg-muted-foreground text-white px-2 py-1 text-[10px] font-black uppercase rounded-sm"
+          >
+        {{ production.performer_type }}
+      </span>
         </div>
 
-        <div class="max-w-4xl">
+        <div class="max-w-4xl text-foreground">
           <h1 class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic">
             {{ production.titel }}
           </h1>
-          <p v-if="isValid(production.artist) && production.artist !== production.titel" class="text-2xl lg:text-3xl font-medium opacity-90">
+          <p
+            v-if="isValid(production.artist) && production.artist !== production.titel"
+            class="text-2xl lg:text-3xl font-medium opacity-80"
+          >
             {{ production.artist }}
           </p>
         </div>
 
         <div v-if="tags?.some(t => isValid(t.tag))" class="flex flex-wrap gap-3 mt-8">
           <template v-for="tag in tags" :key="tag.id">
-            <span v-if="isValid(tag.tag)" class="bg-[var(--accent)] text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]">
-              {{ tag.tag }}
-            </span>
+        <span v-if="isValid(tag.tag)" class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]">
+          {{ tag.tag }}
+        </span>
           </template>
         </div>
       </div>
@@ -179,7 +197,7 @@ const { data: stories } = await useAsyncData(
 
         <div class="max-w-4xl">
           <div v-if="isValid(production.tagline)" class="mb-10">
-            <p class="border-l-4 border-[var(--accent)] pl-6 text-xl lg:text-2xl font-black italic leading-relaxed text-gray-900 dark:text-white">
+            <p class="border-l-4 border-[var(--accent)] pl-6 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white">
               {{ production.tagline }}
             </p>
           </div>
