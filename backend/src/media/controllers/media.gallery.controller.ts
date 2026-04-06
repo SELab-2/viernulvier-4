@@ -216,4 +216,45 @@ export class MediaGalleryController {
   ): Promise<void> {
     await this.mediaGalleryService.unlinkItemFromGallery(galleryId, itemId);
   }
+
+  /**
+   * Responds to a POST to "/media/galleries/:galleryId/prints/:printItemId".
+   * @param printItemId The ID of the print item.
+   * @param galleryId The ID of the media gallery.
+   * @returns Nothing.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Links a print item to a media gallery." })
+  @ApiOkResponse({ description: "Print item linked to gallery successfully." })
+  @Post(":galleryId/prints/:printItemId")
+  async linkToGallery(
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Param("galleryId", ParseIntPipe) galleryId: number,
+  ): Promise<void> {
+    await this.mediaGalleryService.linkPrintItemToGallery(printItemId, galleryId);
+  }
+
+  /**
+   * Responds to a DELETE to "/media/galleries/:galleryId/prints/:printItemId".
+   * @param printItemId The ID of the print item.
+   * @param galleryId The ID of the media gallery.
+   * @returns Nothing.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Unlinks a print item from a media gallery." })
+  @ApiOkResponse({
+    description: "Print item unlinked from gallery successfully.",
+  })
+  @Delete(":galleryId/prints/:printItemId")
+  async unlinkFromGallery(
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Param("galleryId", ParseIntPipe) galleryId: number,
+  ): Promise<void> {
+    await this.mediaGalleryService.unlinkPrintItemFromGallery(
+      printItemId,
+      galleryId,
+    );
+  }
 }

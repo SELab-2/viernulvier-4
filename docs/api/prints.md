@@ -17,11 +17,3 @@
 
 ### [DELETE] `/prints/:printItemId`
 - **Security:** `apiKey` required
-
-### [POST] `/prints/:printItemId/galleries/:galleryId`
-- **Security:** `apiKey` required
-- **Description:** Links an existing print item to an existing media gallery.
-
-### [DELETE] `/prints/:printItemId/galleries/:galleryId`
-- **Security:** `apiKey` required
-- **Description:** Unlinks a print item from a media gallery.

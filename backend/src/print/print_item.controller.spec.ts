@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { PrintItemController } from "./print_item.controller"; // Zorg dat deze import klopt met je bestandsnaam
+import { PrintItemController } from "./print_item.controller";
 import { PrintItemService } from "./print_item.service";
 import { LanguageService } from "../util/language/language.service";
 import { ApiKeyGuard } from "../auth/authGuard";
@@ -200,32 +200,6 @@ describe("PrintItemController", () => {
       await controller.deletePrintItem(1);
 
       expect(printItemService.deletePrintItem).toHaveBeenCalledWith(1);
-    });
-  });
-
-  describe("linkToGallery", () => {
-    it("should link a print item to a gallery", async () => {
-      printItemService.linkPrintItemToGallery.mockResolvedValue(undefined);
-
-      await controller.linkToGallery(1, 2);
-
-      expect(printItemService.linkPrintItemToGallery).toHaveBeenCalledWith(
-        1,
-        2,
-      );
-    });
-  });
-
-  describe("unlinkFromGallery", () => {
-    it("should unlink a print item from a gallery", async () => {
-      printItemService.unlinkPrintItemFromGallery.mockResolvedValue(undefined);
-
-      await controller.unlinkFromGallery(1, 2);
-
-      expect(printItemService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(
-        1,
-        2,
-      );
     });
   });
 });

@@ -24,6 +24,7 @@ export class PrintItemService {
 
   /**
    * Fetches all PrintItem objects from the database.
+   * @param paginationFilter Filters for pagination and ordering.
    * @returns All PrintItems.
    */
   async getPrintItems(
@@ -91,35 +92,5 @@ export class PrintItemService {
    */
   async deletePrintItem(printItemId: number): Promise<void> {
     await this.printItemDbService.deletePrintItem(printItemId);
-  }
-
-  /**
-   * Links a print item to a media gallery.
-   * @param printItemId The ID of the print item.
-   * @param galleryId The ID of the media gallery.
-   */
-  async linkPrintItemToGallery(
-    printItemId: number,
-    galleryId: number,
-  ): Promise<void> {
-    await this.printItemDbService.linkPrintItemToGallery(
-      galleryId,
-      printItemId,
-    );
-  }
-
-  /**
-   * Unlinks a print item from a media gallery.
-   * @param printItemId The ID of the print item.
-   * @param galleryId The ID of the media gallery.
-   */
-  async unlinkPrintItemFromGallery(
-    printItemId: number,
-    galleryId: number,
-  ): Promise<void> {
-    await this.printItemDbService.unlinkPrintItemFromGallery(
-      galleryId,
-      printItemId,
-    );
   }
 }
