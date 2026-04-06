@@ -71,6 +71,8 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
     "text-[11px] font-bold uppercase tracking-widest text-muted-foreground text-center " +
     "hover:border-ring hover:text-foreground " +
     "transition-colors duration-150 cursor-pointer"
+
+const openFile = (src: string) => window.open(src, '_blank') // for opening the PDF in a new browser tab
 </script>
 
 <template>
@@ -116,6 +118,7 @@ const showMoreButton = "mt-4 w-full rounded-lg border border-border bg-card py-3
                 :src="file.image"
                 :alt="file.name"
                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                @click.stop="openFile(file.image!)"
             />
             <ThumbnailPlaceholder
                 v-else

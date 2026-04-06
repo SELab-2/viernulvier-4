@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import testPdf from '@/assets/temp.pdf'
 import testPdf2 from '@/assets/temp2.pdf'
+import testJpg from '@/assets/temp.jpg'
 
 const files1 = [
   { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: testPdf }, // example PDF
@@ -11,7 +12,7 @@ const files1 = [
 ]
 
 const files2 = [
-  { id: 4, name: 'BROCHURE-01.JPG', year: 2025, image: null },
+  { id: 4, name: 'BROCHURE-01.JPG', year: 2025, image: testJpg }, // example image
   { id: 5, name: 'BROCHURE-02.JPG', year: 2026, image: null },
   { id: 6, name: 'BROCHURE-03.JPG', year: 2025, image: null },
   { id: 7, name: 'BROCHURE-04.JPG', year: 2027, image: null },
@@ -28,7 +29,6 @@ const files3: never[] = [] // no files
 </script>
 
 <template>
-  <h1>Gridview showcase:</h1>
   <div class="p-8">
     <PrintsFileGrid category="Affiche" :files="files1" />
   </div>
