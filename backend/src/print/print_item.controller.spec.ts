@@ -103,9 +103,14 @@ describe("PrintItemController", () => {
         expectedFlattened as any,
       );
 
-      const result = await controller.getPrintItems(paginationFilter, langQuery);
+      const result = await controller.getPrintItems(
+        paginationFilter,
+        langQuery,
+      );
 
-      expect(printItemService.getPrintItems).toHaveBeenCalledWith(paginationFilter);
+      expect(printItemService.getPrintItems).toHaveBeenCalledWith(
+        paginationFilter,
+      );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         paginatedItems,
         "en",
@@ -119,7 +124,9 @@ describe("PrintItemController", () => {
       const langQuery: LanguageQueryDto = { lang: "en" };
 
       printItemService.getPrintItemById.mockResolvedValue(mockPrintItem);
-      languageService.flattenByLanguage.mockReturnValue(mockPrintItemView as any);
+      languageService.flattenByLanguage.mockReturnValue(
+        mockPrintItemView as any,
+      );
 
       const result = await controller.getPrintItemById(1, langQuery);
 
@@ -143,7 +150,9 @@ describe("PrintItemController", () => {
 
       const result = await controller.createPrintItem(createItemDto);
 
-      expect(printItemService.createPrintItem).toHaveBeenCalledWith(createItemDto);
+      expect(printItemService.createPrintItem).toHaveBeenCalledWith(
+        createItemDto,
+      );
       expect(result).toEqual(mockPrintItem);
     });
   });
@@ -169,7 +178,9 @@ describe("PrintItemController", () => {
 
   describe("modifyPrintItem", () => {
     it("should modify and return the print item", async () => {
-      const modifyItemDto: ModifyPrintItemDto = { url: "https://example.com/new.pdf" };
+      const modifyItemDto: ModifyPrintItemDto = {
+        url: "https://example.com/new.pdf",
+      };
       printItemService.modifyPrintItem.mockResolvedValue(mockPrintItem);
 
       const result = await controller.modifyPrintItem(1, modifyItemDto);
@@ -198,7 +209,10 @@ describe("PrintItemController", () => {
 
       await controller.linkToGallery(1, 2);
 
-      expect(printItemService.linkPrintItemToGallery).toHaveBeenCalledWith(1, 2);
+      expect(printItemService.linkPrintItemToGallery).toHaveBeenCalledWith(
+        1,
+        2,
+      );
     });
   });
 
@@ -208,7 +222,10 @@ describe("PrintItemController", () => {
 
       await controller.unlinkFromGallery(1, 2);
 
-      expect(printItemService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(1, 2);
+      expect(printItemService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(
+        1,
+        2,
+      );
     });
   });
 });

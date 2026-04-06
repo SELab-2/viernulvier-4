@@ -37,10 +37,12 @@ export class PrintItemService {
    * @param createPrintItem The needed values to create a new PrintItem object.
    * @returns The newly created PrintItem object.
    */
-  async createPrintItem(createPrintItem: CreatePrintItemDto): Promise<PrintItemDto> {
+  async createPrintItem(
+    createPrintItem: CreatePrintItemDto,
+  ): Promise<PrintItemDto> {
     return await this.printItemDbService.createPrintItem(
-        createPrintItem,
-        createPrintItem.gallery_ids || [],
+      createPrintItem,
+      createPrintItem.gallery_ids || [],
     );
   }
 
@@ -54,7 +56,10 @@ export class PrintItemService {
     printItemId: number,
     replacePrintItem: ReplacePrintItemDto,
   ): Promise<PrintItemDto> {
-    return await this.printItemDbService.updatePrintItem(printItemId, replacePrintItem);
+    return await this.printItemDbService.updatePrintItem(
+      printItemId,
+      replacePrintItem,
+    );
   }
 
   /**
@@ -74,7 +79,10 @@ export class PrintItemService {
       ...modifyPrintItem,
       id: printItemId,
     };
-    return await this.printItemDbService.updatePrintItem(printItemId, mergedPrintItem);
+    return await this.printItemDbService.updatePrintItem(
+      printItemId,
+      mergedPrintItem,
+    );
   }
 
   /**
@@ -90,8 +98,14 @@ export class PrintItemService {
    * @param printItemId The ID of the print item.
    * @param galleryId The ID of the media gallery.
    */
-  async linkPrintItemToGallery(printItemId: number, galleryId: number): Promise<void> {
-    await this.printItemDbService.linkPrintItemToGallery(galleryId, printItemId);
+  async linkPrintItemToGallery(
+    printItemId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.printItemDbService.linkPrintItemToGallery(
+      galleryId,
+      printItemId,
+    );
   }
 
   /**
@@ -99,7 +113,13 @@ export class PrintItemService {
    * @param printItemId The ID of the print item.
    * @param galleryId The ID of the media gallery.
    */
-  async unlinkPrintItemFromGallery(printItemId: number, galleryId: number): Promise<void> {
-    await this.printItemDbService.unlinkPrintItemFromGallery(galleryId, printItemId);
+  async unlinkPrintItemFromGallery(
+    printItemId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.printItemDbService.unlinkPrintItemFromGallery(
+      galleryId,
+      printItemId,
+    );
   }
 }

@@ -67,10 +67,10 @@ export class PrintItemDatabaseService {
     ]);
 
     return {
-        page: paginationFilters.page,
-        limit: paginationFilters.limit,
-        totalItems: parseInt(countResult[0].count),
-        objects,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects,
     };
   }
 
@@ -85,7 +85,7 @@ export class PrintItemDatabaseService {
     galleryIds: number[],
   ): Promise<PrintItemDto> {
     if (!item.url) {
-        throw new BadRequestException("Missing required fields (url)");
+      throw new BadRequestException("Missing required fields (url)");
     }
     const insertQuery = `
         INSERT INTO print_items (titel, description, url)
@@ -98,15 +98,15 @@ export class PrintItemDatabaseService {
       item.url,
     ]);
     if (result.length === 0) {
-        throw new Error("Failed to create PrintItem");
+      throw new Error("Failed to create PrintItem");
     }
     if (galleryIds && galleryIds.length > 0) {
-        for (const galleryId of galleryIds) {
-            await this.db.query(
-                `INSERT INTO print_item_media_gallery (print_item_id, media_gallery_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-                [result[0].id, galleryId]
-            );
-        }
+      for (const galleryId of galleryIds) {
+        await this.db.query(
+          `INSERT INTO print_item_media_gallery (print_item_id, media_gallery_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [result[0].id, galleryId],
+        );
+      }
     }
     return result[0];
   }
@@ -120,66 +120,71 @@ export class PrintItemDatabaseService {
   async updatePrintItem(
     itemId: number,
     item: ModifyPrintItemDto | ReplacePrintItemDto,
-    ): Promise<PrintItemDto> {
-        const fields: string[] = [];
-        const values: any[] = [];
-        let index = 1;
+  ): Promise<PrintItemDto> {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let index = 1;
 
-        if (item.titel !== undefined) {
-            fields.push(`titel = $${index++}`);
-            values.push(item.titel);
-        }
-        if (item.description !== undefined) {
-            fields.push(`description = $${index++}`);
-            values.push(item.description);
-        }
-        if (item.url !== undefined) {
-            fields.push(`url = $${index++}`);
-            values.push(item.url);
-        }
+    if (item.titel !== undefined) {
+      fields.push(`titel = $${index++}`);
+      values.push(item.titel);
+    }
+    if (item.description !== undefined) {
+      fields.push(`description = $${index++}`);
+      values.push(item.description);
+    }
+    if (item.url !== undefined) {
+      fields.push(`url = $${index++}`);
+      values.push(item.url);
+    }
 
-        if (fields.length === 0) {
-            throw new BadRequestException("No fields provided for update");
-        }
+    if (fields.length === 0) {
+      throw new BadRequestException("No fields provided for update");
+    }
 
-        values.push(itemId);
+    values.push(itemId);
 
-        const query = `
+    const query = `
             UPDATE print_items
             SET ${fields.join(", ")}
             WHERE id = $${index}
             RETURNING id, titel, description, url, created_at, updated_at;
         `;
 
-        const result = await this.db.query<PrintItemDto>(query, values);
+    const result = await this.db.query<PrintItemDto>(query, values);
 
-        if (result.length === 0) {
-            throw new ResourceGoneException(
-                `Failed to update print item with ID ${itemId}.`,
-            );
-        }
-        return result[0];
+    if (result.length === 0) {
+      throw new ResourceGoneException(
+        `Failed to update print item with ID ${itemId}.`,
+      );
     }
+    return result[0];
+  }
 
-    /**
-     * Delete a print item by ID. Silently does nothing if the ID doesn't exist.
-     * @param id The item to delete.
-     */
-    async deletePrintItem(id: number): Promise<void> {
-        const query = `DELETE FROM print_items WHERE id = $1 RETURNING id`;
-        const result = await this.db.query(query, [id]);
-        if (result.length == 0) {
-            throw new ResourceGoneException(`Cannot delete: Print Item ${id} not found.`);
-        }
+  /**
+   * Delete a print item by ID. Silently does nothing if the ID doesn't exist.
+   * @param id The item to delete.
+   */
+  async deletePrintItem(id: number): Promise<void> {
+    const query = `DELETE FROM print_items WHERE id = $1 RETURNING id`;
+    const result = await this.db.query(query, [id]);
+    if (result.length == 0) {
+      throw new ResourceGoneException(
+        `Cannot delete: Print Item ${id} not found.`,
+      );
     }
+  }
 
-    /**
+  /**
    * Link an existing print item to an existing gallery.
    * Silently does nothing if the link already exists (ON CONFLICT DO NOTHING).
    * @param galleryId The gallery to link to.
    * @param printItemId The print item to link.
    */
-  async linkPrintItemToGallery(galleryId: number, printItemId: number): Promise<void> {
+  async linkPrintItemToGallery(
+    galleryId: number,
+    printItemId: number,
+  ): Promise<void> {
     const query = `
       INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id) 
       VALUES ($1, $2) 

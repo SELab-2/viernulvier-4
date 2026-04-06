@@ -117,7 +117,10 @@ describe("PrintItemService", () => {
 
       const result = await service.createPrintItem(createItemDto);
 
-      expect(printDbService.createPrintItem).toHaveBeenCalledWith(createItemDto, []);
+      expect(printDbService.createPrintItem).toHaveBeenCalledWith(
+        createItemDto,
+        [],
+      );
       expect(result).toEqual(mockPrintItem);
     });
   });
@@ -133,14 +136,19 @@ describe("PrintItemService", () => {
 
       const result = await service.replacePrintItem(1, replaceItemDto);
 
-      expect(printDbService.updatePrintItem).toHaveBeenCalledWith(1, replaceItemDto);
+      expect(printDbService.updatePrintItem).toHaveBeenCalledWith(
+        1,
+        replaceItemDto,
+      );
       expect(result).toEqual(mockPrintItem);
     });
   });
 
   describe("modifyPrintItem", () => {
     it("should fetch the existing item, merge modifications, and update", async () => {
-      const modifyItemDto: ModifyPrintItemDto = { url: "https://example.com/modified.pdf" };
+      const modifyItemDto: ModifyPrintItemDto = {
+        url: "https://example.com/modified.pdf",
+      };
 
       const expectedMergedItem: PrintItemDto = {
         ...mockPrintItem,
@@ -176,7 +184,7 @@ describe("PrintItemService", () => {
     it("should link a print item to a gallery", async () => {
       printDbService.linkPrintItemToGallery.mockResolvedValue(undefined);
 
-      // Let op: service parameters zijn (printItemId, galleryId) 
+      // Let op: service parameters zijn (printItemId, galleryId)
       // DbService parameters zijn (galleryId, printItemId)
       await service.linkPrintItemToGallery(1, 2);
 
@@ -190,7 +198,10 @@ describe("PrintItemService", () => {
 
       await service.unlinkPrintItemFromGallery(1, 2);
 
-      expect(printDbService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(2, 1);
+      expect(printDbService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(
+        2,
+        1,
+      );
     });
   });
 });

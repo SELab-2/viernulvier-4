@@ -12,14 +12,14 @@ import {
   UseGuards,
   UsePipes,
 } from "@nestjs/common";
-import { PrintItemService } from './print_item.service';
+import { PrintItemService } from "./print_item.service";
 import {
-    CreatePrintItemSchema,
-    LanguageQuerySchema,
-    PaginatedResponse,
-    ModifyPrintItemSchema,
-    PaginationFilterSchema,
-    ReplacePrintItemSchema,
+  CreatePrintItemSchema,
+  LanguageQuerySchema,
+  PaginatedResponse,
+  ModifyPrintItemSchema,
+  PaginationFilterSchema,
+  ReplacePrintItemSchema,
 } from "@repo/common";
 import {
   PrintItemDto,
@@ -29,7 +29,7 @@ import {
   ReplacePrintItemDto,
   PaginationFilterDto,
   PrintItemViewDto,
-} from '../dto/dto';
+} from "../dto/dto";
 import { LanguageService } from "../util/language/language.service";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
@@ -70,9 +70,9 @@ export class PrintItemController {
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-): Promise<PaginatedResponse<PrintItemDto | PrintItemViewDto>> {
+  ): Promise<PaginatedResponse<PrintItemDto | PrintItemViewDto>> {
     return this.ls.flattenByLanguage<
-        PaginatedResponse<PrintItemDto | PrintItemViewDto>
+      PaginatedResponse<PrintItemDto | PrintItemViewDto>
     >(await this.printItemService.getPrintItems(paginationFilter), lang.lang);
   }
 
@@ -82,16 +82,16 @@ export class PrintItemController {
    * @param lang The Language Query.
    * @returns The specific print item if it exists.
    */
-  @ApiOperation({ summary: "Fetches a specific print item."})
+  @ApiOperation({ summary: "Fetches a specific print item." })
   @ApiOkAnyOf(PrintItemDto, PrintItemViewDto)
-  @Get(':printItemId')
+  @Get(":printItemId")
   async getPrintItemById(
-    @Param('printItemId', ParseIntPipe) printItemId: number,
+    @Param("printItemId", ParseIntPipe) printItemId: number,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-): Promise<PrintItemDto | PrintItemViewDto>    {
+  ): Promise<PrintItemDto | PrintItemViewDto> {
     return this.ls.flattenByLanguage<PrintItemDto | PrintItemViewDto>(
-        await this.printItemService.getPrintItemById(printItemId),
-        lang.lang,
+      await this.printItemService.getPrintItemById(printItemId),
+      lang.lang,
     );
   }
 
@@ -104,10 +104,15 @@ export class PrintItemController {
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Creates a new print item object." })
   @ApiBody({ type: CreatePrintItemDto })
-  @ApiCreatedResponse({ type: PrintItemDto, description: "Created print item." })
+  @ApiCreatedResponse({
+    type: PrintItemDto,
+    description: "Created print item.",
+  })
   @UsePipes(new ZodValidationPipe(CreatePrintItemSchema))
   @Post()
-  async createPrintItem(@Body() createPrintItem: CreatePrintItemDto): Promise<PrintItemDto> {
+  async createPrintItem(
+    @Body() createPrintItem: CreatePrintItemDto,
+  ): Promise<PrintItemDto> {
     return await this.printItemService.createPrintItem(createPrintItem);
   }
 
@@ -122,13 +127,16 @@ export class PrintItemController {
   @ApiOperation({ summary: "Replaces an existing print item object." })
   @ApiBody({ type: ReplacePrintItemDto })
   @ApiOkResponse({ type: PrintItemDto, description: "Replaced print item." })
-  @Put(':printItemId')
+  @Put(":printItemId")
   async replacePrintItem(
-    @Param('printItemId', ParseIntPipe) printItemId: number,
+    @Param("printItemId", ParseIntPipe) printItemId: number,
     @Body(new ZodValidationPipe(ReplacePrintItemSchema))
     replacePrintItem: ReplacePrintItemDto,
   ): Promise<PrintItemDto> {
-    return this.printItemService.replacePrintItem(printItemId, replacePrintItem);
+    return this.printItemService.replacePrintItem(
+      printItemId,
+      replacePrintItem,
+    );
   }
 
   /**
@@ -142,10 +150,11 @@ export class PrintItemController {
   @ApiOperation({ summary: "Updates an existing print item object." })
   @ApiBody({ type: ModifyPrintItemDto })
   @ApiOkResponse({ type: PrintItemDto, description: "Updated print item." })
-  @Patch(':printItemId')
+  @Patch(":printItemId")
   async modifyPrintItem(
-    @Param('printItemId', ParseIntPipe) printItemId: number,
-    @Body(new ZodValidationPipe(ModifyPrintItemSchema)) modifyPrintItem: ModifyPrintItemDto,
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Body(new ZodValidationPipe(ModifyPrintItemSchema))
+    modifyPrintItem: ModifyPrintItemDto,
   ): Promise<PrintItemDto> {
     return this.printItemService.modifyPrintItem(printItemId, modifyPrintItem);
   }
@@ -159,9 +168,9 @@ export class PrintItemController {
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Deletes an existing print item object." })
   @ApiOkResponse({ description: "print item deleted successfully." })
-  @Delete(':printItemId')
+  @Delete(":printItemId")
   async deletePrintItem(
-    @Param('printItemId', ParseIntPipe) printItemId: number,
+    @Param("printItemId", ParseIntPipe) printItemId: number,
   ): Promise<void> {
     await this.printItemService.deletePrintItem(printItemId);
   }
@@ -176,10 +185,10 @@ export class PrintItemController {
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Links a print item to a media gallery." })
   @ApiOkResponse({ description: "Print item linked to gallery successfully." })
-  @Post(':printItemId/galleries/:galleryId')
+  @Post(":printItemId/galleries/:galleryId")
   async linkToGallery(
-    @Param('printItemId', ParseIntPipe) printItemId: number,
-    @Param('galleryId', ParseIntPipe) galleryId: number,
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Param("galleryId", ParseIntPipe) galleryId: number,
   ): Promise<void> {
     await this.printItemService.linkPrintItemToGallery(printItemId, galleryId);
   }
@@ -193,12 +202,17 @@ export class PrintItemController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Unlinks a print item from a media gallery." })
-  @ApiOkResponse({ description: "Print item unlinked from gallery successfully." })
-  @Delete(':printItemId/galleries/:galleryId')
+  @ApiOkResponse({
+    description: "Print item unlinked from gallery successfully.",
+  })
+  @Delete(":printItemId/galleries/:galleryId")
   async unlinkFromGallery(
-    @Param('printItemId', ParseIntPipe) printItemId: number,
-    @Param('galleryId', ParseIntPipe) galleryId: number,
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Param("galleryId", ParseIntPipe) galleryId: number,
   ): Promise<void> {
-    await this.printItemService.unlinkPrintItemFromGallery(printItemId, galleryId);
+    await this.printItemService.unlinkPrintItemFromGallery(
+      printItemId,
+      galleryId,
+    );
   }
 }
