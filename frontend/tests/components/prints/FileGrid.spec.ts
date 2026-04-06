@@ -12,7 +12,6 @@ const i18n = createI18n({
                 noFilesCat: "Deze categorie bevat geen bestanden.",
                 noFiles: "Geen bestanden beschikbaar.",
                 showMore: "Meer tonen",
-                showLess: "Minder tonen",
                 remaining: "resterend"
             }
         },
@@ -22,7 +21,6 @@ const i18n = createI18n({
                 noFilesCat: "This category doesn't contain any files.",
                 noFiles: "No files available.",
                 showMore: "Show more",
-                showLess: "Show less",
                 remaining: "remaining"
             }
         },
@@ -99,6 +97,30 @@ describe("PrintsFileGrid", () => {
         expect(w.text()).not.toContain("Meer tonen");
     });
 
+    it("shows more files when show-more button is clicked", async () => {
+        expect(wrapper.text()).not.toContain("AFFICHE-9.PDF");
+        const buttons = wrapper.findAll("button");
+        const showMoreButton = buttons.find(b => b.text().includes("Meer tonen"));
+        await showMoreButton?.trigger("click");
+        expect(wrapper.text()).toContain("AFFICHE-9.PDF");
+    });
+
+    it("hides show-more button and resets when section is toggled off and on", async () => {
+        // expanding first
+        const buttons = wrapper.findAll("button");
+        const showMoreButton = buttons.find(b => b.text().includes("Meer tonen"));
+        await showMoreButton?.trigger("click");
+        expect(wrapper.text()).toContain("AFFICHE-9.PDF");
+
+        // toggling off
+        await wrapper.find("button").trigger("click");
+        expect(wrapper.text()).not.toContain("AFFICHE-9.PDF");
+
+        // toggling back on — should be reset to 2 rows again
+        await wrapper.find("button").trigger("click");
+        expect(wrapper.text()).not.toContain("AFFICHE-9.PDF");
+        expect(wrapper.text()).toContain("Meer tonen");
+    });
 
     it("toggles section visibility when header is clicked", async () => {
         expect(wrapper.text()).toContain("AFFICHE-1.PDF");
