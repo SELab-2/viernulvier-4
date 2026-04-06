@@ -1,5 +1,6 @@
 import {
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -13,6 +14,7 @@ import { ProductionService } from "../production.service";
 import {
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
@@ -35,10 +37,20 @@ export class ProductionMediaController {
    */
   @ApiOperation({ summary: "Fetch media gallery connected to production." })
   @ApiOkResponse({ type: MediaGalleryDto, description: "Gallery found." })
+  @ApiQuery({
+    name: "type",
+    enum: GalleryTypeEnum.enum,
+    description: "The type of media wanted.",
+  })
   @Get()
   async getMedia(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Query("type", new ParseEnumPipe(GalleryTypeEnum)) type: GalleryType,
+    @Query(
+      "type",
+      new DefaultValuePipe("default"),
+      new ParseEnumPipe(GalleryTypeEnum.enum),
+    )
+    type: GalleryType,
   ): Promise<MediaGalleryDto> {
     return await this.productionService.getProductionMedia(productionId, type);
   }

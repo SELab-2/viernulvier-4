@@ -1,8 +1,11 @@
 import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { ScraperRunner } from "./main";
-import { CsvInjectionService } from "./csv-injection.service";
+import { MediaStorageService } from "../../media/media_storage/service/media_storage.service";
+import { ScraperRunner } from "./scraper.runner";
+import { CsvInjectionService } from "./csv/csv-injection.service";
+import path from "node:path";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -13,13 +16,22 @@ export class ScraperService implements OnApplicationBootstrap {
     private readonly logger: AppLogger,
     private readonly runner: ScraperRunner,
     private readonly csvInjectionService: CsvInjectionService,
+    private readonly mediaStorage: MediaStorageService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
    * Checks whether the Scraper is currently enabled.
    */
   private get isScraperEnabled(): boolean {
-    return process.env.ENABLE_SCRAPER === "true";
+    return this.configService.get<string>("ENABLE_SCRAPER", "false") === "true";
+  }
+
+  /**
+   * Checks whether the Scraper should download unprocessed media.
+   */
+  private get doDownloadMedia(): boolean {
+    return this.configService.get<string>("DOWNLOAD_MEDIA", "false") === "true";
   }
 
   /**
@@ -59,10 +71,10 @@ export class ScraperService implements OnApplicationBootstrap {
           "ScraperService",
         );
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         this.logger.error(
-          "Initial scrape failed",
-          (err as Error).stack,
+          `Initial scrape failed ${err.message}`,
+          err.stack,
           "ScraperService",
         );
       });
@@ -96,5 +108,101 @@ export class ScraperService implements OnApplicationBootstrap {
           "ScraperService",
         );
       });
+  }
+
+  /**
+   * Image Scraping Job
+   */
+
+  private isProcessingMedia = false;
+  private readonly downloadAmount = 50;
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async processImages() {
+    if (this.isProcessingMedia || !this.doDownloadMedia) return;
+
+    // Start processing.
+    this.isProcessingMedia = true;
+    this.logger.log(
+      `[PROCESSING] Attempting to process Batch of ${this.downloadAmount} Images...`,
+    );
+
+    try {
+      const { batch, totalLeft } = await this.runner.getPendingCrops(
+        this.downloadAmount,
+      );
+      if (batch.length === 0) return;
+      const mediaBase = this.configService.get<string>("MEDIA_BASE_URL");
+      if (!mediaBase)
+        throw Error("Forgot to set MEDIA_BASE_URL .env variable?");
+
+      // Process all 50 images in parallel
+      const results = await Promise.allSettled(
+        batch.map(async (crop) => {
+          const imageData = await this.getImageBuffer(crop.url);
+
+          // Filename logic.
+          // We name the file based on the crop's ID and NAME.
+          // NOTE: No hashing because it would cause strays.
+          const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
+          const newFileName = `${crop.id}-${crop.name}${ext}`;
+          const finalUrl = `${mediaBase}/photos/${newFileName}`;
+
+          // Save & Update
+          const savedUrl = await this.mediaStorage.saveMedia(
+            finalUrl,
+            imageData,
+          );
+          await this.runner.updatePendingCrop(crop.id, savedUrl);
+
+          return crop.id;
+        }),
+      );
+
+      const successCount = results.filter(
+        (r) => r.status === "fulfilled",
+      ).length;
+      const failCount = results.length - successCount;
+      const failedItems = results.filter((r) => r.status === "rejected");
+      if (failCount > 0) {
+        failedItems.forEach((failure, index) => {
+          const failedCrop = batch[index];
+
+          this.logger.error(
+            `[IMAGE FAILURE]: Crop ${failedCrop.id} failed. ` +
+              `URL: "${failedCrop.url}" | Reason: ${failure.reason}`,
+          );
+        });
+      }
+
+      this.logger.log(
+        `[BATCH FINISHED] Success: ${successCount}, Failed: ${failCount}. Approx ${totalLeft} left.`,
+      );
+    } catch (globalError) {
+      this.logger.error(
+        "Global Batch Failure:",
+        (globalError as Error).message,
+      );
+    } finally {
+      this.isProcessingMedia = false;
+    }
+  }
+
+  /**
+   * Helper that will fetch an image from an URL an put it into
+   * A Buffer object.
+   * @param url The URL to the image.
+   * @returns The Buffer.
+   */
+  private async getImageBuffer(url: string): Promise<Buffer> {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch images: ${response.statusText}`);
+    }
+
+    // Return the buffer for the image.
+    const arrayBuffer = await response.arrayBuffer();
+    return Buffer.from(arrayBuffer);
   }
 }
