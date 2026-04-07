@@ -24,16 +24,16 @@
 /* ABCMonumentGrotesk — the official VIERNULVIER brand font.
    Font files live in /public/fonts/ */
 @font-face {
-  font-family: 'ABCMonumentGrotesk';
-  src: url('/fonts/ABCMonumentGrotesk-Heavy.otf') format('opentype');
+  font-family: "ABCMonumentGrotesk";
+  src: url("/fonts/ABCMonumentGrotesk-Heavy.otf") format("opentype");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'ABCMonumentGrotesk';
-  src: url('/fonts/ABCMonumentGrotesk-Regular.otf') format('opentype');
+  font-family: "ABCMonumentGrotesk";
+  src: url("/fonts/ABCMonumentGrotesk-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -81,16 +81,33 @@
   --thumbnail-bg: #ffffff;
   --thumbnail-icon: #ffffff;
 
-   /* Blog timeline — purple accent */
-  --blog-purple-strong:  #534AB7;
-  --blog-purple-mid:     #7F77DD;
-  --blog-purple-soft:    #AFA9EC;
-  --blog-purple-pale:    #CECBF6;
-  --blog-purple-ghost:   #EEEDFE;
-  --blog-year-rule:      #7F77DD;
-  --blog-month-dot:      #AFA9EC;
-  --blog-accent:         #534AB7;
-  --blog-accent-text:    #3C3489;
+  /* Blog timeline — purple accent */
+  --blog-purple-strong: #534ab7;
+  --blog-purple-mid: #7f77dd;
+  --blog-purple-soft: #afa9ec;
+  --blog-purple-pale: #cecbf6;
+  --blog-purple-ghost: #eeedfe;
+  --blog-year-rule: #7f77dd;
+  --blog-month-dot: #afa9ec;
+  --blog-accent: #534ab7;
+  --blog-accent-text: #3c3489;
+
+  /* Admin action buttons */
+  --action-blue-border: #bfdbfe;
+  --action-blue-icon: #2563eb;
+  --action-blue-hover: #eff6ff;
+
+  --action-red-border: #fecaca;
+  --action-red-icon: #dc2626;
+  --action-red-hover: #fef2f2;
+
+  --action-green-border: #bbf7d0;
+  --action-green-icon: #16a34a;
+  --action-green-hover: #f0fdf4;
+
+  --action-gray-border: #d1d5db;
+  --action-gray-icon: #4b5563;
+  --action-gray-hover: #f9fafb;
 }
 
 /* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
@@ -132,16 +149,33 @@
   --thumbnail-bg: #1f2937;
   --thumbnail-icon: #6b7280;
 
-   /* Blog timeline — purple accent, lighter for dark bg */
-  --blog-purple-strong:  #7F77DD;
-  --blog-purple-mid:     #AFA9EC;
-  --blog-purple-soft:    #534AB7;
-  --blog-purple-pale:    #3C3489;
-  --blog-purple-ghost:   #26215C;
-  --blog-year-rule:      #AFA9EC;
-  --blog-month-dot:      #7F77DD;
-  --blog-accent:         #AFA9EC;
-  --blog-accent-text:    #CECBF6;
+  /* Blog timeline — purple accent, lighter for dark bg */
+  --blog-purple-strong: #7f77dd;
+  --blog-purple-mid: #afa9ec;
+  --blog-purple-soft: #534ab7;
+  --blog-purple-pale: #3c3489;
+  --blog-purple-ghost: #26215c;
+  --blog-year-rule: #afa9ec;
+  --blog-month-dot: #7f77dd;
+  --blog-accent: #afa9ec;
+  --blog-accent-text: #cecbf6;
+
+  /* Admin action buttons */
+  --action-blue-border: #1d4ed8;
+  --action-blue-icon: #93c5fd;
+  --action-blue-hover: #1e3a8a;
+
+  --action-red-border: #b91c1c;
+  --action-red-icon: #fca5a5;
+  --action-red-hover: #7f1d1d;
+
+  --action-green-border: #15803d;
+  --action-green-icon: #86efac;
+  --action-green-hover: #14532d;
+
+  --action-gray-border: #4b5563;
+  --action-gray-icon: #d1d5db;
+  --action-gray-hover: #1f2937;
 }
 
 /* ── Tailwind theme mapping ──────────────────────────────────────── */
@@ -161,23 +195,41 @@
   --color-accent: var(--accent);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
+  --color-action-blue-border: var(--action-blue-border);
+  --color-action-blue-icon: var(--action-blue-icon);
+  --color-action-blue-hover: var(--action-blue-hover);
+  --color-action-red-border: var(--action-red-border);
+  --color-action-red-icon: var(--action-red-icon);
+  --color-action-red-hover: var(--action-red-hover);
+  --color-action-green-border: var(--action-green-border);
+  --color-action-green-icon: var(--action-green-icon);
+  --color-action-green-hover: var(--action-green-hover);
+  --color-action-gray-border: var(--action-gray-border);
+  --color-action-gray-icon: var(--action-gray-icon);
+  --color-action-gray-hover: var(--action-gray-hover);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-brand: 'ABCMonumentGrotesk', sans-serif;
+  --font-brand: "ABCMonumentGrotesk", sans-serif;
 }
 
 /* ── Base ────────────────────────────────────────────────────────── */
 @layer base {
-  * { @apply border-border outline-ring/50; }
-  body { @apply bg-background text-foreground; }
-  html { font-size: var(--font-size); }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    font-size: var(--font-size);
+  }
 }
 
 /* ── Utilities ───────────────────────────────────────────────────── */
 .font-brand {
-  font-family: 'ABCMonumentGrotesk', sans-serif;
+  font-family: "ABCMonumentGrotesk", sans-serif;
 }
 
 .dropcap::first-letter {
@@ -220,13 +272,17 @@
   height: 2rem;
   border-radius: 9999px;
   flex-shrink: 0;
-  background: linear-gradient(to bottom, var(--blog-purple-strong), var(--blog-purple-soft));
+  background: linear-gradient(
+    to bottom,
+    var(--blog-purple-strong),
+    var(--blog-purple-soft)
+  );
 }
 
 .blog-year-label {
   font-size: 2.25rem;
   font-weight: 900;
-  font-family: var(--font-brand, 'ABCMonumentGrotesk', sans-serif);
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
   font-style: italic;
   text-transform: uppercase;
   letter-spacing: -0.04em;
@@ -238,7 +294,9 @@
   padding: 0;
   transition: opacity 0.15s;
 }
-.blog-year-label:hover { opacity: 0.65; }
+.blog-year-label:hover {
+  opacity: 0.65;
+}
 
 .blog-year-badge {
   flex-shrink: 0;
@@ -315,8 +373,12 @@
   outline: none;
   transition: background-color 0.1s;
 }
-.blog-story-btn:last-child { border-bottom: none; }
-.blog-story-btn:hover { background-color: var(--card-hover); }
+.blog-story-btn:last-child {
+  border-bottom: none;
+}
+.blog-story-btn:hover {
+  background-color: var(--card-hover);
+}
 .blog-story-btn:focus-visible {
   box-shadow: inset 0 0 0 2px var(--blog-purple-strong);
 }
@@ -361,8 +423,12 @@
 
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .blog-year-label { font-size: 1.75rem; }
-  .blog-month-label { font-size: 8px; }
+  .blog-year-label {
+    font-size: 1.75rem;
+  }
+  .blog-month-label {
+    font-size: 8px;
+  }
 }
 
 /* ─── Shared Components ─────────────────────────────────────────────────────

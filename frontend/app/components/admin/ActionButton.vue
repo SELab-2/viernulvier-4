@@ -28,11 +28,11 @@ const buttonBaseClass =
   "p-0 flex items-center justify-center rounded-md border-2 transition-colors duration-150";
 
 const variantClasses: Record<ActionButtonVariant, string> = {
-  blue: "border-blue-200 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900",
-  red: "border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900",
+  blue: "border-action-blue-border text-action-blue-icon hover:bg-action-blue-hover",
+  red: "border-action-red-border text-action-red-icon hover:bg-action-red-hover",
   green:
-    "border-green-200 text-green-600 hover:bg-green-50 dark:hover:bg-green-900",
-  gray: "border-gray-300 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800",
+    "border-action-green-border text-action-green-icon hover:bg-action-green-hover",
+  gray: "border-action-gray-border text-action-gray-icon hover:bg-action-gray-hover",
   // add more variants as needed
 };
 
