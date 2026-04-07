@@ -132,12 +132,12 @@ describe("MediaGalleryService", () => {
     });
   });
 
-  describe("getGalleryItems", () => {
+describe("getGalleryItems", () => {
     it("should return all items for a gallery", async () => {
+      mediaDbService.getGalleryById.mockResolvedValue(mockGallery);
       mediaDbService.getItemsByGallery.mockResolvedValue([mockItem]);
-
       const result = await service.getGalleryItems(1);
-
+      expect(mediaDbService.getGalleryById).toHaveBeenCalledWith(1);
       expect(mediaDbService.getItemsByGallery).toHaveBeenCalledWith(1);
       expect(result).toEqual([mockItem]);
     });
