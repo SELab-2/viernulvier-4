@@ -9,7 +9,7 @@ import { useBlogApi } from "../../composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n()
 const router = useRouter()
-const { getById, getTags} = useProductionApi()
+const { getById, getTags, getBlogs} = useProductionApi()
 const route = useRoute()
 
 const goBack = () => {
@@ -83,20 +83,15 @@ const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`
   default: () => []
 })
 
-const { getAll: getAllBlogs } = useBlogApi()
-
-/** 5. Blogs (Stories) ophalen gekoppeld aan deze productie */
+/** 5. Blogs (Stories) ophalen */
 const { data: stories } = await useAsyncData(
   `prod-stories-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return []
+    const res = await getBlogs(productionId.value, locale.value as any)
 
-    const res = await getAllBlogs({
-      languageFilters: { lang: locale.value as any },
-      blogFilters: { production_id: productionId.value } as any
-    })
-
-    return (res as any)?.data?.objects ?? (res as any)?.objects ?? []
+    const data = (res as any)?.data ?? res
+    return Array.isArray(data) ? data : []
   },
   { watch: [productionId, locale], default: () => [] }
 )
