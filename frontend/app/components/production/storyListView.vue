@@ -26,11 +26,7 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <div class="m-4">
-    <!-- Title -->
-    <h3 class="text-[12px] font-bold uppercase mb-2">
-      {{ t('production.stories') }}
-    </h3>
+  <div class="w-full">
 
     <div
         v-if="stories.length"

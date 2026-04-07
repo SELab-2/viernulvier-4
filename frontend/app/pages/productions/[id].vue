@@ -200,11 +200,16 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
         </div>
 
         <div class="mt-8 mb-16">
+          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+            {{ t('production.events') }}
+          </h1>
           <EventTable :events="events || []" />
         </div>
 
-        <div v-if="stories && stories.length > 0" class="my-16">
-          <h3 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">Stories</h3>
+        <div class="my-16">
+          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+            {{ t('production.stories') }}
+          </h1>
           <ProductionStories :stories="stories" />
         </div>
 

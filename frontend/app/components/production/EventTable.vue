@@ -59,12 +59,7 @@ const cellNarrow = 'p-4 text-[12px] w-[20%] max-w-0'
 </script>
 
 <template>
-  <div class="m-4">
-    <!-- Title -->
-    <h3 class="text-[12px] font-bold uppercase mb-2">
-      {{ t('production.events') }}
-    </h3>
-
+  <div class="w-full">
     <div
         v-if="events.length"
         class="overflow-hidden rounded-lg border border-border">
