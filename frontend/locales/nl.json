@@ -111,5 +111,12 @@
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
     "noStories": "Deze productie bevat geen verhalen."
+  },
+  "eventlist": {
+    "noEventsFound": "Geen evenementen gevonden",
+    "price": "Prijs",
+    "edit": "Bewerk",
+    "delete": "Verwijder",
+    "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   }
 }

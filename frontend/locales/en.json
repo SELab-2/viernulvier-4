@@ -110,5 +110,12 @@
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
     "noStories": "This production doesn't contain any stories."
+  },
+  "eventlist": {
+    "noEventsFound": "No events found",
+    "price": "Price",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this event?"
   }
 }
