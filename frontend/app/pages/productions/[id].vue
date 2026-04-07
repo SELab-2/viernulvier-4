@@ -53,38 +53,6 @@ const { data: tags } = await useAsyncData<TagView[]>(
   { watch: [productionId, locale] }
 )
 
-/** 3. Helper om "N/A" of lege velden te checken */
-const isValid = (val: any) => {
-  if (!val) return false
-  const s = String(val).trim().toUpperCase()
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
-}
-
-const image = computed(() => (production.value as any)?.image ?? null) //TODO verander! voeg iets toe in useProduction?
-const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0))
-
-const cleanText = (text: string | null | undefined) => {
-  if (!text) return ""
-  return text
-    .replace(/\\/g, '')
-    .trim()
-    .replace(/(\r?\n){2,}/g, '\n\n')
-    .replace(/\n/g, '<br />')
-}
-
-
-const fullDescription = computed(() => cleanText(production.value?.description1) || "")
-
-const displayedDescription = computed(() => {
-  const desc = fullDescription.value
-  if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
-    return desc
-  }
-  return desc.slice(0, CHARACTER_LIMIT) + '...'
-})
-
-const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT)
-
 const { getAll: getAllEvents, getLocation, getPrices } = useEventApi()
 
 const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`, async () => {
@@ -133,6 +101,38 @@ const { data: stories } = await useAsyncData(
   { watch: [productionId, locale], default: () => [] }
 )
 
+/** 3. Helper om "N/A" of lege velden te checken */
+const isValid = (val: any) => {
+  if (!val) return false
+  const s = String(val).trim().toUpperCase()
+  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
+}
+
+const image = computed(() => (production.value as any)?.image ?? null) //TODO verander! voeg iets toe in useProduction?
+const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0))
+
+const cleanText = (text: string | null | undefined) => {
+  if (!text) return ""
+  return text
+    .replace(/\\/g, '')
+    .trim()
+    .replace(/(\r?\n){2,}/g, '\n\n')
+    .replace(/\n/g, '<br />')
+}
+
+
+const fullDescription = computed(() => cleanText(production.value?.description1) || "")
+
+const displayedDescription = computed(() => {
+  const desc = fullDescription.value
+  if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
+    return desc
+  }
+  return desc.slice(0, CHARACTER_LIMIT) + '...'
+})
+
+const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT)
+
 </script>
 
 <template>
@@ -164,10 +164,10 @@ const { data: stories } = await useAsyncData(
 
           <span
             v-if="isValid(production.performer_type)"
-            class="bg-muted-foreground text-white px-2 py-1 text-[10px] font-black uppercase rounded-sm"
+            class="border border-[1.5px] border-muted-foreground text-muted-foreground px-2 py-1 text-[10px] font-black uppercase rounded-sm"
           >
-        {{ production.performer_type }}
-      </span>
+            {{ production.performer_type }}
+          </span>
         </div>
 
         <div class="max-w-4xl text-foreground">
