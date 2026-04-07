@@ -390,7 +390,6 @@
     @apply bg-[var(--foreground)] border-[var(--foreground)];
   }
 }
-
 /* ── Calendar component ──────────────────────────────────────────────────────
    Used by components/calendar.vue + components/calendar/*.vue
    Tokens used: --border, --card, --muted, --muted-foreground, --foreground,
@@ -739,4 +738,3 @@
   .cal-month--right { display: none; }
   .cal-inputs       { flex-direction: column; }
   .cal-input-sep    { transform: rotate(90deg); align-self: center; padding: 0; }
-}
