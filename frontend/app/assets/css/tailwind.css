@@ -713,8 +713,8 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--muted-foreground);
-  background: none;
+  color: #000000;
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 0.25rem 0.6rem;
