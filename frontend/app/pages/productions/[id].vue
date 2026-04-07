@@ -132,7 +132,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
   <main v-if="production" class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100">
 
     <section
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden border-b border-muted"
+      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden"
       :style="{ background: image ? 'var(--muted)' : bannerGradient }"
     >
       <img
@@ -194,12 +194,12 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 
           <div class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200" v-html="displayedDescription"></div>
 
-          <button v-if="isLongDescription" @click="isExpanded = !isExpanded" class="mt-6 mb-12 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none">
+          <button v-if="isLongDescription" @click="isExpanded = !isExpanded" class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none">
             {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
           </button>
         </div>
 
-        <div class="my-16">
+        <div class="mt-8 mb-16">
           <EventTable :events="events || []" />
         </div>
 
@@ -223,7 +223,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 </template>
 
 <style scoped>
-/* links in description (TODO: description2 ook v-html?)*/
+/* links in description (TODO: description2 ook v-html?) */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
