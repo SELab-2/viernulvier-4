@@ -25,6 +25,7 @@ import {
   MediaItemDto,
   ModifyMediaGalleryDto,
   PaginationFilterDto,
+  PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
@@ -178,7 +179,7 @@ export class MediaGalleryController {
   @Get(":galleryId/items")
   async getGalleryItems(
     @Param("galleryId", ParseIntPipe) galleryId: number,
-  ): Promise<MediaItemDto[]> {
+  ): Promise<MediaItemDto[] | PrintItemDto[]> {
     return await this.mediaGalleryService.getGalleryItems(galleryId);
   }
 
@@ -218,7 +219,7 @@ export class MediaGalleryController {
   }
 
   /**
-   * Responds to a POST to "/media/galleries/:galleryId/prints/:printItemId".
+   * Responds to a PUT to "/media/galleries/:galleryId/prints/:printItemId".
    * @param printItemId The ID of the print item.
    * @param galleryId The ID of the media gallery.
    * @returns Nothing.

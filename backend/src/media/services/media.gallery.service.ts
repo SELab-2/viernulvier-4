@@ -5,6 +5,7 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   ModifyMediaGalleryDto,
+  PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { MediaGalleryDatabaseService } from "../../database/media/db.media_gallery.service";
@@ -81,8 +82,13 @@ export class MediaGalleryService {
    * @param galleryId The ID of the gallery we want to fetch items for.
    * @returns A list of media items.
    */
-  async getGalleryItems(galleryId: number): Promise<MediaItemDto[]> {
-    return await this.mediaDbService.getItemsByGallery(galleryId);
+  async getGalleryItems(galleryId: number): Promise<MediaItemDto[] | PrintItemDto[]> {
+    const gallery = await this.mediaDbService.getGalleryById(galleryId);
+    if (gallery.type === "prints") {
+      return await this.mediaDbService.getPrintItemsByGallery(galleryId);
+    } else {
+      return await this.mediaDbService.getItemsByGallery(galleryId);
+    }
   }
 
   /**
