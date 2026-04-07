@@ -738,3 +738,4 @@
   .cal-month--right { display: none; }
   .cal-inputs       { flex-direction: column; }
   .cal-input-sep    { transform: rotate(90deg); align-self: center; padding: 0; }
+}
