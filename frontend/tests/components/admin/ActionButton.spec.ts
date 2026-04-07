@@ -15,7 +15,9 @@ describe("ActionButton", () => {
 
     expect(style).toContain("width: 44px");
     expect(style).toContain("height: 44px");
-    expect(classes).toContain("border-gray-300");
+    expect(classes).toContain("border-action-gray-border");
+    expect(classes).toContain("text-action-gray-icon");
+    expect(classes).toContain("hover:bg-action-gray-hover");
   });
 
   it("applies custom variant and size", () => {
@@ -30,8 +32,9 @@ describe("ActionButton", () => {
 
     expect(style).toContain("width: 36px");
     expect(style).toContain("height: 36px");
-    expect(classes).toContain("border-green-200");
-    expect(classes).toContain("text-green-600");
+    expect(classes).toContain("border-action-green-border");
+    expect(classes).toContain("text-action-green-icon");
+    expect(classes).toContain("hover:bg-action-green-hover");
   });
 
   it("emits click", async () => {
