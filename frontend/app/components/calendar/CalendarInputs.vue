@@ -7,6 +7,8 @@
                        which updates the displayed text fields
 -->
 <script lang="ts" setup>
+import { formatForInput, parseDate } from '~/utils/formatters';
+
 export type CalMode = "single" | "range" | "after-selected" | "before-selected";
 
 const props = defineProps<{
@@ -35,13 +37,6 @@ const errorSingle = ref(false);
 const errorStart  = ref(false);
 const errorEnd    = ref(false);
 
-// Format helpers
-
-/** Display ISO as DD/MM/YYYY to match the placeholder hint */
-function formatForInput(iso: string): string {
-  const [y, m, d] = iso.split("-");
-  return `${d}/${m}/${y}`;
-}
 
 // Sync: calendar → inputs 
 // When the parent reports a new calendar selection, reflect it in the text fields.
@@ -61,41 +56,6 @@ watch(() => props.syncEnd, (v) => {
   inputEnd.value = v ? formatForInput(v) : "";
   errorEnd.value = false;
 });
-
-// Timezone-safe helpers
-
-function localTodayIso(): string {
-  const d  = new Date();
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${dd}`;
-}
-
-function validateIso(iso: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
-  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
-  const date = new Date(y, m - 1, d);
-  if (
-    date.getFullYear() !== y ||
-    date.getMonth()    !== m - 1 ||
-    date.getDate()     !== d
-  ) return null;
-  if (iso > localTodayIso()) return null;
-  return iso;
-}
-
-function parseDate(raw: string): string | null {
-  const val = raw.replace(/[^\d\/\-\.]/g, "").trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return validateIso(val);
-  const parts = val.split(/[\/\-\.]/);
-  if (parts.length === 3) {
-    const [dd, mm, yyyy] = parts;
-    if (yyyy?.length === 4 && dd && mm)
-      return validateIso(`${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`);
-  }
-  return null;
-}
 
 // Handlers
 

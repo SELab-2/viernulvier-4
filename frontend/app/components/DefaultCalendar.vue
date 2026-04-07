@@ -12,8 +12,9 @@ import CalendarTabs   from "~/components/calendar/CalendarTabs.vue";
 import CalendarInputs from "~/components/calendar/CalendarInputs.vue";
 import CalendarMonths from "~/components/calendar/CalendarMonths.vue";
 import CalendarFooter from "~/components/calendar/CalendarFooter.vue";
-import type { CalMode }    from "~/components/calendar/CalendarInputs.vue";
-import type { MonthData }  from "~/components/calendar/CalendarMonths.vue";
+import type { CalMode }   from "~/components/calendar/CalendarInputs.vue";
+import type { MonthData } from "~/components/calendar/CalendarMonths.vue";
+import { localIso, localTodayIso, buildWeekdayLabels } from "~/utils/formatters";
 
 interface DateFilter {
   after?:  string;
@@ -36,17 +37,6 @@ const { t, locale } = useI18n();
 
 const intlLocale = computed(() => locale.value === "en" ? "en-GB" : "nl-BE");
 
-// Timezone-safe helpers
-
-function localIso(d: Date): string {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${dd}`;
-}
-
-const todayIso = computed(() => localIso(new Date()));
-
 // State
 
 const mode      = ref<CalMode>("range");
@@ -59,7 +49,7 @@ const today     = new Date();
 const viewYear  = ref(today.getFullYear());
 const viewMonth = ref(today.getMonth());
 
-// Sync props for CalendarInputs (calendar → text fields) 
+// Sync props for CalendarInputs (calendar → text fields)
 // These computed values mirror the current selection into the input components.
 
 const syncSingle = computed(() =>
@@ -78,19 +68,12 @@ const syncEnd = computed(() => {
   return undefined;
 });
 
-// Month grid data 
+// Month grid data
 
 const rightYear     = computed(() => viewMonth.value === 11 ? viewYear.value + 1 : viewYear.value);
 const rightMonthIdx = computed(() => (viewMonth.value + 1) % 12);
 
-const weekdays = computed(() => {
-  const mon = new Date(2024, 0, 1); // known Monday
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(mon);
-    d.setDate(1 + i);
-    return d.toLocaleDateString(intlLocale.value, { weekday: "narrow" });
-  });
-});
+const weekdays = computed(() => buildWeekdayLabels(intlLocale.value));
 
 function buildMonth(year: number, month: number): MonthData {
   const firstDay = new Date(year, month, 1);
@@ -117,7 +100,9 @@ const viewportStart = computed(() => {
   return `${viewYear.value}-${m}-01`;
 });
 
-// Filter output 
+const todayIso = computed(() => localTodayIso());
+
+// Filter output
 
 const filter = computed<DateFilter>(() => {
   switch (mode.value) {
@@ -145,7 +130,7 @@ const filter = computed<DateFilter>(() => {
   }
 });
 
-// Summary label 
+// Summary label
 
 const summaryLabel = computed<string>(() => {
   const fmt = (iso: string) =>
@@ -176,7 +161,7 @@ const summaryLabel = computed<string>(() => {
 
 const hasSelection = computed(() => !!(anchor.value || selected.value));
 
-//  Day-state classifiers
+// Day-state classifiers
 
 function sorted(a: string, b: string): [string, string] {
   return a <= b ? [a, b] : [b, a];
@@ -202,7 +187,7 @@ function isRangeStart(iso: string): boolean {
   }
   if (mode.value === "after-selected") return iso === anchor.value;
   if (mode.value === "before-selected" && props.oldestDate && selected.value)
-    return iso === props.oldestDate; 
+    return iso === props.oldestDate;
   return false;
 }
 
@@ -249,7 +234,7 @@ function isInRange(iso: string): boolean {
   return !!start && !!end && iso > start && iso < end;
 }
 
-// Interaction 
+// Interaction
 
 function clickDay(iso: string) {
   if (isFuture(iso)) return;
@@ -316,7 +301,6 @@ function onApplyEnd(iso: string) {
   navigateTo(iso);
 }
 
-
 // Restore state from an externally held filter
 // Called once on mount. Figures out which mode the saved filter implies and
 // restores anchor + selected so the clear button reappears immediately.
@@ -330,7 +314,6 @@ function restoreFromFilter(f: DateFilter) {
     navigateTo(f.after);
     return;
   }
-
   if (f.after && props.oldestDate && f.after === props.oldestDate && f.before) {
     mode.value     = "before-selected";
     selected.value = f.before;
@@ -338,8 +321,8 @@ function restoreFromFilter(f: DateFilter) {
     return;
   }
   if (f.after && f.before && f.before === todayIso.value) {
-    mode.value    = "after-selected";
-    anchor.value  = f.after;
+    mode.value   = "after-selected";
+    anchor.value = f.after;
     navigateTo(f.after);
     return;
   }
