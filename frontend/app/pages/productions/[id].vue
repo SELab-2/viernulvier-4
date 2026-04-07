@@ -5,7 +5,6 @@ import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
 import EventTable from "../../components/production/EventTable.vue";
 import ProductionStories from "../../components/production/storyListView.vue";
-import { useBlogApi } from "../../composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -109,12 +108,11 @@ const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value
 const cleanText = (text: string | null | undefined) => {
   if (!text) return ""
   return text
-    .replace(/\\/g, '')
+    .replace(/\\/g, '') //alleen deze nodig? .trim()
     .trim()
     .replace(/(\r?\n){2,}/g, '\n\n')
     .replace(/\n/g, '<br />')
 }
-
 
 const fullDescription = computed(() => cleanText(production.value?.description1) || "")
 
@@ -134,11 +132,8 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
   <main v-if="production" class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100">
 
     <section
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden border-b-[4px]"
-      :style="{
-    background: !image ? bannerGradient : 'var(--muted)',
-    borderColor: 'var(--color-muted)'
-  }"
+      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden border-b border-muted"
+      :style="{ background: image ? 'var(--muted)' : bannerGradient }"
     >
       <img
         v-if="image"
@@ -226,3 +221,15 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
     </section>
   </main>
 </template>
+
+<style scoped>
+/* links in description (TODO: description2 ook v-html?)*/
+.description-content :deep(a) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.description-content :deep(a:hover) {
+  opacity: 0.7;
+}
+</style>
