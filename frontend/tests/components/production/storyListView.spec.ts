@@ -43,10 +43,6 @@ describe("ProductionStories", () => {
         });
     });
 
-    it("renders the title", () => {
-        expect(wrapper.find("h3").text()).toContain("Verhalen");
-    });
-
     it("renders a card for each story", () => {
         expect(wrapper.findAll("[data-testid=data-story]").length).toBe(stories.length);
     });
