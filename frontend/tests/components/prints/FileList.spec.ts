@@ -12,7 +12,9 @@ const i18n = createI18n({
                 noFilesCat: "Deze categorie bevat geen bestanden.",
                 noFiles: "Geen bestanden beschikbaar.",
                 showMore: "Meer tonen",
-                remaining: "resterend"
+                remaining: "resterend",
+                delete: "Verwijder",
+                download: "Download"
             }
         },
         en: {
@@ -21,14 +23,16 @@ const i18n = createI18n({
                 noFilesCat: "This category doesn't contain any files.",
                 noFiles: "No files available.",
                 showMore: "Show more",
-                remaining: "remaining"
+                remaining: "remaining",
+                delete: "Delete",
+                download: "Download"
             }
         },
     },
 });
 
 const files = [
-    { id: 1, name: "AFFICHE-1.PDF", year: 2025, image: null },
+    { id: 1, name: "AFFICHE-1.PDF", year: 2025, image: "http://example.com/1.pdf" },
     { id: 2, name: "AFFICHE-2.PDF", year: 2024, image: null },
     { id: 3, name: "AFFICHE-3.PDF", year: 2023, image: null },
 ];
@@ -77,8 +81,9 @@ describe("PrintsFileList", () => {
         expect(wrapper.text()).not.toContain("Geen bestanden beschikbaar.");
     });
 
-    it("renders a download and delete button per file", () => {
+    it("renders a delete button per file", () => {
         const buttons = wrapper.findAll("button");
-        expect(buttons.length).toBe(files.length * 2);
+        const filesWithImage = files.filter(f => f.image).length;
+        expect(buttons.length).toBe(files.length + filesWithImage); // download button only renders if file has image
     });
 });

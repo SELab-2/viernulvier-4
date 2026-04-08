@@ -12,7 +12,9 @@ const i18n = createI18n({
                 noFilesCat: "Deze categorie bevat geen bestanden.",
                 noFiles: "Geen bestanden beschikbaar.",
                 showMore: "Meer tonen",
-                remaining: "resterend"
+                remaining: "resterend",
+                delete: "Verwijder",
+                download: "Download"
             }
         },
         en: {
@@ -21,7 +23,9 @@ const i18n = createI18n({
                 noFilesCat: "This category doesn't contain any files.",
                 noFiles: "No files available.",
                 showMore: "Show more",
-                remaining: "remaining"
+                remaining: "remaining",
+                delete: "Delete",
+                download: "Download"
             }
         },
     },
