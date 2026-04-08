@@ -52,10 +52,16 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
 
         <!-- File info -->
         <div class="flex-1 min-w-0">
-          <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">{{ file.titel }}</p>
-          <span v-if="file.created_at">
-            {{ new Date(file.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) }}
-          </span>
+          <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">
+            {{ file.titel }}
+          </p>
+
+          <p class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
+            {{ category }} |
+            <span v-if="file.created_at">
+              {{ new Date(file.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) }}
+            </span>
+          </p>
         </div>
 
         <!-- Buttons -->
