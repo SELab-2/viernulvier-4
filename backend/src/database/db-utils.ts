@@ -93,10 +93,18 @@ export function generateInsertClause(
 /**
  * Generates a RETURNING (or SELECT) clause from a Zod Schema.
  * @param schema The Schema to generate from.
+ * @param prefix Optional prefix to add before every clause (eg "mc" -> "mc.name")
  * @returns The Clause.
  */
-export function generateReturningClause(schema: ZodObject): string {
-  return Object.keys(schema.shape).join(", ");
+export function generateReturningClause(
+  schema: ZodObject,
+  prefix: string = "",
+): string {
+  const pre = prefix ? `${prefix}.` : "";
+
+  return Object.keys(schema.shape)
+    .map((key) => `${pre}${key}`)
+    .join(", ");
 }
 
 /**

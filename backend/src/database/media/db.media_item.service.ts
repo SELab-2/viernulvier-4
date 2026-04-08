@@ -10,6 +10,13 @@ import {
 } from "../../dto/dto";
 import { ResourceGoneException } from "../../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "../db-utils";
+import { MediaCropSchema, MediaItemSchema } from "@repo/common";
 
 @Injectable()
 export class MediaItemDatabaseService {
@@ -26,8 +33,10 @@ export class MediaItemDatabaseService {
    * @returns The MediaItem if there is one.
    */
   async getItemById(id: number): Promise<MediaItemDto> {
+    const returnClause = generateReturningClause(MediaItemSchema);
+
     const query = `
-      SELECT id, type, original_filename, position, width, height, title, description, credits , created_at, updated_at
+      SELECT ${returnClause}
       FROM media_item
       WHERE id = $1
     `;
@@ -51,14 +60,14 @@ export class MediaItemDatabaseService {
   async getAllItems(
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<MediaItemDto>> {
+    const returningClause = generateReturningClause(MediaItemSchema);
+
     const query = `
-      SELECT * FROM media_item
+      SELECT ${returningClause}
+      FROM media_item
       LIMIT $1 OFFSET $2;
     `;
-    const countQuery = `
-      SELECT COUNT(DISTINCT id) as count
-      FROM media_item;
-    `;
+    const countQuery = generateCountQuery("media_item");
     const offset = paginationFilters.page * paginationFilters.limit;
 
     const [objects, countResult] = await Promise.all([
@@ -80,43 +89,36 @@ export class MediaItemDatabaseService {
    * @param galleryIds a list of galleryIds you want to link this item to. (if left empty it will link to none)
    * @returns The created media item.
    */
-  async createItem(
-    item: CreateMediaItemDto,
-    galleryIds: number[],
-  ): Promise<MediaItemDto> {
-    if (!item.type || !item.original_filename) {
-      throw new BadRequestException("Missing required fields");
-    }
+  async createItem(item: CreateMediaItemDto): Promise<MediaItemDto> {
+    const { gallery_ids, ...itemData } = item;
+    const { columns, placeholders, values, nextIndex } =
+      generateInsertClause(itemData);
+    const returningClause = generateReturningClause(MediaItemSchema);
 
-    const insertQuery = `
-        INSERT INTO media_item (type, original_filename, position, width, height, title, description, credits)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id, type, original_filename, position, width, height, title, description, credits, created_at, updated_at
+    const insertAndLinkQuery = `
+      WITH inserted_item AS (
+        INSERT INTO media_item (${columns})
+        VALUES (${placeholders})
+        RETURNING ${returningClause}
+      ),
+      inserted_links AS (
+        INSERT INTO gallery_item (gallery_id, item_id)
+        SELECT UNNEST($${nextIndex}::int[]), id
+        FROM inserted_item
+      )
+      SELECT * FROM inserted_item;
     `;
 
-    const result = await this.db.query<MediaItemDto>(insertQuery, [
-      item.type,
-      item.original_filename,
-      item.position ?? 0,
-      item.width ?? null,
-      item.height ?? null,
-      item.title ?? null,
-      item.description ?? null,
-      item.credits ?? null,
-    ]);
+    // Push the gallery ids so they can be linked.
+    values.push(gallery_ids || []);
+
+    const result = await this.db.query<MediaItemDto>(
+      insertAndLinkQuery,
+      values,
+    );
 
     if (result.length === 0) {
       throw new Error("Failed to create media item");
-    }
-
-    // link to a list of galleries
-    if (galleryIds.length > 0) {
-      for (const galleryId of galleryIds) {
-        await this.db.query(
-          `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2)`,
-          [galleryId, result[0].id],
-        );
-      }
     }
 
     return result[0];
@@ -132,61 +134,20 @@ export class MediaItemDatabaseService {
     itemId: number,
     item: ModifyMediaItemDto | ReplaceMediaItemDto,
   ): Promise<MediaItemDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(item);
+    const returningClause = generateReturningClause(MediaItemSchema);
 
-    if (item.type !== undefined) {
-      fields.push(`type = $${index++}`);
-      values.push(item.type);
-    }
-
-    if (item.original_filename !== undefined) {
-      fields.push(`original_filename = $${index++}`);
-      values.push(item.original_filename);
-    }
-
-    if (item.position !== undefined) {
-      fields.push(`position = $${index++}`);
-      values.push(item.position);
-    }
-
-    if (item.width !== undefined) {
-      fields.push(`width = $${index++}`);
-      values.push(item.width);
-    }
-
-    if (item.height !== undefined) {
-      fields.push(`height = $${index++}`);
-      values.push(item.height);
-    }
-
-    if (item.title !== undefined) {
-      fields.push(`title = $${index++}`);
-      values.push(item.title);
-    }
-
-    if (item.description !== undefined) {
-      fields.push(`description = $${index++}`);
-      values.push(item.description);
-    }
-
-    if (item.credits !== undefined) {
-      fields.push(`credits = $${index++}`);
-      values.push(item.credits);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No valid fields to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(itemId);
 
     const query = `
       UPDATE media_item
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING id, type, original_filename, position, width, height, description, title, credits, created_at, updated_at
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<MediaItemDto>(query, values);
@@ -220,12 +181,18 @@ export class MediaItemDatabaseService {
    * @returns List of crops for the given item.
    */
   async getCropsByItem(itemId: number): Promise<MediaCropDto[]> {
+    const cropPrefix = "mc";
+    const cropReturningClause = generateReturningClause(
+      MediaCropSchema,
+      cropPrefix,
+    );
+
     const query = `
-      SELECT mc.id, mc.name, mc.url, mc.created_at, mc.updated_at
-      FROM media_crop mc
-      INNER JOIN item_crop ic ON ic.crop_id = mc.id
+      SELECT ${cropReturningClause}
+      FROM media_crop ${cropPrefix}
+      INNER JOIN item_crop ic ON ic.crop_id = ${cropPrefix}.id
       WHERE ic.item_id = $1
-      ORDER BY mc.name
+      ORDER BY ${cropPrefix}.name
     `;
 
     return this.db.query<MediaCropDto>(query, [itemId]);
