@@ -110,6 +110,37 @@ export function generateInsertClause(
 }
 
 /**
+ * Filtering
+ */
+
+// In your db-utils.ts (or wherever you keep utilities)
+export function applyExactFilters(
+  filters: Record<string, any>,
+  exactColumns: string[],
+  conditions: string[],
+  param: (val: any) => string,
+  prefix: string = "",
+): void {
+  const pre = prefix ? `${prefix}.` : "";
+
+  for (const col of exactColumns) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const val = filters[col];
+
+    // Ignore undefined, null, or empty strings
+    if (val !== undefined && val !== null && val !== "") {
+      // If it's an array, use Postgres ANY() for an IN clause
+      if (Array.isArray(val)) {
+        conditions.push(`${pre}${col} = ANY(${param(val)})`);
+      } else {
+        // Standard exact match
+        conditions.push(`${pre}${col} = ${param(val)}`);
+      }
+    }
+  }
+}
+
+/**
  * Returning Generator
  */
 

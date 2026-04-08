@@ -22,6 +22,7 @@ import {
   TagSchema,
 } from "@repo/common";
 import {
+  applyExactFilters,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
@@ -105,101 +106,95 @@ export class ProductionDatabaseService {
     productionFilters: FilterProductionDto,
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<ProductionDto>> {
+    const productionPrefix = "p";
+    const returningClause = generateReturningClause(
+      ProductionSchema,
+      productionPrefix,
+    );
+
     const conditions: string[] = [];
     const values: any[] = [];
-    let i = 1;
+    const param = (val: any) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Apply the filters that need exact matches first.
+    applyExactFilters(
+      productionFilters,
+      ["id", "performer_type", "attendance_mode"],
+      conditions,
+      param,
+      productionPrefix,
+    );
 
     // Filter by location
     // TODO: Rewrite this filter since it would not work anymore under the new location structure.
 
     // Filter by event date (start or end date)
     if (productionFilters.date) {
-      conditions.push(`(DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i})`);
-      values.push(productionFilters.date);
-      i++;
+      const pDate = param(productionFilters.date);
+      conditions.push(
+        `(DATE(e.starttime) = ${pDate} OR DATE(e.endtime) = ${pDate})`,
+      );
     }
 
     // Filter by given date lying between starttime and endtime (inclusive)
     if (productionFilters.date_between) {
       // Use explicit timestamp comparison to include time component
-      conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(productionFilters.date_between);
-      i++;
+      conditions.push(
+        `${param(productionFilters.date_between)}::timestamp BETWEEN e.starttime AND e.endtime`,
+      );
     }
 
     // Filter events whose starttime is before the provided date
     if (productionFilters.date_before) {
-      conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(productionFilters.date_before);
-      i++;
+      conditions.push(
+        `e.starttime < ${param(productionFilters.date_before)}::timestamp`,
+      );
     }
 
     // Filter events whose endtime is after the provided date
     if (productionFilters.date_after) {
-      conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(productionFilters.date_after);
-      i++;
+      conditions.push(
+        `e.endtime > ${param(productionFilters.date_after)}::timestamp`,
+      );
     }
 
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
     // For all supported languages.
     if (productionFilters.titel) {
+      const pTitel = param(`%${productionFilters.titel}%`);
       const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.titel->>'${lang}' ILIKE $${i}`,
+        (lang) => `p.titel->>'${lang}' ILIKE ${pTitel}`,
       );
-
       conditions.push(`(${titelClauses.join(" OR ")})`);
-      values.push(`%${productionFilters.titel}%`);
-      i++;
     }
 
     // Will look anywhere in the artist field for what was searched.
     // This checks all supported languages.
     if (productionFilters.artist) {
-      const artistClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.artist->>'${lang}' ILIKE $${i}`,
+      const pArtist = param(`%${productionFilters.artist}%`);
+      const titelClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `p.artist->>'${lang}' ILIKE ${pArtist}`,
       );
-
-      conditions.push(`(${artistClauses.join(" OR ")})`);
-      values.push(`%${productionFilters.artist}%`);
-      i++;
-    }
-
-    // Filter by performance_type
-    if (productionFilters.performer_type) {
-      conditions.push(`p.performer_type = $${i}`);
-      values.push(`%${productionFilters.performer_type}%`);
-      i++;
-    }
-
-    // Filter by attendance_mode
-    if (productionFilters.attendance_mode) {
-      conditions.push(`p.attendance_mode = $${i}`);
-      values.push(`%${productionFilters.attendance_mode}%`);
-      i++;
-    }
-
-    // Filter by id
-    if (productionFilters.id) {
-      conditions.push(`p.id = $${i}`);
-      values.push(productionFilters.id);
-      i++;
+      conditions.push(`(${titelClauses.join(" OR ")})`);
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
-    if (productionFilters.tag_ids && productionFilters.tag_ids.length > 0) {
+    // Filter by tag id (Must have AT LEAST ONE tag - "OR" logic)
+    if (
+      productionFilters.tag_ids?.length !== undefined &&
+      productionFilters.tag_ids?.length > 0
+    ) {
       conditions.push(`
         p.id IN (
           SELECT production_id 
           FROM production_tag 
-          WHERE tag_id = ANY($${i}::int[])
-          GROUP BY production_id 
-          HAVING COUNT(DISTINCT tag_id) = ${productionFilters.tag_ids.length}
+          WHERE tag_id = ANY(${param(productionFilters.tag_ids)}::int[])
         )
       `);
-      values.push(productionFilters.tag_ids);
-      i++;
     }
 
     // add more filters here if needed.
@@ -211,40 +206,24 @@ export class ProductionDatabaseService {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
-    SELECT COUNT(DISTINCT p.id) as count
-    FROM productions p
-      LEFT JOIN events e ON e.production_id = p.id
-    ${whereClause}
-  `;
+      SELECT COUNT(DISTINCT p.id) as count
+      FROM productions p
+        LEFT JOIN events e ON e.production_id = p.id
+      ${whereClause}
+    `;
 
-    let paginationClause = "";
-    if (paginationFilters.limit > 0) {
-      const offset = paginationFilters.page * paginationFilters.limit;
-      paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
-      values.push(paginationFilters.limit);
-      values.push(offset);
-      i += 2;
-    }
+    // Apply pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     // The Ordered by the first held event of the production.
     const query = `
-    SELECT
-      p.id,
-      p.titel,
-      p.description1,
-      p.description2,
-      p.artist,
-      p.tagline,
-      p.credits,
-      p.created_at,
-      p.updated_at,
-      p.performer_type,
-      p.attendance_mode
-    FROM productions p
-      LEFT JOIN events e ON e.production_id = p.id
+    SELECT ${returningClause}
+    FROM productions ${productionPrefix}
+      LEFT JOIN events e ON e.production_id = ${productionPrefix}.id
     ${whereClause}
     GROUP BY
-      p.id
+      ${productionPrefix}.id
     ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
     ${paginationClause}
   `;
