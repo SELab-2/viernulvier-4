@@ -17,6 +17,7 @@
  */
 
 import { FileText, Download, Trash2 } from "lucide-vue-next";
+import DeleteButton from "../admin/DeleteButton.vue";
 interface PrintsFile { //TODO replace this with actual object later
   id: number;
   name: string;
@@ -38,6 +39,9 @@ const downloadFile = (src: string, name: string) => {
   a.download = name
   a.click()
 }
+const emit = defineEmits<{
+  (e: "delete", file: PrintsFile): void;
+}>();
 
 // constants
 const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
@@ -77,12 +81,11 @@ const buttonRed = `${buttonBase} border-red-200 text-red-600 hover:bg-red-50 dar
           >
             <Download :size="15" />
           </button>
-          <button
-              :class="buttonRed"
-              @click.stop="() => {}"
-          >
-            <Trash2 :size="15" />
-          </button>
+          <DeleteButton
+              :label="t('eventlist.delete')"
+              :size="37"
+              @click="emit('delete', file)"
+          />
         </div>
       </div>
     </div>

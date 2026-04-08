@@ -123,6 +123,7 @@
     "noFilesCat": "This category doesn't contain any files.",
     "noFiles": "No files available.",
     "showMore": "Show more",
-    "remaining": "remaining"
+    "remaining": "remaining",
+    "delete": "Delete"
   }
 }
