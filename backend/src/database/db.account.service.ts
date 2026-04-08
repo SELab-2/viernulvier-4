@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
+  AccountDto,
   ApiKeyDto,
   CreateAccountDto,
   PublicAccountDto,
@@ -90,13 +91,15 @@ export class AccountDatabaseService {
       WHERE username = $1
       LIMIT 1
     `;
-    const result = await this.db.query(query, [account.username]); // no type for safety.
+
+    // Returning AccountDto should be safe here since we never show this to the user.s
+    const result = await this.db.query<AccountDto>(query, [account.username]);
 
     if (result.length === 0) {
-      throw new Error("Invalid username or password");
+      throw new BadRequestException("Invalid username.");
     }
 
-    const dbAccount = result[0];
+    const dbAccount: AccountDto = result[0];
 
     // 2. Verify password using bcrypt
     const isValid = await bcrypt.compare(account.password, dbAccount.password);
