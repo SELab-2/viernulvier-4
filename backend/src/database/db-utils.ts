@@ -5,6 +5,20 @@
 import { ZodObject } from "@repo/common";
 
 /**
+ * Returns whether something is a plain object or not.
+ * @param value The value.
+ * @returns T/F.
+ */
+function isPlainObject(value: any): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    !(value instanceof Date)
+  );
+}
+
+/**
  * Contains the string that can be passed to SET and the corresponding values in order.
  * Also the next index after the set clause.
  */
@@ -30,8 +44,17 @@ export function generateUpdateClause(
 
   for (const [key, value] of Object.entries(data)) {
     if (value !== undefined) {
-      fields.push(`${key} = $${index++}`);
-      values.push(value);
+      if (isPlainObject(value)) {
+        // If JSON we handle differently.
+        fields.push(
+          `${key} = COALESCE(${key}, '{}'::jsonb) || $${index++}::jsonb`,
+        );
+        values.push(JSON.stringify(value));
+      } else {
+        // Everything else.
+        fields.push(`${key} = $${index++}`);
+        values.push(value);
+      }
     }
   }
 

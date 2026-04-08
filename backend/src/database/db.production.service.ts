@@ -13,12 +13,19 @@ import {
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import {
-  FilterProductionSchema,
+  BlogSchema,
   GalleryType,
+  MediaGallerySchema,
   PaginatedResponse,
-  PaginationFilterSchema,
+  ProductionSchema,
   SUPPORTED_LANGUAGES,
+  TagSchema,
 } from "@repo/common";
+import {
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -30,105 +37,60 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: PaginatedResponse<ProductionDto> =
-      await this.getProductions(
-        FilterProductionSchema.parse({ id: id }),
-        PaginationFilterSchema.parse({}),
-      );
+    const returningClause = generateReturningClause(ProductionSchema);
 
-    const production = productions.objects;
-    if (production.length === 0)
+    const query = `
+      SELECT ${returningClause}
+      FROM productions
+      WHERE id = $1;
+    `;
+
+    const productions = await this.db.query<ProductionDto>(query, [id]);
+
+    if (productions.length === 0)
       throw new ResourceGoneException(
         `No ProductionDto exists for provided ID(${id})`,
       );
 
-    return production[0]; // There should be a ProductionDto in here if the length is not 0.
+    return productions[0]; // There should be a ProductionDto in here if the length is not 0.
   }
 
   /**
    * Get all tags listed under a given production.
    * @param production the production we want all tags of.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * @returns a list of tags connected to the given production.
    */
-  async getTagsOfProduction(
-    production: ProductionDto,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<TagDto[]> {
-    if (amount === 0) {
-      const query = `
-      SELECT t.id,
-             t.tag,
-             t.created_at,
-             t.updated_at
-      FROM tags t
-      JOIN production_tag pt ON t.id = pt.tag_id
-      WHERE pt.production_id = $1
-      `;
-
-      return await this.db.query(query, [production.id]);
-    }
-
-    const offset = page * amount;
+  async getTagsOfProduction(production: ProductionDto): Promise<TagDto[]> {
+    const tagPrefix = "t";
+    const returningClause = generateReturningClause(TagSchema, tagPrefix);
 
     const query = `
-      SELECT t.id,
-             t.tag,
-             t.created_at,
-             t.updated_at
-      FROM tags t
-      JOIN production_tag pt ON t.id = pt.tag_id
-      WHERE pt.production_id = $1
-      LIMIT $2 OFFSET $3
-      `;
+      SELECT ${returningClause}
+      FROM tags ${tagPrefix}
+      JOIN production_tag pt ON ${tagPrefix}.id = pt.tag_id
+      WHERE pt.production_id = $1;
+    `;
 
-    return await this.db.query(query, [production.id, amount, offset]);
+    return await this.db.query<TagDto>(query, [production.id]);
   }
 
   /**
    * Get all blogs listed under a given production.
    * @param id the id of the production we want all blogs of.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * @returns a list of blogs connected to the given production.
    */
-  async getBlogsOfProduction(
-    id: number,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<BlogDto[]> {
-    if (amount === 0) {
-      const query = `
-      SELECT b.id, 
-             b.titel, 
-             b.description,
-             b.created_at,
-             b.updated_at
-      FROM blogs b
-      JOIN production_blogs pb ON b.id = pb.blog_id
-      WHERE pb.production_id = $1
-      `;
-
-      return await this.db.query(query, [id]);
-    }
-
-    const offset = page * amount;
+  async getBlogsOfProduction(id: number): Promise<BlogDto[]> {
+    const blogPrefix = "b";
+    const returningClause = generateReturningClause(BlogSchema, blogPrefix);
 
     const query = `
-      SELECT b.id,
-             b.titel,
-             b.description,
-             b.created_at,
-             b.updated_at
-      FROM blogs b
-      JOIN production_blogs pb ON b.id = pb.blog_id
-      WHERE pb.production_id = $1
-      LIMIT $2 OFFSET $3
-      `;
+      SELECT ${returningClause}
+      FROM blogs ${blogPrefix}
+      JOIN production_blogs pb ON ${blogPrefix}.id = pb.blog_id
+      WHERE pb.production_id = $1;
+    `;
 
-    return await this.db.query(query, [id, amount, offset]);
+    return await this.db.query(query, [id]);
   }
 
   /**
@@ -309,46 +271,14 @@ export class ProductionDatabaseService {
   async createProduction(
     production: CreateProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.titel) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(production);
+    const returningClause = generateReturningClause(ProductionSchema);
 
     const query = `
-      INSERT INTO productions (
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          performer_type,
-          attendance_mode
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      RETURNING
-          id,
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          created_at,
-          updated_at,
-          performer_type,
-          attendance_mode;
-      `;
-
-    const values = [
-      production.titel,
-      production.description1,
-      production.description2,
-      production.artist,
-      production.tagline,
-      production.credits,
-      production.performer_type,
-      production.attendance_mode,
-    ];
+      INSERT INTO productions (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
+    `;
 
     const result = await this.db.query<ProductionDto>(query, values);
 
@@ -362,6 +292,7 @@ export class ProductionDatabaseService {
   /**
    * Update function for productions. Updates the production in the database.
    * note: this function can be used to update/add all of a certain language to a prod.
+   * @param productionId The ID of the production to update.
    * @param production must be of the type "ModifyProduction" or "ReplaceProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
@@ -370,59 +301,20 @@ export class ProductionDatabaseService {
     productionId: number,
     production: ModifyProductionDto | ReplaceProductionDto,
   ): Promise<ProductionDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(production);
+    const returningClause = generateReturningClause(ProductionSchema);
 
-    const jsonbColumns = [
-      "titel",
-      "description1",
-      "description2",
-      "artist",
-      "tagline",
-      "credits",
-    ] as const;
-    for (const column of jsonbColumns) {
-      if (production[column] !== undefined) {
-        fields.push(
-          `${column} = COALESCE(${column}, '{}'::jsonb) || $${index++}::jsonb`,
-        );
-
-        values.push(JSON.stringify(production[column]));
-      }
-    }
-
-    if (production.performer_type !== undefined) {
-      fields.push(`performer_type = $${index++}`);
-      values.push(production.performer_type);
-    }
-
-    if (production.attendance_mode !== undefined) {
-      fields.push(`attendance_mode = $${index++}`);
-      values.push(production.attendance_mode);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(productionId);
+
     const query = `
       UPDATE productions
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING
-        id,
-        titel,
-        description1,
-        description2,
-        artist,
-        tagline,
-        credits,
-        created_at,
-        updated_at,
-        performer_type,
-        attendance_mode;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);
@@ -547,12 +439,18 @@ export class ProductionDatabaseService {
     prod_id: number,
     type: GalleryType,
   ): Promise<MediaGalleryDto> {
+    const galleryPrefix = "mg";
+    const returningClause = generateReturningClause(
+      MediaGallerySchema,
+      galleryPrefix,
+    );
+
     const query = `
-      SELECT mg.id, mg.name, mg.type, mg.created_at, mg.updated_at
-      FROM media_gallery mg
-      INNER JOIN production_media_gallery pmg ON pmg.gallery_id = mg.id
-      WHERE pmg.production_id = $1 AND mg.type = $2
-      ORDER BY mg.id
+      SELECT ${returningClause}
+      FROM media_gallery ${galleryPrefix}
+      INNER JOIN production_media_gallery pmg ON pmg.gallery_id = ${galleryPrefix}.id
+      WHERE pmg.production_id = $1 AND ${galleryPrefix}.type = $2
+      ORDER BY ${galleryPrefix}.id
       LIMIT 1
     `;
 
