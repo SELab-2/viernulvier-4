@@ -125,7 +125,11 @@
     "total_results": "{total} results",
     "sortNewest": "New to Old",
     "sortOldest": "Old to New",
-    "sortLabel": "Sort by"
+    "sortLabel": "Sort by",
+    "show_more": "+{count} more",
+    "show_less": "Show less",
+    "tagsLabel": "Tags",
+    "calendarLabel": "Date"
   },
   "production": {
     "events": "Events",

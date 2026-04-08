@@ -10,6 +10,7 @@ const loading     = ref(false)
 const sortOrder   = ref<'newest' | 'oldest'>('newest')
 const dateFilter  = ref<{ after?: string; before?: string }>({})
 const oldestDate  = ref('')
+const tagIds      = ref<number[]>([])
 
 export function useArchiveView() {
   return {
@@ -21,5 +22,6 @@ export function useArchiveView() {
     sortOrder,
     dateFilter,
     oldestDate,
+    tagIds,
   }
 }

@@ -5,6 +5,7 @@ import Calendar from '~/components/DefaultCalendar.vue'
 import { useProductionApi } from '~/composables/useProductionApi'
 import { useEventApi } from '~/composables/useEventApi'
 import type { ProductionView, Event } from '@repo/common'
+import TagFilter from "./TagFilter.vue";
 
 const { t, locale } = useI18n()
 const { viewMode, searchQuery, sortOrder, dateFilter, oldestDate } = useArchiveView()
@@ -84,10 +85,27 @@ onMounted(fetchOldestDate)
     <!-- Filter panel — in flow, pushes content down -->
     <Transition name="filter-slide">
       <div v-if="filterOpen" class="border-t border-border">
-        <div class="max-w-5xl mx-auto px-4 py-6 flex items-start gap-6">
+        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
 
-          <!-- Calendar (takes remaining width) -->
-          <div class="flex-1 min-w-0">
+          <!-- Sort order -->
+          <div class="flex flex-col gap-2 shrink-0 pt-1 w-max">
+            <span class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
+              {{ t('archive.sortLabel') }}
+            </span>
+            <select
+              v-model="sortOrder"
+              class="h-10 px-3 rounded-md bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
+            >
+              <option value="newest">{{ t('archive.sortNewest') }}</option>
+              <option value="oldest">{{ t('archive.sortOldest') }}</option>
+            </select>
+          </div>
+
+          <!-- Calendar -->
+          <span class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
+            {{ t('archive.calendarLabel') }}
+          </span>
+          <div class="min-w-0">
             <Calendar
               :oldest-date="oldestDate"
               :model-filter="dateFilter"
@@ -95,19 +113,11 @@ onMounted(fetchOldestDate)
             />
           </div>
 
-          <!-- Sort order (pinned to the right) -->
-          <div class="flex flex-col gap-2 shrink-0 pt-1">
-            <span class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
-              {{ t('archive.sortLabel') }}
-            </span>
-            <select
-              v-model="sortOrder"
-              class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30"
-            >
-              <option value="newest">{{ t('archive.sortNewest') }}</option>
-              <option value="oldest">{{ t('archive.sortOldest') }}</option>
-            </select>
-          </div>
+          <!-- Tag filter -->
+          <span class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
+            {{ t('archive.tagsLabel') }}
+          </span>
+          <TagFilter />
 
         </div>
       </div>
@@ -121,7 +131,7 @@ onMounted(fetchOldestDate)
 .filter-slide-leave-active {
   transition: opacity 0.18s ease, max-height 0.22s ease;
   overflow: hidden;
-  max-height: 700px;
+  max-height: 900px;
 }
 .filter-slide-enter-from,
 .filter-slide-leave-to {

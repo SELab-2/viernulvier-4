@@ -126,7 +126,11 @@
     "total_results": "{total} resultaten",
     "sortNewest": "Nieuw naar Oud",
     "sortOldest": "Oud naar Nieuw",
-    "sortLabel": "Sorteer op"
+    "sortLabel": "Sorteer op",
+    "show_more": "+{count} meer",
+    "show_less": "Toon minder",
+    "tagsLabel": "Tags",
+    "calendarLabel": "Datum"
   },
   "production": {
     "events": "Evenementen",

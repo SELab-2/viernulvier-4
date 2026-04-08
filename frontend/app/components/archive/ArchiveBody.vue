@@ -7,7 +7,7 @@ import { useArchiveView } from '../../composables/useArchiveView'
 import ProductionGridViewItem from '../productionGridViewItem.vue'
 import ProductionListViewItem from '../productionListViewItem.vue'
 
-const { viewMode, searchQuery, sortOrder, dateFilter, currentPage, totalPages, loading } = useArchiveView()
+const { viewMode, searchQuery, sortOrder, dateFilter, tagIds, currentPage, totalPages, loading } = useArchiveView()
 const { getAll } = useProductionApi()
 const { t, locale } = useI18n()
 
@@ -23,10 +23,10 @@ async function loadPage(page: number) {
   try {
     const resp = await getAll({
       productionFilters: {
-        titel:        searchQuery.value        || undefined,
-        tag_ids:      undefined,
-        date_after:   dateFilter.value.after   || undefined,
-        date_before:  dateFilter.value.before  || undefined,
+        titel:      searchQuery.value       || undefined,
+        tag_ids:    tagIds.value.length     ? tagIds.value : undefined,
+        date_after:  dateFilter.value.after  || undefined,
+        date_before: dateFilter.value.before || undefined,
       },
       paginationFilters: {
         page:       page - 1,
@@ -58,6 +58,7 @@ watch(currentPage, (page) => loadPage(page))
 watch(locale,      () => { currentPage.value = 1; loadPage(1) })
 watch(sortOrder,   () => { currentPage.value = 1; loadPage(1) })
 watch(dateFilter,  () => { currentPage.value = 1; loadPage(1) }, { deep: true })
+watch(tagIds,      () => { currentPage.value = 1; loadPage(1) }, { deep: true })
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
