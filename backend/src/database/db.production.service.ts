@@ -218,15 +218,15 @@ export class ProductionDatabaseService {
 
     // The Ordered by the first held event of the production.
     const query = `
-    SELECT ${returningClause}
-    FROM productions ${productionPrefix}
-      LEFT JOIN events e ON e.production_id = ${productionPrefix}.id
-    ${whereClause}
-    GROUP BY
-      ${productionPrefix}.id
-    ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
-    ${paginationClause}
-  `;
+      SELECT ${returningClause}
+      FROM productions ${productionPrefix}
+        LEFT JOIN events e ON e.production_id = ${productionPrefix}.id
+      ${whereClause}
+      GROUP BY
+        ${productionPrefix}.id
+      ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
+      ${paginationClause}
+    `;
 
     const [objects, countResult] = await Promise.all([
       this.db.query<ProductionDto>(query, values),
