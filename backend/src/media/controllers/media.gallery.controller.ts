@@ -37,7 +37,7 @@ import {
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
-import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
+import { ApiOkArrayAnyOf, ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
@@ -171,11 +171,7 @@ export class MediaGalleryController {
    * @returns A list of items for that gallery.
    */
   @ApiOperation({ summary: "Gets the items from one gallery." })
-  @ApiOkResponse({
-    type: MediaItemDto,
-    isArray: true,
-    description: "Fetched items from gallery",
-  })
+  @ApiOkArrayAnyOf(MediaItemDto, PrintItemDto)
   @Get(":galleryId/items")
   async getGalleryItems(
     @Param("galleryId", ParseIntPipe) galleryId: number,
@@ -228,7 +224,7 @@ export class MediaGalleryController {
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Links a print item to a media gallery." })
   @ApiOkResponse({ description: "Print item linked to gallery successfully." })
-  @Post(":galleryId/prints/:printItemId")
+  @Put(":galleryId/prints/:printItemId")
   async linkToGallery(
     @Param("printItemId", ParseIntPipe) printItemId: number,
     @Param("galleryId", ParseIntPipe) galleryId: number,
