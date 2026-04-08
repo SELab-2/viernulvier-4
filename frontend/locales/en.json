@@ -122,7 +122,10 @@
     "view_grid": "Grid",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "total_results": "{total} results"
+    "total_results": "{total} results",
+    "sortNewest": "New to Old",
+    "sortOldest": "Old to New",
+    "sortLabel": "Sort by"
   },
   "production": {
     "events": "Events",

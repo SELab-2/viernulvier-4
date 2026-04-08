@@ -123,7 +123,10 @@
     "view_grid": "Raster",
     "page_label": "Pagina",
     "of_pages": "van {total}",
-    "total_results": "{total} resultaten"
+    "total_results": "{total} resultaten",
+    "sortNewest": "Nieuw naar Oud",
+    "sortOldest": "Oud naar Nieuw",
+    "sortLabel": "Sorteer op"
   },
   "production": {
     "events": "Evenementen",

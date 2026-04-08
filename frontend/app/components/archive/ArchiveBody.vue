@@ -7,30 +7,36 @@ import { useArchiveView } from '../../composables/useArchiveView'
 import ProductionGridViewItem from '../productionGridViewItem.vue'
 import ProductionListViewItem from '../productionListViewItem.vue'
 
-const { viewMode, searchQuery, currentPage, totalPages, loading } = useArchiveView()
+const { viewMode, searchQuery, sortOrder, dateFilter, currentPage, totalPages, loading } = useArchiveView()
 const { getAll } = useProductionApi()
 const { t, locale } = useI18n()
 
 const PAGE_SIZE = 15
 
 const productions = ref<ProductionView[]>([])
-const totalItems = ref(0)
-const error = ref<string | null>(null)
-
-const startItem = computed(() => (currentPage.value - 1) * PAGE_SIZE + 1)
-const endItem   = computed(() => Math.min(currentPage.value * PAGE_SIZE, totalItems.value))
+const totalItems  = ref(0)
+const error       = ref<string | null>(null)
 
 async function loadPage(page: number) {
   loading.value = true
-  error.value = null
+  error.value   = null
   try {
     const resp = await getAll({
-      productionFilters: { titel: searchQuery.value || undefined, tag_ids: undefined },
-      paginationFilters: { page: page - 1, limit: PAGE_SIZE, descending: true },
-      languageFilters:   { lang: locale.value },
+      productionFilters: {
+        titel:        searchQuery.value        || undefined,
+        tag_ids:      undefined,
+        date_after:   dateFilter.value.after   || undefined,
+        date_before:  dateFilter.value.before  || undefined,
+      },
+      paginationFilters: {
+        page:       page - 1,
+        limit:      PAGE_SIZE,
+        descending: sortOrder.value === 'newest',
+      },
+      languageFilters: { lang: locale.value },
     })
     if (resp.data) {
-      const data = resp.data as PaginatedResponse<ProductionView>
+      const data        = resp.data as PaginatedResponse<ProductionView>
       productions.value = data.objects
       totalItems.value  = data.totalItems
       totalPages.value  = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE))
@@ -49,7 +55,9 @@ let searchTimer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(() => loadPage(1))
 watch(currentPage, (page) => loadPage(page))
-watch(locale, () => { currentPage.value = 1; loadPage(1) })
+watch(locale,      () => { currentPage.value = 1; loadPage(1) })
+watch(sortOrder,   () => { currentPage.value = 1; loadPage(1) })
+watch(dateFilter,  () => { currentPage.value = 1; loadPage(1) }, { deep: true })
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
