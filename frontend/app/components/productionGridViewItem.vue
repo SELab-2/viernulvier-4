@@ -30,8 +30,16 @@ async function loadTags() {
 
   try {
     const response = await getTags(productionView.id, locale.value)
-    if (response.data) tags.value = response.data as Tag[]
-    else console.error('Failed to load tags:', response.error)
+    if (response.data) {
+      tags.value = (response.data as Tag[]).filter(tag => {
+        const currentTag = typeof tag.tag === 'string'
+          ? tag.tag
+          : tag.tag?.[locale.value as 'en' | 'nl']
+        return currentTag && currentTag !== 'N/A'
+      })
+    } else {
+      console.error('Failed to load tags:', response.error)
+    }
   } catch (err) {
     console.error('Error loading tags:', err)
   }
