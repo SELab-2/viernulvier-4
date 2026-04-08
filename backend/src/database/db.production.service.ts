@@ -430,7 +430,7 @@ export class ProductionDatabaseService {
       INNER JOIN production_media_gallery pmg ON pmg.gallery_id = ${galleryPrefix}.id
       WHERE pmg.production_id = $1 AND ${galleryPrefix}.type = $2
       ORDER BY ${galleryPrefix}.id
-      LIMIT 1
+      LIMIT 1;
     `;
 
     const result = await this.db.query<MediaGalleryDto>(query, [prod_id, type]);
