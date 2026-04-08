@@ -10,6 +10,7 @@ import {
 import path from "node:path";
 import { MediaStorageService } from "../media_storage/service/media_storage.service";
 import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * Defines the connection between controller and database service
@@ -17,13 +18,17 @@ import { MediaCropDatabaseService } from "../../database/media/db.media_crop.ser
  */
 @Injectable()
 export class MediaCropService {
-  private readonly baseUrl = (
-    process.env.MEDIA_BASE_URL ?? "http://127.0.0.1"
-  ).replace(/\/$/, "");
+  private get baseUrl() {
+    return this.configService.get<string>(
+      "MEDIA_BASE_URL",
+      "http://127.0.0.1/photos",
+    );
+  }
 
   constructor(
     private readonly mediaDbService: MediaCropDatabaseService,
     private readonly mediaStorageService: MediaStorageService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
