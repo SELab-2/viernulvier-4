@@ -87,8 +87,7 @@ export class MediaCropDatabaseService {
    * @returns The created crop.
    */
   async createCrop(crop: CreateMediaCropDto): Promise<MediaCropDto> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { item_id, auto_download, ...cropData } = crop;
+    const { item_id, ...cropData } = crop;
 
     const { columns, placeholders, values, nextIndex } =
       generateInsertClause(cropData);
