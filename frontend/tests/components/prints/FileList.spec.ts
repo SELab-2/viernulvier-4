@@ -83,7 +83,7 @@ describe("PrintsFileList", () => {
 
     it("renders a delete button per file", () => {
         const buttons = wrapper.findAll("button");
-        const filesWithImage = files.filter(f => f.image).length;
+        const filesWithImage = files.filter(f => f.url).length;
         expect(buttons.length).toBe(files.length + filesWithImage); // download button only renders if file has image
     });
 });
