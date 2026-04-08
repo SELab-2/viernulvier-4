@@ -58,7 +58,6 @@ export class MediaCropDatabaseService {
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<MediaCropDto>> {
     const returningClause = generateReturningClause(MediaCropSchema);
-    console.log(returningClause);
 
     const query = `
       SELECT ${returningClause}
