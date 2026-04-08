@@ -156,7 +156,7 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
     <!-- No files (empty) -->
     <div
         v-else-if="isOpen && !files.length"
-        class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"
+        class="text-center text-gray-500 dark:text-gray-400"
     >
       {{ t('prints.noFilesCat') }}
     </div>

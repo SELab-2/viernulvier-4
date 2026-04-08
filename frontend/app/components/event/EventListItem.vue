@@ -20,8 +20,6 @@ import {
   formatTime,
   formatPrice,
 } from "../../utils/formatters";
-import EditButton from "../admin/EditButton.vue";
-import DeleteButton from "../admin/DeleteButton.vue";
 
 type EventListItem = EventWithDetails & {
   productionTitle: string;
@@ -76,12 +74,12 @@ const getPricesText = (event: EventWithDetails) => {
     </div>
 
     <div class="flex gap-2 ml-auto items-center">
-      <EditButton
+      <AdminEditButton
         :label="t('eventlist.edit')"
         :size="44"
         @click="emit('edit', item)"
       />
-      <DeleteButton
+      <AdminDeleteButton
         :label="t('eventlist.delete')"
         :size="44"
         @click="emit('delete', item)"
