@@ -5,9 +5,16 @@ import {
   PriceDto,
   ModifyPriceDto,
   ReplacePriceDto,
+  PaginationFilterDto,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { PaginatedResponse } from "@repo/common";
+import { PaginatedResponse, PriceSchema } from "@repo/common";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
 
 @Injectable()
 export class PriceDatabaseService {
@@ -20,13 +27,19 @@ export class PriceDatabaseService {
    * @returns The Price if there is one.
    */
   async getPriceById(id: number): Promise<PriceDto> {
-    const query = `SELECT id, 
-       price, 
-       name, 
-       created_at, 
-       updated_at
-      FROM prices WHERE id = $1`;
+    const returningClause = generateReturningClause(PriceSchema);
+
+    const query = `
+      SELECT ${returningClause}
+      FROM prices 
+      WHERE id = $1;
+    `;
+
     const result = await this.db.query<PriceDto>(query, [id]);
+
+    if (result.length === 0) {
+      throw new ResourceGoneException(`Location with ID ${id} not found.`);
+    }
 
     return result[0];
   }
@@ -38,30 +51,28 @@ export class PriceDatabaseService {
    * @return prices
    */
   async getPrices(
-    amount: number = 0,
-    page: number = 0,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<PriceDto>> {
-    let query = `
-    SELECT id, price, name, created_at, updated_at
-    FROM prices
-    ORDER BY id
-  `;
+    const returningClause = generateReturningClause(PriceSchema);
 
-    const params: any[] = [];
+    const query = `
+      SELECT ${returningClause}
+      FROM prices
+      ORDER BY id
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = generateCountQuery("prices");
 
-    if (amount > 0) {
-      query += ` LIMIT $1 OFFSET $2`;
-      params.push(amount, page * amount);
-    }
+    const offset = paginationFilters.page * paginationFilters.limit;
 
     const [prices, countResult] = await Promise.all([
-      this.db.query<PriceDto>(query, params),
-      this.db.query<{ count: string }>(`SELECT COUNT(*) as count FROM prices`),
+      this.db.query<PriceDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery),
     ]);
 
     return {
-      page,
-      limit: amount,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects: prices,
     };
@@ -73,28 +84,19 @@ export class PriceDatabaseService {
    * @returns the added price if it was successful.
    */
   async createPrice(price: CreatePriceDto): Promise<PriceDto> {
-    if (!price.name || !price.price) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(price);
+    const returningClause = generateReturningClause(PriceSchema);
 
     const query = `
-      INSERT INTO prices (name, price)
-      VALUES ($1, $2)
-      RETURNING
-        id,
-        name,
-        price,
-        created_at,
-        updated_at
-      ;
+      INSERT INTO prices (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
-
-    const values = [JSON.stringify(price.name), price.price];
 
     const result = await this.db.query<PriceDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create price");
+      throw new Error("Failed to create price.");
     }
 
     return result[0];
@@ -110,37 +112,20 @@ export class PriceDatabaseService {
     priceId: number,
     price: ModifyPriceDto | ReplacePriceDto,
   ): Promise<PriceDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(price);
+    const returningClause = generateReturningClause(PriceSchema);
 
-    if (price.name !== undefined) {
-      fields.push(`name = COALESCE(name, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify(price.name));
-    }
-
-    if (price.price !== undefined) {
-      fields.push(`price = $${index++}`);
-      values.push(price.price);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No valid fields to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(priceId);
 
     const query = `
       UPDATE prices
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING
-        id,
-        name,
-        price,
-        created_at,
-        updated_at
-      ;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<PriceDto>(query, values);
