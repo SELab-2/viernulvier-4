@@ -15,6 +15,7 @@ import { LoggerModule } from "./util/logger/logger.module";
 import { LanguageModule } from "./util/language/LanguageModule";
 import { ScraperModule } from "./util/scraper/scraper.module";
 import { ParserModule } from "./parser/parser.module";
+import { PrintItemModule } from "./print/print_item.module";
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ParserModule } from "./parser/parser.module";
     PriceModule,
     AuthModule,
     MediaModule,
+    PrintItemModule,
 
     // This allows all controllers in the MediaModule to use same base name
     RouterModule.register([

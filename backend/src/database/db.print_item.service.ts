@@ -24,10 +24,10 @@ export class PrintItemDatabaseService {
    * @param id The ID we're trying to fetch.
    * @returns The PrintItem if there is one.
    */
-  async getItemById(id: number): Promise<PrintItemDto> {
+  async getPrintItemById(id: number): Promise<PrintItemDto> {
     const query = `
       SELECT id, titel, description, url, created_at, updated_at
-      FROM print_item
+      FROM print_items
       WHERE id = $1
     `;
 
@@ -47,18 +47,16 @@ export class PrintItemDatabaseService {
    * @param paginationFilters The Filters regarding ordering and pagination.
    * @returns The PrintItems.
    */
-  async getAllItems(
+  async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     const query = `
-        SELECT id, titel, description, url, created_at, updated_at
-        FROM print_item
-        ORDER BY id
+        SELECT * FROM print_items
         LIMIT $1 OFFSET $2;
     `;
     const countQuery = `
         SELECT COUNT(DISTINCT id) as count
-        FROM print_item;
+        FROM print_items;
     `;
 
     const offset = paginationFilters.page * paginationFilters.limit;
@@ -82,7 +80,7 @@ export class PrintItemDatabaseService {
    * @param galleryIds a list of media_gallery_ids you want to link this item to. (if left emtpy it will link to none)
    * @returns The created PrintItem.
    */
-  async createItem(
+  async createPrintItem(
     item: CreatePrintItemDto,
     galleryIds: number[],
   ): Promise<PrintItemDto> {
@@ -105,7 +103,7 @@ export class PrintItemDatabaseService {
     if (galleryIds && galleryIds.length > 0) {
       for (const galleryId of galleryIds) {
         await this.db.query(
-          `INSERT INTO print_item_gallery (print_item_id, media_gallery_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          `INSERT INTO print_item_media_gallery (print_item_id, media_gallery_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
           [result[0].id, galleryId],
         );
       }
@@ -119,7 +117,7 @@ export class PrintItemDatabaseService {
    * @param item Fields to update, all optional.
    * @returns The updated print item.
    */
-  async updateItem(
+  async updatePrintItem(
     itemId: number,
     item: ModifyPrintItemDto | ReplacePrintItemDto,
   ): Promise<PrintItemDto> {
@@ -167,7 +165,7 @@ export class PrintItemDatabaseService {
    * Delete a print item by ID. Silently does nothing if the ID doesn't exist.
    * @param id The item to delete.
    */
-  async deleteItem(id: number): Promise<void> {
+  async deletePrintItem(id: number): Promise<void> {
     const query = `DELETE FROM print_items WHERE id = $1 RETURNING id`;
     const result = await this.db.query(query, [id]);
     if (result.length == 0) {
@@ -175,40 +173,5 @@ export class PrintItemDatabaseService {
         `Cannot delete: Print Item ${id} not found.`,
       );
     }
-  }
-
-  /**
-   * Link an existing print item to an existing gallery.
-   * Silently does nothing if the link already exists (ON CONFLICT DO NOTHING).
-   * @param galleryId The gallery to link to.
-   * @param printItemId The print item to link.
-   */
-  async linkPrintItemToGallery(
-    galleryId: number,
-    printItemId: number,
-  ): Promise<void> {
-    const query = `
-      INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id) 
-      VALUES ($1, $2) 
-      ON CONFLICT DO NOTHING
-    `;
-    await this.db.query(query, [galleryId, printItemId]);
-  }
-
-  /**
-   * Unlink a print item from a gallery. Does not delete the print item itself.
-   * Silently does nothing if the link doesn't exist.
-   * @param galleryId The gallery to unlink from.
-   * @param printItemId The print item to unlink.
-   */
-  async unlinkPrintItemFromGallery(
-    galleryId: number,
-    printItemId: number,
-  ): Promise<void> {
-    const query = `
-      DELETE FROM print_item_media_gallery 
-      WHERE media_gallery_id = $1 AND print_item_id = $2
-    `;
-    await this.db.query(query, [galleryId, printItemId]);
   }
 }
