@@ -314,3 +314,5 @@ export type {
   ModifyPrintItem,
   ReplacePrintItem,
 };
+
+export { z, ZodObject } from "zod";

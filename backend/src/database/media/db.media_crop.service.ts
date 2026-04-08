@@ -8,7 +8,13 @@ import {
   ReplaceMediaCropDto,
 } from "../../dto/dto";
 import { ResourceGoneException } from "../../common/exceptions";
-import { PaginatedResponse } from "@repo/common";
+import { MediaCropSchema, PaginatedResponse } from "@repo/common";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "../db-utils";
 
 @Injectable()
 export class MediaCropDatabaseService {
@@ -25,10 +31,12 @@ export class MediaCropDatabaseService {
    * @returns The MediaCrop if there is one.
    */
   async getCropById(id: number): Promise<MediaCropDto> {
+    const returningClause = generateReturningClause(MediaCropSchema);
+
     const query = `
-      SELECT id, name, url, created_at, updated_at
+      SELECT ${returningClause}
       FROM media_crop
-      WHERE id = $1
+      WHERE id = $1;
     `;
 
     const result = await this.db.query<MediaCropDto>(query, [id]);
@@ -42,7 +50,6 @@ export class MediaCropDatabaseService {
     return result[0];
   }
 
-  // overkill but rather overkill than underkill
   /**
    * Get all media crops
    * @returns The MediaCrops.
@@ -50,14 +57,15 @@ export class MediaCropDatabaseService {
   async getAllCrops(
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<MediaCropDto>> {
+    const returningClause = generateReturningClause(MediaCropSchema);
+    console.log(returningClause);
+
     const query = `
-      SELECT * FROM media_crop
+      SELECT ${returningClause}
+      FROM media_crop
       LIMIT $1 OFFSET $2;
     `;
-    const countQuery = `
-      SELECT COUNT(DISTINCT id) as count
-      FROM media_crop;
-    `;
+    const countQuery = generateCountQuery("media_crop");
     const offset = paginationFilters.page * paginationFilters.limit;
 
     const [objects, countResult] = await Promise.all([
@@ -80,30 +88,36 @@ export class MediaCropDatabaseService {
    * @returns The created crop.
    */
   async createCrop(crop: CreateMediaCropDto): Promise<MediaCropDto> {
-    if (!crop.name || !crop.url) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { item_id, ...cropData } = crop;
 
-    const insertQuery = `
-      INSERT INTO media_crop (name, url)
-      VALUES ($1, $2)
-      RETURNING id, name, url, created_at, updated_at
+    const { columns, placeholders, values, nextIndex } =
+      generateInsertClause(cropData);
+    const returningClause = generateReturningClause(MediaCropSchema);
+
+    // Push the item id so it can be used to link.
+    values.push(item_id);
+
+    const insertAndLinkQuery = `
+      WITH inserted_crop AS (
+        INSERT INTO media_crop (${columns})
+        VALUES (${placeholders})
+        RETURNING ${returningClause}
+      ),
+      inserted_link AS (
+        INSERT INTO item_crop (item_id, crop_id)
+        VALUES ($${nextIndex}, (SELECT id FROM inserted_crop))
+      )
+      SELECT * FROM inserted_crop;
     `;
 
-    const result = await this.db.query<MediaCropDto>(insertQuery, [
-      crop.name,
-      crop.url,
-    ]);
+    const result = await this.db.query<MediaCropDto>(
+      insertAndLinkQuery,
+      values,
+    );
 
+    // Throw BadRequest if creation failed.
     if (result.length === 0) {
-      throw new Error("Failed to create media crop");
-    }
-
-    if (crop.item_id) {
-      await this.db.query(
-        `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2)`,
-        [crop.item_id, result[0].id],
-      );
+      throw new BadRequestException("Failed to create media crop.");
     }
 
     return result[0];
@@ -119,31 +133,22 @@ export class MediaCropDatabaseService {
     cropId: number,
     crop: ModifyMediaCropDto | ReplaceMediaCropDto,
   ): Promise<MediaCropDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(crop);
+    const returningClause = generateReturningClause(MediaCropSchema);
 
-    if (crop.name !== undefined) {
-      fields.push(`name = $${index++}`);
-      values.push(crop.name);
+    // Safety guard for empty updates.
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
-    if (crop.url !== undefined) {
-      fields.push(`url = $${index++}`);
-      values.push(crop.url);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No valid fields to update");
-    }
-
+    // Push the actual crop ID.
     values.push(cropId);
 
     const query = `
       UPDATE media_crop
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING id, name, url, created_at, updated_at
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<MediaCropDto>(query, values);
