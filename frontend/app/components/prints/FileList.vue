@@ -16,8 +16,8 @@
  * ]
  */
 
-import { FileText, Download, Trash2 } from "lucide-vue-next";
-import DeleteButton from "../admin/DeleteButton.vue";
+import { FileText } from "lucide-vue-next";
+
 interface PrintsFile { //TODO replace this with actual object later
   id: number;
   name: string;
@@ -33,21 +33,12 @@ const props = defineProps<Props>();
 const { t } = useI18n();
 
 const openFile = (src: string) => window.open(src, '_blank')
-const downloadFile = (src: string, name: string) => {
-  const a = document.createElement('a') // creates a temporary html <a> element
-  a.href = src
-  a.download = name
-  a.click()
-}
 const emit = defineEmits<{
   (e: "delete", file: PrintsFile): void;
 }>();
 
 // constants
 const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer"
-const buttonBase = "p-2 rounded-md border transition-colors duration-150"
-const buttonBlue = `${buttonBase} border-blue-200 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900`
-const buttonRed = `${buttonBase} border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-900`
 </script>
 
 <template>
@@ -74,15 +65,16 @@ const buttonRed = `${buttonBase} border-red-200 text-red-600 hover:bg-red-50 dar
         </div>
 
         <!-- Buttons -->
-        <div class="flex items-center gap-2 shrink-0">
-          <button
-              :class="buttonBlue"
-              @click.stop="file.image && downloadFile(file.image, file.name)"
-          >
-            <Download :size="15" />
-          </button>
-          <DeleteButton
-              :label="t('eventlist.delete')"
+        <div class="flex items-center gap-2 shrink-0" @click.stop>
+          <AdminDownloadButton
+              v-if="file.image"
+              :label="t('prints.download')"
+              :size="37"
+              :src="file.image"
+              :name="file.name"
+          />
+          <AdminDeleteButton
+              :label="t('prints.delete')"
               :size="37"
               @click="emit('delete', file)"
           />
