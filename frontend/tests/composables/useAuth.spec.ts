@@ -12,6 +12,7 @@ vi.mock("#app", async (importOriginal) => {
   }
 });
 
+
 const mockFetch = vi.fn();
 vi.stubGlobal("$fetch", mockFetch);
 
