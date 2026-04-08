@@ -32,15 +32,15 @@ const i18n = createI18n({
 });
 
 const files = [
-    { id: 1, name: "AFFICHE-1.PDF", year: 2025, image: null },
-    { id: 2, name: "AFFICHE-2.PDF", year: 2024, image: null },
-    { id: 3, name: "AFFICHE-3.PDF", year: 2023, image: null },
-    { id: 4, name: "AFFICHE-4.PDF", year: 2022, image: null },
-    { id: 5, name: "AFFICHE-5.PDF", year: 2021, image: null },
-    { id: 6, name: "AFFICHE-6.PDF", year: 2020, image: null },
-    { id: 7, name: "AFFICHE-7.PDF", year: 2019, image: null },
-    { id: 8, name: "AFFICHE-8.PDF", year: 2018, image: null },
-    { id: 9, name: "AFFICHE-9.PDF", year: 2017, image: null },
+    { id: 1, titel: "AFFICHE-1.PDF", description: "", created_at: "2025-01-01T00:00:00Z", updated_at: "2025-01-01T00:00:00Z", url: "" },
+    { id: 2, titel: "AFFICHE-2.PDF", description: "", created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-01T00:00:00Z", url: "" },
+    { id: 3, titel: "AFFICHE-3.PDF", description: "", created_at: "2023-01-01T00:00:00Z", updated_at: "2023-01-01T00:00:00Z", url: "" },
+    { id: 4, titel: "AFFICHE-4.PDF", description: "", created_at: "2022-01-01T00:00:00Z", updated_at: "2022-01-01T00:00:00Z", url: "" },
+    { id: 5, titel: "AFFICHE-5.PDF", description: "", created_at: "2021-01-01T00:00:00Z", updated_at: "2021-01-01T00:00:00Z", url: "" },
+    { id: 6, titel: "AFFICHE-6.PDF", description: "", created_at: "2020-01-01T00:00:00Z", updated_at: "2020-01-01T00:00:00Z", url: "" },
+    { id: 7, titel: "AFFICHE-7.PDF", description: "", created_at: "2019-01-01T00:00:00Z", updated_at: "2019-01-01T00:00:00Z", url: "" },
+    { id: 8, titel: "AFFICHE-8.PDF", description: "", created_at: "2018-01-01T00:00:00Z", updated_at: "2018-01-01T00:00:00Z", url: "" },
+    { id: 9, titel: "AFFICHE-9.PDF", description: "", created_at: "2017-01-01T00:00:00Z", updated_at: "2017-01-01T00:00:00Z", url: "" },
 ];
 
 describe("PrintsFileGrid", () => {

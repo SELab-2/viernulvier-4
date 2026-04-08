@@ -32,9 +32,9 @@ const i18n = createI18n({
 });
 
 const files = [
-    { id: 1, name: "AFFICHE-1.PDF", year: 2025, image: "http://example.com/1.pdf" },
-    { id: 2, name: "AFFICHE-2.PDF", year: 2024, image: null },
-    { id: 3, name: "AFFICHE-3.PDF", year: 2023, image: null },
+    { id: 1, titel: "AFFICHE-1.PDF", description: "", created_at: "2025-01-01T00:00:00Z", updated_at: "2025-01-01T00:00:00Z", url: "http://example.com/1.pdf" },
+    { id: 2, titel: "AFFICHE-2.PDF", description: "", created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-01T00:00:00Z", url: "" },
+    { id: 3, titel: "AFFICHE-3.PDF", description: "", created_at: "2023-01-01T00:00:00Z", updated_at: "2023-01-01T00:00:00Z", url: "" },
 ];
 
 describe("PrintsFileList", () => {
