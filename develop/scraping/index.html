@@ -1183,6 +1183,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#manual-trigger" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2303,6 +2314,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#manual-trigger" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2358,7 +2380,7 @@
 
 
 <h1 id="scraping-overview">Scraping Overview</h1>
-<p>The backend comes with a built-in scheduled scraper that automatically syncs data from the <a href="https://www.viernulvier.gent/api">VierNulVier API</a> into our database archive. Specifically, it pulls productions, events, genres, prices and halls.</p>
+<p>The backend comes with a built-in scheduled scraper that automatically syncs data from the <a href="https://www.viernulvier.gent/api">VierNulVier API</a> into our database archive. Specifically, it pulls productions, events, genres, prices, halls, galleries, items and crops.</p>
 <p>For CSV import documentation, see the CSV Parser section:</p>
 <ul>
 <li><a href="../csv-parser/">CSV Parser Overview</a></li>
@@ -2370,6 +2392,8 @@
 <ul>
 <li><strong>State Tracking:</strong> It relies on the <code>scraper_dates</code> database table, which stores the timestamp of the last successful scrape. Only records modified or created after this timestamp are fetched.</li>
 <li><strong>Database Isolation:</strong> The scraper initializes a dedicated, separate connection to the database. This ensures heavy insert/update operations do not block the connection pool used by the main backend services serving user requests.</li>
+<li><strong>Batched Transactions:</strong> All objects are inserted into the database using transactions with a pre-determined batch size. </li>
+<li><strong>Automatic Media Migration:</strong> When crops are added to the archive database they will start off cross-linked to the original website. Over time they are downloaded by the server and hosted by the archive.</li>
 </ul>
 <h2 id="setup-configuration">Setup &amp; Configuration</h2>
 <p>To enable the scraper, the following environment variables are required:</p>
@@ -2377,22 +2401,29 @@
 <li><code>ENABLE_SCRAPER=true</code></li>
 <li><code>CLIENT_API_KEY=[your_valid_viernulvier_api_key]</code></li>
 </ul>
+<p>To enable automatic migration of media, set the following environment variable:</p>
+<ul>
+<li><code>DOWNLOAD_MEDIA=true</code></li>
+</ul>
 <p>No further manual setup is required. </p>
 <h2 id="execution-troubleshooting">Execution &amp; Troubleshooting</h2>
 <h4 id="schedule">Schedule</h4>
 <p>When enabled, the scraper runs automatically on server initialization, and subsequently every day at exactly midnight (00:00 server time).</p>
+<p>When media downloads are enabled, every minute 50 pieces of media are downloaded and updated in the database. This happens until all current crops are migrated. The 50 crops to migrate are chosen at random as to minimize the recurrence of failed downloads.</p>
+<h4 id="rate-limiting">Rate Limiting</h4>
+<p>The scraper uses the <a href="https://www.npmjs.com/package/bottleneck">Bottleneck</a> package to ensure it doesn't get rate limited. It will also automatically retry any failed request for a total of three times.</p>
 <h4 id="manual-trigger">Manual Trigger</h4>
 <p>Currently there is no manual trigger to run the scraper. You will have to restart the backend to make it run again.</p>
 <h4 id="resetting-the-scraper">Resetting the Scraper</h4>
 <p>If you need to force a full re-scrape of all historical data, simply truncate the <code>scraper_dates</code> table and restart the server. </p>
-<p>A script <code>reset.ts</code> has been added together with the scraper that, when run, will remove all data from the database and reset the <code>scraper_dates</code> table. You can run this script by typing <code>npm run scraper:reset</code> in the root of the project.</p>
+<p>A script <code>reset.ts</code> has been added together with the scraper that, when run, will remove all data from the database and reset the <code>scraper_dates</code> table. You can run this script by typing <code>npm run db:reset</code> in the root of the project.</p>
 <div class="admonition warning">
 <p class="admonition-title">Data Deletion</p>
 <p>This script will remove <strong>ALL</strong> data from the database. Use with caution.</p>
 </div>
 <p>After you've run the reset script you can run the scraper again to fetch all data again.</p>
 <h4 id="error-handling">Error Handling</h4>
-<p>If the VierNulVier API is unreachable or the key is invalid, the scraper will log an error to the log file and will gracefully abort without crashing the main application. It will attempt to scrape again at the next scheduled interval.</p>
+<p>If the VierNulVier API is unreachable or the key is invalid, the scraper will <a href="../logging/">log an error to the log file</a> and will gracefully abort without crashing the main application. It will attempt to scrape again at the next scheduled interval.</p>
 
 
 
