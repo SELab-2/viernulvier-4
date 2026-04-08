@@ -90,7 +90,7 @@ const buttonRed = `${buttonBase} border-red-200 text-red-600 hover:bg-red-50 dar
     <!-- Empty state -->
     <div
         v-else
-        class="rounded-lg border border-border bg-card p-4 text-[12px] text-muted-foreground"
+        class="text-center text-gray-500 dark:text-gray-400"
     >
       {{ t('prints.noFiles') }}
     </div>
