@@ -17,24 +17,18 @@
  */
 
 import { FileText } from "lucide-vue-next";
-
-interface PrintsFile { //TODO replace this with actual object later
-  id: number;
-  name: string;
-  year?: number;
-  image?: string | null;
-}
+import type { PrintItemView } from "@repo/common"
 
 interface Props {
   category: string;
-  files: PrintsFile[];
+  files: PrintItemView[];
 }
 const props = defineProps<Props>();
 const { t } = useI18n();
 
 const openFile = (src: string) => window.open(src, '_blank')
 const emit = defineEmits<{
-  (e: "delete", file: PrintsFile): void;
+  (e: "delete", file: PrintItemView): void;
 }>();
 
 // constants
@@ -49,7 +43,7 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
           v-for="file in props.files"
           :key="file.id"
           :class="rowBase"
-          @click="file.image ? openFile(file.image) : undefined"
+          @click="file.url ? openFile(file.url) : undefined"
       >
         <!-- Icon -->
         <div class="w-9 h-9 rounded-md bg-muted flex items-center justify-center shrink-0">
@@ -58,20 +52,20 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
 
         <!-- File info -->
         <div class="flex-1 min-w-0">
-          <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">{{ file.name }}</p>
-          <p class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
-            {{ category }}<span v-if="file.year"> • {{ file.year }}</span>
-          </p>
+          <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">{{ file.titel }}</p>
+          <span v-if="file.created_at">
+            {{ new Date(file.created_at).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+          </span>
         </div>
 
         <!-- Buttons -->
         <div class="flex items-center gap-2 shrink-0" @click.stop>
           <AdminDownloadButton
-              v-if="file.image"
+              v-if="file.url"
               :label="t('prints.download')"
               :size="37"
-              :src="file.image"
-              :name="file.name"
+              :src="file.url"
+              :name="file.url"
           />
           <AdminDeleteButton
               :label="t('prints.delete')"

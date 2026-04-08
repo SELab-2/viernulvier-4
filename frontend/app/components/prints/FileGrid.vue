@@ -20,17 +20,11 @@
  * ]
  */
 import { ChevronUp, ChevronDown } from "lucide-vue-next";
-
-interface PrintsFile { //TODO replace this with actual object later
-  id: number;
-  name: string;
-  year?: number;
-  image?: string | null;
-}
+import type { PrintItemView } from "@repo/common"
 
 interface Props {
   category: string;
-  files: PrintsFile[];
+  files: PrintItemView[];
 }
 const props = defineProps<Props>();
 const { t } = useI18n();
@@ -103,8 +97,8 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
           <!-- Thumbnail -->
           <div class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150">
             <PdfThumbnail
-                v-if="file.image && file.name.toLowerCase().endsWith('.pdf')"
-                :src="file.image"
+                v-if="file.url && file.titel.toLowerCase().endsWith('.pdf')"
+                :src="file.url"
             >
               <template #fallback>
                 <ThumbnailPlaceholder
@@ -117,11 +111,11 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
               </template>
             </PdfThumbnail>
             <img
-                v-else-if="file.image"
-                :src="file.image"
-                :alt="file.name"
+                v-else-if="file.url"
+                :src="file.url"
+                :alt="file.titel"
                 class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                @click.stop="file.image ? openFile(file.image) : undefined"
+                @click.stop="file.url ? openFile(file.url) : undefined"
             />
             <ThumbnailPlaceholder
                 v-else
@@ -135,13 +129,15 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
 
           <!-- File info -->
           <div class="mt-2">
-            <p :class="[fileLabel, 'group-hover:text-accent transition-colors duration-150']">{{ file.name }}</p>
+            <p :class="[fileLabel, 'group-hover:text-accent transition-colors duration-150']">{{ file.titel }}</p>
             <div class="flex items-center gap-2 mt-1">
               <span
                   :class="[fileLabel, 'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground']"
               >{{ category }}
               </span>
-              <span v-if="file.year" class="text-[11px] text-muted-foreground ml-auto">{{ file.year }}</span>
+              <span v-if="file.created_at" class="text-[11px] text-muted-foreground ml-auto">
+                {{ new Date(file.created_at).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+              </span>
             </div>
           </div>
         </div>
