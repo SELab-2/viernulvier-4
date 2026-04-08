@@ -205,7 +205,7 @@ export class MediaGalleryDatabaseService {
 
     const query = `
       SELECT ${returningClause}
-      FROM print_item ${printPrefix}
+      FROM print_items ${printPrefix}
       INNER JOIN print_item_media_gallery pimg ON pimg.print_item_id = ${printPrefix}.id
       WHERE pimg.media_gallery_id = $1;
     `;
@@ -219,7 +219,11 @@ export class MediaGalleryDatabaseService {
    * @param itemId The item to link.
    */
   async linkItemToGallery(galleryId: number, itemId: number): Promise<void> {
-    const query = `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
+    const query = `
+      INSERT INTO gallery_item (gallery_id, item_id) 
+      VALUES ($1, $2) 
+      ON CONFLICT DO NOTHING;
+    `;
     await this.db.query(query, [galleryId, itemId]);
   }
 
@@ -233,7 +237,10 @@ export class MediaGalleryDatabaseService {
     galleryId: number,
     itemId: number,
   ): Promise<void> {
-    const query = `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`;
+    const query = `
+      DELETE FROM gallery_item 
+      WHERE gallery_id = $1 AND item_id = $2;
+    `;
     await this.db.query(query, [galleryId, itemId]);
   }
 
@@ -250,7 +257,7 @@ export class MediaGalleryDatabaseService {
     const query = `
       INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id) 
       VALUES ($1, $2) 
-      ON CONFLICT DO NOTHING
+      ON CONFLICT DO NOTHING;
     `;
     await this.db.query(query, [galleryId, printItemId]);
   }
@@ -267,7 +274,7 @@ export class MediaGalleryDatabaseService {
   ): Promise<void> {
     const query = `
       DELETE FROM print_item_media_gallery 
-      WHERE media_gallery_id = $1 AND print_item_id = $2
+      WHERE media_gallery_id = $1 AND print_item_id = $2;
     `;
     await this.db.query(query, [galleryId, printItemId]);
   }
