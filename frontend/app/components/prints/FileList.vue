@@ -24,7 +24,7 @@ interface Props {
   files: PrintItemView[];
 }
 const props = defineProps<Props>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const openFile = (src: string) => window.open(src, '_blank')
 const emit = defineEmits<{
@@ -54,7 +54,7 @@ const rowBase = "group relative flex items-center gap-4 px-4 py-3 border-t borde
         <div class="flex-1 min-w-0">
           <p class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150">{{ file.titel }}</p>
           <span v-if="file.created_at">
-            {{ new Date(file.created_at).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+            {{ new Date(file.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) }}
           </span>
         </div>
 

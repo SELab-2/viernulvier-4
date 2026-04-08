@@ -27,7 +27,7 @@ interface Props {
   files: PrintItemView[];
 }
 const props = defineProps<Props>();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
 const handleResize = () => {
@@ -136,7 +136,7 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
               >{{ category }}
               </span>
               <span v-if="file.created_at" class="text-[11px] text-muted-foreground ml-auto">
-                {{ new Date(file.created_at).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}
+                {{ new Date(file.created_at).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' }) }}
               </span>
             </div>
           </div>
