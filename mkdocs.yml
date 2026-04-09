@@ -24,6 +24,7 @@ nav:
       - Locations: api/locations.md
       - Pricing: api/pricing.md
       - Media Storage: api/media_storage.md
+      - Media Crops: api/media_crops.md
       - Prints: api/prints.md
   - Data Schemas:
       - Overview: schemas/index.md
