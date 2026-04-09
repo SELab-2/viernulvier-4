@@ -207,25 +207,18 @@ export class ScraperService implements OnApplicationBootstrap {
    * @returns The Buffer.
    */
   private async getImageBuffer(url: string): Promise<Buffer> {
-    // 1. Clean the URL of stray quotes or newlines
-    const cleanUrl = url.trim().replace(/^"|"$/g, "");
+    const cleanUrl = url.replace(/["'\\]/g, "").trim();
 
-    // 2. Fetch using native routing (NO custom dispatcher!)
     const response = await fetch(cleanUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        Accept:
-          "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-      },
+      // @ts-ignore - dispatcher is a Node-specific extension to standard fetch
+      dispatcher: ipv4Agent,
     });
 
     if (!response.ok) {
-      throw new Error(
-        `[IMAGE FAILURE]: Status ${response.status} for URL: ${cleanUrl}`,
-      );
+      throw new Error(`Failed to fetch images: ${response.statusText}`);
     }
 
+    // Return the buffer for the image.
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   }
