@@ -84,7 +84,9 @@
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
     "noStories": "This production doesn't contain any stories.",
-    "credits": "Credits"
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prices",
+    "hidePriceDetails": "hide details"
   },
   "general": {
     "back": "Back",

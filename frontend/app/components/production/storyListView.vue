@@ -23,6 +23,23 @@ interface Props {
   stories: BlogView[];
 }
 const props = defineProps<Props>();
+
+const stories: BlogView[] = [
+  {
+    id: 1,
+    titel: 'DE MENS: REHEARSAL DIARIES',
+    description: 'Een exclusieve blik achter de schermen tijdens de eerste repetitiedagen in de Theaterzaal.',
+    created_at: '2026-03-10T00:00:00Z',
+    updated_at: '2026-03-10T00:00:00Z'
+  },
+  {
+    id: 2,
+    titel: 'DE GESCHIEDENIS VAN VIERNULVIER',
+    description: 'Hoe deze productie kadert in de rijke historiek van ons kunstencentrum.',
+    created_at: '2026-03-29T19:30:00Z',
+    updated_at: '2026-03-29T19:30:00Z'
+  }
+]
 </script>
 
 <template>

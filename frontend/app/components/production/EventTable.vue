@@ -88,7 +88,7 @@ const cellNarrow = 'p-4 text-sm w-[20%] max-w-0'
   <div class="w-full">
     <div
       v-if="events.length"
-      class="overflow-hidden rounded-lg border-2 border-gray-900 dark:border-white/20 bg-card"
+      class="overflow-hidden rounded-lg border-[1.5px] border-gray-900 dark:border-white/20 bg-card"
     >
       <table class="w-full border-collapse">
         <thead>
@@ -130,9 +130,13 @@ const cellNarrow = 'p-4 text-sm w-[20%] max-w-0'
                 <button
                   v-if="event.prices.length > 1"
                   @click.stop="togglePrices(event.id)"
-                  class="text-[10px] uppercase font-black text-accent mt-1 hover:underline flex items-center gap-1"
+                  class="text-[10px] uppercase font-black text-muted-foreground mt-1 hover:underline flex items-center gap-1"
                 >
-                  {{ expandedPriceIds.has(event.id) ? 'verberg details' : `+ ${event.prices.length - 1} prijzen` }}
+                  {{
+                    expandedPriceIds.has(event.id)
+                      ? t('production.hidePriceDetails')
+                      : t('production.showExtraPrices', { count: event.prices.length - 1 })
+                  }}
                 </button>
               </div>
               <p v-else class="text-sm text-muted-foreground opacity-30">—</p>

@@ -146,7 +146,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
         <div class="flex items-center gap-4 mb-8">
           <button
             @click="goBack()"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] text-muted-foreground hover:text-foreground transition-colors"
+            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] text-foreground hover:text-accent transition-colors"
           >
             <ChevronLeft :size="14" stroke-width="3" />
             {{ t('general.back') }}
@@ -154,7 +154,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 
           <span
             v-if="isValid(production.performer_type)"
-            class="border border-[1.5px] border-muted-foreground text-muted-foreground px-2 py-1 text-[10px] font-black uppercase rounded-sm"
+            class="border border-[1.5px] border-foreground text-foreground px-2 py-1 text-[10px] font-black uppercase rounded-sm"
           >
             {{ production.performer_type }}
           </span>

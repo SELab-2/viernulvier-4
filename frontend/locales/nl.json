@@ -85,7 +85,9 @@
     "stories": "Verhalen",
     "noStories": "Deze productie bevat geen verhalen.",
     "noEvents": "Deze productie bevat geen evenementen.",
-    "credits": "Credits"
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prijzen",
+    "hidePriceDetails": "verberg details"
   },
   "general": {
     "back": "Terug",
