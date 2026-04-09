@@ -56,6 +56,7 @@
     "results": "results",
     "retry": "Try again",
     "loading": "Loading...",
+    "noStories": "No stories",
     "noStoriesDesc": "There are no stories available at this time.",
     "notFound": "Story not found",
     "ariaShow": "Show",
@@ -69,33 +70,7 @@
     "changeLanguage": "Change language",
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
-    "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
-    "calendar": {
-      "toggle": "Date",
-      "filtered": "Filtered",
-      "prevMonth": "Previous month",
-      "nextMonth": "Next month",
-      "clear": "Clear",
-      "apply": "Apply",
-      "today": "Today",
-      "oldest": "Oldest",
-      "date": "Date",
-      "startDate": "Start date",
-      "endDate": "End date",
-      "from": "From",
-      "to": "To",
-      "dateHint": "DD/MM/YYYY",
-      "datePlaceholder": "e.g. 15/03/2023",
-      "fromPlaceholder": "01/01/2023",
-      "toPlaceholder": "31/12/2023",
-      "invalidDate": "Invalid date",
-      "mode": {
-        "single": "Date",
-        "range": "Range",
-        "after-selected": "After ...",
-        "before-selected": "Before ..."
-      }
-    }
+    "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE."
   },
   "baseform": {
     "submitbutton": "Submit",
@@ -107,26 +82,7 @@
     "location": "Location",
     "price": "Price",
     "noEvents": "This production doesn't contain any events.",
-    "stories": "Stories",
-    "noStories": "This production doesn't contain any stories.",
-    "credits": "Credits",
-    "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details"
-  },
-  "general": {
-    "back": "Back",
-    "readMore": "Read more",
-    "readLess": "Read less",
-    "showMore": "Show more",
-    "showLess": "Show less"
-    "noStories": "This production doesn't contain any stories."
-  },
-  "eventlist": {
-    "noEventsFound": "No events found",
-    "price": "Price",
-    "edit": "Edit",
-    "delete": "Delete",
-    "confirmDelete": "Are you sure you want to delete this event?"
+    "stories": "Stories"
   }
 }
 

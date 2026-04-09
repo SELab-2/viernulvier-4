@@ -70,33 +70,7 @@
     "changeLanguage": "Wijzig taal",
     "lightMode": "Lichte modus",
     "darkMode": "Donkere modus",
-    "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
-    "calendar": {
-      "toggle": "Datum",
-      "filtered": "Gefilterd",
-      "prevMonth": "Vorige maand",
-      "nextMonth": "Volgende maand",
-      "clear": "Wissen",
-      "apply": "Toepassen",
-      "today": "Vandaag",
-      "oldest": "Oudste",
-      "date": "Datum",
-      "startDate": "Startdatum",
-      "endDate": "Einddatum",
-      "from": "Van",
-      "to": "Tot",
-      "dateHint": "DD/MM/JJJJ",
-      "datePlaceholder": "bijv. 15/03/2023",
-      "fromPlaceholder": "01/01/2023",
-      "toPlaceholder": "31/12/2023",
-      "invalidDate": "Ongeldige datum",
-      "mode": {
-        "single": "Datum",
-        "range": "Bereik",
-        "after-selected": "Na ...",
-        "before-selected": "Voor ..."
-      }
-    }
+    "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF."
 
   },
   "baseform": {
@@ -108,25 +82,7 @@
     "dateAndTime": "Datum & Tijd",
     "location": "Locatie",
     "price": "Prijs",
-    "stories": "Verhalen",
     "noEvents": "Deze productie bevat geen evenementen.",
-    "credits": "Credits",
-    "showExtraPrices": "+ {count} prijzen",
-    "hidePriceDetails": "verberg details"
-  },
-  "general": {
-    "back": "Terug",
-    "readMore": "Lees meer",
-    "readLess": "Lees minder",
-    "showMore": "Toon meer",
-    "showLess": "Toon minder",
-    "noStories": "Deze productie bevat geen verhalen."
-  },
-  "eventlist": {
-    "noEventsFound": "Geen evenementen gevonden",
-    "price": "Prijs",
-    "edit": "Bewerk",
-    "delete": "Verwijder",
-    "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
+    "stories": "Verhalen"
   }
 }
