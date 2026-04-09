@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+//TODO add display and skeleton
 </script>
 
 <template>
