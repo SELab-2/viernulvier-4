@@ -142,26 +142,34 @@ export class ScraperService implements OnApplicationBootstrap {
 
       for (const crop of batch) {
         try {
-          const imageData = await this.getImageBuffer(crop.url);
+          // --- STEP 1: THE DOWNLOAD ---
+          let imageData: Buffer;
+          try {
+            imageData = await this.getImageBuffer(crop.url);
+          } catch (downloadErr: any) {
+            throw new Error(`DOWNLOAD FAILED: ${downloadErr.message}`);
+          }
 
-          // Filename logic
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
           const finalUrl = `${mediaBase}/photos/${newFileName}`;
 
-          // Save & Update
-          const savedUrl = await this.mediaStorage.saveMedia(
-            finalUrl,
-            imageData,
-          );
-          await this.runner.updatePendingCrop(crop.id, savedUrl);
+          // --- STEP 2: THE SAVE ---
+          let savedUrl: string;
+          try {
+            savedUrl = await this.mediaStorage.saveMedia(finalUrl, imageData);
+          } catch (saveErr: any) {
+            throw new Error(`SAVE FAILED: ${saveErr.message}`);
+          }
 
+          // --- STEP 3: THE UPDATE ---
+          await this.runner.updatePendingCrop(crop.id, savedUrl);
           results.push({ status: "fulfilled", value: crop.id });
 
-          // Sleep for 250ms to be polite to the image server and prevent rate limiting
           await new Promise((resolve) => setTimeout(resolve, 250));
-        } catch (error) {
-          results.push({ status: "rejected", reason: error });
+        } catch (error: any) {
+          // Now our logger will say "Reason: Error: DOWNLOAD FAILED..." or "SAVE FAILED..."
+          results.push({ status: "rejected", reason: error.message });
         }
       }
 
