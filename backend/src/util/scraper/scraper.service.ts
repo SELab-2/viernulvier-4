@@ -6,12 +6,31 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";
 import { ConfigService } from "@nestjs/config";
+import { Agent } from "undici";
+import * as dns from "node:dns";
+
+// Create a dispatcher that strictly uses IPv4
+const ipv4Agent = new Agent({
+  connect: {
+    lookup: (hostname, options, callback) => {
+      // Force family: 4 (IPv4)
+      dns.lookup(hostname, { family: 4 }, callback);
+    },
+  },
+});
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
  */
 @Injectable()
 export class ScraperService implements OnApplicationBootstrap {
+  /**
+   * Image Scraping Job
+   */
+
+  private isProcessingMedia = false;
+  private readonly downloadAmount = 50;
+
   constructor(
     private readonly logger: AppLogger,
     private readonly runner: ScraperRunner,
@@ -110,13 +129,6 @@ export class ScraperService implements OnApplicationBootstrap {
       });
   }
 
-  /**
-   * Image Scraping Job
-   */
-
-  private isProcessingMedia = false;
-  private readonly downloadAmount = 50;
-
   @Cron(CronExpression.EVERY_MINUTE)
   async processImages() {
     if (this.isProcessingMedia || !this.doDownloadMedia) return;
@@ -146,7 +158,7 @@ export class ScraperService implements OnApplicationBootstrap {
           // NOTE: No hashing because it would cause strays.
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
-          const finalUrl = `${mediaBase}/photos/${newFileName}`;
+          const finalUrl = `/photos/${newFileName}`;
 
           // Save & Update
           const savedUrl = await this.mediaStorage.saveMedia(
@@ -195,7 +207,10 @@ export class ScraperService implements OnApplicationBootstrap {
    * @returns The Buffer.
    */
   private async getImageBuffer(url: string): Promise<Buffer> {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      // @ts-ignore - dispatcher is a Node-specific extension to standard fetch
+      dispatcher: ipv4Agent,
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch images: ${response.statusText}`);
