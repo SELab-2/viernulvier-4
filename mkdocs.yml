@@ -23,8 +23,12 @@ nav:
       - Tags: api/tags.md
       - Locations: api/locations.md
       - Pricing: api/pricing.md
-      - Media Storage: api/media_storage.md
-      - Media Crops: api/media_crops.md
+      - Media:
+          - Overview: api/media/index.md
+          - Items: api/media/items.md
+          - Crops: api/media/crops.md
+          - Galleries: api/media/galleries.md
+          - Storage: api/media/storage.md
       - Prints: api/prints.md
   - Data Schemas:
       - Overview: schemas/index.md
