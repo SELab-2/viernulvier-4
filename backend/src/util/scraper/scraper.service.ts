@@ -209,14 +209,33 @@ export class ScraperService implements OnApplicationBootstrap {
   private async getImageBuffer(url: string): Promise<Buffer> {
     const cleanUrl = url.replace(/["'\\]/g, "").trim();
 
-    const response = await fetch(cleanUrl);
+    try {
+      const response = await fetch(cleanUrl, {
+        // 1. Re-attach the IPv4 dispatcher
+        // @ts-ignore - dispatcher is an undici specific property
+        dispatcher: ipv4Agent,
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch images: ${response.statusText}`);
+        // 2. Add headers to masquerade as a normal web browser
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `HTTP Error ${response.status}: ${response.statusText}`,
+        );
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    } catch (err: any) {
+      // 3. Extract the hidden system cause (e.g., ECONNRESET, ETIMEDOUT)
+      const rootCause = err.cause ? err.cause.message : err.message;
+      throw new Error(`Network Error: ${rootCause}`);
     }
-
-    // Return the buffer for the image.
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
   }
 }
