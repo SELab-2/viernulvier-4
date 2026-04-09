@@ -6,7 +6,7 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";
 import { ConfigService } from "@nestjs/config";
-import { Agent } from "undici";
+import { Agent, fetch } from "undici";
 import * as dns from "node:dns";
 
 // Create a dispatcher that strictly uses IPv4
@@ -212,7 +212,6 @@ export class ScraperService implements OnApplicationBootstrap {
     try {
       const response = await fetch(cleanUrl, {
         // 1. Re-attach the IPv4 dispatcher
-        // @ts-ignore - dispatcher is an undici specific property
         dispatcher: ipv4Agent,
 
         // 2. Add headers to masquerade as a normal web browser
