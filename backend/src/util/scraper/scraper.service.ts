@@ -6,7 +6,6 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";
 import { ConfigService } from "@nestjs/config";
-import { fetch } from "undici";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -137,14 +136,14 @@ export class ScraperService implements OnApplicationBootstrap {
       if (!mediaBase)
         throw Error("Forgot to set MEDIA_BASE_URL .env variable?");
 
-      // Process all 50 images in parallel
-      const results = await Promise.allSettled(
-        batch.map(async (crop) => {
+      // Process 50 imgs
+      const results: PromiseSettledResult<number>[] = [];
+
+      for (const crop of batch) {
+        try {
           const imageData = await this.getImageBuffer(crop.url);
 
-          // Filename logic.
-          // We name the file based on the crop's ID and NAME.
-          // NOTE: No hashing because it would cause strays.
+          // Filename logic
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
           const finalUrl = `${mediaBase}/photos/${newFileName}`;
@@ -156,9 +155,14 @@ export class ScraperService implements OnApplicationBootstrap {
           );
           await this.runner.updatePendingCrop(crop.id, savedUrl);
 
-          return crop.id;
-        }),
-      );
+          results.push({ status: "fulfilled", value: crop.id });
+
+          // Sleep for 250ms to be polite to the image server and prevent rate limiting
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        } catch (error) {
+          results.push({ status: "rejected", reason: error });
+        }
+      }
 
       const successCount = results.filter(
         (r) => r.status === "fulfilled",
@@ -218,7 +222,7 @@ export class ScraperService implements OnApplicationBootstrap {
       const arrayBuffer = await response.arrayBuffer();
       return Buffer.from(arrayBuffer);
     } catch (err: any) {
-      // 3. Extract the hidden system cause (e.g., ECONNRESET, ETIMEDOUT)
+      // Extract the hidden system cause (e.g., ECONNRESET, ETIMEDOUT)
       const rootCause = err.cause ? err.cause.message : err.message;
       throw new Error(`Network Error: ${rootCause}`);
     }
