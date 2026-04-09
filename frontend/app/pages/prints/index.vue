@@ -7,6 +7,10 @@
 
     <PrintsHeader/>
 
+    <PrintsToolbar
+        :titles="[]"
+    />
+
   </div>
 </template>
 
