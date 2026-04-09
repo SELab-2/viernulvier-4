@@ -1,26 +1,19 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import { BlogModule } from "../src/blog/blog.module";
-import { EventModule } from "../src/event/event.module";
-import { ProductionModule } from "../src/production/production.module";
-import { TagModule } from "../src/tag/tag.module";
-import { LocationModule } from "../src/location/location.module";
-import { PriceModule } from "../src/price/price.module";
 import { BlogDatabaseService } from "../src/database/db.blog.service";
 import { EventDatabaseService } from "../src/database/db.event.service";
 import { ProductionDatabaseService } from "../src/database/db.production.service";
 import { TagDatabaseService } from "../src/database/db.tag.service";
 import { LocationDatabaseService } from "../src/database/db.location.service";
 import { PriceDatabaseService } from "../src/database/db.price.service";
-
 import request from "supertest";
 import { ApiKeyGuard } from "../src/auth/authGuard";
 import { AppLogger } from "../src/util/logger/logger.service";
 import { ScraperService } from "../src/util/scraper/scraper.service";
-import { MediaModule } from "../src/media/media.module";
 import { MediaCropDatabaseService } from "../src/database/media/db.media_crop.service";
 import { MediaItemDatabaseService } from "../src/database/media/db.media_item.service";
 import { MediaGalleryDatabaseService } from "../src/database/media/db.media_gallery.service";
+import { AppModule } from "../src/app.module"; // <-- Global AppModule imported here
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
@@ -242,7 +235,6 @@ const paginatedResponse = (objects) => ({
 // ==========================================
 
 const mockMediaCropsDbService = () => ({
-  // Crops
   getAllCrops: jest.fn().mockResolvedValue(paginatedResponse([mockMediaCrop])),
   getCropById: jest.fn().mockResolvedValue(mockMediaCrop),
   createCrop: jest.fn().mockResolvedValue(mockMediaCrop),
@@ -251,7 +243,6 @@ const mockMediaCropsDbService = () => ({
 });
 
 const mockMediaItemsDbService = () => ({
-  // Items
   getAllItems: jest.fn().mockResolvedValue(paginatedResponse([mockMediaItem])),
   getItemById: jest.fn().mockResolvedValue(mockMediaItem),
   createItem: jest.fn().mockResolvedValue(mockMediaItem),
@@ -263,7 +254,6 @@ const mockMediaItemsDbService = () => ({
 });
 
 const mockMediaGalleryDbService = () => ({
-  // Galleries
   getGalleries: jest
     .fn()
     .mockResolvedValue(paginatedResponse([mockMediaGallery])),
@@ -276,40 +266,37 @@ const mockMediaGalleryDbService = () => ({
   unlinkItemFromGallery: jest.fn().mockResolvedValue(undefined),
 });
 
+// ==========================================
 // Helper: build app with all modules
+// ==========================================
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [
-      BlogModule,
-      EventModule,
-      ProductionModule,
-      TagModule,
-      LocationModule,
-      PriceModule,
-      MediaModule,
-    ],
+    imports: [AppModule], // <-- Use AppModule globally here
   })
     .overrideGuard(ApiKeyGuard)
     .useValue({ canActivate: jest.fn(() => true) })
+    
+    // Use .useValue() with the executed factory functions!
     .overrideProvider(BlogDatabaseService)
-    .useFactory({ factory: mockBlogDbService })
+    .useValue(mockBlogDbService())
     .overrideProvider(EventDatabaseService)
-    .useFactory({ factory: mockEventDbService })
+    .useValue(mockEventDbService())
     .overrideProvider(ProductionDatabaseService)
-    .useFactory({ factory: mockProductionDbService })
+    .useValue(mockProductionDbService())
     .overrideProvider(TagDatabaseService)
-    .useFactory({ factory: mockTagDbService })
+    .useValue(mockTagDbService())
     .overrideProvider(LocationDatabaseService)
-    .useFactory({ factory: mockLocationDbService })
+    .useValue(mockLocationDbService())
     .overrideProvider(PriceDatabaseService)
-    .useFactory({ factory: mockPriceDbService })
+    .useValue(mockPriceDbService())
     .overrideProvider(MediaItemDatabaseService)
-    .useFactory({ factory: mockMediaItemsDbService })
+    .useValue(mockMediaItemsDbService())
     .overrideProvider(MediaGalleryDatabaseService)
-    .useFactory({ factory: mockMediaGalleryDbService })
+    .useValue(mockMediaGalleryDbService())
     .overrideProvider(MediaCropDatabaseService)
-    .useFactory({ factory: mockMediaCropsDbService })
-    .overrideProvider(AppLogger) // We override these so they don't make a fuss during testing.
+    .useValue(mockMediaCropsDbService())
+    
+    .overrideProvider(AppLogger)
     .useValue({
       log: jest.fn(),
       error: jest.fn(),
@@ -344,7 +331,7 @@ describe("BlogController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close(); // <-- Safety check added everywhere
   });
 
   describe("GET /blogs", () => {
@@ -493,7 +480,7 @@ describe("TagController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /tags", () => {
@@ -608,7 +595,7 @@ describe("ProductionController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /productions", () => {
@@ -757,7 +744,7 @@ describe("ProductionBlogController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /productions/:productionId/blogs", () => {
@@ -843,7 +830,7 @@ describe("ProductionTagController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /productions/:productionId/tags", () => {
@@ -927,7 +914,7 @@ describe("EventController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /events", () => {
@@ -1057,7 +1044,7 @@ describe("LocationController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /locations", () => {
@@ -1135,7 +1122,7 @@ describe("EventLocationController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /events/:eventId/location", () => {
@@ -1217,7 +1204,7 @@ describe("PriceController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /prices", () => {
@@ -1298,7 +1285,7 @@ describe("EventPriceController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
   describe("GET /events/:eventId/prices", () => {
@@ -1377,46 +1364,45 @@ describe("EventPriceController (e2e)", () => {
 
 describe("MediaCropController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaCropDatabaseService; // Using any or MediaDatabaseService type if imported
+  let mediaDb: MediaCropDatabaseService; 
 
   beforeEach(async () => {
     app = await buildApp();
-    // Adjust token if needed based on how it's exported
     mediaDb = app.get<MediaCropDatabaseService>(MediaCropDatabaseService);
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
-  describe("GET /crops", () => {
+  // 👇 ADDED /media/ prefix to ALL crops URLs 👇
+  describe("GET /media/crops", () => {
     it("should return 200 with a paginated list of crops", () => {
       return request(app.getHttpServer())
-        .get("/crops?page=1&limit=10")
+        .get("/media/crops?page=1&limit=10")
         .expect(200)
         .expect(paginatedResponse([mockMediaCrop]));
     });
   });
 
-  describe("GET /crops/:cropId", () => {
+  describe("GET /media/crops/:cropId", () => {
     it("should return 200 with the correct crop", () => {
       return request(app.getHttpServer())
-        .get("/crops/1")
+        .get("/media/crops/1")
         .expect(200)
         .expect(mockMediaCrop);
     });
   });
 
-  describe("POST /crops", () => {
+  describe("POST /media/crops", () => {
     it("should return 201 with the created crop", async () => {
-      const response = await request(app.getHttpServer()).post("/crops").send({
+      const response = await request(app.getHttpServer()).post("/media/crops").send({
         item_id: 1,
         name: "hd_ready",
         url: "https://test.com/a.jpg",
         autoDownload: 0,
       });
 
-      // THIS WILL TELL YOU EXACTLY WHAT IS WRONG:
       if (response.status === 400) {
         console.log("Validation Error:", response.body);
       }
@@ -1426,29 +1412,29 @@ describe("MediaCropController (e2e)", () => {
     });
   });
 
-  describe("PUT /crops/:cropId", () => {
+  describe("PUT /media/crops/:cropId", () => {
     it("should return 200 with the replaced crop", () => {
       return request(app.getHttpServer())
-        .put("/crops/1")
+        .put("/media/crops/1")
         .send({ name: "hd_ready", url: "https://test.com/b.jpg" })
         .expect(200)
         .expect(mockMediaCrop);
     });
   });
 
-  describe("PATCH /crops/:cropId", () => {
+  describe("PATCH /media/crops/:cropId", () => {
     it("should return 200 with the modified crop", () => {
       return request(app.getHttpServer())
-        .patch("/crops/1")
+        .patch("/media/crops/1")
         .send({ url: "https://test.com/new.jpg" })
         .expect(200)
         .expect(mockMediaCrop);
     });
   });
 
-  describe("DELETE /crops/:cropId", () => {
+  describe("DELETE /media/crops/:cropId", () => {
     it("should return 200 after deleting crop", () => {
-      return request(app.getHttpServer()).delete("/crops/1").expect(200);
+      return request(app.getHttpServer()).delete("/media/crops/1").expect(200);
     });
   });
 });
@@ -1467,31 +1453,32 @@ describe("MediaItemController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
-  describe("GET /items", () => {
+  // 👇 ADDED /media/ prefix to ALL items URLs 👇
+  describe("GET /media/items", () => {
     it("should return 200 with a paginated list of flattened items", () => {
       return request(app.getHttpServer())
-        .get("/items?lang=en")
+        .get("/media/items?lang=en")
         .expect(200)
         .expect(paginatedResponse([mockMediaItemView]));
     });
   });
 
-  describe("GET /items/:itemId", () => {
+  describe("GET /media/items/:itemId", () => {
     it("should return 200 with the correct flattened item", () => {
       return request(app.getHttpServer())
-        .get("/items/1?lang=en")
+        .get("/media/items/1?lang=en")
         .expect(200)
         .expect(mockMediaItemView);
     });
   });
 
-  describe("POST /items", () => {
+  describe("POST /media/items", () => {
     it("should return 201 with the created item", () => {
       return request(app.getHttpServer())
-        .post("/items")
+        .post("/media/items")
         .send({
           type: "image",
           original_filename: "test.png",
@@ -1507,10 +1494,10 @@ describe("MediaItemController (e2e)", () => {
     });
   });
 
-  describe("PUT /items/:itemId", () => {
+  describe("PUT /media/items/:itemId", () => {
     it("should return 200 with the replaced item", () => {
       return request(app.getHttpServer())
-        .put("/items/1")
+        .put("/media/items/1")
         .send({
           type: "image",
           original_filename: "test.png",
@@ -1526,42 +1513,42 @@ describe("MediaItemController (e2e)", () => {
     });
   });
 
-  describe("PATCH /items/:itemId", () => {
+  describe("PATCH /media/items/:itemId", () => {
     it("should return 200 with the modified item", () => {
       return request(app.getHttpServer())
-        .patch("/items/1")
+        .patch("/media/items/1")
         .send({ position: "carousel" })
         .expect(200)
         .expect(mockMediaItem);
     });
   });
 
-  describe("DELETE /items/:itemId", () => {
+  describe("DELETE /media/items/:itemId", () => {
     it("should return 200 after deleting item", () => {
-      return request(app.getHttpServer()).delete("/items/1").expect(200);
+      return request(app.getHttpServer()).delete("/media/items/1").expect(200);
     });
   });
 
   // Relationships: Item <-> Crops
-  describe("GET /items/:itemId/crops", () => {
+  describe("GET /media/items/:itemId/crops", () => {
     it("should return 200 with the crops of the item", () => {
       return request(app.getHttpServer())
-        .get("/items/1/crops")
+        .get("/media/items/1/crops")
         .expect(200)
         .expect([mockMediaCrop]);
     });
   });
 
-  describe("PUT /items/:itemId/crops/:cropId", () => {
+  describe("PUT /media/items/:itemId/crops/:cropId", () => {
     it("should return 200 after successfully linking crop", () => {
-      return request(app.getHttpServer()).put("/items/1/crops/2").expect(200);
+      return request(app.getHttpServer()).put("/media/items/1/crops/2").expect(200);
     });
   });
 
-  describe("DELETE /items/:itemId/crops/:cropId", () => {
+  describe("DELETE /media/items/:itemId/crops/:cropId", () => {
     it("should return 200 after unlinking crop", () => {
       return request(app.getHttpServer())
-        .delete("/items/1/crops/2")
+        .delete("/media/items/1/crops/2")
         .expect(200);
     });
   });
@@ -1581,85 +1568,86 @@ describe("MediaGalleryController (e2e)", () => {
   });
 
   afterEach(async () => {
-    await app.close();
+    if (app) await app.close();
   });
 
-  describe("GET /galleries", () => {
+  // 👇 ADDED /media/ prefix to ALL galleries URLs 👇
+  describe("GET /media/galleries", () => {
     it("should return 200 with a paginated list of galleries", () => {
       return request(app.getHttpServer())
-        .get("/galleries?page=1&limit=10")
+        .get("/media/galleries?page=1&limit=10")
         .expect(200)
         .expect(paginatedResponse([mockMediaGallery]));
     });
   });
 
-  describe("GET /galleries/:galleryId", () => {
+  describe("GET /media/galleries/:galleryId", () => {
     it("should return 200 with the correct gallery", () => {
       return request(app.getHttpServer())
-        .get("/galleries/1")
+        .get("/media/galleries/1")
         .expect(200)
         .expect(mockMediaGallery);
     });
   });
 
-  describe("POST /galleries", () => {
+  describe("POST /media/galleries", () => {
     it("should return 201 with the created gallery", () => {
       return request(app.getHttpServer())
-        .post("/galleries")
+        .post("/media/galleries")
         .send({ name: "hi", type: "default" })
         .expect(201)
         .expect(mockMediaGallery);
     });
   });
 
-  describe("PUT /galleries/:galleryId", () => {
+  describe("PUT /media/galleries/:galleryId", () => {
     it("should return 200 with the replaced gallery", () => {
       return request(app.getHttpServer())
-        .put("/galleries/1")
+        .put("/media/galleries/1")
         .send({ name: "completely replaced gallery", type: "default" })
         .expect(200)
         .expect(mockMediaGallery);
     });
   });
 
-  describe("PATCH /galleries/:galleryId", () => {
+  describe("PATCH /media/galleries/:galleryId", () => {
     it("should return 200 with the modified gallery", () => {
       return request(app.getHttpServer())
-        .patch("/galleries/1")
+        .patch("/media/galleries/1")
         .send({ name: "just updated the name" })
         .expect(200)
         .expect(mockMediaGallery);
     });
   });
 
-  describe("DELETE /galleries/:galleryId", () => {
+  describe("DELETE /media/galleries/:galleryId", () => {
     it("should return 200 after deleting gallery", () => {
-      return request(app.getHttpServer()).delete("/galleries/1").expect(200);
+      return request(app.getHttpServer()).delete("/media/galleries/1").expect(200);
     });
   });
 
   // Relationships: Gallery <-> Items
-  describe("GET /galleries/:galleryId/items", () => {
+  describe("GET /media/galleries/:galleryId/items", () => {
     it("should return 200 with items of the gallery", () => {
       return request(app.getHttpServer())
-        .get("/galleries/1/items")
+        .get("/media/galleries/1/items")
         .expect(200)
         .expect([mockMediaItem]);
     });
   });
 
-  describe("PUT /galleries/:galleryId/items/:itemId", () => {
+  describe("PUT /media/galleries/:galleryId/items/:itemId", () => {
     it("should return 200 after linking item to gallery", () => {
       return request(app.getHttpServer())
-        .put("/galleries/1/items/2")
+        .put("/media/galleries/1/items/2")
         .expect(200);
     });
   });
 
-  describe("DELETE /galleries/:galleryId/items/:itemId", () => {
+  describe("DELETE /media/galleries/:galleryId/items/:itemId", () => {
     it("should return 200 after unlinking item from gallery", () => {
       return request(app.getHttpServer())
-        .delete("/galleries/1/items/2")
+        .delete("/media/galleries/1/items/2")
         .expect(200);
     });
   });
