@@ -11,7 +11,7 @@ export class RemoteMediaStorage implements MediaStorage {
    */
   async save(url: string, buffer: Buffer): Promise<string> {
     const response = await fetch(url, {
-      method: "PUT",
+      method: "POST",
       body: buffer.buffer as ArrayBuffer,
     });
     if (!response.ok)
