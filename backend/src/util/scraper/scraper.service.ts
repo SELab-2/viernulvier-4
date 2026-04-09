@@ -6,6 +6,7 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";
 import { ConfigService } from "@nestjs/config";
+import * as https from "node:https";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -199,32 +200,53 @@ export class ScraperService implements OnApplicationBootstrap {
    * @param url The URL to the image.
    * @returns The Buffer.
    */
-  private async getImageBuffer(url: string): Promise<Buffer> {
+  private getImageBuffer(url: string): Promise<Buffer> {
     const cleanUrl = url.replace(/["'\\]/g, "").trim();
 
-    try {
-      const response = await fetch(cleanUrl, {
-        // Add headers to masquerade as a normal web browser
+    return new Promise((resolve, reject) => {
+      const options = {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.9",
         },
+        // This forces the request to use IPv4, solving any DNS issues
+        // without needing custom Agents or package.json flags!
+        family: 4,
+      };
+
+      const req = https.get(cleanUrl, options, (res) => {
+        // Handle HTTP errors (e.g., 404, 403, 500)
+        if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+          reject(
+            new Error(`HTTP Error ${res.statusCode}: ${res.statusMessage}`),
+          );
+          // Consume response data to free up memory
+          res.resume();
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+
+        res.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on("end", () => {
+          resolve(Buffer.concat(chunks));
+        });
       });
 
-      if (!response.ok) {
-        throw new Error(
-          `HTTP Error ${response.status}: ${response.statusText}`,
-        );
-      }
+      // Handle pure network errors (e.g., ECONNRESET, ENOTFOUND)
+      req.on("error", (err) => {
+        reject(new Error(`Network Error: ${err.message}`));
+      });
 
-      const arrayBuffer = await response.arrayBuffer();
-      return Buffer.from(arrayBuffer);
-    } catch (err: any) {
-      // Extract the hidden system cause (e.g., ECONNRESET, ETIMEDOUT)
-      const rootCause = err.cause ? err.cause.message : err.message;
-      throw new Error(`Network Error: ${rootCause}`);
-    }
+      // Set a 15-second timeout so it doesn't hang forever
+      req.setTimeout(15000, () => {
+        req.destroy();
+        reject(new Error("Network Error: Request timed out"));
+      });
+    });
   }
 }
