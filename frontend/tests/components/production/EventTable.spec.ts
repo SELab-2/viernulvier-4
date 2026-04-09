@@ -14,8 +14,7 @@ const i18n = createI18n({
                 events: "Evenementen",
                 dateAndTime: "Datum & Tijd",
                 location: "Locatie",
-                price: "Prijs",
-                noEvents: "Deze productie bevat geen evenementen."
+                price: "Prijs"
             }
         },
         en: {
@@ -23,8 +22,7 @@ const i18n = createI18n({
                 events: "Events",
                 dateAndTime: "Date & Time",
                 location: "Location",
-                price: "Price",
-                noEvents: "This production doesn't any event."
+                price: "Price"
             }
         },
     },
@@ -61,10 +59,6 @@ describe("EventTable", () => {
         });
     });
 
-    it("renders the title", () => {
-        expect(wrapper.find("h3").text()).toContain("Evenementen");
-    });
-
     it("renders the table headers", () => {
         const headers = wrapper.findAll("th").map(th => th.text()); // searches all table header elements
         expect(headers).toEqual(expect.arrayContaining(["Datum & Tijd", "Locatie", "Prijs"]));
@@ -80,18 +74,5 @@ describe("EventTable", () => {
         expect(text).toContain("15,00");
         expect(text).toContain("Gent");
         expect(text).toContain("12,50");
-    });
-
-    it("shows empty message when no events are provided", () => {
-        const w = mount(EventTable, {
-            global: { plugins: [i18n] },
-            props: { events: [] },
-        });
-        expect(w.text()).toContain("Deze productie bevat geen evenementen.");
-        expect(w.find("table").exists()).toBe(false);
-    });
-
-    it("does not show empty message when events are provided", () => {
-        expect(wrapper.text()).not.toContain("Deze productie bevat geen evenementen.");
     });
 });

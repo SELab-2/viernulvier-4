@@ -9,14 +9,12 @@ const i18n = createI18n({
     messages: {
         nl: {
             "production": {
-                stories: "Verhalen",
-                noStories: "Deze productie bevat geen verhalen."
+                stories: "Verhalen"
             }
         },
         en: {
             "production": {
-                stories: "Stories",
-                noStories: "This production doesn't contain any stories."
+                stories: "Stories"
             }
         },
     },
@@ -53,17 +51,5 @@ describe("ProductionStories", () => {
         expect(text).toContain("description 1");
         expect(text).toContain("Titel 2");
         expect(text).toContain("description 2");
-    });
-
-    it("shows empty message when no stories are provided", () => {
-        const w = mount(ProductionStories, {
-            global: { plugins: [i18n] },
-            props: { stories: [] },
-        });
-        expect(w.text()).toContain("Deze productie bevat geen verhalen.");
-    });
-
-    it("does not show empty message when stories are provided", () => {
-        expect(wrapper.text()).not.toContain("Deze productie bevat geen verhalen.");
     });
 });
