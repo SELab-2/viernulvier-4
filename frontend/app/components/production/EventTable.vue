@@ -28,7 +28,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  limit: 1
+  limit: 3
 })
 
 const isExpanded = ref(false)
@@ -160,9 +160,24 @@ const cellNarrow = 'p-4 text-sm w-[20%] max-w-0'
       <button
         v-if="hasHiddenEvents"
         @click="isExpanded = !isExpanded"
-        class="w-full py-4 text-accent hover:bg-card-hover border-t-2 border-gray-900/10 dark:border-white/10 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[2px] transition-all"
+        class="w-full py-4 t text-accent hover:bg-card-hover border-t-2 border-border flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[2px] transition-all"
       >
+        <template v-if="!isExpanded">
+          {{ t('general.showMore') }} ({{ events.length - limit }})
+          <ChevronDown :size="14" stroke-width="3" />
+        </template>
+        <template v-else>
+          {{ t('general.showLess') }}
+          <ChevronUp :size="14" stroke-width="3" />
+        </template>
       </button>
+    </div>
+
+    <div
+      v-else
+      class="rounded-lg border border-border bg-card p-12 text-center text-sm text-muted-foreground"
+    >
+      <p class="font-medium italic opacity-60">{{ t('production.noEvents') }}</p>
     </div>
   </div>
 </template>
