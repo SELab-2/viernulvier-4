@@ -209,10 +209,7 @@ export class ScraperService implements OnApplicationBootstrap {
   private async getImageBuffer(url: string): Promise<Buffer> {
     const cleanUrl = url.replace(/["'\\]/g, "").trim();
 
-    const response = await fetch(cleanUrl, {
-      // @ts-ignore - dispatcher is a Node-specific extension to standard fetch
-      dispatcher: ipv4Agent,
-    });
+    const response = await fetch(cleanUrl);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch images: ${response.statusText}`);
