@@ -50,5 +50,14 @@
     "argon2": "^0.44.0",
     "dotenv": "^17.3.1",
     "sanitize-html": "^2.17.1"
+  },
+
+  "//": "These overrides are temporary fixes for vulnerabilities!!!",
+  "overrides": {
+    "lodash": "^4.17.24",
+    "path-to-regexp": "^8.4.2",
+    "srvx": "^0.11.15",
+    "h3": "^1.15.11",
+    "h3-next": "npm:h3@^2.0.0"
   }
 }
