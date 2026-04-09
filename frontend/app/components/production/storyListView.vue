@@ -44,13 +44,6 @@ const props = defineProps<Props>();
       </div>
     </div>
 
-    <!-- Empty state -->
-    <div
-        v-else
-        class="rounded-xl border border-border bg-card dark:bg-muted p-4 text-[12px] text-foreground/60"
-    >
-      {{ t('production.noStories') }}
-    </div>
   </div>
 </template>
 

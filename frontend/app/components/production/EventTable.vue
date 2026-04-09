@@ -176,12 +176,5 @@ const cellNarrow = 'p-4 text-sm w-[20%] max-w-0'
         </template>
       </button>
     </div>
-
-    <div
-      v-else
-      class="rounded-lg border border-border bg-card p-12 text-center text-sm text-muted-foreground"
-    >
-      <p class="font-medium italic opacity-60">{{ t('production.noEvents') }}</p>
-    </div>
   </div>
 </template>
