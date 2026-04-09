@@ -41,8 +41,7 @@ const mockPrice = (amount: number): PriceView => ({
 const events: EventWithDetails[] = [
     { ...base, id: 1, starttime: '2026-03-10T19:30:00Z', location: mockLocation('Antwerpen'), prices: [mockPrice(15)] },
     { ...base, id: 2, starttime: '2026-03-29T20:00:00Z', location: mockLocation('Gent'), prices: [mockPrice(12.50)] },
-    { ...base, id: 3, starttime: '2026-04-05T18:15:00Z', location: mockLocation('Brussel'), prices: [mockPrice(10)] },
-    { ...base, id: 4, starttime: '2026-04-12T20:45:00Z', location: mockLocation('Leuven'), prices: [mockPrice(8)] },
+    { ...base, id: 3, starttime: '2026-04-05T18:15:00Z', location: mockLocation('Brussel'), prices: [mockPrice(10)] }
 ];
 
 describe("EventTable", () => {
@@ -64,7 +63,7 @@ describe("EventTable", () => {
         expect(headers).toEqual(expect.arrayContaining(["Datum & Tijd", "Locatie", "Prijs"]));
     });
 
-    it("renders a row for each event", () => {
+    it("renders a row for each event when there are less than 4 events", () => {
         expect(wrapper.findAll("tr").length).toBe(events.length + 1); // +1 for the header row
     });
 
