@@ -6,12 +6,31 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";
 import { ConfigService } from "@nestjs/config";
+import { Agent } from "undici";
+import * as dns from "node:dns";
+
+// Create a dispatcher that strictly uses IPv4
+const ipv4Agent = new Agent({
+  connect: {
+    lookup: (hostname, options, callback) => {
+      // Force family: 4 (IPv4)
+      dns.lookup(hostname, { family: 4 }, callback);
+    },
+  },
+});
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
  */
 @Injectable()
 export class ScraperService implements OnApplicationBootstrap {
+  /**
+   * Image Scraping Job
+   */
+
+  private isProcessingMedia = false;
+  private readonly downloadAmount = 50;
+
   constructor(
     private readonly logger: AppLogger,
     private readonly runner: ScraperRunner,
@@ -110,13 +129,6 @@ export class ScraperService implements OnApplicationBootstrap {
       });
   }
 
-  /**
-   * Image Scraping Job
-   */
-
-  private isProcessingMedia = false;
-  private readonly downloadAmount = 50;
-
   @Cron(CronExpression.EVERY_MINUTE)
   async processImages() {
     if (this.isProcessingMedia || !this.doDownloadMedia) return;
@@ -146,7 +158,7 @@ export class ScraperService implements OnApplicationBootstrap {
           // NOTE: No hashing because it would cause strays.
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
-          const finalUrl = `${mediaBase}/photos/${newFileName}`;
+          const finalUrl = `/photos/${newFileName}`;
 
           // Save & Update
           const savedUrl = await this.mediaStorage.saveMedia(
@@ -195,35 +207,9 @@ export class ScraperService implements OnApplicationBootstrap {
    * @returns The Buffer.
    */
   private async getImageBuffer(url: string): Promise<Buffer> {
-    const apiKey = this.configService.get<string>("CLIENT_API_KEY");
-
-    const browserHeaders = new Headers({
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-      "X-AUTH-TOKEN": `${apiKey}`,
-
-      // Tell the server we specifically want an image, falling back to anything
-      Accept:
-        "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-      "Accept-Language": "en-US,en;q=0.9",
-
-      // Modern browser fingerprinting headers (Highly effective against WAFs)
-      "Sec-Ch-Ua":
-        '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
-      "Sec-Ch-Ua-Mobile": "?0",
-      "Sec-Ch-Ua-Platform": '"Windows"',
-      "Sec-Fetch-Dest": "image",
-      "Sec-Fetch-Mode": "no-cors",
-      "Sec-Fetch-Site": "cross-site",
-
-      // Optional: If you suspect hotlink protection, spoof the Referer.
-      // Try setting this to the target's own homepage, or a generic search engine.
-      Referer: "https://www.google.com/",
-    });
-
     const response = await fetch(url, {
-      method: "GET",
-      headers: browserHeaders,
+      // @ts-ignore - dispatcher is a Node-specific extension to standard fetch
+      dispatcher: ipv4Agent,
     });
 
     if (!response.ok) {
