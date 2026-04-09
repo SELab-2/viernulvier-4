@@ -1,130 +1,136 @@
 <script setup lang="ts">
-//TODO: als afbeeldingen erbij zijn -> altijd witte letters nemen. Aparte klasse in css speciaal voor als er bannergradient verwacht wordt
-import { ref, computed } from 'vue'
-import { ChevronLeft } from 'lucide-vue-next'
-import type { ProductionView, TagView } from "@repo/common"
+import { ref, computed } from 'vue';
+import { ChevronLeft } from 'lucide-vue-next';
+import type { ProductionView, TagView } from "@repo/common";
 import ProductionStories from "../../components/production/storyListView.vue";
 import EventTable from "../../components/production/EventTable.vue";
 
-const { t, locale } = useI18n()
-const router = useRouter()
-const { getById, getTags, getBlogs} = useProductionApi()
-const route = useRoute()
+const { t, locale } = useI18n();
+const router = useRouter();
+const { getById, getTags, getBlogs} = useProductionApi();
+const route = useRoute();
 
 const goBack = () => {
   if (window.history.length > 1) {
-    router.back()
+    router.back();
   } else {
-    router.push('/productions') // Fallback
+    router.push('/productions'); // Fallback
   }
 }
 
-const isExpanded = ref(false)
-const CHARACTER_LIMIT = 800
+const isExpanded = ref(false);
+const CHARACTER_LIMIT = 800;
 
 const productionId = computed(() => {
-  const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
-  const n = parseInt(raw ?? "", 10)
-  return isFinite(n) ? n : null
-})
+  const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+  const n = parseInt(raw ?? "", 10);
+  return isFinite(n) ? n : null;
+});
 
-/** 1. Productie ophalen */
+/** Get the main production data */
 const { data: production} = await useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
-    if (!productionId.value) return null
-    const res = await getById(productionId.value, locale.value as any)
-    return (res as any)?.data ?? res
+    if (!productionId.value) return null;
+    const res = await getById(productionId.value, locale.value as any);
+    return (res as any)?.data ?? res;
   },
   { watch: [productionId, locale] }
-)
+);
 
-/** 2. Tags ophalen met opschoning */
+/** Get tags and remove empty ones */
 const { data: tags } = await useAsyncData<TagView[]>(
   `prod-tags-${route.params.id}-${locale.value}`,
   async () => {
-    if (!productionId.value) return []
-    const res = await getTags(productionId.value, locale.value as any)
-    const data = (res as any)?.data ?? res
-    if (!Array.isArray(data)) return []
-    return data.filter(t => (t.tag || "").trim().length > 1)
+    if (!productionId.value) return [];
+    const res = await getTags(productionId.value, locale.value as any);
+    const data = (res as any)?.data ?? res;
+    if (!Array.isArray(data)) return [];
+    return data.filter(t => (t.tag || "").trim().length > 1);
   },
   { watch: [productionId, locale] }
 )
 
-const { getAll: getAllEvents, getLocation, getPrices } = useEventApi()
+const { getAll: getAllEvents, getLocation, getPrices } = useEventApi();
 
+/** Get all events with their location and prices */
 const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`, async () => {
-  if (!productionId.value) return []
+  if (!productionId.value) return [];
 
-  const res = await getAllEvents({ eventFilters: { production_id: productionId.value } })
-  const list = res.data?.objects ?? []
+  const res = await getAllEvents({ eventFilters: { production_id: productionId.value } });
+  const list = res.data?.objects ?? [];
 
-  if (!list.length) return []
+  if (!list.length) return [];
 
   return Promise.all(list.map(async (e) => {
     const [locRes, priceRes] = await Promise.all([
       getLocation(e.id, locale.value as any).catch(() => null),
       getPrices(e.id, locale.value as any).catch(() => [])
-    ])
+    ]);
 
-    const locationData = (locRes as any)?.data ?? locRes
-    const pricesData = (priceRes as any)?.data ?? priceRes ?? []
+    const locationData = (locRes as any)?.data ?? locRes;
+    const pricesData = (priceRes as any)?.data ?? priceRes ?? [];
 
     return {
       ...e,
       location: locationData,
       prices: Array.isArray(pricesData) ? pricesData : []
     }
-  }))
+  }));
 }, {
   watch: [productionId, locale],
   default: () => []
 })
 
-/** 5. Blogs (Stories) ophalen */
+/** Get blogs/stories */
 const { data: stories } = await useAsyncData(
   `prod-stories-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return []
-    const res = await getBlogs(productionId.value, locale.value as any)
+    const res = await getBlogs(productionId.value, locale.value as any);
 
-    const data = (res as any)?.data ?? res
-    return Array.isArray(data) ? data : []
+    const data = (res as any)?.data ?? res;
+    return Array.isArray(data) ? data : [];
   },
   { watch: [productionId, locale], default: () => [] }
 )
 
-/** 3. Helper om "N/A" of lege velden te checken */
+/**
+ * Check if a string is useful (not "N/A" or empty)
+ */
 const isValid = (val: any) => {
-  if (!val) return false
-  const s = String(val).trim().toUpperCase()
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
+  if (!val) return false;
+  const s = String(val).trim().toUpperCase();
+  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N";
 }
 
-const image = computed(() => (production.value as any)?.image ?? null) //TODO verander! voeg iets toe in useProduction?
-const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0))
+const image = computed(() => (production.value as any)?.image ?? null); //TODO verander! (ook: witte letters bij light en dark mode op image)
+const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0));
 
+/**
+ * Sanitizes raw text by removing escape characters and
+ * converting newlines to HTML line breaks for v-html rendering.
+ */
 const cleanText = (text: string | null | undefined) => {
-  if (!text) return ""
+  if (!text) return "";
   return text
-    .replace(/\\/g, '') //alleen deze nodig? .trim()
+    .replace(/\\/g, '')
     .trim()
     .replace(/(\r?\n){2,}/g, '\n\n')
-    .replace(/\n/g, '<br />')
+    .replace(/\n/g, '<br />');
 }
 
-const fullDescription = computed(() => cleanText(production.value?.description1) || "")
+const fullDescription = computed(() => cleanText(production.value?.description1) || "");
 
 const displayedDescription = computed(() => {
-  const desc = fullDescription.value
+  const desc = fullDescription.value;
   if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
-    return desc
+    return desc;
   }
-  return desc.slice(0, CHARACTER_LIMIT) + '...'
+  return desc.slice(0, CHARACTER_LIMIT) + '...';
 })
 
-const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT)
+const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT);
 
 </script>
 
@@ -194,7 +200,11 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 
           <div class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200" v-html="displayedDescription"></div>
 
-          <button v-if="isLongDescription" @click="isExpanded = !isExpanded" class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none">
+          <button
+            v-if="isLongDescription"
+            @click="isExpanded = !isExpanded"
+            class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+          >
             {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
           </button>
         </div>
@@ -214,11 +224,20 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
         </div>
 
         <div class="max-w-4xl">
-          <div v-if="isValid(production.description2)" class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl" v-html="cleanText(production.description2)"></div>
+          <div v-if="isValid(production.description2)"
+               class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl"
+               v-html="cleanText(production.description2)">
+          </div>
 
-          <div v-if="isValid(production.credits)" class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">{{ t('production.credits')}}</h4>
-            <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12" v-html="production.credits"></div>
+          <div
+            v-if="isValid(production.credits)"
+            class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800"
+          >
+            <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
+              {{ t('production.credits')}}</h4>
+            <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12"
+                 v-html="production.credits">
+            </div>
           </div>
         </div>
 
@@ -228,7 +247,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 </template>
 
 <style scoped>
-/* links in description (TODO: description2 ook v-html?) */
+/* links in description */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
