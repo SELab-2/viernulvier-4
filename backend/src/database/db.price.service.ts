@@ -38,7 +38,7 @@ export class PriceDatabaseService {
     const result = await this.db.query<PriceDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Location with ID ${id} not found.`);
+      throw new ResourceGoneException(`Price with ID ${id} not found.`);
     }
 
     return result[0];
