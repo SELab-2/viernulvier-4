@@ -1,6 +1,6 @@
 import { Command, CommandRunner } from "nest-commander";
 import { InjectCsvEngine } from "./inject-csv.engine";
-import { AppLogger } from "src/util/logger/logger.service";
+import { AppLogger } from "../../logger/logger.service";
 import { Injectable } from "@nestjs/common";
 import path from "path";
 
