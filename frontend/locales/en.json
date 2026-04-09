@@ -119,6 +119,8 @@
     "confirmDelete": "Are you sure you want to delete this event?"
   },
   "prints": {
+    "title": "Prints",
+    "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
     "files": "Files",
     "noFilesCat": "This category doesn't contain any files.",
     "noFiles": "No files available.",

@@ -120,6 +120,8 @@
     "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   },
   "prints": {
+    "title": "Drukwerk",
+    "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
     "noFiles": "Geen bestanden beschikbaar.",
