@@ -172,7 +172,7 @@ export function generateReturningClause(
  */
 export function generateCountQuery(tableName: string): string {
   const query = `
-      SELECT COUNT(DISTINCT id) as count
+      SELECT COUNT(id) as count
       FROM ${tableName};
   `;
   return query;
