@@ -89,7 +89,9 @@
   "general": {
     "back": "Back",
     "readMore": "Read more",
-    "readLess": "Read less"
+    "readLess": "Read less",
+    "showMore": "Show more",
+    "showLess": "Show less"
   }
 }
 

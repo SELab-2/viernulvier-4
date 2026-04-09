@@ -3,8 +3,8 @@
 import { ref, computed } from 'vue'
 import { ChevronLeft } from 'lucide-vue-next'
 import type { ProductionView, TagView } from "@repo/common"
-import EventTable from "../../components/production/EventTable.vue";
 import ProductionStories from "../../components/production/storyListView.vue";
+import EventTable from "../../components/production/EventTable.vue";
 
 const { t, locale } = useI18n()
 const router = useRouter()

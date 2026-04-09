@@ -90,6 +90,8 @@
   "general": {
     "back": "Terug",
     "readMore": "Lees meer",
-    "readLess": "Lees minder"
+    "readLess": "Lees minder",
+    "showMore": "Toon meer",
+    "showLess": "Toon minder"
   }
 }
