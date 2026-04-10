@@ -129,7 +129,8 @@
     "show_more": "+{count} more",
     "show_less": "Show less",
     "tagsLabel": "Tags",
-    "calendarLabel": "Date"
+    "calendarLabel": "Date",
+    "clear_tags": "Clear tags"
   },
   "production": {
     "events": "Events",

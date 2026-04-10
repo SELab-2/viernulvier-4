@@ -11,6 +11,12 @@ const tags = ref<TagView[]>([])
 const showAll = ref(false)       // controls whether all tags are shown
 const MAX_VISIBLE = 24            // first N tags to show initially
 
+const hasSelection = computed(() => tagIds.value.length > 0)
+
+function clearAll() {
+  tagIds.value = []
+}
+
 async function fetchTags() {
   try {
     const allTags: TagView[] = []
@@ -82,6 +88,15 @@ watch(locale, fetchTags)
       ? t('archive.show_less')
       : t('archive.show_more', { count: tags.length - MAX_VISIBLE })
       }}
+    </button>
+
+    <!-- Clear all button -->
+    <button
+      v-if="hasSelection"
+      @click="clearAll"
+      class="h-8 px-3 rounded-full text-[9px] font-brand font-black uppercase tracking-widest transition-colors flex items-center justify-center border border-foreground bg-background text-foreground hover:bg-foreground hover:text-background"
+    >
+      {{ t('archive.clear_tags') }} ({{ tagIds.length }})
     </button>
   </div>
 </template>
