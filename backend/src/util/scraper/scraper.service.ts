@@ -6,18 +6,7 @@ import { ScraperRunner } from "./scraper.runner";
 import { CsvInjectionService } from "./csv/csv-injection.service";
 import path from "node:path";
 import { ConfigService } from "@nestjs/config";
-import { Agent } from "undici";
-import * as dns from "node:dns";
-
-// Create a dispatcher that strictly uses IPv4
-const ipv4Agent = new Agent({
-  connect: {
-    lookup: (hostname, options, callback) => {
-      // Force family: 4 (IPv4)
-      dns.lookup(hostname, { family: 4 }, callback);
-    },
-  },
-});
+import * as https from "node:https";
 
 /**
  * Service that handles the scraping of data and injecting of it into the database.
@@ -148,28 +137,40 @@ export class ScraperService implements OnApplicationBootstrap {
       if (!mediaBase)
         throw Error("Forgot to set MEDIA_BASE_URL .env variable?");
 
-      // Process all 50 images in parallel
-      const results = await Promise.allSettled(
-        batch.map(async (crop) => {
-          const imageData = await this.getImageBuffer(crop.url);
+      // Process 50 imgs
+      const results: PromiseSettledResult<number>[] = [];
 
-          // Filename logic.
-          // We name the file based on the crop's ID and NAME.
-          // NOTE: No hashing because it would cause strays.
+      for (const crop of batch) {
+        try {
+          // --- STEP 1: THE DOWNLOAD ---
+          let imageData: Buffer;
+          try {
+            imageData = await this.getImageBuffer(crop.url);
+          } catch (downloadErr: any) {
+            throw new Error(`DOWNLOAD FAILED: ${downloadErr.message}`);
+          }
+
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
-          const finalUrl = `/photos/${newFileName}`;
+          const finalUrl = `${mediaBase}/photos/${newFileName}`;
 
-          // Save & Update
-          const savedUrl = await this.mediaStorage.saveMedia(
-            finalUrl,
-            imageData,
-          );
+          // --- STEP 2: THE SAVE ---
+          let savedUrl: string;
+          try {
+            savedUrl = await this.mediaStorage.saveMedia(finalUrl, imageData);
+          } catch (saveErr: any) {
+            throw new Error(`SAVE FAILED: ${saveErr.message}`);
+          }
+
+          // --- STEP 3: THE UPDATE ---
           await this.runner.updatePendingCrop(crop.id, savedUrl);
+          results.push({ status: "fulfilled", value: crop.id });
 
-          return crop.id;
-        }),
-      );
+          await new Promise((resolve) => setTimeout(resolve, 250));
+        } catch (error: any) {
+          results.push({ status: "rejected", reason: error.message });
+        }
+      }
 
       const successCount = results.filter(
         (r) => r.status === "fulfilled",
@@ -206,18 +207,53 @@ export class ScraperService implements OnApplicationBootstrap {
    * @param url The URL to the image.
    * @returns The Buffer.
    */
-  private async getImageBuffer(url: string): Promise<Buffer> {
-    const response = await fetch(url, {
-      // @ts-ignore - dispatcher is a Node-specific extension to standard fetch
-      dispatcher: ipv4Agent,
+  private getImageBuffer(url: string): Promise<Buffer> {
+    const cleanUrl = url.replace(/["'\\]/g, "").trim();
+
+    return new Promise((resolve, reject) => {
+      const options = {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+        },
+        // This forces the request to use IPv4, solving any DNS issues
+        // without needing custom Agents or package.json flags!
+        family: 4,
+      };
+
+      const req = https.get(cleanUrl, options, (res) => {
+        // Handle HTTP errors (e.g., 404, 403, 500)
+        if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
+          reject(
+            new Error(`HTTP Error ${res.statusCode}: ${res.statusMessage}`),
+          );
+          // Consume response data to free up memory
+          res.resume();
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+
+        res.on("data", (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on("end", () => {
+          resolve(Buffer.concat(chunks));
+        });
+      });
+
+      // Handle pure network errors (e.g., ECONNRESET, ENOTFOUND)
+      req.on("error", (err) => {
+        reject(new Error(`Network Error: ${err.message}`));
+      });
+
+      // Set a 15-second timeout so it doesn't hang forever
+      req.setTimeout(15000, () => {
+        req.destroy();
+        reject(new Error("Network Error: Request timed out"));
+      });
     });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch images: ${response.statusText}`);
-    }
-
-    // Return the buffer for the image.
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
   }
 }
