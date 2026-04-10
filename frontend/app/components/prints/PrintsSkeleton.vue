@@ -4,14 +4,14 @@
   Animated loading skeleton for the first page fetch.
 -->
 <template>
-  <div class="space-y-8">
+  <div class="space-y-8" aria-busy="true" aria-label="Loading prints">
     <!-- Simulate 3 category sections -->
     <div v-for="i in 3" :key="i" class="space-y-4">
       <!-- Header skeleton -->
       <div class="flex items-center gap-3 mb-3">
         <div class="h-7 w-32 bg-muted animate-pulse rounded" />
         <div class="h-4 w-16 bg-muted animate-pulse rounded" />
-        <div class="flex-1 h-px bg-border" />
+        <div class="flex-1 h-px bg-muted" />
       </div>
 
       <!-- Grid skeleton -->
@@ -28,3 +28,5 @@
     </div>
   </div>
 </template>
+<script setup lang="ts">
+</script>
