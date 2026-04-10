@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse } from "@repo/common";
-import {usePrintApi} from "../../composables/usePrintsApi";
+import {usePrintApi} from "../../composables/usePrintApi";
 import ScrollToTop from "../../components/ScrollToTop.vue";
 
 const { t, locale } = useI18n();
@@ -43,12 +43,8 @@ async function loadPage(reset = false) {
 
   try {
     const raw = await getAll({
-      paginationFilters: {
-        page:       page.value,
-        limit:      LIMIT,
-        descending: sortOrder.value === "newest",
-      },
-      languageFilters: { lang: locale.value as "nl" | "en" },
+      paginationFilters: { page: page.value, limit: LIMIT, descending: sortOrder.value === "newest" },
+      lang: locale.value as "nl" | "en",
       printFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
       },
