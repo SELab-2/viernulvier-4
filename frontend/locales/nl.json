@@ -6,6 +6,9 @@
     "prints": "drukwerk",
     "logout": "uitloggen"
   },
+  "auth": {
+    "confirmLogout": "Succesvol uitgelogd"
+  },
   "searchbar": {
     "placeholder": "Zoek..."
   },

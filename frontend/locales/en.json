@@ -6,6 +6,9 @@
     "prints": "prints",
     "logout": "logout"
   },
+  "auth": {
+    "confirmLogout": "Logged out successfully"
+  },
   "searchbar": {
     "placeholder": "Search..."
   },
