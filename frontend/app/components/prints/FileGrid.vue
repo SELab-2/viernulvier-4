@@ -73,7 +73,7 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
 </script>
 
 <template>
-  <div class="m-4">
+  <div>
     <!-- Header -->
     <button
         class="w-full flex items-center gap-3 mb-3 group cursor-pointer"
