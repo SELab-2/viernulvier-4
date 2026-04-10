@@ -96,6 +96,12 @@
         "after-selected": "Na ...",
         "before-selected": "Voor ..."
       }
+    },
+     "filters": {
+      "toggle":    "Filters",
+      "year":      "Jaar",
+      "dateRange": "Datum",
+      "clear":     "Wis"
     }
 
   },

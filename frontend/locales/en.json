@@ -96,6 +96,12 @@
         "after-selected": "After ...",
         "before-selected": "Before ..."
       }
+    },
+     "filters": {
+      "toggle":    "Filters",
+      "year":      "Year",
+      "dateRange": "Date",
+      "clear":     "Clear"
     }
   },
   "baseform": {

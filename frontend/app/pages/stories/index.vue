@@ -30,15 +30,18 @@ const dateFilter  = ref<FilterBlog>({});
 //Oldest date (one-off fetch for Calendar "oldest" mode) 
 
 const oldestDate = ref("");
+const newestDate = ref("");
 
-async function fetchOldestDate() {
+async function fetchDateBounds() {
   try {
-    const raw  = await getAll({
-      paginationFilters: { page: 0, limit: 1, descending: false },
-      languageFilters:   { lang: locale.value as "nl" | "en" },
-    });
-    const first = unwrap(raw)?.objects?.[0] as BlogView | undefined;
+    const [oldestRaw, newestRaw] = await Promise.all([
+      getAll({ paginationFilters: { page: 0, limit: 1, descending: false }, languageFilters: { lang: locale.value as "nl" | "en" } }),
+      getAll({ paginationFilters: { page: 0, limit: 1, descending: true  }, languageFilters: { lang: locale.value as "nl" | "en" } }),
+    ]);
+    const first = unwrap(oldestRaw)?.objects?.[0] as BlogView | undefined;
+    const last  = unwrap(newestRaw)?.objects?.[0] as BlogView | undefined;
     if (first?.created_at) oldestDate.value = first.created_at.slice(0, 10);
+    if (last?.created_at)  newestDate.value = last.created_at.slice(0, 10);
   } catch { /* non-critical */ }
 }
 
@@ -124,7 +127,7 @@ watch(sentinel, (el) => {
 });
 
 onMounted(async () => {
-  await fetchOldestDate();
+  await fetchDateBounds();
   await loadPage(true);
 });
 
@@ -145,6 +148,7 @@ onUnmounted(() => io?.disconnect());
       v-model:sort-order="sortOrder"
       :story-titles="[]"
       :oldest-date="oldestDate"
+      :newest-date="newestDate"
       :date-filter="dateFilter"
       @update:search="searchQuery = $event"
       @update:date-filter="dateFilter = $event"
