@@ -11,7 +11,10 @@ export default [
       'eslint.config.mjs', 
       '**/.turbo/**', 
       '**/dist/**', 
-      '**/coverage/**'
+      '**/coverage/**',
+      '**/.nuxt/**',
+      '**/.output/**',
+      '**/node_modules/**',
     ],
   },
   eslint.configs.recommended,

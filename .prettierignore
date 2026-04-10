@@ -1,0 +1,7 @@
+.turbo
+dist
+coverage
+.nuxt
+.output
+node_modules
+eslint.config.mjs
