@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
+  AccountDto,
   ApiKeyDto,
   CreateAccountDto,
   PublicAccountDto,
@@ -90,7 +91,7 @@ export class AccountDatabaseService {
       WHERE username = $1
       LIMIT 1
     `;
-    const result = await this.db.query(query, [account.username]); // no type for safety.
+    const result = await this.db.query<AccountDto>(query, [account.username]); // no type for safety.
 
     if (result.length === 0) {
       throw new Error("Invalid username or password");

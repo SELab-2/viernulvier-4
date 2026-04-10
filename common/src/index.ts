@@ -1,4 +1,6 @@
 import {
+  Account,
+  AccountSchema,
   CreateAccount,
   CreateAccountSchema,
   PublicAccount,
@@ -188,6 +190,7 @@ export {
   CreateAccountSchema,
   PublicAccountSchema,
   UpdateAccountSchema,
+  AccountSchema,
   ApiKeySchema,
   VerifyApiKeySchema,
 
@@ -270,6 +273,7 @@ export type {
   // Auth Types. (accounts.ts + api.keys.ts)
   UpdateAccount,
   PublicAccount,
+  Account,
   CreateAccount,
   ApiKey,
   VerifyApiKey,
