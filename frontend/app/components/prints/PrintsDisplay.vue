@@ -35,7 +35,7 @@ const categoryEntries = computed(() =>
 </script>
 
 <template>
-  <div class="space-y-16">
+  <div class="space-y-16 px-4">
     <PrintsFileGrid
         v-for="[category, files] in categoryEntries"
         :key="category"
