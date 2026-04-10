@@ -10,12 +10,11 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { MediaStorageService } from "../media_storage/service/media_storage.service";
+import { ConfigService } from "@nestjs/config"; // <-- 1. Import ConfigService
 
 describe("MediaCropService", () => {
   let service: MediaCropService;
   let mediaDbService: jest.Mocked<MediaCropDatabaseService>;
-  const mockMediaStorageService = jest.mocked<MediaStorageService>;
 
   const mockCrop: MediaCropDto = {
     id: 1,
@@ -23,6 +22,16 @@ describe("MediaCropService", () => {
     url: "https://example.com/crop.jpg",
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
+  };
+
+  // 2. Create the mock ConfigService
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      // Provide default fallbacks for your test environment here
+      if (key === "NODE_ENV") return "development";
+      if (key === "MEDIA_BASE_URL") return "http://127.0.0.1/photos";
+      return null;
+    }),
   };
 
   beforeEach(async () => {
@@ -41,15 +50,20 @@ describe("MediaCropService", () => {
           provide: MediaCropDatabaseService,
           useValue: mockMediaDbService,
         },
+        // 3. Inject the mock ConfigService into the testing module
         {
-          provide: MediaStorageService,
-          useValue: mockMediaStorageService,
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();
 
     service = module.get<MediaCropService>(MediaCropService);
     mediaDbService = module.get(MediaCropDatabaseService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it("should be defined", () => {

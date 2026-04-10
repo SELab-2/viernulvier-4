@@ -4,13 +4,14 @@
 
 Retrieves media from a given URL.
 
-- **Query Parameter:** `url` (string) - The URL of the media you want to fetch. **Note:** This must be URL-encoded by
+- **Query Parameter:** `url` (string) - The URL/ relative path of the media you want to fetch. **Note:** This must be
+  URL-encoded by
   the client (e.g., using `encodeURIComponent()`).
 - **Returns:** A binary file stream (the physical media file, ready to be viewed or downloaded by the browser).
 
 ### [POST] `/media/storage`
 
-Saves media to a given URL.
+Saves media to a given URL/path.
 
 - **Security:** `apiKey` required.
 - **Body:** `multipart/form-data` with `url: string` and `file: binary`
@@ -19,7 +20,9 @@ Saves media to a given URL.
 
 ### [DELETE] `/media/storage`
 
-Deletes media at a given URL.
+Deletes media at a given URL/path.
 
 - **Security:** `apiKey` required.
 - **Body:** `{ url: string }`
+
+> note: this all also works for prints. Instead of using `/photos`, you will need to use `/prints` for it to work.

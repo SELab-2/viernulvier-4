@@ -2,12 +2,14 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import logger from "./util/logger/logger";
+import { ConfigService } from "@nestjs/config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   // server -> no touchy ----------------------- //
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = configService.get<string>("NODE_ENV") === "production";
   if (isProduction) {
     app.setGlobalPrefix("api");
   }
@@ -41,8 +43,10 @@ async function bootstrap() {
     ],
   });
 
-  await app.listen(process.env.PORT ?? 3000);
-  logger.info(`Server is running on port ${process.env.PORT ?? 3000}`);
+  // Default to 3000 if not mentioned.
+  const port: number = configService.get<number>("PORT", 3000);
+  await app.listen(port);
+  logger.info(`Server is running on port ${port}`);
 }
 
 void bootstrap();

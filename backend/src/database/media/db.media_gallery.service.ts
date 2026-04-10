@@ -5,6 +5,7 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   ModifyMediaGalleryDto,
+  PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { ResourceGoneException } from "../../common/exceptions";
@@ -78,6 +79,21 @@ export class MediaGalleryDatabaseService {
       totalItems: parseInt(countResult[0].count),
       objects: galleries,
     };
+  }
+
+  /**
+   * Get all print items belonging to a media gallery.
+   * @param galleryId The gallery to fetch print items for.
+   * @returns List of print items.
+   */
+  async getPrintItemsByGallery(galleryId: number): Promise<PrintItemDto[]> {
+    const query = `
+      SELECT pi.id, pi.titel, pi.description, pi.url, pi.created_at, pi.updated_at
+      FROM print_item pi
+      INNER JOIN print_item_media_gallery pimg ON pimg.print_item_id = pi.id
+      WHERE pimg.media_gallery_id = $1
+    `;
+    return this.db.query<PrintItemDto>(query, [galleryId]);
   }
 
   /**
@@ -208,5 +224,40 @@ export class MediaGalleryDatabaseService {
   ): Promise<void> {
     const query = `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`;
     await this.db.query(query, [galleryId, itemId]);
+  }
+
+  /**
+   * Link an existing print item to an existing gallery.
+   * Silently does nothing if the link already exists (ON CONFLICT DO NOTHING).
+   * @param galleryId The gallery to link to.
+   * @param printItemId The print item to link.
+   */
+  async linkPrintItemToGallery(
+    galleryId: number,
+    printItemId: number,
+  ): Promise<void> {
+    const query = `
+      INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id) 
+      VALUES ($1, $2) 
+      ON CONFLICT DO NOTHING
+    `;
+    await this.db.query(query, [galleryId, printItemId]);
+  }
+
+  /**
+   * Unlink a print item from a gallery. Does not delete the print item itself.
+   * Silently does nothing if the link doesn't exist.
+   * @param galleryId The gallery to unlink from.
+   * @param printItemId The print item to unlink.
+   */
+  async unlinkPrintItemFromGallery(
+    galleryId: number,
+    printItemId: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM print_item_media_gallery 
+      WHERE media_gallery_id = $1 AND print_item_id = $2
+    `;
+    await this.db.query(query, [galleryId, printItemId]);
   }
 }

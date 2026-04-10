@@ -152,7 +152,7 @@ export class ScraperService implements OnApplicationBootstrap {
 
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
-          const finalUrl = `${mediaBase}/photos/${newFileName}`;
+          const finalUrl = `/photos/${newFileName}`;
 
           // --- STEP 2: THE SAVE ---
           let savedUrl: string;
@@ -168,7 +168,6 @@ export class ScraperService implements OnApplicationBootstrap {
 
           await new Promise((resolve) => setTimeout(resolve, 250));
         } catch (error: any) {
-          // Now our logger will say "Reason: Error: DOWNLOAD FAILED..." or "SAVE FAILED..."
           results.push({ status: "rejected", reason: error.message });
         }
       }

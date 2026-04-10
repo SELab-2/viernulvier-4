@@ -2,16 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { MediaStorage } from "./storage.interface";
 import { LocalMediaStorage } from "./local_media_storage";
 import { RemoteMediaStorage } from "./remote_media_storage";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class MediaStorageService {
   private readonly storage: MediaStorage;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.storage =
-      process.env.NODE_ENV === "development" // this makes it important to run as npm run start:dev, will not work with npm run start:prod locally!!!
+      this.configService.get<string>("NODE_ENV") === "development" // this makes it important to run as npm run start:dev, will not work with npm run start:prod locally!!!
         ? new LocalMediaStorage()
-        : new RemoteMediaStorage();
+        : new RemoteMediaStorage(configService);
   }
 
   /**
