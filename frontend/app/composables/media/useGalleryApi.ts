@@ -5,6 +5,7 @@ import type {
   ModifyMediaGallery,
   PaginatedResponse,
   PaginationFilter,
+  PrintItem,
   ReplaceMediaGallery,
 } from "@repo/common";
 
@@ -79,7 +80,7 @@ export function useGalleryApi() {
    * Returns all items linked to a gallery.
    */
   const getGalleryItems = (galleryId: number) =>
-    get<MediaItem[]>(API_ROUTES.galleries.items(galleryId));
+    get<MediaItem[] | PrintItem[]>(API_ROUTES.galleries.items(galleryId));
 
   /**
    * Links an item to a gallery.
