@@ -44,10 +44,7 @@ export class MediaItemService {
    * @returns The newly created media item.
    */
   async createItem(createItem: CreateMediaItemDto): Promise<MediaItemDto> {
-    return await this.mediaDbService.createItem(
-      createItem,
-      createItem.gallery_ids || [], // Could be empty so in case we just pass empty list.
-    );
+    return await this.mediaDbService.createItem(createItem);
   }
 
   /**

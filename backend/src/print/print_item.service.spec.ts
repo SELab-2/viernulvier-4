@@ -102,7 +102,6 @@ describe("PrintItemService", () => {
 
       expect(printDbService.createPrintItem).toHaveBeenCalledWith(
         createItemDto,
-        [1, 2],
       );
       expect(result).toEqual(mockPrintItem);
     });
@@ -119,7 +118,6 @@ describe("PrintItemService", () => {
 
       expect(printDbService.createPrintItem).toHaveBeenCalledWith(
         createItemDto,
-        [],
       );
       expect(result).toEqual(mockPrintItem);
     });

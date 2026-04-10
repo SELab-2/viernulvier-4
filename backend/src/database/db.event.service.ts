@@ -12,10 +12,16 @@ import {
   ModifyEventDto,
 } from "../dto/dto";
 import {
-  FilterEventSchema,
+  EventSchema,
+  LocationSchema,
   PaginatedResponse,
-  PaginationFilterSchema,
+  PriceSchema,
 } from "@repo/common";
+import {
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
 
 @Injectable()
 export class EventDatabaseService {
@@ -28,17 +34,22 @@ export class EventDatabaseService {
    * @returns The EventDto if there is one.
    */
   async getEventById(eventId: number): Promise<EventDto> {
-    const events: PaginatedResponse<EventDto> = await this.getEvents(
-      FilterEventSchema.parse({ id: eventId }),
-      PaginationFilterSchema.parse({}),
-    );
-    const event: EventDto[] = events.objects;
-    if (event.length === 0)
+    const returningClause = generateReturningClause(EventSchema);
+
+    const query = `
+      SELECT ${returningClause}
+      FROM events
+      WHERE id = $1;
+    `;
+
+    const events = await this.db.query<EventDto>(query, [eventId]);
+
+    if (events.length === 0)
       throw new ResourceGoneException(
         `No EventDto exists for provided ID(${eventId})`,
       );
 
-    return event[0]; // There should be an EventDto in here if the length is not 0.
+    return events[0]; // There should be an Event in here if the length is not 0.
   }
 
   /**
@@ -52,52 +63,55 @@ export class EventDatabaseService {
     eventFilters: FilterEventDto,
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<EventDto>> {
+    const eventPrefix = "e";
+    const returningClause = generateReturningClause(EventSchema, eventPrefix);
+
     const conditions: string[] = [];
     const values: any[] = [];
-    let i = 1;
+    const param = (val: any) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
 
     // Filter by specific date (matches starttime or endtime)
     // can be split between start and end.
     if (eventFilters.date) {
-      conditions.push(`DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i}`);
-      values.push(eventFilters.date);
-      i++;
+      const pDate = param(eventFilters.date);
+      conditions.push(
+        `DATE(e.starttime) = ${pDate} OR DATE(e.endtime) = ${pDate}`,
+      );
     }
 
     // Filter by given date lying between starttime and endtime (inclusive)
     if (eventFilters.date_between) {
       // Use explicit timestamp comparison to include time component
-      conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(eventFilters.date_between);
-      i++;
+      conditions.push(
+        `${param(eventFilters.date_between)}::timestamp BETWEEN e.starttime AND e.endtime`,
+      );
     }
 
     // Filter events whose starttime is before the provided date
     if (eventFilters.date_before) {
-      conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(eventFilters.date_before);
-      i++;
+      conditions.push(
+        `e.starttime < ${param(eventFilters.date_before)}::timestamp`,
+      );
     }
 
     // Filter events whose endtime is after the provided date
     if (eventFilters.date_after) {
-      conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(eventFilters.date_after);
-      i++;
+      conditions.push(
+        `e.endtime > ${param(eventFilters.date_after)}::timestamp`,
+      );
     }
 
     // Filer by id
     if (eventFilters.id) {
-      conditions.push(`e.id = $${i}`);
-      values.push(eventFilters.id);
-      i++;
+      conditions.push(`e.id = ${param(eventFilters.id)}`);
     }
 
     // Filter by p_id
     if (eventFilters.production_id) {
-      conditions.push(`p.id = $${i}`);
-      values.push(eventFilters.production_id);
-      i++;
+      conditions.push(`p.id = ${param(eventFilters.production_id)}`);
     }
 
     // add more filters here if needed.
@@ -106,41 +120,30 @@ export class EventDatabaseService {
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
-    // pagination
-    let paginationClause = "";
-    if (paginationFilters.limit > 0) {
-      const offset = paginationFilters.page * paginationFilters.limit;
-
-      paginationClause = `
-      LIMIT $${i}
-      OFFSET $${i + 1}
+    // count query uses same filters but no pagination
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count
+      FROM events e
+        JOIN productions p ON e.production_id = p.id
+      ${whereClause}
     `;
 
-      values.push(paginationFilters.limit);
-      values.push(offset);
-    }
-
-    // count query uses same filters but no pagination
-    const countQuery = `
-    SELECT COUNT(*) as count
-    FROM events e
-      JOIN productions p ON e.production_id = p.id
-    ${whereClause}
-  `;
+    // pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     // p is defined, ignore error
     // using SELECT * seems to be buggy sometimes, so explicitly use all vars.
     const query = `
-      SELECT e.id, e.starttime, e.endtime, e.production_id, e.created_at, e.updated_at
-      FROM events e
-        JOIN productions p ON e.production_id = p.id
-          ${whereClause}
-      ORDER BY e.starttime ${paginationFilters.descending ? "DESC" : "ASC"}
-        ${paginationClause}
-        `;
-
-    // count query only uses filter values, not pagination values
-    const filterValues = values.slice(0, i - 1);
+      SELECT ${returningClause}
+      FROM events ${eventPrefix}
+      JOIN productions p ON ${eventPrefix}.production_id = p.id
+      ${whereClause}
+      ORDER BY ${eventPrefix}.starttime ${paginationFilters.descending ? "DESC" : "ASC"}
+      ${paginationClause};
+    `;
 
     const [objects, countResult] = await Promise.all([
       this.db.query<EventDto>(query, values),
@@ -161,28 +164,20 @@ export class EventDatabaseService {
    * @returns the added event if it was successful.
    */
   async createEvent(event: CreateEventDto): Promise<EventDto> {
-    // Validate input, throw error if not all
-    if (!event.starttime || !event.production_id) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(event);
+    const returningClause = generateReturningClause(EventSchema);
 
     const query = `
-      INSERT INTO events (starttime, endtime, production_id, intermission_at, doors_at)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at
+      INSERT INTO events (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
 
-    const result = await this.db.query<EventDto>(query, [
-      event.starttime,
-      event.endtime,
-      event.production_id,
-      event.intermission_at,
-      event.doors_at,
-    ]);
+    const result = await this.db.query<EventDto>(query, values);
 
     // Validate output
     if (!result || result.length === 0) {
-      throw new Error("Failed to create event");
+      throw new Error("Failed to create event.");
     }
 
     return result[0];
@@ -190,7 +185,7 @@ export class EventDatabaseService {
 
   /**
    * Update function for events. Updates the event in the database.
-   * @param event must be of the type "ModifyEvent", gives the freedom to define only what needs to be updated.
+   * @param event must be of the type "ModifyEvent" or "ReplaceEventDto", gives the freedom to define only what needs to be updated.
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
    */
@@ -198,53 +193,26 @@ export class EventDatabaseService {
     eventId: number,
     event: ModifyEventDto | ReplaceEventDto,
   ): Promise<EventDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(event);
+    const returningClause = generateReturningClause(EventSchema);
 
-    if (event.starttime !== undefined) {
-      fields.push(`starttime = $${index++}`);
-      values.push(event.starttime);
-    }
-
-    if (event.endtime !== undefined) {
-      fields.push(`endtime = $${index++}`);
-      values.push(event.endtime);
-    }
-
-    if (event.production_id !== undefined) {
-      fields.push(`production_id = $${index++}`);
-      values.push(event.production_id);
-    }
-
-    if (event.doors_at !== undefined) {
-      fields.push(`doors_at = $${index++}`);
-      values.push(event.doors_at);
-    }
-
-    if (event.intermission_at !== undefined) {
-      fields.push(`intermission_at = $${index++}`);
-      values.push(event.intermission_at);
-    }
-
-    if (fields.length === 0) {
-      throw new Error("No fields provided to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(eventId);
 
-    // ignore error on "RETURNING", query is correct.
     const query = `
-    UPDATE events
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING id, starttime, endtime, production_id, intermission_at, doors_at, created_at, updated_at;
+      UPDATE events
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<EventDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Event not found");
+      throw new ResourceGoneException(`Event with ID(${eventId}) not found.`);
     }
 
     return result[0]; // should have the updated event only.
@@ -258,7 +226,6 @@ export class EventDatabaseService {
    */
   async deleteEvent(blogId: number): Promise<void> {
     // note we delete on id not p_id as that would affect more events.
-    // to delete all events using p_id -> use deleteEventsWithPID()
     const query = `DELETE FROM events WHERE id = $1 RETURNING id;`;
     const result = await this.db.query(query, [blogId]);
     if (result.length == 0) {
@@ -274,13 +241,19 @@ export class EventDatabaseService {
    * @returns the LocationDto of the event.
    */
   async getLocationOfEvent(id: number): Promise<LocationDto> {
+    const locationPrefix = "l";
+    const returningClause = generateReturningClause(
+      LocationSchema,
+      locationPrefix,
+    );
+
     const query = `
-    SELECT l.id, l.location, l.created_at, l.updated_at
-    FROM locations l
-    INNER JOIN event_locations el ON el.location_id = l.id
-    WHERE el.event_id = $1
-    LIMIT 1
-  `;
+      SELECT ${returningClause}
+      FROM locations ${locationPrefix}
+      INNER JOIN event_locations el ON el.location_id = ${locationPrefix}.id
+      WHERE el.event_id = $1
+      LIMIT 1
+    `;
 
     const result = await this.db.query<LocationDto>(query, [id]);
 
@@ -337,45 +310,20 @@ export class EventDatabaseService {
   /**
    * get all the prices linked with an event
    * @param id the ID of the event we want all the prices of.
-   * @param amount the amount of prices you want to get, if 0 is given, then all prices are returned.
-   * @param page the page of the prices you want to get, if amount is 0, then this parameter is ignored.
    * @returns a list of PriceDto objects linked to the given event.
    */
-  async getPricesOfEvent(
-    id: number,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<PriceDto[]> {
-    if (amount === 0) {
-      const query = `
-      SELECT p.id,
-             p.created_at,
-             p.updated_at,
-             p.price,
-             p.name
-      FROM prices p
-      JOIN event_prices ep ON ep.price_id = p.id
-      WHERE ep.event_id = $1
-      `;
-
-      return await this.db.query(query, [id]);
-    }
-
-    const offset = page * amount;
+  async getPricesOfEvent(id: number): Promise<PriceDto[]> {
+    const pricePrefix = "p";
+    const returningClause = generateReturningClause(PriceSchema, pricePrefix);
 
     const query = `
-    SELECT p.id,
-           p.price,
-           p.name,
-           p.created_at,
-           p.updated_at
-    FROM prices p
-    INNER JOIN event_prices ep ON ep.price_id = p.id
-    WHERE ep.event_id = $1
-    LIMIT $2 OFFSET $3
+      SELECT ${returningClause}
+      FROM prices ${pricePrefix}
+      INNER JOIN event_prices ep ON ep.price_id = ${pricePrefix}.id
+      WHERE ep.event_id = $1;
     `;
 
-    return await this.db.query(query, [id, amount, offset]);
+    return await this.db.query(query, [id]);
   }
 
   /**
@@ -386,10 +334,10 @@ export class EventDatabaseService {
    */
   async addPriceToEvent(event_id: number, price_id: number): Promise<boolean> {
     const query = `
-    INSERT INTO event_prices (event_id, price_id)
-    VALUES ($1, $2)
-    ON CONFLICT DO NOTHING
-    RETURNING event_id
+      INSERT INTO event_prices (event_id, price_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      RETURNING event_id
     `;
 
     const result = await this.db.query(query, [event_id, price_id]);
