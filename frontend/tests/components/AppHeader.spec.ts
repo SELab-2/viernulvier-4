@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { ref } from "vue";
 import { mount } from "@vue/test-utils";
 import { createRouter, createWebHistory } from "vue-router";
 import AppHeader from "../../app/components/AppHeader.vue";
@@ -7,8 +6,8 @@ import { createI18n } from "vue-i18n";
 
 vi.mock("../../app/composables/useAuth", () => ({
     useAuth: () => ({
-        isLoggedIn: { value: ref(false) }, // user default not logged in
-        logout: vi.fn(), // dummy logout function
+        isLoggedIn: false,
+        logout: () => {},
     }),
 }));
 
