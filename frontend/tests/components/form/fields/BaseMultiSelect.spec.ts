@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import { X } from "lucide-vue-next";
 import BaseMultiSelect from "../../../../app/components/form/fields/BaseMultiSelect.vue";
@@ -14,7 +14,7 @@ const i18n = createI18n({
 });
 
 describe("BaseMultiSelect", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof BaseMultiSelect>>;
   const options = ["Apple", "Banana", "Mango", "Grape"];
 
   beforeEach(() => {

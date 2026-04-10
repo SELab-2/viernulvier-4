@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import BaseFileUpload from "../../../../app/components/form/fields/BaseFileUpload.vue";
 
 const createFile = (
@@ -8,7 +8,7 @@ const createFile = (
 ) => new File(["content"], name, { type });
 
 describe("BaseFileUpload", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof BaseFileUpload>>;
 
   beforeEach(() => {
     wrapper = mount(BaseFileUpload, {

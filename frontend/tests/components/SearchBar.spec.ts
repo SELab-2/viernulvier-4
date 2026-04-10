@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import SearchBar from "../../app/components/SearchBar.vue";
 import { createI18n } from "vue-i18n";
 
@@ -12,7 +12,7 @@ const i18n = createI18n({
 });
 
 describe("SearchBar", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof SearchBar>>;
   const items = ["Apple", "Banana", "Orange", "Grapes", "Pineapple", "Mango"];
 
   beforeEach(() => {

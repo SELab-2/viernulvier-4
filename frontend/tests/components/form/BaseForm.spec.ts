@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import FormBaseForm from "../../../app/components/form/BaseForm.vue";
 import type { FormField } from "../../../app/types/FormField";
+import BaseForm from "../../../app/components/form/BaseForm.vue";
 
 const i18n = createI18n({
   // needed so no error is thrown when mounted
@@ -39,7 +40,7 @@ const fields: FormField[] = [
 ]; // each component is already tested separately, there is no need to add them all here
 
 describe("FormBaseForm", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof BaseForm>>;
 
   beforeEach(() => {
     wrapper = mount(FormBaseForm, {
@@ -85,7 +86,7 @@ describe("FormBaseForm", () => {
     expect(w.findAll("input").length).toBe(2);
   });
 
-  it("pre-fills form with initialValues", async () => {
+  it("pre-fills form with initialValues", () => {
     const w = mount(FormBaseForm, {
       global: { plugins: [i18n] },
       props: {

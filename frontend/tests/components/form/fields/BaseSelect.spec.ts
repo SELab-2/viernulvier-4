@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import BaseSelect from "../../../../app/components/form/fields/BaseSelect.vue";
 
 describe("BaseSelect", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof BaseSelect>>;
   const options = ["Option A", "Option B", "Option C"];
 
   beforeEach(() => {

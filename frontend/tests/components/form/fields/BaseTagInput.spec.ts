@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import BaseTagInput from "../../../../app/components/form/fields/BaseTagInput.vue";
 
 describe("BaseTagInput", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof BaseTagInput>>;
 
   beforeEach(() => {
     wrapper = mount(BaseTagInput, {
