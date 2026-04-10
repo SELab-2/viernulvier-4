@@ -28,11 +28,14 @@ const categories = computed(() => {
   return category;
 });
 
-const categoryEntries = computed(() => Object.entries(categories.value) as [PrintCategory, PrintItemView[]][]);
+const categoryEntries = computed(() =>
+    (Object.entries(categories.value) as [PrintCategory, PrintItemView[]][])
+        .filter(([, files]) => files.length > 0)
+); // filtering out empty category entries
 </script>
 
 <template>
-  <div class="space-y-8">
+  <div class="space-y-16">
     <PrintsFileGrid
         v-for="[category, files] in categoryEntries"
         :key="category"

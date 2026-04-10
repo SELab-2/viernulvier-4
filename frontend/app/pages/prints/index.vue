@@ -103,7 +103,7 @@ onUnmounted(() => io?.disconnect());
         @update:search="searchQuery = $event"
     />
 
-    <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
+    <main class="container mx-auto px-4 max-w-5xl pt-4 pb-8 sm:pt-6 sm:pb-12">
 
       <PrintsSkeleton v-if="pending" />
 
