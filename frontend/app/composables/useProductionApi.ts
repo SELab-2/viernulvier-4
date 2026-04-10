@@ -49,17 +49,17 @@ export function useProductionApi() {
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
-    const searchParams = new URLSearchParams()
+    const searchParams = new URLSearchParams();
 
     Object.entries(cleanParams).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        value.forEach(v => searchParams.append(key, String(v)))
+        value.forEach((v) => searchParams.append(key, String(v)));
       } else {
-        searchParams.append(key, String(value))
+        searchParams.append(key, String(value));
       }
-    })
+    });
 
-    const queryString = searchParams.toString()
+    const queryString = searchParams.toString();
 
     const query = queryString ? `?${queryString}` : "";
 
