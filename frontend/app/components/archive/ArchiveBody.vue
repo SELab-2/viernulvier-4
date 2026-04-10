@@ -117,6 +117,19 @@ watch(searchQuery, () => {
         </div>
       </template>
 
+      <!-- EMPTY STATE -->
+      <div
+        v-else-if="!loading && productions.length === 0"
+        class="py-24 text-center"
+      >
+        <p class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2">
+          {{ t('archive.no_results') }}
+        </p>
+        <p class="font-brand font-black text-[12px] uppercase tracking-widest text-muted-foreground">
+          {{ t('archive.no_results_sub') }}
+        </p>
+      </div>
+
       <!-- Grid / list -->
       <div
         v-else
