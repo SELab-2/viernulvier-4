@@ -15,6 +15,7 @@ import type {
   ReplaceProduction,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+import type { DefaultGallery, PrintGallery } from "~/utils/galleryFetcher";
 
 interface ProductionListOptions {
   productionFilters?: FilterProduction;
@@ -128,6 +129,30 @@ export function useProductionApi() {
   const unlinkBlog = (productionId: number, blogId: number) =>
     del<Production>(API_ROUTES.productions.blogById(productionId, blogId));
 
+  /**
+   * Media Galleries
+   */
+
+  /** GET /productions/:productionId/media?type=default - Gets a DefaultGallery from the api. */
+  const getMediaGallery = (productionId: number) =>
+    get<DefaultGallery>(
+      `${API_ROUTES.productions.media(productionId)}?type=default`,
+    );
+
+  /** GET /productions/:productionId/media?type=prints - Gets a PrintGallery from the api. */
+  const getPrintsGallery = (productionId: number) =>
+    get<PrintGallery>(
+      `${API_ROUTES.productions.media(productionId)}?type=prints`,
+    );
+
+  /** PUT /productions/:productionId/media/:galleryId — links a MediaGallery to a production. */
+  const linkMedia = (productionId: number, galleryId: number) =>
+    put(API_ROUTES.productions.mediaById(productionId, galleryId), {});
+
+  /** DELETE /productions/:productionId/media/:galleryId — unlinks a MediaGallery from a production. */
+  const unlinkMedia = (productionId: number, galleryId: number) =>
+    del(API_ROUTES.productions.mediaById(productionId, galleryId));
+
   return {
     getAll,
     getById,
@@ -141,5 +166,9 @@ export function useProductionApi() {
     getBlogs,
     linkBlog,
     unlinkBlog,
+    getMediaGallery,
+    getPrintsGallery,
+    linkMedia,
+    unlinkMedia,
   };
 }

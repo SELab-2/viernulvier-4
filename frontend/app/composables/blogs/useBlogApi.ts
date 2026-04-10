@@ -11,6 +11,7 @@ import type {
   FilterBlog,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
+import type { DefaultGallery, PrintGallery } from "~/utils/galleryFetcher";
 
 interface BlogListOptions {
   paginationFilters?: PaginationFilter;
@@ -77,5 +78,36 @@ export function useBlogApi() {
   /** DELETE /blogs/:blogId — deletes a blog. */
   const remove = (blogId: number) => del(API_ROUTES.blogs.byId(blogId));
 
-  return { getAll, getById, create, replace, modify, remove };
+  /**
+   * Media Galleries
+   */
+
+  /** GET /blogs/:blogId/media?type=default - Retrieves a DefaultGallery from the API. */
+  const getMediaGallery = (productionId: number) =>
+    get<DefaultGallery>(`${API_ROUTES.blogs.media(productionId)}?type=default`);
+
+  /** GET /blogs/:blogId/media?type=prints - Retrieves a PrintGallery from the API. */
+  const getPrintsGallery = (productionId: number) =>
+    get<PrintGallery>(`${API_ROUTES.blogs.media(productionId)}?type=prints`);
+
+  /** PUT /blogs/:blogId/media/:galleryId — links a MediaGallery to a blog. */
+  const linkMedia = (productionId: number, galleryId: number) =>
+    put(API_ROUTES.blogs.mediaById(productionId, galleryId), {});
+
+  /** DELETE /blogs/:blogId/media/:galleryId — unlinks a MediaGallery from a blog. */
+  const unlinkMedia = (productionId: number, galleryId: number) =>
+    del(API_ROUTES.blogs.mediaById(productionId, galleryId));
+
+  return {
+    getAll,
+    getById,
+    create,
+    replace,
+    modify,
+    remove,
+    getMediaGallery,
+    getPrintsGallery,
+    linkMedia,
+    unlinkMedia,
+  };
 }

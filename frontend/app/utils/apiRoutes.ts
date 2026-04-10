@@ -19,6 +19,9 @@ export const API_ROUTES = {
     blogs: (productionId: number) => `/productions/${productionId}/blogs`,
     blogById: (productionId: number, blogId: number) =>
       `/productions/${productionId}/blogs/${blogId}`,
+    media: (productionId: number) => `/productions/${productionId}/media`,
+    mediaById: (productionId: number, galleryId: number) =>
+      `/productions/${productionId}/media/${galleryId}`,
   },
   events: {
     base: "/events",
@@ -33,6 +36,9 @@ export const API_ROUTES = {
   blogs: {
     base: "/blogs",
     byId: (blogId: number) => `/blogs/${blogId}`,
+    media: (blogId: number) => `/blogs/${blogId}/media`,
+    mediaById: (blogId: number, galleryId: number) =>
+      `/blogs/${blogId}/media/${galleryId}`,
   },
   tags: {
     base: "/tags",
