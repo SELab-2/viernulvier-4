@@ -7,13 +7,15 @@
  */
 export const ROUTES = {
   home: {
-    base: "/"
+    base: "/",
   },
-  archive: {  // Productions on teh normal page.
+  archive: {
+    // Productions on teh normal page.
     base: "/archive",
     byId: (id: number) => `/archive/${id}`,
   },
-  productions: {  // Productions on the admin page.
+  productions: {
+    // Productions on the admin page.
     base: "/productions",
     byId: (id: number) => `/productions/${id}`,
     create: "/productions/create",
@@ -44,4 +46,4 @@ export const ROUTES = {
   parser: {
     base: "/parser",
   },
-} as const
+} as const;

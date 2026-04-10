@@ -11,10 +11,17 @@ import {
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import {
+  BlogSchema,
   GalleryType,
+  MediaGallerySchema,
   PaginatedResponse,
   SUPPORTED_LANGUAGES,
 } from "@repo/common";
+import {
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -27,12 +34,12 @@ export class BlogDatabaseService {
    * @returns The Blog if there is one.
    */
   async getBlogById(id: number): Promise<BlogDto> {
-    const query = `SELECT id, 
-       titel, 
-       description, 
-       created_at, 
-       updated_at
-    FROM blogs WHERE id = $1`;
+    const returningClause = generateReturningClause(BlogSchema);
+
+    const query = `
+      SELECT ${returningClause}
+      FROM blogs WHERE id = $1;
+    `;
 
     const result = await this.db.query<BlogDto>(query, [id]);
 
@@ -53,61 +60,52 @@ export class BlogDatabaseService {
     paginationFilters: PaginationFilterDto,
     blogFilters: FilterBlogDto,
   ): Promise<PaginatedResponse<BlogDto>> {
+    const returningClause = generateReturningClause(BlogSchema);
+
     const conditions: string[] = [];
     const values: any[] = [];
-    let i = 1;
+    const param = (val: any) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
 
     // Title filter
     // NOTE: This is case-insensitive and looks in all languages + matches on parts.
     if (blogFilters.title) {
+      const titleParam = param(blogFilters.title);
       const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `titel->>'${lang}' ILIKE $${i}`,
+        (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
       );
-
       conditions.push(`(${titelClauses.join(" OR ")})`);
-      values.push(`%${blogFilters.title}%`);
-      i++;
     }
 
     // Filter blogs that were created before.
     if (blogFilters.before) {
-      conditions.push(`created_at < $${i}::timestamp`);
-      values.push(blogFilters.before);
-      i++;
+      conditions.push(`created_at < ${param(blogFilters.before)}::timestamp`);
     }
 
     // Filter blogs that were created after.
     if (blogFilters.after) {
-      conditions.push(`created_at > $${i}::timestamp`);
-      values.push(blogFilters.after);
-      i++;
+      conditions.push(`created_at > ${param(blogFilters.after)}::timestamp`);
     }
 
-    const whereClause =
-      conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
-
-    // Apply pagination.
-    let paginationClause = "";
-    if (paginationFilters.limit > 0) {
-      const offset = paginationFilters.page * paginationFilters.limit;
-      paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
-      values.push(paginationFilters.limit);
-      values.push(offset);
-      i += 2;
-    }
-
     const countQuery = `
       SELECT COUNT(*) as count FROM blogs
       ${whereClause};
     `;
+
+    // pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
     const query = `
-      SELECT id,
-            titel,
-            description,
-            created_at,
-            updated_at
+      SELECT ${returningClause}
       FROM blogs
       ${whereClause}
       ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
@@ -134,30 +132,19 @@ export class BlogDatabaseService {
    * @returns the added blog if it was successful.
    */
   async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
-    if (!blog.titel || !blog.description) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(blog);
+    const returningClause = generateReturningClause(BlogSchema);
 
     const query = `
-      INSERT INTO blogs (titel, description)
-      VALUES ($1, $2)
-      RETURNING
-        id,
-        titel,
-        description,
-        created_at,
-        updated_at;
+      INSERT INTO blogs (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
-
-    const values = [
-      JSON.stringify(blog.titel),
-      JSON.stringify(blog.description),
-    ];
 
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create blog");
+      throw new Error("Failed to create blog.");
     }
 
     return result[0];
@@ -173,39 +160,21 @@ export class BlogDatabaseService {
     blogId: number,
     blog: ModifyBlogDto | ReplaceBlogDto,
   ): Promise<BlogDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(blog);
+    const returningClause = generateReturningClause(BlogSchema);
 
-    if (blog.titel !== undefined) {
-      fields.push(`titel = COALESCE(titel, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify(blog.titel));
-    }
-
-    if (blog.description !== undefined) {
-      fields.push(
-        `description = COALESCE(description, '{}'::jsonb) || $${index++}::jsonb`,
-      );
-      values.push(JSON.stringify(blog.description));
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(blogId);
 
     const query = `
       UPDATE blogs
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-    RETURNING
-      id,
-      titel,
-      description,
-      created_at,
-      updated_at;
-  `;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
+    `;
 
     const result = await this.db.query<BlogDto>(query, values);
 
@@ -243,13 +212,19 @@ export class BlogDatabaseService {
     blog_id: number,
     type: GalleryType,
   ): Promise<MediaGalleryDto> {
+    const galleryPrefix = "mg";
+    const returningClause = generateReturningClause(
+      MediaGallerySchema,
+      galleryPrefix,
+    );
+
     const query = `
-      SELECT mg.id, mg.name, mg.type, mg.created_at, mg.updated_at
-      FROM media_gallery mg
-      INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = mg.id
-      WHERE bmg.blog_id = $1 AND mg.type = $2
-      ORDER BY mg.id
-      LIMIT 1
+      SELECT ${returningClause}
+      FROM media_gallery ${galleryPrefix}
+      INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = ${galleryPrefix}.id
+      WHERE bmg.blog_id = $1 AND ${galleryPrefix}.type = $2
+      ORDER BY ${galleryPrefix}.id
+      LIMIT 1;
     `;
 
     const result = await this.db.query<MediaGalleryDto>(query, [blog_id, type]);
@@ -271,10 +246,10 @@ export class BlogDatabaseService {
    */
   async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
     const query = `
-    INSERT INTO blog_media_gallery (blog_id, gallery_id)
-    VALUES ($1, $2)
-    ON CONFLICT DO NOTHING
-  `;
+      INSERT INTO blog_media_gallery (blog_id, gallery_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING;
+    `;
 
     await this.db.query(query, [blog_id, gallery_id]);
   }
@@ -289,9 +264,9 @@ export class BlogDatabaseService {
     gallery_id: number,
   ): Promise<void> {
     const query = `
-    DELETE FROM blog_media_gallery
-    WHERE blog_id = $1 AND gallery_id = $2
-  `;
+      DELETE FROM blog_media_gallery
+      WHERE blog_id = $1 AND gallery_id = $2
+    `;
 
     await this.db.query(query, [blog_id, gallery_id]);
   }

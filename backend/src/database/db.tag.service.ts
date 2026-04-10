@@ -1,8 +1,19 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateTagDto, TagDto, ModifyTagDto } from "../dto/dto";
+import {
+  CreateTagDto,
+  TagDto,
+  ModifyTagDto,
+  PaginationFilterDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { PaginatedResponse } from "@repo/common";
+import { PaginatedResponse, TagSchema } from "@repo/common";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
 
 @Injectable()
 export class TagDatabaseService {
@@ -15,20 +26,18 @@ export class TagDatabaseService {
    * @returns The tag if there is one.
    */
   async getTagById(id: number): Promise<TagDto> {
+    const returningClause = generateReturningClause(TagSchema);
+
     const query = `
-      SELECT
-        id,
-        tag,
-        created_at,
-        updated_at
+      SELECT ${returningClause}
       FROM tags
-      WHERE id = $1
+      WHERE id = $1;
     `;
 
     const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Tag not found");
+      throw new ResourceGoneException(`Tag with ID ${id} not found`);
     }
     return result[0];
   }
@@ -40,26 +49,28 @@ export class TagDatabaseService {
    * @returns The tags if there are any.
    */
   async getTags(
-    amount: number = 0,
-    page: number = 0,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<TagDto>> {
-    let query = `SELECT id, tag, created_at, updated_at FROM tags ORDER BY id`;
+    const returningClause = generateReturningClause(TagSchema);
 
-    const params: any[] = [];
+    const query = `
+      SELECT ${returningClause}
+      FROM tags 
+      ORDER BY id
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = generateCountQuery("tags");
 
-    if (amount > 0) {
-      query += ` LIMIT $1 OFFSET $2`;
-      params.push(amount, page * amount);
-    }
+    const offset = paginationFilters.page * paginationFilters.limit;
 
     const [tags, countResult] = await Promise.all([
-      this.db.query<TagDto>(query, params),
-      this.db.query<{ count: string }>(`SELECT COUNT(*) as count FROM tags`),
+      this.db.query<TagDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery),
     ]);
 
     return {
-      page,
-      limit: amount,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects: tags,
     };
@@ -71,27 +82,19 @@ export class TagDatabaseService {
    * @returns the added tag if it was successful.
    */
   async createTag(tag: CreateTagDto): Promise<TagDto> {
-    if (!tag.tag) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(tag);
+    const returningClause = generateReturningClause(TagSchema);
 
     const query = `
-      INSERT INTO tags (tag)
-      VALUES ($1)
-      RETURNING
-        id,
-        tag,
-        created_at,
-        updated_at
-      ;
+      INSERT INTO tags (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
-
-    const values = [JSON.stringify(tag.tag)];
 
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create tag");
+      throw new Error("Failed to create tag.");
     }
 
     return result[0];
@@ -104,31 +107,20 @@ export class TagDatabaseService {
    * @returns the updated tag if successful.
    */
   async updateTag(tagId: number, tag: ModifyTagDto): Promise<TagDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(tag);
+    const returningClause = generateReturningClause(TagSchema);
 
-    if (tag.tag !== undefined) {
-      fields.push(`tag = COALESCE(tag, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify(tag.tag));
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(tagId);
 
     const query = `
       UPDATE tags
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING
-        id,
-        tag,
-        created_at,
-        updated_at
-      ;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<TagDto>(query, values);

@@ -54,6 +54,7 @@ import {
   UpdateAccountSchema,
   VerifyApiKeySchema,
   FilterBlogSchema,
+  AccountSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -107,6 +108,7 @@ export class ReplacePriceDto extends createZodDto(ReplacePriceSchema) {}
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
 export class UpdateAccountDto extends createZodDto(UpdateAccountSchema) {}
 export class PublicAccountDto extends createZodDto(PublicAccountSchema) {}
+export class AccountDto extends createZodDto(AccountSchema) {}
 
 // API keys Wrapper
 export class ApiKeyDto extends createZodDto(ApiKeySchema) {}

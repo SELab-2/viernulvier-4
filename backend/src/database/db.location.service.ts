@@ -1,8 +1,19 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
-import { CreateLocationDto, LocationDto, ModifyLocationDto } from "../dto/dto";
+import {
+  CreateLocationDto,
+  LocationDto,
+  ModifyLocationDto,
+  PaginationFilterDto,
+} from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
-import { PaginatedResponse } from "@repo/common";
+import { LocationSchema, PaginatedResponse } from "@repo/common";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -15,11 +26,13 @@ export class LocationDatabaseService {
    * @returns The Location if there is one.
    */
   async getLocationById(id: number): Promise<LocationDto> {
-    const query = `SELECT id, 
-       location, 
-       created_at, 
-       updated_at
-      FROM locations WHERE id = $1`;
+    const returningClause = generateReturningClause(LocationSchema);
+
+    const query = `
+      SELECT ${returningClause}
+      FROM locations
+      WHERE id = $1;
+    `;
 
     const result = await this.db.query<LocationDto>(query, [id]);
 
@@ -36,32 +49,28 @@ export class LocationDatabaseService {
    * @returns locations
    */
   async getLocations(
-    amount: number = 0,
-    page: number = 0,
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<LocationDto>> {
-    let query = `
-    SELECT id, location, created_at, updated_at
-    FROM locations
-    ORDER BY id
-  `;
+    const returningClause = generateReturningClause(LocationSchema);
 
-    const params: any[] = [];
+    const query = `
+      SELECT ${returningClause}
+      FROM locations
+      ORDER BY id
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = generateCountQuery("locations");
 
-    if (amount > 0) {
-      query += ` LIMIT $1 OFFSET $2`;
-      params.push(amount, page * amount);
-    }
+    const offset = paginationFilters.page * paginationFilters.limit;
 
     const [locations, countResult] = await Promise.all([
-      this.db.query<LocationDto>(query, params),
-      this.db.query<{ count: string }>(
-        `SELECT COUNT(*) as count FROM locations`,
-      ),
+      this.db.query<LocationDto>(query, [paginationFilters.limit, offset]),
+      this.db.query<{ count: string }>(countQuery),
     ]);
 
     return {
-      page,
-      limit: amount,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects: locations,
     };
@@ -73,27 +82,19 @@ export class LocationDatabaseService {
    * @returns the added location if it was successful.
    */
   async createLocation(location: CreateLocationDto): Promise<LocationDto> {
-    if (!location.location) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(location);
+    const returningClause = generateReturningClause(LocationSchema);
 
     const query = `
-      INSERT INTO locations (location)
-      VALUES ($1)
-      RETURNING
-        id,
-        location,
-        created_at,
-        updated_at
-      ;
+      INSERT INTO locations (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
-
-    const values = [JSON.stringify(location.location)];
 
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create location");
+      throw new Error("Failed to create location.");
     }
 
     return result[0];
@@ -109,40 +110,27 @@ export class LocationDatabaseService {
     locationId: number,
     location: ModifyLocationDto,
   ): Promise<LocationDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(location);
+    const returningClause = generateReturningClause(LocationSchema);
 
-    if (location.location !== undefined) {
-      fields.push(
-        `location = COALESCE(location, '{}'::jsonb) || $${index++}::jsonb`,
-      );
-      values.push(JSON.stringify(location.location));
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(locationId);
 
     const query = `
       UPDATE locations
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-    RETURNING
-      id,
-      location,
-      created_at,
-      updated_at
-    ;
-  `;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
+    `;
 
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
       throw new ResourceGoneException(
-        `Location with ID ${locationId} not found`,
+        `Location with ID ${locationId} not found.`,
       );
     }
 

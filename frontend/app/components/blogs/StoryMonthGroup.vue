@@ -17,7 +17,9 @@ const props = defineProps<{
 const { locale } = useI18n();
 
 const isOpen = ref(true);
-const toggle = () => { isOpen.value = !isOpen.value; };
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
 
 const label = computed(() => formatMonthLabel(props.monthKey, locale.value));
 </script>
@@ -30,9 +32,14 @@ const label = computed(() => formatMonthLabel(props.monthKey, locale.value));
       :aria-expanded="isOpen"
       @click="toggle"
     >
-      <div class="w-2 h-2 rounded-full bg-foreground/40 shrink-0 transition-colors group-hover/month:bg-purple-400" aria-hidden="true" />
+      <div
+        class="w-2 h-2 rounded-full bg-foreground/40 shrink-0 transition-colors group-hover/month:bg-purple-400"
+        aria-hidden="true"
+      />
 
-      <span class="font-brand font-black text-[10px] uppercase tracking-widest text-foreground/60 group-hover/month:text-foreground transition-colors">
+      <span
+        class="font-brand font-black text-[10px] uppercase tracking-widest text-foreground/60 group-hover/month:text-foreground transition-colors"
+      >
         {{ label }}
       </span>
 
@@ -41,7 +48,10 @@ const label = computed(() => formatMonthLabel(props.monthKey, locale.value));
       <svg
         class="w-3 h-3 shrink-0 text-foreground/30 transition-transform duration-200 ml-1"
         :class="isOpen ? 'rotate-0' : '-rotate-90'"
-        fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        viewBox="0 0 24 24"
         aria-hidden="true"
       >
         <polyline points="6 9 12 15 18 9" />

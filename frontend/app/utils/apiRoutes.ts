@@ -14,17 +14,21 @@ export const API_ROUTES = {
     base: "/productions",
     byId: (productionId: number) => `/productions/${productionId}`,
     tags: (productionId: number) => `/productions/${productionId}/tags`,
-    tagById: (productionId: number, tagId: number) => `/productions/${productionId}/tags/${tagId}`,
+    tagById: (productionId: number, tagId: number) =>
+      `/productions/${productionId}/tags/${tagId}`,
     blogs: (productionId: number) => `/productions/${productionId}/blogs`,
-    blogById: (productionId: number, blogId: number) => `/productions/${productionId}/blogs/${blogId}`,
+    blogById: (productionId: number, blogId: number) =>
+      `/productions/${productionId}/blogs/${blogId}`,
   },
   events: {
     base: "/events",
     byId: (eventId: number) => `/events/${eventId}`,
     locations: (eventId: number) => `/events/${eventId}/location`,
-    locationById: (eventId: number, locationId: number) => `/events/${eventId}/location/${locationId}`,
+    locationById: (eventId: number, locationId: number) =>
+      `/events/${eventId}/location/${locationId}`,
     prices: (eventId: number) => `/events/${eventId}/prices`,
-    priceById: (eventId: number, priceId: number) => `/events/${eventId}/prices/${priceId}`,
+    priceById: (eventId: number, priceId: number) =>
+      `/events/${eventId}/prices/${priceId}`,
   },
   blogs: {
     base: "/blogs",
