@@ -36,48 +36,60 @@ function goToPage(page: number) {
 <template>
   <nav
     v-if="totalPages > 1"
-    class="inline-flex items-center rounded-md border-2 border-foreground overflow-hidden"
+    class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
     :aria-label="t('archive.pagination')"
   >
     <!-- First page -->
     <button
-      class="w-12 h-9 flex items-center justify-center border-r-2 border-foreground bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === 1 || loading"
       @click="goToPage(1)"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.65" stroke="currentColor" class="w-4 h-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.65">
         <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
       </svg>
     </button>
 
+    <!-- separator -->
+    <span class="w-[2px] bg-foreground"></span>
+
     <!-- Previous -->
     <button
-      class="w-12 h-9 flex items-center justify-center border-r-2 border-foreground bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === 1 || loading"
       @click="goToPage(currentPage - 1)"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.65" stroke="currentColor" class="w-4 h-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.65">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
       </svg>
     </button>
 
+    <!-- separator -->
+    <span class="w-[2px] bg-foreground"></span>
+
     <!-- Current page -->
     <span
-      class="w-14 h-9 flex items-center justify-center bg-foreground text-background font-black text-sm border-r-2 border-foreground"
+      class="w-14 h-9 flex items-center justify-center bg-foreground text-background font-black text-sm"
     >
       {{ currentPage }}
     </span>
 
+    <!-- separator -->
+    <span class="w-[2px] bg-foreground"></span>
+
     <!-- Next -->
     <button
-      class="w-12 h-9 flex items-center justify-center border-r-2 border-foreground bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === totalPages || loading"
       @click="goToPage(currentPage + 1)"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.65" stroke="currentColor" class="w-4 h-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.65">
         <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
       </svg>
     </button>
+
+    <!-- separator -->
+    <span class="w-[2px] bg-foreground"></span>
 
     <!-- Last -->
     <button
@@ -85,7 +97,7 @@ function goToPage(page: number) {
       :disabled="currentPage === totalPages || loading"
       @click="goToPage(totalPages)"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.65" stroke="currentColor" class="w-4 h-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.65">
         <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
       </svg>
     </button>
