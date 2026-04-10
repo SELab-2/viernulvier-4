@@ -32,7 +32,7 @@ const { t }     = useI18n();
 
 const searchQuery   = ref("");
 const panelOpen     = ref(false);
-const selectedYears = ref<number[]>([]);
+const selectedYear  = ref<number | null>(null);
 
 watch(searchQuery, (val) => emit("update:search", val));
 
@@ -47,44 +47,37 @@ const years = computed<number[]>(() => {
 });
 
 function toggleYear(year: number) {
-  const idx = selectedYears.value.indexOf(year);
-  if (idx === -1) selectedYears.value = [...selectedYears.value, year];
-  else            selectedYears.value = selectedYears.value.filter(y => y !== year);
-  applyYearFilter();
-}
+  selectedYear.value = selectedYear.value === year ? null : year;
 
-function applyYearFilter() {
-  if (selectedYears.value.length === 0) {
+  if (selectedYear.value === null) {
     emit("update:dateFilter", {});
-    return;
+  } else {
+    emit("update:dateFilter", {
+      after:  `${year}-01-01`,
+      before: `${year}-12-31`,
+    });
   }
-  const min = Math.min(...selectedYears.value);
-  const max = Math.max(...selectedYears.value);
-  emit("update:dateFilter", {
-    after:  `${min}-01-01`,
-    before: `${max}-12-31`,
-  });
 }
 
 function clearYears() {
-  selectedYears.value = [];
+  selectedYear.value = null;
   emit("update:dateFilter", {});
 }
 
 // Calendar pick clears year selection
 function onCalendarFilter(filter: FilterBlog) {
-  selectedYears.value = [];
+  selectedYear.value = null;
   emit("update:dateFilter", filter);
 }
 
 // External clear (e.g. route change) syncs back
 watch(() => props.dateFilter, (f) => {
-  if (!f.after && !f.before) selectedYears.value = [];
+  if (!f.after && !f.before) selectedYear.value = null;
 }, { deep: true });
 
-// ── Active state ──────────────────────────────────────────────────────────────
+// Active state
 const hasDateFilter  = computed(() => !!(props.dateFilter.after || props.dateFilter.before));
-const hasYearFilter  = computed(() => selectedYears.value.length > 0);
+const hasYearFilter  = computed(() => selectedYear.value !== null);
 const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 </script>
 
@@ -173,14 +166,15 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
                        hover:bg-muted transition-colors group"
               >
                 <input
-                  type="checkbox"
+                  type="radio"
+                  name="year-filter"
                   class="accent-purple-500 w-3.5 h-3.5 cursor-pointer"
-                  :checked="selectedYears.includes(year)"
+                  :checked="selectedYear === year"
                   @change="toggleYear(year)"
                 />
                 <span
                   class="font-brand font-black text-[11px] uppercase tracking-widest transition-colors"
-                  :class="selectedYears.includes(year) ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'"
+                  :class="selectedYear === year ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'"
                 >
                   {{ year }}
                 </span>
@@ -194,13 +188,12 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
               </div>
             </div>
 
-            <!-- Summary of active year range -->
+            <!-- Summary of active year -->
             <p
-              v-if="hasYearFilter"
+              v-if="selectedYear"
               class="font-brand font-black text-[9px] uppercase tracking-widest text-purple-500 mt-1 px-1"
             >
-              {{ Math.min(...selectedYears) }}
-              <template v-if="selectedYears.length > 1"> – {{ Math.max(...selectedYears) }}</template>
+              {{ selectedYear }}
             </p>
           </div>
 
