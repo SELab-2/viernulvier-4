@@ -22,7 +22,15 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "src/**/*.{vue,ts,js,json,css,scss}": [
+    "frontend/**/*.{vue,ts,js,json,css,scss}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "backend/**/*.{vue,ts,js,json,css,scss}" : [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "common/**/*.{vue,ts,js,json,css,scss}" : [
       "prettier --write",
       "eslint --fix"
     ]
