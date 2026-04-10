@@ -14,6 +14,7 @@ import { MediaCropDatabaseService } from "../src/database/media/db.media_crop.se
 import { MediaItemDatabaseService } from "../src/database/media/db.media_item.service";
 import { MediaGalleryDatabaseService } from "../src/database/media/db.media_gallery.service";
 import { AppModule } from "../src/app.module";
+import { MediaStorageService } from "../src/media/media_storage/service/media_storage.service";
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
@@ -296,6 +297,12 @@ async function buildApp(): Promise<INestApplication> {
     .overrideProvider(MediaCropDatabaseService)
     .useValue(mockMediaCropsDbService())
 
+    .overrideProvider(MediaStorageService)
+    .useValue({
+      save: jest.fn().mockResolvedValue("http://mock-url.com/image.jpg"),
+      get: jest.fn().mockResolvedValue(Buffer.from("mock")),
+      delete: jest.fn().mockResolvedValue(undefined),
+    })
     .overrideProvider(AppLogger)
     .useValue({
       log: jest.fn(),

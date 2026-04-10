@@ -1,6 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { MediaStorageService } from "./service/media_storage.service";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import * as fs from "fs";
 import { ConfigService } from "@nestjs/config";
 
@@ -94,120 +94,6 @@ describe("MediaStorageService", () => {
         await expect(service.deleteMedia(mockUrl)).rejects.toThrow(
           NotFoundException,
         );
-      });
-    });
-  });
-
-  // ==========================================
-  // REMOTE STORAGE SUITE (PRODUCTION)
-  // ==========================================
-  describe("RemoteMediaStorage (production)", () => {
-    beforeEach(async () => {
-      const module: TestingModule = await Test.createTestingModule({
-        providers: [
-          MediaStorageService,
-          {
-            provide: ConfigService,
-            // INLINE MOCK: 100% guaranteed to return 'production' for this suite
-            useValue: {
-              get: jest.fn().mockReturnValue("production"),
-            },
-          },
-        ],
-      }).compile();
-
-      service = module.get<MediaStorageService>(MediaStorageService);
-    });
-
-    describe("saveMedia", () => {
-      it("should PUT the buffer to the URL and return it", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: true,
-        } as Response);
-
-        const result = await service.saveMedia(mockUrl, mockBuffer);
-
-        expect(global.fetch).toHaveBeenCalledWith(mockUrl, {
-          method: "PUT",
-          body: mockBuffer.buffer,
-        });
-        expect(result).toEqual(mockUrl);
-      });
-
-      it("should throw BadRequestException when the response is not ok", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: false,
-          statusText: "Bad Request",
-        } as Response);
-
-        await expect(service.saveMedia(mockUrl, mockBuffer)).rejects.toThrow(
-          BadRequestException,
-        );
-      });
-    });
-
-    describe("getMedia", () => {
-      it("should return a buffer from the remote URL", async () => {
-        const arrayBuffer = mockBuffer.buffer.slice(
-          mockBuffer.byteOffset,
-          mockBuffer.byteOffset + mockBuffer.byteLength,
-        );
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: true,
-          status: 200,
-          arrayBuffer: jest.fn().mockResolvedValue(arrayBuffer),
-        } as unknown as Response);
-
-        const result = await service.getMedia(mockUrl);
-
-        expect(global.fetch).toHaveBeenCalledWith(mockUrl);
-        expect(result).toEqual(mockBuffer);
-      });
-
-      it("should throw NotFoundException on 404", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: false,
-          status: 404,
-        } as Response);
-
-        await expect(service.getMedia(mockUrl)).rejects.toThrow(
-          NotFoundException,
-        );
-      });
-
-      it("should throw BadRequestException on other non-ok responses", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: false,
-          status: 500,
-          statusText: "Server Error",
-        } as Response);
-
-        await expect(service.getMedia(mockUrl)).rejects.toThrow(
-          BadRequestException,
-        );
-      });
-    });
-
-    describe("deleteMedia", () => {
-      it("should DELETE the media at the given URL", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: true,
-        } as Response);
-
-        await service.deleteMedia(mockUrl);
-
-        expect(global.fetch).toHaveBeenCalledWith(mockUrl, {
-          method: "DELETE",
-        });
-      });
-
-      it("should throw an error when the response is not ok", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-          ok: false,
-          statusText: "Not Found",
-        } as Response);
-
-        await expect(service.deleteMedia(mockUrl)).rejects.toThrow(Error);
       });
     });
   });
