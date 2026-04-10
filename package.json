@@ -18,7 +18,14 @@
     "db:reset": "turbo db:reset",
     "scraper:inject:structured:test": "turbo scraper:inject:structured:test",
     "format": "turbo format",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.{vue,ts,js,json,css,scss}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
   },
   "repository": {
     "type": "git",
@@ -42,6 +49,8 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.4.2",
     "tsx": "^4.21.0",
     "turbo": "^2.8.9",
@@ -53,7 +62,6 @@
     "dotenv": "^17.3.1",
     "sanitize-html": "^2.17.1"
   },
-
   "//": "These overrides are temporary fixes for vulnerabilities!!!",
   "overrides": {
     "lodash": "^4.17.24",
