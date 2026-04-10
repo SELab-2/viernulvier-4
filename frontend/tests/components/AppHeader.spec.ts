@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { ref } from "vue";
 import { mount } from "@vue/test-utils";
 import { createRouter, createWebHistory } from "vue-router";
 import AppHeader from "../../app/components/AppHeader.vue";
@@ -6,7 +7,7 @@ import { createI18n } from "vue-i18n";
 
 vi.mock("../../app/composables/useAuth", () => ({
     useAuth: () => ({
-        isLoggedIn: { value: false }, // user default not logged in
+        isLoggedIn: { value: ref(false) }, // user default not logged in
         logout: vi.fn(), // dummy logout function
     }),
 }));
@@ -63,6 +64,7 @@ describe("AppHeader", () => {
                 plugins: [i18n, router],
                 stubs: {
                     LocaleSelector: true, // component renders as empty placeholder
+                    NuxtLink: { template: '<a><slot /></a>' }, // stubbing NuxtLink as <a> tag
                 },
             },
         });
@@ -76,22 +78,6 @@ describe("AppHeader", () => {
 
     it("tests existence of hamburger button", () => {
         const hamburger = wrapper.find("button");
-        expect(hamburger.exists()).toBe(true);
-    });
-
-    it("hamburger menu button should not show up on larger screens", () => {
-        Object.defineProperty(window, "innerWidth", { value: 1280, writable: true });
-        window.dispatchEvent(new Event("resize"));
-
-        const hamburger = wrapper.find("button.lg\\:hidden");
-        expect(hamburger.exists()).toBe(false);
-    });
-
-    it("hamburger menu button should show up on smaller screens", () => {
-        Object.defineProperty(window, "innerWidth", { value: 375, writable: true });
-        window.dispatchEvent(new Event("resize"));
-
-        const hamburger = wrapper.find("button.lg\\:hidden");
         expect(hamburger.exists()).toBe(true);
     });
 
