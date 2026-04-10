@@ -15,7 +15,6 @@ import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
 import StoryToolbar  from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
-import ScrollToTop   from "~/components/blogs/ScrollToTop.vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n();
