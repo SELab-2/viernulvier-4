@@ -107,9 +107,9 @@ const cellNarrow = 'p-4 text-sm w-[20%] max-w-0'
 
         <tbody>
         <template v-for="event in visibleEvents" :key="event.id">
-          <tr class="group relative border-t-2 border-gray-900/10 dark:border-white/10 transition-colors duration-150 cursor-pointer">
+          <tr class="group relative border-t-2 border-gray-900/10 dark:border-white/10">
             <td :class="cellWide" class="relative">
-              <p class="font-brand font-black text-sm uppercase tracking-tight truncate transition-colors duration-150">
+              <p class="font-brand font-black text-sm uppercase tracking-tight truncate">
                 {{ formatDate(event.starttime) }}
               </p>
               <p class="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5 truncate">
