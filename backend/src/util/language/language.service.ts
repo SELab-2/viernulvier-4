@@ -52,9 +52,10 @@ export class LanguageService {
       "limit" in data &&
       "totalItems" in data
     ) {
+      const paginatedData = data as Record<string, any>;
       return {
-        ...data,
-        objects: this.flattenByLanguage(data.objects, lang),
+        ...paginatedData,
+        objects: this.flattenByLanguage(paginatedData.objects, lang),
       } as T;
     }
 
@@ -109,10 +110,11 @@ export class LanguageService {
 
     // Only process real objects
     if (typeof data !== "object") {
-      return data;
+      return data as T;
     }
 
-    const result: Record<string, any> = { ...data };
+    const original = data as Record<string, unknown>;
+    const result: Record<string, unknown> = { ...original };
 
     for (const key of Object.keys(result)) {
       const value = result[key];
@@ -121,11 +123,21 @@ export class LanguageService {
         value &&
         typeof value === "object" &&
         !Array.isArray(value) &&
-        value[langFrom]
+        !(value instanceof Date)
       ) {
-        result[key] = await this.translateText(value, langFrom, langTo);
-      } else if (typeof value === "object") {
-        result[key] = await this.translateObject(value, langFrom, langTo);
+        const recordValue = value as Record<string, unknown>;
+
+        if (langFrom in recordValue) {
+          // It has the language key, so it's a translation map
+          result[key] = await this.translateText(
+            recordValue as Partial<Record<Language, string>>,
+            langFrom,
+            langTo,
+          );
+        } else {
+          // It's a standard nested object, recursively translate it
+          result[key] = await this.translateObject(value, langFrom, langTo);
+        }
       }
     }
 
@@ -170,11 +182,13 @@ export class LanguageService {
       await new Promise((r) => setTimeout(r, 100));
 
       data[langTo] = result.text;
-    } catch (error) {
-      if (this.apiKey !== "none")
-        this.logger.error(`Translation failed: ${error?.message}`, error);
+    } catch (error: unknown) {
+      if (this.apiKey !== "none") {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        this.logger.error(`Translation failed: ${errorMessage}`);
+      }
 
-      // fallback: copy original language
       data[langTo] = sourceText;
     }
 
