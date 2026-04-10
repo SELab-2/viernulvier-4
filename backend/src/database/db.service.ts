@@ -1,18 +1,19 @@
 import { Pool, QueryResultRow } from "pg";
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class DbService implements OnModuleDestroy {
   private pool: Pool;
 
   // to edit database params go to your .env file.
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.pool = new Pool({
-      user: process.env.DB_USER_DEV,
-      host: process.env.DB_HOST_DEV,
-      database: process.env.DB_NAME_DEV,
-      password: process.env.DB_PASSWORD_DEV,
-      port: Number(process.env.DB_PORT_DEV),
+      user: this.configService.get<string>("DB_USER_DEV"),
+      host: this.configService.get<string>("DB_HOST_DEV"),
+      database: this.configService.get<string>("DB_NAME_DEV"),
+      password: this.configService.get<string>("DB_PASSWORD_DEV"),
+      port: Number(this.configService.get<string>("DB_PORT_DEV")),
     });
   }
 

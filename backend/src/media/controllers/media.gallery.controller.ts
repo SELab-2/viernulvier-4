@@ -25,11 +25,22 @@ import {
   MediaItemDto,
   ModifyMediaGalleryDto,
   PaginationFilterDto,
+  PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
-import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
-import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
+import {
+  ApiOkArrayAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
@@ -163,15 +174,11 @@ export class MediaGalleryController {
    * @returns A list of items for that gallery.
    */
   @ApiOperation({ summary: "Gets the items from one gallery." })
-  @ApiOkResponse({
-    type: MediaItemDto,
-    isArray: true,
-    description: "Fetched items from gallery",
-  })
+  @ApiOkArrayAnyOf(MediaItemDto, PrintItemDto)
   @Get(":galleryId/items")
   async getGalleryItems(
     @Param("galleryId", ParseIntPipe) galleryId: number,
-  ): Promise<MediaItemDto[]> {
+  ): Promise<MediaItemDto[] | PrintItemDto[]> {
     return await this.mediaGalleryService.getGalleryItems(galleryId);
   }
 
@@ -208,5 +215,49 @@ export class MediaGalleryController {
     @Param("itemId", ParseIntPipe) itemId: number,
   ): Promise<void> {
     await this.mediaGalleryService.unlinkItemFromGallery(galleryId, itemId);
+  }
+
+  /**
+   * Responds to a PUT to "/media/galleries/:galleryId/prints/:printItemId".
+   * @param printItemId The ID of the print item.
+   * @param galleryId The ID of the media gallery.
+   * @returns Nothing.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Links a print item to a media gallery." })
+  @ApiOkResponse({ description: "Print item linked to gallery successfully." })
+  @Put(":galleryId/prints/:printItemId")
+  async linkToGallery(
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Param("galleryId", ParseIntPipe) galleryId: number,
+  ): Promise<void> {
+    await this.mediaGalleryService.linkPrintItemToGallery(
+      printItemId,
+      galleryId,
+    );
+  }
+
+  /**
+   * Responds to a DELETE to "/media/galleries/:galleryId/prints/:printItemId".
+   * @param printItemId The ID of the print item.
+   * @param galleryId The ID of the media gallery.
+   * @returns Nothing.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Unlinks a print item from a media gallery." })
+  @ApiOkResponse({
+    description: "Print item unlinked from gallery successfully.",
+  })
+  @Delete(":galleryId/prints/:printItemId")
+  async unlinkFromGallery(
+    @Param("printItemId", ParseIntPipe) printItemId: number,
+    @Param("galleryId", ParseIntPipe) galleryId: number,
+  ): Promise<void> {
+    await this.mediaGalleryService.unlinkPrintItemFromGallery(
+      printItemId,
+      galleryId,
+    );
   }
 }

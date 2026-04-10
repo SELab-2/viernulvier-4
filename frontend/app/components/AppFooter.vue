@@ -22,9 +22,9 @@
   Color scheme is inverted: black background in light mode, white in dark mode.
 -->
 <script setup lang="ts">
-import { ROUTES } from '~/utils/routes'
+import { ROUTES } from "~/utils/routes";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 /**
  * Social media channels for VIERNULVIER.
@@ -33,30 +33,60 @@ const { t } = useI18n()
  * Add new channels here — no template changes needed.
  */
 const socials = [
-  { label: 'Instagram', href: 'https://www.instagram.com/viernulvier.gent/', icon: resolveComponent('IconsInstagramSVG') },
-  { label: 'Facebook',  href: 'https://www.facebook.com/VIERNULVIER.gent/',  icon: resolveComponent('IconsFacebookSVG') },
-  { label: 'TikTok',    href: 'https://www.tiktok.com/@viernulvier.gent',     icon: resolveComponent('IconsTiktokSVG') },
-  { label: 'YouTube',   href: 'https://www.youtube.com/channel/UCdRYlqUQcIm6pbLgHHobQcQ', icon: resolveComponent('IconsYoutubeSVG') },
-  { label: 'LinkedIn',  href: 'https://www.linkedin.com/company/viernulviergent', icon: resolveComponent('IconsLinkedinSVG') },
-]
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/viernulvier.gent/",
+    icon: resolveComponent("IconsInstagramSVG"),
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/VIERNULVIER.gent/",
+    icon: resolveComponent("IconsFacebookSVG"),
+  },
+  {
+    label: "TikTok",
+    href: "https://www.tiktok.com/@viernulvier.gent",
+    icon: resolveComponent("IconsTiktokSVG"),
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/channel/UCdRYlqUQcIm6pbLgHHobQcQ",
+    icon: resolveComponent("IconsYoutubeSVG"),
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/viernulviergent",
+    icon: resolveComponent("IconsLinkedinSVG"),
+  },
+];
 </script>
 
 <template>
-  <footer class="bg-black dark:bg-white text-white dark:text-black border-t border-white/10 dark:border-black/10">
+  <footer
+    class="bg-black dark:bg-white text-white dark:text-black border-t border-white/10 dark:border-black/10"
+  >
     <div class="px-6 md:px-12 lg:px-20 py-12 max-w-7xl mx-auto">
-
       <!-- Three-column grid: brand+contact | navigation | social -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 dark:border-black/10">
-
+      <div
+        class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 dark:border-black/10"
+      >
         <!-- Column 1: Brand and contact information -->
         <div>
-          <address class="not-italic flex flex-col gap-0.5 text-sm text-white dark:text-black leading-relaxed">
+          <address
+            class="not-italic flex flex-col gap-0.5 text-sm text-white dark:text-black leading-relaxed"
+          >
             <span>Kunstencentrum VIERNULVIER vzw.</span>
             <span>Sint-Pietersnieuwstraat 23, 9000 Gent</span>
-            <a href="tel:+3292672820" class="mt-2 hover:text-white/60 dark:hover:text-black/60 transition-colors">
+            <a
+              href="tel:+3292672820"
+              class="mt-2 hover:text-white/60 dark:hover:text-black/60 transition-colors"
+            >
               T. 09 267 28 20
             </a>
-            <a href="mailto:info@viernulvier.gent" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
+            <a
+              href="mailto:info@viernulvier.gent"
+              class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+            >
               info@viernulvier.gent
             </a>
           </address>
@@ -65,7 +95,7 @@ const socials = [
         <!-- Column 2: Site navigation links -->
         <div>
           <h4 class="font-display font-bold text-base mb-4">
-            {{ t('footer.links') }}
+            {{ t("footer.links") }}
           </h4>
           <ul class="flex flex-col gap-2 text-sm text-white dark:text-black">
             <li>
@@ -75,22 +105,31 @@ const socials = [
                 rel="noopener noreferrer"
                 class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
               >
-                {{ t('footer.mainSite') }}
+                {{ t("footer.mainSite") }}
               </a>
             </li>
             <li>
-              <NuxtLink :to="ROUTES.productions.base" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
-                {{ t('footer.archive') }}
+              <NuxtLink
+                :to="ROUTES.productions.base"
+                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+              >
+                {{ t("footer.archive") }}
               </NuxtLink>
             </li>
             <li>
-              <NuxtLink :to="ROUTES.stories.base" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
-                {{ t('footer.stories') }}
+              <NuxtLink
+                :to="ROUTES.stories.base"
+                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+              >
+                {{ t("footer.stories") }}
               </NuxtLink>
             </li>
             <li>
-              <NuxtLink :to="ROUTES.prints.base" class="hover:text-white/60 dark:hover:text-black/60 transition-colors">
-                {{ t('footer.prints') }}
+              <NuxtLink
+                :to="ROUTES.prints.base"
+                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+              >
+                {{ t("footer.prints") }}
               </NuxtLink>
             </li>
           </ul>
@@ -113,24 +152,24 @@ const socials = [
             </a>
           </div>
         </div>
-
       </div>
 
       <!-- Copyright bar -->
-      <p class="text-center pt-6 text-[0.7rem] font-mono tracking-widest uppercase text-white dark:text-black">
-        © {{ new Date().getFullYear() }} VIERNULVIER — {{ t('footer.rights') }}
+      <p
+        class="text-center pt-6 text-[0.7rem] font-mono tracking-widest uppercase text-white dark:text-black"
+      >
+        © {{ new Date().getFullYear() }} VIERNULVIER — {{ t("footer.rights") }}
       </p>
-
     </div>
   </footer>
 </template>
 
 <style scoped>
 .font-display {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: "Georgia", "Times New Roman", serif;
 }
 
 .font-mono {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
 }
 </style>

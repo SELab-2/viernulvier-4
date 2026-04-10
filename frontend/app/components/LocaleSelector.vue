@@ -1,62 +1,61 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { ChevronDown, Check } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import { ChevronDown, Check } from "lucide-vue-next";
 
-const { locale, locales, setLocale } = useI18n()
-const isOpen = ref(false)
-const dropdownRef = ref(null)
+const { locale, locales, setLocale } = useI18n();
+const isOpen = ref(false);
+const dropdownRef = ref(null);
 
 /**
  * Normalizes the locales array into a simple list of strings.
  */
 const normalizedLocales = computed(() => {
-  return locales.value.map(loc => typeof loc === 'string' ? loc : loc.code)
-})
+  return locales.value.map((loc) => (typeof loc === "string" ? loc : loc.code));
+});
 
 /**
  * Closes the dropdown if a click occurs outside the component.
  */
 const closeDropdown = (e) => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
-    isOpen.value = false
+    isOpen.value = false;
   }
-}
+};
 
 /**
  * Closes the dropdown when the 'Escape' key is pressed.
  */
 const handleEscape = (e) => {
-  if (e.key === 'Escape') {
-    isOpen.value = false
+  if (e.key === "Escape") {
+    isOpen.value = false;
   }
-}
+};
 
 const handleResize = () => {
   if (isOpen.value) {
-    isOpen.value = false
+    isOpen.value = false;
   }
-}
+};
 
 onMounted(() => {
-  window.addEventListener('click', closeDropdown)
-  window.addEventListener('keydown', handleEscape)
-  window.addEventListener('resize', handleResize)
-})
+  window.addEventListener("click", closeDropdown);
+  window.addEventListener("keydown", handleEscape);
+  window.addEventListener("resize", handleResize);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('click', closeDropdown)
-  window.removeEventListener('keydown', handleEscape)
-  window.removeEventListener('resize', handleResize)
-})
+  window.removeEventListener("click", closeDropdown);
+  window.removeEventListener("keydown", handleEscape);
+  window.removeEventListener("resize", handleResize);
+});
 
 /**
  * Updates the app locale and closes the menu.
  */
 const handleLocaleChange = (code) => {
-  setLocale(code)
-  isOpen.value = false
-}
-
+  setLocale(code);
+  isOpen.value = false;
+};
 </script>
 
 <template>
@@ -93,7 +92,11 @@ const handleLocaleChange = (code) => {
             :key="loc"
             @click="handleLocaleChange(loc)"
             class="flex w-full items-center justify-between px-4 py-2 text-[11px] font-black uppercase transition-colors outline-none hover:text-[var(--accent)]"
-            :class="loc === locale ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)]'"
+            :class="
+              loc === locale
+                ? 'text-[var(--foreground)]'
+                : 'text-[var(--muted-foreground)]'
+            "
           >
             <span>{{ loc.toUpperCase() }}</span>
 

@@ -24,16 +24,16 @@
 /* ABCMonumentGrotesk — the official VIERNULVIER brand font.
    Font files live in /public/fonts/ */
 @font-face {
-  font-family: 'ABCMonumentGrotesk';
-  src: url('/fonts/ABCMonumentGrotesk-Heavy.otf') format('opentype');
+  font-family: "ABCMonumentGrotesk";
+  src: url("/fonts/ABCMonumentGrotesk-Heavy.otf") format("opentype");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'ABCMonumentGrotesk';
-  src: url('/fonts/ABCMonumentGrotesk-Regular.otf') format('opentype');
+  font-family: "ABCMonumentGrotesk";
+  src: url("/fonts/ABCMonumentGrotesk-Regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -81,16 +81,33 @@
   --thumbnail-bg: #ffffff;
   --thumbnail-icon: #ffffff;
 
-   /* Blog timeline — purple accent */
-  --blog-purple-strong:  #534AB7;
-  --blog-purple-mid:     #7F77DD;
-  --blog-purple-soft:    #AFA9EC;
-  --blog-purple-pale:    #CECBF6;
-  --blog-purple-ghost:   #EEEDFE;
-  --blog-year-rule:      #7F77DD;
-  --blog-month-dot:      #AFA9EC;
-  --blog-accent:         #534AB7;
-  --blog-accent-text:    #3C3489;
+  /* Blog timeline — purple accent */
+  --blog-purple-strong: #534ab7;
+  --blog-purple-mid: #7f77dd;
+  --blog-purple-soft: #afa9ec;
+  --blog-purple-pale: #cecbf6;
+  --blog-purple-ghost: #eeedfe;
+  --blog-year-rule: #7f77dd;
+  --blog-month-dot: #afa9ec;
+  --blog-accent: #534ab7;
+  --blog-accent-text: #3c3489;
+
+  /* Admin action buttons */
+  --action-blue-border: #bfdbfe;
+  --action-blue-icon: #2563eb;
+  --action-blue-hover: #eff6ff;
+
+  --action-red-border: #fecaca;
+  --action-red-icon: #dc2626;
+  --action-red-hover: #fef2f2;
+
+  --action-green-border: #bbf7d0;
+  --action-green-icon: #16a34a;
+  --action-green-hover: #f0fdf4;
+
+  --action-gray-border: #d1d5db;
+  --action-gray-icon: #4b5563;
+  --action-gray-hover: #f9fafb;
 }
 
 /* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
@@ -132,16 +149,33 @@
   --thumbnail-bg: #1f2937;
   --thumbnail-icon: #6b7280;
 
-   /* Blog timeline — purple accent, lighter for dark bg */
-  --blog-purple-strong:  #7F77DD;
-  --blog-purple-mid:     #AFA9EC;
-  --blog-purple-soft:    #534AB7;
-  --blog-purple-pale:    #3C3489;
-  --blog-purple-ghost:   #26215C;
-  --blog-year-rule:      #AFA9EC;
-  --blog-month-dot:      #7F77DD;
-  --blog-accent:         #AFA9EC;
-  --blog-accent-text:    #CECBF6;
+  /* Blog timeline — purple accent, lighter for dark bg */
+  --blog-purple-strong: #7f77dd;
+  --blog-purple-mid: #afa9ec;
+  --blog-purple-soft: #534ab7;
+  --blog-purple-pale: #3c3489;
+  --blog-purple-ghost: #26215c;
+  --blog-year-rule: #afa9ec;
+  --blog-month-dot: #7f77dd;
+  --blog-accent: #afa9ec;
+  --blog-accent-text: #cecbf6;
+
+  /* Admin action buttons */
+  --action-blue-border: #1d4ed8;
+  --action-blue-icon: #93c5fd;
+  --action-blue-hover: #1e3a8a;
+
+  --action-red-border: #b91c1c;
+  --action-red-icon: #fca5a5;
+  --action-red-hover: #7f1d1d;
+
+  --action-green-border: #15803d;
+  --action-green-icon: #86efac;
+  --action-green-hover: #14532d;
+
+  --action-gray-border: #4b5563;
+  --action-gray-icon: #d1d5db;
+  --action-gray-hover: #1f2937;
 }
 
 /* ── Tailwind theme mapping ──────────────────────────────────────── */
@@ -161,23 +195,41 @@
   --color-accent: var(--accent);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
+  --color-action-blue-border: var(--action-blue-border);
+  --color-action-blue-icon: var(--action-blue-icon);
+  --color-action-blue-hover: var(--action-blue-hover);
+  --color-action-red-border: var(--action-red-border);
+  --color-action-red-icon: var(--action-red-icon);
+  --color-action-red-hover: var(--action-red-hover);
+  --color-action-green-border: var(--action-green-border);
+  --color-action-green-icon: var(--action-green-icon);
+  --color-action-green-hover: var(--action-green-hover);
+  --color-action-gray-border: var(--action-gray-border);
+  --color-action-gray-icon: var(--action-gray-icon);
+  --color-action-gray-hover: var(--action-gray-hover);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-brand: 'ABCMonumentGrotesk', sans-serif;
+  --font-brand: "ABCMonumentGrotesk", sans-serif;
 }
 
 /* ── Base ────────────────────────────────────────────────────────── */
 @layer base {
-  * { @apply border-border outline-ring/50; }
-  body { @apply bg-background text-foreground; }
-  html { font-size: var(--font-size); }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    font-size: var(--font-size);
+  }
 }
 
 /* ── Utilities ───────────────────────────────────────────────────── */
 .font-brand {
-  font-family: 'ABCMonumentGrotesk', sans-serif;
+  font-family: "ABCMonumentGrotesk", sans-serif;
 }
 
 .dropcap::first-letter {
@@ -220,13 +272,17 @@
   height: 2rem;
   border-radius: 9999px;
   flex-shrink: 0;
-  background: linear-gradient(to bottom, var(--blog-purple-strong), var(--blog-purple-soft));
+  background: linear-gradient(
+    to bottom,
+    var(--blog-purple-strong),
+    var(--blog-purple-soft)
+  );
 }
 
 .blog-year-label {
   font-size: 2.25rem;
   font-weight: 900;
-  font-family: var(--font-brand, 'ABCMonumentGrotesk', sans-serif);
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
   font-style: italic;
   text-transform: uppercase;
   letter-spacing: -0.04em;
@@ -238,7 +294,9 @@
   padding: 0;
   transition: opacity 0.15s;
 }
-.blog-year-label:hover { opacity: 0.65; }
+.blog-year-label:hover {
+  opacity: 0.65;
+}
 
 .blog-year-badge {
   flex-shrink: 0;
@@ -315,8 +373,12 @@
   outline: none;
   transition: background-color 0.1s;
 }
-.blog-story-btn:last-child { border-bottom: none; }
-.blog-story-btn:hover { background-color: var(--card-hover); }
+.blog-story-btn:last-child {
+  border-bottom: none;
+}
+.blog-story-btn:hover {
+  background-color: var(--card-hover);
+}
 .blog-story-btn:focus-visible {
   box-shadow: inset 0 0 0 2px var(--blog-purple-strong);
 }
@@ -361,8 +423,12 @@
 
 /* ── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .blog-year-label { font-size: 1.75rem; }
-  .blog-month-label { font-size: 8px; }
+  .blog-year-label {
+    font-size: 1.75rem;
+  }
+  .blog-month-label {
+    font-size: 8px;
+  }
 }
 
 /* ─── Shared Components ─────────────────────────────────────────────────────
@@ -388,5 +454,409 @@
 
   .btn-danger:hover {
     @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
+}
+/* ── Calendar component ──────────────────────────────────────────────────────
+   Used by components/calendar.vue + components/calendar/*.vue
+   Tokens used: --border, --card, --muted, --muted-foreground, --foreground,
+                --blog-purple-{strong,mid,soft,pale,ghost}, --blog-accent-text
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.cal-root {
+  width: 100%;
+  max-width: 680px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+
+.cal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.cal-tab {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.cal-tab:last-child {
+  border-right: none;
+}
+.cal-tab:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+.cal-tab--active {
+  color: var(--blog-purple-strong);
+  background: var(--blog-purple-ghost);
+  border-bottom: 2px solid var(--blog-purple-strong);
+  margin-bottom: -1px;
+}
+
+/* ── Manual inputs row ─────────────────────────────────────────────────────── */
+
+.cal-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+  flex-wrap: wrap;
+}
+
+.cal-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.cal-input-label {
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cal-input-hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.65;
+}
+
+.cal-input-row {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.cal-input {
+  flex: 1;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.cal-input:focus {
+  border-color: var(--blog-purple-strong);
+}
+.cal-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+.cal-input-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--blog-purple-strong);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.cal-input-btn:hover {
+  background: var(--blog-purple-mid);
+}
+
+.cal-input-sep {
+  font-size: 14px;
+  color: var(--blog-purple-soft);
+  padding-bottom: 0.3rem;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+/* Shared badge (today / oldest) */
+.cal-badge {
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+  border: 1px solid var(--blog-purple-pale);
+  width: fit-content;
+}
+.cal-badge--muted {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+/* ── Two-month grid wrapper ────────────────────────────────────────────────── */
+
+.cal-months {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1rem 2.5rem;
+}
+
+/* Prev / next navigation arrows */
+.cal-nav {
+  position: absolute;
+  top: 1.1rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+.cal-nav:hover {
+  border-color: var(--blog-purple-strong);
+  color: var(--blog-purple-strong);
+}
+.cal-nav--prev {
+  left: 0.5rem;
+}
+.cal-nav--next {
+  right: 0.5rem;
+}
+
+/* ── Single month panel (CalendarGrid) ─────────────────────────────────────── */
+
+.cal-month {
+  padding: 0 0.5rem;
+}
+.cal-month--right {
+  border-left: 1px solid var(--border);
+  padding-left: 1rem;
+}
+
+.cal-month-label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blog-accent-text);
+  margin-bottom: 0.75rem;
+}
+
+/* Weekday header row */
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.25rem;
+}
+.cal-wd {
+  font-size: 8px;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  padding: 0.2rem 0;
+}
+
+/* Day grid */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    color 0.1s;
+  font-family: inherit;
+  outline: none;
+  padding: 0;
+}
+
+.cal-cell--empty {
+  pointer-events: none;
+}
+
+.cal-cell--day:hover:not(:disabled):not(.cal-cell--selected):not(
+    .cal-cell--in-range
+  ) {
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+
+/* Today dot */
+.cal-cell--today::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--blog-purple-strong);
+}
+
+.cal-cell--future {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Range fill */
+.cal-cell--in-range {
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+  border-radius: 0;
+}
+
+/* Endpoints share the same solid fill; border-radius differs */
+.cal-cell--range-start,
+.cal-cell--range-end,
+.cal-cell--selected {
+  background: var(--blog-purple-strong) !important;
+  color: #fff !important;
+}
+.cal-cell--range-start {
+  border-radius: 4px 0 0 4px;
+}
+.cal-cell--range-end {
+  border-radius: 0 4px 4px 0;
+}
+.cal-cell--selected {
+  border-radius: 4px !important;
+}
+
+/* Single-day range: both endpoints are the same cell */
+.cal-cell--range-start.cal-cell--range-end {
+  border-radius: 4px !important;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+
+.cal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--muted);
+}
+
+.cal-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  font-family: inherit;
+}
+
+.cal-summary-icon {
+  color: var(--blog-purple-strong);
+  flex-shrink: 0;
+}
+
+.cal-clear {
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1.5px solid var(--foreground);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease-in-out;
+}
+
+.cal-clear:hover {
+  background-color: var(--foreground);
+  color: var(--background);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cal-clear:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.cal-cell--range-cap-left {
+  border-radius: 4px 0 0 4px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 540px) {
+  .cal-months {
+    grid-template-columns: 1fr;
+    padding: 1rem 2rem;
+  }
+  .cal-month--right {
+    display: none;
+  }
+  .cal-inputs {
+    flex-direction: column;
+  }
+  .cal-input-sep {
+    transform: rotate(90deg);
+    align-self: center;
+    padding: 0;
   }
 }

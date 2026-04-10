@@ -25,3 +25,4 @@ export const PublicAccountSchema = AccountSchema.omit({
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
 export type PublicAccount = z.infer<typeof PublicAccountSchema>;
+export type Account = z.infer<typeof AccountSchema>;

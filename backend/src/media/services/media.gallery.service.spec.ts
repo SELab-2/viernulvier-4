@@ -45,6 +45,8 @@ describe("MediaGalleryService", () => {
       getItemsByGallery: jest.fn(),
       linkItemToGallery: jest.fn(),
       unlinkItemFromGallery: jest.fn(),
+      linkPrintItemToGallery: jest.fn(),
+      unlinkPrintItemFromGallery: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -85,8 +87,7 @@ describe("MediaGalleryService", () => {
 
       // Note: The service unpacks the DTO properties to pass to the DB service
       expect(mediaDbService.getGalleries).toHaveBeenCalledWith(
-        paginationFilter.limit,
-        paginationFilter.page,
+        paginationFilter,
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -132,10 +133,10 @@ describe("MediaGalleryService", () => {
 
   describe("getGalleryItems", () => {
     it("should return all items for a gallery", async () => {
+      mediaDbService.getGalleryById.mockResolvedValue(mockGallery);
       mediaDbService.getItemsByGallery.mockResolvedValue([mockItem]);
-
       const result = await service.getGalleryItems(1);
-
+      expect(mediaDbService.getGalleryById).toHaveBeenCalledWith(1);
       expect(mediaDbService.getItemsByGallery).toHaveBeenCalledWith(1);
       expect(result).toEqual([mockItem]);
     });
@@ -158,6 +159,31 @@ describe("MediaGalleryService", () => {
       await service.unlinkItemFromGallery(1, 2);
 
       expect(mediaDbService.unlinkItemFromGallery).toHaveBeenCalledWith(1, 2);
+    });
+  });
+
+  describe("linkPrintItemToGallery", () => {
+    it("should link a print item to a gallery", async () => {
+      mediaDbService.linkPrintItemToGallery.mockResolvedValue(undefined);
+
+      // Let op: service parameters zijn (printItemId, galleryId)
+      // DbService parameters zijn (galleryId, printItemId)
+      await service.linkPrintItemToGallery(1, 2);
+
+      expect(mediaDbService.linkPrintItemToGallery).toHaveBeenCalledWith(2, 1);
+    });
+  });
+
+  describe("unlinkPrintItemFromGallery", () => {
+    it("should unlink a print item from a gallery", async () => {
+      mediaDbService.unlinkPrintItemFromGallery.mockResolvedValue(undefined);
+
+      await service.unlinkPrintItemFromGallery(1, 2);
+
+      expect(mediaDbService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(
+        2,
+        1,
+      );
     });
   });
 });

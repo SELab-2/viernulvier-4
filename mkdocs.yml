@@ -24,6 +24,7 @@ nav:
       - Locations: api/locations.md
       - Pricing: api/pricing.md
       - Media Storage: api/media_storage.md
+      - Prints: api/prints.md
   - Data Schemas:
       - Overview: schemas/index.md
       - Core Entities: schemas/entities.md

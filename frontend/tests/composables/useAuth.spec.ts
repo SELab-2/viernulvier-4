@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "../../app/composables/useAuth";
 
 vi.mock("#app", async (importOriginal) => {
-  const actual = await importOriginal() as Record<string, unknown>;
-  return{
+  const actual = await importOriginal<Record<string, any>>();
+  return {
     ...actual,
     useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
     useState: vi.fn((key: string, init: () => unknown) => ({ value: init() })),
     navigateTo: vi.fn(),
     computed: (fn: () => unknown) => ({ value: fn() }),
-  }
+  };
 });
 
 const mockFetch = vi.fn();
@@ -52,7 +52,7 @@ describe("useAuth", () => {
 
     it("returns error when $fetch throws (invalid credentials)", async () => {
       mockFetch.mockRejectedValue(
-        Object.assign(new Error("Unauthorized"), { status: 401 })
+        Object.assign(new Error("Unauthorized"), { status: 401 }),
       );
 
       const { login } = useAuth();
@@ -83,7 +83,7 @@ describe("useAuth", () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         "http://localhost:3000/auth/login",
-        expect.objectContaining({ method: "POST" })
+        expect.objectContaining({ method: "POST" }),
       );
     });
 
@@ -100,7 +100,7 @@ describe("useAuth", () => {
         expect.any(String),
         expect.objectContaining({
           body: { username: "admin", password: "password" },
-        })
+        }),
       );
     });
   });
@@ -121,7 +121,10 @@ describe("useAuth", () => {
   describe("rehydrate", () => {
     it("restores state from sessionStorage", () => {
       sessionStorage.setItem("apiKey", "stored-key");
-      sessionStorage.setItem("account", JSON.stringify({ id: 1, username: "admin" }));
+      sessionStorage.setItem(
+        "account",
+        JSON.stringify({ id: 1, username: "admin" }),
+      );
 
       const { rehydrate, apiKey, account } = useAuth();
       rehydrate();

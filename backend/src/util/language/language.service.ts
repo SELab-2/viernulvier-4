@@ -3,6 +3,7 @@ import { Language } from "@repo/common";
 import { AppLogger } from "../logger/logger.service";
 import * as deepl from "deepl-node";
 import { Translator } from "deepl-node";
+import { ConfigService } from "@nestjs/config";
 
 /**
  * This service provides functionality for working with languages in
@@ -13,9 +14,12 @@ export class LanguageService {
   private translator: Translator;
   private apiKey: string;
 
-  constructor(private readonly logger: AppLogger) {
+  constructor(
+    private readonly logger: AppLogger,
+    private readonly configService: ConfigService,
+  ) {
     // change this constructor when changing provider.
-    this.apiKey = process.env.TRANSLATE_API_KEY || "none";
+    this.apiKey = this.configService.get<string>("TRANSLATE_API_KEY", "none");
 
     if (!this.apiKey) {
       throw new Error("env variable TRANSLATE_API_KEY is not defined");
@@ -48,9 +52,10 @@ export class LanguageService {
       "limit" in data &&
       "totalItems" in data
     ) {
+      const paginatedData = data as Record<string, any>;
       return {
-        ...data,
-        objects: this.flattenByLanguage(data.objects, lang),
+        ...paginatedData,
+        objects: this.flattenByLanguage(paginatedData.objects, lang),
       } as T;
     }
 
@@ -105,19 +110,19 @@ export class LanguageService {
 
     // Only process real objects
     if (typeof data !== "object") {
-      return data;
+      return data as T;
     }
 
-    const result: Record<string, any> = { ...data };
+    const result = data as Record<string, any>;
 
     for (const key of Object.keys(result)) {
-      const value = result[key];
+      const value = result[key] as unknown;
 
       if (
         value &&
         typeof value === "object" &&
         !Array.isArray(value) &&
-        value[langFrom]
+        (value as Record<string, any>)[langFrom]
       ) {
         result[key] = await this.translateText(value, langFrom, langTo);
       } else if (typeof value === "object") {
@@ -168,7 +173,7 @@ export class LanguageService {
       data[langTo] = result.text;
     } catch (error) {
       if (this.apiKey !== "none")
-        this.logger.error(`Translation failed: ${error?.message}`, error);
+        this.logger.error(`Translation failed: ${(error as Error).message}`);
 
       // fallback: copy original language
       data[langTo] = sourceText;
