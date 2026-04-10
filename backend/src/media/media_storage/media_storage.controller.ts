@@ -53,7 +53,7 @@ export class MediaStorageController {
     const buffer = await this.mediaStorageService.getMedia(url);
 
     let contentType: string;
-    const parsedUrl = new URL(url);
+    const parsedUrl = new URL(url, "http://dummybase.com"); // uses a dummy url in case of relative pathing just to build a temp dummy url
     const filename = path.basename(parsedUrl.pathname);
     const ext = path.extname(parsedUrl.pathname);
     switch (ext) {

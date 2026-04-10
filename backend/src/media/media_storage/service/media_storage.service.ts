@@ -11,8 +11,8 @@ export class MediaStorageService {
   constructor(private readonly configService: ConfigService) {
     this.storage =
       this.configService.get<string>("NODE_ENV") === "development" // this makes it important to run as npm run start:dev, will not work with npm run start:prod locally!!!
-        ? new LocalMediaStorage(configService)
-        : new RemoteMediaStorage();
+        ? new LocalMediaStorage()
+        : new RemoteMediaStorage(configService);
   }
 
   /**
