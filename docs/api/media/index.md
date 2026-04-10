@@ -8,7 +8,7 @@ The Media API is built around four main components that are closely connected:
 
 1. **[Media Storage](storage.md):** The foundation. This component manages the actual physical binary files on the server (uploading, fetching, and deleting).
 2. **[Media Items](items.md):** The logical database representation of a file. This is where metadata such as the original resolution, URL, alt texts, and potential credits are stored.
-3. **[Media Crops](crops.md):** Derived versions of a Media Item. Think of specific cutouts (e.g., a square crop for a profile picture, or a 16:9 banner) of the same original file. A crop is always linked to exactly one Media Item.
+3. **[Media Crops](crops.md):** Derived versions of a Media Item. Think of specific cutouts (e.g., a 'thumbnail' crop for list views, or a 'hero' crop for headers) of the same original file. A crop is always linked to exactly one Media Item.
 4. **[Media Galleries](galleries.md):** A collection of multiple Media Items (and in the future, Print Items). Galleries are used to create logical groups of images, such as a photo album for an event or a press kit for a production.
 
 ## Relationships Under the Hood

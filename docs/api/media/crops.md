@@ -12,7 +12,7 @@ Retrieves a specific media crop by its ID.
 ### [POST] `/crops`
 Creates a new media crop entry. 
 - **Security:** `apiKey` required.
-- **Body:** `CreateMediaCropDto` (Optionally include `autoDownload: boolean` in the body to automatically fetch and save external media to the local storage).
+- **Body:** `CreateMediaCropDto`
 - **Returns:** `MediaCropDto`
 
 ### [PUT] `/crops/:cropId`
