@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Reusable download action button.
- * Wraps ActionButton with a blue style and download icon.
+ * Wraps ActionButton with a green style and download icon.
  */
 import {Download} from "lucide-vue-next";
 
@@ -25,11 +25,11 @@ const downloadFile = async () => {
 </script>
 
 <template>
-  <!-- Blue download action button -->
+  <!-- Green download action button -->
   <AdminActionButton
       :label="label"
       :size="props.size"
-      variant="blue"
+      variant="green"
       @click="downloadFile"
   >
     <!-- Download icon inherits the computed size from ActionButton -->
