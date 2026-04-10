@@ -9,6 +9,8 @@ export default [
   {
     ignores: [
       'eslint.config.mjs', 
+      'ecosystem.config.js',
+      '**/nuxt.config.ts',
       '**/.turbo/**', 
       '**/dist/**', 
       '**/coverage/**',
