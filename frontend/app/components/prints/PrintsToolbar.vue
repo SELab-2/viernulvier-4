@@ -33,7 +33,7 @@ watch(searchQuery, (v) => {
 })
 watch(activeTypes, (v) => {
   emit("update:types", v)
-})
+}, { deep: true })
 
 function toggleType(type: PrintType) {
   if (activeTypes.value.includes(type)) {

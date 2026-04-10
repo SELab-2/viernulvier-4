@@ -65,7 +65,7 @@ async function loadPage(reset = false) {
   }
 }
 
-watch([searchQuery, locale], () => loadPage(true));
+watch([searchQuery, locale], () => loadPage(true), { deep: true });
 
 // Infinite scroll
 const sentinel = ref<HTMLElement | null>(null);
@@ -88,6 +88,8 @@ watch(sentinel, (el) => {
 
 onMounted(() => loadPage(true));
 onUnmounted(() => io?.disconnect());
+
+const activeFilters = ref<string[]>([]);
 </script>
 
 <template>
@@ -97,6 +99,7 @@ onUnmounted(() => io?.disconnect());
 
     <PrintsToolbar
         @update:search="searchQuery = $event"
+        @update:types="activeFilters = $event"
     />
 
     <main class="container mx-auto px-4 max-w-5xl pt-4 pb-8 sm:pt-6 sm:pb-12">
@@ -120,7 +123,7 @@ onUnmounted(() => io?.disconnect());
       </div>
 
       <template v-else>
-        <PrintsDisplay :prints="prints" />
+        <PrintsDisplay :prints="prints" :active-types="activeFilters" />
 
         <div ref="sentinel" class="h-1" aria-hidden="true" />
 
