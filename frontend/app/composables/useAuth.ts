@@ -1,4 +1,4 @@
-import type { PublicAccount, ApiKey } from "@repo/common";
+import { type PublicAccount, type ApiKey } from "@repo/common";
 import { ROUTES } from "../utils/routes";
 
 export interface LoginResponse {
@@ -15,7 +15,7 @@ export interface LoginResponse {
  */
 export function useAuth() {
   const config = useRuntimeConfig();
-  const baseUrl = config.public.apiBase as string;
+  const baseUrl = config.public.apiBase;
 
   const account = useState<PublicAccount | null>("auth.account", () => null);
   const apiKey = useState<string | null>("auth.apiKey", () => null);
@@ -29,7 +29,8 @@ export function useAuth() {
       const storedKey = sessionStorage.getItem("apiKey");
       const storedAccount = sessionStorage.getItem("account");
       if (storedKey) apiKey.value = storedKey;
-      if (storedAccount) account.value = JSON.parse(storedAccount);
+      if (storedAccount)
+        account.value = JSON.parse(storedAccount) as PublicAccount;
     }
   }
 
@@ -79,7 +80,7 @@ export function useAuth() {
       sessionStorage.removeItem("apiKey");
       sessionStorage.removeItem("account");
     }
-    navigateTo(ROUTES.login.base);
+    void navigateTo(ROUTES.login.base);
   }
 
   const isLoggedIn = computed(() => !!apiKey.value);

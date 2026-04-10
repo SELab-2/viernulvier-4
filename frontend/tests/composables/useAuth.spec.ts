@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useAuth } from "../../app/composables/useAuth";
 
 vi.mock("#app", async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
+  const actual = await importOriginal<Record<string, any>>();
   return {
     ...actual,
     useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),

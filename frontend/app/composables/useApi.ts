@@ -58,9 +58,11 @@ export function useApi() {
         fetchError.message ??
         "An unexpected network error occurred.";
 
-      onError
-        ? onError(status ?? 0, message)
-        : handleDefaultError(status ?? 0, message);
+      if (onError) {
+        onError(status ?? 0, message);
+      } else {
+        handleDefaultError(status ?? 0, message);
+      }
 
       return { data: null, error: message, status };
     }

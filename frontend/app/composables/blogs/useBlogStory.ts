@@ -19,11 +19,10 @@ export function useBlogStory(story: MaybeRef<BlogView | null>) {
   const { locale } = useI18n();
 
   // Unwrap to any once so every accessor below stays tidy.
-  const s = computed(() => toValue(story) as any);
+  const s = computed(() => toValue(story));
 
   const title = computed<string>(() => s.value?.titel ?? "—");
   const description = computed<string>(() => s.value?.description ?? "");
-  const image = computed<string | null>(() => s.value?.image ?? null);
   const storyId = computed<number>(() => s.value?.id ?? 0);
 
   const formattedDate = computed<string>(() => {
@@ -38,9 +37,9 @@ export function useBlogStory(story: MaybeRef<BlogView | null>) {
   return {
     title,
     description,
-    image,
     storyId,
     formattedDate,
     placeholderGradient,
+    image: null, // TODO: Image Gallery and such have to be fetched seperately.
   };
 }
