@@ -117,12 +117,12 @@ watch(searchQuery, () => {
         </div>
       </template>
 
-      <!-- Production items -->
+      <!-- Grid / list -->
       <div
         v-else
         :class="viewMode === 'grid'
-          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5'
-          : 'flex flex-col gap-3'
+          ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6'
+          : 'flex flex-col gap-3 mb-6'
         "
       >
         <component
@@ -131,6 +131,12 @@ watch(searchQuery, () => {
           :key="production.id"
           :productionView="production"
         />
+      </div>
+
+      <!-- Bottom controls -->
+      <div class="flex items-center justify-between mt-6">
+        <ArchivePageJumper />
+        <ArchivePagination />
       </div>
 
     </div>
