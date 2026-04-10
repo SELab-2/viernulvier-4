@@ -29,11 +29,12 @@ interface Props {
 const props = defineProps<Props>();
 const { t, locale } = useI18n();
 
-const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1024)
+const windowWidth = ref(1024)
 const handleResize = () => {
   windowWidth.value = window.innerWidth
 }
 onMounted(() => {
+  handleResize()
   window.addEventListener('resize', handleResize)
 })
 onUnmounted(() => {
