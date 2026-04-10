@@ -26,11 +26,11 @@
       "prettier --write",
       "eslint --fix"
     ],
-    "backend/**/*.{vue,ts,js,json,css,scss}" : [
+    "backend/**/*.{vue,ts,js,json,css,scss}": [
       "prettier --write",
       "eslint --fix"
     ],
-    "common/**/*.{vue,ts,js,json,css,scss}" : [
+    "common/**/*.{vue,ts,js,json,css,scss}": [
       "prettier --write",
       "eslint --fix"
     ]
@@ -55,6 +55,7 @@
     "@types/sanitize-html": "^2.16.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-jest": "^29.15.2",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
     "husky": "^9.1.7",
