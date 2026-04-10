@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import {usePrintApi} from "../../composables/usePrintApi";
-import ScrollToTop from "../../components/ScrollToTop.vue";
 
 const { t, locale } = useI18n();
 const { getAll }    = usePrintApi();
 
 // Filters
-const sortOrder   = ref<"newest" | "oldest">("newest");
 const searchQuery = ref("");
 
 // Pagination state
@@ -43,8 +41,11 @@ async function loadPage(reset = false) {
 
   try {
     const raw = await getAll({
-      paginationFilters: { page: page.value, limit: LIMIT, descending: sortOrder.value === "newest" },
-      lang: locale.value as "nl" | "en",
+      paginationFilters: {
+        page: page.value,
+        limit: LIMIT,
+        descending: true },
+      languageFilters: { lang: locale.value as "nl" | "en" },
       printFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
       },
@@ -64,7 +65,7 @@ async function loadPage(reset = false) {
   }
 }
 
-watch([sortOrder, searchQuery, locale], () => loadPage(true));
+watch([searchQuery, locale], () => loadPage(true));
 
 // Infinite scroll
 const sentinel = ref<HTMLElement | null>(null);
@@ -74,13 +75,13 @@ watch(sentinel, (el) => {
   io?.disconnect();
   if (!el) return;
   io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting && hasMore.value && !isLoadingMore.value) {
-          page.value++;
-          loadPage(false);
-        }
-      },
-      { rootMargin: "400px" },
+    ([entry]) => {
+      if (entry?.isIntersecting && hasMore.value && !isLoadingMore.value) {
+        page.value++;
+        loadPage(false);
+      }
+    },
+    { rootMargin: "400px" },
   );
   io.observe(el);
 });
@@ -95,7 +96,6 @@ onUnmounted(() => io?.disconnect());
     <PrintsHeader />
 
     <PrintsToolbar
-        v-model:sort-order="sortOrder"
         @update:search="searchQuery = $event"
     />
 
@@ -105,7 +105,8 @@ onUnmounted(() => io?.disconnect());
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
         <p class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20">
-          {{ t("prints.noPrints") }}
+          {{ t("prints.noPrints") }} <!--TODO this one i still have to add but im waiting for that other PR so i can chagne up the names a little -->
+
         </p>
         <p class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400">
           {{ fetchError.message }}

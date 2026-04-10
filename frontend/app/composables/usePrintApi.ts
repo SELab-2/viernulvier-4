@@ -5,7 +5,7 @@ import type { PrintItemView, PaginatedResponse, PaginationFilter } from "@repo/c
 interface PrintListOptions {
     printFilters?: { title?: string };
     paginationFilters?: PaginationFilter;
-    lang?: "nl" | "en";
+    languageFilters?: { lang: "nl" | "en" };
 }
 
 const MOCK_PRINTS: PrintItemView[] = Array.from({ length: 60 }, (_, i) => {
@@ -22,11 +22,11 @@ const MOCK_PRINTS: PrintItemView[] = Array.from({ length: 60 }, (_, i) => {
 }); //TODO these are mock prints !!
 
 export function usePrintApi() {
-    //TODO remove lang if you will not use it
+    //TODO remove languageFilters if you will not use it
     async function getAll({
       printFilters,
       paginationFilters,
-      lang
+      languageFilters
     }: PrintListOptions = {}): Promise<PaginatedResponse<PrintItemView>> { //TODO needs to be changed to get actual API call
         await new Promise(r => setTimeout(r, 600));
 

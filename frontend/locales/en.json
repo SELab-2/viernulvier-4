@@ -127,6 +127,8 @@
     "showMore": "Show more",
     "remaining": "remaining",
     "delete": "Delete",
-    "download": "Download"
+    "download": "Download",
+    "loading": "Loading...",
+    "retry": "Try again"
   }
 }
