@@ -22,23 +22,23 @@ beforeEach(() => {
 describe("useLocationApi", () => {
   it("getAll calls GET /locations", () => {
     const { getAll } = useLocationApi();
-    getAll();
+    void getAll();
     expect(mockGet).toHaveBeenCalledWith("/locations");
   });
 
   it("getAll appends lang query param", () => {
     const { getAll } = useLocationApi();
-    getAll({ languageFilters: { lang: "en" } });
+    void getAll({ languageFilters: { lang: "en" } });
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=en"));
   });
 
   it("getAll appends pagination and lang together", () => {
     const { getAll } = useLocationApi();
-    getAll({
+    void getAll({
       paginationFilters: { page: 1, limit: 20, descending: true },
       languageFilters: { lang: "nl" },
     });
-    const url = mockGet.mock.calls[0][0];
+    const url = mockGet.mock.calls[0][0] as string;
     expect(url).toContain("page=1");
     expect(url).toContain("limit=20");
     expect(url).toContain("lang=nl");
@@ -46,26 +46,26 @@ describe("useLocationApi", () => {
 
   it("getById calls GET /locations/:id", () => {
     const { getById } = useLocationApi();
-    getById(1);
+    void getById(1);
     expect(mockGet).toHaveBeenCalledWith("/locations/1");
   });
 
   it("getById appends lang param", () => {
     const { getById } = useLocationApi();
-    getById(1, "nl");
+    void getById(1, "nl");
     expect(mockGet).toHaveBeenCalledWith("/locations/1?lang=nl");
   });
 
   it("create calls POST /locations with body", () => {
     const { create } = useLocationApi();
     const body = { location: { nl: "Gent", en: "Gent" }, legacy_id: null };
-    create(body);
+    void create(body);
     expect(mockPost).toHaveBeenCalledWith("/locations", body);
   });
 
   it("modify calls PATCH /locations/:id with body", () => {
     const { modify } = useLocationApi();
-    modify(1, { location: { nl: "Brugge", en: "Brugge" } });
+    void modify(1, { location: { nl: "Brugge", en: "Brugge" } });
     expect(mockPatch).toHaveBeenCalledWith("/locations/1", {
       location: { nl: "Brugge", en: "Brugge" },
     });
@@ -73,7 +73,7 @@ describe("useLocationApi", () => {
 
   it("remove calls DELETE /locations/:id", () => {
     const { remove } = useLocationApi();
-    remove(1);
+    void remove(1);
     expect(mockDel).toHaveBeenCalledWith("/locations/1");
   });
 });

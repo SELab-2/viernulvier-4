@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import ProductionStories from "../../../app/components/production/storyListView.vue";
 import type { BlogView } from "@repo/common";
+import StoryListView from "../../../app/components/production/storyListView.vue";
 
 const i18n = createI18n({
   locale: "nl",
@@ -54,7 +55,7 @@ const stories: BlogView[] = [
 ];
 
 describe("ProductionStories", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof StoryListView>>;
 
   beforeEach(() => {
     wrapper = mount(ProductionStories, {

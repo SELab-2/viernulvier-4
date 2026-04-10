@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import EventTable from "../../../app/components/production/EventTable.vue";
 import type { LocationView, PriceView } from "@repo/common";
@@ -85,7 +85,7 @@ const events: EventWithDetails[] = [
 ];
 
 describe("EventTable", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof EventTable>>;
 
   beforeEach(() => {
     wrapper = mount(EventTable, {
