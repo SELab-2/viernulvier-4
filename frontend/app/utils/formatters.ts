@@ -4,8 +4,8 @@
 
 /** Serialize a Date to a local-timezone YYYY-MM-DD string (no UTC drift). */
 export function localIso(d: Date): string {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, "0");
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${dd}`;
 }
@@ -25,9 +25,10 @@ export function validateIso(iso: string): string | null {
   const date = new Date(y, m - 1, d);
   if (
     date.getFullYear() !== y ||
-    date.getMonth()    !== m - 1 ||
-    date.getDate()     !== d
-  ) return null;
+    date.getMonth() !== m - 1 ||
+    date.getDate() !== d
+  )
+    return null;
   if (iso > localTodayIso()) return null;
   return iso;
 }
@@ -43,7 +44,9 @@ export function parseDate(raw: string): string | null {
   if (parts.length === 3) {
     const [dd, mm, yyyy] = parts;
     if (yyyy?.length === 4 && dd && mm)
-      return validateIso(`${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`);
+      return validateIso(
+        `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`,
+      );
   }
   return null;
 }

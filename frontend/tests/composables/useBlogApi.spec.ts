@@ -21,7 +21,6 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-
 describe("useBlogApi", () => {
   it("getAll calls GET /blogs", () => {
     const { getAll } = useBlogApi();

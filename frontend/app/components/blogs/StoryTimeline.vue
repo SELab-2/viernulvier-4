@@ -31,10 +31,14 @@ const byYear = computed(() => {
 <template>
   <div>
     <div v-if="stories.length === 0" class="py-24 text-center">
-      <p class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2">
+      <p
+        class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
+      >
         {{ t("stories.noStories") }}
       </p>
-      <p class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground">
+      <p
+        class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
+      >
         {{ t("stories.noStoriesDesc") }}
       </p>
     </div>

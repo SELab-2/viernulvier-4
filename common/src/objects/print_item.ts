@@ -17,19 +17,19 @@ export const PrintItemSchema = z.object({
 
 // Localized Print Item object.
 export const PrintItemViewSchema = PrintItemSchema.extend({
-    titel: z.string(),
-    description: z.string(),
+  titel: z.string(),
+  description: z.string(),
 });
 
 const MutablePrintItemSchema = PrintItemSchema.omit({
-    id: true,
-    created_at: true,
-    updated_at: true,
+  id: true,
+  created_at: true,
+  updated_at: true,
 });
 
 // Updating and creating.
 export const CreatePrintItemSchema = MutablePrintItemSchema.extend({
-    gallery_ids: z.array(z.number().int().positive()).optional(),
+  gallery_ids: z.array(z.number().int().positive()).optional(),
 });
 export const ModifyPrintItemSchema = MutablePrintItemSchema.partial();
 export const ReplacePrintItemSchema = MutablePrintItemSchema;

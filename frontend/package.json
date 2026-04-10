@@ -10,7 +10,9 @@
     "start:prod": "PORT=3001 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "format": "prettier --write \"{app,tests}/**/*.{vue,ts,js,json,css,scss}\"",
+    "lint": "eslint \"{app,tests}/**/*.{vue,ts,js}\" --fix"
   },
   "dependencies": {
     "@nuxtjs/i18n": "^10.2.3",

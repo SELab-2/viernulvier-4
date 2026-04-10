@@ -9,7 +9,6 @@ vi.mock("~/composables/useApi", () => ({
   }),
 }));
 
-
 beforeEach(() => {
   vi.clearAllMocks();
 });

@@ -275,7 +275,7 @@ async function buildApp(): Promise<INestApplication> {
   })
     .overrideGuard(ApiKeyGuard)
     .useValue({ canActivate: jest.fn(() => true) })
-    
+
     // Use .useValue() with the executed factory functions!
     .overrideProvider(BlogDatabaseService)
     .useValue(mockBlogDbService())
@@ -295,7 +295,7 @@ async function buildApp(): Promise<INestApplication> {
     .useValue(mockMediaGalleryDbService())
     .overrideProvider(MediaCropDatabaseService)
     .useValue(mockMediaCropsDbService())
-    
+
     .overrideProvider(AppLogger)
     .useValue({
       log: jest.fn(),
@@ -1364,7 +1364,7 @@ describe("EventPriceController (e2e)", () => {
 
 describe("MediaCropController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaCropDatabaseService; 
+  let mediaDb: MediaCropDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();
@@ -1396,12 +1396,14 @@ describe("MediaCropController (e2e)", () => {
 
   describe("POST /media/crops", () => {
     it("should return 201 with the created crop", async () => {
-      const response = await request(app.getHttpServer()).post("/media/crops").send({
-        item_id: 1,
-        name: "hd_ready",
-        url: "https://test.com/a.jpg",
-        autoDownload: 0,
-      });
+      const response = await request(app.getHttpServer())
+        .post("/media/crops")
+        .send({
+          item_id: 1,
+          name: "hd_ready",
+          url: "https://test.com/a.jpg",
+          autoDownload: 0,
+        });
 
       if (response.status === 400) {
         console.log("Validation Error:", response.body);
@@ -1541,7 +1543,9 @@ describe("MediaItemController (e2e)", () => {
 
   describe("PUT /media/items/:itemId/crops/:cropId", () => {
     it("should return 200 after successfully linking crop", () => {
-      return request(app.getHttpServer()).put("/media/items/1/crops/2").expect(200);
+      return request(app.getHttpServer())
+        .put("/media/items/1/crops/2")
+        .expect(200);
     });
   });
 
@@ -1622,7 +1626,9 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("DELETE /media/galleries/:galleryId", () => {
     it("should return 200 after deleting gallery", () => {
-      return request(app.getHttpServer()).delete("/media/galleries/1").expect(200);
+      return request(app.getHttpServer())
+        .delete("/media/galleries/1")
+        .expect(200);
     });
   });
 
