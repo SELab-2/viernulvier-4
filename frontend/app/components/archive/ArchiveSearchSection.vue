@@ -6,14 +6,42 @@ import { useProductionApi } from '~/composables/useProductionApi'
 import { useEventApi } from '~/composables/useEventApi'
 import type { ProductionView, Event } from '@repo/common'
 import TagFilter from "./TagFilter.vue";
+import { X } from 'lucide-vue-next'
 
 const { t, locale } = useI18n()
-const { viewMode, searchQuery, sortOrder, dateFilter, oldestDate } = useArchiveView()
+
+const {
+  viewMode,
+  searchQuery,
+  sortOrder,
+  dateFilter,
+  oldestDate,
+  tagIds
+} = useArchiveView()
+
 const { getAll: getAllProductions } = useProductionApi()
 const { getAll: getAllEvents }      = useEventApi()
 
-const filterOpen    = ref(false)
-const hasDateFilter = computed(() => !!(dateFilter.value.after || dateFilter.value.before))
+const filterOpen = ref(false)
+const calendarKey = ref(0)
+
+const hasDateFilter = computed(() =>
+  !!(dateFilter.value.after || dateFilter.value.before)
+)
+
+const hasActiveFilters = computed(() => {
+  return (
+    tagIds.value.length > 0 ||
+    !!dateFilter.value.after ||
+    !!dateFilter.value.before
+  )
+})
+
+function clearAllFilters() {
+  tagIds.value = []
+  dateFilter.value = {}
+  calendarKey.value++
+}
 
 async function fetchOldestDate() {
   try {
@@ -21,13 +49,19 @@ async function fetchOldestDate() {
       paginationFilters: { page: 0, limit: 1, descending: false },
       languageFilters:   { lang: locale.value as 'nl' | 'en' },
     })
+
     const first = resp.data?.objects?.[0] as ProductionView | undefined
     if (!first?.id) return
 
-    const evResp = await getAllEvents({ eventFilters: { production_id: first.id as any } })
+    const evResp = await getAllEvents({
+      eventFilters: { production_id: first.id as any }
+    })
+
     const events: Event[] = Array.isArray((evResp.data as any)?.objects)
       ? (evResp.data as any).objects
-      : Array.isArray(evResp.data) ? evResp.data as any : []
+      : Array.isArray(evResp.data)
+        ? evResp.data as any
+        : []
 
     const times = events
       .flatMap(e => [e.starttime, e.endtime])
@@ -36,9 +70,13 @@ async function fetchOldestDate() {
       .filter(t => !Number.isNaN(t))
 
     if (times.length) {
-      oldestDate.value = new Date(Math.min(...times)).toISOString().slice(0, 10)
+      oldestDate.value = new Date(Math.min(...times))
+        .toISOString()
+        .slice(0, 10)
     }
-  } catch { /* non-critical */ }
+  } catch {
+    /* non-critical */
+  }
 }
 
 onMounted(fetchOldestDate)
@@ -59,17 +97,27 @@ onMounted(fetchOldestDate)
         />
       </div>
 
-      <!-- Filter toggle -->
-      <button
-        :class="[
-          'btn-outline h-12 px-4',
-          (filterOpen || hasDateFilter) && '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
-        ]"
-        :aria-expanded="filterOpen"
-        @click="filterOpen = !filterOpen"
-      >
-        {{ t('archive.filter') }}
-      </button>
+      <!-- Filter toggle + badge -->
+      <div class="relative">
+        <button
+          :class="[
+            'btn-outline h-12 px-4',
+          ]"
+          :aria-expanded="filterOpen"
+          @click="filterOpen = !filterOpen"
+        >
+          {{ t('archive.filter') }}
+        </button>
+
+        <!-- Clear filters badge -->
+        <button
+          v-if="hasActiveFilters"
+          @click.stop="clearAllFilters"
+          class="absolute -top-2.25 -right-2.25 w-5.5 h-5.5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition shadow-sm"
+        >
+          <X class="w-3 h-3" />
+        </button>
+      </div>
 
       <!-- View toggle -->
       <button
@@ -82,7 +130,7 @@ onMounted(fetchOldestDate)
 
     </div>
 
-    <!-- Filter panel — in flow, pushes content down -->
+    <!-- Filter panel -->
     <Transition name="filter-slide">
       <div v-if="filterOpen" class="border-t border-border">
         <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
@@ -107,6 +155,7 @@ onMounted(fetchOldestDate)
           </span>
           <div class="min-w-0">
             <Calendar
+              :key="calendarKey"
               :oldest-date="oldestDate"
               :model-filter="dateFilter"
               @update:filter="dateFilter = $event"
