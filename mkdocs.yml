@@ -29,7 +29,7 @@ nav:
           - Items: api/media/items.md
           - Crops: api/media/crops.md
           - Galleries: api/media/galleries.md
-      - Prints: api/prints.md
+          - Prints: api/media/prints.md
   - Data Schemas:
       - Overview: schemas/index.md
       - Core Entities: schemas/entities.md
