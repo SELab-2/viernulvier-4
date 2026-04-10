@@ -113,31 +113,20 @@ export class LanguageService {
       return data as T;
     }
 
-    const original = data as Record<string, unknown>;
-    const result: Record<string, unknown> = { ...original };
+    const result = data as Record<string, any>;
 
     for (const key of Object.keys(result)) {
-      const value = result[key];
+      const value = result[key] as unknown;
 
       if (
         value &&
         typeof value === "object" &&
         !Array.isArray(value) &&
-        !(value instanceof Date)
+        (value as Record<string, any>)[langFrom]
       ) {
-        const recordValue = value as Record<string, unknown>;
-
-        if (langFrom in recordValue) {
-          // It has the language key, so it's a translation map
-          result[key] = await this.translateText(
-            recordValue as Partial<Record<Language, string>>,
-            langFrom,
-            langTo,
-          );
-        } else {
-          // It's a standard nested object, recursively translate it
-          result[key] = await this.translateObject(value, langFrom, langTo);
-        }
+        result[key] = await this.translateText(value, langFrom, langTo);
+      } else if (typeof value === "object") {
+        result[key] = await this.translateObject(value, langFrom, langTo);
       }
     }
 
@@ -182,13 +171,11 @@ export class LanguageService {
       await new Promise((r) => setTimeout(r, 100));
 
       data[langTo] = result.text;
-    } catch (error: unknown) {
-      if (this.apiKey !== "none") {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        this.logger.error(`Translation failed: ${errorMessage}`);
-      }
+    } catch (error) {
+      if (this.apiKey !== "none")
+        this.logger.error(`Translation failed: ${(error as Error).message}`);
 
+      // fallback: copy original language
       data[langTo] = sourceText;
     }
 
