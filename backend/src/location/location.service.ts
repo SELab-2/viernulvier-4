@@ -26,16 +26,13 @@ export class LocationService {
 
   /**
    * Fetches a list of all Location objects.
-   * @param PaginationFilter is the pagination params requested
+   * @param paginationFilter is the pagination params requested
    * @returns A list of all Locations.
    */
   async getLocations(
-    PaginationFilter: PaginationFilterDto,
+    paginationFilter: PaginationFilterDto,
   ): Promise<PaginatedResponse<LocationDto>> {
-    return await this.locationDbService.getLocations(
-      PaginationFilter.limit,
-      PaginationFilter.page,
-    );
+    return await this.locationDbService.getLocations(paginationFilter);
   }
 
   /**

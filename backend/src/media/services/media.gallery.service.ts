@@ -26,10 +26,7 @@ export class MediaGalleryService {
   async getGalleries(
     paginationFilter: PaginationFilter,
   ): Promise<PaginatedResponse<MediaGalleryDto>> {
-    return await this.mediaDbService.getGalleries(
-      paginationFilter.limit,
-      paginationFilter.page,
-    );
+    return await this.mediaDbService.getGalleries(paginationFilter);
   }
 
   /**

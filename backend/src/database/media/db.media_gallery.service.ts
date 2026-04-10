@@ -5,11 +5,23 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   ModifyMediaGalleryDto,
+  PaginationFilterDto,
   PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { ResourceGoneException } from "../../common/exceptions";
-import { PaginatedResponse } from "@repo/common";
+import {
+  MediaGallerySchema,
+  MediaItemSchema,
+  PaginatedResponse,
+  PrintItemSchema,
+} from "@repo/common";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "../db-utils";
 
 @Injectable()
 export class MediaGalleryDatabaseService {
@@ -26,10 +38,12 @@ export class MediaGalleryDatabaseService {
    * @returns The MediaGallery if there is one.
    */
   async getGalleryById(id: number): Promise<MediaGalleryDto> {
+    const returningClause = generateReturningClause(MediaGallerySchema);
+
     const query = `
-      SELECT id, name, type, created_at, updated_at
+      SELECT ${returningClause}
       FROM media_gallery
-      WHERE id = $1
+      WHERE id = $1;
     `;
 
     const result = await this.db.query<MediaGalleryDto>(query, [id]);
@@ -50,50 +64,30 @@ export class MediaGalleryDatabaseService {
    * @returns Paginated galleries.
    */
   async getGalleries(
-    amount: number = 0,
-    page: number = 0,
+    paginationFilter: PaginationFilterDto,
   ): Promise<PaginatedResponse<MediaGalleryDto>> {
-    let query = `
-      SELECT id, name, type, created_at, updated_at
+    const returningClause = generateReturningClause(MediaGallerySchema);
+
+    const query = `
+      SELECT ${returningClause}
       FROM media_gallery
-      ORDER BY id
+      LIMIT $1 OFFSET $2;
     `;
+    const countQuery = generateCountQuery("media_gallery");
 
-    const params: any[] = [];
-
-    if (amount > 0) {
-      query += ` LIMIT $1 OFFSET $2`;
-      params.push(amount, page * amount);
-    }
+    const offset = paginationFilter.page * paginationFilter.limit;
 
     const [galleries, countResult] = await Promise.all([
-      this.db.query<MediaGalleryDto>(query, params),
-      this.db.query<{ count: string }>(
-        `SELECT COUNT(*) as count FROM media_gallery`,
-      ),
+      this.db.query<MediaGalleryDto>(query, [paginationFilter.limit, offset]),
+      this.db.query<{ count: string }>(countQuery, []),
     ]);
 
     return {
-      page,
-      limit: amount,
+      page: paginationFilter.page,
+      limit: paginationFilter.limit,
       totalItems: parseInt(countResult[0].count),
       objects: galleries,
     };
-  }
-
-  /**
-   * Get all print items belonging to a media gallery.
-   * @param galleryId The gallery to fetch print items for.
-   * @returns List of print items.
-   */
-  async getPrintItemsByGallery(galleryId: number): Promise<PrintItemDto[]> {
-    const query = `
-      SELECT pi.id, pi.titel, pi.description, pi.url, pi.created_at, pi.updated_at
-      FROM print_item pi
-      INNER JOIN print_item_media_gallery pimg ON pimg.print_item_id = pi.id
-      WHERE pimg.media_gallery_id = $1
-    `;
-    return this.db.query<PrintItemDto>(query, [galleryId]);
   }
 
   /**
@@ -104,15 +98,19 @@ export class MediaGalleryDatabaseService {
   async createGallery(
     gallery: CreateMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
+    const { columns, placeholders, values } = generateInsertClause(gallery);
+    const returningClause = generateReturningClause(MediaGallerySchema);
+
     const query = `
-      INSERT INTO media_gallery DEFAULT VALUES 
-      RETURNING id, name, type, created_at, updated_at
+      INSERT INTO media_gallery (${columns})
+      VALUES (${placeholders}) 
+      RETURNING ${returningClause};
     `;
 
-    const result = await this.db.query<MediaGalleryDto>(query, [gallery.name]);
+    const result = await this.db.query<MediaGalleryDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create gallery");
+      throw new Error("Failed to create gallery.");
     }
 
     return result[0];
@@ -128,22 +126,11 @@ export class MediaGalleryDatabaseService {
     galleryId: number,
     gallery: ModifyMediaGalleryDto | ReplaceMediaGalleryDto,
   ): Promise<MediaGalleryDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(gallery);
+    const returningClause = generateReturningClause(MediaGallerySchema);
 
-    if (gallery.name !== undefined) {
-      fields.push(`name = $${index++}`);
-      values.push(gallery.name);
-    }
-
-    if (gallery.type !== undefined) {
-      fields.push(`type = $${index++}`);
-      values.push(gallery.type);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No valid fields to update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     // Push the ID as the final value for the WHERE clause
@@ -151,9 +138,9 @@ export class MediaGalleryDatabaseService {
 
     const query = `
     UPDATE media_gallery
-    SET ${fields.join(", ")}
-    WHERE id = $${index}
-    RETURNING id, created_at, updated_at, name, type
+    SET ${setClause}
+    WHERE id = $${nextIndex}
+    RETURNING ${returningClause};
   `;
 
     const result = await this.db.query<MediaGalleryDto>(query, values);
@@ -166,8 +153,6 @@ export class MediaGalleryDatabaseService {
 
     return result[0];
   }
-
-  // note: no update function for galleries seeing as there are no fields to be updated. (name has been removed)
 
   /**
    * Delete a gallery by ID. Silently does nothing if the ID doesn't exist.
@@ -189,16 +174,42 @@ export class MediaGalleryDatabaseService {
    * @returns Ordered list of media items.
    */
   async getItemsByGallery(galleryId: number): Promise<MediaItemDto[]> {
+    const mediaPrefix = "mi";
+    const returningClause = generateReturningClause(
+      MediaItemSchema,
+      mediaPrefix,
+    );
+
     const query = `
-      SELECT mi.id, mi.type, mi.original_filename, mi.position,
-             mi.width, mi.height, mi.title, mi.description, mi.credits, mi.created_at, mi.updated_at
-      FROM media_item mi
-      INNER JOIN gallery_item gi ON gi.item_id = mi.id
+      SELECT ${returningClause}
+      FROM media_item ${mediaPrefix}
+      INNER JOIN gallery_item gi ON gi.item_id = ${mediaPrefix}.id
       WHERE gi.gallery_id = $1
-      ORDER BY mi.position
+      ORDER BY ${mediaPrefix}.position
     `;
 
-    return this.db.query<MediaItemDto>(query, [galleryId]);
+    return await this.db.query<MediaItemDto>(query, [galleryId]);
+  }
+
+  /**
+   * Get all print items belonging to a media gallery.
+   * @param galleryId The gallery to fetch print items for.
+   * @returns List of print items.
+   */
+  async getPrintItemsByGallery(galleryId: number): Promise<PrintItemDto[]> {
+    const printPrefix = "pi";
+    const returningClause = generateReturningClause(
+      PrintItemSchema,
+      printPrefix,
+    );
+
+    const query = `
+      SELECT ${returningClause}
+      FROM print_items ${printPrefix}
+      INNER JOIN print_item_media_gallery pimg ON pimg.print_item_id = ${printPrefix}.id
+      WHERE pimg.media_gallery_id = $1;
+    `;
+    return await this.db.query<PrintItemDto>(query, [galleryId]);
   }
 
   /**
@@ -208,7 +219,11 @@ export class MediaGalleryDatabaseService {
    * @param itemId The item to link.
    */
   async linkItemToGallery(galleryId: number, itemId: number): Promise<void> {
-    const query = `INSERT INTO gallery_item (gallery_id, item_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
+    const query = `
+      INSERT INTO gallery_item (gallery_id, item_id) 
+      VALUES ($1, $2) 
+      ON CONFLICT DO NOTHING;
+    `;
     await this.db.query(query, [galleryId, itemId]);
   }
 
@@ -222,7 +237,10 @@ export class MediaGalleryDatabaseService {
     galleryId: number,
     itemId: number,
   ): Promise<void> {
-    const query = `DELETE FROM gallery_item WHERE gallery_id = $1 AND item_id = $2`;
+    const query = `
+      DELETE FROM gallery_item 
+      WHERE gallery_id = $1 AND item_id = $2;
+    `;
     await this.db.query(query, [galleryId, itemId]);
   }
 
@@ -239,7 +257,7 @@ export class MediaGalleryDatabaseService {
     const query = `
       INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id) 
       VALUES ($1, $2) 
-      ON CONFLICT DO NOTHING
+      ON CONFLICT DO NOTHING;
     `;
     await this.db.query(query, [galleryId, printItemId]);
   }
@@ -256,7 +274,7 @@ export class MediaGalleryDatabaseService {
   ): Promise<void> {
     const query = `
       DELETE FROM print_item_media_gallery 
-      WHERE media_gallery_id = $1 AND print_item_id = $2
+      WHERE media_gallery_id = $1 AND print_item_id = $2;
     `;
     await this.db.query(query, [galleryId, printItemId]);
   }

@@ -121,10 +121,7 @@ describe("MediaItemService", () => {
 
       const result = await service.createItem(createItemDto);
 
-      expect(mediaDbService.createItem).toHaveBeenCalledWith(
-        createItemDto,
-        [1, 2],
-      );
+      expect(mediaDbService.createItem).toHaveBeenCalledWith(createItemDto);
       expect(result).toEqual(mockItem);
     });
 
@@ -143,7 +140,7 @@ describe("MediaItemService", () => {
 
       const result = await service.createItem(createItemDto);
 
-      expect(mediaDbService.createItem).toHaveBeenCalledWith(createItemDto, []);
+      expect(mediaDbService.createItem).toHaveBeenCalledWith(createItemDto);
       expect(result).toEqual(mockItem);
     });
   });

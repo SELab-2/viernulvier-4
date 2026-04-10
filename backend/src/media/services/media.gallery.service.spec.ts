@@ -87,8 +87,7 @@ describe("MediaGalleryService", () => {
 
       // Note: The service unpacks the DTO properties to pass to the DB service
       expect(mediaDbService.getGalleries).toHaveBeenCalledWith(
-        paginationFilter.limit,
-        paginationFilter.page,
+        paginationFilter,
       );
       expect(result).toEqual(expectedResponse);
     });
