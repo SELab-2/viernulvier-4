@@ -78,7 +78,7 @@ describe("MediaStorageController", () => {
 
   describe("deleteMedia", () => {
     it("should delete media at the given URL", async () => {
-      const result = await controller.deleteMedia({ url: mockUrl });
+      const result = await controller.deleteMedia(mockUrl);
 
       expect(result).toBeUndefined();
       expect(service.deleteMedia).toHaveBeenCalledWith(mockUrl);
