@@ -37,7 +37,10 @@ import {
   ApiSecurity,
   ApiTags,
 } from "@nestjs/swagger";
-import { ApiOkArrayAnyOf, ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
+import {
+  ApiOkArrayAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 /**
@@ -229,7 +232,10 @@ export class MediaGalleryController {
     @Param("printItemId", ParseIntPipe) printItemId: number,
     @Param("galleryId", ParseIntPipe) galleryId: number,
   ): Promise<void> {
-    await this.mediaGalleryService.linkPrintItemToGallery(printItemId, galleryId);
+    await this.mediaGalleryService.linkPrintItemToGallery(
+      printItemId,
+      galleryId,
+    );
   }
 
   /**

@@ -131,7 +131,7 @@ describe("MediaGalleryService", () => {
     });
   });
 
-describe("getGalleryItems", () => {
+  describe("getGalleryItems", () => {
     it("should return all items for a gallery", async () => {
       mediaDbService.getGalleryById.mockResolvedValue(mockGallery);
       mediaDbService.getItemsByGallery.mockResolvedValue([mockItem]);

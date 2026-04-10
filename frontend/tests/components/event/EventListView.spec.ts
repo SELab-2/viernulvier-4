@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import EventListView from "../../../app/components/event/EventListView.vue";
 import type { LocationView, PriceView } from "@repo/common";
 import type { EventWithDetails } from "../../../app/types/EventWithDetails";
 
 vi.mock("#app", async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
+  const actual = await importOriginal<Record<string, any>>();
 
   return {
     ...actual,
@@ -73,7 +73,7 @@ const events: (EventWithDetails & { productionTitle: string })[] = [
 ];
 
 describe("EventListView", () => {
-  let wrapper: ReturnType<typeof mount>;
+  let wrapper: VueWrapper<InstanceType<typeof EventListView>>;
 
   beforeEach(() => {
     wrapper = mount(EventListView, {

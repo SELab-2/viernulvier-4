@@ -3,98 +3,123 @@
   It displays the production's thumbnail, title, date range, and associated tags.
 -->
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import type { ProductionView, Tag, Event } from '@repo/common'
-import { useProductionApi } from '../composables/useProductionApi'
-import { useEventApi } from '../composables/useEventApi'
-import { ROUTES } from '../utils/routes'
-import { computeDateRangeFromEvents } from '../utils/formatters'
-import TagPill from './TagPill.vue'
-import ThumbnailPlaceholder from './ThumbnailPlaceholder.vue'
+import { ref, onMounted, watch, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import type { ProductionView, Tag, Event } from "@repo/common";
+import { useProductionApi } from "../composables/useProductionApi";
+import { useEventApi } from "../composables/useEventApi";
+import { ROUTES } from "../utils/routes";
+import { computeDateRangeFromEvents } from "../utils/formatters";
+import TagPill from "./TagPill.vue";
+import ThumbnailPlaceholder from "./ThumbnailPlaceholder.vue";
 
 const { productionView } = defineProps<{
-  productionView: ProductionView
-}>()
+  productionView: ProductionView;
+}>();
 
-const tags = ref<Tag[]>([])
-const events = ref<Event[]>([])
+const tags = ref<Tag[]>([]);
+const events = ref<Event[]>([]);
 
-const { getTags } = useProductionApi()
-const { getAll: getAllEvents } = useEventApi()
+const { getTags } = useProductionApi();
+const { getAll: getAllEvents } = useEventApi();
 
-const { locale } = useI18n()
+const { locale } = useI18n();
 
 async function loadTags() {
-  if (!productionView?.id) return
+  if (!productionView?.id) return;
 
   try {
-    const response = await getTags(productionView.id, locale.value)
-    if (response.data) tags.value = response.data as Tag[]
-    else console.error('Failed to load tags:', response.error)
+    const response = await getTags(productionView.id, locale.value);
+    if (response.data) tags.value = response.data as Tag[];
+    else console.error("Failed to load tags:", response.error);
   } catch (err) {
-    console.error('Error loading tags:', err)
+    console.error("Error loading tags:", err);
   }
 }
 
 async function loadEvents() {
-  if (!productionView?.id) return
+  if (!productionView?.id) return;
 
   try {
-    const resp = await getAllEvents({ eventFilters: { production_id: productionView.id as any } })
+    const resp = await getAllEvents({
+      eventFilters: { production_id: productionView.id as any },
+    });
     if (resp.data && Array.isArray((resp.data as any).objects)) {
-      events.value = (resp.data as any).objects as Event[]
+      events.value = (resp.data as any).objects as Event[];
     } else if (resp.data && Array.isArray(resp.data)) {
-      events.value = resp.data as Event[]
+      events.value = resp.data as Event[];
     }
   } catch (err) {
-    console.error('Error loading events:', err)
+    console.error("Error loading events:", err);
   }
 }
 
-const dateRangeText = computed(() => computeDateRangeFromEvents(events.value, locale.value))
+const dateRangeText = computed(() =>
+  computeDateRangeFromEvents(events.value, locale.value),
+);
 
 onMounted(() => {
-  loadEvents()
-  loadTags()
-})
+  loadEvents();
+  loadTags();
+});
 
-watch(() => productionView.id, () => {
-  loadEvents()
-  loadTags()
-})
+watch(
+  () => productionView.id,
+  () => {
+    loadEvents();
+    loadTags();
+  },
+);
 
-watch(locale, () => loadTags())
+watch(locale, () => loadTags());
 </script>
 
 <template>
-  <NuxtLink :to="ROUTES.productions.byId(productionView.id)" class="group block">
+  <NuxtLink
+    :to="ROUTES.productions.byId(productionView.id)"
+    class="group block"
+  >
     <div
-      class="
-        flex flex-col rounded-xl border border-card-border bg-card
-        hover:border-ring hover:shadow-sm hover:bg-card-hover
-        transition-colors transition-shadow duration-150
-        overflow-hidden h-full
-      "
+      class="flex flex-col rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150 overflow-hidden h-full"
     >
       <!-- Thumbnail area — square bottom corners, separator line, no own border -->
-      <div class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border">
-        <ThumbnailPlaceholder :id="productionView.id" size="lg" :showIcon="true" :showBorder="false" :rounded="false" class="w-full h-full" />
+      <div
+        class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
+      >
+        <ThumbnailPlaceholder
+          :id="productionView.id"
+          size="lg"
+          :showIcon="true"
+          :showBorder="false"
+          :rounded="false"
+          class="w-full h-full"
+        />
       </div>
 
       <!-- Content area -->
       <div class="flex flex-col flex-1 p-4 gap-2 min-w-0">
-
         <!-- Title -->
-        <h3 class="text-lg font-semibold text-card-foreground leading-tight line-clamp-2">
+        <h3
+          class="text-lg font-semibold text-card-foreground leading-tight line-clamp-2"
+        >
           {{ productionView.titel }}
         </h3>
 
         <!-- Date range -->
         <p class="text-sm text-muted-foreground flex items-center gap-2">
-          <svg class="w-4 h-4 shrink-0 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <svg
+            class="w-4 h-4 shrink-0 text-muted-foreground"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
             <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M16 2v4M8 2v4M3 10h18"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
           <span class="truncate">{{ dateRangeText }}</span>
         </p>
@@ -115,13 +140,17 @@ watch(locale, () => loadTags())
             />
           </div>
         </div>
-
       </div>
     </div>
   </NuxtLink>
 </template>
 
 <style scoped>
-.group:hover { text-decoration: none; }
-[tabindex="0"]:focus { outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12); }
+.group:hover {
+  text-decoration: none;
+}
+[tabindex="0"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
 </style>
