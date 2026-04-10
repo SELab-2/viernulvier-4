@@ -12,22 +12,22 @@
 <script lang="ts" setup>
 import type { BlogView, FilterBlog, PaginatedResponse } from "@repo/common";
 import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
-import StoryToolbar  from "~/components/blogs/StoryToolbar.vue";
+import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
-import ScrollToTop   from "~/components/blogs/ScrollToTop.vue";
+import ScrollToTop from "~/components/blogs/ScrollToTop.vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 
 const { t, locale } = useI18n();
-const { getAll }    = useBlogApi();
+const { getAll } = useBlogApi();
 
-// Filters 
+// Filters
 
-const sortOrder   = ref<"newest" | "oldest">("newest");
+const sortOrder = ref<"newest" | "oldest">("newest");
 const searchQuery = ref("");
-const dateFilter  = ref<FilterBlog>({});
+const dateFilter = ref<FilterBlog>({});
 
-//Oldest date (one-off fetch for Calendar "oldest" mode) 
+//Oldest date (one-off fetch for Calendar "oldest" mode)
 
 const oldestDate = ref("");
 const newestDate = ref("");
@@ -35,23 +35,31 @@ const newestDate = ref("");
 async function fetchDateBounds() {
   try {
     const [oldestRaw, newestRaw] = await Promise.all([
-      getAll({ paginationFilters: { page: 0, limit: 1, descending: false }, languageFilters: { lang: locale.value as "nl" | "en" } }),
-      getAll({ paginationFilters: { page: 0, limit: 1, descending: true  }, languageFilters: { lang: locale.value as "nl" | "en" } }),
+      getAll({
+        paginationFilters: { page: 0, limit: 1, descending: false },
+        languageFilters: { lang: locale.value as "nl" | "en" },
+      }),
+      getAll({
+        paginationFilters: { page: 0, limit: 1, descending: true },
+        languageFilters: { lang: locale.value as "nl" | "en" },
+      }),
     ]);
     const first = unwrap(oldestRaw)?.objects?.[0] as BlogView | undefined;
-    const last  = unwrap(newestRaw)?.objects?.[0] as BlogView | undefined;
+    const last = unwrap(newestRaw)?.objects?.[0] as BlogView | undefined;
     if (first?.created_at) oldestDate.value = first.created_at.slice(0, 10);
-    if (last?.created_at)  newestDate.value = last.created_at.slice(0, 10);
-  } catch { /* non-critical */ }
+    if (last?.created_at) newestDate.value = last.created_at.slice(0, 10);
+  } catch {
+    /* non-critical */
+  }
 }
 
-const LIMIT         = 20;
-const page          = ref(0);
-const totalItems    = ref(0); // total DB rows for the current query — drives infinite scroll
-const stories       = ref<BlogView[]>([]);
-const pending       = ref(false);
+const LIMIT = 20;
+const page = ref(0);
+const totalItems = ref(0); // total DB rows for the current query — drives infinite scroll
+const stories = ref<BlogView[]>([]);
+const pending = ref(false);
 const isLoadingMore = ref(false);
-const fetchError    = ref<Error | null>(null);
+const fetchError = ref<Error | null>(null);
 
 const hasMore = computed(() => stories.value.length < totalItems.value);
 
@@ -59,7 +67,7 @@ function unwrap(result: unknown): PaginatedResponse<BlogView> | null {
   if (!result) return null;
   const r = result as any;
   if (r?.data && "objects" in r.data) return r.data;
-  if ("objects" in (r as object))     return r as any;
+  if ("objects" in (r as object)) return r as any;
   return null;
 }
 
@@ -67,9 +75,9 @@ async function loadPage(reset = false) {
   if (!reset && (isLoadingMore.value || !hasMore.value)) return;
 
   if (reset) {
-    page.value       = 0;
-    stories.value    = [];
-    pending.value    = true;
+    page.value = 0;
+    stories.value = [];
+    pending.value = true;
     fetchError.value = null;
   } else {
     isLoadingMore.value = true;
@@ -78,33 +86,35 @@ async function loadPage(reset = false) {
   try {
     const raw = await getAll({
       paginationFilters: {
-        page:       page.value,
-        limit:      LIMIT,
+        page: page.value,
+        limit: LIMIT,
         descending: sortOrder.value === "newest",
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
       blogFilters: {
-        ...(searchQuery.value       ? { title:  searchQuery.value }       : {}),
-        ...(dateFilter.value.after  ? { after:  dateFilter.value.after }  : {}),
+        ...(searchQuery.value ? { title: searchQuery.value } : {}),
+        ...(dateFilter.value.after ? { after: dateFilter.value.after } : {}),
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),
       },
     });
 
-    const paged      = unwrap(raw);
+    const paged = unwrap(raw);
     totalItems.value = paged?.totalItems ?? 0;
-    const items      = (paged?.objects ?? []) as BlogView[];
+    const items = (paged?.objects ?? []) as BlogView[];
 
     if (reset) stories.value = items;
-    else        stories.value.push(...items);
+    else stories.value.push(...items);
   } catch (e) {
     fetchError.value = e as Error;
   } finally {
-    pending.value       = false;
+    pending.value = false;
     isLoadingMore.value = false;
   }
 }
 
-watch([sortOrder, searchQuery, dateFilter, locale], () => loadPage(true), { deep: true });
+watch([sortOrder, searchQuery, dateFilter, locale], () => loadPage(true), {
+  deep: true,
+});
 
 //Infinite scroll
 
@@ -135,8 +145,9 @@ onUnmounted(() => io?.disconnect());
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200">
-
+  <div
+    class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
+  >
     <StoriesHeader />
 
     <!--
@@ -155,14 +166,17 @@ onUnmounted(() => io?.disconnect());
     />
 
     <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
-
       <StorySkeleton v-if="pending" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
-        <p class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20">
+        <p
+          class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20"
+        >
           {{ t("stories.noStories") }}
         </p>
-        <p class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400">
+        <p
+          class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400"
+        >
           {{ fetchError.message }}
         </p>
         <button
@@ -182,15 +196,22 @@ onUnmounted(() => io?.disconnect());
           v-if="isLoadingMore"
           class="flex items-center justify-center gap-3 py-10 text-muted-foreground"
         >
-          <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-4 h-4 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
-          <span class="font-brand font-black text-[10px] uppercase tracking-widest">
+          <span
+            class="font-brand font-black text-[10px] uppercase tracking-widest"
+          >
             {{ t("stories.loading") }}
           </span>
         </div>
       </template>
-
     </main>
     <ScrollToTop />
   </div>

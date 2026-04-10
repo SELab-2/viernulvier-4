@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { ReadStream } from "fs";
 import { Readable } from "stream";
 import { z } from "zod";
 import { CSVFileParser } from "./csv_file_parser";
@@ -7,7 +7,7 @@ jest.mock("fs");
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
 
-function createMockReadStream(rows: any[], error?: Error) {
+function createMockReadStream(rows: any[], error?: Error): ReadStream {
   const sourceStream = new Readable({
     read() {},
   });
@@ -30,7 +30,7 @@ function createMockReadStream(rows: any[], error?: Error) {
     parsedStream.emit("end");
   });
 
-  return sourceStream;
+  return sourceStream as unknown as ReadStream;
 }
 
 describe("CSVFileParser", () => {
@@ -50,7 +50,7 @@ describe("CSVFileParser", () => {
         createMockReadStream([
           { name: "John", age: "30" },
           { name: "Jane", age: "25" },
-        ]) as any,
+        ]),
       );
 
       const schema = z.object({
@@ -99,7 +99,7 @@ describe("CSVFileParser", () => {
 
     it("should reject when stream emits error", async () => {
       mockedFs.createReadStream.mockReturnValue(
-        createMockReadStream([], new Error("Stream failure")) as any,
+        createMockReadStream([], new Error("Stream failure")),
       );
 
       await expect(

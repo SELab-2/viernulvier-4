@@ -92,7 +92,6 @@ export class AccountDatabaseService {
       LIMIT 1
     `;
 
-    // Returning AccountDto should be safe here since we never show this to the users.
     const result = await this.db.query<AccountDto>(query, [account.username]);
 
     if (result.length === 0) {

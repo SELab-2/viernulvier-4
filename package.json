@@ -16,7 +16,21 @@
     "test": "turbo test",
     "test:coverage": "turbo test:coverage",
     "db:reset": "turbo db:reset",
-    "scraper:inject:structured:test": "turbo scraper:inject:structured:test"
+    "scraper:inject:structured:test": "turbo scraper:inject:structured:test",
+    "format": "npx prettier --write .",
+    "lint": "npx eslint .",
+    "prepare": "husky || true"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,vue,json,css,scss,md}": [
+      "prettier --write"
+    ],
+    "**/*.{js,ts,vue}": [
+      "eslint --fix --no-warn-ignored"
+    ]
+  },
+  "engines": {
+    "node": ">=22.0.0"
   },
   "repository": {
     "type": "git",
@@ -38,8 +52,11 @@
     "@types/sanitize-html": "^2.16.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-jest": "^29.15.2",
     "eslint-plugin-prettier": "^5.2.2",
     "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.4.2",
     "tsx": "^4.21.0",
     "turbo": "^2.8.9",
@@ -50,5 +67,13 @@
     "argon2": "^0.44.0",
     "dotenv": "^17.3.1",
     "sanitize-html": "^2.17.1"
+  },
+  "//": "These overrides are temporary fixes for vulnerabilities!!!",
+  "overrides": {
+    "lodash": "^4.17.24",
+    "path-to-regexp": "^8.4.2",
+    "srvx": "^0.11.15",
+    "h3": "^1.15.11",
+    "h3-next": "npm:h3@2.0.1-rc.20"
   }
 }

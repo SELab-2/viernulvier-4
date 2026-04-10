@@ -97,13 +97,12 @@
         "before-selected": "Voor ..."
       }
     },
-     "filters": {
-      "toggle":    "Filters",
-      "year":      "Jaar",
+    "filters": {
+      "toggle": "Filters",
+      "year": "Jaar",
       "dateRange": "Datum",
-      "clear":     "Wis"
+      "clear": "Wis"
     }
-
   },
   "baseform": {
     "submitbutton": "Indienen",

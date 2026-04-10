@@ -1,5 +1,9 @@
 import { InjectCsvEngine } from "./inject-csv.engine";
 import { ResourceGoneException } from "../../../common/exceptions";
+import { UtilsDbConnection } from "../database/db.connection";
+import { AppLogger } from "../../logger/logger.service";
+import { ConfigService } from "@nestjs/config";
+import { LanguageService } from "../../language/language.service";
 
 const mockParseProductionsCSV = jest.fn();
 const mockParseEventsCSV = jest.fn();
@@ -10,11 +14,15 @@ const mockParsePricesCSV = jest.fn();
 jest.mock("../../../csv_parsing/csv_file_parser", () => ({
   CSVFileParser: {
     parseProductionsCSV: (...args: unknown[]) =>
-      mockParseProductionsCSV(...args),
-    parseEventsCSV: (...args: unknown[]) => mockParseEventsCSV(...args),
-    parseTagsCSV: (...args: unknown[]) => mockParseTagsCSV(...args),
-    parseBlogsCSV: (...args: unknown[]) => mockParseBlogsCSV(...args),
-    parsePricesCSV: (...args: unknown[]) => mockParsePricesCSV(...args),
+      mockParseProductionsCSV(...args) as Promise<unknown>,
+    parseEventsCSV: (...args: unknown[]) =>
+      mockParseEventsCSV(...args) as Promise<unknown>,
+    parseTagsCSV: (...args: unknown[]) =>
+      mockParseTagsCSV(...args) as Promise<unknown>,
+    parseBlogsCSV: (...args: unknown[]) =>
+      mockParseBlogsCSV(...args) as Promise<unknown>,
+    parsePricesCSV: (...args: unknown[]) =>
+      mockParsePricesCSV(...args) as Promise<unknown>,
   },
 }));
 
@@ -30,10 +38,10 @@ jest.mock("../../logger/logger", () => ({
 }));
 
 describe("inject-csv structured importers", () => {
-  let dbMock: any;
-  let languageServiceMock: any;
-  let appLoggerMock: any;
-  let configServiceMock: any;
+  let dbMock: jest.Mocked<UtilsDbConnection>;
+  let languageServiceMock: jest.Mocked<LanguageService>;
+  let appLoggerMock: jest.Mocked<AppLogger>;
+  let configServiceMock: jest.Mocked<ConfigService>;
 
   let engine: InjectCsvEngine;
 
@@ -53,12 +61,12 @@ describe("inject-csv structured importers", () => {
       getEventByLegacyId: jest.fn(),
       insertPrice: jest.fn().mockResolvedValue({ id: 66 }),
       linkPrice: jest.fn().mockResolvedValue(true),
-    };
+    } as unknown as jest.Mocked<UtilsDbConnection>;
 
     // 2. Setup the LanguageService Mock (Just pass the data through unchanged)
     languageServiceMock = {
-      translateObject: jest.fn().mockImplementation(async (data) => data),
-    };
+      translateObject: jest.fn().mockImplementation((data) => data as unknown),
+    } as unknown as jest.Mocked<LanguageService>;
 
     // 3. Setup AppLogger and ConfigService Mocks
     appLoggerMock = {
@@ -66,11 +74,11 @@ describe("inject-csv structured importers", () => {
       error: jest.fn(),
       warn: jest.fn(),
       debug: jest.fn(),
-    };
+    } as unknown as jest.Mocked<AppLogger>;
 
     configServiceMock = {
       get: jest.fn(),
-    };
+    } as unknown as jest.Mocked<ConfigService>;
 
     // 4. Instantiate the class with the mocked dependencies
     engine = new InjectCsvEngine(
@@ -177,7 +185,7 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    dbMock.getProductionByLegacyId
+    (dbMock.getProductionByLegacyId as jest.Mock)
       .mockResolvedValueOnce({ id: 11 })
       .mockRejectedValueOnce(new ResourceGoneException("missing"));
 
@@ -213,7 +221,7 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    dbMock.getProductionByLegacyId
+    (dbMock.getProductionByLegacyId as jest.Mock)
       .mockResolvedValueOnce({ id: 21 })
       .mockRejectedValueOnce(new ResourceGoneException("missing"));
 
@@ -243,7 +251,7 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    dbMock.getEventByLegacyId
+    (dbMock.getEventByLegacyId as jest.Mock)
       .mockResolvedValueOnce({ id: 8 })
       .mockRejectedValueOnce(new ResourceGoneException("missing"));
 

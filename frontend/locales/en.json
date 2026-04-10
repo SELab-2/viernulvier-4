@@ -97,11 +97,11 @@
         "before-selected": "Before ..."
       }
     },
-     "filters": {
-      "toggle":    "Filters",
-      "year":      "Year",
+    "filters": {
+      "toggle": "Filters",
+      "year": "Year",
       "dateRange": "Date",
-      "clear":     "Clear"
+      "clear": "Clear"
     }
   },
   "baseform": {

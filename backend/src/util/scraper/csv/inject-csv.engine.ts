@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { UtilsDbConnection } from "../database/db.connection";
 import { LanguageService } from "../../language/language.service";
 import { OldCSVFileParser } from "../../../csv_parsing/old_csv_file_parser";
@@ -13,6 +11,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../../util/logger/logger.service";
 import { ResourceGoneException } from "../../../common/exceptions";
+import { CreateEventDto, CreateProductionDto } from "../../../dto/dto";
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
 const TRANSLATION_LANG_FROM: Language = "nl";
@@ -37,7 +36,7 @@ function toOldCsvLocation(locationName: string): vnvLocation {
 }
 
 function toOldCsvProduction(
-  production: any,
+  production: CreateProductionDto & { legacy_id: string },
   tagsForProduction: string[],
 ): vnvProduction {
   return {
@@ -59,7 +58,7 @@ function toOldCsvProduction(
 }
 
 function toOldCsvEvent(
-  event: any,
+  event: CreateEventDto,
   index: number,
   locationName: string,
 ): vnvEvent {
@@ -121,7 +120,7 @@ export class InjectCsvEngine {
   }
 
   private toCsvEvent(row: {
-    event: any;
+    event: CreateEventDto;
     legacy_id: string;
     locationLegacyId: string;
   }): vnvEvent {
@@ -141,7 +140,7 @@ export class InjectCsvEngine {
   }
 
   private toCsvProduction(row: {
-    production: any;
+    production: CreateProductionDto;
     legacy_id: string;
   }): vnvProduction {
     const production = row.production;
@@ -277,8 +276,7 @@ export class InjectCsvEngine {
           }
 
           this.logger.error(
-            `Unexpected error while linking tag to production ${productionLegacyId}`,
-            error,
+            `Unexpected error while linking tag to production ${productionLegacyId}: ${(error as Error).message}`,
           );
           continue;
         }
@@ -322,8 +320,7 @@ export class InjectCsvEngine {
         }
 
         this.logger.error(
-          `Unexpected error while linking blog to production ${productionLegacyId}`,
-          error,
+          `Unexpected error while linking blog to production ${productionLegacyId}: ${(error as Error).message}`,
         );
         continue;
       }
@@ -368,8 +365,7 @@ export class InjectCsvEngine {
         }
 
         this.logger.error(
-          `Unexpected error while linking price to event ${eventLegacyId}`,
-          error,
+          `Unexpected error while linking price to event ${eventLegacyId}: ${(error as Error).message}`,
         );
         continue;
       }
