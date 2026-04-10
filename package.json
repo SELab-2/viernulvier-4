@@ -17,23 +17,20 @@
     "test:coverage": "turbo test:coverage",
     "db:reset": "turbo db:reset",
     "scraper:inject:structured:test": "turbo scraper:inject:structured:test",
-    "format": "npx prettier --check .",
+    "format": "npx prettier --write .",
     "lint": "npx eslint .",
     "prepare": "husky || true"
   },
   "lint-staged": {
-    "frontend/**/*.{vue,ts,js,json,css,scss}": [
-      "prettier --write",
-      "eslint --fix"
+    "**/*.{js,ts,vue,json,css,scss,md}": [
+      "prettier --write"
     ],
-    "backend/**/*.{vue,ts,js,json,css,scss}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "common/**/*.{vue,ts,js,json,css,scss}": [
-      "prettier --write",
-      "eslint --fix"
+    "**/*.{js,ts,vue}": [
+      "eslint --fix --no-warn-ignored"
     ]
+  },
+  "engines": {
+    "node": ">=22.0.0"
   },
   "repository": {
     "type": "git",
