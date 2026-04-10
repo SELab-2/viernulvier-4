@@ -82,8 +82,8 @@ const openFile = (src: string) => window.open(src, '_blank') // for opening the 
       <span class="text-[20px] font-bold uppercase shrink-0">{{ category }}</span>
       <span class="text-[11px] text-muted-foreground shrink-0">{{ files.length }} {{ t('prints.files') }}</span>
       <span class="flex-1 h-px bg-border" />
-      <ChevronUp v-if="isOpen" :size="14" :class="chevron" />
-      <ChevronDown v-else :size="14" :class="chevron" />
+      <ChevronUp v-if="isOpen" :size="20" :class="chevron" />
+      <ChevronDown v-else :size="20" :class="chevron" />
     </button>
 
     <!-- Grid -->
