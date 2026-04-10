@@ -152,7 +152,7 @@ export class ScraperService implements OnApplicationBootstrap {
 
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
-          const finalUrl = `${mediaBase}/photos/${newFileName}`;
+          const finalUrl = `/photos/${newFileName}`;
 
           // --- STEP 2: THE SAVE ---
           let savedUrl: string;

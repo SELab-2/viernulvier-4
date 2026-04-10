@@ -31,7 +31,7 @@ import path from "node:path";
  * 1. security reasons as this way nginx can accept only local requests for media
  * 2. if you are on dev instead of prod, the service will auto-adjust the url for you.
  */
-@ApiTags("Media - Storage")
+@ApiTags("Media & Prints - Storage")
 @Controller("media/storage")
 export class MediaStorageController {
   constructor(private readonly mediaStorageService: MediaStorageService) {}
