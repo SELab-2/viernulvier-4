@@ -113,7 +113,16 @@ export function generateInsertClause(
  * Filtering
  */
 
-// In your db-utils.ts (or wherever you keep utilities)
+/**
+ * Generates a Filtering Clause for an SQL Query for exact matches.
+ * So if something needs to be an exact ID or an exact string you can feed
+ * the values into this and it will automatically generate the queries.
+ * @param filters The object containing the filter values.
+ * @param exactColumns A list of the keys you want to exactly filter for.
+ * @param conditions The array the conditions should be added to afterwards.
+ * @param param A lambda function that will generate the $x placeholders.
+ * @param prefix An optional prefix for the to filter values (eg. p."x")
+ */
 export function applyExactFilters(
   filters: Record<string, any>,
   exactColumns: string[],

@@ -53,7 +53,6 @@ export class MediaCropService {
   /**
    * Creates a new media crop.
    * @param createCrop The crop to create.
-   * @param autoDownload Whether to automatically fetch and save the physical file. Defaults to false.
    * @returns The newly created (and potentially updated) crop.
    */
   async createCrop(createCrop: CreateMediaCropDto): Promise<MediaCropDto> {
