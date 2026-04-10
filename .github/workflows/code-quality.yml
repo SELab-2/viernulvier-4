@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Check Formatting (Prettier)
-        run: npx prettier --check "backend/**/*.{vue,ts,js,json,css,scss}" "frontend/**/*.{vue,ts,js,json,css,scss}" "common/**/*.{vue,ts,js,json,css,scss}"
+        run: npx prettier --check "backend/{src,test}/**/*.{vue,ts,js,json,css,scss}" "frontend/{app,tests}/**/*.{vue,ts,js,json,css,scss}" "common/**/*.{vue,ts,js,json,css,scss}"
 
       - name: Check Linting (ESLint)
         run: npx eslint backend/ frontend/ common/
