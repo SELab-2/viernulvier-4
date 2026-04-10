@@ -7,18 +7,13 @@ server {
 
 server {
     listen 443 ssl;
-    server_name your-domain.com;
+    server_name your-domain.com; # don't forget to replace all instances of this by your domain.
 
     # SSL - managed by Certbot
     ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
-
-    # Redirect root to frontend
-    location = / {
-        return 301 /archive;
-    }
 
     # Frontend (Vue/Nuxt) - publicly accessible
     location /archive {
@@ -44,5 +39,62 @@ server {
         proxy_set_header   X-Forwarded-Proto $scheme;
     }
 
+        # photos
+        location /photos {
+            alias /var/www/photos;
+
+            dav_methods PUT DELETE;
+            create_full_put_path on;
+            dav_access group:rw all:r;
+
+            # Only allow POST from backend (localhost)
+            limit_except GET HEAD {
+                allow 127.0.0.1;
+                # possibly add your server ip to allow here.
+                deny all;
+            }
+
+            autoindex on;
+            autoindex_exact_size off;
+            autoindex_localtime on;
+
+            # Cache headers for images
+            location ~* \.(jpg|jpeg|png|gif|webp|svg|ico|mp4|webm|ogg)$ {
+                expires 30d;
+                add_header Cache-Control "public, immutable";
+            }
+        }
+
+    # prints (PDFs and documents)
+    location /prints {
+        alias /var/www/prints;
+
+        # Only allow modifications from backend (localhost)
+        limit_except GET HEAD {
+            allow 127.0.0.1;
+            # possibly add your server ip to allow here.
+            deny all;
+        }
+
+        autoindex on;               # remove if you don't want directory listing
+        autoindex_exact_size off;
+        autoindex_localtime on;
+
+        # Cache headers for PDFs
+        location ~* \.(pdf)$ {
+            expires 30d;
+            add_header Cache-Control "public, immutable";
+
+            # Optional: This header encourages the browser to open the PDF
+            # in a new tab rather than instantly downloading it.
+            add_header Content-Disposition 'inline';
+        }
+    }
+
     # Admin page - removed as no longer needed to restrict access.
+
+    # Redirect root to frontend
+    location = / {
+        return 301 /archive;
+    }
 }
