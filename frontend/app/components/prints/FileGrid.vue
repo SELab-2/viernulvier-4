@@ -4,7 +4,6 @@
  *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
  *  - Max 4 rows before pagination
  *  - File previews, clickable files
- *  - Thumbnail placeholders
  *
  * Usage:
  * <PrintsFileGrid
@@ -26,7 +25,7 @@ interface Props {
   files: PrintItemView[];
 }
 const props = defineProps<Props>();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 // responsive columns
 const windowWidth = ref(1024);
@@ -67,7 +66,6 @@ function goToPage(page: number) {
 }
 
 //constants
-const fileLabel = "text-[11px] font-bold uppercase truncate";
 const grid = computed(() =>
   totalPages.value > 1
     ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 grid-rows-4 items-start"
@@ -75,8 +73,6 @@ const grid = computed(() =>
 );
 const chevronButton =
   "w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default";
-
-const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
 </script>
 
 <template>
@@ -95,79 +91,12 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
     <!-- Grid -->
     <div v-if="files.length">
       <div :class="grid">
-        <div
+        <PrintsFileGridItem
           v-for="file in visibleFiles"
           :key="file.id"
-          class="group flex flex-col cursor-pointer"
-        >
-          <!-- Thumbnail -->
-          <div
-            class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150"
-          >
-            <PdfThumbnail
-              v-if="file.url && file.titel.toLowerCase().endsWith('.pdf')"
-              :src="file.url"
-            >
-              <template #fallback>
-                <ThumbnailPlaceholder
-                  :id="file.id"
-                  size="fill"
-                  :show-icon="true"
-                  :show-border="false"
-                  :rounded="false"
-                />
-              </template>
-            </PdfThumbnail>
-            <img
-              v-else-if="file.url"
-              :src="file.url"
-              :alt="file.titel"
-              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              @click.stop="file.url ? openFile(file.url) : undefined"
-            />
-            <ThumbnailPlaceholder
-              v-else
-              :id="file.id"
-              size="fill"
-              :show-icon="true"
-              :show-border="false"
-              :rounded="false"
-            />
-          </div>
-
-          <!-- File info -->
-          <div class="mt-2">
-            <p
-              :class="[
-                fileLabel,
-                'group-hover:text-accent transition-colors duration-150',
-              ]"
-            >
-              {{ file.titel }}
-            </p>
-            <div class="flex items-center gap-2 mt-1">
-              <span
-                :class="[
-                  fileLabel,
-                  'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground',
-                ]"
-                >{{ category }}
-              </span>
-              <span
-                v-if="file.created_at"
-                class="text-[11px] text-muted-foreground ml-auto"
-              >
-                {{
-                  new Date(file.created_at).toLocaleDateString(locale, {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-                }}
-              </span>
-            </div>
-          </div>
-        </div>
+          :file="file"
+          :category="category"
+        />
       </div>
       <!-- Pagination -->
       <div class="flex items-center justify-center gap-2 mt-6 h-9">
