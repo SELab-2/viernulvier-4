@@ -19,12 +19,7 @@
  *    { id: 2, name: 'AFFICHE-VIDEODROOM-2024.PDF', year: 2024, image: null },
  * ]
  */
-import {
-  ChevronUp,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-vue-next";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import type { PrintItemView } from "@repo/common";
 
 interface Props {
@@ -72,14 +67,7 @@ function goToPage(page: number) {
   currentPage.value = page;
 }
 
-// toggling logic
-const isOpen = ref(true); // for toggling the whole category section  (chevrons)
-const toggle = () => {
-  isOpen.value = !isOpen.value;
-}; // for toggling the whole category section  (chevrons)
-
 //constants
-const chevron = "shrink-0 text-muted-foreground";
 const fileLabel = "text-[11px] font-bold uppercase truncate";
 
 const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
@@ -88,10 +76,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
 <template>
   <div>
     <!-- Header -->
-    <button
-      class="w-full flex items-center gap-3 mb-3 group cursor-pointer"
-      @click="toggle"
-    >
+    <div class="flex items-center gap-3 mb-4">
       <span class="text-[20px] font-bold uppercase shrink-0">{{
         category
       }}</span>
@@ -99,12 +84,10 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
         >{{ files.length }} {{ t("prints.files") }}</span
       >
       <span class="flex-1 h-px bg-border" />
-      <ChevronUp v-if="isOpen" :size="20" :class="chevron" />
-      <ChevronDown v-else :size="20" :class="chevron" />
-    </button>
+    </div>
 
     <!-- Grid -->
-    <div v-if="isOpen && files.length">
+    <div v-if="files.length">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         <div
           v-for="file in visibleFiles"
@@ -181,13 +164,11 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
         </div>
       </div>
     </div>
+
     <!-- Pagination -->
-    <div
-      v-if="totalPages > 1"
-      class="flex items-center justify-center gap-2 mt-6"
-    >
+    <div class="flex items-center justify-center gap-2 mt-6 h-9">
       <button
-        class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+        class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
         :disabled="currentPage === 1"
         @click="goToPage(currentPage - 1)"
       >
@@ -195,22 +176,24 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
       </button>
 
       <span
+        v-if="totalPages > 1"
         class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
       >
         {{ currentPage }} / {{ totalPages }}
       </span>
 
       <button
-        class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+        class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
         :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
       >
         <ChevronRight :size="16" />
       </button>
     </div>
+
     <!-- No files (empty) -->
     <div
-      v-else-if="isOpen && !files.length"
+      v-if="!files.length"
       class="text-center text-gray-500 dark:text-gray-400"
     >
       {{ t("prints.noFilesCat") }}
