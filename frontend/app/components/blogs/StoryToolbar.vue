@@ -1,14 +1,5 @@
 <!--
   components/blogs/StoryToolbar.vue
-  ===================================
-  Toolbar row + in-flow filter panel.
-
-  The panel opens below the toolbar (in flow), pushing <main> down.
-  It contains two sections:
-    1. Year picker       — derived from oldestDate/newestDate backend bounds.
-       Clicking a year filters to that year; clicking again deselects.
-    2. Calendar          — fine-grained date picking.
-  Using one clears the other.
 -->
 <script lang="ts" setup>
 import { isoYear } from "~/utils/formatters";
@@ -36,6 +27,11 @@ const panelOpen = ref(false);
 const selectedYear = ref<number | null>(null);
 const calendarKey = ref(0);
 
+// When we remount the calendar via calendarKey++, DefaultCalendar fires an
+// initial @update:filter({}) on mount. This flag lets onCalendarFilter know
+// to ignore that one synthetic emit so it doesn't wipe selectedYear.
+const skipNextCalendarEmit = ref(false);
+
 watch(searchQuery, (val) => emit("update:search", val));
 
 // Year range
@@ -50,24 +46,35 @@ const years = computed<number[]>(() => {
 
 function toggleYear(year: number) {
   if (selectedYear.value === year) {
+    // Deselect — full reset, calendar emit on remount is fine (filter is empty)
     selectedYear.value = null;
+    calendarKey.value++;
     emit("update:dateFilter", {});
   } else {
+    // Select — remount calendar to clear its internal range state, but
+    // suppress the resulting mount-emit so it doesn't clear selectedYear.
     selectedYear.value = year;
+    skipNextCalendarEmit.value = true;
     emit("update:dateFilter", {
       after: `${year}-01-01`,
       before: `${year}-12-31`,
     });
+    calendarKey.value++;
   }
 }
 
 function clearYears() {
   selectedYear.value = null;
+  calendarKey.value++;
   emit("update:dateFilter", {});
 }
 
-// Calendar pick clears year selection and resets calendar internal state
 function onCalendarFilter(filter: FilterBlog) {
+  // Swallow the one synthetic emit that fires when the calendar remounts
+  if (skipNextCalendarEmit.value) {
+    skipNextCalendarEmit.value = false;
+    return;
+  }
   selectedYear.value = null;
   emit("update:dateFilter", filter);
 }
@@ -174,7 +181,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
       </div>
     </div>
 
-    <!-- Filter panel — vertical layout, matches archive -->
+    <!-- Filter panel — vertical layout -->
     <Transition name="cal-slide">
       <div v-if="panelOpen" class="border-t border-border">
         <div class="container mx-auto px-4 max-w-5xl py-6 flex flex-col gap-6">
@@ -192,19 +199,8 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 
           <!-- Year picker -->
           <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between">
-              <span class="section-label">{{ t("stories.filters.year") }}</span>
-              <button
-                v-if="hasYearFilter"
-                type="button"
-                class="year-clear-inline"
-                @click="clearYears"
-              >
-                {{ selectedYear }} · {{ t("stories.filters.clear") }}
-              </button>
-            </div>
+            <span class="section-label">{{ t("stories.filters.year") }}</span>
 
-            <!-- Horizontal pill row -->
             <div class="year-pills">
               <button
                 v-for="year in years"
@@ -216,6 +212,30 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
               >
                 {{ year }}
               </button>
+
+              <button
+                v-if="hasYearFilter"
+                type="button"
+                class="year-pill year-pill--clear"
+                @click="clearYears"
+              >
+                <svg
+                  width="8"
+                  height="8"
+                  viewBox="0 0 8 8"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 1l6 6M7 1L1 7"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                  />
+                </svg>
+                {{ t("stories.filters.clear") }}
+              </button>
+
               <div v-if="years.length === 0" class="year-empty">—</div>
             </div>
           </div>
@@ -253,7 +273,6 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
   max-height: 0;
 }
 
-/* Section label — matches archive style */
 .section-label {
   font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
   font-weight: 900;
@@ -263,14 +282,18 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
   color: var(--muted-foreground);
 }
 
-/* ── Year pills (horizontal) ── */
+/* Year pills */
 .year-pills {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
 }
 
 .year-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 5px 12px;
   border-radius: 999px;
   border: 1px solid var(--border);
@@ -295,23 +318,15 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
   color: #fff;
 }
 
-/* Inline clear next to section label */
-.year-clear-inline {
-  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
-  font-weight: 900;
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--blog-purple-strong);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background 0.12s;
-}
-.year-clear-inline:hover {
+.year-pill--clear {
+  border-style: dashed;
+  border-color: var(--blog-purple-strong);
   background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+.year-pill--clear:hover {
+  background: var(--blog-purple-strong);
+  color: #fff;
 }
 
 .year-empty {
