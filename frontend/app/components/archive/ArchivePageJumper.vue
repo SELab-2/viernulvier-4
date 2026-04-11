@@ -1,6 +1,18 @@
+<!--
+ArchivePageJumper.vue
+
+Input control for navigating directly to a specific page in the archive.
+Responsible for:
+- Allowing users to enter a page number
+- Validating the input against available pages
+- Updating the current page in the shared archive state
+- Scrolling to the top after navigation
+
+Uses:
+- useArchiveView: pagination state (currentPage, totalPages, loading)
+-->
 <script setup lang="ts">
 import { ref } from "vue";
-import { useI18n } from "vue-i18n";
 import { useArchiveView } from "../../composables/useArchiveView";
 
 const { currentPage, totalPages, loading } = useArchiveView();
@@ -9,6 +21,7 @@ const { t } = useI18n();
 const jumpInput = ref("");
 
 function goToPage(page: number) {
+  // Prevent invalid or unnecessary navigation
   if (
     page < 1 ||
     page > totalPages.value ||
@@ -17,12 +30,14 @@ function goToPage(page: number) {
   )
     return;
   currentPage.value = page;
+  // Scroll to top after page change
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function handleJump() {
-  const page = parseInt(jumpInput.value);
+  const page = parseInt(jumpInput.value, 10);
   if (!isNaN(page)) goToPage(page);
+  // Reset input after attempting jump
   jumpInput.value = "";
 }
 </script>

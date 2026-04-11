@@ -1,32 +1,25 @@
+<!--
+ArchivePagination.vue
+
+Pagination control for navigating through archive pages.
+Responsible for:
+- Displaying current page and navigation controls
+- Handling previous/next/first/last navigation
+- Generating a condensed page list with ellipsis for large datasets
+- Updating shared pagination state
+
+Uses:
+- useArchiveView: pagination state (currentPage, totalPages, loading)
+-->
 <script setup lang="ts">
-import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { useArchiveView } from "../../composables/useArchiveView";
 
 const { currentPage, totalPages, loading } = useArchiveView();
 const { t } = useI18n();
 
-const visiblePages = computed(() => {
-  const tp = totalPages.value;
-  const cp = currentPage.value;
-  const pages: (number | "…")[] = [];
-
-  if (tp <= 7) {
-    for (let i = 1; i <= tp; i++) pages.push(i);
-  } else {
-    pages.push(1);
-    if (cp > 3) pages.push("…");
-    const start = Math.max(2, cp - 1);
-    const end = Math.min(tp - 1, cp + 1);
-    for (let i = start; i <= end; i++) pages.push(i);
-    if (cp < tp - 2) pages.push("…");
-    pages.push(tp);
-  }
-  return pages;
-});
-
 function goToPage(page: number) {
+  // Prevent invalid or unnecessary navigation
   if (
     page < 1 ||
     page > totalPages.value ||
@@ -35,6 +28,7 @@ function goToPage(page: number) {
   )
     return;
   currentPage.value = page;
+  // Scroll to top after page change
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 </script>

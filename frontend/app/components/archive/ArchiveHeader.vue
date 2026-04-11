@@ -1,3 +1,11 @@
+<!--
+ArchiveHeader.vue
+
+Displays the header section of the archive page.
+Responsible for:
+- Rendering the archive title and subtitle
+- Handling translations via i18n
+-->
 <script lang="ts" setup>
 const { t } = useI18n();
 </script>

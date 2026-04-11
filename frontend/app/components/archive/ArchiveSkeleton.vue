@@ -1,3 +1,12 @@
+<!--
+ArchiveSkeleton.vue
+
+Skeleton loading UI for the archive page.
+Responsible for:
+- Displaying placeholder content while archive data is loading
+- Supporting both grid and list layout modes
+- Matching the visual structure of ArchiveBody items for smooth UX transition
+-->
 <script setup lang="ts">
 const props = withDefaults(
   defineProps<{
@@ -8,6 +17,8 @@ const props = withDefaults(
     pageSize: 15,
   },
 );
+
+const { viewMode, pageSize } = props;
 </script>
 
 <template>

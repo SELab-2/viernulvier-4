@@ -1,3 +1,19 @@
+<!--
+ArchiveSearchSection.vue
+
+Top control section for the archive page.
+Responsible for:
+- Managing search input, filters, and view mode
+- Toggling and rendering the filter panel
+- Handling tag, date, and sorting filters
+- Fetching and setting the oldest available date for the calendar
+
+Uses:
+- useArchiveView: shared archive state (filters, view mode, etc.)
+- useProductionApi / useEventApi: to derive oldest available date
+- Calendar: date range filtering UI
+- TagFilter: tag selection UI
+-->
 <script setup lang="ts">
 import { LayoutGrid, List } from "lucide-vue-next";
 import { useArchiveView } from "../../composables/useArchiveView";
@@ -19,10 +35,7 @@ const { getAll: getAllEvents } = useEventApi();
 const filterOpen = ref(false);
 const calendarKey = ref(0);
 
-const hasDateFilter = computed(
-  () => !!(dateFilter.value.after || dateFilter.value.before),
-);
-
+// Check if any filter is currently active (used for "clear filters" button)
 const hasActiveFilters = computed(() => {
   return (
     tagIds.value.length > 0 ||
@@ -32,8 +45,10 @@ const hasActiveFilters = computed(() => {
 });
 
 function clearAllFilters() {
+  // Reset all filters to default state
   tagIds.value = [];
   dateFilter.value = {};
+  // Force calendar component to re-render/reset
   calendarKey.value++;
 }
 
@@ -57,6 +72,7 @@ async function fetchOldestDate() {
         ? (evResp.data as any)
         : [];
 
+    // Extract all timestamps and find earliest
     const times = events
       .flatMap((e) => [e.starttime, e.endtime])
       .filter(Boolean)
@@ -69,7 +85,7 @@ async function fetchOldestDate() {
         .slice(0, 10);
     }
   } catch {
-    /* non-critical */
+    // Non-critical: calendar still works without the oldest date
   }
 }
 

@@ -1,3 +1,17 @@
+<!--
+TagFilter.vue
+
+Tag selection component for the archive filters.
+Responsible for:
+- Fetching and displaying available tags from the API
+- Allowing users to select/deselect tags
+- Supporting "show more / show less" behavior for large tag sets
+- Clearing all selected tags
+
+Uses:
+- useArchiveView: shared archive filter state (tagIds)
+- useTagApi: API access for fetching tags
+-->
 <script setup lang="ts">
 import { useTagApi } from "~/composables/useTagApi";
 import { useArchiveView } from "~/composables/useArchiveView";
@@ -17,6 +31,18 @@ function clearAll() {
   tagIds.value = [];
 }
 
+function toggle(id: number) {
+  const idx = tagIds.value.indexOf(id);
+
+  if (idx === -1) {
+    tagIds.value.push(id);
+  } else {
+    tagIds.value.splice(idx, 1);
+  }
+}
+
+const isSelected = (id: number) => tagIds.value.includes(id);
+
 async function fetchTags() {
   try {
     const allTags: TagView[] = [];
@@ -24,6 +50,7 @@ async function fetchTags() {
     const limit = 100;
     let totalPages = 1;
 
+    // Fetch all pages of tags (API is paginated)
     do {
       const resp = await getAll({
         paginationFilters: { page, limit, descending: false },
@@ -33,9 +60,12 @@ async function fetchTags() {
       if (!resp.data) break;
 
       const data = resp.data as PaginatedResponse<TagView>;
+
+      // Filter out invalid placeholder tags
       const validTags = data.objects.filter((tag) => tag.tag !== "N/A");
 
       allTags.push(...validTags);
+
       totalPages = Math.ceil(data.totalItems / limit);
       page += 1;
     } while (page < totalPages);
@@ -46,21 +76,15 @@ async function fetchTags() {
   }
 }
 
-function toggle(id: number) {
-  const idx = tagIds.value.indexOf(id);
-  if (idx === -1) tagIds.value.push(id);
-  else tagIds.value.splice(idx, 1);
-}
-
-const isSelected = (id: number) => tagIds.value.includes(id);
-
 onMounted(fetchTags);
+
+// Refetch tags when language changes
 watch(locale, fetchTags);
 </script>
 
 <template>
   <div class="flex flex-wrap gap-2 items-center">
-    <!-- Show either the first MAX_VISIBLE tags or all -->
+    <!-- Tag buttons -->
     <button
       v-for="tag in showAll ? tags : tags.slice(0, MAX_VISIBLE)"
       :key="tag.id"
@@ -75,7 +99,7 @@ watch(locale, fetchTags);
       {{ tag.tag }}
     </button>
 
-    <!-- "+X more" pill -->
+    <!-- Show more / less toggle -->
     <button
       v-if="tags.length > MAX_VISIBLE"
       @click="showAll = !showAll"
@@ -91,7 +115,7 @@ watch(locale, fetchTags);
       }}
     </button>
 
-    <!-- Clear all button -->
+    <!-- Clear selection -->
     <button
       v-if="hasSelection"
       @click="clearAll"

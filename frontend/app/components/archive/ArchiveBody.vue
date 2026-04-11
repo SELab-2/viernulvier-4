@@ -1,5 +1,19 @@
+<!--
+ArchiveBody.vue
+
+Main container component for the archive page.
+Responsible for:
+- Fetching paginated productions from the API
+- Reacting to filters (search, tags, date, sorting, language)
+- Handling loading, error, and empty states
+- Rendering results in grid or list view
+
+Uses:
+- useArchiveView: shared archive state (filters, pagination, view mode)
+- useProductionApi: API communication
+-->
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useProductionApi } from "../../composables/useProductionApi";
 import type { ProductionView, PaginatedResponse } from "@repo/common";
@@ -20,7 +34,7 @@ const {
 const { getAll } = useProductionApi();
 const { t, locale } = useI18n();
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 15; // number of items per page
 
 const productions = ref<ProductionView[]>([]);
 const totalItems = ref(0);
@@ -38,7 +52,7 @@ async function loadPage(page: number) {
         date_before: dateFilter.value.before || undefined,
       },
       paginationFilters: {
-        page: page - 1,
+        page: page - 1, // backend uses 0-based pagination
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
@@ -60,39 +74,31 @@ async function loadPage(page: number) {
   }
 }
 
+function resetAndLoad() {
+  currentPage.value = 1;
+  loadPage(1);
+}
+
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
+onUnmounted(() => {
+  if (searchTimer) clearTimeout(searchTimer);
+});
 
 onMounted(() => loadPage(1));
+
+// Reload when pagination changes
 watch(currentPage, (page) => loadPage(page));
-watch(locale, () => {
-  currentPage.value = 1;
-  loadPage(1);
-});
-watch(sortOrder, () => {
-  currentPage.value = 1;
-  loadPage(1);
-});
-watch(
-  dateFilter,
-  () => {
-    currentPage.value = 1;
-    loadPage(1);
-  },
-  { deep: true },
-);
-watch(
-  tagIds,
-  () => {
-    currentPage.value = 1;
-    loadPage(1);
-  },
-  { deep: true },
-);
+
+// Reset + reload when filters change
+watch(locale, resetAndLoad);
+watch(sortOrder, resetAndLoad);
+watch(dateFilter, resetAndLoad, { deep: true });
+watch(tagIds, resetAndLoad, { deep: true });
+
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
-    currentPage.value = 1;
-    loadPage(1);
+    resetAndLoad();
   }, 350);
 });
 </script>
