@@ -4,8 +4,8 @@ import { useI18n } from "vue-i18n";
 import { useProductionApi } from "../../composables/useProductionApi";
 import type { ProductionView, PaginatedResponse } from "@repo/common";
 import { useArchiveView } from "../../composables/useArchiveView";
-import ProductionGridViewItem from "../productionGridViewItem.vue";
-import ProductionListViewItem from "../productionListViewItem.vue";
+import ProductionGridViewItem from "../ProductionGridViewItem.vue";
+import ProductionListViewItem from "../ProductionListViewItem.vue";
 
 const {
   viewMode,
