@@ -16,7 +16,7 @@
  * ]
  */
 
-import { FileText } from "lucide-vue-next";
+import { FileText, ChevronLeft, ChevronRight } from "lucide-vue-next";
 import type { PrintItemView } from "@repo/common";
 
 interface Props {
@@ -26,14 +26,37 @@ interface Props {
 const props = defineProps<Props>();
 const { t, locale } = useI18n();
 
+// file logic
 const openFile = (src: string) => window.open(src, "_blank");
 const emit = defineEmits<{
   (e: "delete", file: PrintItemView): void;
 }>();
 
+// pagination
+const ITEMS_PER_PAGE = 10;
+const currentPage = ref(1);
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(props.files.length / ITEMS_PER_PAGE)),
+);
+
+const visibleFiles = computed(() => {
+  const start = (currentPage.value - 1) * ITEMS_PER_PAGE;
+  return props.files.slice(start, start + ITEMS_PER_PAGE);
+});
+
+function goToPage(page: number) {
+  if (page < 1 || page > totalPages.value || page === currentPage.value) return;
+  currentPage.value = page;
+}
+
 // constants
 const rowBase =
   "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer";
+const list = computed(() =>
+  totalPages.value > 1 ? { minHeight: `${ITEMS_PER_PAGE * 63}px` } : {},
+); // 62 is height of one row (approximately)
+const chevronButton =
+  "w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default";
 </script>
 
 <template>
@@ -42,9 +65,10 @@ const rowBase =
     <div
       v-if="files.length"
       class="rounded-lg border border-border overflow-hidden"
+      :style="list"
     >
       <div
-        v-for="file in props.files"
+        v-for="file in visibleFiles"
         :key="file.id"
         :class="rowBase"
         @click="file.url ? openFile(file.url) : undefined"
@@ -98,8 +122,39 @@ const rowBase =
       </div>
     </div>
 
+    <!-- Pagination -->
+    <div
+      v-if="totalPages > 1"
+      class="flex items-center justify-center gap-2 mt-6 h-9"
+    >
+      <button
+        :class="chevronButton"
+        :disabled="currentPage === 1"
+        @click="goToPage(currentPage - 1)"
+      >
+        <ChevronLeft :size="16" />
+      </button>
+
+      <span
+        class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
+      >
+        {{ currentPage }} / {{ totalPages }}
+      </span>
+
+      <button
+        :class="chevronButton"
+        :disabled="currentPage === totalPages"
+        @click="goToPage(currentPage + 1)"
+      >
+        <ChevronRight :size="16" />
+      </button>
+    </div>
+
     <!-- Empty state -->
-    <div v-else class="text-center text-gray-500 dark:text-gray-400">
+    <div
+      v-if="!files.length"
+      class="text-center text-gray-500 dark:text-gray-400"
+    >
       {{ t("prints.noFiles") }}
     </div>
   </div>
