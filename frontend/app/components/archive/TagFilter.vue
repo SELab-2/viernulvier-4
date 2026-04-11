@@ -105,7 +105,7 @@ watch(locale, fetchTags);
       @click="showAll = !showAll"
       :class="[
         'h-8 px-3 rounded-full text-[9px] font-brand font-black uppercase tracking-widest transition-colors flex items-center justify-center',
-        'bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-mid)] hover:text-white border-[var(--blog-purple-ghost)]',
+        'bg-foreground text-background hover:bg-foreground/80 hover:text-background',
       ]"
     >
       {{
