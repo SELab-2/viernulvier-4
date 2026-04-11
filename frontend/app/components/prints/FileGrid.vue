@@ -69,6 +69,10 @@ function goToPage(page: number) {
 
 //constants
 const fileLabel = "text-[11px] font-bold uppercase truncate";
+const grid =
+  totalPages.value > 1
+    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 grid-rows-4 items-start" // fixed height for 4 rows
+    : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4";
 
 const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
 </script>
@@ -80,15 +84,15 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
       <span class="text-[20px] font-bold uppercase shrink-0">{{
         category
       }}</span>
+      <span class="flex-1 h-px bg-border" />
       <span class="text-[11px] text-muted-foreground shrink-0"
         >{{ files.length }} {{ t("prints.files") }}</span
       >
-      <span class="flex-1 h-px bg-border" />
     </div>
 
     <!-- Grid -->
     <div v-if="files.length">
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div :class="grid">
         <div
           v-for="file in visibleFiles"
           :key="file.id"
@@ -163,32 +167,31 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
           </div>
         </div>
       </div>
-    </div>
+      <!-- Pagination -->
+      <div class="flex items-center justify-center gap-2 mt-6 h-9">
+        <button
+          class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
+          :disabled="currentPage === 1"
+          @click="goToPage(currentPage - 1)"
+        >
+          <ChevronLeft :size="16" />
+        </button>
 
-    <!-- Pagination -->
-    <div class="flex items-center justify-center gap-2 mt-6 h-9">
-      <button
-        class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
-        :disabled="currentPage === 1"
-        @click="goToPage(currentPage - 1)"
-      >
-        <ChevronLeft :size="16" />
-      </button>
+        <span
+          v-if="totalPages > 1"
+          class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
+        >
+          {{ currentPage }} / {{ totalPages }}
+        </span>
 
-      <span
-        v-if="totalPages > 1"
-        class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
-      >
-        {{ currentPage }} / {{ totalPages }}
-      </span>
-
-      <button
-        class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
-        :disabled="currentPage === totalPages"
-        @click="goToPage(currentPage + 1)"
-      >
-        <ChevronRight :size="16" />
-      </button>
+        <button
+          class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
+          :disabled="currentPage === totalPages"
+          @click="goToPage(currentPage + 1)"
+        >
+          <ChevronRight :size="16" />
+        </button>
+      </div>
     </div>
 
     <!-- No files (empty) -->
