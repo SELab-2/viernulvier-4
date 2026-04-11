@@ -41,7 +41,7 @@ function goToPage(page: number) {
   >
     <!-- First page -->
     <button
-      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === 1 || loading"
       @click="goToPage(1)"
     >
@@ -65,7 +65,7 @@ function goToPage(page: number) {
 
     <!-- Previous -->
     <button
-      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === 1 || loading"
       @click="goToPage(currentPage - 1)"
     >
@@ -89,7 +89,7 @@ function goToPage(page: number) {
 
     <!-- Current page -->
     <span
-      class="w-14 h-9 flex items-center justify-center bg-foreground text-background font-black text-sm"
+      class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
     >
       {{ currentPage }}
     </span>
@@ -99,7 +99,7 @@ function goToPage(page: number) {
 
     <!-- Next -->
     <button
-      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === totalPages || loading"
       @click="goToPage(currentPage + 1)"
     >
@@ -123,7 +123,7 @@ function goToPage(page: number) {
 
     <!-- Last -->
     <button
-      class="w-12 h-9 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
       :disabled="currentPage === totalPages || loading"
       @click="goToPage(totalPages)"
     >
