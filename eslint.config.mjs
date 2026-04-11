@@ -3,14 +3,20 @@ import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import jestPlugin from 'eslint-plugin-jest';
 
 export default [
   {
     ignores: [
       'eslint.config.mjs', 
+      'ecosystem.config.js',
+      '**/nuxt.config.ts',
       '**/.turbo/**', 
       '**/dist/**', 
-      '**/coverage/**'
+      '**/coverage/**',
+      '**/.nuxt/**',
+      '**/.output/**',
+      '**/node_modules/**',
     ],
   },
   eslint.configs.recommended,
@@ -47,8 +53,12 @@ export default [
 
   {
     files: ['**/*.spec.ts', '**/*.test.ts'],
+    plugins: {
+      jest: jestPlugin,
+    },
     rules: {
       '@typescript-eslint/unbound-method': 'off',
+      'jest/unbound-method': 'error',
     },
   }
 ];

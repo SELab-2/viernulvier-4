@@ -11,7 +11,13 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { BlogService } from "../blog.service";
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity, ApiTags, } from "@nestjs/swagger";
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { MediaGalleryDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import type { GalleryType } from "@repo/common";

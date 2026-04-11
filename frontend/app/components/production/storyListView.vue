@@ -17,7 +17,7 @@
  */
 
 import type { BlogView } from "@repo/common";
-const { t } = useI18n()
+const { t } = useI18n();
 
 interface Props {
   stories: BlogView[];
@@ -29,20 +29,17 @@ const props = defineProps<Props>();
   <div class="m-4">
     <!-- Title -->
     <h3 class="text-[12px] font-bold uppercase mb-2">
-      {{ t('production.stories') }}
+      {{ t("production.stories") }}
     </h3>
 
-    <div
-        v-if="stories.length"
-        class="flex flex-col gap-2"
-    >
+    <div v-if="stories.length" class="flex flex-col gap-2">
       <div v-if="stories.length" class="overflow-y-auto max-h-[25rem]">
         <div class="flex flex-col gap-2">
           <BlogsStoryListItem
-              v-for="story in stories"
-              :key="story.id"
-              :story="story"
-              data-testid="data-story"
+            v-for="story in stories"
+            :key="story.id"
+            :story="story"
+            data-testid="data-story"
           />
         </div>
       </div>
@@ -50,14 +47,12 @@ const props = defineProps<Props>();
 
     <!-- Empty state -->
     <div
-        v-else
-        class="rounded-xl border border-border bg-card dark:bg-muted p-4 text-[12px] text-foreground/60"
+      v-else
+      class="rounded-xl border border-border bg-card dark:bg-muted p-4 text-[12px] text-foreground/60"
     >
-      {{ t('production.noStories') }}
+      {{ t("production.noStories") }}
     </div>
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

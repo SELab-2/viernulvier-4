@@ -10,23 +10,22 @@
     "start:prod": "PORT=3001 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "format": "prettier --write \"{app,tests}/**/*.{vue,ts,js,json,css,scss}\"",
+    "lint": "eslint \"{app,tests}/**/*.{vue,ts,js}\" --fix"
   },
   "dependencies": {
     "@nuxtjs/i18n": "^10.2.3",
-    "@tailwindcss/postcss": "^4.0.0",
-    "tailwindcss": "^4.0.0",
-    "lucide-vue-next": "^0.469.0",
     "@repo/common": "*",
-    "vue": "^3.5.28",
-    "vue-router": "^4.6.4",
-    "pdfjs-dist": "^5.6.205"
+    "@tailwindcss/postcss": "^4.0.0",
+    "happy-dom": "^20.8.9",
+    "lucide-vue-next": "^0.469.0",
+    "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@nuxt/test-utils": "^4.0.0",
+    "@nuxt/test-utils": "4.0.0",
     "@vitest/coverage-v8": "^4.0.18",
     "@vue/test-utils": "^2.4.6",
-    "happy-dom": "^20.6.1",
     "nuxt": "^4.3.1",
     "vitest": "^4.0.18"
   }

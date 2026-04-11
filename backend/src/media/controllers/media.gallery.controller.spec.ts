@@ -17,6 +17,8 @@ describe("MediaGalleryController", () => {
 
   const mockGallery: MediaGalleryDto = {
     id: 1,
+    name: "Test Gallery",
+    type: "default",
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
   };
@@ -44,6 +46,8 @@ describe("MediaGalleryController", () => {
       getGalleryItems: jest.fn(),
       linkItemToGallery: jest.fn(),
       unlinkItemFromGallery: jest.fn(),
+      linkPrintItemToGallery: jest.fn(),
+      unlinkPrintItemFromGallery: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -107,7 +111,10 @@ describe("MediaGalleryController", () => {
 
   describe("createGallery", () => {
     it("should create and return a new gallery", async () => {
-      const createGalleryDto: CreateMediaGalleryDto = {};
+      const createGalleryDto: CreateMediaGalleryDto = {
+        name: "Nieuwe Test Gallery",
+        type: "default",
+      };
       mediaGalleryService.createGallery.mockResolvedValue(mockGallery);
 
       const result = await controller.createGallery(createGalleryDto);
@@ -160,6 +167,33 @@ describe("MediaGalleryController", () => {
         1,
         2,
       );
+    });
+  });
+
+  describe("linkToGallery", () => {
+    it("should link a print item to a gallery", async () => {
+      mediaGalleryService.linkPrintItemToGallery.mockResolvedValue(undefined);
+
+      await controller.linkToGallery(1, 2);
+
+      expect(mediaGalleryService.linkPrintItemToGallery).toHaveBeenCalledWith(
+        1,
+        2,
+      );
+    });
+  });
+
+  describe("unlinkFromGallery", () => {
+    it("should unlink a print item from a gallery", async () => {
+      mediaGalleryService.unlinkPrintItemFromGallery.mockResolvedValue(
+        undefined,
+      );
+
+      await controller.unlinkFromGallery(1, 2);
+
+      expect(
+        mediaGalleryService.unlinkPrintItemFromGallery,
+      ).toHaveBeenCalledWith(1, 2);
     });
   });
 });

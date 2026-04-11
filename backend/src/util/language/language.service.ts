@@ -52,9 +52,10 @@ export class LanguageService {
       "limit" in data &&
       "totalItems" in data
     ) {
+      const paginatedData = data as Record<string, any>;
       return {
-        ...data,
-        objects: this.flattenByLanguage(data.objects, lang),
+        ...paginatedData,
+        objects: this.flattenByLanguage(paginatedData.objects, lang),
       } as T;
     }
 
@@ -109,19 +110,19 @@ export class LanguageService {
 
     // Only process real objects
     if (typeof data !== "object") {
-      return data;
+      return data as T;
     }
 
-    const result: Record<string, any> = { ...data };
+    const result = data as Record<string, any>;
 
     for (const key of Object.keys(result)) {
-      const value = result[key];
+      const value = result[key] as unknown;
 
       if (
         value &&
         typeof value === "object" &&
         !Array.isArray(value) &&
-        value[langFrom]
+        (value as Record<string, any>)[langFrom]
       ) {
         result[key] = await this.translateText(value, langFrom, langTo);
       } else if (typeof value === "object") {
@@ -172,7 +173,7 @@ export class LanguageService {
       data[langTo] = result.text;
     } catch (error) {
       if (this.apiKey !== "none")
-        this.logger.error(`Translation failed: ${error?.message}`, error);
+        this.logger.error(`Translation failed: ${(error as Error).message}`);
 
       // fallback: copy original language
       data[langTo] = sourceText;

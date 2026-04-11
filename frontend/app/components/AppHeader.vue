@@ -119,10 +119,10 @@ onUnmounted(() => {
 
 // ── Navigation items ─────────────────────────────────────────────────────────
 const navItems = [
-  { label: "home",    route: ROUTES.home.base },
+  { label: "home", route: ROUTES.home.base },
   { label: "archive", route: ROUTES.productions.base },
   { label: "stories", route: ROUTES.stories.base },
-  { label: "prints",  route: ROUTES.prints.base },
+  { label: "prints", route: ROUTES.prints.base },
 ];
 </script>
 
@@ -134,7 +134,6 @@ const navItems = [
     <div
       class="mx-auto grid max-w-[1400px] grid-cols-3 items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
-
       <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
       <div class="flex items-center justify-start">
         <nav v-if="!isAdmin" class="hidden lg:flex gap-[20px] xl:gap-[30px]">
@@ -171,14 +170,17 @@ const navItems = [
           <span
             v-if="isAdmin"
             class="text-xl lg:text-2xl font-black text-gray-400 tracking-[-1px]"
-          >ADMIN</span>
+            >ADMIN</span
+          >
         </div>
       </div>
 
       <!-- ── Right: locale + dark-mode + logout ─────────────────────────── -->
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
-
-        <div :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']" class="items-center gap-2 lg:gap-[15px]">
+        <div
+          :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']"
+          class="items-center gap-2 lg:gap-[15px]"
+        >
           <LocaleSelector />
 
           <button
@@ -201,7 +203,6 @@ const navItems = [
           <LogOut :size="16" />
           <span class="hidden xl:inline">{{ t("nav.logout") }}</span>
         </button>
-
       </div>
     </div>
 
@@ -211,7 +212,6 @@ const navItems = [
       class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
     >
       <nav class="flex flex-col gap-6">
-
         <template v-if="!isAdmin">
           <NuxtLink
             v-for="item in navItems"
@@ -239,16 +239,11 @@ const navItems = [
             {{ isDark ? "LIGHT" : "DARK" }}
           </button>
 
-          <button
-            v-if="isAdmin"
-            class="btn-danger"
-            @click="handleLogout"
-          >
+          <button v-if="isAdmin" class="btn-danger" @click="handleLogout">
             <LogOut :size="16" />
             {{ t("nav.logout") }}
           </button>
         </div>
-
       </nav>
     </div>
   </header>
