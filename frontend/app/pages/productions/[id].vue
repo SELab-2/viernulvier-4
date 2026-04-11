@@ -164,7 +164,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           </span>
         </div>
 
-        <div class="max-w-4xl text-foreground">
+        <div class="text-foreground">
           <h1 class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic">
             {{ production.titel }}
           </h1>
@@ -189,7 +189,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
     <section class="py-20">
       <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
 
-        <div class="max-w-4xl">
+        <div class="w-full">
           <div v-if="isValid(production.tagline)" class="mb-10">
             <p class="border-l-4 border-[var(--accent)] pl-6 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white">
               {{ production.tagline }}
@@ -224,11 +224,9 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           <ProductionStoryListView :stories="stories" />
         </div>
 
-        <div class="max-w-4xl">
-          <div v-if="isValid(production.description2)"
-               class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl"
-               v-html="cleanText(production.description2)">
-          </div>
+        <div v-if="isValid(production.description2)"
+             class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
+             v-html="cleanText(production.description2)">
         </div>
 
         <div
