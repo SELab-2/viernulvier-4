@@ -15,6 +15,11 @@ export function localTodayIso(): string {
   return localIso(new Date());
 }
 
+/** Extract the year from a YYYY-MM-DD string without timezone drift. */
+export function isoYear(iso: string): number {
+  return parseInt(iso.split("-")[0] ?? "0", 10);
+}
+
 /**
  * Validate a YYYY-MM-DD string: checks calendar validity and rejects future dates.
  * Returns the ISO string on success, null on failure.

@@ -5,15 +5,14 @@
 
   The panel opens below the toolbar (in flow), pushing <main> down.
   It contains two sections:
-    1. Year multiselect  — derived from oldestDate/newestDate backend bounds.
-       Multiple years = union mapped to a single before/after range
-       (min-year Jan 1 → max-year Dec 31).
+    1. Year picker       — derived from oldestDate/newestDate backend bounds.
+       Clicking a year filters to that year; clicking again deselects.
     2. Calendar          — fine-grained date picking.
   Using one clears the other.
 -->
 <script lang="ts" setup>
+import { isoYear } from "~/utils/formatters";
 import type { FilterBlog } from "@repo/common";
-import Calendar from "~/components/DefaultCalendar.vue";
 
 const props = defineProps<{
   storyTitles: string[];
@@ -35,14 +34,15 @@ const { t } = useI18n();
 const searchQuery = ref("");
 const panelOpen = ref(false);
 const selectedYear = ref<number | null>(null);
+const calendarKey = ref(0);
 
 watch(searchQuery, (val) => emit("update:search", val));
 
-// Year range
+// ── Year range ────────────────────────────────────────────────────────────────
 const years = computed<number[]>(() => {
   if (!props.oldestDate || !props.newestDate) return [];
-  const start = new Date(props.oldestDate).getFullYear();
-  const end = new Date(props.newestDate).getFullYear();
+  const start = isoYear(props.oldestDate);
+  const end = isoYear(props.newestDate);
   const arr: number[] = [];
   for (let y = end; y >= start; y--) arr.push(y); // newest first
   return arr;
@@ -54,6 +54,8 @@ function toggleYear(year: number) {
   if (selectedYear.value === null) {
     emit("update:dateFilter", {});
   } else {
+    // Force calendar remount so its internal anchor/selected state is cleared
+    calendarKey.value++;
     emit("update:dateFilter", {
       after: `${year}-01-01`,
       before: `${year}-12-31`,
@@ -177,22 +179,33 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
             <!--
               Scrollable list: max ~6 items visible (~192px),
               scrolls when the year range is long.
+              Uses buttons instead of radio inputs so clicking the active
+              year can deselect it (radio @change never fires for same value).
             -->
             <div
               class="flex flex-col gap-0.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin"
             >
-              <label
+              <button
                 v-for="year in years"
                 :key="year"
-                class="flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer select-none hover:bg-muted transition-colors group"
+                type="button"
+                class="flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer select-none w-full text-left hover:bg-muted transition-colors group"
+                @click="toggleYear(year)"
               >
-                <input
-                  type="radio"
-                  name="year-filter"
-                  class="accent-purple-500 w-3.5 h-3.5 cursor-pointer"
-                  :checked="selectedYear === year"
-                  @change="toggleYear(year)"
-                />
+                <!-- Custom radio indicator -->
+                <span
+                  class="w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-colors"
+                  :class="
+                    selectedYear === year
+                      ? 'bg-purple-500 border-purple-500'
+                      : 'border-muted-foreground/40 group-hover:border-purple-400'
+                  "
+                >
+                  <span
+                    v-if="selectedYear === year"
+                    class="w-1.5 h-1.5 rounded-full bg-white"
+                  />
+                </span>
                 <span
                   class="font-brand font-black text-[11px] uppercase tracking-widest transition-colors"
                   :class="
@@ -203,7 +216,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
                 >
                   {{ year }}
                 </span>
-              </label>
+              </button>
 
               <div
                 v-if="years.length === 0"
@@ -232,7 +245,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
             aria-hidden="true"
           />
 
-          <!-- Calendar -->
+          <!-- ── Calendar ─────────────────────────────────────────────────── -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between mb-3">
               <span
@@ -241,7 +254,8 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
                 {{ t("stories.filters.dateRange") }}
               </span>
             </div>
-            <Calendar
+            <DefaultCalendar
+              :key="calendarKey"
               :oldest-date="oldestDate"
               :model-filter="dateFilter"
               @update:filter="onCalendarFilter"
