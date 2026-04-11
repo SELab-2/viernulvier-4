@@ -9,6 +9,13 @@ import {
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
+import {
+  generateCountQuery,
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
+import { PrintItemSchema } from "@repo/common";
 
 @Injectable()
 export class PrintItemDatabaseService {
@@ -25,10 +32,12 @@ export class PrintItemDatabaseService {
    * @returns The PrintItem if there is one.
    */
   async getPrintItemById(id: number): Promise<PrintItemDto> {
+    const returningClause = generateReturningClause(PrintItemSchema);
+
     const query = `
-      SELECT id, titel, description, url, created_at, updated_at
+      SELECT ${returningClause}
       FROM print_items
-      WHERE id = $1
+      WHERE id = $1;
     `;
 
     const result = await this.db.query<PrintItemDto>(query, [id]);
@@ -50,15 +59,14 @@ export class PrintItemDatabaseService {
   async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<PrintItemDto>> {
-    const query = `
-        SELECT * FROM print_items
-        LIMIT $1 OFFSET $2;
-    `;
-    const countQuery = `
-        SELECT COUNT(DISTINCT id) as count
-        FROM print_items;
-    `;
+    const returningClause = generateReturningClause(PrintItemSchema);
 
+    const query = `
+      SELECT ${returningClause}
+      FROM print_items
+      LIMIT $1 OFFSET $2;
+    `;
+    const countQuery = generateCountQuery("print_items");
     const offset = paginationFilters.page * paginationFilters.limit;
 
     const [objects, countResult] = await Promise.all([
@@ -77,37 +85,40 @@ export class PrintItemDatabaseService {
   /**
    * Create a new print item and link it to 1 or more gallery(s).
    * @param item Must be of type CreatePrintItemDto.
-   * @param galleryIds a list of media_gallery_ids you want to link this item to. (if left emtpy it will link to none)
    * @returns The created PrintItem.
    */
-  async createPrintItem(
-    item: CreatePrintItemDto,
-    galleryIds: number[],
-  ): Promise<PrintItemDto> {
-    if (!item.url) {
-      throw new BadRequestException("Missing required fields (url)");
-    }
-    const insertQuery = `
-        INSERT INTO print_items (titel, description, url)
-        VALUES ($1, $2, $3)
-        RETURNING id, titel, description, url, created_at, updated_at;
+  async createPrintItem(item: CreatePrintItemDto): Promise<PrintItemDto> {
+    const { gallery_ids, ...itemData } = item;
+    const { columns, placeholders, values, nextIndex } =
+      generateInsertClause(itemData);
+    const returningClause = generateReturningClause(PrintItemSchema);
+
+    const insertAndLinkQuery = `
+      WITH inserted_item AS (
+        INSERT INTO print_items (${columns})
+        VALUES (${placeholders})
+        RETURNING ${returningClause}
+      ),
+      inserted_links AS (
+        INSERT INTO print_item_media_gallery (media_gallery_id, print_item_id)
+        SELECT UNNEST($${nextIndex}::int[]), id
+        FROM inserted_item
+      )
+      SELECT * FROM inserted_item;
     `;
-    const result = await this.db.query<PrintItemDto>(insertQuery, [
-      item.titel ?? null,
-      item.description ?? null,
-      item.url,
-    ]);
+
+    // Push the gallery ids so they can be linked.
+    values.push(gallery_ids || []);
+
+    const result = await this.db.query<PrintItemDto>(
+      insertAndLinkQuery,
+      values,
+    );
+
     if (result.length === 0) {
-      throw new Error("Failed to create PrintItem");
+      throw new BadRequestException("Failed to create PrintItem.");
     }
-    if (galleryIds && galleryIds.length > 0) {
-      for (const galleryId of galleryIds) {
-        await this.db.query(
-          `INSERT INTO print_item_media_gallery (print_item_id, media_gallery_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-          [result[0].id, galleryId],
-        );
-      }
-    }
+
     return result[0];
   }
 
@@ -121,35 +132,21 @@ export class PrintItemDatabaseService {
     itemId: number,
     item: ModifyPrintItemDto | ReplacePrintItemDto,
   ): Promise<PrintItemDto> {
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    const { setClause, values, nextIndex } = generateUpdateClause(item);
+    const returningClause = generateReturningClause(PrintItemSchema);
 
-    if (item.titel !== undefined) {
-      fields.push(`titel = $${index++}`);
-      values.push(item.titel);
-    }
-    if (item.description !== undefined) {
-      fields.push(`description = $${index++}`);
-      values.push(item.description);
-    }
-    if (item.url !== undefined) {
-      fields.push(`url = $${index++}`);
-      values.push(item.url);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided for update");
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
     values.push(itemId);
 
     const query = `
-            UPDATE print_items
-            SET ${fields.join(", ")}
-            WHERE id = $${index}
-            RETURNING id, titel, description, url, created_at, updated_at;
-        `;
+      UPDATE print_items
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
+    `;
 
     const result = await this.db.query<PrintItemDto>(query, values);
 

@@ -108,10 +108,8 @@ export class OldCSVFileParser {
   static async parseOldEventsCSV(filePath: string): Promise<ParsedEventRow[]> {
     const parsed = await CSVFileParser.parseCSVWithSchema<
       CreateEventDto & { location: string }
-    >(
-      filePath,
-      CreateEventSchema.extend({ location: string() }),
-      OldCSVFileParser.transformOldEventRow,
+    >(filePath, CreateEventSchema.extend({ location: string() }), (row) =>
+      OldCSVFileParser.transformOldEventRow(row),
     );
 
     return parsed.map((r) => {
@@ -138,7 +136,7 @@ export class OldCSVFileParser {
         tags: string().array(),
         legacy_id: string(),
       }),
-      OldCSVFileParser.transformOldProductionRow,
+      (row) => OldCSVFileParser.transformOldProductionRow(row),
     );
 
     for (const production of parsed) {

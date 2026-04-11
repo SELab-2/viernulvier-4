@@ -5,16 +5,23 @@
   `threshold` pixels. Centered horizontally within the page content area.
 -->
 <script lang="ts" setup>
-const props = withDefaults(defineProps<{
-  threshold?: number;
-}>(), {
-  threshold: 320,
-});
+const props = withDefaults(
+  defineProps<{
+    threshold?: number;
+  }>(),
+  {
+    threshold: 320,
+  },
+);
 
 const visible = ref(false);
 
-const onScroll = () => { visible.value = window.scrollY > props.threshold; };
-const scrollToTop = () => { window.scrollTo({ top: 0, behavior: "smooth" }); };
+const onScroll = () => {
+  visible.value = window.scrollY > props.threshold;
+};
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 onMounted(() => {
   window.addEventListener("scroll", onScroll, { passive: true });
@@ -35,16 +42,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
     <button
       v-if="visible"
       type="button"
-      class="
-        fixed bottom-8 left-1/2 -translate-x-1/2 z-50
-        w-14 h-14 rounded-full
-        bg-purple-500 text-white
-        shadow-xl shadow-purple-500/40
-        flex items-center justify-center
-        transition-all duration-150
-        hover:bg-purple-600 hover:scale-110 hover:shadow-purple-500/60
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2
-      "
+      class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-14 h-14 rounded-full bg-purple-500 text-white shadow-xl shadow-purple-500/40 flex items-center justify-center transition-all duration-150 hover:bg-purple-600 hover:scale-110 hover:shadow-purple-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:ring-offset-2"
       aria-label="Scroll back to top"
       @click="scrollToTop"
     >

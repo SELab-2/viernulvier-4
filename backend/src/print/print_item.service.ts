@@ -41,10 +41,7 @@ export class PrintItemService {
   async createPrintItem(
     createPrintItem: CreatePrintItemDto,
   ): Promise<PrintItemDto> {
-    return await this.printItemDbService.createPrintItem(
-      createPrintItem,
-      createPrintItem.gallery_ids || [],
-    );
+    return await this.printItemDbService.createPrintItem(createPrintItem);
   }
 
   /**

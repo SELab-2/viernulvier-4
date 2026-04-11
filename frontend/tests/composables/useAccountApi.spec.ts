@@ -15,7 +15,6 @@ vi.mock("~/composables/useApi", () => ({
   }),
 }));
 
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -23,13 +22,13 @@ beforeEach(() => {
 describe("useAccountApi", () => {
   it("getAll calls GET /auth", () => {
     const { getAll } = useAccountApi();
-    getAll();
+    void getAll();
     expect(mockGet).toHaveBeenCalledWith("/auth");
   });
 
   it("getAll appends pagination query params", () => {
     const { getAll } = useAccountApi();
-    getAll({ page: 1, limit: 10 });
+    void getAll({ page: 1, limit: 10 });
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("page=1"));
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("limit=10"));
   });
@@ -37,20 +36,20 @@ describe("useAccountApi", () => {
   it("create calls POST /auth with body", () => {
     const { create } = useAccountApi();
     const body = { username: "admin", password: "secret" };
-    create(body);
+    void create(body);
     expect(mockPost).toHaveBeenCalledWith("/auth", body);
   });
 
   it("modify calls PATCH /auth with body", () => {
     const { modify } = useAccountApi();
     const body = { id: 1, username: "updated" };
-    modify(body);
+    void modify(body);
     expect(mockPatch).toHaveBeenCalledWith("/auth", body);
   });
 
   it("remove calls DELETE /auth/:id", () => {
     const { remove } = useAccountApi();
-    remove(1);
+    void remove(1);
     expect(mockDel).toHaveBeenCalledWith("/auth/1");
   });
 });

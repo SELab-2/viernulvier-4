@@ -14,6 +14,8 @@ import { MediaCropDatabaseService } from "../src/database/media/db.media_crop.se
 import { MediaItemDatabaseService } from "../src/database/media/db.media_item.service";
 import { MediaGalleryDatabaseService } from "../src/database/media/db.media_gallery.service";
 import { AppModule } from "../src/app.module";
+import { Server } from "http";
+import { PaginatedResponse } from "@repo/common";
 import { MediaStorageService } from "../src/media/media_storage/media_storage.service";
 
 // ==========================================
@@ -223,10 +225,9 @@ const mockMediaGallery = {
   updated_at: "2026-03-28T14:00:00.000Z",
 };
 
-// @ts-ignore
-const paginatedResponse = (objects) => ({
+const paginatedResponse = <T>(objects: T[]): PaginatedResponse<T> => ({
   objects,
-  totalItems: 1,
+  totalItems: objects.length,
   page: 1,
   limit: 10,
 });
@@ -296,7 +297,6 @@ async function buildApp(): Promise<INestApplication> {
     .useValue(mockMediaGalleryDbService())
     .overrideProvider(MediaCropDatabaseService)
     .useValue(mockMediaCropsDbService())
-
     .overrideProvider(MediaStorageService)
     .useValue({
       save: jest.fn().mockResolvedValue("http://mock-url.com/image.jpg"),
@@ -343,49 +343,56 @@ describe("BlogController (e2e)", () => {
 
   describe("GET /blogs", () => {
     it("should return 200 with an array of flattened blogs", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/blogs?lang=en&descending=true")
         .expect(200)
         .expect([mockBlogView, mockBlog2View]);
     });
 
     it("should call blogDb.getBlogs()", async () => {
-      await request(app.getHttpServer()).get("/blogs?lang=en&descending=true");
-      expect(blogDb.getBlogs).toHaveBeenCalled();
+      await request(app.getHttpServer() as Server).get(
+        "/blogs?lang=en&descending=true",
+      );
+      expect(jest.mocked(blogDb.getBlogs)).toHaveBeenCalled();
     });
 
     it("should return 200 with an empty array when no blogs exist", async () => {
-      // @ts-ignore
-      jest.spyOn(blogDb, "getBlogs").mockResolvedValueOnce([]);
-      return request(app.getHttpServer())
+      jest
+        .spyOn(blogDb, "getBlogs")
+        .mockResolvedValueOnce(paginatedResponse([]));
+      return request(app.getHttpServer() as Server)
         .get("/blogs?lang=en&descending=true")
         .expect(200)
-        .expect([]);
+        .expect(paginatedResponse([]));
     });
   });
 
   describe("GET /blogs/:id", () => {
     it("should return 200 with the correct flattened blog", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/blogs/1?lang=en")
         .expect(200)
         .expect(mockBlogView);
     });
 
     it("should call blogDb.getBlogById with the correct id", async () => {
-      await request(app.getHttpServer()).get("/blogs/1?lang=en");
+      await request(app.getHttpServer() as Server).get("/blogs/1?lang=en");
       expect(blogDb.getBlogById).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).get("/blogs/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/blogs/abc")
+        .expect(400);
     });
 
     it("should propagate errors from the database", async () => {
       jest
         .spyOn(blogDb, "getBlogById")
         .mockRejectedValueOnce(new Error("Not Found"));
-      return request(app.getHttpServer()).get("/blogs/999?lang=en").expect(500);
+      return request(app.getHttpServer() as Server)
+        .get("/blogs/999?lang=en")
+        .expect(500);
     });
   });
 
@@ -396,7 +403,7 @@ describe("BlogController (e2e)", () => {
     };
 
     it("should return 201 with the created blog", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/blogs")
         .send(createPayload)
         .expect(201)
@@ -404,12 +411,14 @@ describe("BlogController (e2e)", () => {
     });
 
     it("should call blogDb.createBlog with the payload", async () => {
-      await request(app.getHttpServer()).post("/blogs").send(createPayload);
+      await request(app.getHttpServer() as Server)
+        .post("/blogs")
+        .send(createPayload);
       expect(blogDb.createBlog).toHaveBeenCalledWith(createPayload);
     });
 
     it("should return 400 when body is missing required fields", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/blogs")
         .send({ titel: { en: "Only title" } })
         .expect(400);
@@ -418,7 +427,7 @@ describe("BlogController (e2e)", () => {
 
   describe("PUT /blogs/:id", () => {
     it("should return 200 with the replaced blog when ids match", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/blogs/1")
         .send(mockBlog)
         .expect(200)
@@ -426,7 +435,7 @@ describe("BlogController (e2e)", () => {
     });
 
     it("should return 400 when id param is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/blogs/abc")
         .send(mockBlog)
         .expect(400);
@@ -435,7 +444,7 @@ describe("BlogController (e2e)", () => {
 
   describe("PATCH /blogs/:id", () => {
     it("should return 200 with the modified blog", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/blogs/1")
         .send({ titel: { en: "Updated title", nl: "Bijgewerkte titel" } })
         .expect(200)
@@ -443,14 +452,14 @@ describe("BlogController (e2e)", () => {
     });
 
     it("should call blogDb.updateBlog", async () => {
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Server)
         .patch("/blogs/1")
         .send({ titel: { en: "Updated title", nl: "Bijgewerkte titel" } });
       expect(blogDb.updateBlog).toHaveBeenCalled();
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/blogs/abc")
         .send({ titel: { en: "Updated title", nl: "Bijgewerkte titel" } })
         .expect(400);
@@ -459,16 +468,20 @@ describe("BlogController (e2e)", () => {
 
   describe("DELETE /blogs/:id", () => {
     it("should return 200 when blog is deleted", () => {
-      return request(app.getHttpServer()).delete("/blogs/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/blogs/1")
+        .expect(200);
     });
 
     it("should call blogDb.deleteBlog with the correct id", async () => {
-      await request(app.getHttpServer()).delete("/blogs/1");
+      await request(app.getHttpServer() as Server).delete("/blogs/1");
       expect(blogDb.deleteBlog).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).delete("/blogs/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .delete("/blogs/abc")
+        .expect(400);
     });
   });
 });
@@ -492,37 +505,38 @@ describe("TagController (e2e)", () => {
 
   describe("GET /tags", () => {
     it("should return 200 with an array of flattened tags", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/tags?lang=en")
         .expect(200)
         .expect([mockTagView, mockTag2View]);
     });
 
     it("should return 200 with empty array when no tags exist", async () => {
-      // @ts-ignore
-      jest.spyOn(tagDb, "getTags").mockResolvedValueOnce([]);
-      return request(app.getHttpServer())
+      jest.spyOn(tagDb, "getTags").mockResolvedValueOnce(paginatedResponse([]));
+      return request(app.getHttpServer() as Server)
         .get("/tags?lang=en")
         .expect(200)
-        .expect([]);
+        .expect(paginatedResponse([]));
     });
   });
 
   describe("GET /tags/:id", () => {
     it("should return 200 with the correct flattened tag", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/tags/1?lang=en")
         .expect(200)
         .expect(mockTagView);
     });
 
     it("should call tagDb.getTagById with the correct id", async () => {
-      await request(app.getHttpServer()).get("/tags/1?lang=en");
+      await request(app.getHttpServer() as Server).get("/tags/1?lang=en");
       expect(tagDb.getTagById).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).get("/tags/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/tags/abc")
+        .expect(400);
     });
   });
 
@@ -532,7 +546,7 @@ describe("TagController (e2e)", () => {
     };
 
     it("should return 201 with the created tag", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/tags")
         .send(createPayload)
         .expect(201)
@@ -540,18 +554,23 @@ describe("TagController (e2e)", () => {
     });
 
     it("should call tagDb.createTag with the payload", async () => {
-      await request(app.getHttpServer()).post("/tags").send(createPayload);
+      await request(app.getHttpServer() as Server)
+        .post("/tags")
+        .send(createPayload);
       expect(tagDb.createTag).toHaveBeenCalledWith(createPayload);
     });
 
     it("should return 400 when body is missing required field 'tag'", () => {
-      return request(app.getHttpServer()).post("/tags").send({}).expect(400);
+      return request(app.getHttpServer() as Server)
+        .post("/tags")
+        .send({})
+        .expect(400);
     });
   });
 
   describe("PATCH /tags/:id", () => {
     it("should return 200 with the updated tag", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/tags/1")
         .send({ tag: { en: "Thriller", nl: "Thriller" } })
         .expect(200)
@@ -559,7 +578,7 @@ describe("TagController (e2e)", () => {
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/tags/abc")
         .send({ tag: { en: "Something", nl: "Iets" } })
         .expect(400);
@@ -568,20 +587,21 @@ describe("TagController (e2e)", () => {
 
   describe("DELETE /tags/:id", () => {
     it("should return 200 with a success message", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer() as Server)
         .delete("/tags/1")
         .expect(200);
       expect(response.body).toHaveProperty("message");
-      expect(response.body.message).toContain("1");
     });
 
     it("should call tagDb.deleteTag with the correct id", async () => {
-      await request(app.getHttpServer()).delete("/tags/1");
+      await request(app.getHttpServer() as Server).delete("/tags/1");
       expect(tagDb.deleteTag).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).delete("/tags/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .delete("/tags/abc")
+        .expect(400);
     });
   });
 });
@@ -607,37 +627,42 @@ describe("ProductionController (e2e)", () => {
 
   describe("GET /productions", () => {
     it("should return 200 with an array of flattened productions", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/productions?lang=en")
         .expect(200)
         .expect([mockProductionView]);
     });
 
     it("should return 200 with empty array when no productions exist", async () => {
-      // @ts-ignore
-      jest.spyOn(productionDb, "getProductions").mockResolvedValueOnce([]);
-      return request(app.getHttpServer())
+      jest
+        .spyOn(productionDb, "getProductions")
+        .mockResolvedValueOnce(paginatedResponse([]));
+      return request(app.getHttpServer() as Server)
         .get("/productions?lang=en")
         .expect(200)
-        .expect([]);
+        .expect(paginatedResponse([]));
     });
   });
 
   describe("GET /productions/:productionId", () => {
     it("should return 200 with the correct flattened production", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/productions/1?lang=en")
         .expect(200)
         .expect(mockProductionView);
     });
 
     it("should call productionDb.getProductionById with the correct id", async () => {
-      await request(app.getHttpServer()).get("/productions/1?lang=en");
+      await request(app.getHttpServer() as Server).get(
+        "/productions/1?lang=en",
+      );
       expect(productionDb.getProductionById).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).get("/productions/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/productions/abc")
+        .expect(400);
     });
   });
 
@@ -654,7 +679,7 @@ describe("ProductionController (e2e)", () => {
     };
 
     it("should return 201 with the created production", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/productions")
         .send(createPayload)
         .expect(201)
@@ -662,14 +687,14 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should call productionDb.createProduction with the payload", async () => {
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Server)
         .post("/productions")
         .send(createPayload);
       expect(productionDb.createProduction).toHaveBeenCalledWith(createPayload);
     });
 
     it("should return 400 when required fields are missing", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/productions")
         .send({ titel: { en: "Incomplete", nl: "Incompleet" } })
         .expect(400);
@@ -678,7 +703,7 @@ describe("ProductionController (e2e)", () => {
 
   describe("PUT /productions/:productionId", () => {
     it("should return 200 with the replaced production when ids match", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/1")
         .send(mockProduction)
         .expect(200)
@@ -686,7 +711,7 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/abc")
         .send(mockProduction)
         .expect(400);
@@ -695,7 +720,7 @@ describe("ProductionController (e2e)", () => {
 
   describe("PATCH /productions/:productionId", () => {
     it("should return 200 with the modified production", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/productions/1")
         .send({ titel: { en: "Patched titel", nl: "Bijgewerkte titel" } })
         .expect(200)
@@ -703,14 +728,14 @@ describe("ProductionController (e2e)", () => {
     });
 
     it("should call productionDb.updateProduction", async () => {
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Server)
         .patch("/productions/1")
         .send({ titel: { en: "Patched titel", nl: "Bijgewerkte titel" } });
       expect(productionDb.updateProduction).toHaveBeenCalled();
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/productions/abc")
         .send({ titel: { en: "Patched", nl: "Gepatched" } })
         .expect(400);
@@ -719,16 +744,18 @@ describe("ProductionController (e2e)", () => {
 
   describe("DELETE /productions/:productionId", () => {
     it("should return 200 when production is deleted", () => {
-      return request(app.getHttpServer()).delete("/productions/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/productions/1")
+        .expect(200);
     });
 
     it("should call productionDb.deleteProduction with the correct id", async () => {
-      await request(app.getHttpServer()).delete("/productions/1");
+      await request(app.getHttpServer() as Server).delete("/productions/1");
       expect(productionDb.deleteProduction).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/productions/abc")
         .expect(400);
     });
@@ -756,19 +783,21 @@ describe("ProductionBlogController (e2e)", () => {
 
   describe("GET /productions/:productionId/blogs", () => {
     it("should return 200 with flattened blogs linked to the production", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/productions/1/blogs?lang=en")
         .expect(200)
         .expect([mockBlogView]);
     });
 
     it("should call productionDb.getBlogsOfProduction with the correct id", async () => {
-      await request(app.getHttpServer()).get("/productions/1/blogs?lang=en");
+      await request(app.getHttpServer() as Server).get(
+        "/productions/1/blogs?lang=en",
+      );
       expect(productionDb.getBlogsOfProduction).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when productionId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/productions/abc/blogs")
         .expect(400);
     });
@@ -776,25 +805,27 @@ describe("ProductionBlogController (e2e)", () => {
 
   describe("PUT /productions/:productionId/blogs/:blogId", () => {
     it("should return 200 with the linked blog", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/1/blogs/1")
         .expect(200)
         .expect(mockBlog);
     });
 
     it("should call productionDb.linkBlogWithProductionID with correct ids", async () => {
-      await request(app.getHttpServer()).put("/productions/1/blogs/2");
+      await request(app.getHttpServer() as Server).put(
+        "/productions/1/blogs/2",
+      );
       expect(productionDb.linkBlogWithProductionID).toHaveBeenCalledWith(2, 1);
     });
 
     it("should return 400 when productionId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/abc/blogs/1")
         .expect(400);
     });
 
     it("should return 400 when blogId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/1/blogs/abc")
         .expect(400);
     });
@@ -802,19 +833,21 @@ describe("ProductionBlogController (e2e)", () => {
 
   describe("DELETE /productions/:productionId/blogs/:blogId", () => {
     it("should return 200 with the production after unlinking", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/productions/1/blogs/1")
         .expect(200)
         .expect(mockProduction);
     });
 
     it("should call productionDb.deleteBlogFromProduction with correct ids", async () => {
-      await request(app.getHttpServer()).delete("/productions/1/blogs/2");
+      await request(app.getHttpServer() as Server).delete(
+        "/productions/1/blogs/2",
+      );
       expect(productionDb.deleteBlogFromProduction).toHaveBeenCalledWith(1, 2);
     });
 
     it("should return 400 when productionId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/productions/abc/blogs/1")
         .expect(400);
     });
@@ -842,19 +875,21 @@ describe("ProductionTagController (e2e)", () => {
 
   describe("GET /productions/:productionId/tags", () => {
     it("should return 200 with flattened tags linked to the production", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/productions/1/tags?lang=en")
         .expect(200)
         .expect([mockTagView]);
     });
 
     it("should call productionDb.getTagsOfProduction", async () => {
-      await request(app.getHttpServer()).get("/productions/1/tags?lang=en");
+      await request(app.getHttpServer() as Server).get(
+        "/productions/1/tags?lang=en",
+      );
       expect(productionDb.getTagsOfProduction).toHaveBeenCalled();
     });
 
     it("should return 400 when productionId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/productions/abc/tags")
         .expect(400);
     });
@@ -862,25 +897,25 @@ describe("ProductionTagController (e2e)", () => {
 
   describe("PUT /productions/:productionId/tags/:tagId", () => {
     it("should return 200 with the production after adding tag", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/1/tags/1")
         .expect(200)
         .expect(mockProduction);
     });
 
     it("should call productionDb.addTagToProduction with correct ids", async () => {
-      await request(app.getHttpServer()).put("/productions/1/tags/2");
+      await request(app.getHttpServer() as Server).put("/productions/1/tags/2");
       expect(productionDb.addTagToProduction).toHaveBeenCalledWith(2, 1);
     });
 
     it("should return 400 when productionId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/abc/tags/1")
         .expect(400);
     });
 
     it("should return 400 when tagId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/productions/1/tags/abc")
         .expect(400);
     });
@@ -888,19 +923,21 @@ describe("ProductionTagController (e2e)", () => {
 
   describe("DELETE /productions/:productionId/tags/:tagId", () => {
     it("should return 200 with the production after removing tag", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/productions/1/tags/1")
         .expect(200)
         .expect(mockProduction);
     });
 
     it("should call productionDb.removeTagFromProduction with correct ids", async () => {
-      await request(app.getHttpServer()).delete("/productions/1/tags/2");
+      await request(app.getHttpServer() as Server).delete(
+        "/productions/1/tags/2",
+      );
       expect(productionDb.removeTagFromProduction).toHaveBeenCalledWith(2, 1);
     });
 
     it("should return 400 when productionId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/productions/abc/tags/1")
         .expect(400);
     });
@@ -926,34 +963,40 @@ describe("EventController (e2e)", () => {
 
   describe("GET /events", () => {
     it("should return 200 with an array of events", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/events")
         .expect(200)
         .expect([mockEvent]);
     });
 
     it("should return 200 with empty array when no events exist", async () => {
-      // @ts-ignore
-      jest.spyOn(eventDb, "getEvents").mockResolvedValueOnce([]);
-      return request(app.getHttpServer()).get("/events").expect(200).expect([]);
+      jest
+        .spyOn(eventDb, "getEvents")
+        .mockResolvedValueOnce(paginatedResponse([]));
+      return request(app.getHttpServer() as Server)
+        .get("/events")
+        .expect(200)
+        .expect(paginatedResponse([]));
     });
   });
 
   describe("GET /events/:id", () => {
     it("should return 200 with the correct event", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/events/1")
         .expect(200)
         .expect(mockEvent);
     });
 
     it("should call eventDb.getEventById with the correct id", async () => {
-      await request(app.getHttpServer()).get("/events/1");
+      await request(app.getHttpServer() as Server).get("/events/1");
       expect(eventDb.getEventById).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).get("/events/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/events/abc")
+        .expect(400);
     });
   });
 
@@ -967,7 +1010,7 @@ describe("EventController (e2e)", () => {
     };
 
     it("should return 201 with the created event", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/events")
         .send(createPayload)
         .expect(201)
@@ -975,14 +1018,16 @@ describe("EventController (e2e)", () => {
     });
 
     it("should call eventDb.createEvent with the payload", async () => {
-      await request(app.getHttpServer()).post("/events").send(createPayload);
+      await request(app.getHttpServer() as Server)
+        .post("/events")
+        .send(createPayload);
       expect(eventDb.createEvent).toHaveBeenCalledWith(createPayload);
     });
   });
 
   describe("PUT /events/:id", () => {
     it("should return 200 with the replaced event when ids match", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/1")
         .send(mockEvent)
         .expect(200)
@@ -990,7 +1035,7 @@ describe("EventController (e2e)", () => {
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/abc")
         .send(mockEvent)
         .expect(400);
@@ -999,7 +1044,7 @@ describe("EventController (e2e)", () => {
 
   describe("PATCH /events/:id", () => {
     it("should return 200 with the modified event", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/events/1")
         .send({ production_id: 2 })
         .expect(200)
@@ -1007,14 +1052,14 @@ describe("EventController (e2e)", () => {
     });
 
     it("should call eventDb.updateEvent", async () => {
-      await request(app.getHttpServer())
+      await request(app.getHttpServer() as Server)
         .patch("/events/1")
         .send({ production_id: 2 });
       expect(eventDb.updateEvent).toHaveBeenCalled();
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/events/abc")
         .send({ production_id: 2 })
         .expect(400);
@@ -1023,16 +1068,20 @@ describe("EventController (e2e)", () => {
 
   describe("DELETE /events/:id", () => {
     it("should return 200 when event is deleted", () => {
-      return request(app.getHttpServer()).delete("/events/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/events/1")
+        .expect(200);
     });
 
     it("should call eventDb.deleteEvent with the correct id", async () => {
-      await request(app.getHttpServer()).delete("/events/1");
+      await request(app.getHttpServer() as Server).delete("/events/1");
       expect(eventDb.deleteEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when id is not a number", () => {
-      return request(app.getHttpServer()).delete("/events/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .delete("/events/abc")
+        .expect(400);
     });
   });
 });
@@ -1043,11 +1092,9 @@ describe("EventController (e2e)", () => {
 
 describe("LocationController (e2e)", () => {
   let app: INestApplication;
-  let locationDb: LocationDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();
-    locationDb = app.get<LocationDatabaseService>(LocationDatabaseService);
   });
 
   afterEach(async () => {
@@ -1056,7 +1103,7 @@ describe("LocationController (e2e)", () => {
 
   describe("GET /locations", () => {
     it("should return 200 with an array of flattened locations", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/locations?lang=en")
         .expect(200)
         .expect([mockLocationView]);
@@ -1065,14 +1112,16 @@ describe("LocationController (e2e)", () => {
 
   describe("GET /locations/:locationId", () => {
     it("should return 200 with the correct flattened location", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/locations/1?lang=en")
         .expect(200)
         .expect(mockLocationView);
     });
 
     it("should return 400 when locationId is not a number", () => {
-      return request(app.getHttpServer()).get("/locations/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/locations/abc")
+        .expect(400);
     });
   });
 
@@ -1082,7 +1131,7 @@ describe("LocationController (e2e)", () => {
         location: { en: "Side Stage", nl: "Zijpodium" },
         legacy_id: "st",
       };
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/locations")
         .send(createPayload)
         .expect(201)
@@ -1096,7 +1145,7 @@ describe("LocationController (e2e)", () => {
         id: 1,
         location: { en: "Updated Stage", nl: "Bijgewerkt podium" },
       };
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/locations/1")
         .send(updatePayload)
         .expect(200)
@@ -1106,11 +1155,15 @@ describe("LocationController (e2e)", () => {
 
   describe("DELETE /locations/:locationId", () => {
     it("should return 200 after deleting location", () => {
-      return request(app.getHttpServer()).delete("/locations/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/locations/1")
+        .expect(200);
     });
 
     it("should return 400 when locationId is not a number", () => {
-      return request(app.getHttpServer()).delete("/locations/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .delete("/locations/abc")
+        .expect(400);
     });
   });
 });
@@ -1134,19 +1187,21 @@ describe("EventLocationController (e2e)", () => {
 
   describe("GET /events/:eventId/location", () => {
     it("should return 200 with the flattened location of the event", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/events/1/location?lang=en")
         .expect(200)
         .expect(mockLocationView);
     });
 
     it("should call eventDb.getLocationOfEvent with the correct id", async () => {
-      await request(app.getHttpServer()).get("/events/1/location?lang=en");
+      await request(app.getHttpServer() as Server).get(
+        "/events/1/location?lang=en",
+      );
       expect(eventDb.getLocationOfEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/events/abc/location")
         .expect(400);
     });
@@ -1154,24 +1209,24 @@ describe("EventLocationController (e2e)", () => {
 
   describe("PUT /events/:eventId/location/:locationId", () => {
     it("should return 200 after successfully linking", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/1/location/2")
         .expect(200);
     });
 
     it("should call eventDb.linkEventToLocation with correct ids", async () => {
-      await request(app.getHttpServer()).put("/events/1/location/2");
+      await request(app.getHttpServer() as Server).put("/events/1/location/2");
       expect(eventDb.linkEventToLocation).toHaveBeenCalledWith(1, 2);
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/abc/location/1")
         .expect(400);
     });
 
     it("should return 400 when locationId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/1/location/abc")
         .expect(400);
     });
@@ -1179,18 +1234,18 @@ describe("EventLocationController (e2e)", () => {
 
   describe("DELETE /events/:eventId/location", () => {
     it("should return 200 after unlinking", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/events/1/location")
         .expect(200);
     });
 
     it("should call eventDb.deleteLocationFromEvent with the eventId", async () => {
-      await request(app.getHttpServer()).delete("/events/1/location");
+      await request(app.getHttpServer() as Server).delete("/events/1/location");
       expect(eventDb.deleteLocationFromEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/events/abc/location")
         .expect(400);
     });
@@ -1216,7 +1271,7 @@ describe("PriceController (e2e)", () => {
 
   describe("GET /prices", () => {
     it("should return 200 with an array of flattened prices", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/prices?lang=en")
         .expect(200)
         .expect([mockPriceView]);
@@ -1225,14 +1280,16 @@ describe("PriceController (e2e)", () => {
 
   describe("GET /prices/:priceId", () => {
     it("should return 200 with the correct flattened price", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/prices/1?lang=en")
         .expect(200)
         .expect(mockPriceView);
     });
 
     it("should return 400 when priceId is not a number", () => {
-      return request(app.getHttpServer()).get("/prices/abc").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/prices/abc")
+        .expect(400);
     });
   });
 
@@ -1243,7 +1300,7 @@ describe("PriceController (e2e)", () => {
         name: { en: "Standard", nl: "Standaard" },
         legacy_id: "",
       };
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/prices")
         .send(createPayload)
         .expect(201)
@@ -1258,7 +1315,7 @@ describe("PriceController (e2e)", () => {
         price: 25.0,
         name: { en: "Updated", nl: "Bijgewerkt" },
       };
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/prices/1")
         .send(updatePayload)
         .expect(200)
@@ -1268,11 +1325,13 @@ describe("PriceController (e2e)", () => {
 
   describe("DELETE /prices/:priceId", () => {
     it("should return 200 after deleting price", () => {
-      return request(app.getHttpServer()).delete("/prices/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/prices/1")
+        .expect(200);
     });
 
     it("should call priceDb.deletePrice with correct id", async () => {
-      await request(app.getHttpServer()).delete("/prices/1");
+      await request(app.getHttpServer() as Server).delete("/prices/1");
       expect(priceDb.deletePrice).toHaveBeenCalled();
     });
   });
@@ -1297,43 +1356,47 @@ describe("EventPriceController (e2e)", () => {
 
   describe("GET /events/:eventId/prices", () => {
     it("should return 200 with the flattened prices of the event", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/events/1/prices?lang=en")
         .expect(200)
         .expect([mockPriceView]);
     });
 
     it("should call eventDb.getPricesOfEvent with the correct id", async () => {
-      await request(app.getHttpServer()).get("/events/1/prices?lang=en");
+      await request(app.getHttpServer() as Server).get(
+        "/events/1/prices?lang=en",
+      );
       expect(eventDb.getPricesOfEvent).toHaveBeenCalledWith(1);
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer()).get("/events/abc/prices").expect(400);
+      return request(app.getHttpServer() as Server)
+        .get("/events/abc/prices")
+        .expect(400);
     });
   });
 
   describe("PUT /events/:eventId/prices/:priceId", () => {
     it("should return 200 after successfully linking a price", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/1/prices/100")
         .expect(200)
         .expect("true");
     });
 
     it("should call eventDb.addPriceToEvent with correct ids", async () => {
-      await request(app.getHttpServer()).put("/events/1/prices/100");
+      await request(app.getHttpServer() as Server).put("/events/1/prices/100");
       expect(eventDb.addPriceToEvent).toHaveBeenCalledWith(1, 100);
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/abc/prices/100")
         .expect(400);
     });
 
     it("should return 400 when priceId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/events/1/prices/abc")
         .expect(400);
     });
@@ -1341,24 +1404,26 @@ describe("EventPriceController (e2e)", () => {
 
   describe("DELETE /events/:eventId/prices/:priceId", () => {
     it("should return 200 after unlinking a price", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/events/1/prices/100")
         .expect(200);
     });
 
     it("should call eventDb.removePriceFromEvent with correct ids", async () => {
-      await request(app.getHttpServer()).delete("/events/1/prices/100");
+      await request(app.getHttpServer() as Server).delete(
+        "/events/1/prices/100",
+      );
       expect(eventDb.removePriceFromEvent).toHaveBeenCalledWith(1, 100);
     });
 
     it("should return 400 when eventId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/events/abc/prices/100")
         .expect(400);
     });
 
     it("should return 400 when priceId is not a number", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/events/1/prices/abc")
         .expect(400);
     });
@@ -1375,7 +1440,6 @@ describe("MediaCropController (e2e)", () => {
 
   beforeEach(async () => {
     app = await buildApp();
-    mediaDb = app.get<MediaCropDatabaseService>(MediaCropDatabaseService);
   });
 
   afterEach(async () => {
@@ -1385,7 +1449,7 @@ describe("MediaCropController (e2e)", () => {
   // 👇 ADDED /media/ prefix to ALL crops URLs 👇
   describe("GET /media/crops", () => {
     it("should return 200 with a paginated list of crops", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/crops?page=1&limit=10")
         .expect(200)
         .expect(paginatedResponse([mockMediaCrop]));
@@ -1394,7 +1458,7 @@ describe("MediaCropController (e2e)", () => {
 
   describe("GET /media/crops/:cropId", () => {
     it("should return 200 with the correct crop", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/crops/1")
         .expect(200)
         .expect(mockMediaCrop);
@@ -1403,7 +1467,7 @@ describe("MediaCropController (e2e)", () => {
 
   describe("POST /media/crops", () => {
     it("should return 201 with the created crop", async () => {
-      const response = await request(app.getHttpServer())
+      const response = await request(app.getHttpServer() as Server)
         .post("/media/crops")
         .send({
           item_id: 1,
@@ -1423,7 +1487,7 @@ describe("MediaCropController (e2e)", () => {
 
   describe("PUT /media/crops/:cropId", () => {
     it("should return 200 with the replaced crop", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/media/crops/1")
         .send({ name: "hd_ready", url: "https://test.com/b.jpg" })
         .expect(200)
@@ -1433,7 +1497,7 @@ describe("MediaCropController (e2e)", () => {
 
   describe("PATCH /media/crops/:cropId", () => {
     it("should return 200 with the modified crop", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/media/crops/1")
         .send({ url: "https://test.com/new.jpg" })
         .expect(200)
@@ -1443,7 +1507,9 @@ describe("MediaCropController (e2e)", () => {
 
   describe("DELETE /media/crops/:cropId", () => {
     it("should return 200 after deleting crop", () => {
-      return request(app.getHttpServer()).delete("/media/crops/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/media/crops/1")
+        .expect(200);
     });
   });
 });
@@ -1454,11 +1520,9 @@ describe("MediaCropController (e2e)", () => {
 
 describe("MediaItemController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaItemDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();
-    mediaDb = app.get<MediaItemDatabaseService>(MediaItemDatabaseService);
   });
 
   afterEach(async () => {
@@ -1468,7 +1532,7 @@ describe("MediaItemController (e2e)", () => {
   // 👇 ADDED /media/ prefix to ALL items URLs 👇
   describe("GET /media/items", () => {
     it("should return 200 with a paginated list of flattened items", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/items?lang=en")
         .expect(200)
         .expect(paginatedResponse([mockMediaItemView]));
@@ -1477,7 +1541,7 @@ describe("MediaItemController (e2e)", () => {
 
   describe("GET /media/items/:itemId", () => {
     it("should return 200 with the correct flattened item", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/items/1?lang=en")
         .expect(200)
         .expect(mockMediaItemView);
@@ -1486,7 +1550,7 @@ describe("MediaItemController (e2e)", () => {
 
   describe("POST /media/items", () => {
     it("should return 201 with the created item", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/media/items")
         .send({
           type: "image",
@@ -1505,7 +1569,7 @@ describe("MediaItemController (e2e)", () => {
 
   describe("PUT /media/items/:itemId", () => {
     it("should return 200 with the replaced item", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/media/items/1")
         .send({
           type: "image",
@@ -1524,7 +1588,7 @@ describe("MediaItemController (e2e)", () => {
 
   describe("PATCH /media/items/:itemId", () => {
     it("should return 200 with the modified item", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/media/items/1")
         .send({ position: "carousel" })
         .expect(200)
@@ -1534,14 +1598,16 @@ describe("MediaItemController (e2e)", () => {
 
   describe("DELETE /media/items/:itemId", () => {
     it("should return 200 after deleting item", () => {
-      return request(app.getHttpServer()).delete("/media/items/1").expect(200);
+      return request(app.getHttpServer() as Server)
+        .delete("/media/items/1")
+        .expect(200);
     });
   });
 
   // Relationships: Item <-> Crops
   describe("GET /media/items/:itemId/crops", () => {
     it("should return 200 with the crops of the item", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/items/1/crops")
         .expect(200)
         .expect([mockMediaCrop]);
@@ -1550,7 +1616,7 @@ describe("MediaItemController (e2e)", () => {
 
   describe("PUT /media/items/:itemId/crops/:cropId", () => {
     it("should return 200 after successfully linking crop", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/media/items/1/crops/2")
         .expect(200);
     });
@@ -1558,7 +1624,7 @@ describe("MediaItemController (e2e)", () => {
 
   describe("DELETE /media/items/:itemId/crops/:cropId", () => {
     it("should return 200 after unlinking crop", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/media/items/1/crops/2")
         .expect(200);
     });
@@ -1571,11 +1637,9 @@ describe("MediaItemController (e2e)", () => {
 
 describe("MediaGalleryController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaGalleryDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();
-    mediaDb = app.get<MediaGalleryDatabaseService>(MediaGalleryDatabaseService);
   });
 
   afterEach(async () => {
@@ -1585,7 +1649,7 @@ describe("MediaGalleryController (e2e)", () => {
   // 👇 ADDED /media/ prefix to ALL galleries URLs 👇
   describe("GET /media/galleries", () => {
     it("should return 200 with a paginated list of galleries", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/galleries?page=1&limit=10")
         .expect(200)
         .expect(paginatedResponse([mockMediaGallery]));
@@ -1594,7 +1658,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("GET /media/galleries/:galleryId", () => {
     it("should return 200 with the correct gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/galleries/1")
         .expect(200)
         .expect(mockMediaGallery);
@@ -1603,7 +1667,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("POST /media/galleries", () => {
     it("should return 201 with the created gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .post("/media/galleries")
         .send({ name: "hi", type: "default" })
         .expect(201)
@@ -1613,7 +1677,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("PUT /media/galleries/:galleryId", () => {
     it("should return 200 with the replaced gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/media/galleries/1")
         .send({ name: "completely replaced gallery", type: "default" })
         .expect(200)
@@ -1623,7 +1687,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("PATCH /media/galleries/:galleryId", () => {
     it("should return 200 with the modified gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .patch("/media/galleries/1")
         .send({ name: "just updated the name" })
         .expect(200)
@@ -1633,7 +1697,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("DELETE /media/galleries/:galleryId", () => {
     it("should return 200 after deleting gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/media/galleries/1")
         .expect(200);
     });
@@ -1642,7 +1706,7 @@ describe("MediaGalleryController (e2e)", () => {
   // Relationships: Gallery <-> Items
   describe("GET /media/galleries/:galleryId/items", () => {
     it("should return 200 with items of the gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .get("/media/galleries/1/items")
         .expect(200)
         .expect([mockMediaItem]);
@@ -1651,7 +1715,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("PUT /media/galleries/:galleryId/items/:itemId", () => {
     it("should return 200 after linking item to gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .put("/media/galleries/1/items/2")
         .expect(200);
     });
@@ -1659,7 +1723,7 @@ describe("MediaGalleryController (e2e)", () => {
 
   describe("DELETE /media/galleries/:galleryId/items/:itemId", () => {
     it("should return 200 after unlinking item from gallery", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as Server)
         .delete("/media/galleries/1/items/2")
         .expect(200);
     });

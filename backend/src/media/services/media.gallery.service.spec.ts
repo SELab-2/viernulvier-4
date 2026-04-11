@@ -87,8 +87,7 @@ describe("MediaGalleryService", () => {
 
       // Note: The service unpacks the DTO properties to pass to the DB service
       expect(mediaDbService.getGalleries).toHaveBeenCalledWith(
-        paginationFilter.limit,
-        paginationFilter.page,
+        paginationFilter,
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -132,7 +131,7 @@ describe("MediaGalleryService", () => {
     });
   });
 
-describe("getGalleryItems", () => {
+  describe("getGalleryItems", () => {
     it("should return all items for a gallery", async () => {
       mediaDbService.getGalleryById.mockResolvedValue(mockGallery);
       mediaDbService.getItemsByGallery.mockResolvedValue([mockItem]);
