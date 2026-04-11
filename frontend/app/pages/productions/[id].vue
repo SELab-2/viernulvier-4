@@ -233,7 +233,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 
         <div
           v-if="isValid(production.credits)"
-          class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800 flex flex-col items-center"
+          class="pt-12 flex flex-col items-center"
         >
           <div class="max-w-2xl text-center">
             <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
