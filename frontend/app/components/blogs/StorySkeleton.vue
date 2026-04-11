@@ -19,9 +19,14 @@
             <div class="flex-1 h-px bg-muted" />
           </div>
 
-          <div class="border border-border rounded-lg overflow-hidden divide-y divide-border">
+          <div
+            class="border border-border rounded-lg overflow-hidden divide-y divide-border"
+          >
             <div v-for="j in 3" :key="j" class="flex animate-pulse">
-              <div class="w-32 sm:w-40 shrink-0 bg-muted" style="aspect-ratio: 4/3; min-height: 88px;" />
+              <div
+                class="w-32 sm:w-40 shrink-0 bg-muted"
+                style="aspect-ratio: 4/3; min-height: 88px"
+              />
               <div class="flex-1 px-5 py-4 space-y-2.5">
                 <div class="h-3.5 bg-muted rounded w-3/4" />
                 <div class="h-3 bg-muted rounded w-1/2" />

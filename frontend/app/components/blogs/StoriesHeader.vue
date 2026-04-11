@@ -9,7 +9,9 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="bg-white dark:bg-[#151821] border-b border-gray-200 dark:border-[#2e3347] transition-colors duration-200">
+  <div
+    class="bg-white dark:bg-[#151821] border-b border-gray-200 dark:border-[#2e3347] transition-colors duration-200"
+  >
     <div class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
       <h1
         class="font-brand font-black text-4xl sm:text-6xl uppercase tracking-tighter leading-none text-gray-900 dark:text-gray-100 mb-3"
