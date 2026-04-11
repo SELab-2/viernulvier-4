@@ -8,17 +8,14 @@
     text input      → CalendarInputs emits apply-* → parent updates state + navigates
 -->
 <script lang="ts" setup>
-import CalendarTabs from "~/components/calendar/CalendarTabs.vue";
-import CalendarInputs from "~/components/calendar/CalendarInputs.vue";
-import CalendarMonths from "~/components/calendar/CalendarMonths.vue";
-import CalendarFooter from "~/components/calendar/CalendarFooter.vue";
-import type { CalMode } from "~/components/calendar/CalendarInputs.vue";
-import type { MonthData } from "~/components/calendar/CalendarMonths.vue";
 import {
   localIso,
   localTodayIso,
   buildWeekdayLabels,
+  addDays,
 } from "~/utils/formatters";
+import type { CalMode } from "./calendar/CalendarInputs.vue";
+import type { MonthData } from "./calendar/CalendarMonths.vue";
 
 interface DateFilter {
   after?: string;
@@ -122,7 +119,7 @@ const filter = computed<DateFilter>(() => {
   switch (mode.value) {
     case "single":
       return selected.value
-        ? { after: selected.value, before: selected.value }
+        ? { after: selected.value, before: addDays(selected.value, 1) }
         : {};
 
     case "range": {

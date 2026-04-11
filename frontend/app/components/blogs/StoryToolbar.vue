@@ -194,16 +194,17 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
               >
                 <!-- Custom radio indicator -->
                 <span
-                  class="w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 transition-colors"
-                  :class="
+                  class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+                  :style="
                     selectedYear === year
-                      ? 'bg-purple-500 border-purple-500'
-                      : 'border-muted-foreground/40 group-hover:border-purple-400'
+                      ? 'background: var(--blog-purple-strong); border-color: var(--blog-purple-strong);'
+                      : 'background: transparent; border-color: var(--border);'
                   "
                 >
                   <span
                     v-if="selectedYear === year"
-                    class="w-1.5 h-1.5 rounded-full bg-white"
+                    class="w-1.5 h-1.5 rounded-full"
+                    style="background: white"
                   />
                 </span>
                 <span
