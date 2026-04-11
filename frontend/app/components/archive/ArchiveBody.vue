@@ -1,0 +1,187 @@
+<!--
+ArchiveBody.vue
+
+Main container component for the archive page.
+Responsible for:
+- Fetching paginated productions from the API
+- Reacting to filters (search, tags, date, sorting, language)
+- Handling loading, error, and empty states
+- Rendering results in grid or list view
+
+Uses:
+- useArchiveView: shared archive state (filters, pagination, view mode)
+- useProductionApi: API communication
+-->
+<script setup lang="ts">
+import { ref, watch, onMounted, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
+import { useProductionApi } from "../../composables/useProductionApi";
+import type { ProductionView, PaginatedResponse } from "@repo/common";
+import { useArchiveView } from "../../composables/useArchiveView";
+import ProductionGridViewItem from "../ProductionGridViewItem.vue";
+import ProductionListViewItem from "../ProductionListViewItem.vue";
+
+const {
+  viewMode,
+  searchQuery,
+  sortOrder,
+  dateFilter,
+  tagIds,
+  currentPage,
+  totalPages,
+  loading,
+} = useArchiveView();
+const { getAll } = useProductionApi();
+const { t, locale } = useI18n();
+
+const PAGE_SIZE = 15; // number of items per page
+
+const productions = ref<ProductionView[]>([]);
+const totalItems = ref(0);
+const error = ref<string | null>(null);
+
+async function loadPage(page: number) {
+  loading.value = true;
+  error.value = null;
+  try {
+    const resp = await getAll({
+      productionFilters: {
+        titel: searchQuery.value || undefined,
+        tag_ids: tagIds.value.length ? tagIds.value : undefined,
+        date_after: dateFilter.value.after || undefined,
+        date_before: dateFilter.value.before || undefined,
+      },
+      paginationFilters: {
+        page: page - 1, // backend uses 0-based pagination
+        limit: PAGE_SIZE,
+        descending: sortOrder.value === "newest",
+      },
+      languageFilters: { lang: locale.value },
+    });
+    if (resp.data) {
+      const data = resp.data as PaginatedResponse<ProductionView>;
+      productions.value = data.objects;
+      totalItems.value = data.totalItems;
+      totalPages.value = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE));
+    } else {
+      error.value = resp.error ?? "Failed to load productions";
+    }
+  } catch (err) {
+    error.value = "An unexpected error occurred";
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+function resetAndLoad() {
+  currentPage.value = 1;
+  loadPage(1);
+}
+
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
+onUnmounted(() => {
+  if (searchTimer) clearTimeout(searchTimer);
+});
+
+onMounted(() => loadPage(1));
+
+// Reload when pagination changes
+watch(currentPage, (page) => loadPage(page));
+
+// Reset + reload when filters change
+watch(locale, resetAndLoad);
+watch(sortOrder, resetAndLoad);
+watch(dateFilter, resetAndLoad, { deep: true });
+watch(tagIds, resetAndLoad, { deep: true });
+
+watch(searchQuery, () => {
+  if (searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    resetAndLoad();
+  }, 350);
+});
+</script>
+
+<template>
+  <section class="w-full bg-background">
+    <div class="max-w-5xl mx-auto px-4 py-6">
+      <!-- Results count + pagination -->
+      <div class="flex items-center justify-between mb-6">
+        <p
+          v-if="!loading && totalItems > 0"
+          class="font-brand text-2xl font-black text-foreground"
+        >
+          {{ t("archive.total_results", { total: totalItems }) }}
+        </p>
+        <div
+          v-else-if="loading"
+          class="h-7 w-36 bg-muted rounded animate-pulse"
+        />
+
+        <ArchivePagination />
+      </div>
+
+      <!-- Error state -->
+      <div
+        v-if="error"
+        class="rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/20 dark:border-rose-900 px-4 py-8 text-sm text-rose-600 dark:text-rose-400 text-center"
+      >
+        {{ error }}
+      </div>
+
+      <!-- Skeleton -->
+      <ArchiveSkeleton
+        v-else-if="loading"
+        :viewMode="viewMode"
+        :pageSize="PAGE_SIZE"
+      />
+
+      <!-- EMPTY STATE -->
+      <div
+        v-else-if="!loading && productions.length === 0"
+        class="py-24 text-center"
+      >
+        <p
+          class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
+        >
+          {{ t("archive.no_results") }}
+        </p>
+        <p
+          class="font-brand font-black text-[12px] uppercase tracking-widest text-muted-foreground"
+        >
+          {{ t("archive.no_results_sub") }}
+        </p>
+      </div>
+
+      <!-- Grid / list -->
+      <div
+        v-else
+        :class="
+          viewMode === 'grid'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-6'
+            : 'flex flex-col gap-3 mb-6'
+        "
+      >
+        <component
+          :is="
+            viewMode === 'grid'
+              ? ProductionGridViewItem
+              : ProductionListViewItem
+          "
+          v-for="production in productions"
+          :key="production.id"
+          :productionView="production"
+        />
+      </div>
+
+      <!-- Bottom controls -->
+      <div class="flex items-center justify-between mt-6">
+        <ArchivePageJumper />
+        <ArchivePagination />
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped></style>

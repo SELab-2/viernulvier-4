@@ -56,7 +56,7 @@ const { t } = useI18n();
         {{ t("hero.subtitle") }}
       </p>
 
-      <NuxtLink :to="ROUTES.productions.base">
+      <NuxtLink :to="ROUTES.archive.base">
         <button
           class="group inline-flex items-center gap-3 bg-white text-black px-7 py-3.5 font-bold text-sm tracking-wide hover:bg-white/90 transition-colors"
         >

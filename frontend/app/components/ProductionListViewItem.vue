@@ -1,6 +1,6 @@
 <!--
-  This component represents a single item in the production grid view.
-  It displays the production's thumbnail, title, date range, and associated tags.
+  This component represents a single item in the production list view.
+  It displays the production's title, date range, and associated tags.
 -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
@@ -30,8 +30,17 @@ async function loadTags() {
 
   try {
     const response = await getTags(productionView.id, locale.value);
-    if (response.data) tags.value = response.data as Tag[];
-    else console.error("Failed to load tags:", response.error);
+    if (response.data) {
+      tags.value = (response.data as Tag[]).filter((tag) => {
+        const currentTag =
+          typeof tag.tag === "string"
+            ? tag.tag
+            : tag.tag?.[locale.value as "en" | "nl"];
+        return currentTag && currentTag !== "N/A";
+      });
+    } else {
+      console.error("Failed to load tags:", response.error);
+    }
   } catch (err) {
     console.error("Error loading tags:", err);
   }
@@ -54,6 +63,7 @@ async function loadEvents() {
   }
 }
 
+// Recompute dateRangeText whenever events or locale changes
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
@@ -71,71 +81,63 @@ watch(
   },
 );
 
+// reload tags if language changes
 watch(locale, () => loadTags());
 </script>
 
 <template>
-  <NuxtLink
-    :to="ROUTES.productions.byId(productionView.id)"
-    class="group block"
-  >
+  <NuxtLink :to="ROUTES.archive.byId(productionView.id)" class="group block">
     <div
-      class="flex flex-col rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150 overflow-hidden h-full"
+      class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
     >
-      <!-- Thumbnail area — square bottom corners, separator line, no own border -->
-      <div
-        class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
-      >
-        <ThumbnailPlaceholder
-          :id="productionView.id"
-          size="lg"
-          :showIcon="true"
-          :showBorder="false"
-          :rounded="false"
-          class="w-full h-full"
-        />
-      </div>
+      <ThumbnailPlaceholder
+        :id="productionView.id"
+        size="md"
+        :showIcon="true"
+      />
 
-      <!-- Content area -->
-      <div class="flex flex-col flex-1 p-4 gap-2 min-w-0">
-        <!-- Title -->
-        <h3
-          class="text-lg font-semibold text-card-foreground leading-tight line-clamp-2"
-        >
-          {{ productionView.titel }}
-        </h3>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0 max-w-[60%]">
+            <h3
+              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate"
+            >
+              {{ productionView.titel }}
+            </h3>
 
-        <!-- Date range -->
-        <p class="text-sm text-muted-foreground flex items-center gap-2">
-          <svg
-            class="w-4 h-4 shrink-0 text-muted-foreground"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path
-              d="M16 2v4M8 2v4M3 10h18"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span class="truncate">{{ dateRangeText }}</span>
-        </p>
+            <p
+              class="mt-2 text-sm text-muted-foreground flex items-center gap-2"
+            >
+              <svg
+                class="w-4 h-4 text-muted-foreground"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path
+                  d="M16 2v4M8 2v4M3 10h18"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span>{{ dateRangeText }}</span>
+            </p>
+          </div>
+        </div>
 
-        <!-- Tags -->
-        <div class="overflow-hidden">
-          <div class="flex flex-wrap items-center gap-1.5">
+        <!-- Tags container -->
+        <div class="mt-2 overflow-hidden">
+          <div class="flex items-center gap-2">
             <TagPill
               v-for="tag in tags"
               :key="tag.id"
               :label="typeof tag.tag === 'string' ? tag.tag : ''"
             />
-            <!-- Invisible spacer to preserve height when no tags -->
             <TagPill
               v-if="tags.length === 0"
-              label="/"
+              :label="'/'"
               class="opacity-0 pointer-events-none"
             />
           </div>
@@ -146,11 +148,11 @@ watch(locale, () => loadTags());
 </template>
 
 <style scoped>
-.group:hover {
-  text-decoration: none;
-}
 [tabindex="0"]:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+.group:hover {
+  text-decoration: none;
 }
 </style>
