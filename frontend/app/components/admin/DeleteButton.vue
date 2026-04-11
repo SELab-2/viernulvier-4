@@ -4,7 +4,6 @@
  * Wraps ActionButton with a red style and trash icon.
  */
 import { Trash2 } from "lucide-vue-next";
-import ActionButton from "./ActionButton.vue";
 
 interface Props {
   label: string;
@@ -22,7 +21,7 @@ const emit = defineEmits<{
 
 <template>
   <!-- Red delete action button -->
-  <ActionButton
+  <AdminActionButton
     :label="label"
     :size="props.size"
     variant="red"
@@ -32,5 +31,5 @@ const emit = defineEmits<{
     <template #default="{ iconSize }">
       <Trash2 :size="iconSize" />
     </template>
-  </ActionButton>
+  </AdminActionButton>
 </template>
