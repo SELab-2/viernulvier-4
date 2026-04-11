@@ -2,8 +2,6 @@
 import { ref, computed } from 'vue';
 import { ChevronLeft } from 'lucide-vue-next';
 import type { ProductionView, TagView } from "@repo/common";
-import ProductionStories from "../../components/production/storyListView.vue";
-import EventTable from "../../components/production/EventTable.vue";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -213,7 +211,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
             {{ t('production.events') }}
           </h1>
-          <EventTable v-if="events && events.length > 0" :events="events" />
+          <ProductionEventTable v-if="events && events.length > 0" :events="events" />
           <div v-else class="py-4 opacity-60 italic text-sm">
             {{ t('production.noEvents') }}
           </div>
@@ -223,7 +221,7 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
             {{ t('production.stories') }}
           </h1>
-          <ProductionStories :stories="stories" />
+          <ProductionStoryListView :stories="stories" />
         </div>
 
         <div class="max-w-4xl">
