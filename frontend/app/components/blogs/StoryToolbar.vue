@@ -38,24 +38,22 @@ const calendarKey = ref(0);
 
 watch(searchQuery, (val) => emit("update:search", val));
 
-// ── Year range ────────────────────────────────────────────────────────────────
+// Year range
 const years = computed<number[]>(() => {
   if (!props.oldestDate || !props.newestDate) return [];
   const start = isoYear(props.oldestDate);
   const end = isoYear(props.newestDate);
   const arr: number[] = [];
-  for (let y = end; y >= start; y--) arr.push(y); // newest first
+  for (let y = end; y >= start; y--) arr.push(y);
   return arr;
 });
 
 function toggleYear(year: number) {
-  selectedYear.value = selectedYear.value === year ? null : year;
-
-  if (selectedYear.value === null) {
+  if (selectedYear.value === year) {
+    selectedYear.value = null;
     emit("update:dateFilter", {});
   } else {
-    // Force calendar remount so its internal anchor/selected state is cleared
-    calendarKey.value++;
+    selectedYear.value = year;
     emit("update:dateFilter", {
       after: `${year}-01-01`,
       before: `${year}-12-31`,
@@ -68,17 +66,32 @@ function clearYears() {
   emit("update:dateFilter", {});
 }
 
-// Calendar pick clears year selection
+// Calendar pick clears year selection and resets calendar internal state
 function onCalendarFilter(filter: FilterBlog) {
   selectedYear.value = null;
   emit("update:dateFilter", filter);
 }
 
-// External clear (e.g. route change) syncs back
+function clearAllFilters() {
+  selectedYear.value = null;
+  calendarKey.value++;
+  emit("update:dateFilter", {});
+}
+
 watch(
   () => props.dateFilter,
   (f) => {
-    if (!f.after && !f.before) selectedYear.value = null;
+    if (!f.after && !f.before) {
+      selectedYear.value = null;
+      return;
+    }
+    const isFullYear =
+      f.after?.endsWith("-01-01") &&
+      f.before?.endsWith("-12-31") &&
+      f.after.substring(0, 4) === f.before.substring(0, 4);
+    if (!isFullYear) {
+      selectedYear.value = null;
+    }
   },
   { deep: true },
 );
@@ -107,154 +120,111 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
       </div>
 
       <!-- Filters toggle -->
-      <button
-        type="button"
-        :class="[
-          'btn-outline h-10 gap-2 shrink-0 relative',
-          filterIsActive &&
-            '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
-        ]"
-        :aria-expanded="panelOpen"
-        :aria-label="t('stories.filters.toggle')"
-        @click="panelOpen = !panelOpen"
-      >
-        <!-- Funnel icon -->
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          aria-hidden="true"
+      <div class="relative">
+        <button
+          type="button"
+          :class="[
+            'btn-outline h-10 gap-2 shrink-0',
+            filterIsActive &&
+              '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
+          ]"
+          :aria-expanded="panelOpen"
+          :aria-label="t('stories.filters.toggle')"
+          @click="panelOpen = !panelOpen"
         >
-          <path
-            d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
-            stroke="currentColor"
-            stroke-width="1.2"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span>{{ t("stories.filters.toggle") }}</span>
-        <!-- Active dot when filter is on but panel is closed -->
-        <span
-          v-if="hasDateFilter && !panelOpen"
-          class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-purple-500"
-          aria-hidden="true"
-        />
-      </button>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>{{ t("stories.filters.toggle") }}</span>
+        </button>
 
-      <!-- Sort -->
-      <select
-        v-model="sortOrder"
-        class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 shrink-0 self-center"
-      >
-        <option value="newest">{{ t("stories.sortNewest") }}</option>
-        <option value="oldest">{{ t("stories.sortOldest") }}</option>
-      </select>
+        <!-- Clear badge — visible when filter active but panel closed -->
+        <button
+          v-if="hasDateFilter && !panelOpen"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
+          @click.stop="clearAllFilters"
+          :aria-label="t('stories.filters.clear')"
+        >
+          <svg
+            width="8"
+            height="8"
+            viewBox="0 0 8 8"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M1 1l6 6M7 1L1 7"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <!-- Filter panel — in flow, pushes content down -->
+    <!-- Filter panel — vertical layout, matches archive -->
     <Transition name="cal-slide">
       <div v-if="panelOpen" class="border-t border-border">
-        <div
-          class="container mx-auto px-4 max-w-5xl py-5 flex flex-col sm:flex-row gap-6"
-        >
+        <div class="container mx-auto px-4 max-w-5xl py-6 flex flex-col gap-6">
+          <!-- Sort order -->
+          <div class="flex flex-col gap-2 w-max">
+            <span class="section-label">{{ t("stories.sortLabel") }}</span>
+            <select
+              v-model="sortOrder"
+              class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
+            >
+              <option value="newest">{{ t("stories.sortNewest") }}</option>
+              <option value="oldest">{{ t("stories.sortOldest") }}</option>
+            </select>
+          </div>
+
           <!-- Year picker -->
-          <div class="sm:w-44 shrink-0 flex flex-col gap-2">
-            <div class="flex items-center justify-between mb-1">
-              <span
-                class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
-              >
-                {{ t("stories.filters.year") }}
-              </span>
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="section-label">{{ t("stories.filters.year") }}</span>
               <button
                 v-if="hasYearFilter"
                 type="button"
-                class="font-brand font-black text-[9px] uppercase tracking-widest text-purple-500 hover:text-purple-400 transition-colors"
+                class="year-clear-inline"
                 @click="clearYears"
               >
-                {{ t("stories.filters.clear") }}
+                {{ selectedYear }} · {{ t("stories.filters.clear") }}
               </button>
             </div>
 
-            <!--
-              Scrollable list: max ~6 items visible (~192px),
-              scrolls when the year range is long.
-              Uses buttons instead of radio inputs so clicking the active
-              year can deselect it (radio @change never fires for same value).
-            -->
-            <div
-              class="flex flex-col gap-0.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin"
-            >
+            <!-- Horizontal pill row -->
+            <div class="year-pills">
               <button
                 v-for="year in years"
                 :key="year"
                 type="button"
-                class="flex items-center gap-2.5 px-2 py-1.5 rounded cursor-pointer select-none w-full text-left hover:bg-muted transition-colors group"
+                class="year-pill"
+                :data-selected="selectedYear === year ? true : undefined"
                 @click="toggleYear(year)"
               >
-                <!-- Custom radio indicator -->
-                <span
-                  class="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-                  :style="
-                    selectedYear === year
-                      ? 'background: var(--blog-purple-strong); border-color: var(--blog-purple-strong);'
-                      : 'background: transparent; border-color: var(--border);'
-                  "
-                >
-                  <span
-                    v-if="selectedYear === year"
-                    class="w-1.5 h-1.5 rounded-full"
-                    style="background: white"
-                  />
-                </span>
-                <span
-                  class="font-brand font-black text-[11px] uppercase tracking-widest transition-colors"
-                  :class="
-                    selectedYear === year
-                      ? 'text-foreground'
-                      : 'text-muted-foreground group-hover:text-foreground'
-                  "
-                >
-                  {{ year }}
-                </span>
+                {{ year }}
               </button>
-
-              <div
-                v-if="years.length === 0"
-                class="px-2 py-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground/50"
-              >
-                —
-              </div>
+              <div v-if="years.length === 0" class="year-empty">—</div>
             </div>
-
-            <!-- Summary of active year -->
-            <p
-              v-if="selectedYear"
-              class="font-brand font-black text-[9px] uppercase tracking-widest text-purple-500 mt-1 px-1"
-            >
-              {{ selectedYear }}
-            </p>
           </div>
 
-          <!-- Divider -->
-          <div
-            class="hidden sm:block w-px bg-border self-stretch"
-            aria-hidden="true"
-          />
-          <div
-            class="block sm:hidden h-px w-full bg-border"
-            aria-hidden="true"
-          />
-
-          <!-- ── Calendar ─────────────────────────────────────────────────── -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-3">
-              <span
-                class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
-              >
-                {{ t("stories.filters.dateRange") }}
-              </span>
-            </div>
+          <!-- Calendar -->
+          <div class="flex flex-col gap-2">
+            <span class="section-label">{{
+              t("stories.filters.dateRange")
+            }}</span>
             <DefaultCalendar
               :key="calendarKey"
               :oldest-date="oldestDate"
@@ -275,7 +245,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
     opacity 0.18s ease,
     max-height 0.25s ease;
   overflow: hidden;
-  max-height: 700px;
+  max-height: 900px;
 }
 .cal-slide-enter-from,
 .cal-slide-leave-to {
@@ -283,19 +253,74 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
   max-height: 0;
 }
 
-/* Thin scrollbar for year list */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+/* Section label — matches archive style */
+.section-label {
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
 }
-.scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+
+/* ── Year pills (horizontal) ── */
+.year-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
-.scrollbar-thin::-webkit-scrollbar-track {
+
+.year-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
   background: transparent;
+  cursor: pointer;
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  transition: all 0.12s;
 }
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
+.year-pill:hover {
+  border-color: var(--blog-purple-strong);
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+.year-pill[data-selected] {
+  border-color: var(--blog-purple-strong);
+  background: var(--blog-purple-strong);
+  color: #fff;
+}
+
+/* Inline clear next to section label */
+.year-clear-inline {
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-weight: 900;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blog-purple-strong);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+.year-clear-inline:hover {
+  background: var(--blog-purple-ghost);
+}
+
+.year-empty {
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  opacity: 0.5;
 }
 </style>

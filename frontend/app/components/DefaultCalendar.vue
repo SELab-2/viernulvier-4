@@ -125,18 +125,18 @@ const filter = computed<DateFilter>(() => {
     case "range": {
       if (!anchor.value || !selected.value) return {};
       const [a, b] = sorted(anchor.value, selected.value);
-      return { after: a, before: b };
+      return { after: a, before: addDays(b, 1) };
     }
 
     case "after-selected":
       return anchor.value
-        ? { after: anchor.value, before: todayIso.value }
+        ? { after: anchor.value, before: addDays(todayIso.value, 1) }
         : {};
 
     case "before-selected":
       if (!props.oldestDate) return {};
       return selected.value
-        ? { after: props.oldestDate, before: selected.value }
+        ? { after: props.oldestDate, before: addDays(selected.value, 1) }
         : { after: props.oldestDate };
   }
 });

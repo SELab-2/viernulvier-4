@@ -618,11 +618,6 @@
   border: 1px solid var(--blog-purple-pale);
   width: fit-content;
 }
-.cal-badge--muted {
-  background: var(--muted);
-  color: var(--muted-foreground);
-  border-color: var(--border);
-}
 
 /* ── Two-month grid wrapper ────────────────────────────────────────────────── */
 
