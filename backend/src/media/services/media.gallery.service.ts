@@ -26,10 +26,7 @@ export class MediaGalleryService {
   async getGalleries(
     paginationFilter: PaginationFilter,
   ): Promise<PaginatedResponse<MediaGalleryDto>> {
-    return await this.mediaDbService.getGalleries(
-      paginationFilter.limit,
-      paginationFilter.page,
-    );
+    return await this.mediaDbService.getGalleries(paginationFilter);
   }
 
   /**
@@ -82,7 +79,9 @@ export class MediaGalleryService {
    * @param galleryId The ID of the gallery we want to fetch items for.
    * @returns A list of media items.
    */
-  async getGalleryItems(galleryId: number): Promise<MediaItemDto[] | PrintItemDto[]> {
+  async getGalleryItems(
+    galleryId: number,
+  ): Promise<MediaItemDto[] | PrintItemDto[]> {
     const gallery = await this.mediaDbService.getGalleryById(galleryId);
     if (gallery.type === "prints") {
       return await this.mediaDbService.getPrintItemsByGallery(galleryId);
@@ -112,7 +111,7 @@ export class MediaGalleryService {
     await this.mediaDbService.unlinkItemFromGallery(galleryId, itemId);
   }
 
-    /**
+  /**
    * Links a print item to a media gallery.
    * @param printItemId The ID of the print item.
    * @param galleryId The ID of the media gallery.
@@ -121,10 +120,7 @@ export class MediaGalleryService {
     printItemId: number,
     galleryId: number,
   ): Promise<void> {
-    await this.mediaDbService.linkPrintItemToGallery(
-      galleryId,
-      printItemId,
-    );
+    await this.mediaDbService.linkPrintItemToGallery(galleryId, printItemId);
   }
 
   /**

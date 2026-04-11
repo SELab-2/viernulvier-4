@@ -45,4 +45,15 @@ export default defineNuxtConfig({
       "@tailwindcss/postcss": {},
     },
   },
+
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        'lucide-vue-next',
+        'zod',
+      ]
+    }
+  }
 });

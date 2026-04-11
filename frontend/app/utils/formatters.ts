@@ -38,9 +38,9 @@ export function validateIso(iso: string): string | null {
  * Returns a validated ISO string, or null if unparseable / invalid.
  */
 export function parseDate(raw: string): string | null {
-  const val = raw.replace(/[^\d\/\-\.]/g, "").trim();
+  const val = raw.replace(/[^\d/\-.]/g, "").trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return validateIso(val);
-  const parts = val.split(/[\/\-\.]/);
+  const parts = val.split(/[/\-.]/);
   if (parts.length === 3) {
     const [dd, mm, yyyy] = parts;
     if (yyyy?.length === 4 && dd && mm)
@@ -164,7 +164,7 @@ export function formatPrice(price: number, locale: string): string {
  */
 export function formatUrl(url: string): string {
   const config = useRuntimeConfig();
-  const baseUrl = config.public.mediaBaseUrl as string;
+  const baseUrl = config.public.mediaBaseUrl;
 
   if (url.startsWith("http")) {
     return url;

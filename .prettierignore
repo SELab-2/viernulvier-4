@@ -1,0 +1,18 @@
+# Ignore lockfiles and big generated files
+package-lock.json
+node_modules
+.turbo
+dist
+.nuxt
+.output
+.github
+
+# Ignore documentation if you don't want it touched
+docs/**/*.md
+README.md
+
+# Ignore specific config files
+ecosystem.config.js
+package.json
+eslint.config.mjs
+nuxt.config.ts

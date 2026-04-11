@@ -29,10 +29,7 @@ export class PriceService {
   async getPrices(
     paginationFilter: PaginationFilterDto,
   ): Promise<PaginatedResponse<PriceDto>> {
-    return await this.priceDbService.getPrices(
-      paginationFilter.limit,
-      paginationFilter.page,
-    );
+    return await this.priceDbService.getPrices(paginationFilter);
   }
 
   /**

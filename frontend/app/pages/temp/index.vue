@@ -6,9 +6,9 @@ const { getAll: getLocations } = useLocationApi();
 const { getAll: getTags } = useTagApi();
 const { getAll: getPrices } = usePriceApi();
 
-const productions = await getProductions({ 
-  paginationFilters: { page: 1, descending: true }, 
-  languageFilters: { lang: "nl" }
+const productions = await getProductions({
+  paginationFilters: { page: 1, descending: true },
+  languageFilters: { lang: "nl" },
 });
 console.log(productions);
 

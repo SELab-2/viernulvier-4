@@ -23,32 +23,34 @@ import Calendar from "~/components/DefaultCalendar.vue";
 
 const props = defineProps<{
   storyTitles: string[];
-  oldestDate:  string;
-  dateFilter:  FilterBlog;
+  oldestDate: string;
+  dateFilter: FilterBlog;
 }>();
 
 const emit = defineEmits<{
-  (e: "update:search",     query:  string):     void;
+  (e: "update:search", query: string): void;
   (e: "update:dateFilter", filter: FilterBlog): void;
 }>();
 
-const sortOrder = defineModel<"newest" | "oldest">("sortOrder", { required: true });
-const { t }     = useI18n();
+const sortOrder = defineModel<"newest" | "oldest">("sortOrder", {
+  required: true,
+});
+const { t } = useI18n();
 
-const searchQuery   = ref("");
-const calOpen       = ref(false);
+const searchQuery = ref("");
+const calOpen = ref(false);
 
-const hasDateFilter = computed(() => !!(props.dateFilter.after || props.dateFilter.before));
+const hasDateFilter = computed(
+  () => !!(props.dateFilter.after || props.dateFilter.before),
+);
 
 watch(searchQuery, (val) => emit("update:search", val));
 </script>
 
 <template>
   <div class="border-b border-border bg-background">
-
     <!-- Toolbar row  -->
     <div class="container mx-auto px-4 max-w-5xl py-5 flex items-stretch gap-3">
-
       <!-- Search -->
       <div class="flex-1 min-w-0 h-10">
         <SearchBar
@@ -64,16 +66,36 @@ watch(searchQuery, (val) => emit("update:search", val));
       <button
         :class="[
           'btn-outline h-10 gap-2 shrink-0',
-          (calOpen || hasDateFilter) && '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
+          (calOpen || hasDateFilter) &&
+            '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
         ]"
         :aria-expanded="calOpen"
         :aria-label="t('stories.calendar.toggle')"
         @click="calOpen = !calOpen"
       >
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
-          <path d="M4 1V3M8 1V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-          <path d="M1 5H11" stroke="currentColor" stroke-width="1.2"/>
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          aria-hidden="true"
+        >
+          <rect
+            x="1"
+            y="2"
+            width="10"
+            height="9"
+            rx="1.5"
+            stroke="currentColor"
+            stroke-width="1.2"
+          />
+          <path
+            d="M4 1V3M8 1V3"
+            stroke="currentColor"
+            stroke-width="1.2"
+            stroke-linecap="round"
+          />
+          <path d="M1 5H11" stroke="currentColor" stroke-width="1.2" />
         </svg>
         <span v-if="hasDateFilter">{{ t("stories.calendar.filtered") }}</span>
         <span v-else>{{ t("stories.calendar.toggle") }}</span>
@@ -87,7 +109,6 @@ watch(searchQuery, (val) => emit("update:search", val));
         <option value="newest">{{ t("stories.sortNewest") }}</option>
         <option value="oldest">{{ t("stories.sortOldest") }}</option>
       </select>
-
     </div>
 
     <!--Calendar panel — in flow, pushes content down -->
@@ -102,14 +123,15 @@ watch(searchQuery, (val) => emit("update:search", val));
         </div>
       </div>
     </Transition>
-
   </div>
 </template>
 
 <style scoped>
 .cal-slide-enter-active,
 .cal-slide-leave-active {
-  transition: opacity 0.18s ease, max-height 0.22s ease;
+  transition:
+    opacity 0.18s ease,
+    max-height 0.22s ease;
   overflow: hidden;
   max-height: 600px;
 }
