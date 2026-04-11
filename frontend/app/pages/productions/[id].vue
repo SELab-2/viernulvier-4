@@ -217,16 +217,16 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           </div>
         </div>
 
+        <div v-if="isValid(production.description2)"
+             class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
+             v-html="cleanText(production.description2)">
+        </div>
+
         <div v-if="stories && stories.length > 0" class="my-16">
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
             {{ t('production.stories') }}
           </h1>
           <ProductionStoryListView :stories="stories" />
-        </div>
-
-        <div v-if="isValid(production.description2)"
-             class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
-             v-html="cleanText(production.description2)">
         </div>
 
         <div

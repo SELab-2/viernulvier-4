@@ -184,7 +184,7 @@ const image = undefined
           </span>
         </div>
 
-        <div class="max-w-4xl text-foreground">
+        <div class="text-foreground">
           <h1 class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic">
             {{ production.titel[locale as 'nl' | 'en'] }}
           </h1>
@@ -209,7 +209,7 @@ const image = undefined
     <section class="py-20">
       <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
 
-        <div class="max-w-4xl">
+        <div class="w-full">
           <div v-if="isValid(production.tagline)" class="mb-10">
             <p class="border-l-4 border-[var(--accent)] pl-6 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white">
               {{ production.tagline[locale as 'nl' | 'en'] }}
@@ -218,7 +218,11 @@ const image = undefined
 
           <div class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200" v-html="displayedDescription"></div>
 
-          <button v-if="isLongDescription" @click="isExpanded = !isExpanded" class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none">
+          <button
+            v-if="isLongDescription"
+            @click="isExpanded = !isExpanded"
+            class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+          >
             {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
           </button>
         </div>
@@ -227,32 +231,46 @@ const image = undefined
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
             {{ t('production.events') }}
           </h1>
-          <EventTable :events="(production.events as any)" />
-        </div>
-
-        <div class="my-16">
-          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
-            {{ t('production.stories') }}
-          </h1>
-          <ProductionStories  :stories="(production.stories as any)" />
-        </div>
-
-        <div class="max-w-4xl">
-          <div v-if="isValid(production.description2)" class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl" v-html="cleanText(production.description2[locale as 'nl'|'en'])"></div>
-
-          <div v-if="isValid(production.credits[locale as 'nl' | 'en'])" class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">{{ t('production.credits')}}</h4>
-            <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12" v-html="production.credits[locale as 'nl' | 'en']"></div>
+          <ProductionEventTable v-if="production.events && (production.events as any).length > 0" :events="production.events as any" />
+          <div v-else class="py-4 opacity-60 italic text-sm">
+            {{ t('production.noEvents') }}
           </div>
         </div>
 
+        <div v-if="isValid(production.description2[locale as 'nl' | 'en'])"
+             class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
+             v-html="cleanText(production.description2[locale as 'nl' | 'en'])">
+        </div>
+
+        <div v-if="production.stories && (production.stories as any).length > 0" class="my-16">
+          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+            {{ t('production.stories') }}
+          </h1>
+          <ProductionStoryListView :stories="(production.stories as any)" />
+        </div>
+
+        <div
+          v-if="isValid(production.credits)"
+          class="pt-12 flex flex-col items-center"
+        >
+          <div class="max-w-2xl text-center">
+            <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
+              {{ t('production.credits')}}
+            </h4>
+            <div
+              class="text-sm leading-relaxed opacity-70"
+              v-html="production.credits[locale as 'nl' | 'en']"
+            >
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 </template>
 
 <style scoped>
-/* links in description (TODO: description2 ook v-html?) */
+/* links in description */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
