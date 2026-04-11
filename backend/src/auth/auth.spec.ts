@@ -4,7 +4,7 @@ import request from "supertest";
 import { AppModule } from "../app.module";
 import { ScraperService } from "../util/scraper/scraper.service";
 import { AppLogger } from "../util/logger/logger.service";
-import { MediaStorageService } from "../media/media_storage/service/media_storage.service";
+import { MediaStorageService } from "../media/media_storage/media_storage.service";
 
 describe("AuthGuards tests", () => {
   let app: INestApplication;

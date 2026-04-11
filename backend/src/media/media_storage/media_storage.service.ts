@@ -1,8 +1,8 @@
-import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { MediaStorage } from "./storage.interface";
+import { BadRequestException, Injectable, NotFoundException, } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
-export class RemoteMediaStorage implements MediaStorage {
+@Injectable()
+export class MediaStorageService {
   private readonly mediaBase: string;
 
   constructor(private readonly configService: ConfigService) {
@@ -13,6 +13,7 @@ export class RemoteMediaStorage implements MediaStorage {
       throw new Error("Forgot to set MEDIA_BASE_URL .env variable?");
     }
   }
+
   /**
    * This function saves a piece of media to the media storage
    * @param url is the url where you want to save it
@@ -20,7 +21,7 @@ export class RemoteMediaStorage implements MediaStorage {
    * @returns the url if successful
    * note: this is the production impl and thus will save to the given url.
    */
-  async save(url: string, buffer: Buffer): Promise<string> {
+  async saveMedia(url: string, buffer: Buffer): Promise<string> {
     const newUrl = this.getFormattedUrl(url);
     const response = await fetch(newUrl, {
       method: "PUT",
@@ -40,7 +41,7 @@ export class RemoteMediaStorage implements MediaStorage {
    * @returns the media if it exists.
    * note: this is the production impl and thus will call the url itself.
    */
-  async get(url: string): Promise<Buffer> {
+  async getMedia(url: string): Promise<Buffer> {
     const newUrl = this.getFormattedUrl(url);
     const response = await fetch(newUrl);
     if (response.status === 404)
@@ -57,7 +58,7 @@ export class RemoteMediaStorage implements MediaStorage {
    * @param url is the url you want to delete the media from
    * note: this is the production impl and thus will call from the url.
    */
-  async delete(url: string): Promise<void> {
+  async deleteMedia(url: string): Promise<void> {
     const newUrl = this.getFormattedUrl(url);
     const response = await fetch(newUrl, { method: "DELETE" });
     if (!response.ok)

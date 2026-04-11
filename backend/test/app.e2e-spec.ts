@@ -14,7 +14,7 @@ import { MediaCropDatabaseService } from "../src/database/media/db.media_crop.se
 import { MediaItemDatabaseService } from "../src/database/media/db.media_item.service";
 import { MediaGalleryDatabaseService } from "../src/database/media/db.media_gallery.service";
 import { AppModule } from "../src/app.module";
-import { MediaStorageService } from "../src/media/media_storage/service/media_storage.service";
+import { MediaStorageService } from "../src/media/media_storage/media_storage.service";
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
