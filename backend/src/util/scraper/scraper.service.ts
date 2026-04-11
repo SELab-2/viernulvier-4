@@ -140,15 +140,16 @@ export class ScraperService implements OnApplicationBootstrap {
       for (const crop of batch) {
         try {
           // download
-          let imageData: Buffer;
-          imageData = await this.getImageBuffer(crop.url);
+          const imageData = await this.getImageBuffer(crop.url);
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
           const finalUrl = `/photos/${newFileName}`;
 
           // save
-          let savedUrl: string;
-          savedUrl = await this.mediaStorage.saveMedia(finalUrl, imageData);
+          const savedUrl = await this.mediaStorage.saveMedia(
+            finalUrl,
+            imageData,
+          );
 
           // update
           await this.runner.updatePendingCrop(crop.id, savedUrl);
@@ -157,7 +158,15 @@ export class ScraperService implements OnApplicationBootstrap {
 
           // catch errors
         } catch (error) {
-          results.push({ status: "rejected", reason: error.message });
+          let errorMessage = "An unknown error occurred";
+
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          } else if (typeof error === "string") {
+            errorMessage = error;
+          }
+
+          results.push({ status: "rejected", reason: errorMessage });
         }
       }
 
