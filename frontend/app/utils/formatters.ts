@@ -164,7 +164,7 @@ export function formatPrice(price: number, locale: string): string {
  */
 export function formatUrl(url: string): string {
   const config = useRuntimeConfig();
-  const baseUrl = config.public.mediaBaseUrl as string;
+  const baseUrl = config.public.mediaBaseUrl;
 
   if (url.startsWith("http")) {
     return url;

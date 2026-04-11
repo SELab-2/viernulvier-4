@@ -1436,7 +1436,6 @@ describe("EventPriceController (e2e)", () => {
 
 describe("MediaCropController (e2e)", () => {
   let app: INestApplication;
-  let mediaDb: MediaCropDatabaseService;
 
   beforeEach(async () => {
     app = await buildApp();

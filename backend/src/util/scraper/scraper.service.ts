@@ -133,41 +133,30 @@ export class ScraperService implements OnApplicationBootstrap {
         this.downloadAmount,
       );
       if (batch.length === 0) return;
-      const mediaBase = this.configService.get<string>("MEDIA_BASE_URL");
-      if (!mediaBase)
-        throw Error("Forgot to set MEDIA_BASE_URL .env variable?");
 
       // Process 50 imgs
       const results: PromiseSettledResult<number>[] = [];
 
       for (const crop of batch) {
         try {
-          // --- STEP 1: THE DOWNLOAD ---
+          // download
           let imageData: Buffer;
-          try {
-            imageData = await this.getImageBuffer(crop.url);
-          } catch (downloadErr: any) {
-            throw new Error(`DOWNLOAD FAILED: ${downloadErr.message}`);
-          }
-
+          imageData = await this.getImageBuffer(crop.url);
           const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
           const newFileName = `${crop.id}-${crop.name}${ext}`;
           const finalUrl = `/photos/${newFileName}`;
 
-          // --- STEP 2: THE SAVE ---
+          // save
           let savedUrl: string;
-          try {
-            savedUrl = await this.mediaStorage.saveMedia(finalUrl, imageData);
-          } catch (saveErr: any) {
-            throw new Error(`SAVE FAILED: ${saveErr.message}`);
-          }
+          savedUrl = await this.mediaStorage.saveMedia(finalUrl, imageData);
 
-          // --- STEP 3: THE UPDATE ---
+          // update
           await this.runner.updatePendingCrop(crop.id, savedUrl);
           results.push({ status: "fulfilled", value: crop.id });
-
           await new Promise((resolve) => setTimeout(resolve, 250));
-        } catch (error: any) {
+
+          // catch errors
+        } catch (error) {
           results.push({ status: "rejected", reason: error.message });
         }
       }
