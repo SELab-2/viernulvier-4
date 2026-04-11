@@ -229,19 +229,23 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
                class="description-content mb-16 p-8 bg-gray-50 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl"
                v-html="cleanText(production.description2)">
           </div>
+        </div>
 
-          <div
-            v-if="isValid(production.credits)"
-            class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800"
-          >
+        <div
+          v-if="isValid(production.credits)"
+          class="mt-20 pt-12 border-t border-gray-100 dark:border-gray-800 flex flex-col items-center"
+        >
+          <div class="max-w-2xl text-center">
             <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
-              {{ t('production.credits')}}</h4>
-            <div class="text-sm leading-relaxed opacity-70 lg:columns-2 gap-12"
-                 v-html="production.credits">
+              {{ t('production.credits')}}
+            </h4>
+            <div
+              class="text-sm leading-relaxed opacity-70"
+              v-html="production.credits"
+            >
             </div>
           </div>
         </div>
-
       </div>
     </section>
   </main>
