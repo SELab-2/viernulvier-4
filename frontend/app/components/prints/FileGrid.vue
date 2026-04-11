@@ -1,9 +1,8 @@
 <script setup lang="ts">
 /**
  * A reusable file grid component, displays files belonging to a specific category, includes:
- *  - Collapsible section with title and file count (chevron toggle)
  *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
- *  - Max 2 rows before a "show more" button appears (if there are more files)
+ *  - Max 4 rows before pagination
  *  - File previews, clickable files
  *  - Thumbnail placeholders
  *
@@ -14,9 +13,9 @@
  * />
  *
  * Example files:
- * const files: PrintsFile[] = [
- *    { id: 1, name: 'AFFICHE-FESTIVAL-2025.PDF', year: 2025, image: null },
- *    { id: 2, name: 'AFFICHE-VIDEODROOM-2024.PDF', year: 2024, image: null },
+ * const files: PrintItemView[] = [
+ *    { id: 1, titel: 'AFFICHE-FESTIVAL-2025.PDF', description: '', url: '', created_at: '...', updated_at: '...' },
+ *    { id: 2, titel: 'AFFICHE-VIDEODROOM-2024.PDF', description: '', url: '', created_at: '...', updated_at: '...' },
  * ]
  */
 import { ChevronLeft, ChevronRight } from "lucide-vue-next";
@@ -69,10 +68,13 @@ function goToPage(page: number) {
 
 //constants
 const fileLabel = "text-[11px] font-bold uppercase truncate";
-const grid =
+const grid = computed(() =>
   totalPages.value > 1
-    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 grid-rows-4 items-start" // fixed height for 4 rows
-    : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4";
+    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 grid-rows-4 items-start"
+    : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4",
+);
+const chevronButton =
+  "w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default";
 
 const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
 </script>
@@ -170,7 +172,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
       <!-- Pagination -->
       <div class="flex items-center justify-center gap-2 mt-6 h-9">
         <button
-          class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
+          :class="chevronButton"
           :disabled="currentPage === 1"
           @click="goToPage(currentPage - 1)"
         >
@@ -185,7 +187,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
         </span>
 
         <button
-          class="w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default"
+          :class="chevronButton"
           :disabled="currentPage === totalPages"
           @click="goToPage(currentPage + 1)"
         >
