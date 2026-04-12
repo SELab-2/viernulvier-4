@@ -20,15 +20,15 @@ const { getMainImageCrop } = useGallery();
 const { getAll, getMediaGallery } = useProductionApi();
 
 const productions = ref<ProductionView[]>([]);
-const galleries = ref<GalleryWithItems<ItemWithCrops>[]>([]);
+const galleries = ref<(GalleryWithItems<ItemWithCrops> | null)[]>([]);
 const totalItems = ref(0);
 const isLoading = ref(false); // Good practice to add a loading state
 
 // 1. Automatically extract the main crops whenever 'galleries' changes
 const galleryImages = computed(() => {
-  return galleries.value
-    .map((gallery) => getMainImageCrop(gallery, "hd_ready")) // Replace 'default' with your preferred crop name
-    .filter(Boolean); // This removes any null/undefined values if a gallery had no main image
+  return galleries.value.map((gallery) =>
+    getMainImageCrop(gallery, "hd_ready"),
+  ); // Replace 'default' with your preferred crop name
 });
 
 async function loadPage(page: number) {
@@ -61,31 +61,13 @@ async function loadPage(page: number) {
 async function loadGalleriesForProductions(prods: ProductionView[]) {
   // Create an array of Promises that will fetch concurrently
   const galleryPromises = prods.map(async (production) => {
-    try {
-      const galleryResp = await getMediaGallery(production.id);
-
-      // If no gallery exists for this production, return null instead of breaking the whole loop
-      if (!galleryResp?.data) return null;
-
-      const fullGallery: GalleryWithItems<ItemWithCrops> =
-        await fetchFullGallery(galleryResp.data);
-      return fullGallery;
-    } catch (error) {
-      console.error(
-        `Failed to fetch gallery for production ${production.id}`,
-        error,
-      );
-      return null;
-    }
+    const fullGallery = await getMediaGallery(production.id);
+    return fullGallery;
   });
 
   // Wait for ALL promises to finish simultaneously
   const resolvedGalleries = await Promise.all(galleryPromises);
-
-  // Filter out the nulls (failed or empty galleries) and assign to our ref
-  galleries.value = resolvedGalleries.filter(
-    Boolean,
-  ) as GalleryWithItems<ItemWithCrops>[];
+  galleries.value = resolvedGalleries;
 }
 
 // Top-level await is perfectly fine in Nuxt <script setup>

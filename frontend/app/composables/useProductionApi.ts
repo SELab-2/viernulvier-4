@@ -13,9 +13,16 @@ import type {
   PaginationFilter,
   LanguageQuery,
   ReplaceProduction,
+  PrintItem,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
-import type { DefaultGallery, PrintGallery } from "~/utils/galleryFetcher";
+import type {
+  DefaultGallery,
+  GalleryWithItems,
+  ItemWithCrops,
+  PrintGallery,
+} from "~/utils/galleryFetcher";
+import { fetchFullGallery } from "~/utils/galleryFetcher";
 
 interface ProductionListOptions {
   productionFilters?: FilterProduction;
@@ -142,16 +149,42 @@ export function useProductionApi() {
    */
 
   /** GET /productions/:productionId/media?type=default - Gets a DefaultGallery from the api. */
-  const getMediaGallery = (productionId: number) =>
-    get<DefaultGallery>(
-      `${API_ROUTES.productions.media(productionId)}?type=default`,
-    );
+  const getMediaGallery = async (
+    productionId: number,
+  ): Promise<GalleryWithItems<ItemWithCrops> | null> => {
+    try {
+      const response = await get<DefaultGallery>(
+        `${API_ROUTES.productions.media(productionId)}?type=default`,
+      );
+
+      const gallery = response.data;
+      if (!gallery) return null;
+
+      return await fetchFullGallery(gallery);
+    } catch {
+      // We return null because no gallery exists.
+      return null;
+    }
+  };
 
   /** GET /productions/:productionId/media?type=prints - Gets a PrintGallery from the api. */
-  const getPrintsGallery = (productionId: number) =>
-    get<PrintGallery>(
-      `${API_ROUTES.productions.media(productionId)}?type=prints`,
-    );
+  const getPrintsGallery = async (
+    productionId: number,
+  ): Promise<GalleryWithItems<PrintItem> | null> => {
+    try {
+      const response = await get<PrintGallery>(
+        `${API_ROUTES.productions.media(productionId)}?type=prints`,
+      );
+
+      const gallery = response.data;
+      if (!gallery) return null;
+
+      return await fetchFullGallery(gallery);
+    } catch {
+      // We return null because no gallery exists.
+      return null;
+    }
+  };
 
   /** PUT /productions/:productionId/media/:galleryId — links a MediaGallery to a production. */
   const linkMedia = (productionId: number, galleryId: number) =>
