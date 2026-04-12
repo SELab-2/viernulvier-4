@@ -12,6 +12,7 @@ import {
   ReplacePrintItemDto,
   PaginationFilterDto,
   LanguageQueryDto,
+  PrintType,
 } from "../dto/dto";
 
 describe("PrintItemController", () => {
@@ -24,6 +25,7 @@ describe("PrintItemController", () => {
     titel: { en: "Print Title", nl: "Print Titel" },
     description: { en: "Print Desc", nl: "Print Beschrijving" },
     url: "https://example.com/print.pdf",
+    type: PrintType.AFFICHE,
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
   };
@@ -110,12 +112,40 @@ describe("PrintItemController", () => {
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
+        undefined,
       );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         paginatedItems,
         "en",
       );
       expect(result).toEqual(expectedFlattened);
+    });
+
+    it("should pass the type parameter to the service when provided", async () => {
+      const paginationFilter: PaginationFilterDto = {
+        page: 1,
+        limit: 10,
+        descending: true,
+      };
+      const langQuery: LanguageQueryDto = { lang: "en" };
+      const testType = PrintType.BROCHURE;
+
+      const paginatedItems: PaginatedResponse<PrintItemDto> = {
+        objects: [],
+        totalItems: 0,
+        page: 1,
+        limit: 10,
+      };
+
+      printItemService.getPrintItems.mockResolvedValue(paginatedItems);
+      languageService.flattenByLanguage.mockReturnValue(paginatedItems as any);
+
+      await controller.getPrintItems(paginationFilter, langQuery, testType);
+
+      expect(printItemService.getPrintItems).toHaveBeenCalledWith(
+        paginationFilter,
+        testType,
+      );
     });
   });
 
@@ -145,6 +175,7 @@ describe("PrintItemController", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
+        type: PrintType.AFFICHE,
       };
       printItemService.createPrintItem.mockResolvedValue(mockPrintItem);
 
@@ -163,6 +194,7 @@ describe("PrintItemController", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
+        type: PrintType.AFFICHE,
       };
       printItemService.replacePrintItem.mockResolvedValue(mockPrintItem);
 

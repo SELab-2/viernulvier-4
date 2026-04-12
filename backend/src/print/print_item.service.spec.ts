@@ -8,6 +8,7 @@ import {
   ModifyPrintItemDto,
   PaginationFilterDto,
   ReplacePrintItemDto,
+  PrintType,
 } from "../dto/dto";
 
 describe("PrintItemService", () => {
@@ -19,6 +20,7 @@ describe("PrintItemService", () => {
     titel: { en: "Print Title", nl: "Print Titel" },
     description: { en: "Print Desc", nl: "Print Beschrijving" },
     url: "https://example.com/print.pdf",
+    type: PrintType.AFFICHE,
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
   };
@@ -72,8 +74,34 @@ describe("PrintItemService", () => {
 
       expect(printDbService.getAllPrintItems).toHaveBeenCalledWith(
         paginationFilters,
+        undefined,
       );
       expect(result).toEqual(expectedResponse);
+    });
+
+    it("should pass the type parameter to the db service", async () => {
+      const paginationFilters: PaginationFilterDto = {
+        page: 1,
+        limit: 10,
+        descending: true,
+      };
+      const testType = PrintType.DRUKWERK;
+
+      const expectedResponse: PaginatedResponse<PrintItemDto> = {
+        objects: [],
+        totalItems: 0,
+        page: 1,
+        limit: 10,
+      };
+
+      printDbService.getAllPrintItems.mockResolvedValue(expectedResponse);
+
+      await service.getPrintItems(paginationFilters, testType);
+
+      expect(printDbService.getAllPrintItems).toHaveBeenCalledWith(
+        paginationFilters,
+        testType,
+      );
     });
   });
 
@@ -95,6 +123,7 @@ describe("PrintItemService", () => {
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
         gallery_ids: [1, 2],
+        type: PrintType.AFFICHE,
       };
       printDbService.createPrintItem.mockResolvedValue(mockPrintItem);
 
@@ -111,6 +140,7 @@ describe("PrintItemService", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
+        type: PrintType.AFFICHE,
       };
       printDbService.createPrintItem.mockResolvedValue(mockPrintItem);
 
@@ -129,6 +159,7 @@ describe("PrintItemService", () => {
         titel: { en: "New Title", nl: "Nieuwe Titel" },
         description: { en: "New Desc", nl: "Nieuwe Beschrijving" },
         url: "https://example.com/new.pdf",
+        type: PrintType.AFFICHE,
       };
       printDbService.updatePrintItem.mockResolvedValue(mockPrintItem);
 
