@@ -4,6 +4,7 @@ import request from "supertest";
 import { AppModule } from "../app.module";
 import { ScraperService } from "../util/scraper/scraper.service";
 import { AppLogger } from "../util/logger/logger.service";
+import { MediaStorageService } from "../media/media_storage/media_storage.service";
 import { Server } from "http";
 
 describe("AuthGuards tests", () => {
@@ -20,6 +21,12 @@ describe("AuthGuards tests", () => {
         warn: jest.fn(),
         debug: jest.fn(),
         verbose: jest.fn(),
+      })
+      .overrideProvider(MediaStorageService)
+      .useValue({
+        save: jest.fn().mockResolvedValue("http://mock-url.com/image.jpg"),
+        get: jest.fn().mockResolvedValue(Buffer.from("mock")),
+        delete: jest.fn().mockResolvedValue(undefined),
       })
       .overrideProvider(ScraperService)
       .useValue({
