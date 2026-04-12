@@ -156,9 +156,6 @@ export function formatPrice(price: number, locale: string): string {
   }).format(price);
 }
 
-const config = useRuntimeConfig();
-const baseUrl = config.public.mediaBaseUrl;
-
 /**
  * Format a url using relative pathing or absolute.
  * note in case of relative pathing the MEDIA_BASE_URL will be appended infront of it.
@@ -166,6 +163,8 @@ const baseUrl = config.public.mediaBaseUrl;
  * @returns a valid url you can use to fetch/delete/put anything.
  */
 export function formatUrl(url: string): string {
+  const config = useRuntimeConfig();
+  const baseUrl = config.public.mediaBaseUrl;
   if (url.startsWith("http")) {
     return url;
   }
