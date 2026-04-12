@@ -27,7 +27,14 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiSecurity, ApiTags, } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
@@ -71,7 +78,6 @@ export class MediaCropController {
   /**
    * Responds to a POST to "/media/crops"
    * @param createCrop The crop we want to create (includes the item it should be linked to)
-   * @param autoDownload indicates whether you want to download the media from the given url and save it to the server.
    * @returns The created crop.
    */
   @UseGuards(ApiKeyGuard)
@@ -85,9 +91,8 @@ export class MediaCropController {
   async createCrop(
     @Body(new ZodValidationPipe(CreateMediaCropSchema))
     createCrop: CreateMediaCropDto,
-    @Body("autoDownload", ParseIntPipe) autoDownload: boolean = false,
   ): Promise<MediaCropDto> {
-    return await this.mediaCropService.createCrop(createCrop, autoDownload);
+    return await this.mediaCropService.createCrop(createCrop);
   }
 
   /**

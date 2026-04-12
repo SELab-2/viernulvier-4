@@ -102,6 +102,37 @@
     "submitbutton": "Submit",
     "resetbutton": "Reset"
   },
+  "archive": {
+    "header_title": "Archive",
+    "header_subtitle": "Search and discover performances, concerts and events from our rich history.",
+    "showing_results": "Showing {start}–{end} of {total} results",
+    "no_results": "No productions",
+    "no_results_sub": "Try adjusting your filters or search terms",
+    "page_of": "Page {current} of {total}",
+    "prev": "Prev",
+    "next": "Next",
+    "pagination": "Pagination",
+    "first_page": "First page",
+    "last_page": "Last page",
+    "prev_page": "Previous page",
+    "next_page": "Next page",
+    "loading": "Loading…",
+    "search_placeholder": "Search archive...",
+    "filter": "Filter",
+    "view_list": "List",
+    "view_grid": "Grid",
+    "page_label": "Page",
+    "of_pages": "of {total}",
+    "total_results": "{total} results",
+    "sortNewest": "New to Old",
+    "sortOldest": "Old to New",
+    "sortLabel": "Sort by",
+    "show_more": "+{count} more",
+    "show_less": "Show less",
+    "tagsLabel": "Tags",
+    "calendarLabel": "Date",
+    "clear_tags": "Clear tags"
+  },
   "production": {
     "events": "Events",
     "dateAndTime": "Date & Time",
@@ -127,6 +158,14 @@
     "edit": "Edit",
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this event?"
+  },
+  "prints": {
+    "files": "Files",
+    "noFilesCat": "This category doesn't contain any files.",
+    "noFiles": "No files available.",
+    "showMore": "Show more",
+    "remaining": "remaining",
+    "delete": "Delete",
+    "download": "Download"
   }
 }
-

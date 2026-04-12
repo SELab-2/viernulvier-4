@@ -17,11 +17,11 @@ vi.mock("../../app/composables/useAuth", () => ({
 }));
 
 vi.mock("#app", async (importOriginal) => {
-  const actual = await importOriginal() as Record<string, unknown>;
+  const actual = await importOriginal<Record<string, any>>();
   return {
     ...actual,
     useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
-  }
+  };
 });
 
 import { useApi } from "../../app/composables/useApi";
@@ -151,16 +151,20 @@ describe("useApi", () => {
       mockFetch.mockResolvedValue({});
       const { get } = useApi();
       await get("/test");
-      const calledHeaders = mockFetch.mock.calls[0][1].headers;
-      expect(calledHeaders["x-api-key"]).toBe("test-key");
+      const fetchOptions = mockFetch.mock.calls[0][1] as {
+        headers: Record<string, string>;
+      };
+      expect(fetchOptions.headers["x-api-key"]).toBe("test-key");
     });
 
     it("does not attach x-api-key header when not logged in", async () => {
       mockFetch.mockResolvedValue({});
       const { get } = useApi();
       await get("/test");
-      const calledHeaders = mockFetch.mock.calls[0][1].headers;
-      expect(calledHeaders["x-api-key"]).toBeUndefined();
+      const fetchOptions = mockFetch.mock.calls[0][1] as {
+        headers: Record<string, string>;
+      };
+      expect(fetchOptions.headers["x-api-key"]).toBeUndefined();
     });
   });
 });

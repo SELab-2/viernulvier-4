@@ -31,7 +31,6 @@
  * ]
  */
 import type { EventWithDetails } from "../../types/EventWithDetails";
-import EventListItem from "./EventListItem.vue";
 
 type Id = number | string;
 

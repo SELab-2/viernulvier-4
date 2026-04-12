@@ -82,10 +82,7 @@ describe("PriceService", () => {
       const result = await service.getPrices(filter);
 
       // Verify that the service correctly passes the individual limit and page properties
-      expect(dbService.getPrices).toHaveBeenCalledWith(
-        filter.limit,
-        filter.page,
-      );
+      expect(dbService.getPrices).toHaveBeenCalledWith(filter);
       expect(result).toEqual(expectedPrices);
     });
   });

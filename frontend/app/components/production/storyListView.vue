@@ -17,7 +17,7 @@
  */
 
 import type { BlogView } from "@repo/common";
-const { t } = useI18n()
+const { t } = useI18n();
 
 interface Props {
   stories: BlogView[];
@@ -27,26 +27,19 @@ const props = defineProps<Props>();
 
 <template>
   <div class="w-full">
-
-    <div
-        v-if="stories.length"
-        class="flex flex-col gap-2"
-    >
+    <div v-if="stories.length" class="flex flex-col gap-2">
       <div v-if="stories.length" class="overflow-y-auto max-h-[25rem]">
         <div class="flex flex-col gap-2">
           <BlogsStoryListItem
-              v-for="story in stories"
-              :key="story.id"
-              :story="story"
-              data-testid="data-story"
+            v-for="story in stories"
+            :key="story.id"
+            :story="story"
+            data-testid="data-story"
           />
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

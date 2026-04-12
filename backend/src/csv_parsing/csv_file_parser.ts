@@ -111,7 +111,7 @@ export class CSVFileParser {
         csvParser({
           strict: true, // Enable strict mode to catch parsing errors
           mapHeaders: ({ header }) => header.trim(), // Trim whitespace from headers
-          mapValues: ({ value }) => value.trim(), // Trim whitespace from values
+          mapValues: ({ value }) => String(value).trim(), // Trim whitespace from values
         }),
       );
 
@@ -376,7 +376,7 @@ export class CSVFileParser {
         location: z.object({ en: string(), nl: string() }),
         legacy_id: string(),
       }),
-      this.transformEventRow,
+      (row) => this.transformEventRow(row),
     );
 
     return parsed.map((r) => {
@@ -399,10 +399,8 @@ export class CSVFileParser {
   ): Promise<ParsedProductionRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateProductionDto & { legacy_id: string }
-    >(
-      input,
-      CreateProductionSchema.extend({ legacy_id: string() }),
-      this.transformProductionRow,
+    >(input, CreateProductionSchema.extend({ legacy_id: string() }), (row) =>
+      this.transformProductionRow(row),
     );
 
     return parsed.map((r) => {
@@ -424,10 +422,8 @@ export class CSVFileParser {
   ): Promise<ParsedPriceRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreatePriceDto & { event_id: number }
-    >(
-      input,
-      CreatePriceSchema.extend({ event_id: z.number() }),
-      this.transformPriceRow,
+    >(input, CreatePriceSchema.extend({ event_id: z.number() }), (row) =>
+      this.transformPriceRow(row),
     );
 
     return parsed.map((r) => {
@@ -444,10 +440,8 @@ export class CSVFileParser {
   static async parseBlogsCSV(input: CsvInputSource): Promise<ParsedBlogRow[]> {
     const parsed = await this.parseCSVWithSchema<
       CreateBlogDto & { production_id: number }
-    >(
-      input,
-      CreateBlogSchema.extend({ production_id: z.number() }),
-      this.transformBlogRow,
+    >(input, CreateBlogSchema.extend({ production_id: z.number() }), (row) =>
+      this.transformBlogRow(row),
     );
 
     return parsed.map((r) => {
@@ -467,7 +461,7 @@ export class CSVFileParser {
     >(
       input,
       CreateTagSchema.extend({ productionIds: z.number().array() }),
-      this.transformTagRow,
+      (row) => this.transformTagRow(row),
     );
 
     return parsed.map((r) => {

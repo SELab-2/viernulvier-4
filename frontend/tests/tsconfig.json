@@ -5,7 +5,5 @@
       "vitest/globals" // Or "jest" if you use Jest instead of Vitest
     ]
   },
-  "include": [
-    "./**/*"
-  ]
+  "include": ["./**/*"]
 }
