@@ -2,7 +2,7 @@
 
 ### [GET] `/prints`
 - **Query Parameters:**
-  - `type` *(optional)*: Filter the list by a specific print type (`affiche`, `brochure`, `drukwerk`, `programma`).
+  - `print_type` *(optional)*: Filter the list by a specific print type (`affiche`, `brochure`, `drukwerk`, `programma`).
 - **Returns:** `PaginatedResponse<PrintItem | PrintItemView>` a [paginated](../pagination/index.md) list of print items or print item views.
 
 ### [GET] `/prints/:printItemId`
