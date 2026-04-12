@@ -1,8 +1,8 @@
-import dotenv from 'dotenv';
-import path from 'path';
-import process from 'process';
+// import dotenv from 'dotenv';
+// import path from 'path';
+// import process from 'process';
 
-dotenv.config({ path: path.resolve(process.cwd(), "../.env"), quiet: true });
+// dotenv.config({ path: path.resolve(process.cwd(), "../.env"), quiet: true });
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 // don't touch this without asking @Seb first. baseURL and apiBase must not be altered without knowing what you are doing.
