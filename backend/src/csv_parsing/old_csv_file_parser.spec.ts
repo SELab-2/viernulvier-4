@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { ReadStream } from "fs";
 import { Readable } from "stream";
 import { OldCSVFileParser } from "./old_csv_file_parser";
 
@@ -6,7 +6,7 @@ jest.mock("fs");
 
 const mockedFs = fs as jest.Mocked<typeof fs>;
 
-function createMockStream(rows: any[], error?: Error) {
+function createMockStream(rows: any[], error?: Error): ReadStream {
   const stream = new Readable({
     objectMode: true,
     read() {},
@@ -24,7 +24,7 @@ function createMockStream(rows: any[], error?: Error) {
 
   return {
     pipe: jest.fn().mockReturnValue(stream),
-  };
+  } as unknown as ReadStream;
 }
 
 describe("OldCSVFileParser", () => {
@@ -155,7 +155,7 @@ describe("OldCSVFileParser", () => {
             Production: "10",
             Hall: "Backstage",
           },
-        ]) as any,
+        ]),
       );
 
       const items = await OldCSVFileParser.parseOldEventsCSV("events.csv");
@@ -189,7 +189,7 @@ describe("OldCSVFileParser", () => {
             Description2: "more",
             Genre: "tragedy",
           },
-        ]) as any,
+        ]),
       );
       const result = await OldCSVFileParser.parseOldProductionsCSV("prods.csv");
 

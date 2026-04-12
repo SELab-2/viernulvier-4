@@ -16,7 +16,9 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const isOpen = ref(true);
-const toggle = () => { isOpen.value = !isOpen.value; };
+const toggle = () => {
+  isOpen.value = !isOpen.value;
+};
 
 const byMonth = computed(() => {
   const map = new Map<string, BlogView[]>();
@@ -32,12 +34,10 @@ const byMonth = computed(() => {
   );
   return keys.map((key) => ({ key, stories: map.get(key)! }));
 });
-
 </script>
 
 <template>
   <section :id="`story-year-${year}`" class="blog-year-section">
-
     <button
       type="button"
       class="blog-year-heading w-full text-left cursor-pointer"
@@ -53,7 +53,10 @@ const byMonth = computed(() => {
       <svg
         class="w-3.5 h-3.5 shrink-0 text-foreground/40 transition-transform duration-200"
         :class="isOpen ? 'rotate-0' : '-rotate-90'"
-        fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        viewBox="0 0 24 24"
         aria-hidden="true"
       >
         <polyline points="6 9 12 15 18 9" />
@@ -80,6 +83,5 @@ const byMonth = computed(() => {
         </div>
       </div>
     </Transition>
-
   </section>
 </template>

@@ -38,10 +38,7 @@ export class TagService {
   async getAllTags(
     paginationFilter: PaginationFilterDto,
   ): Promise<PaginatedResponse<TagDto>> {
-    return await this.dbTagService.getTags(
-      paginationFilter.limit,
-      paginationFilter.page,
-    );
+    return await this.dbTagService.getTags(paginationFilter);
   }
 
   /**

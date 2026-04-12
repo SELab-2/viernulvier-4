@@ -15,7 +15,7 @@ describe("MediaGalleryController", () => {
   let controller: MediaGalleryController;
   let mediaGalleryService: jest.Mocked<MediaGalleryService>;
 
-const mockGallery: MediaGalleryDto = {
+  const mockGallery: MediaGalleryDto = {
     id: 1,
     name: "Test Gallery",
     type: "default",
@@ -176,17 +176,24 @@ const mockGallery: MediaGalleryDto = {
 
       await controller.linkToGallery(1, 2);
 
-      expect(mediaGalleryService.linkPrintItemToGallery).toHaveBeenCalledWith(1, 2);
+      expect(mediaGalleryService.linkPrintItemToGallery).toHaveBeenCalledWith(
+        1,
+        2,
+      );
     });
   });
 
   describe("unlinkFromGallery", () => {
     it("should unlink a print item from a gallery", async () => {
-      mediaGalleryService.unlinkPrintItemFromGallery.mockResolvedValue(undefined);
+      mediaGalleryService.unlinkPrintItemFromGallery.mockResolvedValue(
+        undefined,
+      );
 
       await controller.unlinkFromGallery(1, 2);
 
-      expect(mediaGalleryService.unlinkPrintItemFromGallery).toHaveBeenCalledWith(1, 2);
+      expect(
+        mediaGalleryService.unlinkPrintItemFromGallery,
+      ).toHaveBeenCalledWith(1, 2);
     });
   });
 });
