@@ -48,7 +48,8 @@ jobs:
           mv site frontend/public/docs
 
           cd $PR_PATH/frontend
-          npm install
+          npm ci
+          npx nuxi clean
 
           NUXT_API_BASE="https://sel2-4.ugent.be/api" \
           npm run build
