@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 
@@ -15,9 +15,6 @@ const goBack = () => {
     router.push("/productions"); // Fallback
   }
 };
-
-const isExpanded = ref(false);
-const CHARACTER_LIMIT = 800;
 
 const productionId = computed(() => {
   const raw = Array.isArray(route.params.id)
@@ -132,20 +129,30 @@ const cleanText = (text: string | null | undefined) => {
     .replace(/\n/g, "<br />");
 };
 
-const fullDescription = computed(
-  () => cleanText(production.value?.description1) || "",
-);
+const isExpanded = ref(false);
+const showReadMoreButton = ref(false);
+const descriptionRef = ref<HTMLElement | null>(null);
 
-const displayedDescription = computed(() => {
-  const desc = fullDescription.value;
-  if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
-    return desc;
+const checkOverflow = () => {
+  const el = descriptionRef.value;
+  if (el) {
+    // Als de tekst groter is dan wat we laten zien, moet de knop aan
+    showReadMoreButton.value = el.scrollHeight > el.clientHeight;
   }
-  return desc.slice(0, CHARACTER_LIMIT) + "...";
+};
+onMounted(async () => {
+  await nextTick(); // Wacht tot DOM gerenderd is
+  checkOverflow();
+  // Optioneel: check opnieuw als het schermformaat verandert
+  window.addEventListener("resize", checkOverflow);
 });
 
-const isLongDescription = computed(
-  () => fullDescription.value.length > CHARACTER_LIMIT,
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", checkOverflow);
+});
+
+const fullDescription = computed(
+  () => cleanText(production.value?.description1) || "",
 );
 </script>
 
@@ -229,12 +236,18 @@ const isLongDescription = computed(
           </div>
 
           <div
-            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
-            v-html="displayedDescription"
+            ref="descriptionRef"
+            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
+            :class="[
+              isExpanded
+                ? 'line-clamp-none'
+                : 'line-clamp-[12] md:line-clamp-[8]',
+            ]"
+            v-html="fullDescription"
           ></div>
 
           <button
-            v-if="isLongDescription"
+            v-if="showReadMoreButton || isExpanded"
             @click="isExpanded = !isExpanded"
             class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
           >
