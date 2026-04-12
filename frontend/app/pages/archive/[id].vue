@@ -1,39 +1,41 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { ChevronLeft } from 'lucide-vue-next';
+import { ref, computed } from "vue";
+import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 
 const { t, locale } = useI18n();
 const router = useRouter();
-const { getById, getTags, getBlogs} = useProductionApi();
+const { getById, getTags, getBlogs } = useProductionApi();
 const route = useRoute();
 
 const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push('/productions'); // Fallback
+    router.push("/productions"); // Fallback
   }
-}
+};
 
 const isExpanded = ref(false);
 const CHARACTER_LIMIT = 800;
 
 const productionId = computed(() => {
-  const raw = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id;
+  const raw = Array.isArray(route.params.id)
+    ? route.params.id[0]
+    : route.params.id;
   const n = parseInt(raw ?? "", 10);
   return isFinite(n) ? n : null;
 });
 
 /** Get the main production data */
-const { data: production} = await useAsyncData<ProductionView>(
+const { data: production } = await useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null;
     const res = await getById(productionId.value, locale.value as any);
     return (res as any)?.data ?? res;
   },
-  { watch: [productionId, locale] }
+  { watch: [productionId, locale] },
 );
 
 /** Get tags and remove empty ones */
@@ -44,54 +46,62 @@ const { data: tags } = await useAsyncData<TagView[]>(
     const res = await getTags(productionId.value, locale.value as any);
     const data = (res as any)?.data ?? res;
     if (!Array.isArray(data)) return [];
-    return data.filter(t => (t.tag || "").trim().length > 1);
+    return data.filter((t) => (t.tag || "").trim().length > 1);
   },
-  { watch: [productionId, locale] }
-)
+  { watch: [productionId, locale] },
+);
 
 const { getAll: getAllEvents, getLocation, getPrices } = useEventApi();
 
 /** Get all events with their location and prices */
-const { data: events } = await useAsyncData(`events-detailed-${route.params.id}`, async () => {
-  if (!productionId.value) return [];
+const { data: events } = await useAsyncData(
+  `events-detailed-${route.params.id}`,
+  async () => {
+    if (!productionId.value) return [];
 
-  const res = await getAllEvents({ eventFilters: { production_id: productionId.value } });
-  const list = res.data?.objects ?? [];
+    const res = await getAllEvents({
+      eventFilters: { production_id: productionId.value },
+    });
+    const list = res.data?.objects ?? [];
 
-  if (!list.length) return [];
+    if (!list.length) return [];
 
-  return Promise.all(list.map(async (e) => {
-    const [locRes, priceRes] = await Promise.all([
-      getLocation(e.id, locale.value as any).catch(() => null),
-      getPrices(e.id, locale.value as any).catch(() => [])
-    ]);
+    return Promise.all(
+      list.map(async (e) => {
+        const [locRes, priceRes] = await Promise.all([
+          getLocation(e.id, locale.value as any).catch(() => null),
+          getPrices(e.id, locale.value as any).catch(() => []),
+        ]);
 
-    const locationData = (locRes as any)?.data ?? locRes;
-    const pricesData = (priceRes as any)?.data ?? priceRes ?? [];
+        const locationData = (locRes as any)?.data ?? locRes;
+        const pricesData = (priceRes as any)?.data ?? priceRes ?? [];
 
-    return {
-      ...e,
-      location: locationData,
-      prices: Array.isArray(pricesData) ? pricesData : []
-    }
-  }));
-}, {
-  watch: [productionId, locale],
-  default: () => []
-})
+        return {
+          ...e,
+          location: locationData,
+          prices: Array.isArray(pricesData) ? pricesData : [],
+        };
+      }),
+    );
+  },
+  {
+    watch: [productionId, locale],
+    default: () => [],
+  },
+);
 
 /** Get blogs/stories */
 const { data: stories } = await useAsyncData(
   `prod-stories-${route.params.id}-${locale.value}`,
   async () => {
-    if (!productionId.value) return []
+    if (!productionId.value) return [];
     const res = await getBlogs(productionId.value, locale.value as any);
 
     const data = (res as any)?.data ?? res;
     return Array.isArray(data) ? data : [];
   },
-  { watch: [productionId, locale], default: () => [] }
-)
+  { watch: [productionId, locale], default: () => [] },
+);
 
 /**
  * Check if a string is useful (not "N/A" or empty)
@@ -99,11 +109,15 @@ const { data: stories } = await useAsyncData(
 const isValid = (val: any) => {
   if (!val) return false;
   const s = String(val).trim().toUpperCase();
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N";
-}
+  return (
+    s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
+  );
+};
 
 const image = computed(() => (production.value as any)?.image ?? null); //TODO verander! (ook: witte letters bij light en dark mode op image)
-const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value ?? 0));
+const bannerGradient = computed(() =>
+  pickPlaceholderGradient(productionId.value ?? 0),
+);
 
 /**
  * Sanitizes raw text by removing escape characters and
@@ -112,29 +126,34 @@ const bannerGradient = computed(() => pickPlaceholderGradient(productionId.value
 const cleanText = (text: string | null | undefined) => {
   if (!text) return "";
   return text
-    .replace(/\\/g, '')
+    .replace(/\\/g, "")
     .trim()
-    .replace(/(\r?\n){2,}/g, '\n\n')
-    .replace(/\n/g, '<br />');
-}
+    .replace(/(\r?\n){2,}/g, "\n\n")
+    .replace(/\n/g, "<br />");
+};
 
-const fullDescription = computed(() => cleanText(production.value?.description1) || "");
+const fullDescription = computed(
+  () => cleanText(production.value?.description1) || "",
+);
 
 const displayedDescription = computed(() => {
   const desc = fullDescription.value;
   if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
     return desc;
   }
-  return desc.slice(0, CHARACTER_LIMIT) + '...';
-})
+  return desc.slice(0, CHARACTER_LIMIT) + "...";
+});
 
-const isLongDescription = computed(() => fullDescription.value.length > CHARACTER_LIMIT);
-
+const isLongDescription = computed(
+  () => fullDescription.value.length > CHARACTER_LIMIT,
+);
 </script>
 
 <template>
-  <main v-if="production" class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100">
-
+  <main
+    v-if="production"
+    class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
+  >
     <section
       class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden"
       :style="{ background: image ? 'var(--muted)' : bannerGradient }"
@@ -145,15 +164,16 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
         class="absolute inset-0 h-full w-full object-cover opacity-80 dark:opacity-50"
       />
 
-      <div class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12">
-
+      <div
+        class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12"
+      >
         <div class="flex items-center gap-4 mb-8">
           <button
             @click="goBack()"
             class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] text-foreground hover:text-accent transition-colors"
           >
             <ChevronLeft :size="14" stroke-width="3" />
-            {{ t('general.back') }}
+            {{ t("general.back") }}
           </button>
 
           <span
@@ -165,22 +185,33 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
         </div>
 
         <div class="text-foreground">
-          <h1 class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic">
+          <h1
+            class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
+          >
             {{ production.titel }}
           </h1>
           <p
-            v-if="isValid(production.artist) && production.artist !== production.titel"
+            v-if="
+              isValid(production.artist) &&
+              production.artist !== production.titel
+            "
             class="text-2xl lg:text-3xl font-medium opacity-80"
           >
             {{ production.artist }}
           </p>
         </div>
 
-        <div v-if="tags?.some(t => isValid(t.tag))" class="flex flex-wrap gap-3 mt-8">
+        <div
+          v-if="tags?.some((t) => isValid(t.tag))"
+          class="flex flex-wrap gap-3 mt-8"
+        >
           <template v-for="tag in tags" :key="tag.id">
-        <span v-if="isValid(tag.tag)" class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]">
-          {{ tag.tag }}
-        </span>
+            <span
+              v-if="isValid(tag.tag)"
+              class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]"
+            >
+              {{ tag.tag }}
+            </span>
           </template>
         </div>
       </div>
@@ -188,43 +219,51 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
 
     <section class="py-20">
       <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
-
         <div class="w-full">
           <div v-if="isValid(production.tagline)" class="mb-10">
-            <p class="border-l-4 border-[var(--accent)] pl-6 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white">
+            <p
+              class="border-l-4 border-[var(--accent)] pl-6 text-lg lg:text-xl font-black italic leading-relaxed text-gray-900 dark:text-white"
+            >
               {{ production.tagline }}
             </p>
           </div>
 
-          <div class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200" v-html="displayedDescription"></div>
+          <div
+            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
+            v-html="displayedDescription"
+          ></div>
 
           <button
             v-if="isLongDescription"
             @click="isExpanded = !isExpanded"
             class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
           >
-            {{ isExpanded ? t('general.readLess') : t('general.readMore') }}
+            {{ isExpanded ? t("general.readLess") : t("general.readMore") }}
           </button>
         </div>
 
         <div class="mt-8 mb-16">
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
-            {{ t('production.events') }}
+            {{ t("production.events") }}
           </h1>
-          <ProductionEventTable v-if="events && events.length > 0" :events="events" />
+          <ProductionEventTable
+            v-if="events && events.length > 0"
+            :events="events"
+          />
           <div v-else class="py-4 opacity-60 italic text-sm">
-            {{ t('production.noEvents') }}
+            {{ t("production.noEvents") }}
           </div>
         </div>
 
-        <div v-if="isValid(production.description2)"
-             class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
-             v-html="cleanText(production.description2)">
-        </div>
+        <div
+          v-if="isValid(production.description2)"
+          class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
+          v-html="cleanText(production.description2)"
+        ></div>
 
         <div v-if="stories && stories.length > 0" class="my-16">
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
-            {{ t('production.stories') }}
+            {{ t("production.stories") }}
           </h1>
           <ProductionStoryListView :stories="stories" />
         </div>
@@ -234,14 +273,15 @@ const isLongDescription = computed(() => fullDescription.value.length > CHARACTE
           class="pt-12 flex flex-col items-center"
         >
           <div class="max-w-2xl text-center">
-            <h4 class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest">
-              {{ t('production.credits')}}
+            <h4
+              class="text-[10px] uppercase font-black opacity-40 mb-6 tracking-widest"
+            >
+              {{ t("production.credits") }}
             </h4>
             <div
               class="text-sm leading-relaxed opacity-70"
               v-html="production.credits"
-            >
-            </div>
+            ></div>
           </div>
         </div>
       </div>
