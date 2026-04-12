@@ -25,7 +25,7 @@ describe("PrintItemController", () => {
     titel: { en: "Print Title", nl: "Print Titel" },
     description: { en: "Print Desc", nl: "Print Beschrijving" },
     url: "https://example.com/print.pdf",
-    type: PrintType.AFFICHE,
+    print_type: PrintType.AFFICHE,
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
   };
@@ -175,7 +175,7 @@ describe("PrintItemController", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
-        type: PrintType.AFFICHE,
+        print_type: PrintType.AFFICHE,
       };
       printItemService.createPrintItem.mockResolvedValue(mockPrintItem);
 
@@ -194,7 +194,7 @@ describe("PrintItemController", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
-        type: PrintType.AFFICHE,
+        print_type: PrintType.AFFICHE,
       };
       printItemService.replacePrintItem.mockResolvedValue(mockPrintItem);
 

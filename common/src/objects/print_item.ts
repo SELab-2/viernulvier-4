@@ -21,7 +21,7 @@ export const PrintItemSchema = z.object({
   titel: LocalizedStringSchema,
   description: LocalizedStringSchema,
   url: z.string(),
-  type: PrintTypeZodEnum,
+  print_type: PrintTypeZodEnum,
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });

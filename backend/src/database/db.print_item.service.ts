@@ -11,7 +11,6 @@ import {
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
-  generateCountQuery,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
@@ -55,12 +54,12 @@ export class PrintItemDatabaseService {
   /**
    * Get all print items paginated.
    * @param paginationFilters The Filters regarding ordering and pagination.
-   * @param type Optional filter by print type.
+   * @param print_type Optional filter by print type.
    * @returns The PrintItems.
    */
   async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
-    type?: PrintType,
+    print_type?: PrintType,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     const returningClause = generateReturningClause(PrintItemSchema);
     const offset = paginationFilters.page * paginationFilters.limit;
@@ -68,15 +67,15 @@ export class PrintItemDatabaseService {
     let countQuery = `SELECT COUNT(*) as count FROM print_items`;
     const values: any[] = [];
     const countValues: any[] = [];
-    if (type) {
-      query += ` WHERE type = $1`;
-      countQuery += ` WHERE type = $1`;
-      values.push(type);
-      countValues.push(type);
+    if (print_type) {
+      query += ` WHERE print_type = $1`;
+      countQuery += ` WHERE print_type = $1`;
+      values.push(print_type);
+      countValues.push(print_type);
     }
     const limitIndex = values.length + 1;
     const offsetIndex = values.length + 2;
-    
+
     query += ` LIMIT $${limitIndex} OFFSET $${offsetIndex};`;
     values.push(paginationFilters.limit, offset);
     const [objects, countResult] = await Promise.all([

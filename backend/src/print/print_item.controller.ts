@@ -66,18 +66,26 @@ export class PrintItemController {
    * @returns A paginated list of print items.
    */
   @ApiOperation({ summary: "Fetch a paginated list of print items." })
-  @ApiQuery({ name: 'type', enum: PrintType, required: false, description: 'Filter by print type.' })
+  @ApiQuery({
+    name: "type",
+    enum: PrintType,
+    required: false,
+    description: "Filter by print type.",
+  })
   @ApiOkPaginatedResponseAnyOf(PrintItemDto, PrintItemViewDto)
   @Get()
   async getPrintItems(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-    @Query('type') type?: PrintType,
+    @Query("type") print_type?: PrintType,
   ): Promise<PaginatedResponse<PrintItemDto | PrintItemViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<PrintItemDto | PrintItemViewDto>
-    >(await this.printItemService.getPrintItems(paginationFilter, type), lang.lang);
+    >(
+      await this.printItemService.getPrintItems(paginationFilter, print_type),
+      lang.lang,
+    );
   }
 
   /**

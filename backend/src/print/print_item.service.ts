@@ -30,9 +30,12 @@ export class PrintItemService {
    */
   async getPrintItems(
     paginationFilter: PaginationFilterDto,
-    type?: PrintType,
+    print_type?: PrintType,
   ): Promise<PaginatedResponse<PrintItemDto>> {
-    return await this.printItemDbService.getAllPrintItems(paginationFilter, type);
+    return await this.printItemDbService.getAllPrintItems(
+      paginationFilter,
+      print_type,
+    );
   }
 
   /**
