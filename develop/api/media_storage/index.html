@@ -2261,12 +2261,13 @@
 <h3 id="get-mediastoragefetch">[GET] <code>/media/storage/fetch</code></h3>
 <p>Retrieves media from a given URL.</p>
 <ul>
-<li><strong>Query Parameter:</strong> <code>url</code> (string) - The URL of the media you want to fetch. <strong>Note:</strong> This must be URL-encoded by
+<li><strong>Query Parameter:</strong> <code>url</code> (string) - The URL/ relative path of the media you want to fetch. <strong>Note:</strong> This must be
+  URL-encoded by
   the client (e.g., using <code>encodeURIComponent()</code>).</li>
 <li><strong>Returns:</strong> A binary file stream (the physical media file, ready to be viewed or downloaded by the browser).</li>
 </ul>
 <h3 id="post-mediastorage">[POST] <code>/media/storage</code></h3>
-<p>Saves media to a given URL.</p>
+<p>Saves media to a given URL/path.</p>
 <ul>
 <li><strong>Security:</strong> <code>apiKey</code> required.</li>
 <li><strong>Body:</strong> <code>multipart/form-data</code> with <code>url: string</code> and <code>file: binary</code></li>
@@ -2274,11 +2275,14 @@
 <li><strong>Returns:</strong> <code>string</code> — the URL of the saved media.</li>
 </ul>
 <h3 id="delete-mediastorage">[DELETE] <code>/media/storage</code></h3>
-<p>Deletes media at a given URL.</p>
+<p>Deletes media at a given URL/path.</p>
 <ul>
 <li><strong>Security:</strong> <code>apiKey</code> required.</li>
 <li><strong>Body:</strong> <code>{ url: string }</code></li>
 </ul>
+<blockquote>
+<p>note: this all also works for prints. Instead of using <code>/photos</code>, you will need to use <code>/prints</code> for it to work.</p>
+</blockquote>
 
 
 
