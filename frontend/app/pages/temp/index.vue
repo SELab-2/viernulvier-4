@@ -4,7 +4,7 @@
 
     <div class="grid grid-cols-4 gap-4">
       <div v-for="(crop, index) in galleryImages" :key="index">
-        <GalleryImage :crop="crop" />
+        <MediaGalleryImage :crop="crop" />
       </div>
     </div>
   </div>

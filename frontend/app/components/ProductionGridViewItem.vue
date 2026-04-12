@@ -12,6 +12,7 @@ import { ROUTES } from "../utils/routes";
 import { computeDateRangeFromEvents } from "../utils/formatters";
 import TagPill from "./TagPill.vue";
 import ThumbnailPlaceholder from "./ThumbnailPlaceholder.vue";
+import { useGallery } from "~/composables/media/useGallery";
 
 const { productionView } = defineProps<{
   productionView: ProductionView;
@@ -19,9 +20,15 @@ const { productionView } = defineProps<{
 
 const tags = ref<Tag[]>([]);
 const events = ref<Event[]>([]);
+const gallery = ref<GalleryWithItems<ItemWithCrops> | null>(null);
+const mainCrop = computed(() => {
+  if (!gallery.value) return null;
+  return getMainImageCrop(gallery.value, "hd_ready");
+});
 
-const { getTags } = useProductionApi();
+const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
+const { getMainImageCrop } = useGallery();
 
 const { locale } = useI18n();
 
@@ -63,6 +70,11 @@ async function loadEvents() {
   }
 }
 
+async function loadGallery() {
+  if (!productionView?.id) return;
+  gallery.value = await getMediaGallery(productionView.id);
+}
+
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
@@ -70,6 +82,7 @@ const dateRangeText = computed(() =>
 onMounted(() => {
   loadEvents();
   loadTags();
+  loadGallery();
 });
 
 watch(
@@ -77,6 +90,7 @@ watch(
   () => {
     loadEvents();
     loadTags();
+    loadGallery();
   },
 );
 
@@ -92,14 +106,7 @@ watch(locale, () => loadTags());
       <div
         class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
       >
-        <ThumbnailPlaceholder
-          :id="productionView.id"
-          size="lg"
-          :showIcon="true"
-          :showBorder="false"
-          :rounded="false"
-          class="w-full h-full"
-        />
+        <MediaGalleryImage :crop="mainCrop" size="lg" class="w-full h-full" />
       </div>
 
       <!-- Content area -->
