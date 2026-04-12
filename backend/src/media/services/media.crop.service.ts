@@ -7,7 +7,6 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { MediaStorageService } from "../media_storage/service/media_storage.service";
 import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
 import { ConfigService } from "@nestjs/config";
 
@@ -17,18 +16,17 @@ import { ConfigService } from "@nestjs/config";
  */
 @Injectable()
 export class MediaCropService {
+  constructor(
+    private readonly mediaDbService: MediaCropDatabaseService,
+    private readonly configService: ConfigService,
+  ) {}
+
   private get baseUrl() {
     return this.configService.get<string>(
       "MEDIA_BASE_URL",
       "http://127.0.0.1/photos",
     );
   }
-
-  constructor(
-    private readonly mediaDbService: MediaCropDatabaseService,
-    private readonly mediaStorageService: MediaStorageService,
-    private readonly configService: ConfigService,
-  ) {}
 
   /**
    * Fetches a paginated list of crops.
@@ -56,9 +54,7 @@ export class MediaCropService {
    * @returns The newly created (and potentially updated) crop.
    */
   async createCrop(createCrop: CreateMediaCropDto): Promise<MediaCropDto> {
-    // first save the crop in the db -> need it for its id.
-    const savedCrop = await this.mediaDbService.createCrop(createCrop);
-    return savedCrop;
+    return await this.mediaDbService.createCrop(createCrop);
   }
 
   /**

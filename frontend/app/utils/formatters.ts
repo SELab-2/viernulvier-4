@@ -155,3 +155,19 @@ export function formatPrice(price: number, locale: string): string {
     currency: "EUR",
   }).format(price);
 }
+
+/**
+ * Format a url using relative pathing or absolute.
+ * note in case of relative pathing the MEDIA_BASE_URL will be appended infront of it.
+ * @param url is the url in relative or absolute pathing
+ * @returns a valid url you can use to fetch/delete/put anything.
+ */
+export function formatUrl(url: string): string {
+  const config = useRuntimeConfig();
+  const baseUrl = config.public.mediaBaseUrl;
+
+  if (url.startsWith("http")) {
+    return url;
+  }
+  return `${baseUrl}${url}`;
+}
