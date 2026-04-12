@@ -7,7 +7,7 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "start:dev": "nuxt dev --port 3001",
-    "start:prod": "PORT=3001 node .output/server/index.mjs",
+    "start:prod": "cross-env PORT=3001 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",

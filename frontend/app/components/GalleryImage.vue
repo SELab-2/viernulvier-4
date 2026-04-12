@@ -1,18 +1,35 @@
 <template>
-  <img v-if="crop" :src="crop.url" loading="lazy" />
-  <div v-else>
-    <ThumbnailPlaceholder />
-  </div>
+  <img
+    v-if="crop && !hasError"
+    :src="crop.url"
+    loading="lazy"
+    @error="handleImageError"
+  />
+  <ThumbnailPlaceholder
+    v-else
+    size="lg"
+    :showIcon="true"
+    :showBorder="false"
+    :rounded="false"
+    class="w-full h-full"
+  />
 </template>
 <script setup lang="ts">
-import type { CropName } from "@repo/common";
-import { computed } from "vue";
-import type { ItemWithCrops } from "~/utils/galleryFetcher";
+import type { MediaCrop } from "@repo/common";
 
 const props = defineProps<{
-  item: ItemWithCrops;
-  name: CropName;
+  crop: MediaCrop | null;
 }>();
 
-const crop = computed(() => props.item.crops[props.name]);
+const hasError = ref(false);
+const handleImageError = () => {
+  hasError.value = true;
+};
+
+watch(
+  () => props.crop?.url,
+  () => {
+    hasError.value = false;
+  },
+);
 </script>
