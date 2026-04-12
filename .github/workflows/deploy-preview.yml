@@ -49,7 +49,7 @@ jobs:
 
           cd $PR_PATH/frontend
           npm ci
-          npx nuxi clean
+          npx nuxi cleanup
 
           NUXT_API_BASE="https://sel2-4.ugent.be/api" \
           npm run build
