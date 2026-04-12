@@ -6,6 +6,7 @@ import {
   ModifyPrintItemDto,
   PaginationFilterDto,
   ReplacePrintItemDto,
+  PrintType,
 } from "../dto/dto";
 import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
@@ -54,24 +55,33 @@ export class PrintItemDatabaseService {
   /**
    * Get all print items paginated.
    * @param paginationFilters The Filters regarding ordering and pagination.
+   * @param type Optional filter by print type.
    * @returns The PrintItems.
    */
   async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
+    type?: PrintType,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     const returningClause = generateReturningClause(PrintItemSchema);
-
-    const query = `
-      SELECT ${returningClause}
-      FROM print_items
-      LIMIT $1 OFFSET $2;
-    `;
-    const countQuery = generateCountQuery("print_items");
     const offset = paginationFilters.page * paginationFilters.limit;
-
+    let query = `SELECT ${returningClause} FROM print_items`;
+    let countQuery = `SELECT COUNT(*) as count FROM print_items`;
+    const values: any[] = [];
+    const countValues: any[] = [];
+    if (type) {
+      query += ` WHERE type = $1`;
+      countQuery += ` WHERE type = $1`;
+      values.push(type);
+      countValues.push(type);
+    }
+    const limitIndex = values.length + 1;
+    const offsetIndex = values.length + 2;
+    
+    query += ` LIMIT $${limitIndex} OFFSET $${offsetIndex};`;
+    values.push(paginationFilters.limit, offset);
     const [objects, countResult] = await Promise.all([
-      this.db.query<PrintItemDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery, []),
+      this.db.query<PrintItemDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, countValues),
     ]);
 
     return {

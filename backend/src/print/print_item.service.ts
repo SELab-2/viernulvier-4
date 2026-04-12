@@ -6,6 +6,7 @@ import {
   PaginationFilterDto,
   PrintItemDto,
   ReplacePrintItemDto,
+  PrintType,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -29,8 +30,9 @@ export class PrintItemService {
    */
   async getPrintItems(
     paginationFilter: PaginationFilterDto,
+    type?: PrintType,
   ): Promise<PaginatedResponse<PrintItemDto>> {
-    return await this.printItemDbService.getAllPrintItems(paginationFilter);
+    return await this.printItemDbService.getAllPrintItems(paginationFilter, type);
   }
 
   /**

@@ -5,12 +5,23 @@
 import z from "zod";
 import { LocalizedStringSchema } from "./language";
 
+// Enum for Print Types.
+export enum PrintType {
+  AFFICHE = "affiche",
+  BROCHURE = "brochure",
+  DRUKWERK = "drukwerk",
+  PROGRAMMA = "programma",
+}
+
+const PrintTypeZodEnum = z.nativeEnum(PrintType);
+
 // Base Print Item object.
 export const PrintItemSchema = z.object({
   id: z.number(),
   titel: LocalizedStringSchema,
   description: LocalizedStringSchema,
   url: z.string(),
+  type: PrintTypeZodEnum,
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });

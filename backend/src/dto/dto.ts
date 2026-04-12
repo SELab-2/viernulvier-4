@@ -142,6 +142,7 @@ export class ModifyMediaCropDto extends createZodDto(ModifyMediaCropSchema) {}
 export class ReplaceMediaCropDto extends createZodDto(ReplaceMediaCropSchema) {}
 
 // Prints
+export { PrintType } from "@repo/common";
 export class PrintItemDto extends createZodDto(PrintItemSchema) {}
 export class PrintItemViewDto extends createZodDto(PrintItemViewSchema) {}
 export class CreatePrintItemDto extends createZodDto(CreatePrintItemSchema) {}
