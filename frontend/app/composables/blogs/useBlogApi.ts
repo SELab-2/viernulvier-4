@@ -12,7 +12,13 @@ import type {
   PrintItem,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
-import type { DefaultGallery, PrintGallery } from "~/utils/galleryFetcher";
+import {
+  fetchFullGallery,
+  type DefaultGallery,
+  type GalleryWithItems,
+  type ItemWithCrops,
+  type PrintGallery,
+} from "~/utils/galleryFetcher";
 
 interface BlogListOptions {
   paginationFilters?: PaginationFilter;
