@@ -9,39 +9,49 @@ import CalendarGrid from "./CalendarGrid.vue";
 
 export interface MonthData {
   label: string;
-  days:  Array<{ iso: string; day: number } | null>;
+  days: Array<{ iso: string; day: number } | null>;
 }
 
 defineProps<{
-  leftMonth:    MonthData;
-  rightMonth:   MonthData;
-  weekdays:     string[];
-  isSelected:   (iso: string) => boolean;
+  leftMonth: MonthData;
+  rightMonth: MonthData;
+  weekdays: string[];
+  isSelected: (iso: string) => boolean;
   isRangeStart: (iso: string) => boolean;
-  isRangeEnd:   (iso: string) => boolean;
-  isInRange:    (iso: string) => boolean;
-  isToday:      (iso: string) => boolean;
-  isFuture:     (iso: string) => boolean;
+  isRangeEnd: (iso: string) => boolean;
+  isInRange: (iso: string) => boolean;
+  isToday: (iso: string) => boolean;
+  isFuture: (iso: string) => boolean;
   isRangeCapLeft: (iso: string) => boolean;
-  prevLabel:    string;
-  nextLabel:    string;
+  prevLabel: string;
+  nextLabel: string;
 }>();
 
 const emit = defineEmits<{
   (e: "click-day", iso: string): void;
   (e: "hover-day", iso: string): void;
-  (e: "leave-day"             ): void;
-  (e: "prev"                  ): void;
-  (e: "next"                  ): void;
+  (e: "leave-day"): void;
+  (e: "prev"): void;
+  (e: "next"): void;
 }>();
 </script>
 
 <template>
   <div class="cal-months">
     <!-- Prev arrow -->
-    <button class="cal-nav cal-nav--prev" :aria-label="prevLabel" @click="emit('prev')">
+    <button
+      class="cal-nav cal-nav--prev"
+      :aria-label="prevLabel"
+      @click="emit('prev')"
+    >
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M9 2L4 7L9 12"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
 
@@ -81,9 +91,19 @@ const emit = defineEmits<{
     />
 
     <!-- Next arrow -->
-    <button class="cal-nav cal-nav--next" :aria-label="nextLabel" @click="emit('next')">
+    <button
+      class="cal-nav cal-nav--next"
+      :aria-label="nextLabel"
+      @click="emit('next')"
+    >
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M5 2L10 7L5 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M5 2L10 7L5 12"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
   </div>

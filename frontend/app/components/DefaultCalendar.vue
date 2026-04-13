@@ -8,26 +8,30 @@
     text input      → CalendarInputs emits apply-* → parent updates state + navigates
 -->
 <script lang="ts" setup>
-import CalendarTabs   from "~/components/calendar/CalendarTabs.vue";
-import CalendarInputs from "~/components/calendar/CalendarInputs.vue";
-import CalendarMonths from "~/components/calendar/CalendarMonths.vue";
-import CalendarFooter from "~/components/calendar/CalendarFooter.vue";
-import type { CalMode }   from "~/components/calendar/CalendarInputs.vue";
-import type { MonthData } from "~/components/calendar/CalendarMonths.vue";
-import { localIso, localTodayIso, buildWeekdayLabels } from "~/utils/formatters";
+import {
+  localIso,
+  localTodayIso,
+  buildWeekdayLabels,
+  addDays,
+} from "~/utils/formatters";
+import type { CalMode } from "./calendar/CalendarInputs.vue";
+import type { MonthData } from "./calendar/CalendarMonths.vue";
 
 interface DateFilter {
-  after?:  string;
+  after?: string;
   before?: string;
 }
 
-const props = withDefaults(defineProps<{
-  oldestDate?:   string;
-  modelFilter?:  DateFilter;
-}>(), {
-  oldestDate:  "",
-  modelFilter: () => ({}),
-});
+const props = withDefaults(
+  defineProps<{
+    oldestDate?: string;
+    modelFilter?: DateFilter;
+  }>(),
+  {
+    oldestDate: "",
+    modelFilter: () => ({}),
+  },
+);
 
 const emit = defineEmits<{
   (e: "update:filter", filter: DateFilter): void;
@@ -35,25 +39,25 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 
-const intlLocale = computed(() => locale.value === "en" ? "en-GB" : "nl-BE");
+const intlLocale = computed(() => (locale.value === "en" ? "en-GB" : "nl-BE"));
 
 // State
 
-const mode      = ref<CalMode>("range");
+const mode = ref<CalMode>("range");
 const hoverDate = ref<string | null>(null);
-const anchor    = ref<string | null>(null);
-const selected  = ref<string | null>(null);
+const anchor = ref<string | null>(null);
+const selected = ref<string | null>(null);
 const selecting = ref(false);
 
-const today     = new Date();
-const viewYear  = ref(today.getFullYear());
+const today = new Date();
+const viewYear = ref(today.getFullYear());
 const viewMonth = ref(today.getMonth());
 
 // Sync props for CalendarInputs (calendar → text fields)
 // These computed values mirror the current selection into the input components.
 
 const syncSingle = computed(() =>
-  mode.value === "single" ? (selected.value ?? undefined) : undefined
+  mode.value === "single" ? (selected.value ?? undefined) : undefined,
 );
 
 const syncStart = computed(() => {
@@ -70,14 +74,16 @@ const syncEnd = computed(() => {
 
 // Month grid data
 
-const rightYear     = computed(() => viewMonth.value === 11 ? viewYear.value + 1 : viewYear.value);
+const rightYear = computed(() =>
+  viewMonth.value === 11 ? viewYear.value + 1 : viewYear.value,
+);
 const rightMonthIdx = computed(() => (viewMonth.value + 1) % 12);
 
 const weekdays = computed(() => buildWeekdayLabels(intlLocale.value));
 
 function buildMonth(year: number, month: number): MonthData {
   const firstDay = new Date(year, month, 1);
-  const lastDay  = new Date(year, month + 1, 0);
+  const lastDay = new Date(year, month + 1, 0);
   const startDow = (firstDay.getDay() + 6) % 7; // Monday = 0
 
   const days: MonthData["days"] = [];
@@ -86,13 +92,18 @@ function buildMonth(year: number, month: number): MonthData {
     days.push({ iso: localIso(new Date(year, month, d)), day: d });
 
   return {
-    label: firstDay.toLocaleDateString(intlLocale.value, { month: "long", year: "numeric" }),
+    label: firstDay.toLocaleDateString(intlLocale.value, {
+      month: "long",
+      year: "numeric",
+    }),
     days,
   };
 }
 
-const leftMonth  = computed(() => buildMonth(viewYear.value,  viewMonth.value));
-const rightMonth = computed(() => buildMonth(rightYear.value, rightMonthIdx.value));
+const leftMonth = computed(() => buildMonth(viewYear.value, viewMonth.value));
+const rightMonth = computed(() =>
+  buildMonth(rightYear.value, rightMonthIdx.value),
+);
 
 /** ISO of the first visible day (used for oldest-mode range-start capping) */
 const viewportStart = computed(() => {
@@ -108,24 +119,24 @@ const filter = computed<DateFilter>(() => {
   switch (mode.value) {
     case "single":
       return selected.value
-        ? { after: selected.value, before: selected.value }
+        ? { after: selected.value, before: addDays(selected.value, 1) }
         : {};
 
     case "range": {
       if (!anchor.value || !selected.value) return {};
       const [a, b] = sorted(anchor.value, selected.value);
-      return { after: a, before: b };
+      return { after: a, before: addDays(b, 1) };
     }
 
     case "after-selected":
       return anchor.value
-        ? { after: anchor.value, before: todayIso.value }
+        ? { after: anchor.value, before: addDays(todayIso.value, 1) }
         : {};
 
     case "before-selected":
       if (!props.oldestDate) return {};
       return selected.value
-        ? { after: props.oldestDate, before: selected.value }
+        ? { after: props.oldestDate, before: addDays(selected.value, 1) }
         : { after: props.oldestDate };
   }
 });
@@ -135,7 +146,9 @@ const filter = computed<DateFilter>(() => {
 const summaryLabel = computed<string>(() => {
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString(intlLocale.value, {
-      day: "numeric", month: "short", year: "numeric",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
 
   switch (mode.value) {
@@ -143,7 +156,8 @@ const summaryLabel = computed<string>(() => {
       return selected.value ? fmt(selected.value) : "—";
 
     case "range":
-      if (anchor.value && selected.value)  return `${fmt(anchor.value)} → ${fmt(selected.value)}`;
+      if (anchor.value && selected.value)
+        return `${fmt(anchor.value)} → ${fmt(selected.value)}`;
       if (anchor.value && selecting.value) return `${fmt(anchor.value)} → …`;
       return "—";
 
@@ -167,15 +181,19 @@ function sorted(a: string, b: string): [string, string] {
   return a <= b ? [a, b] : [b, a];
 }
 
-const isToday  = (iso: string) => iso === todayIso.value;
+const isToday = (iso: string) => iso === todayIso.value;
 const isFuture = (iso: string) => iso > todayIso.value;
 
 function isSelected(iso: string): boolean {
   switch (mode.value) {
-    case "single":          return iso === selected.value;
-    case "range":           return iso === anchor.value || iso === selected.value;
-    case "after-selected":  return iso === anchor.value || iso === todayIso.value;
-    case "before-selected": return iso === selected.value;
+    case "single":
+      return iso === selected.value;
+    case "range":
+      return iso === anchor.value || iso === selected.value;
+    case "after-selected":
+      return iso === anchor.value || iso === todayIso.value;
+    case "before-selected":
+      return iso === selected.value;
   }
 }
 
@@ -197,7 +215,7 @@ function isRangeEnd(iso: string): boolean {
       return iso === sorted(anchor.value, selected.value)[1];
     return iso === selected.value;
   }
-  if (mode.value === "after-selected")  return iso === todayIso.value;
+  if (mode.value === "after-selected") return iso === todayIso.value;
   if (mode.value === "before-selected") return iso === selected.value;
   return false;
 }
@@ -219,15 +237,20 @@ function isRangeCapLeft(iso: string): boolean {
 
 function isInRange(iso: string): boolean {
   let start: string | null = null;
-  let end:   string | null = null;
+  let end: string | null = null;
 
   if (mode.value === "range") {
-    const a = anchor.value, h = hoverDate.value;
+    const a = anchor.value,
+      h = hoverDate.value;
     if (a && h && selecting.value) [start, end] = sorted(a, h);
-    else if (a && selected.value)  [start, end] = sorted(a, selected.value);
+    else if (a && selected.value) [start, end] = sorted(a, selected.value);
   } else if (mode.value === "after-selected" && anchor.value) {
     [start, end] = sorted(anchor.value, todayIso.value);
-  } else if (mode.value === "before-selected" && selected.value && props.oldestDate) {
+  } else if (
+    mode.value === "before-selected" &&
+    selected.value &&
+    props.oldestDate
+  ) {
     [start, end] = sorted(props.oldestDate, selected.value);
   }
 
@@ -244,24 +267,30 @@ function clickDay(iso: string) {
       break;
     case "range":
       if (!selecting.value || !anchor.value) {
-        anchor.value = iso; selected.value = null; selecting.value = true;
+        anchor.value = iso;
+        selected.value = null;
+        selecting.value = true;
       } else {
         const [a, b] = sorted(anchor.value, iso);
-        anchor.value = a; selected.value = b; selecting.value = false;
+        anchor.value = a;
+        selected.value = b;
+        selecting.value = false;
       }
       break;
     case "after-selected":
-      anchor.value = iso; selecting.value = false;
+      anchor.value = iso;
+      selecting.value = false;
       break;
     case "before-selected":
-      selected.value = iso; selecting.value = false;
+      selected.value = iso;
+      selecting.value = false;
       break;
   }
 }
 
 function navigateTo(iso: string) {
   const parts = iso.split("-").map(Number) as [number, number, number];
-  viewYear.value  = parts[0];
+  viewYear.value = parts[0];
   viewMonth.value = parts[1] - 1;
 }
 
@@ -287,12 +316,14 @@ function onApplySingle(iso: string) {
 
 function onApplyRange(start: string, end: string) {
   const [a, b] = sorted(start, end);
-  anchor.value = a; selected.value = b;
+  anchor.value = a;
+  selected.value = b;
   navigateTo(a);
 }
 
 function onApplyStart(iso: string) {
-  anchor.value = iso; selected.value = null;
+  anchor.value = iso;
+  selected.value = null;
   navigateTo(iso);
 }
 
@@ -309,26 +340,26 @@ function restoreFromFilter(f: DateFilter) {
   if (!f.after && !f.before) return;
 
   if (f.after && f.before && f.after === f.before) {
-    mode.value     = "single";
+    mode.value = "single";
     selected.value = f.after;
     navigateTo(f.after);
     return;
   }
   if (f.after && props.oldestDate && f.after === props.oldestDate && f.before) {
-    mode.value     = "before-selected";
+    mode.value = "before-selected";
     selected.value = f.before;
     navigateTo(f.before);
     return;
   }
   if (f.after && f.before && f.before === todayIso.value) {
-    mode.value   = "after-selected";
+    mode.value = "after-selected";
     anchor.value = f.after;
     navigateTo(f.after);
     return;
   }
   if (f.after && f.before) {
-    mode.value     = "range";
-    anchor.value   = f.after;
+    mode.value = "range";
+    anchor.value = f.after;
     selected.value = f.before;
     navigateTo(f.after);
     return;
@@ -348,7 +379,6 @@ watch(filter, (val) => emit("update:filter", val), { deep: true });
 
 <template>
   <div class="cal-root" @mouseleave="hoverDate = null">
-
     <CalendarTabs :mode="mode" @change="switchMode" />
 
     <CalendarInputs
@@ -379,8 +409,22 @@ watch(filter, (val) => emit("update:filter", val), { deep: true });
       @click-day="clickDay"
       @hover-day="(iso) => (hoverDate = iso)"
       @leave-day="hoverDate = null"
-      @prev="() => { if (viewMonth === 0) { viewYear--; viewMonth = 11; } else viewMonth--; }"
-      @next="() => { if (viewMonth === 11) { viewYear++; viewMonth = 0; } else viewMonth++; }"
+      @prev="
+        () => {
+          if (viewMonth === 0) {
+            viewYear--;
+            viewMonth = 11;
+          } else viewMonth--;
+        }
+      "
+      @next="
+        () => {
+          if (viewMonth === 11) {
+            viewYear++;
+            viewMonth = 0;
+          } else viewMonth++;
+        }
+      "
     />
 
     <CalendarFooter
@@ -389,6 +433,5 @@ watch(filter, (val) => emit("update:filter", val), { deep: true });
       :clear-label="t('stories.calendar.clear')"
       @clear="clearFilter"
     />
-
   </div>
 </template>

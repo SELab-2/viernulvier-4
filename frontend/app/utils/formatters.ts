@@ -4,8 +4,8 @@
 
 /** Serialize a Date to a local-timezone YYYY-MM-DD string (no UTC drift). */
 export function localIso(d: Date): string {
-  const y  = d.getFullYear();
-  const m  = String(d.getMonth() + 1).padStart(2, "0");
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${dd}`;
 }
@@ -13,6 +13,17 @@ export function localIso(d: Date): string {
 /** Return today's date as a local-timezone ISO string. */
 export function localTodayIso(): string {
   return localIso(new Date());
+}
+
+/** Extract the year from a YYYY-MM-DD string without timezone drift. */
+export function isoYear(iso: string): number {
+  return parseInt(iso.split("-")[0] ?? "0", 10);
+}
+
+/** Add n days to an ISO date string, returns a new ISO date string. */
+export function addDays(iso: string, n: number): string {
+  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
+  return localIso(new Date(y, m - 1, d + n));
 }
 
 /**
@@ -25,9 +36,10 @@ export function validateIso(iso: string): string | null {
   const date = new Date(y, m - 1, d);
   if (
     date.getFullYear() !== y ||
-    date.getMonth()    !== m - 1 ||
-    date.getDate()     !== d
-  ) return null;
+    date.getMonth() !== m - 1 ||
+    date.getDate() !== d
+  )
+    return null;
   if (iso > localTodayIso()) return null;
   return iso;
 }
@@ -37,13 +49,15 @@ export function validateIso(iso: string): string | null {
  * Returns a validated ISO string, or null if unparseable / invalid.
  */
 export function parseDate(raw: string): string | null {
-  const val = raw.replace(/[^\d\/\-\.]/g, "").trim();
+  const val = raw.replace(/[^\d/\-.]/g, "").trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return validateIso(val);
-  const parts = val.split(/[\/\-\.]/);
+  const parts = val.split(/[/\-.]/);
   if (parts.length === 3) {
     const [dd, mm, yyyy] = parts;
     if (yyyy?.length === 4 && dd && mm)
-      return validateIso(`${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`);
+      return validateIso(
+        `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`,
+      );
   }
   return null;
 }
@@ -151,4 +165,20 @@ export function formatPrice(price: number, locale: string): string {
     style: "currency",
     currency: "EUR",
   }).format(price);
+}
+
+/**
+ * Format a url using relative pathing or absolute.
+ * note in case of relative pathing the MEDIA_BASE_URL will be appended infront of it.
+ * @param url is the url in relative or absolute pathing
+ * @returns a valid url you can use to fetch/delete/put anything.
+ */
+export function formatUrl(url: string): string {
+  const config = useRuntimeConfig();
+  const baseUrl = String(config.public.mediaBaseUrl);
+
+  if (url.startsWith("http")) {
+    return url;
+  }
+  return `${baseUrl}${url}`;
 }

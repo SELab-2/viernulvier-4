@@ -5,6 +5,7 @@ import {
   MediaGalleryDto,
   MediaItemDto,
   ModifyMediaGalleryDto,
+  PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { MediaGalleryDatabaseService } from "../../database/media/db.media_gallery.service";
@@ -25,10 +26,7 @@ export class MediaGalleryService {
   async getGalleries(
     paginationFilter: PaginationFilter,
   ): Promise<PaginatedResponse<MediaGalleryDto>> {
-    return await this.mediaDbService.getGalleries(
-      paginationFilter.limit,
-      paginationFilter.page,
-    );
+    return await this.mediaDbService.getGalleries(paginationFilter);
   }
 
   /**
@@ -81,8 +79,15 @@ export class MediaGalleryService {
    * @param galleryId The ID of the gallery we want to fetch items for.
    * @returns A list of media items.
    */
-  async getGalleryItems(galleryId: number): Promise<MediaItemDto[]> {
-    return await this.mediaDbService.getItemsByGallery(galleryId);
+  async getGalleryItems(
+    galleryId: number,
+  ): Promise<MediaItemDto[] | PrintItemDto[]> {
+    const gallery = await this.mediaDbService.getGalleryById(galleryId);
+    if (gallery.type === "prints") {
+      return await this.mediaDbService.getPrintItemsByGallery(galleryId);
+    } else {
+      return await this.mediaDbService.getItemsByGallery(galleryId);
+    }
   }
 
   /**
@@ -104,5 +109,32 @@ export class MediaGalleryService {
     itemId: number,
   ): Promise<void> {
     await this.mediaDbService.unlinkItemFromGallery(galleryId, itemId);
+  }
+
+  /**
+   * Links a print item to a media gallery.
+   * @param printItemId The ID of the print item.
+   * @param galleryId The ID of the media gallery.
+   */
+  async linkPrintItemToGallery(
+    printItemId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.mediaDbService.linkPrintItemToGallery(galleryId, printItemId);
+  }
+
+  /**
+   * Unlinks a print item from a media gallery.
+   * @param printItemId The ID of the print item.
+   * @param galleryId The ID of the media gallery.
+   */
+  async unlinkPrintItemFromGallery(
+    printItemId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.mediaDbService.unlinkPrintItemFromGallery(
+      galleryId,
+      printItemId,
+    );
   }
 }
