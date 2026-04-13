@@ -1,18 +1,18 @@
 # Security & Authentication
 
-The Security schemas define the access control and user management system for the VIERNULVIER archive. Access is managed through user accounts (for dashboard access) and API keys (for machine-to-machine or frontend access).
+The Security schemas define the access control and user management system for the VIERNULVIER archive. Access is managed through user accounts (for accessing the admin page/dashboard) and API keys (for machine-to-machine or frontend access).
 
 ---
 
 ## 👤 Account
-An **Account** represents a human user (usually an admin or editor) who can log into the system to manage productions, events, media, and other entities.
+An **Account** represents a human user (usually an admin or editor) who can log into the admin page to manage productions, events, media, and other entities.
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | `id` | `number` | Yes | Unique internal identifier. |
 | `username` | `string` | Yes | The unique login name for the user. |
 | `password` | `string` | Yes | The securely hashed password. |
-| `super_admin` | `boolean` | Yes | If `true`, the user has unrestricted access to all system features. Defaults to `false`. |
+| `super_admin` | `boolean` | Yes | If `true`, the user has unrestricted access to all system features, **including creating and managing other accounts**. Defaults to `false`. |
 
 ---
 

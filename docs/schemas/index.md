@@ -24,6 +24,7 @@ Many fields use a localized structure to support multiple languages. Instead of 
 
 ### Pagination
 List endpoints return a standard paginated response to ensure performance.
+
 | Type | Structure |
 | :--- | :--- |
 | `PaginatedResponse<T>` | `{ "page": number, "limit": number, "totalItems": number, "objects": T[] }` |

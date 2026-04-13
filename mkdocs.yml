@@ -34,8 +34,8 @@ nav:
       - Overview: schemas/index.md
       - Core Entities: schemas/entities.md
       - Metadata: schemas/metadata.md
-      - Authentication: schemas/auth.md
       - Media: schemas/media.md
+      - Authentication: schemas/auth.md
   - Testing:
       - Overview: testing/index.md
       - Backend: testing/backend.md

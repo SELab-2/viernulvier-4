@@ -56,5 +56,5 @@ A **Media Crop** represents a specific, optimized cutout or scaled version of a 
 | :--- | :--- | :--- | :--- |
 | `id` | `number` | Yes | Unique internal identifier. |
 | `legacy_id` | `string` | No | Identifier used for historical data migration. |
-| `name` | `CropName` (Enum) | Yes | The specific UI target for the crop (e.g., `'hd_ready'`, `'FE3_header'`). |
+| `name` | `CropName` (Enum) | Yes | The specific UI target for the crop.<br><br>**Allowed values:**<br>• `'hd_ready'`<br>• `'FE3_header'`<br>• `'square'`<br>• `'portrait'`<br>• `'thumbnail'` |
 | `url` | `string` | Yes | The storage URL for the generated crop file. |
