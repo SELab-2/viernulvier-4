@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, nextTick } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 
 const { t, locale } = useI18n();
@@ -21,8 +21,8 @@ const production = {
     nl: "Een knotsgekke muzikale show vol dierenplezier.",
   },
   description1: {
-    en: `<p>Kapitein Winokio neemt je mee naar de vrolijkste boerderij van het land.<br>Is iedereen daar? Zitten jullie klaar?<br>Lichten uit en spots aan want de show gaat beginnen!</p>\r\n<p>Samen met de muziekmatrozen, Mevrouw de Poes en alle dieren op de boerderij zingen we loeiende liedjes, kikkermelodietjes en stampen we stoer mee op het ritme van de hele gróte .... oh, neen, dat verklappen we nog niet. Dat blijft nog even een verrassing! De koe doet “boe!”, het varken knort en zelfs de leeuw en de octopus zingen luidkeels mee, want op de boerderij van Kapitein Winokio zijn ALLE dieren welkom.</p>\r\n<p>Een knotsgekke muzikale show vol dierenplezier, meezingvreugde en boerderijgrappen en grollen.</p>\r\n<p>Dit is nog een test voor een extra lange description. Dit is nog een test voor een extra lange description.</p>`,
-    nl: `<p>Kapitein Winokio neemt je mee naar de vrolijkste boerderij van het land.<br>Is iedereen daar? Zitten jullie klaar?<br>Lichten uit en spots aan want de show gaat beginnen!</p>\r\n<p>Samen met de muziekmatrozen, Mevrouw de Poes en alle dieren op de boerderij zingen we loeiende liedjes, kikkermelodietjes en stampen we stoer mee op het ritme van de hele gróte .... oh, neen, dat verklappen we nog niet. Dat blijft nog even een verrassing! De koe doet “boe!”, het varken knort en zelfs de leeuw en de octopus zingen luidkeels mee, want op de boerderij van Kapitein Winokio zijn ALLE dieren welkom.</p>\r\n<p>Een knotsgekke muzikale show vol dierenplezier, meezingvreugde en boerderijgrappen en grollen.</p>\r\n<p>Dit is nog een test voor een extra lange description. Dit is nog een test voor een extra lange description.</p>`,
+    en: `<p>Kapitein Winokio neemt je mee naar de vrolijkste boerderij van het land.<br>Is iedereen daar? Zitten jullie klaar?<br>Lichten uit en spots aan want de show gaat beginnen!</p>\r\n<p>Samen met de muziekmatrozen, Mevrouw de Poes en alle dieren op de boerderij zingen we loeiende liedjes, kikkermelodietjes en stampen we stoer mee op het ritme van de hele gróte .... oh, neen, dat verklappen we nog niet. Dat blijft nog even een verrassing! De koe doet “boe!”, het varken knort en zelfs de leeuw en de octopus zingen luidkeels mee, want op de boerderij van Kapitein Winokio zijn ALLE dieren welkom.</p>\r\n<p>Een knotsgekke muzikale show vol dierenplezier, meezingvreugde en boerderijgrappen en grollen.</p>`,
+    nl: `<p>Kapitein Winokio neemt je mee naar de vrolijkste boerderij van het land.<br>Is iedereen daar? Zitten jullie klaar?<br>Lichten uit en spots aan want de show gaat beginnen!</p>\r\n<p>Samen met de muziekmatrozen, Mevrouw de Poes en alle dieren op de boerderij zingen we loeiende liedjes, kikkermelodietjes en stampen we stoer mee op het ritme van de hele gróte .... oh, neen, dat verklappen we nog niet. Dat blijft nog even een verrassing! De koe doet “boe!”, het varken knort en zelfs de leeuw en de octopus zingen luidkeels mee, want op de boerderij van Kapitein Winokio zijn ALLE dieren welkom.</p>\r\n<p>Een knotsgekke muzikale show vol dierenplezier, meezingvreugde en boerderijgrappen en grollen.</p>`,
   },
   description2: {
     nl: `<p>Het publiek kan voor de voorstelling verzoeknummers doorgeven via de website van de kapitein. Zo wordt elke boerderij-avond een unieke belevenis voor jong en oud.</p>`,
@@ -118,9 +118,6 @@ const goBack = () => {
   }
 };
 
-const isExpanded = ref(false);
-const CHARACTER_LIMIT = 800;
-
 const productionId = computed(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -137,6 +134,8 @@ const isValid = (val: any) => {
     s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
   );
 };
+
+const image = undefined;
 const bannerGradient = computed(() =>
   pickPlaceholderGradient(productionId.value ?? 0),
 );
@@ -150,22 +149,29 @@ const cleanText = (text: string | null | undefined) => {
     .replace(/\n/g, "<br />");
 };
 
+const isExpanded = ref(false);
+const showReadMoreButton = ref(false);
+const descriptionRef = ref<HTMLElement | null>(null);
+
+const checkOverflow = () => {
+  const el = descriptionRef.value;
+  if (el) {
+    showReadMoreButton.value = el.scrollHeight > el.clientHeight;
+  }
+};
+onMounted(async () => {
+  await nextTick();
+  checkOverflow();
+  window.addEventListener("resize", checkOverflow);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", checkOverflow);
+});
+
 const fullDescription = computed(
   () => cleanText(production.description1[locale.value as "nl" | "en"]) || "",
 );
-
-const displayedDescription = computed(() => {
-  const desc = fullDescription.value;
-  if (isExpanded.value || desc.length <= CHARACTER_LIMIT) {
-    return desc;
-  }
-  return desc.slice(0, CHARACTER_LIMIT) + "...";
-});
-
-const isLongDescription = computed(
-  () => fullDescription.value.length > CHARACTER_LIMIT,
-);
-const image = undefined;
 </script>
 
 <template>
@@ -248,12 +254,18 @@ const image = undefined;
           </div>
 
           <div
-            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
-            v-html="displayedDescription"
+            ref="descriptionRef"
+            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
+            :class="[
+              isExpanded
+                ? 'line-clamp-none'
+                : 'line-clamp-[6] md:line-clamp-[8]',
+            ]"
+            v-html="fullDescription"
           ></div>
 
           <button
-            v-if="isLongDescription"
+            v-if="showReadMoreButton || isExpanded"
             @click="isExpanded = !isExpanded"
             class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
           >

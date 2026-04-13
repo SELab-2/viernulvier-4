@@ -129,6 +129,9 @@ const cleanText = (text: string | null | undefined) => {
     .replace(/\n/g, "<br />");
 };
 
+const fullDescription = computed(
+  () => cleanText(production.value?.description1) || "",
+);
 const isExpanded = ref(false);
 const showReadMoreButton = ref(false);
 const descriptionRef = ref<HTMLElement | null>(null);
@@ -136,24 +139,18 @@ const descriptionRef = ref<HTMLElement | null>(null);
 const checkOverflow = () => {
   const el = descriptionRef.value;
   if (el) {
-    // Als de tekst groter is dan wat we laten zien, moet de knop aan
     showReadMoreButton.value = el.scrollHeight > el.clientHeight;
   }
 };
 onMounted(async () => {
-  await nextTick(); // Wacht tot DOM gerenderd is
+  await nextTick();
   checkOverflow();
-  // Optioneel: check opnieuw als het schermformaat verandert
   window.addEventListener("resize", checkOverflow);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", checkOverflow);
 });
-
-const fullDescription = computed(
-  () => cleanText(production.value?.description1) || "",
-);
 </script>
 
 <template>
@@ -235,16 +232,16 @@ const fullDescription = computed(
             </p>
           </div>
 
-          <div
+          <divs
             ref="descriptionRef"
             class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
             :class="[
               isExpanded
                 ? 'line-clamp-none'
-                : 'line-clamp-[12] md:line-clamp-[8]',
+                : 'line-clamp-[6] md:line-clamp-[8]',
             ]"
             v-html="fullDescription"
-          ></div>
+          ></divs>
 
           <button
             v-if="showReadMoreButton || isExpanded"
