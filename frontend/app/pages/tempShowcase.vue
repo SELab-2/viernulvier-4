@@ -114,7 +114,7 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push("/productions"); // Fallback
+    router.push("/archive"); // Fallback
   }
 };
 
@@ -211,7 +211,14 @@ const fullDescription = computed(
 
         <div class="text-foreground">
           <h1
-            class="font-brand text-6xl lg:text-8xl font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
+            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
+            :class="[
+              production.titel[locale].length > 35
+                ? 'text-4xl lg:text-6xl'
+                : production.titel[locale].length > 25
+                  ? 'text-5xl lg:text-7xl'
+                  : 'text-6xl lg:text-8xl',
+            ]"
           >
             {{ production.titel[locale as "nl" | "en"] }}
           </h1>
