@@ -36,7 +36,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  limit: 3,
+  limit: 5,
 });
 
 const isExpanded = ref(false);
@@ -69,6 +69,8 @@ const formatTime = (dateStr: string) => {
     minute: "2-digit",
   });
 };
+
+//TODO: doors_at? intermission_at?
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat(locale.value, {

@@ -72,6 +72,24 @@ const production = {
         { id: 202, name: "Reductie", price: 22.0 },
       ],
     },
+    {
+      id: 5,
+      starttime: "2027-03-10T11:00:00Z",
+      location: { location: "Balzaal, Vooruit" },
+      prices: [
+        { id: 201, name: "Standaard", price: 27.0 },
+        { id: 202, name: "Reductie", price: 22.0 },
+      ],
+    },
+    {
+      id: 6,
+      starttime: "2027-04-10T11:00:00Z",
+      location: { location: "Minard Schouwburg" },
+      prices: [
+        { id: 201, name: "Standaard", price: 27.0 },
+        { id: 202, name: "Reductie", price: 22.0 },
+      ],
+    },
   ],
 
   stories: [
@@ -267,6 +285,7 @@ const fullDescription = computed(
               isExpanded
                 ? 'line-clamp-none'
                 : 'line-clamp-[6] md:line-clamp-[8]',
+              showReadMoreButton && !isExpanded ? 'should-fade' : '',
             ]"
             v-html="fullDescription"
           ></div>
@@ -280,7 +299,7 @@ const fullDescription = computed(
           </button>
         </div>
 
-        <div class="mt-8 mb-16">
+        <div class="mt-12 mb-16">
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
             {{ t("production.events") }}
           </h1>
@@ -341,8 +360,7 @@ const fullDescription = computed(
   opacity: 0.7;
 }
 
-[class*="line-clamp-[6]"],
-[class*="line-clamp-[8]"] {
+.should-fade {
   mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }

@@ -246,6 +246,7 @@ onBeforeUnmount(() => {
               isExpanded
                 ? 'line-clamp-none'
                 : 'line-clamp-[6] md:line-clamp-[8]',
+              showReadMoreButton && !isExpanded ? 'should-fade' : '',
             ]"
             v-html="fullDescription"
           ></div>
@@ -259,7 +260,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <div class="mt-8 mb-16">
+        <div class="mt-12 mb-16">
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
             {{ t("production.events") }}
           </h1>
@@ -317,10 +318,9 @@ onBeforeUnmount(() => {
   opacity: 0.7;
 }
 
-[class*="line-clamp-[6]"],
-[class*="line-clamp-[8]"] {
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+.should-fade {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
 }
 
 .line-clamp-none {
