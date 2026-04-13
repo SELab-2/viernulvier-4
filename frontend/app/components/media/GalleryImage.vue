@@ -8,6 +8,7 @@
   />
   <ThumbnailPlaceholder
     v-else
+    :id="objectId"
     :size="size"
     :showIcon="showIcon"
     :showBorder="showBorder"
@@ -19,6 +20,7 @@ import type { MediaCrop } from "@repo/common";
 import { formatUrl } from "#imports";
 
 const props = defineProps<{
+  objectId?: number;
   crop: MediaCrop | null;
   size?: "sm" | "md" | "lg" | "fill" | number;
   showIcon?: boolean;

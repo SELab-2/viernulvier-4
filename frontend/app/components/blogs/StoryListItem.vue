@@ -56,7 +56,12 @@ watch(
       class="w-32 sm:w-48 shrink-0 relative overflow-hidden rounded-lg"
       style="min-height: 84px"
     >
-      <MediaGalleryImage :crop="mainCrop" :rounded="true" :show-icon="true" />
+      <MediaGalleryImage
+        :object-id="props.story.id"
+        :crop="mainCrop"
+        :rounded="true"
+        :show-icon="true"
+      />
     </div>
 
     <!-- Text content -->

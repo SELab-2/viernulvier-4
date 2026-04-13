@@ -107,6 +107,7 @@ watch(locale, () => loadTags());
         class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
       >
         <MediaGalleryImage
+          :object-id="productionView.id"
           :crop="mainCrop"
           :show-icon="true"
           size="lg"

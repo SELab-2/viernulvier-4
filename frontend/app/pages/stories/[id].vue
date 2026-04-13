@@ -117,6 +117,7 @@ watch(
       >
         <MediaGalleryImage
           class="absolute inset-0 w-full h-full object-cover z-0"
+          :object-id="blog.id"
           :crop="headerCrop"
         />
 
