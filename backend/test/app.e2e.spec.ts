@@ -16,6 +16,7 @@ import { MediaGalleryDatabaseService } from "../src/database/media/db.media_gall
 import { AppModule } from "../src/app.module";
 import { Server } from "http";
 import { PaginatedResponse } from "@repo/common";
+import { MediaStorageService } from "../src/media/media_storage/media_storage.service";
 
 // ==========================================
 // MOCK DATA (Raw & View Variants)
@@ -272,7 +273,7 @@ const mockMediaGalleryDbService = () => ({
 // ==========================================
 async function buildApp(): Promise<INestApplication> {
   const moduleFixture: TestingModule = await Test.createTestingModule({
-    imports: [AppModule], // <-- Use AppModule globally here
+    imports: [AppModule],
   })
     .overrideGuard(ApiKeyGuard)
     .useValue({ canActivate: jest.fn(() => true) })
@@ -296,7 +297,12 @@ async function buildApp(): Promise<INestApplication> {
     .useValue(mockMediaGalleryDbService())
     .overrideProvider(MediaCropDatabaseService)
     .useValue(mockMediaCropsDbService())
-
+    .overrideProvider(MediaStorageService)
+    .useValue({
+      save: jest.fn().mockResolvedValue("http://mock-url.com/image.jpg"),
+      get: jest.fn().mockResolvedValue(Buffer.from("mock")),
+      delete: jest.fn().mockResolvedValue(undefined),
+    })
     .overrideProvider(AppLogger)
     .useValue({
       log: jest.fn(),

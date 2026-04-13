@@ -49,9 +49,17 @@ export function useProductionApi() {
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
-    const queryString = new URLSearchParams(
-      cleanParams as Record<string, string>,
-    ).toString();
+    const searchParams = new URLSearchParams();
+
+    Object.entries(cleanParams).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => searchParams.append(key, String(v)));
+      } else {
+        searchParams.append(key, String(value));
+      }
+    });
+
+    const queryString = searchParams.toString();
 
     const query = queryString ? `?${queryString}` : "";
 

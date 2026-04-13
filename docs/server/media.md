@@ -12,14 +12,17 @@ the files actually live.
 
 ## Production
 
-In production, Nginx serves media files from `/var/www/photos` on the server.
+In production, Nginx serves media files from `/var/www/photos` (print files from `/var/www/prints`) on the server.
 
 ### How It Works
 
 - The backend saves files to `/var/www/photos` (via HTTP PUT to itself on `127.0.0.1`)
 - Nginx serves them publicly at `https://sel2-4.ugent.be/photos/<path>`
 - Only requests from `127.0.0.1` (the backend itself) can PUT or DELETE files
-- The full URL is stored in the database, e.g. `https://sel2-4.ugent.be/photos/1/foto.jpg`
+- The full URL or relative path is stored in the database, e.g. `https://sel2-4.ugent.be/photos/1/foto.jpg`
+
+> note: the relative path is stored when saving to your media server that way you can simply change your domain and
+> update the MEDIA_BASE_URL env var.
 
 ### Directory Structure
 
@@ -43,15 +46,8 @@ the project directory.
 
 ### How It Works
 
-The `LocalMediaStorage` class strips the dev base URL from any incoming URL to get the relative file path, then
-reads/writes directly on disk:
-
-```
-URL:       http://127.0.0.1:3000/photos/1/foto.jpg
-Strip:     http://127.0.0.1:3000/photos
-Remaining: /1/foto.jpg
-Full path: <project_root>/assets/media/1/foto.jpg
-```
+The `LocalMediaStorage` class accepts the relative pathing from in the database and translates them into a valid path to
+the photos in you local directory.
 
 This means the same URL format is used everywhere — the service just resolves it differently depending on the
 environment.
@@ -83,18 +79,19 @@ constructor()
 
 ### Environment Variables
 
-| Variable         | Description                       | Default (dev)                  | Default (prod)                   |
-|------------------|-----------------------------------|--------------------------------|----------------------------------|
-| `MEDIA_BASE_URL` | Base URL used to build media URLs | `http://127.0.0.1:3000/photos` | `https://sel2-4.ugent.be/photos` |
+| Variable         | Description                       | Default (dev)           | Default (prod)            |
+|------------------|-----------------------------------|-------------------------|---------------------------|
+| `MEDIA_BASE_URL` | Base URL used to build media URLs | `http://127.0.0.1:3000` | `https://sel2-4.ugent.be` |
 
 Set these in your `.env` files:
+> Note: notice that it stops before the first /.
 
 ```bash
 # .env.development
-MEDIA_BASE_URL=http://127.0.0.1:3000/media_dev
+MEDIA_BASE_URL=http://127.0.0.1:3000 # not really relevant in dev.
 
 # .env.production
-MEDIA_BASE_URL=https://sel2-4.ugent.be/photos
+MEDIA_BASE_URL=https://sel2-4.ugent.be
 ```
 
 > **Important:** Always use `npm run start:dev` for development. Running `npm run start:prod` locally will use

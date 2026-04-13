@@ -136,7 +136,7 @@
   /* Accent */
   --accent: #8224e3;
   --accent-hover: #9333ea;
-  --accent-light: rgba(130, 36, 227, 0.15);
+  --accent-light: #1f0f3d;
   --accent-foreground: #ffffff;
 
   /* Card */
@@ -193,6 +193,9 @@
   --color-card-border: var(--card-border);
   --color-card-hover: var(--card-hover);
   --color-accent: var(--accent);
+  --accent-hover: var(--accent-hover);
+  --accent-light: var(--accent-light);
+  --accent-foreground: var(--accent-foreground);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
   --color-action-blue-border: var(--action-blue-border);

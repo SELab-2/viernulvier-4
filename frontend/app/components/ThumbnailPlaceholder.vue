@@ -15,7 +15,7 @@ import { pickPlaceholderGradient } from "../utils/constants";
 
 const props = defineProps<{
   id?: number;
-  size?: "sm" | "md" | "lg" | number;
+  size?: "sm" | "md" | "lg" | "fill" | number;
   showIcon?: boolean;
   showBorder?: boolean;
   rounded?: boolean;
@@ -31,7 +31,8 @@ const containerClass = computed(() => {
   if (rounded) parts.push("rounded-lg");
   if (showBorder) parts.push("border border-card-border");
 
-  if (props.size === "sm") parts.push("w-32 h-20");
+  if (props.size === "fill") parts.push("w-full h-full");
+  else if (props.size === "sm") parts.push("w-32 h-20");
   else if (props.size === "lg") parts.push("w-72 h-48");
   else parts.push("w-48 h-32");
 

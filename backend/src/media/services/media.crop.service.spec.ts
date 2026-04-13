@@ -10,13 +10,11 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { MediaStorageService } from "../media_storage/service/media_storage.service";
 import { ConfigService } from "@nestjs/config"; // <-- 1. Import ConfigService
 
 describe("MediaCropService", () => {
   let service: MediaCropService;
   let mediaDbService: jest.Mocked<MediaCropDatabaseService>;
-  const mockMediaStorageService = jest.mocked<MediaStorageService>;
 
   const mockCrop: MediaCropDto = {
     id: 1,
@@ -51,10 +49,6 @@ describe("MediaCropService", () => {
         {
           provide: MediaCropDatabaseService,
           useValue: mockMediaDbService,
-        },
-        {
-          provide: MediaStorageService,
-          useValue: mockMediaStorageService,
         },
         // 3. Inject the mock ConfigService into the testing module
         {
