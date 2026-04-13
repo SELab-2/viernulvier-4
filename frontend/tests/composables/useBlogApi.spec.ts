@@ -95,4 +95,30 @@ describe("useBlogApi", () => {
     void remove(1);
     expect(mockDel).toHaveBeenCalledWith("/blogs/1");
   });
+
+  describe("media", () => {
+    it("getMediaGallery calls GET /blogs/:id/media?type=default", () => {
+      const { getMediaGallery } = useBlogApi();
+      void getMediaGallery(1);
+      expect(mockGet).toHaveBeenCalledWith("/blogs/1/media?type=default");
+    });
+
+    it("getPrintsGallery calls GET /blogs/:id/media?type=prints", () => {
+      const { getPrintsGallery } = useBlogApi();
+      void getPrintsGallery(1);
+      expect(mockGet).toHaveBeenCalledWith("/blogs/1/media?type=prints");
+    });
+
+    it("linkMedia calls PUT /blogs/:id/media/:galleryId", () => {
+      const { linkMedia } = useBlogApi();
+      void linkMedia(1, 2);
+      expect(mockPut).toHaveBeenCalledWith("/blogs/1/media/2", {});
+    });
+
+    it("unlinkMedia calls DELETE /blogs/:id/media/:galleryId", () => {
+      const { unlinkMedia } = useBlogApi();
+      void unlinkMedia(1, 2);
+      expect(mockDel).toHaveBeenCalledWith("/blogs/1/media/2");
+    });
+  });
 });

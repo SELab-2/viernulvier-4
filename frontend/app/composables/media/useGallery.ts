@@ -59,7 +59,9 @@ export function useGallery() {
    * @param gallery The gallery.
    * @returns A list of all print items.
    */
-  const getPrints = (gallery: GalleryWithItems<PrintItem>): PrintItem[] => {
+  const getPrints = (
+    gallery: GalleryWithItems<PrintItem> | null | undefined,
+  ): PrintItem[] => {
     if (!gallery || !gallery.items.length) return [];
 
     const prints = gallery.items;

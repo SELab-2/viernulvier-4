@@ -28,7 +28,6 @@ const isLoading = ref(false); // Good practice to add a loading state
 const galleryImages = computed(() => {
   return galleries.value.map((gallery) => {
     const crop = getMainImageCrop(gallery, "hd_ready");
-    console.log(toRaw(crop));
     return crop;
   }); // Replace 'default' with your preferred crop name
 });

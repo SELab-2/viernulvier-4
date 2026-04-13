@@ -52,8 +52,6 @@ const formattedUrl = computed(() => {
 
   const url = formatUrl(props.crop.url);
 
-  console.log(url);
-
   return url;
 });
 
