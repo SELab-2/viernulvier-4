@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse } from "@repo/common";
-import {usePrintApi} from "../../composables/usePrintApi";
+import { usePrintApi } from "../../composables/usePrintApi";
 
 const { t, locale } = useI18n();
-const { getAll }    = usePrintApi();
+const { getAll } = usePrintApi();
+
+const PRINT_TYPES = ["AFFICHE", "BROCHURE", "DRUKWERK", "PROGRAMMA"] as const; //TODO replace/remove later when official enum comes
+type PrintType = (typeof PRINT_TYPES)[number];
 
 // Filters
 const searchQuery = ref("");
 
 // Pagination state
-const LIMIT         = 20;
-const page          = ref(0);
-const totalItems    = ref(0);
-const prints        = ref<PrintItemView[]>([]);
-const pending       = ref(false);
+const LIMIT = 20;
+const page = ref(0);
+const totalItems = ref(0);
+const prints = ref<PrintItemView[]>([]);
+const pending = ref(false);
 const isLoadingMore = ref(false);
-const fetchError    = ref<Error | null>(null);
+const fetchError = ref<Error | null>(null);
 
 const hasMore = computed(() => prints.value.length < totalItems.value);
 
@@ -23,7 +26,7 @@ function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
   const r = result as any;
   if (r?.data && "objects" in r.data) return r.data;
-  if ("objects" in (r as object))     return r as any;
+  if ("objects" in (r as object)) return r as any;
   return null;
 }
 
@@ -31,9 +34,9 @@ async function loadPage(reset = false) {
   if (!reset && (isLoadingMore.value || !hasMore.value)) return;
 
   if (reset) {
-    page.value       = 0;
-    prints.value     = [];
-    pending.value    = true;
+    page.value = 0;
+    prints.value = [];
+    pending.value = true;
     fetchError.value = null;
   } else {
     isLoadingMore.value = true;
@@ -44,23 +47,24 @@ async function loadPage(reset = false) {
       paginationFilters: {
         page: page.value,
         limit: LIMIT,
-        descending: true },
+        descending: true,
+      },
       languageFilters: { lang: locale.value as "nl" | "en" },
       printFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
       },
     });
 
-    const paged      = unwrap(raw);
+    const paged = unwrap(raw);
     totalItems.value = paged?.totalItems ?? 0;
-    const items      = (paged?.objects ?? []) as PrintItemView[];
+    const items = (paged?.objects ?? []) as PrintItemView[];
 
     if (reset) prints.value = items;
-    else        prints.value.push(...items);
+    else prints.value.push(...items);
   } catch (e) {
     fetchError.value = e as Error;
   } finally {
-    pending.value       = false;
+    pending.value = false;
     isLoadingMore.value = false;
   }
 }
@@ -89,61 +93,71 @@ watch(sentinel, (el) => {
 onMounted(() => loadPage(true));
 onUnmounted(() => io?.disconnect());
 
-const activeFilters = ref<string[]>([]);
+const activeFilter = ref<PrintType>(PRINT_TYPES[0]);
 </script>
 
 <template>
-  <div class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200">
-
+  <div
+    class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
+  >
     <PrintsHeader />
 
     <PrintsToolbar
-        @update:search="searchQuery = $event"
-        @update:types="activeFilters = $event"
+      @update:search="searchQuery = $event"
+      @update:types="activeFilter = $event"
     />
 
     <main class="container mx-auto px-4 max-w-5xl pt-4 pb-8 sm:pt-6 sm:pb-12">
-
       <PrintsSkeleton v-if="pending" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
-        <p class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20">
-          {{ t("prints.noPrints") }} <!--TODO this one i still have to add but im waiting for that other PR so i can chagne up the names a little -->
-
+        <p
+          class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20"
+        >
+          {{ t("prints.noPrints") }}
+          <!--TODO this one i still have to add but im waiting for that other PR so i can chagne up the names a little -->
         </p>
-        <p class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400">
+        <p
+          class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400"
+        >
           {{ fetchError.message }}
         </p>
         <button
-            class="mt-4 px-6 py-3 border font-brand font-black text-[11px] uppercase tracking-widest transition-all border-border text-muted-foreground hover:border-foreground hover:text-foreground hover:bg-muted"
-            @click="loadPage(true)"
+          class="mt-4 px-6 py-3 border font-brand font-black text-[11px] uppercase tracking-widest transition-all border-border text-muted-foreground hover:border-foreground hover:text-foreground hover:bg-muted"
+          @click="loadPage(true)"
         >
           {{ t("prints.retry") }}
         </button>
       </div>
 
       <template v-else>
-        <PrintsDisplay :prints="prints" :active-types="activeFilters" />
+        <PrintsDisplay :prints="prints" :active-type="activeFilter" />
 
         <div ref="sentinel" class="h-1" aria-hidden="true" />
 
         <div
-            v-if="isLoadingMore"
-            class="flex items-center justify-center gap-3 py-10 text-muted-foreground"
+          v-if="isLoadingMore"
+          class="flex items-center justify-center gap-3 py-10 text-muted-foreground"
         >
-          <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <svg
+            class="w-4 h-4 animate-spin"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
             <path d="M21 12a9 9 0 1 1-6.219-8.56" />
           </svg>
-          <span class="font-brand font-black text-[10px] uppercase tracking-widest">
+          <span
+            class="font-brand font-black text-[10px] uppercase tracking-widest"
+          >
             {{ t("prints.loading") }}
           </span>
         </div>
       </template>
-
     </main>
-    <ScrollToTop/>
+    <ScrollToTop />
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
