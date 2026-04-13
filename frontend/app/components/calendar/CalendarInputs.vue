@@ -204,7 +204,7 @@ watch(
       </div>
     </template>
 
-    <!-- After selected (was: date-to-now) -->
+    <!-- After selected -->
     <template v-else-if="mode === 'after-selected'">
       <div class="cal-input-group">
         <label class="cal-input-label">
@@ -242,13 +242,13 @@ watch(
       </div>
     </template>
 
-    <!-- Before selected (was: oldest) -->
+    <!-- Before selected -->
     <template v-else>
       <div class="cal-input-group">
         <label class="cal-input-label">{{
           t("stories.calendar.startDate")
         }}</label>
-        <div class="cal-badge cal-badge--muted">
+        <div class="cal-badge">
           {{ t("stories.calendar.oldest") }}
         </div>
       </div>
