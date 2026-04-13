@@ -232,7 +232,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <divs
+          <div
             ref="descriptionRef"
             class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
             :class="[
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
                 : 'line-clamp-[6] md:line-clamp-[8]',
             ]"
             v-html="fullDescription"
-          ></divs>
+          ></div>
 
           <button
             v-if="showReadMoreButton || isExpanded"
@@ -308,5 +308,16 @@ onBeforeUnmount(() => {
 
 .description-content :deep(a:hover) {
   opacity: 0.7;
+}
+
+[class*="line-clamp-[6]"],
+[class*="line-clamp-[8]"] {
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+.line-clamp-none {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
 }
 </style>

@@ -333,4 +333,15 @@ const fullDescription = computed(
 .description-content :deep(a:hover) {
   opacity: 0.7;
 }
+
+[class*="line-clamp-[6]"],
+[class*="line-clamp-[8]"] {
+  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+}
+
+.line-clamp-none {
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
 </style>
