@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { useGallery } from "../../app/composables/media/useGallery"; // Update path if needed
+import { useGallery } from "../../app/composables/media/useGallery";
 import type { MediaCrop, PrintItem } from "@repo/common";
 import type {
   GalleryWithItems,
