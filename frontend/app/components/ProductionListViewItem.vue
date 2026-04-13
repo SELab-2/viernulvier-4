@@ -104,7 +104,13 @@ watch(locale, () => loadTags());
     <div
       class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
     >
-      <MediaGalleryImage :crop="mainCrop" size="md" :rounded="true" />
+      <MediaGalleryImage
+        :crop="mainCrop"
+        size="md"
+        :rounded="true"
+        :show-icon="true"
+        class="object-cover"
+      />
 
       <div class="flex-1 min-w-0">
         <div class="flex items-start justify-between gap-3">
