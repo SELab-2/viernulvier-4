@@ -20,6 +20,10 @@ import type { ProductionView, PaginatedResponse } from "@repo/common";
 import { useArchiveView } from "../../composables/useArchiveView";
 import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
 
 const {
   viewMode,
@@ -75,8 +79,11 @@ async function loadPage(page: number) {
 }
 
 function resetAndLoad() {
-  currentPage.value = 1;
-  loadPage(1);
+  if (currentPage.value === 1) {
+    loadPage(1);
+  } else {
+    currentPage.value = 1;
+  }
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -84,10 +91,38 @@ onUnmounted(() => {
   if (searchTimer) clearTimeout(searchTimer);
 });
 
-onMounted(() => loadPage(1));
+onMounted(() => {
+  const pageFromUrl = parseInt(route.query.page as string) || 1;
+  currentPage.value = pageFromUrl;
+  loadPage(pageFromUrl);
+});
+
+watch(
+  () => route.query.page,
+  (newPage) => {
+    if (route.path !== "/archive") return;
+
+    const pageNum = parseInt(newPage as string) || 1;
+
+    if (currentPage.value !== pageNum) {
+      currentPage.value = pageNum;
+    }
+
+    loadPage(pageNum);
+  },
+  { immediate: false },
+);
 
 // Reload when pagination changes
-watch(currentPage, (page) => loadPage(page));
+watch(currentPage, (newPage) => {
+  if (route.path !== "/archive") return;
+
+  if (newPage.toString() !== route.query.page) {
+    router.push({
+      query: { ...route.query, page: newPage.toString() },
+    });
+  }
+});
 
 // Reset + reload when filters change
 watch(locale, resetAndLoad);
