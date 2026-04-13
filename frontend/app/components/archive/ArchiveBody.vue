@@ -47,6 +47,9 @@ const error = ref<string | null>(null);
 async function loadPage(page: number) {
   loading.value = true;
   error.value = null;
+
+  let targetedPage = Math.max(1, page);
+
   try {
     const resp = await getAll({
       productionFilters: {
@@ -56,17 +59,32 @@ async function loadPage(page: number) {
         date_before: dateFilter.value.before || undefined,
       },
       paginationFilters: {
-        page: page - 1, // backend uses 0-based pagination
+        page: targetedPage - 1, // backend uses 0-based pagination
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
       languageFilters: { lang: locale.value },
     });
+
     if (resp.data) {
       const data = resp.data as PaginatedResponse<ProductionView>;
       productions.value = data.objects;
       totalItems.value = data.totalItems;
-      totalPages.value = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE));
+      const calculatedTotalPages = Math.max(
+        1,
+        Math.ceil(data.totalItems / PAGE_SIZE),
+      );
+      totalPages.value = calculatedTotalPages;
+
+      if (targetedPage > calculatedTotalPages) {
+        currentPage.value = calculatedTotalPages;
+        await loadPage(calculatedTotalPages);
+        return;
+      }
+
+      if (currentPage.value !== targetedPage) {
+        currentPage.value = targetedPage;
+      }
     } else {
       error.value = resp.error ?? "Failed to load productions";
     }
@@ -93,8 +111,9 @@ onUnmounted(() => {
 
 onMounted(() => {
   const pageFromUrl = parseInt(route.query.page as string) || 1;
-  currentPage.value = pageFromUrl;
-  loadPage(pageFromUrl);
+  const safePage = Math.max(1, pageFromUrl);
+  currentPage.value = safePage;
+  loadPage(safePage);
 });
 
 watch(
