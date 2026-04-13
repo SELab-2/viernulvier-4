@@ -6,8 +6,8 @@ import {
   PaginationFilterDto,
   PrintItemDto,
   ReplacePrintItemDto,
-  PrintType,
 } from "../dto/dto";
+import type { PrintType } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
