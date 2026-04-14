@@ -6,6 +6,11 @@ import {
 } from "@nestjs/common";
 import { GalleryType } from "@repo/common";
 
+/**
+ * This file contains some specific specialized Exceptions that are thrown
+ * from withing the backend if something goes wrong.
+ */
+
 // 418 I'm a teapot easter egg
 export class TeapotException extends HttpException {
   constructor() {
@@ -30,6 +35,9 @@ export class ResourceNotFoundException extends NotFoundException {
   }
 }
 
+/**
+ * 404 Not Found specifically for links between two objects.
+ */
 export class LinkNotFoundException extends NotFoundException {
   constructor(
     dtoClass1: Type<any>,
@@ -51,6 +59,9 @@ export class LinkNotFoundException extends NotFoundException {
   }
 }
 
+/**
+ * 404 Not Found specifically for objects that don't have media attached.
+ */
 export class MediaNotFoundException extends NotFoundException {
   constructor(
     dtoClass: Type<any>,
