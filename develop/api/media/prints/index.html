@@ -2495,6 +2495,8 @@
 <h1 id="prints-api">Prints API</h1>
 <h3 id="get-prints">[GET] <code>/prints</code></h3>
 <ul>
+<li><strong>Query Parameters:</strong></li>
+<li><code>print_type</code> <em>(optional)</em>: Filter the list by a specific print type (<code>affiche</code>, <code>brochure</code>, <code>drukwerk</code>, <code>programma</code>).</li>
 <li><strong>Returns:</strong> <code>PaginatedResponse&lt;PrintItem | PrintItemView&gt;</code> a <a href="../pagination/index.md">paginated</a> list of print items or print item views.</li>
 </ul>
 <h3 id="get-printsprintitemid">[GET] <code>/prints/:printItemId</code></h3>
