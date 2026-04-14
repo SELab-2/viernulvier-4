@@ -7,6 +7,7 @@ const username = ref("");
 const password = ref("");
 const error = ref<string | null>(null);
 const loading = ref(false);
+const { t } = useI18n();
 
 async function handleLogin() {
   error.value = null;
@@ -67,7 +68,7 @@ async function handleLogin() {
             <label
               class="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground"
             >
-              Username
+              {{ t("login.username") }}
             </label>
             <input
               v-model="username"
@@ -84,7 +85,7 @@ async function handleLogin() {
             <label
               class="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground"
             >
-              Password
+              {{ t("login.password") }}
             </label>
             <input
               v-model="password"
@@ -102,8 +103,8 @@ async function handleLogin() {
             :disabled="loading || !username || !password"
             class="mt-2 w-full rounded-md bg-accent text-[var(--accent-foreground)] text-[11px] font-black uppercase tracking-[0.08em] h-10 transition-all hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <span v-if="loading">Signing in…</span>
-            <span v-else>Sign in</span>
+            <span v-if="loading">{{ t("login.signingIn") }}</span>
+            <span v-else>{{ t("login.signIn") }}</span>
           </button>
         </form>
       </div>
