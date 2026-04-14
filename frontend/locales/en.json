@@ -74,6 +74,7 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
+    "sortLabel": "Sort",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
@@ -99,6 +100,12 @@
         "after-selected": "After ...",
         "before-selected": "Before ..."
       }
+    },
+    "filters": {
+      "toggle": "Filters",
+      "year": "Year",
+      "dateRange": "Date",
+      "clear": "Clear"
     }
   },
   "baseform": {
@@ -143,6 +150,16 @@
     "price": "Price",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prices",
+    "hidePriceDetails": "hide details"
+  },
+  "general": {
+    "back": "Back",
+    "readMore": "Read more",
+    "readLess": "Read less",
+    "showMore": "Show more",
+    "showLess": "Show less",
     "noStories": "This production doesn't contain any stories."
   },
   "eventlist": {
