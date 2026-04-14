@@ -1,5 +1,5 @@
 <!--
-  media/GalleryImage.vue -> MediaGalleryImage component
+  media/GalleryImage.vue -> MediaDisplay component
 
   This component allows us to display and style an image or a placeholder any way we want.
   You can pass the crop that you want to display (or null) and the component
@@ -9,8 +9,14 @@
 -->
 
 <template>
+  <PdfThumbnail
+    v-if="isPdf && src && !hasError"
+    :src="src.url"
+    @error="handleImageError"
+    :class="containerClass"
+  />
   <img
-    v-if="crop && !hasError"
+    v-else-if="src && !hasError"
     :src="formattedUrl"
     loading="lazy"
     @error="handleImageError"
@@ -18,7 +24,7 @@
   />
   <ThumbnailPlaceholder
     v-else
-    :id="objectId"
+    :id="id"
     :size="size"
     :showIcon="showIcon"
     :showBorder="showBorder"
@@ -26,12 +32,12 @@
   />
 </template>
 <script setup lang="ts">
-import type { MediaCrop } from "@repo/common";
+import type { MediaCrop, PrintItem, PrintItemView } from "@repo/common";
 import { formatUrl } from "#imports";
 
 const props = defineProps<{
-  objectId?: number;
-  crop: MediaCrop | null;
+  id?: number;
+  src: MediaCrop | PrintItem | PrintItemView | null;
   size?: "sm" | "md" | "lg" | "fill" | number;
   showIcon?: boolean;
   showBorder?: boolean;
@@ -58,15 +64,19 @@ const containerClass = computed(() => {
 });
 
 const formattedUrl = computed(() => {
-  if (!props.crop) return undefined;
+  if (!props.src) return undefined;
 
-  const url = formatUrl(props.crop.url);
+  const url = formatUrl(props.src.url);
 
   return url;
 });
 
+const isPdf = computed(() => {
+  return props.src?.url?.toLowerCase().endsWith(".pdf");
+});
+
 watch(
-  () => props.crop?.url,
+  () => props.src?.url,
   () => {
     hasError.value = false;
   },

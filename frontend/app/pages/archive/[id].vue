@@ -173,10 +173,10 @@ onBeforeUnmount(() => {
     <section
       class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden"
     >
-      <MediaGalleryImage
+      <MediaDisplay
         class="absolute inset-0 w-full h-full object-cover z-0"
-        :object-id="production.id"
-        :crop="headerCrop"
+        :id="production.id"
+        :src="headerCrop"
       />
 
       <div

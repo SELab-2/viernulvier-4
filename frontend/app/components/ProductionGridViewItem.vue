@@ -106,9 +106,9 @@ watch(locale, () => loadTags());
       <div
         class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
       >
-        <MediaGalleryImage
-          :object-id="productionView.id"
-          :crop="mainCrop"
+        <MediaDisplay
+          :id="productionView.id"
+          :src="mainCrop"
           :show-icon="true"
           size="lg"
           class="w-full h-full"

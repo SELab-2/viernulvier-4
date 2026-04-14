@@ -104,9 +104,9 @@ watch(locale, () => loadTags());
     <div
       class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
     >
-      <MediaGalleryImage
-        :object-id="productionView.id"
-        :crop="mainCrop"
+      <MediaDisplay
+        :id="productionView.id"
+        :src="mainCrop"
         size="md"
         :rounded="true"
         :show-icon="true"

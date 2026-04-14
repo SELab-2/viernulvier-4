@@ -57,9 +57,9 @@ watch(
       class="w-32 sm:w-48 shrink-0 relative overflow-hidden rounded-lg"
       style="min-height: 84px"
     >
-      <MediaGalleryImage
-        :object-id="props.story.id"
-        :crop="mainCrop"
+      <MediaDisplay
+        :id="props.story.id"
+        :src="mainCrop"
         :rounded="true"
         :show-icon="true"
       />

@@ -1,6 +1,6 @@
 import { mount } from "@vue/test-utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import GalleryImage from "../../../app/components/media/GalleryImage.vue";
+import GalleryImage from "../../../app/components/media/Display.vue";
 import ThumbnailPlaceholder from "../../../app/components/ThumbnailPlaceholder.vue";
 
 vi.mock("#imports", () => ({
@@ -15,7 +15,7 @@ describe("GalleryImage", () => {
   it("renders the image with formatted url when a valid crop is provided", () => {
     const wrapper = mount(GalleryImage, {
       props: {
-        crop: {
+        src: {
           id: 1,
           url: "test-image.jpg",
           name: "hd_ready",
@@ -39,7 +39,7 @@ describe("GalleryImage", () => {
     const wrapper = mount(GalleryImage, {
       props: {
         crop: null,
-        objectId: 42,
+        id: 42,
       },
       global: {
         stubs: { ThumbnailPlaceholder: true },
@@ -57,7 +57,7 @@ describe("GalleryImage", () => {
   it("falls back to ThumbnailPlaceholder when the image fails to load", async () => {
     const wrapper = mount(GalleryImage, {
       props: {
-        crop: {
+        src: {
           id: 1,
           url: "broken-image.jpg",
           name: "hd_ready",
@@ -85,7 +85,7 @@ describe("GalleryImage", () => {
   it("resets the error state if the crop url changes", async () => {
     const wrapper = mount(GalleryImage, {
       props: {
-        crop: {
+        src: {
           id: 1,
           url: "broken.jpg",
           name: "hd_ready",
@@ -104,7 +104,7 @@ describe("GalleryImage", () => {
 
     // Change the crop URL (triggering the watch)
     await wrapper.setProps({
-      crop: {
+      src: {
         id: 2,
         url: "fixed.jpg",
         name: "hd_ready",
@@ -122,7 +122,7 @@ describe("GalleryImage", () => {
     it("applies default sizing and rounded classes", () => {
       const wrapper = mount(GalleryImage, {
         props: {
-          crop: {
+          src: {
             id: 1,
             url: "test.jpg",
             name: "hd_ready",
@@ -140,7 +140,7 @@ describe("GalleryImage", () => {
     it("applies exact size classes when size prop is provided", () => {
       const wrapper = mount(GalleryImage, {
         props: {
-          crop: {
+          src: {
             id: 1,
             url: "test.jpg",
             name: "hd_ready",
@@ -159,7 +159,7 @@ describe("GalleryImage", () => {
     it("removes rounded class when rounded prop is false", () => {
       const wrapper = mount(GalleryImage, {
         props: {
-          crop: {
+          src: {
             id: 1,
             url: "test.jpg",
             name: "hd_ready",

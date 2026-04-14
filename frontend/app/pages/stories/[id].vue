@@ -110,10 +110,10 @@ watch(
         class="relative flex items-end overflow-hidden"
         :class="headerCrop ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
       >
-        <MediaGalleryImage
+        <MediaDisplay
           class="absolute inset-0 w-full h-full object-cover z-0"
-          :object-id="blog.id"
-          :crop="headerCrop"
+          :id="blog.id"
+          :src="headerCrop"
         />
 
         <div
