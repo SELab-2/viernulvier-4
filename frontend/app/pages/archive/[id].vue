@@ -125,11 +125,6 @@ const isValid = (val: any) => {
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
 
-const image = computed(() => (production.value as any)?.image ?? null); //TODO verander! (ook: witte letters bij light en dark mode op image)
-const bannerGradient = computed(() =>
-  pickPlaceholderGradient(productionId.value ?? 0),
-);
-
 /**
  * Sanitizes raw text by removing escape characters and
  * converting newlines to HTML line breaks for v-html rendering.
@@ -173,7 +168,8 @@ onBeforeUnmount(() => {
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
     <section
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden"
+      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
+      :class="{ 'image-overlay text-white': headerCrop }"
     >
       <MediaGalleryImage
         class="absolute inset-0 w-full h-full object-cover z-0"
@@ -187,7 +183,8 @@ onBeforeUnmount(() => {
         <div class="flex items-center gap-4 mb-8">
           <button
             @click="goBack()"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] text-foreground hover:text-accent transition-colors"
+            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
+            :class="headerCrop ? 'text-white' : 'text-foreground'"
           >
             <ChevronLeft :size="14" stroke-width="3" />
             {{ t("general.back") }}
@@ -195,13 +192,18 @@ onBeforeUnmount(() => {
 
           <span
             v-if="isValid(production.performer_type)"
-            class="border border-[1.5px] border-foreground text-foreground px-2 py-1 text-[10px] font-black uppercase rounded-sm"
+            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
+            :class="
+              headerCrop
+                ? 'border-white text-white'
+                : 'border-foreground text-foreground'
+            "
           >
             {{ production.performer_type }}
           </span>
         </div>
 
-        <div class="text-foreground">
+        <div>
           <h1
             class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
             :class="[
@@ -339,5 +341,19 @@ onBeforeUnmount(() => {
 .line-clamp-none {
   mask-image: none !important;
   -webkit-mask-image: none !important;
+}
+
+.image-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
 }
 </style>
