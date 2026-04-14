@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#data-schemas-overview" class="md-skip">
+        <a href="#data-schemas" class="md-skip">
           Skip to content
         </a>
       
@@ -1029,6 +1029,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#schema-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Categories
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-types-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Types &amp; Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Types &amp; Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#localization" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1038,15 +1061,31 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#common-date-format" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#pagination" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Common Date Format
+        Pagination
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Date Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1102,6 +1141,62 @@
     
   
     Metadata
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="media/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Media
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="auth/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Authentication
   
 
     
@@ -2364,6 +2459,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#schema-categories" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema Categories
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-types-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Types &amp; Utilities
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Types &amp; Utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#localization" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2373,15 +2491,31 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#common-date-format" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#pagination" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Common Date Format
+        Pagination
       
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#date-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Date Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2402,10 +2536,20 @@
 
 
 
-<h1 id="data-schemas-overview">Data Schemas Overview</h1>
-<p>The project uses <strong>Zod</strong> for schema definition and validation. These schemas are shared between the frontend and backend via the <code>@repo/common</code> package to ensure data consistency.</p>
-<h2 id="localization">Localization</h2>
-<p>Many fields use a localized structure. Instead of a raw string, these fields expect an object containing translations:</p>
+<h1 id="data-schemas">Data Schemas</h1>
+<p>Welcome to the Data Schemas documentation. This section outlines the structural definitions and data models used throughout the VIERNULVIER archive system. </p>
+<p>We use <strong>Zod</strong> for schema definition and validation. These schemas are shared between the frontend and backend via the <code>@repo/common</code> package to ensure strict data consistency across the entire stack.</p>
+<h2 id="schema-categories">Schema Categories</h2>
+<p>To keep things organized, our data schemas are divided into the following logical domains:</p>
+<ul>
+<li><strong><a href="entities/">Core Entities</a></strong>: The primary business logic (<code>Productions</code>, <code>Events</code>, <code>Blogs</code>).</li>
+<li><strong><a href="metadata/">Metadata &amp; Taxonomy</a></strong>: Supporting data used for categorization (<code>Tags</code>, <code>Locations</code>, <code>Prices</code>).</li>
+<li><strong><a href="media/">Media &amp; Prints</a></strong>: Management of visual assets and physical/digital documents (<code>Galleries</code>, <code>Media Items</code>, <code>Crops</code>, <code>Print Items</code>).</li>
+<li><strong><a href="auth/">Security &amp; Authentication</a></strong>: Access control models (<code>Accounts</code>, <code>API Keys</code>).</li>
+</ul>
+<h2 id="common-types-utilities">Common Types &amp; Utilities</h2>
+<h3 id="localization">Localization</h3>
+<p>Many fields use a localized structure to support multiple languages. Instead of a raw string, these fields expect an object containing translations:</p>
 <table>
 <thead>
 <tr>
@@ -2420,8 +2564,24 @@
 </tr>
 </tbody>
 </table>
-<h2 id="common-date-format">Common Date Format</h2>
-<p>All date-time fields follow the <strong>ISO 8601</strong> format (e.g., <code>2024-03-21T12:00:00Z</code>).</p>
+<h3 id="pagination">Pagination</h3>
+<p>List endpoints return a standard paginated response to ensure performance.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Type</th>
+<th style="text-align: left;">Structure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>PaginatedResponse&lt;T&gt;</code></td>
+<td style="text-align: left;"><code>{ "page": number, "limit": number, "totalItems": number, "objects": T[] }</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="date-format">Date Format</h3>
+<p>All date-time fields follow the strict <strong>ISO 8601</strong> format (e.g., <code>2024-03-21T12:00:00Z</code>).</p>
 
 
 
