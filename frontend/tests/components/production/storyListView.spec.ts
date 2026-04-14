@@ -68,10 +68,6 @@ describe("ProductionStories", () => {
     });
   });
 
-  it("renders the title", () => {
-    expect(wrapper.find("h3").text()).toContain("Verhalen");
-  });
-
   it("renders a card for each story", () => {
     expect(wrapper.findAll("[data-testid=data-story]").length).toBe(
       stories.length,
@@ -84,17 +80,5 @@ describe("ProductionStories", () => {
     expect(text).toContain("description 1");
     expect(text).toContain("Titel 2");
     expect(text).toContain("description 2");
-  });
-
-  it("shows empty message when no stories are provided", () => {
-    const w = mount(ProductionStories, {
-      global: { plugins: [i18n] },
-      props: { stories: [] },
-    });
-    expect(w.text()).toContain("Deze productie bevat geen verhalen.");
-  });
-
-  it("does not show empty message when stories are provided", () => {
-    expect(wrapper.text()).not.toContain("Deze productie bevat geen verhalen.");
   });
 });

@@ -150,6 +150,16 @@
     "price": "Price",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prices",
+    "hidePriceDetails": "hide details"
+  },
+  "general": {
+    "back": "Back",
+    "readMore": "Read more",
+    "readLess": "Read less",
+    "showMore": "Show more",
+    "showLess": "Show less",
     "noStories": "This production doesn't contain any stories."
   },
   "eventlist": {

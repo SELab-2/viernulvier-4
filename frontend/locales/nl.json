@@ -150,6 +150,16 @@
     "price": "Prijs",
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prijzen",
+    "hidePriceDetails": "verberg details"
+  },
+  "general": {
+    "back": "Terug",
+    "readMore": "Lees meer",
+    "readLess": "Lees minder",
+    "showMore": "Toon meer",
+    "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen."
   },
   "eventlist": {
