@@ -5,12 +5,25 @@
 import z from "zod";
 import { LocalizedStringSchema } from "./language";
 
+// Allowed print types.
+export const PrintTypeValues = [
+  "affiche",
+  "brochure",
+  "drukwerk",
+  "programma",
+] as const;
+
+export const PrintTypeSchema = z.enum(PrintTypeValues);
+
+export type PrintType = z.infer<typeof PrintTypeSchema>;
+
 // Base Print Item object.
 export const PrintItemSchema = z.object({
   id: z.number(),
   titel: LocalizedStringSchema,
   description: LocalizedStringSchema,
   url: z.string(),
+  print_type: PrintTypeSchema,
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
 });
