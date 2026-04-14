@@ -45,6 +45,7 @@ Table print_items {
   titel jsonb
   description jsonb
   url text
+  print_type enum_type
   created_at timestamp [not null, default: `now()`]
   updated_at timestamp [not null, default: `now()`]
 }
