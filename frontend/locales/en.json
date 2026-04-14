@@ -182,6 +182,7 @@
     "username": "Username",
     "password": "Password",
     "signIn": "Sign in",
-    "signingIn": "Signing in..."
+    "signingIn": "Signing in...",
+    "error": "Something went wrong."
   }
 }

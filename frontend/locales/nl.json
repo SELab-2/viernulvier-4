@@ -182,6 +182,7 @@
     "username": "Gebruikersnaam",
     "password": "Wachtwoord",
     "signIn": "Inloggen",
-    "signingIn": "Inloggen..."
+    "signingIn": "Inloggen...",
+    "error": "Er is iets misgegaan."
   }
 }

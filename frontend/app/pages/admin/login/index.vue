@@ -18,7 +18,7 @@ async function handleLogin() {
   if (result.success) {
     await navigateTo(ROUTES.admin.dashboard.base);
   } else {
-    error.value = result.error ?? "Something went wrong.";
+    error.value = result.error ?? t("login.error");
   }
 
   loading.value = false;
@@ -48,7 +48,7 @@ async function handleLogin() {
 
       <!-- Card -->
       <div
-        class="bg-card border border-card-border rounded-lg p-8 shadow-sm transition hover:shadow-md"
+        class="bg-card border border-card-border rounded-lg p-8 shadow-[0_5px_30px_-10px_var(--accent)]"
       >
         <!-- Error -->
         <div
