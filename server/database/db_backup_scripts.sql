@@ -312,12 +312,20 @@ CREATE TABLE blog_media_gallery
 
 CREATE INDEX idx_blog_media_gallery_gallery_id ON blog_media_gallery (gallery_id);
 
+CREATE TYPE print_enum AS ENUM (
+    'affiche', 
+    'brochure',
+    'drukwerk', 
+    'programma'
+);
+
 CREATE TABLE print_items
 (
     id          SERIAL PRIMARY KEY,
     titel       JSONB,
     description JSONB,
     url         TEXT,
+    print_type  print_enum,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
