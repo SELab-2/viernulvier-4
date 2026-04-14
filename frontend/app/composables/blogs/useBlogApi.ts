@@ -10,12 +10,14 @@ import type {
   ReplaceBlog,
   FilterBlog,
   PrintItem,
+  PrintItemView,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
 import {
   fetchFullGallery,
   type DefaultGallery,
   type GalleryWithItems,
+  type ItemViewWithCrops,
   type ItemWithCrops,
   type PrintGallery,
 } from "~/utils/galleryFetcher";
@@ -92,7 +94,8 @@ export function useBlogApi() {
   /** GET /blogs/:blogId/media?type=default - Gets a DefaultGallery from the api. */
   const getMediaGallery = async (
     blogId: number,
-  ): Promise<GalleryWithItems<ItemWithCrops> | null> => {
+    lang?: Language,
+  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> => {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=default`,
@@ -101,7 +104,7 @@ export function useBlogApi() {
       const gallery = response.data;
       if (!gallery) return null;
 
-      return await fetchFullGallery(gallery);
+      return await fetchFullGallery(gallery, lang);
     } catch {
       // We return null because no gallery exists.
       return null;
@@ -111,7 +114,8 @@ export function useBlogApi() {
   /** GET /blogs/:blogId/media?type=prints - Gets a PrintGallery from the api. */
   const getPrintsGallery = async (
     blogId: number,
-  ): Promise<GalleryWithItems<PrintItem> | null> => {
+    lang?: Language,
+  ): Promise<GalleryWithItems<PrintItem | PrintItemView> | null> => {
     try {
       const response = await get<PrintGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=prints`,
@@ -120,7 +124,7 @@ export function useBlogApi() {
       const gallery = response.data;
       if (!gallery) return null;
 
-      return await fetchFullGallery(gallery);
+      return await fetchFullGallery(gallery, lang);
     } catch {
       // We return null because no gallery exists.
       return null;
