@@ -8,10 +8,13 @@
 import type { BlogView } from "@repo/common";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogStory } from "~/composables/blogs/useBlogStory";
+import { useGallery } from "~/composables/media/useGallery";
 import { ROUTES } from "~/utils/routes";
 
 const route = useRoute();
 const { t, locale } = useI18n();
+const { getMainImageCrop } = useGallery();
+const { getMediaGallery } = useBlogApi();
 
 const blogId = computed(() => {
   const raw = Array.isArray(route.params.id)
@@ -35,22 +38,42 @@ const { data, pending, error, refresh } = await useAsyncData<BlogView | null>(
   },
 );
 
-watch(locale, () => refresh());
-
 const blog = computed<BlogView | null>(() => data.value ?? null);
 
 const {
   title,
   description: body,
-  image,
   formattedDate,
   placeholderGradient: bannerGradient,
 } = useBlogStory(blog);
+const gallery = ref<GalleryWithItems<ItemWithCrops> | null>(null);
+const headerCrop = computed(() => {
+  if (!gallery.value) return null;
+  return getMainImageCrop(gallery.value, "FE3_header");
+});
 
 const readingTime = computed(() => {
   const words = body.value.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 });
+
+async function loadGallery() {
+  if (!blog.value) return;
+  gallery.value = await getMediaGallery(blog.value.id);
+}
+
+watch(locale, () => refresh());
+
+onMounted(() => {
+  loadGallery();
+});
+
+watch(
+  () => blog.value,
+  () => {
+    loadGallery();
+  },
+);
 </script>
 
 <template>
@@ -89,34 +112,26 @@ const readingTime = computed(() => {
     <template v-else>
       <!-- ── Hero banner ──────────────────────────────────────────────── -->
       <section
-        class="relative flex items-end"
-        :class="image ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
+        class="relative flex items-end overflow-hidden"
+        :class="headerCrop ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
       >
-        <template v-if="image">
-          <img
-            :src="image"
-            :alt="title"
-            class="absolute inset-0 w-full h-full object-cover"
-          />
-          <div
-            class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
-          />
-        </template>
-
-        <div
-          v-else
-          class="absolute inset-0 opacity-60"
-          :style="{ background: bannerGradient }"
-          aria-hidden="true"
+        <MediaGalleryImage
+          class="absolute inset-0 w-full h-full object-cover z-0"
+          :object-id="blog.id"
+          :crop="headerCrop"
         />
 
         <div
           class="relative z-10 container mx-auto px-6 max-w-4xl w-full pb-10"
-          :class="image ? 'text-white' : 'text-gray-900 dark:text-gray-100'"
+          :class="
+            headerCrop ? 'text-white' : 'text-gray-900 dark:text-gray-100'
+          "
         >
           <h1
             class="font-brand font-black uppercase tracking-tighter leading-none mb-5"
-            :class="image ? 'text-4xl md:text-6xl' : 'text-3xl md:text-5xl'"
+            :class="
+              headerCrop ? 'text-4xl md:text-6xl' : 'text-3xl md:text-5xl'
+            "
           >
             {{ title }}
           </h1>
@@ -125,7 +140,7 @@ const readingTime = computed(() => {
           <div
             class="flex flex-wrap items-center justify-between gap-4 font-brand font-black text-[10px] uppercase tracking-widest"
             :class="
-              image ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'
+              headerCrop ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'
             "
           >
             <!-- Left: date + reading time -->
@@ -153,7 +168,7 @@ const readingTime = computed(() => {
               :to="ROUTES.stories.base"
               class="flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all duration-150 font-brand font-black text-[9px] uppercase tracking-widest"
               :class="
-                image
+                headerCrop
                   ? 'border-white/40 text-white/90 hover:border-white hover:bg-white/20'
                   : 'border-gray-400/60 text-gray-700 dark:border-gray-500/60 dark:text-gray-200 hover:border-gray-700 hover:bg-gray-100 dark:hover:border-gray-300 dark:hover:bg-white/10'
               "

@@ -2,10 +2,12 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
+import { useGallery } from "~/composables/media/useGallery";
 
 const { t, locale } = useI18n();
 const router = useRouter();
-const { getById, getTags, getBlogs } = useProductionApi();
+const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
+const { getMainImageCrop } = useGallery();
 const route = useRoute();
 
 const goBack = () => {
@@ -100,6 +102,20 @@ const { data: stories } = await useAsyncData(
   { watch: [productionId, locale], default: () => [] },
 );
 
+const { data: gallery } = await useAsyncData<GalleryWithItems<ItemWithCrops>>(
+  `gallery-v3-${route.params.id}-${locale.value}`,
+  async () => {
+    if (!productionId.value) return null;
+    const res = await getMediaGallery(productionId.value);
+    return (res as any)?.data ?? res;
+  },
+  { watch: [productionId, locale] },
+);
+const headerCrop = computed(() => {
+  if (!gallery.value) return null;
+  return getMainImageCrop(gallery.value, "FE3_header");
+});
+
 /**
  * Check if a string is useful (not "N/A" or empty)
  */
@@ -158,12 +174,11 @@ onBeforeUnmount(() => {
   >
     <section
       class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden"
-      :style="{ background: image ? 'var(--muted)' : bannerGradient }"
     >
-      <img
-        v-if="image"
-        :src="image"
-        class="absolute inset-0 h-full w-full object-cover opacity-80 dark:opacity-50"
+      <MediaGalleryImage
+        class="absolute inset-0 w-full h-full object-cover z-0"
+        :object-id="production.id"
+        :crop="headerCrop"
       />
 
       <div

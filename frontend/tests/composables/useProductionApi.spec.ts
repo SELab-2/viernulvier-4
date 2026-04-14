@@ -154,4 +154,30 @@ describe("useProductionApi", () => {
       expect(mockDel).toHaveBeenCalledWith("/productions/1/blogs/3");
     });
   });
+
+  describe("media", () => {
+    it("getMediaGallery calls GET /productions/:id/media?type=default", () => {
+      const { getMediaGallery } = useProductionApi();
+      void getMediaGallery(1);
+      expect(mockGet).toHaveBeenCalledWith("/productions/1/media?type=default");
+    });
+
+    it("getPrintsGallery calls GET /productions/:id/media?type=prints", () => {
+      const { getPrintsGallery } = useProductionApi();
+      void getPrintsGallery(1);
+      expect(mockGet).toHaveBeenCalledWith("/productions/1/media?type=prints");
+    });
+
+    it("linkMedia calls PUT /productions/:id/media/:galleryId", () => {
+      const { linkMedia } = useProductionApi();
+      void linkMedia(1, 2);
+      expect(mockPut).toHaveBeenCalledWith("/productions/1/media/2", {});
+    });
+
+    it("unlinkMedia calls DELETE /productions/:id/media/:galleryId", () => {
+      const { unlinkMedia } = useProductionApi();
+      void unlinkMedia(1, 2);
+      expect(mockDel).toHaveBeenCalledWith("/productions/1/media/2");
+    });
+  });
 });
