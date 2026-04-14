@@ -3,6 +3,11 @@ import type { GalleryWithItems, ItemWithCrops } from "~/utils/galleryFetcher";
 
 /**
  * These are composables that can be used to select images or prints.
+ *
+ * The functions exposed can be used to easily extract a crop from a
+ * gallery if there is one specified.
+ * These functions handle null values silently and will thus return null
+ * (or an empty list) if anything goes wrong.
  */
 export function useGallery() {
   /**

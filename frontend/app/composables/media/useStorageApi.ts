@@ -1,5 +1,9 @@
 /**
  * Frontend connection to the Media Storage API.
+ *
+ * NOTE: This Composable does not include a GET to the storage because the media
+ * is hosted with NGINX on the server. That way all you have to do is GET the
+ * URL that is in the crop or print item.
  */
 export function useStorageApi() {
   const { post, del } = useApi();

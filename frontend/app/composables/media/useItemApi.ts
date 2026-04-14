@@ -16,6 +16,9 @@ interface MediaItemListOptions {
   languageFilters?: LanguageQuery;
 }
 
+/**
+ * Frontend API calls for media items.
+ */
 export function useItemApi() {
   const { get, post, patch, put, del } = useApi();
 

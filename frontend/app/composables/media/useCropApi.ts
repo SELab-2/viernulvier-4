@@ -7,6 +7,9 @@ import type {
   ReplaceMediaCrop,
 } from "@repo/common";
 
+/**
+ * Frontend API calls for media crops.
+ */
 export function useCropApi() {
   const { get, post, patch, put, del } = useApi();
 

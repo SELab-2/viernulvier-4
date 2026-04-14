@@ -9,6 +9,9 @@ import type {
   ReplaceMediaGallery,
 } from "@repo/common";
 
+/**
+ * Frontend API calls for media and print galleries.
+ */
 export function useGalleryApi() {
   const { get, post, patch, put, del } = useApi();
 

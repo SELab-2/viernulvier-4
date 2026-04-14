@@ -1,3 +1,13 @@
+<!--
+  media/GalleryImage.vue -> MediaGalleryImage component
+
+  This component allows us to display and style an image or a placeholder any way we want.
+  You can pass the crop that you want to display (or null) and the component
+  will automatically show a placeholder when the image is unable to be loaded
+  for any reason.
+  There are also some style options for the placeholder that can be adjusted. 
+-->
+
 <template>
   <img
     v-if="crop && !hasError"
