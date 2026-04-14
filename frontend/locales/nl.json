@@ -169,6 +169,10 @@
     "delete": "Verwijder",
     "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   },
+  "accounts": {
+    "superAdmin": "Super admin",
+    "admin": "Admin"
+  },
   "prints": {
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
