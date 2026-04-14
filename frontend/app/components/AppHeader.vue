@@ -120,7 +120,7 @@ onUnmounted(() => {
 // ── Navigation items ─────────────────────────────────────────────────────────
 const navItems = [
   { label: "home", route: ROUTES.home.base },
-  { label: "archive", route: ROUTES.archive.base },
+  { label: "archive", route: ROUTES.productions.base },
   { label: "stories", route: ROUTES.stories.base },
   { label: "prints", route: ROUTES.prints.base },
 ];
