@@ -13,8 +13,16 @@ import type {
   PaginationFilter,
   LanguageQuery,
   ReplaceProduction,
+  PrintItem,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
+import type {
+  DefaultGallery,
+  GalleryWithItems,
+  ItemWithCrops,
+  PrintGallery,
+} from "~/utils/galleryFetcher";
+import { fetchFullGallery } from "~/utils/galleryFetcher";
 
 interface ProductionListOptions {
   productionFilters?: FilterProduction;
@@ -136,6 +144,56 @@ export function useProductionApi() {
   const unlinkBlog = (productionId: number, blogId: number) =>
     del<Production>(API_ROUTES.productions.blogById(productionId, blogId));
 
+  /**
+   * Media Galleries
+   */
+
+  /** GET /productions/:productionId/media?type=default - Gets a DefaultGallery from the api. */
+  const getMediaGallery = async (
+    productionId: number,
+  ): Promise<GalleryWithItems<ItemWithCrops> | null> => {
+    try {
+      const response = await get<DefaultGallery>(
+        `${API_ROUTES.productions.media(productionId)}?type=default`,
+      );
+
+      const gallery = response.data;
+      if (!gallery) return null;
+
+      return await fetchFullGallery(gallery);
+    } catch {
+      // We return null because no gallery exists.
+      return null;
+    }
+  };
+
+  /** GET /productions/:productionId/media?type=prints - Gets a PrintGallery from the api. */
+  const getPrintsGallery = async (
+    productionId: number,
+  ): Promise<GalleryWithItems<PrintItem> | null> => {
+    try {
+      const response = await get<PrintGallery>(
+        `${API_ROUTES.productions.media(productionId)}?type=prints`,
+      );
+
+      const gallery = response.data;
+      if (!gallery) return null;
+
+      return await fetchFullGallery(gallery);
+    } catch {
+      // We return null because no gallery exists.
+      return null;
+    }
+  };
+
+  /** PUT /productions/:productionId/media/:galleryId — links a MediaGallery to a production. */
+  const linkMedia = (productionId: number, galleryId: number) =>
+    put(API_ROUTES.productions.mediaById(productionId, galleryId), {});
+
+  /** DELETE /productions/:productionId/media/:galleryId — unlinks a MediaGallery from a production. */
+  const unlinkMedia = (productionId: number, galleryId: number) =>
+    del(API_ROUTES.productions.mediaById(productionId, galleryId));
+
   return {
     getAll,
     getById,
@@ -149,5 +207,9 @@ export function useProductionApi() {
     getBlogs,
     linkBlog,
     unlinkBlog,
+    getMediaGallery,
+    getPrintsGallery,
+    linkMedia,
+    unlinkMedia,
   };
 }

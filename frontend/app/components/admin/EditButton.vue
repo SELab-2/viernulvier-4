@@ -4,7 +4,6 @@
  * Wraps ActionButton with a blue style and edit icon.
  */
 import { Edit2 } from "lucide-vue-next";
-import ActionButton from "./ActionButton.vue";
 
 interface Props {
   label: string;
@@ -22,7 +21,7 @@ const emit = defineEmits<{
 
 <template>
   <!-- Blue edit action button -->
-  <ActionButton
+  <AdminActionButton
     :label="label"
     :size="props.size"
     variant="blue"
@@ -32,5 +31,5 @@ const emit = defineEmits<{
     <template #default="{ iconSize }">
       <Edit2 :size="iconSize" />
     </template>
-  </ActionButton>
+  </AdminActionButton>
 </template>
