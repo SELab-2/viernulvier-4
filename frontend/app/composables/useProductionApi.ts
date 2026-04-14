@@ -150,11 +150,20 @@ export function useProductionApi() {
    * Media Galleries
    */
 
+  /** These overloads make TS happy with the types. */
+  function getMediaGallery(
+    productionId: number,
+    lang: Language,
+  ): Promise<GalleryWithItems<ItemViewWithCrops> | null>;
+  function getMediaGallery(
+    productionId: number,
+  ): Promise<GalleryWithItems<ItemWithCrops> | null>;
+
   /** GET /productions/:productionId/media?type=default - Gets a DefaultGallery from the api. */
-  const getMediaGallery = async (
+  async function getMediaGallery(
     productionId: number,
     lang?: Language,
-  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> => {
+  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.productions.media(productionId)}?type=default`,
@@ -168,7 +177,7 @@ export function useProductionApi() {
       // We return null because no gallery exists.
       return null;
     }
-  };
+  }
 
   /** GET /productions/:productionId/media?type=prints - Gets a PrintGallery from the api. */
   const getPrintsGallery = async (

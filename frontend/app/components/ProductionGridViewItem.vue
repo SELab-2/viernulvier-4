@@ -20,7 +20,7 @@ const { productionView } = defineProps<{
 
 const tags = ref<Tag[]>([]);
 const events = ref<Event[]>([]);
-const gallery = ref<GalleryWithItems<ItemWithCrops> | null>(null);
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const mainCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "hd_ready");
@@ -72,7 +72,7 @@ async function loadEvents() {
 
 async function loadGallery() {
   if (!productionView?.id) return;
-  gallery.value = await getMediaGallery(productionView.id);
+  gallery.value = await getMediaGallery(productionView.id, locale.value);
 }
 
 const dateRangeText = computed(() =>

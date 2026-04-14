@@ -91,11 +91,20 @@ export function useBlogApi() {
    * Media Galleries
    */
 
+  /** These overloads make TS happy with the types. */
+  function getMediaGallery(
+    blogId: number,
+    lang: Language,
+  ): Promise<GalleryWithItems<ItemViewWithCrops> | null>;
+  function getMediaGallery(
+    blogId: number,
+  ): Promise<GalleryWithItems<ItemWithCrops> | null>;
+
   /** GET /blogs/:blogId/media?type=default - Gets a DefaultGallery from the api. */
-  const getMediaGallery = async (
+  async function getMediaGallery(
     blogId: number,
     lang?: Language,
-  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> => {
+  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=default`,
@@ -109,7 +118,7 @@ export function useBlogApi() {
       // We return null because no gallery exists.
       return null;
     }
-  };
+  }
 
   /** GET /blogs/:blogId/media?type=prints - Gets a PrintGallery from the api. */
   const getPrintsGallery = async (
