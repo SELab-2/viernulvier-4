@@ -27,7 +27,6 @@ const { t } = useI18n();
       </p>
     </div>
 
-    <!-- Dedicated id column -->
     <div class="text-sm text-gray-600">
       {{ account.id }}
     </div>

@@ -170,8 +170,20 @@
     "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   },
   "accounts": {
+    "title": "Accounts",
+    "subtitle": "Beheer de accounts in deze lijst.",
+    "emptyTitle": "Geen accounts gevonden",
+    "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
+    "username": "Gebruiker",
+    "accountId": "Account-ID",
+    "role": "Rol",
     "superAdmin": "Super admin",
-    "admin": "Admin"
+    "admin": "Admin",
+    "actions": "Acties",
+    "delete": "Verwijderen",
+    "protected": "Beveiligd",
+    "countSingular": "account",
+    "countPlural": "accounts"
   },
   "prints": {
     "files": "Bestanden",
