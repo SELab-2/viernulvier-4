@@ -63,8 +63,14 @@ nav:
           - Blog: modules/blog.md
           - Location: modules/location.md
           - Price: modules/price.md
+          - Media: modules/media.md
+          - Print Item: modules/print_item.md
+          - Parser: modules/parser.md
       - Core Modules:
           - Database: modules/database.md
           - Auth: modules/auth.md
+          - CLI: modules/cli.md
       - Shared Modules:
-          - Util: modules/util.md
+          - Logger: modules/logger.md
+          - Language: modules/language.md
+          - Scraper: modules/scraper.md
