@@ -12,7 +12,7 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push("/archive"); // Fallback
+    router.push(ROUTES.archive.base); // Fallback
   }
 };
 
@@ -106,9 +106,7 @@ const { data: stories } = await useAsyncData(
 const isValid = (val: any) => {
   if (!val) return false;
   const s = String(val).trim().toUpperCase();
-  return (
-    s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N" && s !== "\N"
-  );
+  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N";
 };
 
 const image = computed(() => (production.value as any)?.image ?? null); //TODO verander! (ook: witte letters bij light en dark mode op image)
