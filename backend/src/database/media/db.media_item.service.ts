@@ -8,7 +8,6 @@ import {
   PaginationFilterDto,
   ReplaceMediaItemDto,
 } from "../../dto/dto";
-import { ResourceGoneException } from "../../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
   generateCountQuery,
@@ -17,6 +16,7 @@ import {
   generateUpdateClause,
 } from "../db-utils";
 import { MediaCropSchema, MediaItemSchema } from "@repo/common";
+import { ResourceNotFoundException } from "../../common/exceptions";
 
 @Injectable()
 export class MediaItemDatabaseService {
@@ -44,9 +44,7 @@ export class MediaItemDatabaseService {
     const result = await this.db.query<MediaItemDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `No MediaItemDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(MediaItemDto, id);
     }
 
     return result[0];
@@ -153,9 +151,7 @@ export class MediaItemDatabaseService {
     const result = await this.db.query<MediaItemDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update media item with ID ${itemId}.`,
-      );
+      throw new ResourceNotFoundException(MediaItemDto, itemId);
     }
 
     return result[0];
@@ -167,10 +163,7 @@ export class MediaItemDatabaseService {
    */
   async deleteItem(id: number): Promise<void> {
     const query = `DELETE FROM media_item WHERE id = $1 RETURNING id`;
-    const result = await this.db.query(query, [id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(`Cannot delete: Item ${id} not found`);
-    }
+    await this.db.query(query, [id]);
   }
 
   //--------------------- crops: ------------------------//

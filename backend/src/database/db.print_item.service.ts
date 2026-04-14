@@ -7,7 +7,6 @@ import {
   PaginationFilterDto,
   ReplacePrintItemDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
   generateCountQuery,
@@ -16,6 +15,7 @@ import {
   generateUpdateClause,
 } from "./db-utils";
 import { PrintItemSchema } from "@repo/common";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class PrintItemDatabaseService {
@@ -43,9 +43,7 @@ export class PrintItemDatabaseService {
     const result = await this.db.query<PrintItemDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `No PrintItemDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(PrintItemDto, id);
     }
 
     return result[0];
@@ -151,9 +149,7 @@ export class PrintItemDatabaseService {
     const result = await this.db.query<PrintItemDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update print item with ID ${itemId}.`,
-      );
+      throw new ResourceNotFoundException(PrintItemDto, itemId);
     }
     return result[0];
   }
@@ -164,11 +160,8 @@ export class PrintItemDatabaseService {
    */
   async deletePrintItem(id: number): Promise<void> {
     const query = `DELETE FROM print_items WHERE id = $1 RETURNING id`;
-    const result = await this.db.query(query, [id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        `Cannot delete: Print Item ${id} not found.`,
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 }
