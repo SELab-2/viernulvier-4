@@ -35,4 +35,3 @@ Because API keys can be bound to specific accounts for auditing and permission s
 | :--- | :--- | :--- | :--- |
 | `account_id` | `number` | Yes | Reference to the parent Account. |
 | `api_key_id` | `number` | Yes | Reference to the assigned API Key. |
-| `active` | `boolean` | Yes | Allows temporarily disabling a specific key for a specific user. |
