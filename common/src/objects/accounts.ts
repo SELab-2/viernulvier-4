@@ -18,7 +18,6 @@ export const UpdateAccountSchema = AccountSchema.partial();
 // Public Account object.
 export const PublicAccountSchema = AccountSchema.omit({
   password: true,
-  superAdmin: true,
 }); // don't leak these. (note: still contains your id so you can still get your api key through that.)
 
 // Type exports.
