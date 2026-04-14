@@ -122,7 +122,7 @@ const headerCrop = computed(() => {
 const isValid = (val: any) => {
   if (!val) return false;
   const s = String(val).trim().toUpperCase();
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N";
+  return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
 
 const image = computed(() => (production.value as any)?.image ?? null); //TODO verander! (ook: witte letters bij light en dark mode op image)
