@@ -15,7 +15,7 @@ These modules encapsulate specific business domains. They contain the controller
 * **[Location Module](location.md)** - *Handles the different locations events can be at.*
 * **[Price Module](price.md)** - *Handles the different types of prices events can have.*
 * **[Media Module](media.md)** - *Manages media assets, galleries, crops, and storage.*
-* **[Print Item Module](print_item.md)** - *Manages print items.*
+* **[Print Item Module](print.md)** - *Manages print items.*
 * **[Parser Module](parser.md)** - *Handles the parser endpoints.*
 
 ## 2. Core Modules
