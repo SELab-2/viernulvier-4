@@ -28,7 +28,7 @@ export const ROUTES = {
       base: "/admin/login",
     },
     dashboard: {
-      base: "/admin/dashboard",
+      base: "/admin",
     },
     productions: {
       base: "/admin/productions",
