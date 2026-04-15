@@ -60,7 +60,7 @@ const { t } = useI18n();
     </div>
 
     <!-- Actions: non-super-admin can be deleted; super admin is protected -->
-    <div class="flex justify-start sm:justify-end">
+    <div class="flex justify-start sm:justify-left">
       <AdminDeleteButton
         v-if="!account.superAdmin"
         :label="t('accounts.delete')"

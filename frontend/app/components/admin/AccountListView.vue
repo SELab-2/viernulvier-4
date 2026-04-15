@@ -65,7 +65,7 @@ const { t } = useI18n();
         <div>{{ t("accounts.username") }}</div>
         <div>{{ t("accounts.accountId") }}</div>
         <div>{{ t("accounts.role") }}</div>
-        <div class="text-right">{{ t("accounts.actions") }}</div>
+        <div class="text-left">{{ t("accounts.actions") }}</div>
       </div>
 
       <!-- Account rows -->
