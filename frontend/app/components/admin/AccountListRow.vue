@@ -64,6 +64,7 @@ const { t } = useI18n();
       <AdminDeleteButton
         v-if="!account.superAdmin"
         :label="t('accounts.delete')"
+        mode="text"
         @click="emit('delete', account)"
       />
       <span

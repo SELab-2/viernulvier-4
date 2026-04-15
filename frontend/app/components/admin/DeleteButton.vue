@@ -8,10 +8,12 @@ import { Trash2 } from "lucide-vue-next";
 interface Props {
   label: string;
   size?: number;
+  mode?: "icon" | "text";
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 44,
+  mode: "icon",
 });
 
 const emit = defineEmits<{
@@ -20,8 +22,19 @@ const emit = defineEmits<{
 </script>
 
 <template>
+  <button
+    v-if="props.mode === 'text'"
+    type="button"
+    :aria-label="label"
+    class="text-xs font-semibold uppercase tracking-widest text-action-red-icon hover:text-action-red-border"
+    @click="emit('click')"
+  >
+    {{ label }}
+  </button>
+
   <!-- Red delete action button -->
   <AdminActionButton
+    v-else
     :label="label"
     :size="props.size"
     variant="red"
