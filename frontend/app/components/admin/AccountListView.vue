@@ -19,7 +19,7 @@ const { t } = useI18n();
     class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950"
   >
     <div
-      class="border-b border-gray-200 bg-gray-100 px-8 py-4 dark:border-gray-800 dark:bg-gray-900"
+      class="border-b border-gray-200 bg-gray-100 px-5 py-4 dark:border-gray-800 dark:bg-gray-900 sm:px-8"
     >
       <div class="space-y-1">
         <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -31,7 +31,7 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div v-if="accounts.length === 0" class="px-6 py-14">
+    <div v-if="accounts.length === 0" class="px-5 py-14 sm:px-6">
       <div class="mx-auto max-w-md text-center">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
           {{ t("accounts.emptyTitle") }}
@@ -44,7 +44,7 @@ const { t } = useI18n();
 
     <div v-else class="divide-y divide-gray-200 dark:divide-gray-800">
       <div
-        class="grid grid-cols-[minmax(0,1fr)_120px_120px_104px] gap-4 border-b border-gray-200 bg-gray-50 px-8 py-3 text-[10px] font-black uppercase tracking-[0.22em] text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400"
+        class="hidden grid-cols-[minmax(0,1fr)_120px_120px_104px] gap-4 border-b border-gray-200 bg-gray-50 px-8 py-3 text-[10px] font-black uppercase tracking-[0.22em] text-gray-600 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 sm:grid"
       >
         <div>{{ t("accounts.username") }}</div>
         <div>{{ t("accounts.accountId") }}</div>

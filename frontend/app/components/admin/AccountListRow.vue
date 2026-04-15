@@ -18,7 +18,7 @@ const { t } = useI18n();
 <template>
   <!-- Single account row in the desktop grid/list layout -->
   <article
-    class="grid grid-cols-[minmax(0,1fr)_120px_120px_104px] items-center gap-4 px-8 py-5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900"
+    class="grid gap-3 px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900 sm:grid-cols-[minmax(0,1fr)_120px_120px_104px] sm:items-center sm:gap-4 sm:px-8 sm:py-5"
   >
     <!-- Primary account info -->
     <div class="min-w-0">
@@ -27,14 +27,26 @@ const { t } = useI18n();
       >
         {{ account.username }}
       </p>
+
+      <!-- Added for mobile view -->
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+        {{ t("accounts.accountId") }}: {{ account.id }}
+      </p>
+
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+        {{ t("accounts.role") }}:
+        {{
+          account.superAdmin ? t("accounts.superAdmin") : t("accounts.admin")
+        }}
+      </p>
     </div>
 
-    <div class="text-sm text-gray-600 dark:text-gray-400">
+    <div class="hidden text-sm text-gray-600 dark:text-gray-400 sm:block">
       {{ account.id }}
     </div>
 
     <!-- Role badge column (different style for super admin) -->
-    <div>
+    <div class="hidden sm:block">
       <span
         class="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest"
         :class="
@@ -50,7 +62,7 @@ const { t } = useI18n();
     </div>
 
     <!-- Actions: non-super-admin can be deleted; super admin is protected -->
-    <div class="flex justify-end">
+    <div class="flex justify-start sm:justify-end">
       <AdminDeleteButton
         v-if="!account.superAdmin"
         :label="t('accounts.delete')"
