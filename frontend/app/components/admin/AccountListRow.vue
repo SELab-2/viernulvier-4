@@ -18,22 +18,20 @@ const { t } = useI18n();
 <template>
   <!-- Single account row in the desktop grid/list layout -->
   <article
-    class="grid gap-3 px-5 py-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-900 sm:grid-cols-[minmax(0,1fr)_120px_120px_104px] sm:items-center sm:gap-4 sm:px-8 sm:py-5"
+    class="grid gap-3 bg-card px-5 py-4 hover:bg-card-hover sm:grid-cols-[minmax(0,1fr)_120px_120px_104px] sm:items-center sm:gap-4 sm:px-8 sm:py-5"
   >
     <!-- Primary account info -->
     <div class="min-w-0">
-      <p
-        class="truncate text-sm font-semibold text-gray-900 dark:text-gray-100"
-      >
+      <p class="truncate text-sm font-semibold text-card-foreground">
         {{ account.username }}
       </p>
 
       <!-- Added for mobile view -->
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+      <p class="mt-1 text-xs text-muted-foreground sm:hidden">
         {{ t("accounts.accountId") }}: {{ account.id }}
       </p>
 
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 sm:hidden">
+      <p class="mt-1 text-xs text-muted-foreground sm:hidden">
         {{ t("accounts.role") }}:
         {{
           account.superAdmin ? t("accounts.superAdmin") : t("accounts.admin")
@@ -41,7 +39,7 @@ const { t } = useI18n();
       </p>
     </div>
 
-    <div class="hidden text-sm text-gray-600 dark:text-gray-400 sm:block">
+    <div class="hidden text-sm text-muted-foreground sm:block">
       {{ account.id }}
     </div>
 
@@ -51,8 +49,8 @@ const { t } = useI18n();
         class="inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest"
         :class="
           account.superAdmin
-            ? 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-950 dark:text-blue-300'
-            : 'border-gray-300 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'
+            ? 'border-action-blue-border bg-action-blue-hover text-action-blue-icon'
+            : 'border-action-gray-border bg-action-gray-hover text-action-gray-icon'
         "
       >
         {{
@@ -70,7 +68,7 @@ const { t } = useI18n();
       />
       <span
         v-else
-        class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500"
+        class="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
       >
         {{ t("accounts.protected") }}
       </span>
