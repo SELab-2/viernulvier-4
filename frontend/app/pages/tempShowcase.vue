@@ -24,17 +24,24 @@ const handleDelete = (account: PublicAccount) => {
       </div>
 
       <section class="space-y-3">
-        <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <h2
+          class="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground"
+        >
           With mock data
         </h2>
         <AdminAccountListView :accounts="mockAccounts" @delete="handleDelete" />
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <h2
+          class="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground"
+        >
           Empty state
         </h2>
-        <AdminAccountListView :accounts="emptyAccounts" @delete="handleDelete" />
+        <AdminAccountListView
+          :accounts="emptyAccounts"
+          @delete="handleDelete"
+        />
       </section>
     </div>
   </main>
