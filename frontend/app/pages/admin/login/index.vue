@@ -32,6 +32,12 @@ async function handleLogin() {
 
 <template>
   <div class="min-h-screen bg-background flex items-center justify-center px-4">
+    <!-- Top right utilities -->
+    <div class="fixed top-8 right-8 flex items-center gap-2 z-50">
+      <LocaleSelector />
+      <ThemeToggle />
+    </div>
+
     <div class="w-full max-w-sm">
       <!-- Brand -->
       <div class="mb-8 text-center">
@@ -116,5 +122,3 @@ async function handleLogin() {
     </div>
   </div>
 </template>
-
-<style scoped></style>

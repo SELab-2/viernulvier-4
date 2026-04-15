@@ -12,7 +12,7 @@
 
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { ROUTES } from "~/utils/routes";
-import { Sun, Moon, LogOut, Menu, X } from "lucide-vue-next";
+import { LogOut, Menu, X } from "lucide-vue-next";
 
 import logoBlack from "~/assets/logo_black.svg";
 import logoWhite from "~/assets/logo_white.svg";
@@ -25,22 +25,12 @@ const { t } = useI18n();
 // ── Dark mode ────────────────────────────────────────────────────────────────
 const isDark = ref(false);
 
-const applyTheme = (dark) => {
-  document.documentElement.classList.toggle("dark", dark);
-  localStorage.setItem("theme", dark ? "dark" : "light");
+const syncTheme = () => {
+  if (typeof window === "undefined") return;
+  isDark.value = document.documentElement.classList.contains("dark");
 };
 
-const toggleDark = () => {
-  isDark.value = !isDark.value;
-  applyTheme(isDark.value);
-};
-
-const initDark = () => {
-  const stored = localStorage.getItem("theme");
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  isDark.value = stored ? stored === "dark" : prefersDark;
-  applyTheme(isDark.value);
-};
+let themeObserver;
 
 // ── Mobile menu ──────────────────────────────────────────────────────────────
 const isMenuOpen = ref(false);
@@ -106,7 +96,14 @@ const handleResize = () => {
 onMounted(() => {
   lastScrollPosition.value = window.scrollY;
   resetHeader();
-  initDark();
+
+  syncTheme();
+  themeObserver = new MutationObserver(syncTheme);
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("resize", handleResize);
   handleResize();
@@ -115,6 +112,8 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("resize", handleResize);
+
+  if (themeObserver) themeObserver.disconnect();
 });
 
 // ── Navigation items ─────────────────────────────────────────────────────────
@@ -183,16 +182,7 @@ const navItems = [
         >
           <LocaleSelector />
 
-          <button
-            class="btn-outline flex items-center justify-center gap-2"
-            @click="toggleDark"
-          >
-            <Sun v-if="isDark" :size="16" />
-            <Moon v-else :size="16" />
-            <span :class="isAdmin ? 'hidden xl:inline' : 'hidden lg:inline'">
-              {{ isDark ? "LIGHT" : "DARK" }}
-            </span>
-          </button>
+          <ThemeToggle />
         </div>
 
         <button
@@ -230,14 +220,7 @@ const navItems = [
         >
           <LocaleSelector />
 
-          <button
-            class="btn-outline flex items-center gap-2"
-            @click="toggleDark"
-          >
-            <Sun v-if="isDark" :size="16" />
-            <Moon v-else :size="16" />
-            {{ isDark ? "LIGHT" : "DARK" }}
-          </button>
+          <ThemeToggle />
 
           <button v-if="isAdmin" class="btn-danger" @click="handleLogout">
             <LogOut :size="16" />
