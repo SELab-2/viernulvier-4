@@ -9,6 +9,11 @@ const error = ref<string | null>(null);
 const loading = ref(false);
 const { t } = useI18n();
 
+// This makes sure that the login does not use the default layout with the header and footer.
+definePageMeta({
+  layout: false,
+});
+
 async function handleLogin() {
   error.value = null;
   loading.value = true;
