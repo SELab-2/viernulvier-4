@@ -171,7 +171,7 @@
   },
   "accounts": {
     "title": "Accounts",
-    "subtitle": "Beheer de accounts in deze lijst.",
+    "subtitle": "Beheer de accounts.",
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruiker",
@@ -181,9 +181,7 @@
     "admin": "Admin",
     "actions": "Acties",
     "delete": "Verwijderen",
-    "protected": "Beveiligd",
-    "countSingular": "account",
-    "countPlural": "accounts"
+    "protected": "Beveiligd"
   },
   "prints": {
     "files": "Bestanden",

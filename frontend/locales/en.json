@@ -171,7 +171,7 @@
   },
   "accounts": {
     "title": "Accounts",
-    "subtitle": "Manage the accounts in this list.",
+    "subtitle": "Manage the accounts .",
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",
@@ -181,9 +181,7 @@
     "admin": "Admin",
     "actions": "Actions",
     "delete": "Delete",
-    "protected": "Protected",
-    "countSingular": "account",
-    "countPlural": "accounts"
+    "protected": "Protected"
   },
   "prints": {
     "files": "Files",
