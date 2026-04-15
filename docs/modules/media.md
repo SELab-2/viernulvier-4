@@ -17,7 +17,7 @@ This module manages media-related database tables (such as `media_items`, `media
 * [Database Module](database.md) for data persistence.
 * [Logger Module](logger.md) for application logging.
 * [Language Module](language.md) for flattening language responses.
-* **MediaStorageModule** (Internal) for handling actual file storage and API key verification.
+* [Media Storage](media_storage.md) for handling actual file storage and API key verification.
 
 ### Provides
 
