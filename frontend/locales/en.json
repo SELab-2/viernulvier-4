@@ -171,7 +171,7 @@
   },
   "accounts": {
     "title": "Accounts",
-    "subtitle": "Manage the accounts .",
+    "subtitle": "Manage the accounts.",
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",
