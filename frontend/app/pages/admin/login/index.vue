@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ROUTES } from "~/utils/routes";
+import { Eye, EyeOff } from "lucide-vue-next";
 
 const { login } = useAuth();
 
@@ -7,6 +8,7 @@ const username = ref("");
 const password = ref("");
 const error = ref<string | null>(null);
 const loading = ref(false);
+const showPassword = ref(false);
 const { t } = useI18n();
 
 // This makes sure that the login does not use the default layout with the header and footer.
@@ -14,7 +16,12 @@ definePageMeta({
   layout: false,
 });
 
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
+
 async function handleLogin() {
+  showPassword.value = false;
   error.value = null;
   loading.value = true;
 
@@ -98,14 +105,36 @@ async function handleLogin() {
             >
               {{ t("login.password") }}
             </label>
-            <input
-              v-model="password"
-              type="password"
-              autocomplete="current-password"
-              required
-              :disabled="loading"
-              class="h-10 w-full rounded-md border border-border bg-muted/40 px-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-accent focus:ring-2 focus:ring-ring disabled:opacity-50"
-            />
+
+            <div class="relative">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                autocomplete="current-password"
+                required
+                :disabled="loading"
+                class="h-10 w-full rounded-md border border-border bg-muted/40 px-3 pr-10 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-accent focus:ring-2 focus:ring-ring disabled:opacity-50"
+              />
+
+              <!-- Toggle button -->
+              <button
+                type="button"
+                @click="togglePassword"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                tabindex="-1"
+              >
+                <Eye
+                  v-if="!showPassword"
+                  :size="18"
+                  class="text-accent hover:opacity-80 transition"
+                />
+                <EyeOff
+                  v-else
+                  :size="18"
+                  class="text-accent hover:opacity-80 transition"
+                />
+              </button>
+            </div>
           </div>
 
           <!-- Submit -->
