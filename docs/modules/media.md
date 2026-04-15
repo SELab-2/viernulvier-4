@@ -6,7 +6,7 @@
 
 This module acts as the metadata layer for media within the application. Rather than managing physical media assets (which is the responsibility of the server and Nginx), it provides structured endpoints for creating and retrieving database records that represent media items, galleries, and crops.
 
-Please note that this module does not perform any actual image manipulation. "Crops" are simply database objects that store cropping parameters (like coordinates or ratios) for the frontend to use. The dedicated storage submodule merely acts as an interface to the server's local file system.
+Please note that this module does not perform any actual image manipulation. "Crops" are simply database objects that act as individual types or labels (storing just their names, rather than actual coordinates or ratios) for the frontend to use. The dedicated storage submodule merely acts as an interface to the server's local file system.
 
 ## Module Boundaries
 

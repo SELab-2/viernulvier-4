@@ -4,7 +4,7 @@
 
 ## Overview
 
-This module is responsible for the VierNulVier scraping engine. It contains the logic to fetch, parse, and inject data (like Events, Productions, and Locations) into the database via structured parsing and CSV injection.
+This module is responsible for the VierNulVier scraping engine. It contains the logic to fetch parse, and inject data (like Events, Productions, and Locations) into the database via structured parsing.
 
 ## Module Boundaries
 
@@ -15,4 +15,5 @@ This module is responsible for the VierNulVier scraping engine. It contains the 
 * [Media Storage Module](media_storage.md) to manage downloaded media assets related to scraped events.
 
 ### Exports
-* `ScraperService`, `ScraperEngine`, `ScraperRunner`, and `CsvInjectionService`.
+
+This module does not functionally export any services for other feature modules to consume, as the scraping process is designed to run automatically.

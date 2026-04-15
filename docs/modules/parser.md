@@ -12,7 +12,7 @@ This module acts as a high-level controller layer that orchestrates the capabili
 
 ### Dependencies
 
-* [Scraper Module](scraper.md) to execute the actual scraping and parsing logic.
+* [Scraper Module](scraper.md) to execute the actual parsing and inserting logic.
 * [Database Module](database.md) for verifying permissions or accessing task-related data.
 
 ### Provides
