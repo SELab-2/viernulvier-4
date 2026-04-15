@@ -21,9 +21,10 @@ import {
   MediaGallery,
 } from "@repo/common";
 import logger from "../../logger/logger";
-import { ResourceGoneException } from "../../../common/exceptions";
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { ResourceNotFoundException } from "../../../common/exceptions";
+import { EventDto, ProductionDto } from "../../../dto/dto";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -181,9 +182,7 @@ export class UtilsDbConnection implements OnModuleDestroy {
     );
 
     if (rows.length === 0) {
-      throw new ResourceGoneException(
-        `No Production exists for provided legacy_id(${legacyId})`,
-      );
+      throw new ResourceNotFoundException(ProductionDto, legacyId);
     }
 
     return rows[0];
@@ -205,9 +204,7 @@ export class UtilsDbConnection implements OnModuleDestroy {
     );
 
     if (rows.length === 0) {
-      throw new ResourceGoneException(
-        `No Event exists for provided legacy_id(${legacyId})`,
-      );
+      throw new ResourceNotFoundException(EventDto, legacyId);
     }
 
     return rows[0];
