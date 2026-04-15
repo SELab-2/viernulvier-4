@@ -26,7 +26,7 @@ const emit = defineEmits<{
     v-if="props.mode === 'text'"
     type="button"
     :aria-label="label"
-    class="text-xs font-semibold uppercase tracking-widest text-action-red-icon transition-colors duration-150 hover:text-action-red-text-hover"
+    class="text-xs font-semibold uppercase tracking-widest text-action-red-icon hover:text-action-red-text-hover [&:hover]:transition-colors [&:hover]:duration-150"
     @click="emit('click')"
   >
     {{ label }}
