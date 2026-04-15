@@ -14,7 +14,7 @@ This module typically manages the `print_items` database table.
 
 * [Database Module](database.md) for data persistence.
 * [Logger Module](logger.md) for application logging.
-* [Language Module](language.md) for handling multi-lingual fields.
+* [Language Module](language.md) for flattening language responses.
 
 ### Provides
 

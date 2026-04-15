@@ -14,7 +14,7 @@ This module manages the `tags` database table.
 
 * [Database Module](database.md) for data persistence.
 * [Logger Module](logger.md) for application logging.
-* [Language Module](language.md) for data translation.
+* [Language Module](language.md) for flattening language responses.
 
 ### Provides
 

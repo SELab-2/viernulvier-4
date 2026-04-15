@@ -14,7 +14,7 @@ This module manages the `events`, `event_locations` and `event_prices` database 
 
 * [Database Module](database.md) for data persistence.
 * [Logger Module](logger.md) for application logging.
-* [Language Module](language.md) for data translation.
+* [Language Module](language.md) for flattening language responses.
 
 ### Provides
 
