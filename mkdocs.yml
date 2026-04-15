@@ -64,7 +64,7 @@ nav:
           - Location: modules/location.md
           - Price: modules/price.md
           - Media: modules/media.md
-          - Print Item: modules/print_item.md
+          - Print Item: modules/print.md
           - Parser: modules/parser.md
       - Core Modules:
           - Database: modules/database.md
