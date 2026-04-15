@@ -16,7 +16,7 @@ These modules encapsulate specific business domains. They contain the controller
 * **[Price Module](price.md)** - *Handles the different types of prices events can have.*
 * **[Media Module](media.md)** - *Manages media assets, galleries, crops, and storage.*
 * **[Print Item Module](print_item.md)** - *Manages print items.*
-* **[Parser Module](parser.md)** - *Handles parsing interactions via the scraper.*
+* **[Parser Module](parser.md)** - *Handles the parser endpoints.*
 
 ## 2. Core Modules
 
@@ -24,12 +24,12 @@ These modules handle application-wide infrastructure. They are typically importe
 
 * **[Database Module](database.md)** - *Configuration and connection pooling.*
 * **[Auth Module](auth.md)** - *Authentication and authorization guards.*
-* **[CLI Module](cli.md)** - *Provides command-line interface commands for administrative tasks.*
+* **[CLI Module](cli.md)** - *Bundles loose scripts so they can be run with the correct dependencies.*
 
 ## 3. Shared/Utility Modules
 
-These are helper modules that provide reusable services across multiple feature modules. The legacy Util module has been split into three focused modules.
+These are helper modules that provide reusable services across multiple feature modules.
 
 * **[Logger Module](logger.md)** - *Provides the central AppLogger service.*
 * **[Language Module](language.md)** - *Handles language formatting and translation.*
-* **[Scraper Module](scraper.md)** - *Provides the scraping engine and database interactions.*
+* **[Scraper Module](scraper.md)** - *Provides the core scraping engine and parsing services.*

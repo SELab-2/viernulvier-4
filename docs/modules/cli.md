@@ -4,7 +4,7 @@
 
 ## Overview
 
-This module provides the command-line interface (CLI) infrastructure for the application. It acts as an alternative entry point to the standard HTTP server, allowing developers to run administrative scripts, utility commands, and testing tasks directly from the terminal.
+This module is used to bundle loose scripts, such as the database reset script and the old CSV parser entry point. Grouping them in this module ensures that they can be run with the correct dependencies injected.
 
 ## Module Boundaries
 

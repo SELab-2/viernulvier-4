@@ -12,7 +12,7 @@ This module is responsible for the VierNulVier scraping engine. It contains the 
 * [Language Module](language.md) for translating scraped multi-lingual text.
 * [Logger Module](logger.md) for process logging.
 * **ScraperDbModule** for localized database connection handling during scraping.
-* **MediaStorageModule** to store downloaded media assets related to scraped events.
+* [Media Storage Module](media_storage.md) to manage downloaded media assets related to scraped events.
 
 ### Exports
 * `ScraperService`, `ScraperEngine`, `ScraperRunner`, and `CsvInjectionService`.
