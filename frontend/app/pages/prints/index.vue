@@ -1,24 +1,57 @@
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse, PrintType } from "@repo/common";
 import { PrintTypeValues } from "@repo/common";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { usePrintApi } from "../../composables/usePrintApi";
 import PrintsHeader from "../../components/prints/PrintsHeader.vue";
 import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
 import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
+import FileGrid from "../../components/prints/FileGrid.vue";
 
 const { t, locale } = useI18n();
 const { getAll } = usePrintApi();
 
 // Filters
 const searchQuery = ref("");
+const activeFilter = ref<PrintType>(PrintTypeValues[0]);
+
+// Responsive columns
+const ROWS_PER_PAGE = 4;
+const windowWidth = ref(1024);
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
+onMounted(() => {
+  handleResize();
+  window.addEventListener("resize", handleResize);
+});
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
+const currentCols = computed(() => {
+  // how many items there are currently in a row
+  if (windowWidth.value >= 1024) return 4; // lg:grid-cols-4
+  if (windowWidth.value >= 640) return 3; // sm:grid-cols-3
+  return 2; // grid-cols-2
+});
+const LIMIT = computed(() => ROWS_PER_PAGE * currentCols.value);
 
 // Pagination state
-const LIMIT = 16; // max amount of items on a page on full screen
 const page = ref(0);
 const totalItems = ref(0);
 const prints = ref<PrintItemView[]>([]);
 const pending = ref(false);
 const fetchError = ref<Error | null>(null);
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(totalItems.value / LIMIT.value)),
+);
+
+function goToPage(p: number) {
+  if (p < 0 || p >= totalPages.value) return;
+  page.value = p;
+  loadPage();
+}
 
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
@@ -36,7 +69,7 @@ async function loadPage() {
     const raw = await getAll({
       paginationFilters: {
         page: page.value,
-        limit: LIMIT,
+        limit: LIMIT.value,
         descending: true,
       },
       printFilters: {
@@ -55,14 +88,16 @@ async function loadPage() {
   }
 }
 
-const activeFilter = ref<PrintType>(PrintTypeValues[0]);
-
 watch([searchQuery, locale, activeFilter], () => {
   page.value = 0;
   loadPage();
 });
 
 onMounted(loadPage);
+
+// constants
+const chevronButton =
+  "w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default";
 </script>
 
 <template>
@@ -98,9 +133,37 @@ onMounted(loadPage);
         </button>
       </div>
 
-      <template v-else>
-        <PrintsFileGrid :category="activeFilter" :files="prints" />
-      </template>
+      <FileGrid
+        :category="activeFilter"
+        :files="prints"
+        :total-files="totalItems"
+      />
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-center gap-2 mt-6 h-9">
+        <button
+          :class="chevronButton"
+          :disabled="page === 1"
+          @click="goToPage(page - 1)"
+        >
+          <ChevronLeft :size="16" />
+        </button>
+
+        <span
+          v-if="totalPages > 1"
+          class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
+        >
+          {{ page }} / {{ totalPages }}
+        </span>
+
+        <button
+          :class="chevronButton"
+          :disabled="page === totalPages"
+          @click="goToPage(page + 1)"
+        >
+          <ChevronRight :size="16" />
+        </button>
+      </div>
     </main>
   </div>
 </template>
