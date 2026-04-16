@@ -21,6 +21,7 @@ import { useArchiveView } from "../../composables/useArchiveView";
 import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
+import { ROUTES } from "~/utils/routes";
 
 const route = useRoute();
 const router = useRouter();
@@ -119,7 +120,7 @@ onMounted(() => {
 watch(
   () => route.query.page,
   (newPage) => {
-    if (route.path !== "/archive") return;
+    if (route.path !== ROUTES.productions.base) return;
 
     const pageNum = parseInt(newPage as string) || 1;
 
@@ -134,7 +135,7 @@ watch(
 
 // Reload when pagination changes
 watch(currentPage, (newPage) => {
-  if (route.path !== "/archive") return;
+  if (route.path !== ROUTES.productions.base) return;
 
   if (newPage.toString() !== route.query.page) {
     router.push({

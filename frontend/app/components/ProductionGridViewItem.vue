@@ -98,7 +98,10 @@ watch(locale, () => loadTags());
 </script>
 
 <template>
-  <NuxtLink :to="ROUTES.archive.byId(productionView.id)" class="group block">
+  <NuxtLink
+    :to="ROUTES.productions.byId(productionView.id)"
+    class="group block"
+  >
     <div
       class="flex flex-col rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150 overflow-hidden h-full"
     >

@@ -72,12 +72,12 @@ export function parseProductions(productions: object[]): vnvProduction[] {
  */
 function parseVnvProduction(object: Record<string, any>): vnvProduction {
   const events: string[] = [];
-  for (const eventUrl of object.events) {
+  for (const eventUrl of object.events || []) {
     events.push(extractIdFromUri(eventUrl as string) || "");
   }
 
   const genres: string[] = [];
-  for (const genreUrl of object.genres) {
+  for (const genreUrl of object.genres || []) {
     genres.push(extractIdFromUri(genreUrl as string) || "");
   }
 
@@ -175,7 +175,7 @@ export function parseEvents(events: object[]): vnvEvent[] {
  */
 function parseVnvEvent(object: Record<string, any>): vnvEvent {
   const prices: string[] = [];
-  for (const price of object.prices) {
+  for (const price of object.prices || []) {
     prices.push(extractIdFromUri(price as string) || "N/A");
   }
 
@@ -183,7 +183,7 @@ function parseVnvEvent(object: Record<string, any>): vnvEvent {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
     production_id:
       extractIdFromUri(
-        (object["production"] as Record<string, any>)["@id"] as string,
+        (object["production"] as Record<string, any>)?.["@id"] as string,
       ) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
@@ -276,7 +276,7 @@ export function parsePrices(prices: object[]): vnvPrice[] {
  */
 function parseVnvPrice(object: Record<string, any>): vnvPrice {
   const name: vnvLocal = ((object.price as nestedPrice)
-    .description as vnvLocal) || {
+    ?.description as vnvLocal) || {
     en: "N/A",
     nl: "N/A",
   };
@@ -285,7 +285,7 @@ function parseVnvPrice(object: Record<string, any>): vnvPrice {
     legacy_id: extractIdFromUri(object["@id"] as string) || "",
     created_at: (object.created_at as string) || "1970-01-01T00:00:00+00:00",
     updated_at: (object.updated_at as string) || "1970-01-01T00:00:00+00:00",
-    amount: (object.amount as number) || null,
+    amount: (object.amount as number) ?? null,
     name: name,
   };
 }
@@ -322,7 +322,7 @@ export function parseGalleries(galleries: object[]): vnvGallery[] {
  */
 function parseVnvGallery(gallery: Record<string, any>): vnvGallery {
   const items: string[] = [];
-  for (const item of gallery.items) {
+  for (const item of gallery.items || []) {
     items.push(extractIdFromUri(item as string) || "N/A");
   }
 
@@ -372,12 +372,12 @@ export function parseMediaItems(items: object[]): vnvMediaItem[] {
  */
 function parseVnvMediaItem(item: Record<string, any>): vnvMediaItem {
   const crops: string[] = [];
-  for (const crop of item.crops) {
+  for (const crop of item.crops || []) {
     crops.push(
       extractIdFromUri((crop as Record<string, any>)["@id"] as string) || "N/A",
     );
   }
-  const posIndex: number = (item.position as number) || 1;
+  const posIndex: number = (item.position as number) ?? 1;
   const position: ItemPosition = posIndex == 0 ? "main" : "carousel";
 
   return {
