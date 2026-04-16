@@ -5,7 +5,6 @@ import { usePrintApi } from "../../composables/usePrintApi";
 import PrintsHeader from "../../components/prints/PrintsHeader.vue";
 import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
 import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
-import PrintsDisplay from "../../components/prints/PrintsDisplay.vue";
 
 const { t, locale } = useI18n();
 const { getAll } = usePrintApi();
@@ -95,6 +94,9 @@ onMounted(() => loadPage(true));
 onUnmounted(() => io?.disconnect());
 
 const activeFilter = ref<PrintType>(PrintTypeValues[0]);
+const filteredPrints = computed(() =>
+  prints.value.filter((p) => p.print_type === activeFilter.value),
+);
 </script>
 
 <template>
@@ -131,7 +133,7 @@ const activeFilter = ref<PrintType>(PrintTypeValues[0]);
       </div>
 
       <template v-else>
-        <PrintsDisplay :prints="prints" :active-type="activeFilter" />
+        <PrintsFileGrid :category="activeFilter" :files="filteredPrints" />
 
         <div ref="sentinel" class="h-1" aria-hidden="true" />
 
