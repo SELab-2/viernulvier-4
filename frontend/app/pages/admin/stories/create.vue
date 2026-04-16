@@ -1,26 +1,30 @@
 <!--
   pages/admin/stories/create.vue
   =================================
-  Admin page for creating a new blog/story.
+  Two-step create flow on a single page:
 
-  After a successful POST the user is redirected to the edit page so they
-  can immediately upload a header image for the new story.
+  Step 1 — Fill in the bilingual form and click "Create story".
+           The blog is saved via POST /blogs and we receive the new ID.
+
+  Step 2 — The form is replaced by the AdminBlogImageSection so the user
+           can immediately upload a header image without navigating away.
+           Two buttons: "Upload another" (stays) and "Finish" (→ stories list).
 -->
 <script setup lang="ts">
 import type { CreateBlog } from "@repo/common";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useAdminGuard } from "~/composables/useAdminGuard";
+
+useAdminGuard();
 
 const { create } = useBlogApi();
-const { isLoggedIn } = useAuth();
 
+// --- State ---
 const saving = ref(false);
 const error = ref<string | null>(null);
+const createdBlogId = ref<number | null>(null); // null = still on step 1
 
-// Guard
-onMounted(() => {
-  if (!isLoggedIn.value) navigateTo(ROUTES.admin.login.base);
-});
-
+// --- Step 1: create blog ---
 async function handleSubmit(data: CreateBlog) {
   saving.value = true;
   error.value = null;
@@ -28,8 +32,7 @@ async function handleSubmit(data: CreateBlog) {
   try {
     const resp = await create(data);
     if (resp.data) {
-      // Redirect to edit so the user can upload an image right away
-      navigateTo(ROUTES.admin.stories.edit(resp.data.id));
+      createdBlogId.value = resp.data.id;
     } else {
       error.value = resp.error ?? "Failed to create story.";
     }
@@ -38,6 +41,11 @@ async function handleSubmit(data: CreateBlog) {
   } finally {
     saving.value = false;
   }
+}
+
+// --- Step 2: finish ---
+function finish() {
+  navigateTo(ROUTES.admin.stories.base);
 }
 </script>
 
@@ -56,8 +64,48 @@ async function handleSubmit(data: CreateBlog) {
       <h1
         class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
       >
-        New story
+        <template v-if="!createdBlogId">New story</template>
+        <template v-else>Add header image</template>
       </h1>
+
+      <!-- Step indicator -->
+      <div class="flex items-center gap-3">
+        <div
+          class="flex items-center gap-2 font-brand font-black text-[10px] uppercase tracking-widest"
+          :class="
+            !createdBlogId
+              ? 'text-foreground'
+              : 'text-muted-foreground line-through'
+          "
+        >
+          <span
+            class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] shrink-0"
+            :class="
+              !createdBlogId
+                ? 'bg-foreground text-background'
+                : 'bg-muted text-muted-foreground'
+            "
+            >1</span
+          >
+          Content
+        </div>
+        <div class="flex-1 h-px bg-border" />
+        <div
+          class="flex items-center gap-2 font-brand font-black text-[10px] uppercase tracking-widest"
+          :class="createdBlogId ? 'text-foreground' : 'text-muted-foreground'"
+        >
+          <span
+            class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] shrink-0"
+            :class="
+              createdBlogId
+                ? 'bg-foreground text-background'
+                : 'bg-muted text-muted-foreground'
+            "
+            >2</span
+          >
+          Image
+        </div>
+      </div>
 
       <!-- Error banner -->
       <div
@@ -67,13 +115,37 @@ async function handleSubmit(data: CreateBlog) {
         {{ error }}
       </div>
 
-      <!-- Form -->
-      <AdminBlogForm
+      <!-- ── Step 1: form ──────────────────────────────────────────── -->
+      <AdminBlogsAdminBlogForm
+        v-if="!createdBlogId"
         mode="create"
         :loading="saving"
         @submit="handleSubmit"
         @cancel="navigateTo(ROUTES.admin.stories.base)"
       />
+
+      <!-- ── Step 2: image upload ──────────────────────────────────── -->
+      <template v-else>
+        <p class="text-sm text-muted-foreground leading-relaxed">
+          Your story has been created. You can upload a header image now, or
+          skip and do it later from the edit page.
+        </p>
+
+        <AdminBlogsAdminBlogImageSection :blog-id="createdBlogId" />
+
+        <!-- Finish / skip actions -->
+        <div class="flex items-center gap-3 pt-2">
+          <button class="btn-outline flex-1 justify-center" @click="finish">
+            Finish
+          </button>
+          <NuxtLink
+            :to="ROUTES.admin.stories.edit(createdBlogId)"
+            class="btn-outline px-8 shrink-0"
+          >
+            Edit more
+          </NuxtLink>
+        </div>
+      </template>
     </div>
   </div>
 </template>

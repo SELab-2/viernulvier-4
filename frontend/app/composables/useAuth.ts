@@ -80,7 +80,7 @@ export function useAuth() {
       sessionStorage.removeItem("apiKey");
       sessionStorage.removeItem("account");
     }
-    void navigateTo(ROUTES.login.base);
+    void navigateTo(ROUTES.admin.login.base);
   }
 
   const isLoggedIn = computed(() => !!apiKey.value);

@@ -71,7 +71,7 @@ onMounted(async () => {
 
       <!-- "View all" CTA linking to the full archive -->
       <div class="flex justify-center">
-        <NuxtLink :to="ROUTES.archive.base">
+        <NuxtLink :to="ROUTES.productions.base">
           <button class="group inline-flex items-center gap-3 btn-outline">
             {{ t("highlights.viewAll") }}
             <ArrowRight

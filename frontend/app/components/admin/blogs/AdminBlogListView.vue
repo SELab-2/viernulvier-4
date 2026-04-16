@@ -188,7 +188,7 @@ function nextPage() {
 
     <!-- List -->
     <div v-else class="space-y-3">
-      <AdminBlogListItem
+      <AdminBlogsAdminBlogListItem
         v-for="blog in blogs"
         :key="blog.id"
         :blog="blog"
