@@ -109,7 +109,6 @@ const { data: gallery } = await useAsyncData<
   async () => {
     if (!productionId.value) return null;
     const res = await getMediaGallery(productionId.value, locale.value);
-    console.log(res);
     return (res as any)?.data ?? res;
   },
   { watch: [productionId, locale] },
