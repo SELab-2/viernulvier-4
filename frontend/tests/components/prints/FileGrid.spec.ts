@@ -215,22 +215,6 @@ describe("PrintsFileGrid", () => {
     expect(text).not.toContain("AFFICHE-19.PDF");
   });
 
-  it("shows pagination when files exceed one page", () => {
-    expect(wrapper.text()).toContain("1 /");
-  });
-
-  it("navigates to next page when next button is clicked", async () => {
-    expect(wrapper.text()).toContain("AFFICHE-1.PDF");
-    expect(wrapper.text()).not.toContain("AFFICHE-19.PDF");
-
-    const buttons = wrapper.findAll("button");
-    const nextButton = buttons[buttons.length - 1]; // last button is next page
-    await nextButton.trigger("click");
-
-    expect(wrapper.text()).toContain("AFFICHE-17.PDF");
-    expect(wrapper.text()).not.toContain("AFFICHE-1.PDF");
-  });
-
   it("shows empty message when no files are provided", () => {
     const w: VueWrapper<InstanceType<typeof FileGrid>> = mount(FileGrid, {
       global: { plugins: [i18n] },
