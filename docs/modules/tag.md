@@ -13,7 +13,8 @@ This module manages the `tags` database table.
 ### Dependencies
 
 * [Database Module](database.md) for data persistence.
-* [Util Module](util.md) for utilities.
+* [Logger Module](logger.md) for application logging.
+* [Language Module](language.md) for flattening language responses.
 
 ### Provides
 
