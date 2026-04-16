@@ -169,6 +169,20 @@
     "delete": "Verwijder",
     "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   },
+  "accounts": {
+    "title": "Accounts",
+    "subtitle": "Beheer de accounts.",
+    "emptyTitle": "Geen accounts gevonden",
+    "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
+    "username": "Gebruikersnaam",
+    "accountId": "Account-ID",
+    "role": "Rol",
+    "superAdmin": "Super admin",
+    "admin": "Admin",
+    "actions": "Acties",
+    "delete": "Verwijder",
+    "protected": "Beveiligd"
+  },
   "prints": {
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",

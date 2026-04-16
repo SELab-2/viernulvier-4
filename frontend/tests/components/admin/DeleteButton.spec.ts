@@ -49,4 +49,31 @@ describe("DeleteButton", () => {
     expect(style).toContain("width: 36px");
     expect(style).toContain("height: 36px");
   });
+
+  it("renders text mode without icon sizing styles", () => {
+    const wrapper = mount(DeleteButton, {
+      props: {
+        label: "REMOVE",
+        mode: "text",
+      },
+    });
+
+    const button = wrapper.find('[aria-label="REMOVE"]');
+    expect(button.exists()).toBe(true);
+    expect(button.text()).toBe("REMOVE");
+    expect(button.attributes("style")).toBeUndefined();
+  });
+
+  it("emits click in text mode", async () => {
+    const wrapper = mount(DeleteButton, {
+      props: {
+        label: "REMOVE",
+        mode: "text",
+      },
+    });
+
+    await wrapper.find('[aria-label="REMOVE"]').trigger("click");
+
+    expect(wrapper.emitted("click")).toHaveLength(1);
+  });
 });
