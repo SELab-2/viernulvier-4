@@ -145,20 +145,33 @@ const isExpanded = ref(false);
 const showReadMoreButton = ref(false);
 const descriptionRef = ref<HTMLElement | null>(null);
 
+const isExpanded2 = ref(false);
+const showReadMoreButton2 = ref(false);
+const description2Ref = ref<HTMLElement | null>(null);
+
 const checkOverflow = () => {
-  const el = descriptionRef.value;
-  if (el) {
-    showReadMoreButton.value = el.scrollHeight > el.clientHeight;
+  if (descriptionRef.value) {
+    showReadMoreButton.value =
+      descriptionRef.value.scrollHeight > descriptionRef.value.clientHeight;
+  }
+  if (description2Ref.value) {
+    showReadMoreButton2.value =
+      description2Ref.value.scrollHeight > description2Ref.value.clientHeight;
   }
 };
+
+let observer: ResizeObserver | null = null;
+
 onMounted(async () => {
   await nextTick();
-  checkOverflow();
-  window.addEventListener("resize", checkOverflow);
+  observer = new ResizeObserver(() => checkOverflow());
+
+  if (descriptionRef.value) observer.observe(descriptionRef.value);
+  if (description2Ref.value) observer.observe(description2Ref.value);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("resize", checkOverflow);
+  observer?.disconnect();
 });
 </script>
 
@@ -288,11 +301,25 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div
-          v-if="isValid(production.description2)"
-          class="description-content mb-16 p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl"
-          v-html="cleanText(production.description2)"
-        ></div>
+        <div v-if="isValid(production.description2)" class="mb-16">
+          <div
+            ref="description2Ref"
+            class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
+            :class="[
+              isExpanded2 ? 'line-clamp-none' : 'line-clamp-[6]',
+              showReadMoreButton2 && !isExpanded2 ? 'should-fade' : '',
+            ]"
+            v-html="cleanText(production.description2)"
+          ></div>
+
+          <button
+            v-if="showReadMoreButton2 || isExpanded2"
+            @click="isExpanded2 = !isExpanded2"
+            class="mt-4 ml-8 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+          >
+            {{ isExpanded2 ? t("general.readLess") : t("general.readMore") }}
+          </button>
+        </div>
 
         <div v-if="stories && stories.length > 0" class="my-16">
           <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
