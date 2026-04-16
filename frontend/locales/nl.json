@@ -177,5 +177,48 @@
     "remaining": "resterend",
     "delete": "Verwijder",
     "download": "Download"
+  },
+  "admin": {
+    "back": "Terug",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+
+    "blogs": {
+      "new": "Nieuw Verhaal",
+      "edit": "Verhaal Bewerken",
+      "results": "resultaten",
+      "fetchError": "Er ging iets mis bij het laden van de verhalen.",
+      "notFound": "Verhaal niet gevonden",
+      "createBtn": "Verhaal Aanmaken",
+      "saveBtn": "Wijzigingen Opslaan",
+      "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
+      "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
+
+      "dateFrom": "Datum vanaf",
+      "dateTo": "Datum tot",
+
+      "date": "Datum",
+      "titleNl": "Titel (NL)",
+      "titleNlPlaceholder": "Titel in het Nederlands",
+      "titleEn": "Titel (EN)",
+      "titleEnPlaceholder": "Titel in het Engels",
+      "descriptionNl": "Omschrijving (NL)",
+      "descriptionNlPlaceholder": "Schrijf de Nederlandstalige omschrijving…",
+      "descriptionEn": "Omschrijving (EN)",
+      "descriptionEnPlaceholder": "Schrijf de Engelstalige omschrijving…",
+
+      "deleteTitle": "Verhaal Verwijderen",
+      "deleteConfirm": "Weet je zeker dat je \"{title}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      "deleteConfirmBtn": "Verwijderen",
+
+      "validation": {
+        "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
+        "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht.",
+        "dateRequired": "Een datum is verplicht."
+      }
+    }
   }
 }
