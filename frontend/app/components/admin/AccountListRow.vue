@@ -1,4 +1,20 @@
 <script setup lang="ts">
+/**
+ * Reusable row component for AdminAccountListView.
+ *
+ * Includes:
+ * - Username, account id and role rendering
+ * - Role badge styling for super admin vs admin
+ * - Responsive mobile details for id + role
+ * - Delete action for non-super-admin accounts
+ * - Protected label for super-admin accounts
+ *
+ * Usage:
+ * <AdminAccountListRow
+ *   :account="account"
+ *   @delete="onDeleteAccount"
+ * />
+ */
 import type { PublicAccount } from "@repo/common";
 
 interface Props {
