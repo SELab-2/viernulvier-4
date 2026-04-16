@@ -13,15 +13,12 @@ const { getAll } = usePrintApi();
 const searchQuery = ref("");
 
 // Pagination state
-const LIMIT = 20;
+const LIMIT = 16; // max amount of items on a page on full screen
 const page = ref(0);
 const totalItems = ref(0);
 const prints = ref<PrintItemView[]>([]);
 const pending = ref(false);
-const isLoadingMore = ref(false);
 const fetchError = ref<Error | null>(null);
-
-const hasMore = computed(() => prints.value.length < totalItems.value);
 
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
@@ -31,17 +28,9 @@ function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   return null;
 }
 
-async function loadPage(reset = false) {
-  if (!reset && (isLoadingMore.value || !hasMore.value)) return;
-
-  if (reset) {
-    page.value = 0;
-    prints.value = [];
-    pending.value = true;
-    fetchError.value = null;
-  } else {
-    isLoadingMore.value = true;
-  }
+async function loadPage() {
+  pending.value = true;
+  fetchError.value = null;
 
   try {
     const raw = await getAll({
@@ -51,52 +40,29 @@ async function loadPage(reset = false) {
         descending: true,
       },
       printFilters: {
+        type: activeFilter.value,
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
       },
     });
 
     const paged = unwrap(raw);
+    prints.value = (paged?.objects ?? []) as PrintItemView[];
     totalItems.value = paged?.totalItems ?? 0;
-    const items = (paged?.objects ?? []) as PrintItemView[];
-
-    if (reset) prints.value = items;
-    else prints.value.push(...items);
   } catch (e) {
     fetchError.value = e as Error;
   } finally {
     pending.value = false;
-    isLoadingMore.value = false;
   }
 }
 
-watch([searchQuery, locale], () => loadPage(true), { deep: true });
+const activeFilter = ref<PrintType>(PrintTypeValues[0]);
 
-// Infinite scroll
-const sentinel = ref<HTMLElement | null>(null);
-let io: IntersectionObserver | null = null;
-
-watch(sentinel, (el) => {
-  io?.disconnect();
-  if (!el) return;
-  io = new IntersectionObserver(
-    ([entry]) => {
-      if (entry?.isIntersecting && hasMore.value && !isLoadingMore.value) {
-        page.value++;
-        loadPage(false);
-      }
-    },
-    { rootMargin: "400px" },
-  );
-  io.observe(el);
+watch([searchQuery, locale, activeFilter], () => {
+  page.value = 0;
+  loadPage();
 });
 
-onMounted(() => loadPage(true));
-onUnmounted(() => io?.disconnect());
-
-const activeFilter = ref<PrintType>(PrintTypeValues[0]);
-const filteredPrints = computed(() =>
-  prints.value.filter((p) => p.print_type === activeFilter.value),
-);
+onMounted(loadPage);
 </script>
 
 <template>
@@ -126,36 +92,14 @@ const filteredPrints = computed(() =>
         </p>
         <button
           class="mt-4 px-6 py-3 border font-brand font-black text-[11px] uppercase tracking-widest transition-all border-border text-muted-foreground hover:border-foreground hover:text-foreground hover:bg-muted"
-          @click="loadPage(true)"
+          @click="loadPage()"
         >
           {{ t("prints.retry") }}
         </button>
       </div>
 
       <template v-else>
-        <PrintsFileGrid :category="activeFilter" :files="filteredPrints" />
-
-        <div ref="sentinel" class="h-1" aria-hidden="true" />
-
-        <div
-          v-if="isLoadingMore"
-          class="flex items-center justify-center gap-3 py-10 text-muted-foreground"
-        >
-          <svg
-            class="w-4 h-4 animate-spin"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-          </svg>
-          <span
-            class="font-brand font-black text-[10px] uppercase tracking-widest"
-          >
-            {{ t("prints.loading") }}
-          </span>
-        </div>
+        <PrintsFileGrid :category="activeFilter" :files="prints" />
       </template>
     </main>
   </div>

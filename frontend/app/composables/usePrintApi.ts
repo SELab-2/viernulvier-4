@@ -4,11 +4,15 @@ import type {
   PrintItemView,
   PaginatedResponse,
   PaginationFilter,
+  PrintType,
 } from "@repo/common";
 import { PrintTypeValues } from "@repo/common";
 
 interface PrintListOptions {
-  printFilters?: { title?: string };
+  printFilters?: {
+    title?: string;
+    type?: PrintType;
+  };
   paginationFilters?: PaginationFilter;
 }
 
@@ -34,15 +38,21 @@ export function usePrintApi() {
     //TODO needs to be changed to get actual API call
     await new Promise((r) => setTimeout(r, 600));
 
-    const { page = 0, limit = 20, descending = true } = paginationFilters ?? {};
+    const { page = 0, limit = 16, descending = true } = paginationFilters ?? {};
     const titleFilter = printFilters?.title?.toLowerCase() ?? "";
 
-    let filtered = MOCK_PRINTS.filter((p) =>
-      titleFilter ? p.titel.toLowerCase().includes(titleFilter) : true,
-    );
-
+    let filtered = MOCK_PRINTS;
     if (descending) filtered = [...filtered].reverse();
 
+    if (printFilters?.type) {
+      filtered = filtered.filter((p) => p.print_type === printFilters.type);
+    }
+
+    if (titleFilter) {
+      filtered = filtered.filter((p) =>
+        p.titel.toLowerCase().includes(titleFilter),
+      );
+    }
     const objects = filtered.slice(page * limit, page * limit + limit);
 
     return { objects, totalItems: filtered.length, page, limit };
