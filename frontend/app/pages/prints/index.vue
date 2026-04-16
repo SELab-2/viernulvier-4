@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse, PrintType } from "@repo/common";
 import { PrintTypeValues } from "@repo/common";
-import { usePrintApi } from "../../composables/usePrintApi";
+import { usePrintApi } from "../../composables/media/usePrintApi";
 import PrintsHeader from "../../components/prints/PrintsHeader.vue";
 import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
 import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
@@ -71,10 +71,8 @@ async function loadPage() {
         limit: LIMIT.value,
         descending: true,
       },
-      printFilters: {
-        type: activeFilter.value,
-        ...(searchQuery.value ? { title: searchQuery.value } : {}),
-      },
+      languageFilters: { lang: locale.value as "nl" | "en" },
+      type: activeFilter.value,
     });
 
     const paged = unwrap(raw);
