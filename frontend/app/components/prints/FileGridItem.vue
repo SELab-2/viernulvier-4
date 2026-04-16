@@ -28,6 +28,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
     <!-- Thumbnail -->
     <div
       class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150"
+      @click="openFile(file.url)"
     >
       <MediaDisplay :src="file" size="fill" :show-icon="true" />
     </div>
