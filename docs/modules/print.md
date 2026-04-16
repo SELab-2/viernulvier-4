@@ -1,14 +1,14 @@
-# Blog Module
+# Print Module
 
 **Category:** Feature
 
 ## Overview
 
-This module manages blog data. It acts as the central source of truth for managing and viewing raw blogs. Blogs are an exclusive resource to the Archive.
+This module manages the prints within the archive. These prints can either be leaflets/booklets, posters, prints or programs.
 
 ## Module Boundaries
 
-This module manages the `blogs` database table.
+This module typically manages the `print_items` database table.
 
 ### Dependencies
 
@@ -18,4 +18,4 @@ This module manages the `blogs` database table.
 
 ### Provides
 
-* Endpoints for managing blogs.
+* Endpoints for managing and retrieving print items.

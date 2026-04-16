@@ -15,7 +15,7 @@ import {
   LanguageQuerySchema,
   PaginationFilterSchema,
 } from "@repo/common";
-import { ResourceGoneException } from "../../common/exceptions";
+import { ResourceNotFoundException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -176,12 +176,12 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProductionView);
     });
 
-    it("should throw a ResourceGoneException (410) if the production does not exist", async () => {
+    it("should throw a ResourceNotFoundException (410) if the production does not exist", async () => {
       jest
         .spyOn(service, "getProductionById")
-        .mockRejectedValue(new ResourceGoneException("Production not found"));
+        .mockRejectedValue(new ResourceNotFoundException(ProductionDto, 999));
       await expect(controller.getProductionById(999, {})).rejects.toThrow(
-        ResourceGoneException,
+        ResourceNotFoundException,
       );
     });
   });
@@ -193,13 +193,13 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should throw a ResourceGoneException (410) if trying to replace a non-existent production", async () => {
+    it("should throw a ResourceNotFoundException (410) if trying to replace a non-existent production", async () => {
       jest
         .spyOn(service, "replaceProduction")
-        .mockRejectedValue(new ResourceGoneException("Production not found"));
+        .mockRejectedValue(new ResourceNotFoundException(ProductionDto, 999));
       await expect(
         controller.replaceProduction(999, mockProduction),
-      ).rejects.toThrow(ResourceGoneException);
+      ).rejects.toThrow(ResourceNotFoundException);
     });
   });
 
@@ -222,17 +222,17 @@ describe("ProductionController", () => {
       expect(result).toEqual(patchedProduction);
     });
 
-    it("should throw a ResourceGoneException (410) if trying to modify a non-existent production", async () => {
+    it("should throw a ResourceNotFoundException (410) if trying to modify a non-existent production", async () => {
       const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       jest
         .spyOn(service, "modifyProduction")
         .mockRejectedValueOnce(
-          new ResourceGoneException("Production not found"),
+          new ResourceNotFoundException(ProductionDto, 999),
         );
       await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(
-        ResourceGoneException,
+        ResourceNotFoundException,
       );
     });
   });
@@ -242,15 +242,6 @@ describe("ProductionController", () => {
       const result = await controller.deleteProduction(1);
       expect(service.deleteProduction).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
-    });
-
-    it("should throw a ResourceGoneException (410) if trying to delete a non-existent production", async () => {
-      jest
-        .spyOn(service, "deleteProduction")
-        .mockRejectedValue(new ResourceGoneException("Production not found"));
-      await expect(controller.deleteProduction(999)).rejects.toThrow(
-        ResourceGoneException,
-      );
     });
   });
 

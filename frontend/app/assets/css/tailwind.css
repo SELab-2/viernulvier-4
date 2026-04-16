@@ -100,6 +100,7 @@
   --action-red-border: #fecaca;
   --action-red-icon: #dc2626;
   --action-red-hover: #fef2f2;
+  --action-red-text-hover: #991b1b;
 
   --action-green-border: #bbf7d0;
   --action-green-icon: #16a34a;
@@ -168,6 +169,7 @@
   --action-red-border: #b91c1c;
   --action-red-icon: #fca5a5;
   --action-red-hover: #7f1d1d;
+  --action-red-text-hover: #fecdd3;
 
   --action-green-border: #15803d;
   --action-green-icon: #86efac;
@@ -204,6 +206,7 @@
   --color-action-red-border: var(--action-red-border);
   --color-action-red-icon: var(--action-red-icon);
   --color-action-red-hover: var(--action-red-hover);
+  --color-action-red-text-hover: var(--action-red-text-hover);
   --color-action-green-border: var(--action-green-border);
   --color-action-green-icon: var(--action-green-icon);
   --color-action-green-hover: var(--action-green-hover);
