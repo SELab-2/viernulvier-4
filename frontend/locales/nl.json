@@ -213,6 +213,8 @@
       "deleteTitle": "Verhaal Verwijderen",
       "deleteConfirm": "Weet je zeker dat je \"{title}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
       "deleteConfirmBtn": "Verwijderen",
+      "titleEnRequired": "Engelse titel is nodig",
+      "descriptionEnRequired": "Engelse beschrijving is nodig",
 
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",

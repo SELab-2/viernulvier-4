@@ -214,6 +214,9 @@
       "deleteConfirm": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
       "deleteConfirmBtn": "Delete",
 
+      "titleEnRequired": "English title is required",
+      "descriptionEnRequired": "English description is required",
+
       "validation": {
         "titleNlRequired": "A Dutch title is required.",
         "descriptionNlRequired": "A Dutch description is required.",
