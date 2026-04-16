@@ -1,3 +1,9 @@
+<!--
+  Theme Toggle Component
+
+  This component allows users to switch between light and dark mode.
+  It stores the selected theme in localStorage and applies it to the document.
+-->
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { Sun, Moon } from "lucide-vue-next";

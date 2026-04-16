@@ -1,3 +1,22 @@
+<!--
+  Admin Login Page
+
+  This page handles authentication for accessing the admin area.
+  It provides a username and password form, manages loading and error states,
+  and redirects users after a successful login.
+
+  Features:
+  - Required username and password fields
+  - Error handling with user feedback
+  - Loading state during authentication
+  - Password visibility toggle
+  - Internationalization (i18n support)
+  - Theme and locale switchers (top-right utilities)
+
+  Notes:
+  - Uses a custom layout (no default header/footer)
+  - Authentication is handled via the useAuth composable
+-->
 <script setup lang="ts">
 import { ROUTES } from "~/utils/routes";
 import { Eye, EyeOff } from "lucide-vue-next";
