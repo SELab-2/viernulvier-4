@@ -19,6 +19,9 @@ export const API_ROUTES = {
     blogs: (productionId: number) => `/productions/${productionId}/blogs`,
     blogById: (productionId: number, blogId: number) =>
       `/productions/${productionId}/blogs/${blogId}`,
+    media: (productionId: number) => `/productions/${productionId}/media`,
+    mediaById: (productionId: number, galleryId: number) =>
+      `/productions/${productionId}/media/${galleryId}`,
   },
   events: {
     base: "/events",
@@ -33,6 +36,9 @@ export const API_ROUTES = {
   blogs: {
     base: "/blogs",
     byId: (blogId: number) => `/blogs/${blogId}`,
+    media: (blogId: number) => `/blogs/${blogId}/media`,
+    mediaById: (blogId: number, galleryId: number) =>
+      `/blogs/${blogId}/media/${galleryId}`,
   },
   tags: {
     base: "/tags",
@@ -52,5 +58,26 @@ export const API_ROUTES = {
     tags: "/parser/tags",
     blogs: "/parser/blogs",
     prices: "/parser/prices",
+  },
+  galleries: {
+    base: "/media/galleries",
+    byId: (galleryId: number) => `/media/galleries/${galleryId}`,
+    items: (galleryId: number) => `/media/galleries/${galleryId}/items`,
+    itemLink: (galleryId: number, itemId: number) =>
+      `/media/galleries/${galleryId}/items/${itemId}`,
+  },
+  items: {
+    base: "/media/items",
+    byId: (itemId: number) => `/media/items/${itemId}`,
+    crops: (itemId: number) => `/media/items/${itemId}/crops`,
+    cropLink: (itemId: number, cropId: number) =>
+      `/media/items/${itemId}/crops/${cropId}`,
+  },
+  crops: {
+    base: "/media/crops",
+    byId: (cropId: number) => `/media/crops/${cropId}`,
+  },
+  storage: {
+    base: "/media/storage",
   },
 } as const;

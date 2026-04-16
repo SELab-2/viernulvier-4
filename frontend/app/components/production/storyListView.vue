@@ -26,12 +26,7 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <div class="m-4">
-    <!-- Title -->
-    <h3 class="text-[12px] font-bold uppercase mb-2">
-      {{ t("production.stories") }}
-    </h3>
-
+  <div class="w-full">
     <div v-if="stories.length" class="flex flex-col gap-2">
       <div v-if="stories.length" class="overflow-y-auto max-h-[25rem]">
         <div class="flex flex-col gap-2">
@@ -43,14 +38,6 @@ const props = defineProps<Props>();
           />
         </div>
       </div>
-    </div>
-
-    <!-- Empty state -->
-    <div
-      v-else
-      class="rounded-xl border border-border bg-card dark:bg-muted p-4 text-[12px] text-foreground/60"
-    >
-      {{ t("production.noStories") }}
     </div>
   </div>
 </template>

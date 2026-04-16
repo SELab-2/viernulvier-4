@@ -7,7 +7,6 @@ import {
   ReplacePriceDto,
   PaginationFilterDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse, PriceSchema } from "@repo/common";
 import {
   generateCountQuery,
@@ -15,6 +14,7 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class PriceDatabaseService {
@@ -38,7 +38,7 @@ export class PriceDatabaseService {
     const result = await this.db.query<PriceDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Price with ID ${id} not found.`);
+      throw new ResourceNotFoundException(PriceDto, id);
     }
 
     return result[0];
@@ -131,9 +131,7 @@ export class PriceDatabaseService {
     const result = await this.db.query<PriceDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update price with ID ${priceId}.`,
-      );
+      throw new ResourceNotFoundException(PriceDto, priceId);
     }
 
     return result[0];
@@ -148,6 +146,7 @@ export class PriceDatabaseService {
   async deletePrice(id: number): Promise<void> {
     const query = `DELETE FROM prices WHERE id = $1`;
 
+    // * NOTE: We don't check for failures here for idempotency.
     await this.db.query(query, [id]);
   }
 

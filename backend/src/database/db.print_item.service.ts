@@ -6,16 +6,16 @@ import {
   ModifyPrintItemDto,
   PaginationFilterDto,
   ReplacePrintItemDto,
+  PrintType,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
-  generateCountQuery,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
 import { PrintItemSchema } from "@repo/common";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class PrintItemDatabaseService {
@@ -43,9 +43,7 @@ export class PrintItemDatabaseService {
     const result = await this.db.query<PrintItemDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `No PrintItemDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(PrintItemDto, id);
     }
 
     return result[0];
@@ -54,24 +52,33 @@ export class PrintItemDatabaseService {
   /**
    * Get all print items paginated.
    * @param paginationFilters The Filters regarding ordering and pagination.
+   * @param print_type Optional filter by print type.
    * @returns The PrintItems.
    */
   async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
+    print_type?: PrintType,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     const returningClause = generateReturningClause(PrintItemSchema);
-
-    const query = `
-      SELECT ${returningClause}
-      FROM print_items
-      LIMIT $1 OFFSET $2;
-    `;
-    const countQuery = generateCountQuery("print_items");
     const offset = paginationFilters.page * paginationFilters.limit;
+    let query = `SELECT ${returningClause} FROM print_items`;
+    let countQuery = `SELECT COUNT(*) as count FROM print_items`;
+    const values: any[] = [];
+    const countValues: any[] = [];
+    if (print_type) {
+      query += ` WHERE print_type = $1`;
+      countQuery += ` WHERE print_type = $1`;
+      values.push(print_type);
+      countValues.push(print_type);
+    }
+    const limitIndex = values.length + 1;
+    const offsetIndex = values.length + 2;
 
+    query += ` LIMIT $${limitIndex} OFFSET $${offsetIndex};`;
+    values.push(paginationFilters.limit, offset);
     const [objects, countResult] = await Promise.all([
-      this.db.query<PrintItemDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery, []),
+      this.db.query<PrintItemDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, countValues),
     ]);
 
     return {
@@ -151,9 +158,7 @@ export class PrintItemDatabaseService {
     const result = await this.db.query<PrintItemDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update print item with ID ${itemId}.`,
-      );
+      throw new ResourceNotFoundException(PrintItemDto, itemId);
     }
     return result[0];
   }
@@ -164,11 +169,8 @@ export class PrintItemDatabaseService {
    */
   async deletePrintItem(id: number): Promise<void> {
     const query = `DELETE FROM print_items WHERE id = $1 RETURNING id`;
-    const result = await this.db.query(query, [id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        `Cannot delete: Print Item ${id} not found.`,
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 }

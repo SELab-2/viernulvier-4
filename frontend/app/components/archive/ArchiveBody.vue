@@ -20,6 +20,11 @@ import type { ProductionView, PaginatedResponse } from "@repo/common";
 import { useArchiveView } from "../../composables/useArchiveView";
 import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
+import { useRoute, useRouter } from "vue-router";
+import { ROUTES } from "~/utils/routes";
+
+const route = useRoute();
+const router = useRouter();
 
 const {
   viewMode,
@@ -43,6 +48,9 @@ const error = ref<string | null>(null);
 async function loadPage(page: number) {
   loading.value = true;
   error.value = null;
+
+  let targetedPage = Math.max(1, page);
+
   try {
     const resp = await getAll({
       productionFilters: {
@@ -52,17 +60,32 @@ async function loadPage(page: number) {
         date_before: dateFilter.value.before || undefined,
       },
       paginationFilters: {
-        page: page - 1, // backend uses 0-based pagination
+        page: targetedPage - 1, // backend uses 0-based pagination
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
       languageFilters: { lang: locale.value },
     });
+
     if (resp.data) {
       const data = resp.data as PaginatedResponse<ProductionView>;
       productions.value = data.objects;
       totalItems.value = data.totalItems;
-      totalPages.value = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE));
+      const calculatedTotalPages = Math.max(
+        1,
+        Math.ceil(data.totalItems / PAGE_SIZE),
+      );
+      totalPages.value = calculatedTotalPages;
+
+      if (targetedPage > calculatedTotalPages) {
+        currentPage.value = calculatedTotalPages;
+        await loadPage(calculatedTotalPages);
+        return;
+      }
+
+      if (currentPage.value !== targetedPage) {
+        currentPage.value = targetedPage;
+      }
     } else {
       error.value = resp.error ?? "Failed to load productions";
     }
@@ -75,8 +98,11 @@ async function loadPage(page: number) {
 }
 
 function resetAndLoad() {
-  currentPage.value = 1;
-  loadPage(1);
+  if (currentPage.value === 1) {
+    loadPage(1);
+  } else {
+    currentPage.value = 1;
+  }
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -84,10 +110,39 @@ onUnmounted(() => {
   if (searchTimer) clearTimeout(searchTimer);
 });
 
-onMounted(() => loadPage(1));
+onMounted(() => {
+  const pageFromUrl = parseInt(route.query.page as string) || 1;
+  const safePage = Math.max(1, pageFromUrl);
+  currentPage.value = safePage;
+  loadPage(safePage);
+});
+
+watch(
+  () => route.query.page,
+  (newPage) => {
+    if (route.path !== ROUTES.productions.base) return;
+
+    const pageNum = parseInt(newPage as string) || 1;
+
+    if (currentPage.value !== pageNum) {
+      currentPage.value = pageNum;
+    }
+
+    loadPage(pageNum);
+  },
+  { immediate: false },
+);
 
 // Reload when pagination changes
-watch(currentPage, (page) => loadPage(page));
+watch(currentPage, (newPage) => {
+  if (route.path !== ROUTES.productions.base) return;
+
+  if (newPage.toString() !== route.query.page) {
+    router.push({
+      query: { ...route.query, page: newPage.toString() },
+    });
+  }
+});
 
 // Reset + reload when filters change
 watch(locale, resetAndLoad);

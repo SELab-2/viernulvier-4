@@ -9,7 +9,6 @@ import {
   PrintItemDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
-import { ResourceGoneException } from "../../common/exceptions";
 import {
   MediaGallerySchema,
   MediaItemSchema,
@@ -22,6 +21,7 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "../db-utils";
+import { ResourceNotFoundException } from "../../common/exceptions";
 
 @Injectable()
 export class MediaGalleryDatabaseService {
@@ -49,9 +49,7 @@ export class MediaGalleryDatabaseService {
     const result = await this.db.query<MediaGalleryDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `No MediaGalleryDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(MediaGalleryDto, id);
     }
 
     return result[0];
@@ -146,9 +144,7 @@ export class MediaGalleryDatabaseService {
     const result = await this.db.query<MediaGalleryDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update media gallery with ID ${galleryId}.`,
-      );
+      throw new ResourceNotFoundException(MediaGalleryDto, galleryId);
     }
 
     return result[0];
@@ -160,10 +156,9 @@ export class MediaGalleryDatabaseService {
    */
   async deleteGallery(id: number): Promise<void> {
     const query = `DELETE FROM media_gallery WHERE id = $1 RETURNING id`;
-    const result = await this.db.query(query, [id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(`Cannot delete: Gallery ${id} not found`);
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 
   //--------------------- items: ------------------------//

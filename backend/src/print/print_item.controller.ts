@@ -29,6 +29,9 @@ import {
   ReplacePrintItemDto,
   PaginationFilterDto,
   PrintItemViewDto,
+  PrintType,
+  PrintTypeSchema,
+  PrintTypeValues,
 } from "../dto/dto";
 import { LanguageService } from "../util/language/language.service";
 import { ZodValidationPipe } from "nestjs-zod";
@@ -39,6 +42,7 @@ import {
   ApiOperation,
   ApiSecurity,
   ApiTags,
+  ApiQuery,
 } from "@nestjs/swagger";
 import {
   ApiOkAnyOf,
@@ -64,16 +68,30 @@ export class PrintItemController {
    * @returns A paginated list of print items.
    */
   @ApiOperation({ summary: "Fetch a paginated list of print items." })
+  @ApiQuery({
+    name: "type",
+    enum: PrintTypeValues,
+    required: false,
+    description: "Filter by print type.",
+  })
   @ApiOkPaginatedResponseAnyOf(PrintItemDto, PrintItemViewDto)
   @Get()
   async getPrintItems(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+    @Query("type", new ZodValidationPipe(PrintTypeSchema.optional()))
+    print_type?: string,
   ): Promise<PaginatedResponse<PrintItemDto | PrintItemViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<PrintItemDto | PrintItemViewDto>
-    >(await this.printItemService.getPrintItems(paginationFilter), lang.lang);
+    >(
+      await this.printItemService.getPrintItems(
+        paginationFilter,
+        print_type as PrintType,
+      ),
+      lang.lang,
+    );
   }
 
   /**

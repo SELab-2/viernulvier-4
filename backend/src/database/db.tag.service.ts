@@ -6,7 +6,6 @@ import {
   ModifyTagDto,
   PaginationFilterDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse, TagSchema } from "@repo/common";
 import {
   generateCountQuery,
@@ -14,6 +13,7 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class TagDatabaseService {
@@ -37,7 +37,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Tag with ID ${id} not found`);
+      throw new ResourceNotFoundException(TagDto, id);
     }
     return result[0];
   }
@@ -126,7 +126,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Tag with ID ${tagId} not found`);
+      throw new ResourceNotFoundException(TagDto, tagId);
     }
 
     return result[0];
@@ -141,12 +141,8 @@ export class TagDatabaseService {
   async deleteTag(id: number): Promise<void> {
     const query = `DELETE FROM tags WHERE id = $1 RETURNING id;`;
 
-    const result = await this.db.query(query, [id]);
-    if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Cannot Delete: Tag with ID ${id} not found`,
-      );
-    }
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 
   // insert extra functions here if desired

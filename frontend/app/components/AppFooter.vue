@@ -110,7 +110,7 @@ const socials = [
             </li>
             <li>
               <NuxtLink
-                :to="ROUTES.archive.base"
+                :to="ROUTES.productions.base"
                 class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
               >
                 {{ t("footer.archive") }}

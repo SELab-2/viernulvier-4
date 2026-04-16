@@ -9,8 +9,16 @@ import type {
   LanguageQuery,
   ReplaceBlog,
   FilterBlog,
+  PrintItem,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
+import {
+  fetchFullGallery,
+  type DefaultGallery,
+  type GalleryWithItems,
+  type ItemWithCrops,
+  type PrintGallery,
+} from "~/utils/galleryFetcher";
 
 interface BlogListOptions {
   paginationFilters?: PaginationFilter;
@@ -77,5 +85,66 @@ export function useBlogApi() {
   /** DELETE /blogs/:blogId — deletes a blog. */
   const remove = (blogId: number) => del(API_ROUTES.blogs.byId(blogId));
 
-  return { getAll, getById, create, replace, modify, remove };
+  /**
+   * Media Galleries
+   */
+
+  /** GET /blogs/:blogId/media?type=default - Gets a DefaultGallery from the api. */
+  const getMediaGallery = async (
+    blogId: number,
+  ): Promise<GalleryWithItems<ItemWithCrops> | null> => {
+    try {
+      const response = await get<DefaultGallery>(
+        `${API_ROUTES.blogs.media(blogId)}?type=default`,
+      );
+
+      const gallery = response.data;
+      if (!gallery) return null;
+
+      return await fetchFullGallery(gallery);
+    } catch {
+      // We return null because no gallery exists.
+      return null;
+    }
+  };
+
+  /** GET /blogs/:blogId/media?type=prints - Gets a PrintGallery from the api. */
+  const getPrintsGallery = async (
+    blogId: number,
+  ): Promise<GalleryWithItems<PrintItem> | null> => {
+    try {
+      const response = await get<PrintGallery>(
+        `${API_ROUTES.blogs.media(blogId)}?type=prints`,
+      );
+
+      const gallery = response.data;
+      if (!gallery) return null;
+
+      return await fetchFullGallery(gallery);
+    } catch {
+      // We return null because no gallery exists.
+      return null;
+    }
+  };
+
+  /** PUT /blogs/:blogId/media/:galleryId — links a MediaGallery to a blog. */
+  const linkMedia = (productionId: number, galleryId: number) =>
+    put(API_ROUTES.blogs.mediaById(productionId, galleryId), {});
+
+  /** DELETE /blogs/:blogId/media/:galleryId — unlinks a MediaGallery from a blog. */
+  const unlinkMedia = (productionId: number, galleryId: number) =>
+    del(API_ROUTES.blogs.mediaById(productionId, galleryId));
+
+  return {
+    getAll,
+    getById,
+    create,
+    replace,
+    modify,
+    remove,
+    getMediaGallery,
+    getPrintsGallery,
+    linkMedia,
+    unlinkMedia,
+  };
 }

@@ -149,6 +149,16 @@
     "price": "Price",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prices",
+    "hidePriceDetails": "hide details"
+  },
+  "general": {
+    "back": "Back",
+    "readMore": "Read more",
+    "readLess": "Read less",
+    "showMore": "Show more",
+    "showLess": "Show less",
     "noStories": "This production doesn't contain any stories."
   },
   "eventlist": {
@@ -157,6 +167,20 @@
     "edit": "Edit",
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to delete this event?"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "subtitle": "Manage the accounts.",
+    "emptyTitle": "No accounts found",
+    "emptyDescription": "There are no accounts available to display yet.",
+    "username": "Username",
+    "accountId": "Account ID",
+    "role": "Role",
+    "superAdmin": "Super admin",
+    "admin": "Admin",
+    "actions": "Actions",
+    "delete": "Remove",
+    "protected": "Protected"
   },
   "prints": {
     "title": "Prints",
@@ -170,5 +194,12 @@
     "download": "Download",
     "loading": "Loading...",
     "retry": "Try again"
+  },
+  "login": {
+    "username": "Username",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "error": "Something went wrong."
   }
 }

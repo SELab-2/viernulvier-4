@@ -110,12 +110,14 @@ export class AccountDatabaseService {
     const apiKey = await this.getApiKeyFromAccount({
       id: dbAccount.id,
       username: dbAccount.username,
+      superAdmin: dbAccount.superAdmin,
     });
 
     // 4. Return safe account info + apiKey
     const publicAccount: PublicAccountDto = {
       id: dbAccount.id,
       username: dbAccount.username,
+      superAdmin: dbAccount.superAdmin,
     };
 
     return { account: publicAccount, apiKey };

@@ -6,7 +6,6 @@ import {
   ModifyLocationDto,
   PaginationFilterDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import { LocationSchema, PaginatedResponse } from "@repo/common";
 import {
   generateCountQuery,
@@ -14,6 +13,7 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -37,7 +37,7 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Location with ID ${id} not found`);
+      throw new ResourceNotFoundException(LocationDto, id);
     }
     return result[0];
   }
@@ -129,9 +129,7 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Location with ID ${locationId} not found.`,
-      );
+      throw new ResourceNotFoundException(LocationDto, locationId);
     }
 
     return result[0];
@@ -145,10 +143,9 @@ export class LocationDatabaseService {
    */
   async deleteLocation(id: number): Promise<void> {
     const query = `DELETE FROM locations WHERE id = $1 RETURNING id;`;
-    const result = await this.db.query(query, [id]);
-    if (result.length === 0) {
-      throw new ResourceGoneException(`Location with ID ${id} not found`);
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 
   // insert extra functions here if desired.
