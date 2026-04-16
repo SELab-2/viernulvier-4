@@ -26,6 +26,7 @@ export class PrintItemService {
   /**
    * Fetches all PrintItem objects from the database.
    * @param paginationFilter Filters for pagination and ordering.
+   * @param printItemFilters The filters for the prints.
    * @returns All PrintItems.
    */
   async getPrintItems(

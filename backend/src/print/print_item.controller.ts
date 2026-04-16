@@ -63,6 +63,7 @@ export class PrintItemController {
    * Responds to a GET to "/prints".
    * @param paginationFilter The Filters for pagination and ordering.
    * @param lang The Language Query.
+   * @param printItemFilters The filters for the prints.
    * @returns A paginated list of print items.
    */
   @ApiOperation({ summary: "Fetch a paginated list of print items." })

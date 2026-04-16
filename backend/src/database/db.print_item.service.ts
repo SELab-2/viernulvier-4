@@ -52,7 +52,7 @@ export class PrintItemDatabaseService {
   /**
    * Get all print items paginated.
    * @param paginationFilters The Filters regarding ordering and pagination.
-   * @param print_type Optional filter by print type.
+   * @param printItemFilters The filters for the prints.
    * @returns The PrintItems.
    */
   async getAllPrintItems(
