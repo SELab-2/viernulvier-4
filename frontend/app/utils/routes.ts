@@ -46,4 +46,11 @@ export const ROUTES = {
   parser: {
     base: "/parser",
   },
+  admin: {
+    blogs: {
+      base: "/admin/blogs",
+      create: "/admin/blogs/create",
+      edit: (id: number) => `/admin/blogs/${id}/edit`,
+    },
+  },
 } as const;
