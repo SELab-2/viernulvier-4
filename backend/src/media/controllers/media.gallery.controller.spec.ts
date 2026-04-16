@@ -3,13 +3,14 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { MediaGalleryController } from "./media.gallery.controller";
 import { MediaGalleryService } from "../services/media.gallery.service";
 import { ApiKeyGuard } from "../../auth/authGuard";
-import { PaginatedResponse } from "@repo/common";
+import { MediaItemView, PaginatedResponse } from "@repo/common";
 import {
   CreateMediaGalleryDto,
   MediaGalleryDto,
   MediaItemDto,
   PaginationFilterDto,
 } from "../../dto/dto";
+import { LanguageService } from "../../util/language/language.service";
 
 describe("MediaGalleryController", () => {
   let controller: MediaGalleryController;
@@ -37,6 +38,20 @@ describe("MediaGalleryController", () => {
     updated_at: "2026-03-28T14:00:00.000Z",
   };
 
+  const mockItemView: MediaItemView = {
+    id: 1,
+    type: "image",
+    original_filename: "test.png",
+    position: "main",
+    width: 1920,
+    height: 1080,
+    title: "Vid Title",
+    description: "Vid Desc",
+    credits: "Vid Credits",
+    created_at: "2026-03-28T14:00:00.000Z",
+    updated_at: "2026-03-28T14:00:00.000Z",
+  };
+
   beforeEach(async () => {
     const mockMediaGalleryService = {
       getGalleries: jest.fn(),
@@ -50,12 +65,20 @@ describe("MediaGalleryController", () => {
       unlinkPrintItemFromGallery: jest.fn(),
     };
 
+    const mockLanguageService = {
+      flattenByLanguage: jest.fn().mockReturnValue([mockItemView]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MediaGalleryController],
       providers: [
         {
           provide: MediaGalleryService,
           useValue: mockMediaGalleryService,
+        },
+        {
+          provide: LanguageService,
+          useValue: mockLanguageService,
         },
       ],
     })
@@ -140,10 +163,10 @@ describe("MediaGalleryController", () => {
     it("should return all items for a gallery", async () => {
       mediaGalleryService.getGalleryItems.mockResolvedValue([mockItem]);
 
-      const result = await controller.getGalleryItems(1);
+      const result = await controller.getGalleryItems(1, { lang: "en" });
 
       expect(mediaGalleryService.getGalleryItems).toHaveBeenCalledWith(1);
-      expect(result).toEqual([mockItem]);
+      expect(result).toEqual([mockItemView]);
     });
   });
 

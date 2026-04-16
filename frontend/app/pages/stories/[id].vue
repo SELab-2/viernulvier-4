@@ -40,13 +40,8 @@ const { data, pending, error, refresh } = await useAsyncData<BlogView | null>(
 
 const blog = computed<BlogView | null>(() => data.value ?? null);
 
-const {
-  title,
-  description: body,
-  formattedDate,
-  placeholderGradient: bannerGradient,
-} = useBlogStory(blog);
-const gallery = ref<GalleryWithItems<ItemWithCrops> | null>(null);
+const { title, description: body, formattedDate } = useBlogStory(blog);
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
@@ -59,7 +54,7 @@ const readingTime = computed(() => {
 
 async function loadGallery() {
   if (!blog.value) return;
-  gallery.value = await getMediaGallery(blog.value.id);
+  gallery.value = await getMediaGallery(blog.value.id, locale.value);
 }
 
 watch(locale, () => refresh());
@@ -115,10 +110,10 @@ watch(
         class="relative flex items-end overflow-hidden"
         :class="headerCrop ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
       >
-        <MediaGalleryImage
+        <MediaDisplay
           class="absolute inset-0 w-full h-full object-cover z-0"
-          :object-id="blog.id"
-          :crop="headerCrop"
+          :id="blog.id"
+          :src="headerCrop"
         />
 
         <div
