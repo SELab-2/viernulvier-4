@@ -193,7 +193,8 @@
     "delete": "Delete",
     "download": "Download",
     "loading": "Loading...",
-    "retry": "Try again"
+    "retry": "Try again",
+    "noPrints": "No prints"
   },
   "login": {
     "username": "Username",

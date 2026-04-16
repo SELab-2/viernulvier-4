@@ -5,9 +5,8 @@
 -->
 
 <script setup lang="ts">
-import type { PrintItemView } from "@repo/common";
-
-type PrintCategory = "AFFICHE" | "BROCHURE" | "DRUKWERK" | "PROGRAMMA"; //TODO probably needs to be changed later on
+import type { PrintItemView, PrintType } from "@repo/common";
+import { PrintTypeValues } from "@repo/common";
 
 interface Props {
   prints: PrintItemView[];
@@ -17,19 +16,12 @@ interface Props {
 const props = defineProps<Props>();
 
 const categories = computed(() => {
-  const category: Record<PrintCategory, PrintItemView[]> = {
-    AFFICHE: [],
-    BROCHURE: [],
-    DRUKWERK: [],
-    PROGRAMMA: [],
-  }; //TODO probably needs to be changed later on
+  const category = Object.fromEntries(
+    PrintTypeValues.map((t) => [t, [] as PrintItemView[]]),
+  ) as Record<PrintType, PrintItemView[]>;
 
   props.prints.forEach((print) => {
-    const titelUpper = print.titel.toUpperCase();
-    if (titelUpper.includes("AFFICHE")) category.AFFICHE.push(print);
-    else if (titelUpper.includes("BROCHURE")) category.BROCHURE.push(print);
-    else if (titelUpper.includes("DRUKWERK")) category.DRUKWERK.push(print);
-    else if (titelUpper.includes("PROGRAMMA")) category.PROGRAMMA.push(print);
+    category[print.print_type]?.push(print);
   });
 
   return category;

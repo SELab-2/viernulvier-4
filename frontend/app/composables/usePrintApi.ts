@@ -5,6 +5,7 @@ import type {
   PaginatedResponse,
   PaginationFilter,
 } from "@repo/common";
+import { PrintTypeValues } from "@repo/common";
 
 interface PrintListOptions {
   printFilters?: { title?: string };
@@ -12,13 +13,13 @@ interface PrintListOptions {
 }
 
 const MOCK_PRINTS: PrintItemView[] = Array.from({ length: 200 }, (_, i) => {
-  const types = ["AFFICHE", "BROCHURE", "DRUKWERK", "PROGRAMMA"] as const;
-  const type = types[i % 4];
+  const type = PrintTypeValues[i % 4]!;
   return {
     id: i + 1,
     titel: `${type} — item ${i + 1}`,
     description: `Mock description for print item ${i + 1}`,
     url: `https://picsum.photos/seed/${i + 1}/400/533`,
+    print_type: type,
     created_at: new Date(2022, 0, i + 1).toISOString(),
     updated_at: new Date(2023, 0, i + 1).toISOString(),
   };

@@ -194,7 +194,8 @@
     "delete": "Verwijder",
     "download": "Download",
     "loading": "Laden...",
-    "retry": "Opnieuw proberen"
+    "retry": "Opnieuw proberen",
+    "noPrints": "Geen drukwerk"
   },
   "login": {
     "username": "Gebruikersnaam",

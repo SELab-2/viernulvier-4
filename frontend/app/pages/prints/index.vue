@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import type { PrintItemView, PaginatedResponse } from "@repo/common";
+import type { PrintItemView, PaginatedResponse, PrintType } from "@repo/common";
+import { PrintTypeValues } from "@repo/common";
 import { usePrintApi } from "../../composables/usePrintApi";
+import PrintsHeader from "../../components/prints/PrintsHeader.vue";
+import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
+import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
+import PrintsDisplay from "../../components/prints/PrintsDisplay.vue";
 
 const { t, locale } = useI18n();
 const { getAll } = usePrintApi();
-
-const PRINT_TYPES = ["AFFICHE", "BROCHURE", "DRUKWERK", "PROGRAMMA"] as const; //TODO replace/remove later when official enum comes
-type PrintType = (typeof PRINT_TYPES)[number];
 
 // Filters
 const searchQuery = ref("");
@@ -49,7 +51,6 @@ async function loadPage(reset = false) {
         limit: LIMIT,
         descending: true,
       },
-      languageFilters: { lang: locale.value as "nl" | "en" },
       printFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
       },
@@ -93,7 +94,7 @@ watch(sentinel, (el) => {
 onMounted(() => loadPage(true));
 onUnmounted(() => io?.disconnect());
 
-const activeFilter = ref<PrintType>(PRINT_TYPES[0]);
+const activeFilter = ref<PrintType>(PrintTypeValues[0]);
 </script>
 
 <template>
@@ -115,7 +116,6 @@ const activeFilter = ref<PrintType>(PRINT_TYPES[0]);
           class="font-brand font-black text-4xl uppercase italic tracking-tighter opacity-20"
         >
           {{ t("prints.noPrints") }}
-          <!--TODO this one i still have to add but im waiting for that other PR so i can chagne up the names a little -->
         </p>
         <p
           class="font-brand font-black text-[10px] uppercase tracking-widest text-red-400"
@@ -156,7 +156,6 @@ const activeFilter = ref<PrintType>(PRINT_TYPES[0]);
         </div>
       </template>
     </main>
-    <ScrollToTop />
   </div>
 </template>
 

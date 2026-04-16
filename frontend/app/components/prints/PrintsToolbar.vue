@@ -1,9 +1,6 @@
 <script setup lang="ts">
-const PRINT_TYPES = ["AFFICHE", "BROCHURE", "DRUKWERK", "PROGRAMMA"] as const;
-type PrintType = (typeof PRINT_TYPES)[number];
-
-// ---------------------------------------- // TODO: all of the above needs to be deleted/replaced
 import { ChevronDown, ChevronUp } from "lucide-vue-next";
+import { PrintTypeValues, type PrintType } from "@repo/common";
 defineProps<{
   titles?: string[];
 }>();
@@ -15,7 +12,7 @@ const emit = defineEmits<{
 
 const searchQuery = ref("");
 const filterOpen = ref(false);
-const activeType = ref<PrintType>(PRINT_TYPES[0]);
+const activeType = ref<PrintType>(PrintTypeValues[0]);
 
 watch(searchQuery, (v) => {
   emit("update:search", v);
@@ -62,7 +59,7 @@ function selectType(type: PrintType) {
       <div v-if="filterOpen" class="border-t border-border">
         <div class="container mx-auto px-4 max-w-5xl py-4 flex flex-wrap gap-2">
           <button
-            v-for="type in PRINT_TYPES"
+            v-for="type in PrintTypeValues"
             :key="type"
             @click="selectType(type)"
             :class="[
