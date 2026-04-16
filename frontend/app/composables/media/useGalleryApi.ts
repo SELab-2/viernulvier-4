@@ -1,11 +1,14 @@
 import type {
   CreateMediaGallery,
+  Language,
   MediaGallery,
   MediaItem,
+  MediaItemView,
   ModifyMediaGallery,
   PaginatedResponse,
   PaginationFilter,
   PrintItem,
+  PrintItemView,
   ReplaceMediaGallery,
 } from "@repo/common";
 
@@ -82,8 +85,12 @@ export function useGalleryApi() {
   /**
    * Returns all items linked to a gallery.
    */
-  const getGalleryItems = (galleryId: number) =>
-    get<MediaItem[] | PrintItem[]>(API_ROUTES.galleries.items(galleryId));
+  const getGalleryItems = (galleryId: number, lang?: Language) => {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<MediaItem[] | PrintItem[] | MediaItemView[] | PrintItemView[]>(
+      `${API_ROUTES.galleries.items(galleryId)}${query}`,
+    );
+  };
 
   /**
    * Links an item to a gallery.

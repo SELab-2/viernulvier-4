@@ -102,11 +102,13 @@ const { data: stories } = await useAsyncData(
   { watch: [productionId, locale], default: () => [] },
 );
 
-const { data: gallery } = await useAsyncData<GalleryWithItems<ItemWithCrops>>(
+const { data: gallery } = await useAsyncData<
+  GalleryWithItems<ItemViewWithCrops>
+>(
   `gallery-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null;
-    const res = await getMediaGallery(productionId.value);
+    const res = await getMediaGallery(productionId.value, locale.value);
     return (res as any)?.data ?? res;
   },
   { watch: [productionId, locale] },
@@ -124,11 +126,6 @@ const isValid = (val: any) => {
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED" && s !== "\\N";
 };
-
-const image = computed(() => (production.value as any)?.image ?? null); //TODO verander! (ook: witte letters bij light en dark mode op image)
-const bannerGradient = computed(() =>
-  pickPlaceholderGradient(productionId.value ?? 0),
-);
 
 /**
  * Sanitizes raw text by removing escape characters and
@@ -175,10 +172,10 @@ onBeforeUnmount(() => {
     <section
       class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden"
     >
-      <MediaGalleryImage
+      <MediaDisplay
         class="absolute inset-0 w-full h-full object-cover z-0"
-        :object-id="production.id"
-        :crop="headerCrop"
+        :id="production.id"
+        :src="headerCrop"
       />
 
       <div

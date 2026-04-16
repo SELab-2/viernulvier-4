@@ -12,21 +12,22 @@ import { useGallery } from "~/composables/media/useGallery";
 
 const { getMainImageCrop } = useGallery();
 const { getMediaGallery } = useBlogApi();
+const { locale } = useI18n();
 
 const props = defineProps<{ story: BlogView }>();
-const gallery = ref<GalleryWithItems<ItemWithCrops> | null>(null);
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const mainCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "hd_ready");
 });
 
-const { title, description, formattedDate, placeholderGradient } = useBlogStory(
+const { title, description, formattedDate } = useBlogStory(
   computed(() => props.story),
 );
 
 async function loadGallery() {
   if (!props.story?.id) return;
-  gallery.value = await getMediaGallery(props.story.id);
+  gallery.value = await getMediaGallery(props.story.id, locale.value);
 }
 
 onMounted(() => {
@@ -56,9 +57,9 @@ watch(
       class="w-32 sm:w-48 shrink-0 relative overflow-hidden rounded-lg"
       style="min-height: 84px"
     >
-      <MediaGalleryImage
-        :object-id="props.story.id"
-        :crop="mainCrop"
+      <MediaDisplay
+        :id="props.story.id"
+        :src="mainCrop"
         :rounded="true"
         :show-icon="true"
       />
