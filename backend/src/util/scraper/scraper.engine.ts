@@ -58,8 +58,24 @@ export interface ScrapeResult {
   crops: vnvMediaCrop[];
 }
 
+/**
+ * The scraper engine class.
+ * The core logic of the scraper.
+ */
 @Injectable()
 export class ScraperEngine {
+  /**
+   * The Base of the VNV API.
+   */
+  private readonly apiBase: string;
+  /**
+   * Limiter used for scraping.
+   */
+  private readonly limiter = new Bottleneck({
+    maxConcurrent: 20, // Maximum connections open at a time.
+    minTime: 50, // Waits x ms between starts.
+  });
+
   constructor(
     private readonly languageService: LanguageService,
     private readonly logger: AppLogger,
@@ -83,19 +99,6 @@ export class ScraperEngine {
       "https://www.viernulvier.gent",
     );
   }
-
-  /**
-   * The Base of the VNV API.
-   */
-  private readonly apiBase: string;
-
-  /**
-   * Limiter used for scraping.
-   */
-  private readonly limiter = new Bottleneck({
-    maxConcurrent: 20, // Maximum connections open at a time.
-    minTime: 50, // Waits x ms between starts.
-  });
 
   /**
    * Scrapes the existing data we need from the VNV API.
