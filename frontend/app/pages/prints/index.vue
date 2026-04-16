@@ -92,6 +92,10 @@ watch([searchQuery, locale, activeFilter], () => {
   page.value = 0;
   loadPage();
 });
+watch(currentCols, () => {
+  page.value = 0;
+  loadPage();
+});
 
 onMounted(loadPage);
 
@@ -133,36 +137,38 @@ const chevronButton =
         </button>
       </div>
 
-      <FileGrid
-        :category="activeFilter"
-        :files="prints"
-        :total-files="totalItems"
-      />
+      <div v-else>
+        <FileGrid
+          :category="activeFilter"
+          :files="prints"
+          :total-files="totalItems"
+        />
 
-      <!-- Pagination -->
-      <div class="flex items-center justify-center gap-2 mt-6 h-9">
-        <button
-          :class="chevronButton"
-          :disabled="page === 1"
-          @click="goToPage(page - 1)"
-        >
-          <ChevronLeft :size="16" />
-        </button>
+        <!-- Pagination -->
+        <div class="flex items-center justify-center gap-2 mt-6 h-9">
+          <button
+            :class="chevronButton"
+            :disabled="page === 0"
+            @click="goToPage(page - 1)"
+          >
+            <ChevronLeft :size="16" />
+          </button>
 
-        <span
-          v-if="totalPages > 1"
-          class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
-        >
-          {{ page }} / {{ totalPages }}
-        </span>
+          <span
+            v-if="totalPages > 1"
+            class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
+          >
+            {{ page + 1 }} / {{ totalPages }}
+          </span>
 
-        <button
-          :class="chevronButton"
-          :disabled="page === totalPages"
-          @click="goToPage(page + 1)"
-        >
-          <ChevronRight :size="16" />
-        </button>
+          <button
+            :class="chevronButton"
+            :disabled="page === totalPages - 1"
+            @click="goToPage(page + 1)"
+          >
+            <ChevronRight :size="16" />
+          </button>
+        </div>
       </div>
     </main>
   </div>
