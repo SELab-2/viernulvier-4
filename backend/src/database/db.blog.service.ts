@@ -75,7 +75,7 @@ export class BlogDatabaseService {
     // Title filter
     // NOTE: This is case-insensitive and looks in all languages + matches on parts.
     if (blogFilters.title) {
-      const titleParam = param(blogFilters.title);
+      const titleParam = param(`%${blogFilters.title}%`);
       const titelClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
       );

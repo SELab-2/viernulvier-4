@@ -55,6 +55,7 @@ import {
   VerifyApiKeySchema,
   FilterBlogSchema,
   AccountSchema,
+  FilterPrintItemSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -142,12 +143,12 @@ export class ModifyMediaCropDto extends createZodDto(ModifyMediaCropSchema) {}
 export class ReplaceMediaCropDto extends createZodDto(ReplaceMediaCropSchema) {}
 
 // Prints
-export { type PrintType, PrintTypeSchema, PrintTypeValues } from "@repo/common";
 export class PrintItemDto extends createZodDto(PrintItemSchema) {}
 export class PrintItemViewDto extends createZodDto(PrintItemViewSchema) {}
 export class CreatePrintItemDto extends createZodDto(CreatePrintItemSchema) {}
 export class ModifyPrintItemDto extends createZodDto(ModifyPrintItemSchema) {}
 export class ReplacePrintItemDto extends createZodDto(ReplacePrintItemSchema) {}
+export class FilterPrintItemDto extends createZodDto(FilterPrintItemSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {
