@@ -177,5 +177,12 @@
     "remaining": "resterend",
     "delete": "Verwijder",
     "download": "Download"
+  },
+  "login": {
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "signIn": "Inloggen",
+    "signingIn": "Inloggen...",
+    "error": "Er is iets misgegaan."
   }
 }

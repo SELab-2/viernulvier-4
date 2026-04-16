@@ -14,7 +14,7 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push(ROUTES.archive.base); // Fallback
+    router.push(ROUTES.productions.base); // Fallback
   }
 };
 

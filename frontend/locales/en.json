@@ -177,5 +177,12 @@
     "remaining": "remaining",
     "delete": "Delete",
     "download": "Download"
+  },
+  "login": {
+    "username": "Username",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "error": "Something went wrong."
   }
 }
