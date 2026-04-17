@@ -84,12 +84,15 @@ export class BlogDatabaseService {
 
     // Filter blogs that were created before.
     if (blogFilters.before) {
-      conditions.push(`created_at::date <= ${param(blogFilters.before)}::date`);
+      conditions.push(
+        // NOTE: We add + 1 day here for performance and include reasons.
+        `created_at < ${param(blogFilters.before)}::date + interval '1 day'`,
+      );
     }
 
     // Filter blogs that were created after.
     if (blogFilters.after) {
-      conditions.push(`created_at::date >= ${param(blogFilters.after)}::date`);
+      conditions.push(`created_at >= ${param(blogFilters.after)}::date`);
     }
 
     const whereClause = conditions.length
