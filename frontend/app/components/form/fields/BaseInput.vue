@@ -18,7 +18,7 @@
 interface Props {
   label?: string; // label displayed above the field
   placeholder?: string; // placeholder text displayed inside the field
-  type?: "text" | "number"; // input accepts either text, or a number
+  type?: "text" | "number" | "password"; // input accepts common input variants
   id?: string;
   required?: boolean; // adds a "*" if required
 }
