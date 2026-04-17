@@ -129,10 +129,10 @@ const navItems = [
 
 const adminNavItems = [
   { label: "productions", route: ROUTES.admin.productions.base },
-  { label: "events", route: "ROUTES.admin.events.base" },
-  { label: "stories", route: "ROUTES.admin.stories.base" },
-  { label: "prints", route: "ROUTES.admin.prints.base" },
-  { label: "accounts", route: "ROUTES.admin.accounts.base" },
+  { label: "events", route: ROUTES.admin.events.base },
+  { label: "stories", route: ROUTES.admin.stories.base },
+  { label: "prints", route: ROUTES.admin.prints.base },
+  { label: "accounts", route: ROUTES.admin.accounts.base },
 ];
 </script>
 
@@ -169,7 +169,9 @@ const adminNavItems = [
       <!-- ── Centre: logo ────────────────────────────────────────────────── -->
       <div class="flex justify-center">
         <div class="flex items-center gap-[10px]">
-          <NuxtLink :to="ROUTES.home.base">
+          <NuxtLink
+            :to="isAdmin ? ROUTES.admin.accounts.base : ROUTES.home.base"
+          >
             <img
               :src="isDark ? logoWhite : logoBlack"
               alt="viernulvier Logo"
@@ -208,16 +210,16 @@ const adminNavItems = [
 
     <nav
       v-if="isAdmin"
-      class="hidden lg:flex border-t-2 border-[var(--foreground)]"
+      class="hidden lg:flex border-t-2 border-[var(--foreground)] w-full"
     >
-      <div class="mx-auto w-full max-w-[1400px] flex">
+      <div class="flex w-full">
         <NuxtLink
           v-for="item in adminNavItems"
           :key="item.route"
           :to="item.route"
           class="admin-nav-item"
         >
-          {{ item.label }}
+          {{ t("nav." + item.label) }}
         </NuxtLink>
       </div>
     </nav>
