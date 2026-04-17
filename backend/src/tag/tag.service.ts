@@ -34,6 +34,7 @@ export class TagService {
   /**
    * Fetches all TagDto objects from the DBService.
    * @param paginationFilter is the pagination params
+   * @param tagFilters Filters for tag.
    * @returns All TagDto objects
    */
   async getAllTags(

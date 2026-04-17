@@ -53,6 +53,7 @@ export class TagController {
    * Responds to GET /tags
    * @param lang is the language filter
    * @param paginationFilter is the pagination parameters.
+   * @param tagFilters Filters for tag.
    * @returns All TagDto objects
    */
   @ApiOperation({ summary: "Returns all Tag objects." })

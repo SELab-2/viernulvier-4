@@ -48,8 +48,8 @@ export class TagDatabaseService {
 
   /**
    * Get all tags.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
+   * @param paginationFilters Filters for pagination and ordering.
+   * @param tagFilters Filters for tag.
    * @returns The tags if there are any.
    */
   async getTags(

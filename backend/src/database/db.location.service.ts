@@ -2,13 +2,17 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreateLocationDto,
+  FilterLocationDto,
   LocationDto,
   ModifyLocationDto,
   PaginationFilterDto,
 } from "../dto/dto";
-import { LocationSchema, PaginatedResponse } from "@repo/common";
 import {
-  generateCountQuery,
+  LocationSchema,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
+import {
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
@@ -44,28 +48,58 @@ export class LocationDatabaseService {
 
   /**
    * Get locations with pagination
-   * @param amount number of locations per page (if amount=0, it will default to grabbing all locations)
-   * @param page page index (starts at 0)
+   * @param paginationFilters The pagination filters and ordering filter.
+   * @param locationFilters Filters for the location.
    * @returns locations
    */
   async getLocations(
     paginationFilters: PaginationFilterDto,
+    locationFilters: FilterLocationDto,
   ): Promise<PaginatedResponse<LocationDto>> {
     const returningClause = generateReturningClause(LocationSchema);
 
-    const query = `
-      SELECT ${returningClause}
-      FROM locations
-      ORDER BY id
-      LIMIT $1 OFFSET $2;
+    const conditions: string[] = [];
+    const values: any[] = [];
+    const param = (val: any) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Filter by the location itself. (Only used in admin page)
+    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    if (locationFilters.location) {
+      const locationParam = param(`%${locationFilters.location}%`);
+      const locationClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `location->>'${lang}' ILIKE ${locationParam}`,
+      );
+      conditions.push(`(${locationClauses.join(" OR ")})`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM locations
+      ${whereClause};
     `;
-    const countQuery = generateCountQuery("locations");
 
     const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
+    const query = `
+      SELECT ${returningClause}
+      FROM locations 
+      ${whereClause}
+      ORDER BY id
+      ${paginationClause};
+    `;
 
     const [locations, countResult] = await Promise.all([
-      this.db.query<LocationDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery),
+      this.db.query<LocationDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
     ]);
 
     return {
