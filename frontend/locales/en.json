@@ -4,6 +4,9 @@
     "archive": "archive",
     "stories": "stories",
     "prints": "prints",
+    "productions": "productions",
+    "events": "events",
+    "accounts": "accounts",
     "logout": "logout"
   },
   "auth": {

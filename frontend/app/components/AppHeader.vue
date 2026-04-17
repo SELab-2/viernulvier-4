@@ -18,7 +18,7 @@ import logoBlack from "~/assets/logo_black.svg";
 import logoWhite from "~/assets/logo_white.svg";
 
 const { isLoggedIn, logout } = useAuth();
-const isAdmin = ref(true);
+const isAdmin = ref(true); //isLoggedIn;
 
 const { t } = useI18n();
 
@@ -128,10 +128,11 @@ const navItems = [
 ];
 
 const adminNavItems = [
-  { label: "producties", route: "/admin/producties" },
-  { label: "events", route: "/admin/events" },
-  { label: "verhalen", route: "/admin/verhalen" },
-  { label: "drukwerk", route: "/admin/drukwerk" },
+  { label: "productions", route: ROUTES.admin.productions.base },
+  { label: "events", route: "ROUTES.admin.events.base" },
+  { label: "stories", route: "ROUTES.admin.stories.base" },
+  { label: "prints", route: "ROUTES.admin.prints.base" },
+  { label: "accounts", route: "ROUTES.admin.accounts.base" },
 ];
 </script>
 
