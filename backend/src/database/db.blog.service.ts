@@ -66,8 +66,8 @@ export class BlogDatabaseService {
     const returningClause = generateReturningClause(BlogSchema);
 
     const conditions: string[] = [];
-    const values: any[] = [];
-    const param = (val: any) => {
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
       values.push(val);
       return `$${values.length}`;
     };
@@ -99,7 +99,6 @@ export class BlogDatabaseService {
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
       SELECT COUNT(*) as count FROM blogs

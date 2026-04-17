@@ -115,8 +115,8 @@ export class ProductionDatabaseService {
 
     const conditions: string[] = [];
     const havingConditions: string[] = [];
-    const values: any[] = [];
-    const param = (val: any) => {
+    const values: (string | number | number[])[] = [];
+    const param = (val: string | number | number[]) => {
       values.push(val);
       return `$${values.length}`;
     };
@@ -170,14 +170,14 @@ export class ProductionDatabaseService {
     // HAVING filters.
 
     // Filter events whose starttime is before the provided date
-    if (productionFilters.before) {
+    if (productionFilters.after) {
       havingConditions.push(
         `MIN(e.starttime) >= ${param(productionFilters.after)}::date`,
       );
     }
 
     // Filter events whose endtime is after the provided date
-    if (productionFilters.after) {
+    if (productionFilters.before) {
       havingConditions.push(
         // Note: We add one day here to include the day itself too without having to cast the column.
         `MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day'`,
@@ -194,7 +194,6 @@ export class ProductionDatabaseService {
         : "";
 
     // count query uses same filters but no pagination
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
       SELECT COUNT(*) as count
