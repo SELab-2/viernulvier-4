@@ -57,7 +57,8 @@ async function loadPage(page: number) {
         titelOrArtist: searchQuery.value || undefined,
         tag_ids: tagIds.value.length ? tagIds.value : undefined,
         after: dateFilter.value.after || undefined,
-        before: dateFilter.value.before || undefined,
+        before:
+          dateFilter.value.before || new Date().toISOString().split("T")[0],
       },
       paginationFilters: {
         page: targetedPage - 1, // backend uses 0-based pagination
