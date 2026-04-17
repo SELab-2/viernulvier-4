@@ -176,9 +176,8 @@ export class ScraperService implements OnApplicationBootstrap {
             await this.runner.updatePendingCrop(crop.id, savedUrl);
             results.push({ status: "fulfilled", value: crop.id });
             await new Promise((resolve) => setTimeout(resolve, 250));
-
-            // error handling
           } catch (error) {
+            // error handling for image processing
             let errorMessage = "An unknown error occurred";
             if (error instanceof Error) {
               errorMessage = error.message;
@@ -216,15 +215,13 @@ export class ScraperService implements OnApplicationBootstrap {
           );
           break;
         }
-        // ---------------------------------
 
         if (totalLeft === 0) {
           hasMore = false;
         }
       }
-
-      // global error handling -> errors resulted besides image processing.
     } catch (globalError) {
+      // global error handling -> errors resulted besides image processing.
       this.logger.error(
         "Global Batch Failure:",
         (globalError as Error).message,
@@ -235,7 +232,7 @@ export class ScraperService implements OnApplicationBootstrap {
   }
 
   /**
-   * Helper that will fetch an image from an URL an put it into
+   * Helper that will fetch an image from a URL and put it into
    * A Buffer object.
    * @param url The URL to the image.
    * @returns The Buffer.
