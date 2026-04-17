@@ -12,6 +12,7 @@ import {
   ReplacePrintItemDto,
   PaginationFilterDto,
   LanguageQueryDto,
+  FilterPrintItemDto,
 } from "../dto/dto";
 
 describe("PrintItemController", () => {
@@ -107,11 +108,12 @@ describe("PrintItemController", () => {
       const result = await controller.getPrintItems(
         paginationFilter,
         langQuery,
+        {},
       );
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
-        undefined,
+        {},
       );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         paginatedItems,
@@ -120,14 +122,17 @@ describe("PrintItemController", () => {
       expect(result).toEqual(expectedFlattened);
     });
 
-    it("should pass the type parameter to the service when provided", async () => {
+    it("should pass the filters parameter to the service when provided", async () => {
       const paginationFilter: PaginationFilterDto = {
         page: 1,
         limit: 10,
         descending: true,
       };
       const langQuery: LanguageQueryDto = { lang: "en" };
-      const testType = "brochure";
+      const filters: FilterPrintItemDto = {
+        type: "affiche",
+        title: "brugge",
+      };
 
       const paginatedItems: PaginatedResponse<PrintItemDto> = {
         objects: [],
@@ -139,11 +144,11 @@ describe("PrintItemController", () => {
       printItemService.getPrintItems.mockResolvedValue(paginatedItems);
       languageService.flattenByLanguage.mockReturnValue(paginatedItems as any);
 
-      await controller.getPrintItems(paginationFilter, langQuery, testType);
+      await controller.getPrintItems(paginationFilter, langQuery, filters);
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
-        testType,
+        filters,
       );
     });
   });
