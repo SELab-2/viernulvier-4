@@ -30,7 +30,7 @@ function handleJump() {
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div v-if="totalPages > 1" class="flex items-center gap-2">
     <span
       class="text-sm font-black uppercase tracking-wide text-muted-foreground"
     >
