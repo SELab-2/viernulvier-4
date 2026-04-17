@@ -175,6 +175,7 @@
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",
+    "password": "Password",
     "accountId": "Account ID",
     "role": "Role",
     "superAdmin": "Super admin",

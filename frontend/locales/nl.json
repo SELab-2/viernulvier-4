@@ -175,6 +175,7 @@
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
     "accountId": "Account-ID",
     "role": "Rol",
     "superAdmin": "Super admin",

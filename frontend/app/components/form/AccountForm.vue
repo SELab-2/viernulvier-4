@@ -4,6 +4,7 @@ import type { FormField } from "../../types/FormField";
 
 // type AccountRole = "Admin" | "Super Admin";
 
+const { t } = useI18n();
 interface AccountFormModel {
   username: string;
   password: string;
@@ -32,7 +33,7 @@ const fields: FormField[] = [
     component: "BaseInput",
     name: "username",
     props: {
-      label: "Username",
+      label: t("accounts.username"),
       placeholder: "admin",
       required: true,
     },
@@ -41,7 +42,7 @@ const fields: FormField[] = [
     component: "BaseInput",
     name: "password",
     props: {
-      label: "Password",
+      label: t("accounts.password"),
       type: "password",
       placeholder: "Enter a secure password",
       required: true,
@@ -52,8 +53,8 @@ const fields: FormField[] = [
     component: "BaseSelect",
     name: "role",
     props: {
-      label: "Role",
-      options: ["Admin", "Super Admin"],
+      label: t("accounts.role"),
+      options: [t("accounts.admin"), t("accounts.superAdmin")],
       required: true,
     },
   },
