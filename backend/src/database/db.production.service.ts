@@ -130,25 +130,26 @@ export class ProductionDatabaseService {
       productionPrefix,
     );
 
-    // Filter by titel (case-insensitive)
+    // Filter by titel or artist (case-insensitive)
+    // * NOTE: Looks through both the artist ant title for the searched sentence.
     // Will look anywhere in the title field for what was searched.
     // For all supported languages.
-    if (productionFilters.titel) {
-      const pTitel = param(`%${productionFilters.titel}%`);
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.titel->>'${lang}' ILIKE ${pTitel}`,
-      );
-      conditions.push(`(${titelClauses.join(" OR ")})`);
-    }
+    if (productionFilters.titelOrArtist) {
+      const pTitelOrArtist = param(`%${productionFilters.titelOrArtist}%`);
 
-    // Will look anywhere in the artist field for what was searched.
-    // This checks all supported languages.
-    if (productionFilters.artist) {
-      const pArtist = param(`%${productionFilters.artist}%`);
       const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.artist->>'${lang}' ILIKE ${pArtist}`,
+        (lang) => `p.titel->>'${lang}' ILIKE ${pTitelOrArtist}`,
       );
-      conditions.push(`(${titelClauses.join(" OR ")})`);
+
+      const artistClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `p.artist->>'${lang}' ILIKE ${pTitelOrArtist}`,
+      );
+
+      // Combine both arrays into one single list
+      const allClauses = [...titelClauses, ...artistClauses];
+
+      // Push them as a single string wrapped in parentheses, joined by OR
+      conditions.push(`(${allClauses.join(" OR ")})`);
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)

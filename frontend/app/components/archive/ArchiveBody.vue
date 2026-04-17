@@ -54,7 +54,7 @@ async function loadPage(page: number) {
   try {
     const resp = await getAll({
       productionFilters: {
-        titel: searchQuery.value || undefined,
+        titelOrArtist: searchQuery.value || undefined,
         tag_ids: tagIds.value.length ? tagIds.value : undefined,
         after: dateFilter.value.after || undefined,
         before: dateFilter.value.before || undefined,
