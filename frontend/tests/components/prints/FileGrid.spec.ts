@@ -152,38 +152,6 @@ const files = [
     updated_at: "2021-01-01T00:00:00Z",
     url: "",
   },
-  {
-    id: 16,
-    titel: "AFFICHE-16.PDF",
-    description: "",
-    created_at: "2020-01-01T00:00:00Z",
-    updated_at: "2020-01-01T00:00:00Z",
-    url: "",
-  },
-  {
-    id: 17,
-    titel: "AFFICHE-17.PDF",
-    description: "",
-    created_at: "2019-01-01T00:00:00Z",
-    updated_at: "2019-01-01T00:00:00Z",
-    url: "",
-  },
-  {
-    id: 18,
-    titel: "AFFICHE-18.PDF",
-    description: "",
-    created_at: "2018-01-01T00:00:00Z",
-    updated_at: "2018-01-01T00:00:00Z",
-    url: "",
-  },
-  {
-    id: 19,
-    titel: "AFFICHE-19.PDF",
-    description: "",
-    created_at: "2017-01-01T00:00:00Z",
-    updated_at: "2017-01-01T00:00:00Z",
-    url: "",
-  },
 ];
 
 describe("PrintsFileGrid", () => {
@@ -194,7 +162,8 @@ describe("PrintsFileGrid", () => {
       global: { plugins: [i18n] },
       props: {
         category: "Affiche",
-        files,
+        files: [],
+        totalFiles: files.length,
       },
     });
   });
@@ -204,21 +173,24 @@ describe("PrintsFileGrid", () => {
   });
 
   it("renders the file count", () => {
-    expect(wrapper.text()).toContain(files.length.toString());
+    expect(wrapper.text()).toContain("15 Bestanden");
   });
 
-  it("renders file names on first page", () => {
+  it("renders correct number of file items", () => {
+    const items = wrapper.findAllComponents({ name: "PrintsFileGridItem" });
+    expect(items.length).toBe(files.length);
+  });
+
+  it("renders file names", () => {
     const text = wrapper.text();
     expect(text).toContain("AFFICHE-1.PDF");
     expect(text).toContain("AFFICHE-2.PDF");
-    expect(text).not.toContain("AFFICHE-18.PDF");
-    expect(text).not.toContain("AFFICHE-19.PDF");
   });
 
   it("shows empty message when no files are provided", () => {
     const w: VueWrapper<InstanceType<typeof FileGrid>> = mount(FileGrid, {
       global: { plugins: [i18n] },
-      props: { category: "Affiche", files: [] },
+      props: { category: "Affiche", files: [], totalFiles: 0 },
     });
     expect(w.text()).toContain("Deze categorie bevat geen bestanden.");
   });
