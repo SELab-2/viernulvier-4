@@ -76,7 +76,9 @@ async function loadPage() {
         descending: true,
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
-      type: activeFilter.value,
+      printItemFilters: {
+        type: activeFilter.value,
+      },
     });
 
     const paged = unwrap(raw);
