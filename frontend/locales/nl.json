@@ -184,6 +184,12 @@
     "protected": "Beveiligd"
   },
   "prints": {
+    "types": {
+      "affiche": "Affiche",
+      "brochure": "Brochure",
+      "drukwerk": "Drukwerk",
+      "programma": "Programma"
+    },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
     "files": "Bestanden",

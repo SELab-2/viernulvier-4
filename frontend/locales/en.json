@@ -183,6 +183,12 @@
     "protected": "Protected"
   },
   "prints": {
+    "types": {
+      "affiche": "Poster",
+      "brochure": "Brochure",
+      "drukwerk": "Print",
+      "programma": "Program"
+    },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
     "files": "Files",

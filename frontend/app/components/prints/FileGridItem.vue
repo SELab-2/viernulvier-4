@@ -11,6 +11,7 @@
  * />
  */
 import type { PrintItemView } from "@repo/common";
+const { t } = useI18n();
 
 interface Props {
   file: PrintItemView;
@@ -50,7 +51,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
             'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground',
           ]"
         >
-          {{ category }}
+          {{ t(`prints.types.${category}`) }}
         </span>
         <span
           v-if="file.created_at"

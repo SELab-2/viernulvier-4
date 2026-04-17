@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { PrintTypeValues, type PrintType } from "@repo/common";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 defineProps<{
   titles?: string[];
 }>();
@@ -69,7 +71,7 @@ function selectType(type: PrintType) {
                 : 'border-border text-muted-foreground hover:border-foreground/40',
             ]"
           >
-            {{ type }}
+            {{ t(`prints.types.${type}`) }}
           </button>
         </div>
       </div>
