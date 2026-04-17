@@ -5,6 +5,10 @@ import { ResourceGoneException } from "../../../common/exceptions";
 import { vnvProduction } from "../vnv.parser";
 import logger from "../../logger/logger";
 
+/**
+ * Production db service for the scraper & parser.
+ * handles the insertion of productions & linking of tags & galleries to productions.
+ */
 @Injectable()
 export class ScraperProductionDbService {
   constructor(private db: ScraperDbService) {}

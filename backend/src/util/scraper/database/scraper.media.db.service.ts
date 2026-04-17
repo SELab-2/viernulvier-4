@@ -5,11 +5,20 @@ import { vnvGallery, vnvMediaCrop, vnvMediaItem } from "../vnv.parser";
 import { MediaCrop, MediaGallery, MediaItem } from "@repo/common";
 import { ConfigService } from "@nestjs/config";
 
+/**
+ * interface for the PendingCrops (used in crop download job.)
+ */
 export interface PendingCrops {
   batch: MediaCrop[];
   totalLeft: number;
 }
 
+/**
+ * Media db Service for the scraper & parser.
+ * handles the insertion and linking of all media types.
+ * (galleries, media_items & media_crops.)
+ * + also handles the functions needed to download crops from elsewhere (getPending & updateUrl)
+ */
 @Injectable()
 export class ScraperMediaDbService {
   constructor(

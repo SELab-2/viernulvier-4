@@ -2,6 +2,7 @@ import { Pool, QueryResultRow } from "pg";
 import logger from "../../logger/logger";
 import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { calculateETA } from "../../utils";
 
 /**
  * Holds the Connection to the database and important inserting functions.
@@ -14,7 +15,7 @@ import { ConfigService } from "@nestjs/config";
  *     used in the backend isn't affected.
  *
  * In short: We chose to split the DB connections for backend and scraper to make
- *           sure there can be no confusions between the two and so they can't
+ *           sure there can be no confusions between the two, and so they can't
  *           hinder each other either.
  */
 
@@ -93,7 +94,7 @@ export class ScraperDbService implements OnModuleDestroy {
 
         // Progress Log
         const percent = Math.floor((completed / total) * 100);
-        const eta = this.calculateETA(startTime, completed, total);
+        const eta = calculateETA(startTime, completed, total);
         logger.info(
           `[BATCH DB] ${label}: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
         );
@@ -108,27 +109,5 @@ export class ScraperDbService implements OnModuleDestroy {
         client.release();
       }
     }
-  }
-
-  /**
-   * Calculates the ETA of a network action.
-   * @param startTime The starting time of the action.
-   * @param current The current items.
-   * @param total The total items.
-   * @returns A time string.
-   */
-  calculateETA(startTime: number, current: number, total: number): string {
-    if (current === 0) return "Calculating...";
-
-    const elapsed = Date.now() - startTime; // ms spent so far
-    const msPerItem = elapsed / current;
-    const remainingItems = total - current;
-    const remainingMs = remainingItems * msPerItem;
-
-    // Convert MS to a nice string like "2m 30s"
-    const seconds = Math.floor((remainingMs / 1000) % 60);
-    const minutes = Math.floor((remainingMs / (1000 * 60)) % 60);
-
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   }
 }

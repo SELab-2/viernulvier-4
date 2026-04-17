@@ -5,6 +5,11 @@ import { vnvEvent } from "../vnv.parser";
 import logger from "../../logger/logger";
 import { Event, Location, Price, Production } from "@repo/common";
 
+/**
+ * Events db service for the scraper & csv parser.
+ * This object handles the insertion of events
+ * & the linking of locations and prices to the events.
+ */
 @Injectable()
 export class ScraperEventDbService {
   constructor(private db: ScraperDbService) {}

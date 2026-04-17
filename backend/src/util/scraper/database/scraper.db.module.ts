@@ -7,6 +7,9 @@ import { ScraperAttributesDbService } from "./scraper.attributes.db.service";
 import { ScraperBlogDbService } from "./scraper.blog.db.service";
 import { ScraperDbManager } from "./scraper.db.facade";
 
+/**
+ * Scraper db module.
+ */
 @Module({
   providers: [
     ScraperDbService,

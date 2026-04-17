@@ -5,6 +5,7 @@ import { Blog } from "@repo/common";
 /**
  * note: There are no blogs used in the scraper.
  * However, this is used in the csv engine for csv parsing.
+ * This service handles the insertion of blogs (only for csv parsing.)
  */
 @Injectable()
 export class ScraperBlogDbService {

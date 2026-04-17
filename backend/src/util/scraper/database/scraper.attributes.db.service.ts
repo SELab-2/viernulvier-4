@@ -3,6 +3,11 @@ import { vnvGenre, vnvLocation, vnvPrice } from "../vnv.parser";
 import { Location, Price, Tag } from "@repo/common";
 import { ScraperDbService } from "./scraper.db.service";
 
+/**
+ * This service handles insertion of the smaller objects.
+ * They would be too small to put in their own service hinds why they are here.
+ * here you will find the insertion for tags, locations & prices.
+ */
 @Injectable()
 export class ScraperAttributesDbService {
   constructor(private db: ScraperDbService) {}

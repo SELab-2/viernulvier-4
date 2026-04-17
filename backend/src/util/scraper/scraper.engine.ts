@@ -26,6 +26,7 @@ import {
   CropName,
 } from "@repo/common/src/objects/media/media_crop";
 import { ConfigService } from "@nestjs/config";
+import { calculateETA } from "../utils";
 
 const apiDomain: string = "/api/v1/";
 
@@ -239,7 +240,7 @@ export class ScraperEngine {
         const percent = Math.floor((processedItems / totalItems) * 100);
 
         if (percent !== lastLoggedPercent) {
-          const eta = this.calculateETA(startTime, processedItems, totalItems);
+          const eta = calculateETA(startTime, processedItems, totalItems);
 
           this.logger.log(
             `[PROGRESS] ${url}: ${percent}% (${processedItems}/${totalItems}) | ETA: ${eta}`,
@@ -296,7 +297,7 @@ export class ScraperEngine {
       const percent = Math.floor((completed / total) * 100);
 
       if (percent !== lastLoggedPercent) {
-        const eta = this.calculateETA(startTime, completed, total);
+        const eta = calculateETA(startTime, completed, total);
         this.logger.log(
           `[PROGRESS] Fixing items: ${percent}% (${completed}/${total}) | ETA: ${eta}`,
         );
@@ -322,31 +323,5 @@ export class ScraperEngine {
     );
     this.logger.log("Sifted crops!");
     return filteredCrops;
-  }
-
-  /**
-   * Calculates the ETA of a network action.
-   * @param startTime The starting time of the action.
-   * @param current The current items.
-   * @param total The total items.
-   * @returns A time string.
-   */
-  private calculateETA(
-    startTime: number,
-    current: number,
-    total: number,
-  ): string {
-    if (current === 0) return "Calculating...";
-
-    const elapsed = Date.now() - startTime; // ms spent so far
-    const msPerItem = elapsed / current;
-    const remainingItems = total - current;
-    const remainingMs = remainingItems * msPerItem;
-
-    // Convert MS to a nice string like "2m 30s"
-    const seconds = Math.floor((remainingMs / 1000) % 60);
-    const minutes = Math.floor((remainingMs / (1000 * 60)) % 60);
-
-    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   }
 }
