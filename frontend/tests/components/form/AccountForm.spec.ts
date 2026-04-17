@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 import { createI18n } from "vue-i18n";
-import AccountForm from "../../../app/components/form/AccountForm.vue";
+import AccountForm from "../../../app/components/admin/AccountForm.vue";
 
 const FormBaseFormStub = {
   name: "FormBaseForm",

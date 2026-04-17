@@ -41,7 +41,7 @@ async function handleSubmit(payload: CreateAccount) {
         </p>
       </div>
 
-      <FormAccountForm @submit="handleSubmit" />
+      <AdminAccountForm @submit="handleSubmit" />
 
       <div
         v-if="isLoading"

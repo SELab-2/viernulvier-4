@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * Reusable admin account creation form.
+ *
+ * Includes:
+ * - Localized username/password field definitions
+ * - BaseForm integration with optional initial values
+ * - CreateAccount payload mapping on submit
+ *
+ * Usage:
+ * <AdminAccountForm
+ *   :initial-values="{ username: '', password: '' }"
+ *   @submit="onSubmitAccount"
+ * />
+ */
 import { computed } from "vue";
 import type { CreateAccount } from "@repo/common";
 import type { FormField } from "../../types/FormField";
