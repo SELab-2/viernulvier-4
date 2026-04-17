@@ -19,7 +19,7 @@ import { ConfigService } from "@nestjs/config";
  */
 
 @Injectable()
-export class UtilsDbConnection implements OnModuleDestroy {
+export class ScraperDbService implements OnModuleDestroy {
   /**
    * The Pool to the database, used to execute queries.
    */

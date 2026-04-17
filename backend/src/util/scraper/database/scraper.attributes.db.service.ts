@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "./scraper.db.service";
 import { vnvGenre, vnvLocation, vnvPrice } from "../vnv.parser";
 import { Location, Price, Tag } from "@repo/common";
+import { ScraperDbService } from "./scraper.db.service";
 
 @Injectable()
-export class ScraperTaxonomiesDbService {
-  constructor(private db: UtilsDbConnection) {}
+export class ScraperAttributesDbService {
+  constructor(private db: ScraperDbService) {}
 
   /**
    * Inserts a list of vnvGenre objects into Tags.
@@ -50,8 +50,8 @@ export class ScraperTaxonomiesDbService {
     const query = `
       INSERT INTO tags (tag, legacy_id)
       VALUES ($1, $2)
-      ON CONFLICT (legacy_id) 
-      DO UPDATE SET tag = EXCLUDED.tag
+      ON CONFLICT (legacy_id)
+        DO UPDATE SET tag = EXCLUDED.tag
       RETURNING *;
     `;
     const values = [genre.name, genre.legacy_id];
@@ -69,7 +69,7 @@ export class ScraperTaxonomiesDbService {
       INSERT INTO locations (location, legacy_id)
       VALUES ($1, $2)
       ON CONFLICT (legacy_id)
-      DO UPDATE SET location = EXCLUDED.location
+        DO UPDATE SET location = EXCLUDED.location
       RETURNING *;
     `;
     await this.db.query<Location>(query, [location.name, location.legacy_id]);
@@ -85,7 +85,8 @@ export class ScraperTaxonomiesDbService {
       INSERT INTO prices (name, price, legacy_id)
       VALUES ($1, $2, $3)
       ON CONFLICT (legacy_id)
-      DO UPDATE SET name = EXCLUDED.name, price = EXCLUDED.price
+        DO UPDATE SET name  = EXCLUDED.name,
+                      price = EXCLUDED.price
       RETURNING *;
     `;
     const rows = await this.db.query<Price>(query, [

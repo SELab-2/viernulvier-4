@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { UtilsDbConnection } from "./util/scraper/database/scraper.db.service";
+import { ScraperDbService } from "./util/scraper/database/scraper.db.service";
 import { ResetDbCommand } from "./util/scraper/reset-db.command";
 import { ConfigModule } from "@nestjs/config";
 import { AppLogger } from "./util/logger/logger.service";
@@ -15,7 +15,7 @@ import { LanguageService } from "./util/language/language.service";
     }),
   ],
   providers: [
-    UtilsDbConnection,
+    ScraperDbService,
     ResetDbCommand,
     AppLogger,
     InjectStructuredCsvTest,

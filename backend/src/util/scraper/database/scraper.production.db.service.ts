@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "./scraper.db.service";
+import { ScraperDbService } from "./scraper.db.service";
 import { MediaGallery, Production, Tag } from "@repo/common";
 import { ResourceGoneException } from "../../../common/exceptions";
 import { vnvProduction } from "../vnv.parser";
@@ -7,7 +7,7 @@ import logger from "../../logger/logger";
 
 @Injectable()
 export class ScraperProductionDbService {
-  constructor(private db: UtilsDbConnection) {}
+  constructor(private db: ScraperDbService) {}
 
   /**
    * Fetches a production by legacy id.

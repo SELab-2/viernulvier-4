@@ -3,7 +3,7 @@ import { ResourceGoneException } from "../../../common/exceptions";
 import { AppLogger } from "../../logger/logger.service";
 import { ConfigService } from "@nestjs/config";
 import { LanguageService } from "../../language/language.service";
-import { ScraperDbFacade } from "../database/scraper.db.facade";
+import { ScraperDbManager } from "../database/scraper.db.facade";
 
 const mockParseProductionsCSV = jest.fn();
 const mockParseEventsCSV = jest.fn();
@@ -38,7 +38,7 @@ jest.mock("../../logger/logger", () => ({
 }));
 
 describe("inject-csv structured importers", () => {
-  let dbMock: jest.Mocked<ScraperDbFacade>;
+  let dbMock: jest.Mocked<ScraperDbManager>;
   let languageServiceMock: jest.Mocked<LanguageService>;
   let appLoggerMock: jest.Mocked<AppLogger>;
   let configServiceMock: jest.Mocked<ConfigService>;
@@ -76,7 +76,7 @@ describe("inject-csv structured importers", () => {
         insertBlog: jest.fn().mockResolvedValue({ id: 99 }),
         linkBlog: jest.fn().mockResolvedValue(true),
       },
-    } as unknown as jest.Mocked<ScraperDbFacade>;
+    } as unknown as jest.Mocked<ScraperDbManager>;
 
     // 2. Setup the LanguageService Mock (Just pass the data through unchanged)
     languageServiceMock = {

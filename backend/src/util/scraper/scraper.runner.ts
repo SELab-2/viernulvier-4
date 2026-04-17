@@ -2,8 +2,8 @@ import { ScraperEngine, ScrapeResult } from "./scraper.engine";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
 import { MediaCrop } from "@repo/common";
-import { UtilsDbConnection } from "./database/scraper.db.service";
-import { ScraperDbFacade } from "./database/scraper.db.facade";
+import { ScraperDbService } from "./database/scraper.db.service";
+import { ScraperDbManager } from "./database/scraper.db.facade";
 import { PendingCrops } from "./database/scraper.media.db.service";
 
 /**
@@ -16,8 +16,8 @@ export class ScraperRunner {
   constructor(
     private readonly scraperEngine: ScraperEngine,
     private readonly logger: AppLogger,
-    private readonly dbConnection: UtilsDbConnection,
-    private readonly db: ScraperDbFacade,
+    private readonly dbConnection: ScraperDbService,
+    private readonly db: ScraperDbManager,
   ) {}
 
   /**

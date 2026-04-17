@@ -11,7 +11,7 @@ import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../logger/logger.service";
 import { ResourceGoneException } from "../../../common/exceptions";
 import { CreateEventDto, CreateProductionDto } from "../../../dto/dto";
-import { ScraperDbFacade } from "../database/scraper.db.facade";
+import { ScraperDbManager } from "../database/scraper.db.facade";
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
 const TRANSLATION_LANG_FROM: Language = "nl";
@@ -79,7 +79,7 @@ function toOldCsvEvent(
 @Injectable()
 export class InjectCsvEngine {
   constructor(
-    private readonly dbConnection: ScraperDbFacade,
+    private readonly dbConnection: ScraperDbManager,
     private readonly logger: AppLogger,
     private readonly configService: ConfigService,
     private readonly languageService: LanguageService,

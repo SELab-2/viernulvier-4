@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "./scraper.db.service";
+import { ScraperDbService } from "./scraper.db.service";
 import { ResourceGoneException } from "../../../common/exceptions";
 import { vnvEvent } from "../vnv.parser";
 import logger from "../../logger/logger";
@@ -7,7 +7,7 @@ import { Event, Location, Price, Production } from "@repo/common";
 
 @Injectable()
 export class ScraperEventDbService {
-  constructor(private db: UtilsDbConnection) {}
+  constructor(private db: ScraperDbService) {}
 
   /**
    * Fetches an event by legacy id.

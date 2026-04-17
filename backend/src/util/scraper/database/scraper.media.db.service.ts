@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "./scraper.db.service";
+import { ScraperDbService } from "./scraper.db.service";
 import logger from "../../logger/logger";
 import { vnvGallery, vnvMediaCrop, vnvMediaItem } from "../vnv.parser";
 import { MediaCrop, MediaGallery, MediaItem } from "@repo/common";
@@ -14,7 +14,7 @@ export interface PendingCrops {
 export class ScraperMediaDbService {
   constructor(
     private readonly configService: ConfigService,
-    private db: UtilsDbConnection,
+    private db: ScraperDbService,
   ) {}
 
   /**

@@ -1,4 +1,4 @@
-import { UtilsDbConnection } from "./database/scraper.db.service";
+import { ScraperDbService } from "./database/scraper.db.service";
 import { Injectable } from "@nestjs/common";
 import { Command, CommandRunner } from "nest-commander";
 import { AppLogger } from "../logger/logger.service";
@@ -11,7 +11,7 @@ import { AppLogger } from "../logger/logger.service";
 export class ResetDbCommand extends CommandRunner {
   constructor(
     private readonly logger: AppLogger,
-    private readonly dbConnection: UtilsDbConnection,
+    private readonly dbConnection: ScraperDbService,
   ) {
     super();
   }

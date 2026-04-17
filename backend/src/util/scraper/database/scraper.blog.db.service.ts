@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "./scraper.db.service";
+import { ScraperDbService } from "./scraper.db.service";
 import { Blog } from "@repo/common";
 
 /**
@@ -7,8 +7,8 @@ import { Blog } from "@repo/common";
  * However, this is used in the csv engine for csv parsing.
  */
 @Injectable()
-export class ScraperDbBlogService {
-  constructor(private db: UtilsDbConnection) {}
+export class ScraperBlogDbService {
+  constructor(private db: ScraperDbService) {}
 
   /**
    * Inserts a single blog row.
