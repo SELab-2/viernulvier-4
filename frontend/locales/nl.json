@@ -199,7 +199,6 @@
     "saving": "Opslaan…",
     "edit": "Bewerken",
     "delete": "Verwijderen",
-
     "blogs": {
       "new": "Nieuw Verhaal",
       "edit": "Verhaal Bewerken",
@@ -210,30 +209,41 @@
       "saveBtn": "Wijzigingen Opslaan",
       "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
       "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
-
-      "dateFrom": "Datum vanaf",
-      "dateTo": "Datum tot",
-
-      "date": "Datum",
+      "sectionTitle": "Titel",
+      "sectionContent": "Inhoud",
       "titleNl": "Titel (NL)",
       "titleNlPlaceholder": "Titel in het Nederlands",
       "titleEn": "Titel (EN)",
       "titleEnPlaceholder": "Titel in het Engels",
+      "titleEnFallback": "Valt terug op de Nederlandse titel als leeg gelaten.",
       "descriptionNl": "Omschrijving (NL)",
       "descriptionNlPlaceholder": "Schrijf de Nederlandstalige omschrijving…",
       "descriptionEn": "Omschrijving (EN)",
       "descriptionEnPlaceholder": "Schrijf de Engelstalige omschrijving…",
-
+      "descriptionEnFallback": "Valt terug op de Nederlandse omschrijving als leeg gelaten.",
       "deleteTitle": "Verhaal Verwijderen",
       "deleteConfirm": "Weet je zeker dat je \"{title}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
       "deleteConfirmBtn": "Verwijderen",
       "titleEnRequired": "Engelse titel is nodig",
       "descriptionEnRequired": "Engelse beschrijving is nodig",
-
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
-        "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht.",
-        "dateRequired": "Een datum is verplicht."
+        "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
+      },
+      "image": {
+        "title": "Headerafbeelding",
+        "subtitle": "PNG, JPG of WebP — wordt getoond als story-hero en in de lijstweergave.",
+        "currentLabel": "Huidige header",
+        "noImage": "Nog geen afbeelding",
+        "upload": "Afbeelding uploaden",
+        "replace": "Afbeelding vervangen",
+        "uploading": "Uploaden…",
+        "typeError": "Selecteer een afbeeldingsbestand (PNG, JPG, WebP…).",
+        "uploadError": "Upload mislukt.",
+        "galleryError": "Aanmaken van mediagalerij mislukt.",
+        "itemError": "Aanmaken van media-item mislukt.",
+        "cropError": "Aanmaken van media-crop mislukt.",
+        "success": "Afbeelding succesvol geüpload."
       }
     }
   },

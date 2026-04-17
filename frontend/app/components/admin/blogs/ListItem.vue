@@ -1,15 +1,5 @@
 <!--
   components/admin/blogs/ListItem.vue
-
-  Single blog row.  Mirrors the public StoryListItem (thumbnail + date + title)
-  but adds Edit / Delete action buttons.
-
-  Props:
-    blog      — BlogView (flat strings, already localised by ListView)
-    deleting  — shows a spinner while the parent is deleting this row
-
-  Emits:
-    delete  — parent handles the actual API call
 -->
 <script setup lang="ts">
 import type { BlogView } from "@repo/common";
@@ -17,36 +7,34 @@ import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { useGallery } from "~/composables/media/useGallery";
 
-// ── Props & emits ────────────────────────────────────────────────────────────
 const props = defineProps<{
-  blog: BlogView; // ← MUST match what ListView sends (:blog="…")
+  blog: BlogView;
   deleting?: boolean;
 }>();
 
 const emit = defineEmits<{ (e: "delete"): void }>();
 
-// ── Composables ──────────────────────────────────────────────────────────────
 const { getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { locale, t } = useI18n();
 
-// ── Gallery / crop ───────────────────────────────────────────────────────────
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 
 const mainCrop = computed(() =>
   gallery.value ? getMainImageCrop(gallery.value, "hd_ready") : null,
 );
 
-// getMediaGallery returns GalleryWithItems | null directly (not ApiResponse)
 async function loadGallery() {
-  gallery.value = await getMediaGallery(props.blog.id, locale.value);
+  try {
+    gallery.value = await getMediaGallery(props.blog.id, locale.value);
+  } catch {
+    gallery.value = null;
+  }
 }
 
 onMounted(loadGallery);
 watch(() => props.blog.id, loadGallery);
 
-// ── Derived display values ───────────────────────────────────────────────────
-// useBlogStory expects a BlogView — pass it directly via computed
 const { title, formattedDate } = useBlogStory(computed(() => props.blog));
 </script>
 

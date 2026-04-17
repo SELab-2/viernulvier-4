@@ -1,9 +1,5 @@
 <!--
   components/admin/blogs/ImageSection.vue
-
-  Upload / replace the header image for a blog.
-  Uses the same media pipeline as the rest of the app:
-    storage → media item → hd_ready crop → gallery → blog link
 -->
 <script setup lang="ts">
 import type { MediaGallery, MediaItem } from "@repo/common";
@@ -25,7 +21,6 @@ const { saveMedia } = useStorageApi();
 const { getMainImageCrop } = useGallery();
 const { get: apiGet, put: apiPut } = useApi();
 
-// ── State ────────────────────────────────────────────────────────────────────
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const loading = ref(false);
 const uploading = ref(false);
@@ -33,7 +28,6 @@ const error = ref<string | null>(null);
 const success = ref<string | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 
-// ── Load existing gallery ────────────────────────────────────────────────────
 async function loadGallery() {
   loading.value = true;
   error.value = null;
@@ -48,7 +42,6 @@ async function loadGallery() {
       );
     }
   } catch {
-    // 404 = no gallery yet — that's fine
     gallery.value = null;
   } finally {
     loading.value = false;
@@ -57,7 +50,6 @@ async function loadGallery() {
 
 onMounted(loadGallery);
 
-// ── Ensure gallery exists ────────────────────────────────────────────────────
 async function ensureGallery(): Promise<MediaGallery> {
   if (gallery.value) return gallery.value as unknown as MediaGallery;
 
@@ -70,21 +62,20 @@ async function ensureGallery(): Promise<MediaGallery> {
     name: `blog-${props.blogId}-gallery`,
     type: "default",
   });
-  if (!createResp.data) throw new Error("Failed to create media gallery.");
+  if (!createResp.data) throw new Error(t("admin.blogs.image.galleryError"));
 
   const newGallery = createResp.data;
   await apiPut(`/blogs/${props.blogId}/media/${newGallery.id}`, {});
   return newGallery;
 }
 
-// ── Upload ────────────────────────────────────────────────────────────────────
 async function handleFileChange(e: Event) {
   const input = e.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
 
   if (!file.type.startsWith("image/")) {
-    error.value = "Please select an image file (PNG, JPG, WebP…).";
+    error.value = t("admin.blogs.image.typeError");
     input.value = "";
     return;
   }
@@ -94,18 +85,13 @@ async function handleFileChange(e: Event) {
   success.value = null;
 
   try {
-    // 1. Ensure gallery
     const gal = await ensureGallery();
 
-    // 2. Upload to storage
     const ext = file.name.split(".").pop() ?? "jpg";
     const storagePath = `/photos/blog-${props.blogId}-${Date.now()}.${ext}`;
     const storeResp = await saveMedia(storagePath, file);
-    if (storeResp.error) {
-      throw new Error(`Storage upload failed: ${storeResp.error}`);
-    }
+    if (storeResp.error) throw new Error(storeResp.error);
 
-    // 3. Create media item linked to gallery
     const itemResp = await createItem({
       type: file.type,
       original_filename: file.name,
@@ -114,29 +100,27 @@ async function handleFileChange(e: Event) {
       height: 0,
       gallery_ids: [gal.id],
     });
-    if (!itemResp.data) throw new Error("Failed to create media item.");
+    if (!itemResp.data) throw new Error(t("admin.blogs.image.itemError"));
     const item = itemResp.data as MediaItem;
 
-    // 4. Create hd_ready crop linked to item
     const cropResp = await createCrop({
       name: "hd_ready",
       url: storagePath,
       item_id: item.id,
     });
-    if (!cropResp.data) throw new Error("Failed to create media crop.");
+    if (!cropResp.data) throw new Error(t("admin.blogs.image.cropError"));
 
-    success.value = "Image uploaded successfully.";
+    success.value = t("admin.blogs.image.success");
     input.value = "";
     await loadGallery();
   } catch (err) {
-    console.error("[AdminBlogsImageSection] Upload failed:", err);
-    error.value = err instanceof Error ? err.message : "Upload failed.";
+    error.value =
+      err instanceof Error ? err.message : t("admin.blogs.image.uploadError");
   } finally {
     uploading.value = false;
   }
 }
 
-// ── Computed ─────────────────────────────────────────────────────────────────
 const mainCrop = computed(() =>
   gallery.value ? getMainImageCrop(gallery.value, "hd_ready") : null,
 );
@@ -150,10 +134,10 @@ const hasImage = computed(() => !!mainCrop.value);
       <h2
         class="font-brand font-black text-[13px] uppercase tracking-widest text-card-foreground"
       >
-        Header image
+        {{ t("admin.blogs.image.title") }}
       </h2>
       <p class="text-xs text-muted-foreground mt-0.5">
-        PNG, JPG or WebP — shown as the story hero and in the list view.
+        {{ t("admin.blogs.image.subtitle") }}
       </p>
     </div>
 
@@ -177,7 +161,7 @@ const hasImage = computed(() => !!mainCrop.value);
         <span
           class="absolute top-2 left-2 bg-black/60 text-white text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded"
         >
-          Current header
+          {{ t("admin.blogs.image.currentLabel") }}
         </span>
       </div>
 
@@ -201,7 +185,7 @@ const hasImage = computed(() => !!mainCrop.value);
           />
         </svg>
         <p class="text-[11px] font-black uppercase tracking-widest">
-          No image yet
+          {{ t("admin.blogs.image.noImage") }}
         </p>
       </div>
 
@@ -259,7 +243,11 @@ const hasImage = computed(() => !!mainCrop.value);
           />
         </svg>
         {{
-          uploading ? "Uploading…" : hasImage ? "Replace image" : "Upload image"
+          uploading
+            ? t("admin.blogs.image.uploading")
+            : hasImage
+              ? t("admin.blogs.image.replace")
+              : t("admin.blogs.image.upload")
         }}
       </button>
     </div>

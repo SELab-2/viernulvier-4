@@ -199,7 +199,6 @@
     "saving": "Saving…",
     "edit": "Edit",
     "delete": "Delete",
-
     "blogs": {
       "new": "New Story",
       "edit": "Edit Story",
@@ -210,31 +209,41 @@
       "saveBtn": "Save Changes",
       "createError": "Could not create the story. Please try again.",
       "saveError": "Could not save the changes. Please try again.",
-
-      "dateFrom": "Date from",
-      "dateTo": "Date to",
-
-      "date": "Date",
+      "sectionTitle": "Title",
+      "sectionContent": "Content",
       "titleNl": "Title (NL)",
       "titleNlPlaceholder": "Title in Dutch",
       "titleEn": "Title (EN)",
       "titleEnPlaceholder": "Title in English",
+      "titleEnFallback": "Falls back to Dutch title if left empty.",
       "descriptionNl": "Description (NL)",
       "descriptionNlPlaceholder": "Write the Dutch description…",
       "descriptionEn": "Description (EN)",
       "descriptionEnPlaceholder": "Write the English description…",
-
+      "descriptionEnFallback": "Falls back to Dutch description if left empty.",
       "deleteTitle": "Delete Story",
       "deleteConfirm": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
       "deleteConfirmBtn": "Delete",
-
       "titleEnRequired": "English title is required",
       "descriptionEnRequired": "English description is required",
-
       "validation": {
         "titleNlRequired": "A Dutch title is required.",
-        "descriptionNlRequired": "A Dutch description is required.",
-        "dateRequired": "A date is required."
+        "descriptionNlRequired": "A Dutch description is required."
+      },
+      "image": {
+        "title": "Header image",
+        "subtitle": "PNG, JPG or WebP — shown as the story hero and in the list view.",
+        "currentLabel": "Current header",
+        "noImage": "No image yet",
+        "upload": "Upload image",
+        "replace": "Replace image",
+        "uploading": "Uploading…",
+        "typeError": "Please select an image file (PNG, JPG, WebP…).",
+        "uploadError": "Upload failed.",
+        "galleryError": "Failed to create media gallery.",
+        "itemError": "Failed to create media item.",
+        "cropError": "Failed to create media crop.",
+        "success": "Image uploaded successfully."
       }
     }
   },

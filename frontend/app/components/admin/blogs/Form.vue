@@ -1,8 +1,5 @@
 <!--
   components/admin/blogs/Form.vue
-
-  Bilingual (NL/EN) create/edit form for a blog/story.
-  All UI text comes from i18n keys (admin.blogs.*).
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -32,7 +29,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-// ── Form state ───────────────────────────────────────────────────────────────
 const form = reactive<{ titel: LocalizedPair; description: LocalizedPair }>({
   titel: { nl: "", en: "" },
   description: { nl: "", en: "" },
@@ -69,7 +65,6 @@ function handleSubmit() {
   });
 }
 
-// ── Style tokens ─────────────────────────────────────────────────────────────
 const inputClass =
   "w-full px-4 py-3 bg-muted border border-border text-sm rounded-lg outline-none transition-colors duration-150 hover:border-foreground/20 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground resize-none";
 const labelClass =
@@ -84,7 +79,7 @@ const sectionHeadingClass =
   <form class="space-y-5" @submit.prevent="handleSubmit">
     <!-- Title section -->
     <section :class="sectionClass">
-      <h2 :class="sectionHeadingClass">{{ t("admin.blogs.date") }} — title</h2>
+      <h2 :class="sectionHeadingClass">{{ t("admin.blogs.sectionTitle") }}</h2>
 
       <div>
         <label :class="labelClass">
@@ -108,14 +103,16 @@ const sectionHeadingClass =
           :placeholder="t('admin.blogs.titleEnPlaceholder')"
         />
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
-          {{ t("admin.blogs.titleEnRequired") }}
+          {{ t("admin.blogs.titleEnFallback") }}
         </p>
       </div>
     </section>
 
     <!-- Content section -->
     <section :class="sectionClass">
-      <h2 :class="sectionHeadingClass">Content</h2>
+      <h2 :class="sectionHeadingClass">
+        {{ t("admin.blogs.sectionContent") }}
+      </h2>
 
       <div>
         <label :class="labelClass">
@@ -140,7 +137,7 @@ const sectionHeadingClass =
           :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
         />
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
-          {{ t("admin.blogs.descriptionEnRequired") }}
+          {{ t("admin.blogs.descriptionEnFallback") }}
         </p>
       </div>
     </section>
