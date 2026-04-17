@@ -20,11 +20,11 @@
     "@tailwindcss/postcss": "^4.0.0",
     "happy-dom": "^20.8.9",
     "lucide-vue-next": "^0.469.0",
-    "tailwindcss": "^4.0.0",
-    "pdfjs-dist": "^4.0.0"
+    "pdfjs-dist": "^4.0.0",
+    "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@nuxt/test-utils": "4.0.0",
+    "@nuxt/test-utils": "^4.0.2",
     "@vitest/coverage-v8": "^4.0.18",
     "@vue/test-utils": "^2.4.6",
     "nuxt": "^4.3.1",

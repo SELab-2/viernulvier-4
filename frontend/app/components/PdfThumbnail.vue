@@ -15,9 +15,11 @@
  * </PrintsPdfThumbnail>
  */
 
+// With this import we don't rely on external delivery networks.
 import * as pdfjsLib from "pdfjs-dist";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+const emit = defineEmits(["error"]);
 
 interface Props {
   src: string;
@@ -45,7 +47,6 @@ onMounted(async () => {
     const renderTask = page.render({
       canvasContext: canvas.value!.getContext("2d")!,
       viewport: scaledViewport,
-      canvas: canvas.value!, // the canvas element itself
     });
     await renderTask.promise;
 
@@ -53,6 +54,7 @@ onMounted(async () => {
   } catch (e) {
     loading.value = false; // failure
     error.value = true;
+    emit("error");
   }
 });
 
