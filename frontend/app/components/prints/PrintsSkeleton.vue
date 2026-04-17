@@ -9,7 +9,7 @@ import { PrintTypeValues } from "@repo/common";
 
 <template>
   <div class="space-y-8" aria-busy="true" aria-label="Loading prints">
-    <!-- Simulate 3 category sections -->
+    <!-- Simulate category sections -->
     <div v-for="i in PrintTypeValues.length" :key="i" class="space-y-4">
       <!-- Header skeleton -->
       <div class="flex items-center gap-3 mb-3">
