@@ -196,7 +196,9 @@
     "loading": "Laden...",
     "retry": "Opnieuw proberen",
     "noPrints": "Geen drukwerk",
-    "pagination": "Paginering"
+    "pagination": "Paginering",
+    "page_label": "Pagina",
+    "of_pages": "van {total}"
   },
   "login": {
     "username": "Gebruikersnaam",

@@ -195,7 +195,9 @@
     "loading": "Loading...",
     "retry": "Try again",
     "noPrints": "No prints",
-    "pagination": "Pagination"
+    "pagination": "Pagination",
+    "page_label": "Page",
+    "of_pages": "of {total}"
   },
   "login": {
     "username": "Username",

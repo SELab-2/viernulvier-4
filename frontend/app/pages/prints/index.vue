@@ -134,7 +134,10 @@ onMounted(loadPage);
       />
 
       <!-- Pagination -->
-      <PrintsPagination />
+      <div class="flex items-center justify-between mt-6">
+        <PrintsPageJumper />
+        <PrintsPagination />
+      </div>
     </div>
   </div>
 </template>
