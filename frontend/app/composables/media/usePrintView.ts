@@ -9,9 +9,11 @@ const activeFilter = ref<PrintType>(PrintTypeValues[0]);
 // Pagination
 const currentPage = ref(0);
 const totalItems = ref(0);
+const totalPages = ref(1);
 
 // Loading state
 const loading = ref(false);
+const fetchError = ref<Error | null>(null);
 
 export function usePrintView() {
   return {
@@ -19,6 +21,8 @@ export function usePrintView() {
     activeFilter,
     currentPage,
     totalItems,
+    totalPages,
     loading,
+    fetchError,
   };
 }

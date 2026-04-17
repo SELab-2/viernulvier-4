@@ -2,14 +2,22 @@
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-defineProps<{
-  page: number;
-  totalPages: number;
-}>();
+import { usePrintView } from "../../composables/media/usePrintView";
+const { currentPage, totalPages, loading } = usePrintView();
 
-const emit = defineEmits<{
-  (e: "go-to-page", page: number): void;
-}>();
+function goToPage(page: number) {
+  // Prevent invalid or unnecessary navigation
+  if (
+    page < 0 ||
+    page > totalPages.value ||
+    page === currentPage.value ||
+    loading.value
+  )
+    return;
+  currentPage.value = page;
+  // Scroll to top after page change
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 // constants
 const chevronButton =
@@ -26,8 +34,8 @@ const chevronButton =
       <!-- First page -->
       <button
         :class="chevronButton"
-        :disabled="page === 0"
-        @click="emit('go-to-page', 0)"
+        :disabled="currentPage === 0"
+        @click="goToPage(0)"
       >
         <svg
           class="w-4 h-4"
@@ -50,8 +58,8 @@ const chevronButton =
       <!-- Previous -->
       <button
         :class="chevronButton"
-        :disabled="page === 0"
-        @click="emit('go-to-page', page - 1)"
+        :disabled="currentPage === 0"
+        @click="goToPage(currentPage - 1)"
       >
         <svg
           class="w-4 h-4"
@@ -75,7 +83,7 @@ const chevronButton =
       <span
         class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
       >
-        {{ page + 1 }}
+        {{ currentPage + 1 }}
       </span>
 
       <span class="w-[2px] bg-foreground" />
@@ -83,8 +91,8 @@ const chevronButton =
       <!-- Next -->
       <button
         :class="chevronButton"
-        :disabled="page === totalPages - 1"
-        @click="emit('go-to-page', page + 1)"
+        :disabled="currentPage === totalPages - 1"
+        @click="goToPage(currentPage + 1)"
       >
         <svg
           class="w-4 h-4"
@@ -107,8 +115,8 @@ const chevronButton =
       <!-- Last -->
       <button
         :class="chevronButton"
-        :disabled="page === totalPages - 1"
-        @click="emit('go-to-page', totalPages - 1)"
+        :disabled="currentPage === totalPages - 1"
+        @click="goToPage(totalPages - 1)"
       >
         <svg
           class="w-4 h-4"

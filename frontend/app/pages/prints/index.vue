@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { PrintItemView, PaginatedResponse, PrintType } from "@repo/common";
-import { PrintTypeValues } from "@repo/common";
+import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../composables/media/usePrintApi";
+import { usePrintView } from "../../composables/media/usePrintView";
 import PrintsHeader from "../../components/prints/PrintsHeader.vue";
 import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
 import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
@@ -9,12 +9,20 @@ import FileGrid from "../../components/prints/FileGrid.vue";
 
 const { t, locale } = useI18n();
 const { getAll } = usePrintApi();
+const {
+  searchQuery,
+  activeFilter,
+  currentPage,
+  totalItems,
+  totalPages,
+  loading,
+  fetchError,
+} = usePrintView();
 
 // Filters
-const searchQuery = ref("");
-const activeFilter = ref<PrintType>(PrintTypeValues[0]);
 
 // Responsive columns
+const prints = ref<PrintItemView[]>([]);
 const ROWS_PER_PAGE = 4;
 const windowWidth = ref(1024);
 const handleResize = () => {
@@ -36,22 +44,6 @@ const currentCols = computed(() => {
 });
 const LIMIT = computed(() => ROWS_PER_PAGE * currentCols.value);
 
-// Pagination state
-const page = ref(0);
-const totalItems = ref(0);
-const prints = ref<PrintItemView[]>([]);
-const pending = ref(false);
-const fetchError = ref<Error | null>(null);
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(totalItems.value / LIMIT.value)),
-);
-
-function goToPage(p: number) {
-  if (p < 0 || p >= totalPages.value) return;
-  page.value = p;
-  loadPage();
-}
-
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
   const r = result as any;
@@ -61,13 +53,13 @@ function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
 }
 
 async function loadPage() {
-  pending.value = true;
+  loading.value = true;
   fetchError.value = null;
 
   try {
     const raw = await getAll({
       paginationFilters: {
-        page: page.value,
+        page: currentPage.value,
         limit: LIMIT.value,
         descending: true,
       },
@@ -78,21 +70,21 @@ async function loadPage() {
     const paged = unwrap(raw);
     prints.value = (paged?.objects ?? []) as PrintItemView[];
     totalItems.value = paged?.totalItems ?? 0;
+    totalPages.value = Math.max(1, Math.ceil(totalItems.value / LIMIT.value));
   } catch (e) {
     fetchError.value = e as Error;
   } finally {
-    pending.value = false;
+    loading.value = false;
   }
 }
 
 watch([searchQuery, locale, activeFilter], () => {
-  page.value = 0;
-  loadPage();
+  currentPage.value = 0;
 });
 watch(currentCols, () => {
-  page.value = 0;
-  loadPage();
+  currentPage.value = 0;
 });
+watch(currentPage, loadPage, { immediate: false });
 
 onMounted(loadPage);
 </script>
@@ -109,7 +101,7 @@ onMounted(loadPage);
     />
 
     <div class="container mx-auto px-4 max-w-5xl pt-4 pb-8 sm:pt-6 sm:pb-12">
-      <PrintsSkeleton v-if="pending" />
+      <PrintsSkeleton v-if="loading" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
         <p
@@ -138,11 +130,7 @@ onMounted(loadPage);
         />
 
         <!-- Pagination -->
-        <PrintsPagination
-          :page="page"
-          :total-pages="totalPages"
-          @go-to-page="goToPage"
-        />
+        <PrintsPagination />
       </div>
     </div>
   </div>
