@@ -253,5 +253,27 @@
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "error": "Something went wrong."
+  },
+  "editor": {
+    "placeholder": "Write your story...",
+    "toolbar": {
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "underline": "Underline (Ctrl+U)",
+      "strike": "Strikethrough",
+      "h1": "Heading 1 (block)",
+      "h2": "Heading 2 (block)",
+      "h3": "Heading 3 (block)",
+      "bulletList": "Bullet list",
+      "orderedList": "Numbered list",
+      "blockquote": "Block quote",
+      "link": "Insert / edit link",
+      "linkPrompt": "URL:",
+      "color": "Text colour",
+      "fontSize": "Font size (inline selection)",
+      "sizeNormal": "Normal",
+      "hr": "Horizontal line",
+      "clearFormat": "Clear formatting"
+    }
   }
 }

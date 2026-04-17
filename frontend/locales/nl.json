@@ -253,5 +253,27 @@
     "signIn": "Inloggen",
     "signingIn": "Inloggen...",
     "error": "Er is iets misgegaan."
+  },
+  "editor": {
+    "placeholder": "Schrijf je verhaal...",
+    "toolbar": {
+      "bold": "Vet (Ctrl+B)",
+      "italic": "Cursief (Ctrl+I)",
+      "underline": "Onderstrepen (Ctrl+U)",
+      "strike": "Doorhalen",
+      "h1": "Kop 1 (heel alinea)",
+      "h2": "Kop 2 (heel alinea)",
+      "h3": "Kop 3 (heel alinea)",
+      "bulletList": "Opsommingslijst",
+      "orderedList": "Genummerde lijst",
+      "blockquote": "Blokcitaat",
+      "link": "Link invoegen/bewerken",
+      "linkPrompt": "URL:",
+      "color": "Tekstkleur",
+      "fontSize": "Lettergrootte (selectie)",
+      "sizeNormal": "Normaal",
+      "hr": "Horizontale lijn",
+      "clearFormat": "Opmaak wissen"
+    }
   }
 }

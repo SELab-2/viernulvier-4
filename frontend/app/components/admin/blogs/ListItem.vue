@@ -42,7 +42,6 @@ const { title, formattedDate } = useBlogStory(computed(() => props.blog));
   <article
     class="flex items-center gap-4 rounded-xl border border-card-border bg-card px-4 py-3 hover:bg-card-hover transition-colors"
   >
-    <!-- Thumbnail -->
     <div class="w-24 h-16 shrink-0 rounded-lg overflow-hidden">
       <MediaDisplay
         :id="blog.id"
@@ -54,7 +53,6 @@ const { title, formattedDate } = useBlogStory(computed(() => props.blog));
       />
     </div>
 
-    <!-- Text -->
     <div class="flex-1 min-w-0">
       <p class="text-sm font-semibold text-card-foreground truncate">
         {{ title || "—" }}
@@ -67,22 +65,19 @@ const { title, formattedDate } = useBlogStory(computed(() => props.blog));
       </p>
     </div>
 
-    <!-- Actions -->
     <div class="flex items-center gap-2 shrink-0">
-      <NuxtLink
-        :to="ROUTES.admin.stories.edit(blog.id)"
-        class="inline-flex items-center rounded-md border-2 border-action-blue-border text-action-blue-icon hover:bg-action-blue-hover transition-colors px-3 py-1.5 text-[10px] font-black uppercase tracking-widest"
-      >
-        {{ t("admin.edit") }}
-      </NuxtLink>
+      <AdminEditButton
+        :label="t('admin.edit')"
+        :size="36"
+        @click="navigateTo(ROUTES.admin.stories.edit(blog.id))"
+      />
 
-      <button
+      <AdminDeleteButton
+        :label="deleting ? '…' : t('admin.delete')"
+        :size="36"
         :disabled="deleting"
-        class="inline-flex items-center rounded-md border-2 border-action-red-border text-action-red-icon hover:bg-action-red-hover disabled:opacity-40 transition-colors px-3 py-1.5 text-[10px] font-black uppercase tracking-widest"
         @click="emit('delete')"
-      >
-        {{ deleting ? "…" : t("admin.delete") }}
-      </button>
+      />
     </div>
   </article>
 </template>

@@ -77,7 +77,6 @@ const sectionHeadingClass =
 
 <template>
   <form class="space-y-5" @submit.prevent="handleSubmit">
-    <!-- Title section -->
     <section :class="sectionClass">
       <h2 :class="sectionHeadingClass">{{ t("admin.blogs.sectionTitle") }}</h2>
 
@@ -108,7 +107,6 @@ const sectionHeadingClass =
       </div>
     </section>
 
-    <!-- Content section -->
     <section :class="sectionClass">
       <h2 :class="sectionHeadingClass">
         {{ t("admin.blogs.sectionContent") }}
@@ -119,22 +117,17 @@ const sectionHeadingClass =
           {{ t("admin.blogs.descriptionNl") }}
           <span class="text-red-500">*</span>
         </label>
-        <textarea
+        <AdminEditor
           v-model="form.description.nl"
-          :class="inputClass"
-          rows="9"
           :placeholder="t('admin.blogs.descriptionNlPlaceholder')"
-          required
         />
       </div>
 
       <div>
         <label :class="labelClass">{{ t("admin.blogs.descriptionEn") }}</label>
-        <textarea
+        <AdminEditor
           v-model="form.description.en"
-          :class="inputClass"
-          rows="9"
-          :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
+          :placeholder="t('admin.blogs.descriptionENPlaceholder')"
         />
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
           {{ t("admin.blogs.descriptionEnFallback") }}
@@ -142,7 +135,6 @@ const sectionHeadingClass =
       </div>
     </section>
 
-    <!-- Actions -->
     <div class="flex items-center gap-3">
       <button
         type="submit"

@@ -12,16 +12,16 @@
  * are already flat strings (backend returns them localised via the lang param).
  */
 import type { BlogView } from "@repo/common";
-import { formatDateShort } from "~/utils/formatters";
+import { formatDateShort, stripHtml } from "~/utils/formatters";
 
 export function useBlogStory(story: MaybeRef<BlogView | null>) {
   const { locale } = useI18n();
-
-  // Unwrap to any once so every accessor below stays tidy.
   const s = computed(() => toValue(story));
 
   const title = computed<string>(() => s.value?.titel ?? "—");
   const description = computed<string>(() => s.value?.description ?? "");
+  // Stripped plain text for card previews
+  const previewText = computed<string>(() => stripHtml(description.value));
   const storyId = computed<number>(() => s.value?.id ?? 0);
 
   const formattedDate = computed<string>(() => {
@@ -29,10 +29,5 @@ export function useBlogStory(story: MaybeRef<BlogView | null>) {
     return formatDateShort(s.value.created_at, locale.value);
   });
 
-  return {
-    title,
-    description,
-    storyId,
-    formattedDate,
-  };
+  return { title, description, previewText, storyId, formattedDate };
 }

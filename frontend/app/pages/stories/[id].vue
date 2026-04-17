@@ -1,8 +1,9 @@
 <!--
-  pages/blog/[id].vue
-  =====================
+  pages/stories/[id].vue
+  ========================
   Fetches a single blog post by ID with the current locale so the backend
-  returns a flat BlogView.
+  returns a flat BlogView. Renders the HTML description from the rich-text
+  editor, including blue links, colors, headings, lists etc.
 -->
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
@@ -48,7 +49,9 @@ const headerCrop = computed(() => {
 });
 
 const readingTime = computed(() => {
-  const words = body.value.split(/\s+/).filter(Boolean).length;
+  // Strip HTML tags for word count
+  const plain = body.value.replace(/<[^>]*>/g, " ").trim();
+  const words = plain.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 });
 
@@ -59,15 +62,10 @@ async function loadGallery() {
 
 watch(locale, () => refresh());
 
-onMounted(() => {
-  loadGallery();
-});
-
+onMounted(() => loadGallery());
 watch(
   () => blog.value,
-  () => {
-    loadGallery();
-  },
+  () => loadGallery(),
 );
 </script>
 
@@ -75,6 +73,7 @@ watch(
   <div
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
+    <!-- Loading -->
     <div v-if="pending" class="min-h-screen flex items-center justify-center">
       <svg
         class="w-6 h-6 animate-spin text-gray-400"
@@ -87,6 +86,7 @@ watch(
       </svg>
     </div>
 
+    <!-- Not found -->
     <div
       v-else-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
@@ -105,7 +105,7 @@ watch(
     </div>
 
     <template v-else>
-      <!-- ── Hero banner ──────────────────────────────────────────────── -->
+      <!-- ── Hero banner ─────────────────────────────────────────── -->
       <section
         class="relative flex items-end overflow-hidden"
         :class="headerCrop ? 'h-[52vh] min-h-[380px]' : 'h-52 min-h-[180px]'"
@@ -131,14 +131,13 @@ watch(
             {{ title }}
           </h1>
 
-          <!-- replace the metadata flex row in the hero section -->
           <div
             class="flex flex-wrap items-center justify-between gap-4 font-brand font-black text-[10px] uppercase tracking-widest"
             :class="
               headerCrop ? 'text-white/70' : 'text-gray-500 dark:text-gray-400'
             "
           >
-            <!-- Left: date + reading time -->
+            <!-- Date + reading time -->
             <div class="flex items-center gap-4">
               <span v-if="formattedDate" class="flex items-center gap-1.5">
                 <svg
@@ -158,7 +157,7 @@ watch(
               <span>{{ readingTime }} {{ t("stories.minRead") }}</span>
             </div>
 
-            <!-- Right: back button -->
+            <!-- Back button -->
             <NuxtLink
               :to="ROUTES.stories.base"
               class="flex items-center gap-1.5 px-3 py-1.5 rounded border transition-all duration-150 font-brand font-black text-[9px] uppercase tracking-widest"
@@ -184,10 +183,11 @@ watch(
         </div>
       </section>
 
-      <!-- ── Body ────────────────────────────────────────────────────── -->
+      <!-- ── Body ──────────────────────────────────────────────── -->
       <section class="py-16 sm:py-20">
         <div class="container mx-auto px-6 max-w-4xl">
           <article class="relative max-w-3xl mx-auto">
+            <!-- Decorative left line -->
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
               style="
@@ -202,11 +202,16 @@ watch(
             />
 
             <div class="md:pl-10">
-              <p
-                class="text-base leading-8 whitespace-pre-line text-gray-700 dark:text-gray-300"
-              >
-                {{ body }}
-              </p>
+              <!--
+                HTML from the rich-text editor.
+                The `.story-body` scoped class handles all typography:
+                blue links, headings, lists, blockquotes, etc.
+                No @tailwindcss/typography plugin required.
+              -->
+              <div
+                class="story-body text-base leading-8 text-gray-700 dark:text-gray-300 break-words"
+                v-html="body"
+              />
 
               <div
                 class="mt-20 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
@@ -241,3 +246,106 @@ watch(
     </template>
   </div>
 </template>
+
+<style scoped>
+/* ── Rich-text body typography ───────────────────────────────────────────
+   Styles every element the TipTap editor can produce.
+   Links are blue — no @tailwindcss/typography required.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Links — blue + underline, the main fix for issue 4 */
+.story-body :deep(a) {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.story-body :deep(a:hover) {
+  color: #1d4ed8;
+}
+
+:global(.dark) .story-body :deep(a) {
+  color: #60a5fa;
+}
+:global(.dark) .story-body :deep(a:hover) {
+  color: #93c5fd;
+}
+
+/* Headings */
+.story-body :deep(h1) {
+  font-size: 1.75rem;
+  font-weight: 900;
+  margin: 1.5rem 0 0.5rem;
+  line-height: 1.2;
+}
+.story-body :deep(h2) {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 1.25rem 0 0.4rem;
+  line-height: 1.25;
+}
+.story-body :deep(h3) {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1rem 0 0.3rem;
+}
+
+/* Paragraphs */
+.story-body :deep(p) {
+  margin: 0.75rem 0;
+}
+
+/* Lists */
+.story-body :deep(ul) {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.story-body :deep(ol) {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.story-body :deep(li) {
+  margin: 0.25rem 0;
+}
+
+/* Blockquote */
+.story-body :deep(blockquote) {
+  border-left: 3px solid #9333ea;
+  padding: 0.25rem 0 0.25rem 1rem;
+  margin: 1rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+:global(.dark) .story-body :deep(blockquote) {
+  color: #9ca3af;
+}
+
+/* Horizontal rule */
+.story-body :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+:global(.dark) .story-body :deep(hr) {
+  border-top-color: #374151;
+}
+
+/* Inline formatting */
+.story-body :deep(strong) {
+  font-weight: 700;
+}
+.story-body :deep(em) {
+  font-style: italic;
+}
+.story-body :deep(s) {
+  text-decoration: line-through;
+}
+.story-body :deep(u) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+</style>

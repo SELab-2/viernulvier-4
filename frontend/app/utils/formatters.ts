@@ -181,3 +181,12 @@ export function formatUrl(url: string): string {
   }
   return `${baseUrl}${url}`;
 }
+
+/** Strip HTML tags and return plain text (for list previews). */
+export function stripHtml(html: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}

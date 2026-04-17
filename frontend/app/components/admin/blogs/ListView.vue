@@ -206,7 +206,6 @@ const byYear = computed(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- Header row -->
     <div class="flex items-start justify-between gap-4">
       <div>
         <h1
@@ -230,12 +229,9 @@ const byYear = computed(() => {
       </NuxtLink>
     </div>
 
-    <!-- Toolbar (mirrors StoryToolbar) -->
-    <div class="border border-border rounded-xl overflow-hidden">
-      <!-- Toolbar row -->
+    <div class="border border-border rounded-xl overflow-hidden bg-background">
       <div class="flex items-stretch gap-3 p-4 bg-muted/40 flex-wrap">
-        <!-- Search -->
-        <div class="flex-1 min-w-48 h-10">
+        <div class="flex-1 min-w-0 h-10">
           <SearchBar
             v-model="searchQuery"
             :items="[]"
@@ -243,15 +239,16 @@ const byYear = computed(() => {
           />
         </div>
 
-        <!-- Filter toggle -->
         <div class="relative">
           <button
+            type="button"
             :class="[
               'btn-outline h-10 gap-2 shrink-0',
               filterIsActive &&
                 '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
             ]"
             :aria-expanded="panelOpen"
+            :aria-label="t('stories.filters.toggle')"
             @click="panelOpen = !panelOpen"
           >
             <svg
@@ -268,14 +265,14 @@ const byYear = computed(() => {
                 stroke-linejoin="round"
               />
             </svg>
-            {{ t("stories.filters.toggle") }}
+            <span>{{ t("stories.filters.toggle") }}</span>
           </button>
 
-          <!-- Clear badge -->
           <button
             v-if="hasDateFilter && !panelOpen"
             class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
             @click.stop="clearAllFilters"
+            :aria-label="t('stories.filters.clear')"
           >
             <svg
               width="8"
@@ -293,28 +290,24 @@ const byYear = computed(() => {
             </svg>
           </button>
         </div>
-
-        <!-- Sort -->
-        <select
-          v-model="sortOrder"
-          class="h-10 px-3 rounded-md bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 shrink-0"
-        >
-          <option value="newest">{{ t("stories.sortNewest") }}</option>
-          <option value="oldest">{{ t("stories.sortOldest") }}</option>
-        </select>
       </div>
 
-      <!-- Filter panel -->
       <Transition name="cal-slide">
         <div v-if="panelOpen" class="border-t border-border">
           <div class="p-4 flex flex-col gap-6">
-            <!-- Year picker -->
-            <div class="flex flex-col gap-2">
-              <span
-                class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
+            <div class="flex flex-col gap-2 w-max">
+              <span class="section-label">{{ t("stories.sortLabel") }}</span>
+              <select
+                v-model="sortOrder"
+                class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
               >
-                {{ t("stories.filters.year") }}
-              </span>
+                <option value="newest">{{ t("stories.sortNewest") }}</option>
+                <option value="oldest">{{ t("stories.sortOldest") }}</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <span class="section-label">{{ t("stories.filters.year") }}</span>
               <YearPicker
                 :model-value="selectedYear"
                 :oldest-date="oldestDate"
@@ -323,13 +316,10 @@ const byYear = computed(() => {
               />
             </div>
 
-            <!-- Calendar -->
             <div class="flex flex-col gap-2">
-              <span
-                class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
-              >
-                {{ t("stories.filters.dateRange") }}
-              </span>
+              <span class="section-label">{{
+                t("stories.filters.dateRange")
+              }}</span>
               <DefaultCalendar
                 :key="calendarKey"
                 :oldest-date="oldestDate"
@@ -342,7 +332,6 @@ const byYear = computed(() => {
       </Transition>
     </div>
 
-    <!-- Error banner -->
     <div
       v-if="error"
       class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
@@ -350,7 +339,6 @@ const byYear = computed(() => {
       {{ error }}
     </div>
 
-    <!-- Loading skeleton -->
     <div v-if="loading" class="space-y-3">
       <div
         v-for="i in PAGE_SIZE"
@@ -359,7 +347,6 @@ const byYear = computed(() => {
       />
     </div>
 
-    <!-- Empty state -->
     <div v-else-if="!blogs.length" class="py-20 text-center">
       <p
         class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
@@ -373,10 +360,8 @@ const byYear = computed(() => {
       </p>
     </div>
 
-    <!-- Timeline -->
     <div v-else class="space-y-10">
       <section v-for="group in byYear" :key="group.year">
-        <!-- Year heading -->
         <div class="blog-year-heading mb-4">
           <div class="blog-year-accent" aria-hidden="true" />
           <span class="blog-year-label font-brand select-none">{{
@@ -385,7 +370,6 @@ const byYear = computed(() => {
           <div class="flex-1 h-px bg-foreground/15 mx-3" />
         </div>
 
-        <!-- Story rows -->
         <div class="space-y-3">
           <AdminBlogsListItem
             v-for="blog in group.stories"
@@ -398,7 +382,6 @@ const byYear = computed(() => {
       </section>
     </div>
 
-    <!-- Pagination footer -->
     <div
       v-if="totalPages > 1 || totalItems > 0"
       class="flex items-center justify-between pt-2 border-t border-border"
@@ -449,5 +432,13 @@ const byYear = computed(() => {
 .cal-slide-leave-to {
   opacity: 0;
   max-height: 0;
+}
+.section-label {
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
 }
 </style>
