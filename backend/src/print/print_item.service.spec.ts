@@ -8,6 +8,7 @@ import {
   ModifyPrintItemDto,
   PaginationFilterDto,
   ReplacePrintItemDto,
+  FilterPrintItemDto,
 } from "../dto/dto";
 
 describe("PrintItemService", () => {
@@ -67,24 +68,25 @@ describe("PrintItemService", () => {
         limit: 10,
       };
 
+      const filters = {};
+
       printDbService.getAllPrintItems.mockResolvedValue(expectedResponse);
 
-      const result = await service.getPrintItems(paginationFilters);
+      const result = await service.getPrintItems(paginationFilters, filters);
 
       expect(printDbService.getAllPrintItems).toHaveBeenCalledWith(
         paginationFilters,
-        undefined,
+        filters,
       );
       expect(result).toEqual(expectedResponse);
     });
 
-    it("should pass the type parameter to the db service", async () => {
+    it("should pass the filters parameter to the db service", async () => {
       const paginationFilters: PaginationFilterDto = {
         page: 1,
         limit: 10,
         descending: true,
       };
-      const testType = "drukwerk";
 
       const expectedResponse: PaginatedResponse<PrintItemDto> = {
         objects: [],
@@ -93,13 +95,17 @@ describe("PrintItemService", () => {
         limit: 10,
       };
 
+      const filters: FilterPrintItemDto = {
+        type: "drukwerk",
+      };
+
       printDbService.getAllPrintItems.mockResolvedValue(expectedResponse);
 
-      await service.getPrintItems(paginationFilters, testType);
+      await service.getPrintItems(paginationFilters, filters);
 
       expect(printDbService.getAllPrintItems).toHaveBeenCalledWith(
         paginationFilters,
-        testType,
+        filters,
       );
     });
   });

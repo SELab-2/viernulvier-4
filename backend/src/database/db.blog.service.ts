@@ -75,7 +75,7 @@ export class BlogDatabaseService {
     // Title filter
     // NOTE: This is case-insensitive and looks in all languages + matches on parts.
     if (blogFilters.title) {
-      const titleParam = param(blogFilters.title);
+      const titleParam = param(`%${blogFilters.title}%`);
       const titelClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
       );
@@ -84,12 +84,12 @@ export class BlogDatabaseService {
 
     // Filter blogs that were created before.
     if (blogFilters.before) {
-      conditions.push(`created_at < ${param(blogFilters.before)}::timestamp`);
+      conditions.push(`created_at::date <= ${param(blogFilters.before)}::date`);
     }
 
     // Filter blogs that were created after.
     if (blogFilters.after) {
-      conditions.push(`created_at > ${param(blogFilters.after)}::timestamp`);
+      conditions.push(`created_at::date >= ${param(blogFilters.after)}::date`);
     }
 
     const whereClause = conditions.length

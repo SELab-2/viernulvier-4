@@ -35,7 +35,7 @@ describe("usePrintApi", () => {
     void getAll({
       paginationFilters: { page: 1, limit: 10, descending: true },
       languageFilters: { lang: "en" },
-      type: "affiche",
+      printItemFilters: { type: "affiche" },
     });
     const url = mockGet.mock.calls[0][0] as string;
     expect(url).toContain("page=1");
