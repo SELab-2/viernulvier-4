@@ -7,6 +7,9 @@
  * - BaseForm integration with optional initial values
  * - CreateAccount payload mapping on submit
  *
+ * Note: The role field is currently commented out because there currentky only can be one super admin
+ *       but can be easily re-enabled if needed in the future.
+ *
  * Usage:
  * <AdminAccountForm
  *   :initial-values="{ username: '', password: '' }"
