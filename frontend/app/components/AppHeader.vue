@@ -157,8 +157,7 @@ const adminNavItems = [
         </nav>
 
         <button
-          :class="[isAdmin ? 'md:hidden' : 'lg:hidden']"
-          class="text-[var(--foreground)] outline-none"
+          class="lg:hidden text-[var(--foreground)] outline-none"
           @click="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
