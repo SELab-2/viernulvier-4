@@ -74,6 +74,7 @@
     "lightMode": "Lichte modus",
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
+    "sortLabel": "Sorteer",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -99,6 +100,12 @@
         "after-selected": "Na ...",
         "before-selected": "Voor ..."
       }
+    },
+    "filters": {
+      "toggle": "Filters",
+      "year": "Jaar",
+      "dateRange": "Datum",
+      "clear": "Wis"
     }
   },
   "baseform": {
@@ -143,6 +150,16 @@
     "price": "Prijs",
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prijzen",
+    "hidePriceDetails": "verberg details"
+  },
+  "general": {
+    "back": "Terug",
+    "readMore": "Lees meer",
+    "readLess": "Lees minder",
+    "showMore": "Toon meer",
+    "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen."
   },
   "eventlist": {

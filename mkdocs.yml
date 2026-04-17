@@ -23,12 +23,19 @@ nav:
       - Tags: api/tags.md
       - Locations: api/locations.md
       - Pricing: api/pricing.md
-      - Media Storage: api/media_storage.md
-      - Prints: api/prints.md
+      - Media:
+          - Overview: api/media/index.md
+          - Storage: api/media/storage.md
+          - Items: api/media/items.md
+          - Crops: api/media/crops.md
+          - Galleries: api/media/galleries.md
+          - Prints: api/media/prints.md
   - Data Schemas:
       - Overview: schemas/index.md
       - Core Entities: schemas/entities.md
       - Metadata: schemas/metadata.md
+      - Media: schemas/media.md
+      - Authentication: schemas/auth.md
   - Testing:
       - Overview: testing/index.md
       - Backend: testing/backend.md

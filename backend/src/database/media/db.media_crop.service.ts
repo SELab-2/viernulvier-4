@@ -7,7 +7,6 @@ import {
   PaginationFilterDto,
   ReplaceMediaCropDto,
 } from "../../dto/dto";
-import { ResourceGoneException } from "../../common/exceptions";
 import { MediaCropSchema, PaginatedResponse } from "@repo/common";
 import {
   generateCountQuery,
@@ -15,6 +14,7 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "../db-utils";
+import { ResourceNotFoundException } from "../../common/exceptions";
 
 @Injectable()
 export class MediaCropDatabaseService {
@@ -42,9 +42,7 @@ export class MediaCropDatabaseService {
     const result = await this.db.query<MediaCropDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `No MediaCropDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(MediaCropDto, id);
     }
 
     return result[0];
@@ -153,9 +151,7 @@ export class MediaCropDatabaseService {
     const result = await this.db.query<MediaCropDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update media crop with ID ${cropId}.`,
-      );
+      throw new ResourceNotFoundException(MediaCropDto, cropId);
     }
 
     return result[0];
@@ -167,9 +163,8 @@ export class MediaCropDatabaseService {
    */
   async deleteCrop(id: number): Promise<void> {
     const query = `DELETE FROM media_crop WHERE id = $1 RETURNING id`;
-    const result = await this.db.query(query, [id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(`Cannot delete: Crop ${id} not found`);
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 }

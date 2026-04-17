@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { ScraperDbService } from "./scraper.db.service";
-import { ResourceGoneException } from "../../../common/exceptions";
+import { ResourceNotFoundException } from "../../../common/exceptions";
 import { vnvEvent } from "../vnv.parser";
 import logger from "../../logger/logger";
 import { Event, Location, Price, Production } from "@repo/common";
+import { ProductionDto } from "../../../dto/dto";
 
 /**
  * Events db service for the scraper & csv parser.
@@ -30,9 +31,7 @@ export class ScraperEventDbService {
     );
 
     if (rows.length === 0) {
-      throw new ResourceGoneException(
-        `No Event exists for provided legacy_id(${legacyId})`,
-      );
+      throw new ResourceNotFoundException(ProductionDto, legacyId);
     }
 
     return rows[0];

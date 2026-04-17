@@ -11,7 +11,6 @@ import {
   ReplaceProductionDto,
   TagDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import {
   BlogSchema,
   GalleryType,
@@ -27,6 +26,10 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import {
+  MediaNotFoundException,
+  ResourceNotFoundException,
+} from "../common/exceptions";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -49,9 +52,7 @@ export class ProductionDatabaseService {
     const productions = await this.db.query<ProductionDto>(query, [id]);
 
     if (productions.length === 0)
-      throw new ResourceGoneException(
-        `No ProductionDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(ProductionDto, id);
 
     return productions[0]; // There should be a ProductionDto in here if the length is not 0.
   }
@@ -299,7 +300,7 @@ export class ProductionDatabaseService {
     const result = await this.db.query<ProductionDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Production not found");
+      throw new ResourceNotFoundException(ProductionDto, productionId);
     }
 
     return result[0];
@@ -337,12 +338,9 @@ export class ProductionDatabaseService {
         AND production_blogs.production_id = $2
         RETURNING *;
     `;
-    const result = await this.db.query(query, [blog_id, production_id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        "Cannot delete: Blog-Production link not found",
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [blog_id, production_id]);
   }
 
   /**
@@ -400,12 +398,9 @@ export class ProductionDatabaseService {
         AND production_tag.production_id = $2
       RETURNING *;
     `;
-    const result = await this.db.query(query, [tag_id, production_id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        "Cannot delete: Tag-Production link not found",
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [tag_id, production_id]);
   }
 
   /**
@@ -436,9 +431,7 @@ export class ProductionDatabaseService {
     const result = await this.db.query<MediaGalleryDto>(query, [prod_id, type]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Production with ID ${prod_id} has no media gallery of the given type`,
-      );
+      throw new MediaNotFoundException(ProductionDto, type, prod_id);
     }
 
     return result[0];

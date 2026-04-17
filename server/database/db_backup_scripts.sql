@@ -168,7 +168,6 @@ CREATE TABLE account_api_keys
 (
     account_id INT     NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
     api_key_id INT     NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
-    active     boolean not null default true,
     PRIMARY KEY (account_id, api_key_id)
 );
 CREATE INDEX idx_account_api_keys_api_key_id ON account_api_keys (api_key_id);
@@ -312,12 +311,20 @@ CREATE TABLE blog_media_gallery
 
 CREATE INDEX idx_blog_media_gallery_gallery_id ON blog_media_gallery (gallery_id);
 
+CREATE TYPE print_enum AS ENUM (
+    'affiche', 
+    'brochure',
+    'drukwerk', 
+    'programma'
+);
+
 CREATE TABLE print_items
 (
     id          SERIAL PRIMARY KEY,
     titel       JSONB,
     description JSONB,
     url         TEXT,
+    print_type  print_enum,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

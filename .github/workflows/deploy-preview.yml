@@ -48,9 +48,11 @@ jobs:
           mv site frontend/public/docs
 
           cd $PR_PATH/frontend
-          npm install
+          npm ci
+          npx nuxi cleanup
 
           NUXT_API_BASE="https://sel2-4.ugent.be/api" \
+          MEDIA_BASE_URL="https://sel2-4.ugent.be" \
           npm run build
 
           pm2 delete preview-$PR || true

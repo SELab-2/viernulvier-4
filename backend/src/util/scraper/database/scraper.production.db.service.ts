@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { ScraperDbService } from "./scraper.db.service";
 import { MediaGallery, Production, Tag } from "@repo/common";
-import { ResourceGoneException } from "../../../common/exceptions";
+import { ResourceNotFoundException } from "../../../common/exceptions";
 import { vnvProduction } from "../vnv.parser";
 import logger from "../../logger/logger";
+import { EventDto } from "../../../dto/dto";
 
 /**
  * Production db service for the scraper & parser.
@@ -29,9 +30,7 @@ export class ScraperProductionDbService {
     );
 
     if (rows.length === 0) {
-      throw new ResourceGoneException(
-        `No Production exists for provided legacy_id(${legacyId})`,
-      );
+      throw new ResourceNotFoundException(EventDto, legacyId);
     }
 
     return rows[0];

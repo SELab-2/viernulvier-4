@@ -9,8 +9,8 @@ import { Language } from "@repo/common";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AppLogger } from "../../logger/logger.service";
-import { ResourceGoneException } from "../../../common/exceptions";
 import { CreateEventDto, CreateProductionDto } from "../../../dto/dto";
+import { ResourceNotFoundException } from "../../../common/exceptions";
 import { ScraperDbManager } from "../database/scraper.db.facade";
 
 const DEFAULT_DATE = "1970-01-01T00:00:00+00:00";
@@ -184,7 +184,7 @@ export class InjectCsvEngine {
             );
           await this.dbConnection.production.linkTag(production.id, tagId);
         } catch (error) {
-          if (error instanceof ResourceGoneException) {
+          if (error instanceof ResourceNotFoundException) {
             this.logger.warn(
               `Skipping tag link; production not found for ${productionLegacyId}`,
             );
@@ -229,7 +229,7 @@ export class InjectCsvEngine {
 
         await this.dbConnection.blog.linkBlog(production.id, blog.id);
       } catch (error) {
-        if (error instanceof ResourceGoneException) {
+        if (error instanceof ResourceNotFoundException) {
           this.logger.warn(
             `Skipping blog link; production not found for ${productionLegacyId}`,
           );
@@ -274,7 +274,7 @@ export class InjectCsvEngine {
 
         await this.dbConnection.event.linkPrice(event.id, price.id);
       } catch (error) {
-        if (error instanceof ResourceGoneException) {
+        if (error instanceof ResourceNotFoundException) {
           this.logger.warn(
             `Skipping price link; event not found for ${eventLegacyId}`,
           );

@@ -40,6 +40,5 @@ export function useBlogStory(story: MaybeRef<BlogView | null>) {
     storyId,
     formattedDate,
     placeholderGradient,
-    image: null, // TODO: Image Gallery and such have to be fetched seperately.
   };
 }
