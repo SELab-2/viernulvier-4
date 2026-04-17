@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { CreateAccount } from "@repo/common";
 import type { FormField } from "../../types/FormField";
 
@@ -28,13 +29,13 @@ const emit = defineEmits<{
   submit: [CreateAccount];
 }>();
 
-const fields: FormField[] = [
+const fields = computed<FormField[]>(() => [
   {
     component: "BaseInput",
     name: "username",
     props: {
       label: t("accounts.username"),
-      placeholder: "admin",
+      placeholder: t("accounts.username_placeholder"),
       required: true,
     },
   },
@@ -44,7 +45,7 @@ const fields: FormField[] = [
     props: {
       label: t("accounts.password"),
       type: "password",
-      placeholder: "Enter a secure password",
+      placeholder: t("accounts.password_placeholder"),
       required: true,
     },
   },
@@ -59,7 +60,7 @@ const fields: FormField[] = [
     },
   },
   */
-];
+]);
 
 function handleFormSubmit(formData: Record<string, any>) {
   const payload: CreateAccount = {
