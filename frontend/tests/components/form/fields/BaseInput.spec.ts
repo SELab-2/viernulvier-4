@@ -59,4 +59,36 @@ describe("BaseInput", () => {
     const w = mount(BaseInput);
     expect(w.find("input").attributes("required")).toBeUndefined();
   });
+
+  it("shows password toggle only when type is password", async () => {
+    const w = mount(BaseInput, {
+      props: {
+        type: "password",
+      },
+    });
+
+    expect(w.find("button[type='button']").exists()).toBe(true);
+
+    await w.setProps({ type: "text" });
+    expect(w.find("button[type='button']").exists()).toBe(false);
+  });
+
+  it("toggles input type when password visibility button is clicked", async () => {
+    const w = mount(BaseInput, {
+      props: {
+        type: "password",
+      },
+    });
+
+    const input = w.find("input");
+    const toggle = w.find("button[type='button']");
+
+    expect(input.attributes("type")).toBe("password");
+
+    await toggle.trigger("click");
+    expect(input.attributes("type")).toBe("text");
+
+    await toggle.trigger("click");
+    expect(input.attributes("type")).toBe("password");
+  });
 });
