@@ -1,21 +1,30 @@
 <script setup lang="ts">
 /**
  * A reusable file grid component, displays files belonging to a specific category, includes:
- *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
- *  - Max 4 rows before pagination
  *  - File previews, clickable files
+ *  - Responsive grid (default: 4 items per row, can change to 3 -> 2)
+ *  - Shows total file count
+ *  - Empty state fallback when no files are available
  *
  * Usage:
  * <PrintsFileGrid
  *    category="Affiche"
  *    :files="files"
+ *    :total-files="files.length"
  * />
  *
- * Example files:
+ * Example file:
  * const files: PrintItemView[] = [
- *    { id: 1, titel: 'AFFICHE-FESTIVAL-2025.PDF', description: '', url: '', created_at: '...', updated_at: '...' },
- *    { id: 2, titel: 'AFFICHE-VIDEODROOM-2024.PDF', description: '', url: '', created_at: '...', updated_at: '...' },
- * ]
+ *   {
+ *     id: 1,
+ *     titel: "AFFICHE-FESTIVAL-2025.PDF",
+ *     description: "",
+ *     url: "/files/affiche1.pdf",
+ *     print_type: "affiche",
+ *     created_at: "2025-01-01T00:00:00Z",
+ *     updated_at: "2025-01-01T00:00:00Z",
+ *   },
+ * ];
  */
 import type { PrintItemView } from "@repo/common";
 
