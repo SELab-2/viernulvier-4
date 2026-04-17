@@ -1,4 +1,9 @@
 import { ref } from "vue";
+/**
+ * Shared state for the Prints feature.
+ * Acts as a lightweight global store for filters, pagination, and view settings.
+ */
+
 import type { PrintType } from "@repo/common";
 import { PrintTypeValues } from "@repo/common";
 

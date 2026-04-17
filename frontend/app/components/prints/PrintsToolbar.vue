@@ -1,3 +1,12 @@
+<!--
+  components/prints/PrintsToolbar.vue
+  ===================================
+  Sticky toolbar rendered above the prints grid. Provides:
+
+  - Full-text search (delegates to SearchBar, emits `update:search`).
+  - A collapsible filter panel containing a toggle group of multiple print-types/categories.
+    Shows only clicked category when clicked, default on first category.
+-->
 <script setup lang="ts">
 import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { PrintTypeValues, type PrintType } from "@repo/common";
@@ -13,8 +22,8 @@ const emit = defineEmits<{
 }>();
 
 const searchQuery = ref("");
-const filterOpen = ref(false);
-const activeType = ref<PrintType>(PrintTypeValues[0]);
+const filterOpen = ref(false); // Checks if filter panel is open or not.
+const activeType = ref<PrintType>(PrintTypeValues[0]); // Current selected print-type.
 
 watch(searchQuery, (v) => {
   emit("update:search", v);

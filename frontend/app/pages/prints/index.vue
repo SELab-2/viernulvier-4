@@ -1,6 +1,13 @@
 <!--
+  pages/prints/index.vue
+  ========================
+  Prints overview page.
 
- - Max 4 rows before pagination
+  - Composes prints page layout
+  - Fetches paginated print items from the API
+  - Pagination is dynamically calculated based on:
+    rows per page (4) × responsive column count (2–4)
+
 -->
 
 <script setup lang="ts">
