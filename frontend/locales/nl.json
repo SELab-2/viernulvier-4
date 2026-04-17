@@ -195,7 +195,8 @@
     "download": "Download",
     "loading": "Laden...",
     "retry": "Opnieuw proberen",
-    "noPrints": "Geen drukwerk"
+    "noPrints": "Geen drukwerk",
+    "pagination": "Paginering"
   },
   "login": {
     "username": "Gebruikersnaam",

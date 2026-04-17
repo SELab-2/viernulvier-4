@@ -194,7 +194,8 @@
     "download": "Download",
     "loading": "Loading...",
     "retry": "Try again",
-    "noPrints": "No prints"
+    "noPrints": "No prints",
+    "pagination": "Pagination"
   },
   "login": {
     "username": "Username",
