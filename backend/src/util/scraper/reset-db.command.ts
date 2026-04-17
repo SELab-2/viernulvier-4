@@ -1,4 +1,4 @@
-import { UtilsDbConnection } from "./database/db.connection";
+import { UtilsDbConnection } from "./database/scraper.db.service";
 import { Injectable } from "@nestjs/common";
 import { Command, CommandRunner } from "nest-commander";
 import { AppLogger } from "../logger/logger.service";

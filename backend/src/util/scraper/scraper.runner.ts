@@ -1,15 +1,23 @@
 import { ScraperEngine, ScrapeResult } from "./scraper.engine";
 import { Injectable } from "@nestjs/common";
 import { AppLogger } from "../logger/logger.service";
-import { PendingCrops, UtilsDbConnection } from "./database/db.connection";
 import { MediaCrop } from "@repo/common";
+import { UtilsDbConnection } from "./database/scraper.db.service";
+import { ScraperDbFacade } from "./database/scraper.db.facade";
+import { PendingCrops } from "./database/scraper.media.db.service";
 
+/**
+ * This class is the scraper runner.
+ * This runs the scraper and acts as the main-entrypoiny of the scraper.
+ * note: all scraper logic is in the Scraper engine. (here only insertion.)
+ */
 @Injectable()
 export class ScraperRunner {
   constructor(
     private readonly scraperEngine: ScraperEngine,
     private readonly logger: AppLogger,
     private readonly dbConnection: UtilsDbConnection,
+    private readonly db: ScraperDbFacade,
   ) {}
 
   /**
@@ -35,19 +43,19 @@ export class ScraperRunner {
 
     // We can bundle the adding of tags, locations, prices and crops.
     await Promise.all([
-      this.dbConnection.insertTags(scrapeResults.genres),
-      this.dbConnection.insertPrices(scrapeResults.prices),
-      this.dbConnection.insertLocations(scrapeResults.locations),
-      this.dbConnection.insertCrops(scrapeResults.crops),
+      this.db.taxonomies.insertTags(scrapeResults.genres),
+      this.db.taxonomies.insertPrices(scrapeResults.prices),
+      this.db.taxonomies.insertLocations(scrapeResults.locations),
+      this.db.media.insertCrops(scrapeResults.crops),
     ]);
 
     // Insert Items then galleries. We can then link the previous crops.
-    await this.dbConnection.insertItems(scrapeResults.items);
-    await this.dbConnection.insertGalleries(scrapeResults.galleries);
+    await this.db.media.insertItems(scrapeResults.items);
+    await this.db.media.insertGalleries(scrapeResults.galleries);
 
     // First Productions since we need those ids for Events.
-    await this.dbConnection.insertProductions(scrapeResults.productions);
-    await this.dbConnection.insertEvents(scrapeResults.events);
+    await this.db.production.insertProductions(scrapeResults.productions);
+    await this.db.event.insertEvents(scrapeResults.events);
 
     // After scraping all data we can update the date in the DB.
     await this.dbConnection.query(
@@ -65,7 +73,7 @@ export class ScraperRunner {
    * @returns The list of crops with length amount or less together with total remaining.
    */
   async getPendingCrops(amount: number): Promise<PendingCrops> {
-    return await this.dbConnection.getPendingCrops(amount);
+    return await this.db.media.getPendingCrops(amount);
   }
 
   /**
@@ -75,6 +83,6 @@ export class ScraperRunner {
    * @returns The updated crop.
    */
   async updatePendingCrop(cropId: number, url: string): Promise<MediaCrop> {
-    return await this.dbConnection.updateCropWithOwnUrl(cropId, url);
+    return await this.db.media.updateCropWithOwnUrl(cropId, url);
   }
 }

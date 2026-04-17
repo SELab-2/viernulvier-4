@@ -61,6 +61,7 @@ export interface ScrapeResult {
 /**
  * The scraper engine class.
  * The core logic of the scraper.
+ * note: this class handles all logic for the scraping part, db insertion happens in the scraper runner.
  */
 @Injectable()
 export class ScraperEngine {
