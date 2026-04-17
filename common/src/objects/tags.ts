@@ -26,7 +26,7 @@ const MutableTagSchema = TagSchema.omit({
 export const CreateTagSchema = MutableTagSchema;
 export const ModifyTagSchema = MutableTagSchema.partial();
 
-// Filtering
+// Filtering.
 export const FilterTagSchema = z.object({
   tag: z.string().optional(),
 });
