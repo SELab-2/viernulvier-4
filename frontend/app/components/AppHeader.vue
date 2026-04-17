@@ -1,4 +1,15 @@
 <script setup>
+/**
+ * Header Component
+ *
+ * Handles:
+ * - Responsive Navigation (Desktop horizontal, Mobile hamburger)
+ * - Localization (EN / NL)
+ * - Theme switching (Dark / Light) — local ref, persisted in localStorage
+ * - Admin-specific actions (Logout functionality)
+ * - Sticky visibility logic (Hide on scroll down, show on scroll up)
+ */
+
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { ROUTES } from "~/utils/routes";
 import { LogOut, Menu, X } from "lucide-vue-next";
@@ -181,7 +192,7 @@ const adminNavItems = [
         >
           <LocaleSelector />
 
-          <ThemeToggle />
+          <ThemeToggle :is-compact="isAdmin" />
         </div>
 
         <button
