@@ -89,9 +89,9 @@ onMounted(loadBlog);
       </div>
 
       <template v-else-if="blog && blogId">
-        <AdminBlogsAdminBlogImageSection :blog-id="blogId" />
+        <AdminBlogsImageSection :blog-id="blogId" />
 
-        <AdminBlogForm
+        <AdminBlogsForm
           mode="edit"
           :initial-data="{
             titel: blog.titel as { nl: string; en: string },

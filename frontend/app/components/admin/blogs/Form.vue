@@ -1,20 +1,8 @@
 <!--
-  components/admin/AdminBlogForm.vue
-  ====================================
-  Reusable form for creating and editing a blog/story.
+  components/admin/blogs/Form.vue
 
-  Provides bilingual (NL/EN) input for:
-  - Title
-  - Content (description)
-
-  Props:
-    initialData  — pre-fills the form when editing an existing blog
-    loading      — disables submit during save
-    mode         — "create" | "edit" (controls button label)
-
-  Emits:
-    submit(data)  — CreateBlog or ModifyBlog payload ready to send to API
-    cancel        — navigate back without saving
+  Bilingual (NL/EN) create/edit form for a blog/story.
+  All UI text comes from i18n keys (admin.blogs.*).
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -23,7 +11,6 @@ interface LocalizedPair {
   nl: string;
   en: string;
 }
-
 interface InitialData {
   titel?: LocalizedPair;
   description?: LocalizedPair;
@@ -43,13 +30,14 @@ const emit = defineEmits<{
   (e: "cancel"): void;
 }>();
 
-// --- Form state ---
+const { t } = useI18n();
+
+// ── Form state ───────────────────────────────────────────────────────────────
 const form = reactive<{ titel: LocalizedPair; description: LocalizedPair }>({
   titel: { nl: "", en: "" },
   description: { nl: "", en: "" },
 });
 
-// Sync when initialData arrives (edit mode)
 watch(
   () => props.initialData,
   (data) => {
@@ -81,7 +69,7 @@ function handleSubmit() {
   });
 }
 
-// --- Shared style tokens ---
+// ── Style tokens ─────────────────────────────────────────────────────────────
 const inputClass =
   "w-full px-4 py-3 bg-muted border border-border text-sm rounded-lg outline-none transition-colors duration-150 hover:border-foreground/20 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground resize-none";
 const labelClass =
@@ -96,31 +84,31 @@ const sectionHeadingClass =
   <form class="space-y-5" @submit.prevent="handleSubmit">
     <!-- Title section -->
     <section :class="sectionClass">
-      <h2 :class="sectionHeadingClass">Title</h2>
+      <h2 :class="sectionHeadingClass">{{ t("admin.blogs.date") }} — title</h2>
 
       <div>
         <label :class="labelClass">
-          Nederlands <span class="text-red-500">*</span>
+          {{ t("admin.blogs.titleNl") }} <span class="text-red-500">*</span>
         </label>
         <input
           v-model="form.titel.nl"
           :class="inputClass"
           type="text"
-          placeholder="Voer de Nederlandse titel in…"
+          :placeholder="t('admin.blogs.titleNlPlaceholder')"
           required
         />
       </div>
 
       <div>
-        <label :class="labelClass">English</label>
+        <label :class="labelClass">{{ t("admin.blogs.titleEn") }}</label>
         <input
           v-model="form.titel.en"
           :class="inputClass"
           type="text"
-          placeholder="Enter the English title…"
+          :placeholder="t('admin.blogs.titleEnPlaceholder')"
         />
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
-          Leave blank to copy the Dutch title.
+          {{ t("admin.blogs.titleEnRequired") }}
         </p>
       </div>
     </section>
@@ -131,27 +119,28 @@ const sectionHeadingClass =
 
       <div>
         <label :class="labelClass">
-          Nederlands <span class="text-red-500">*</span>
+          {{ t("admin.blogs.descriptionNl") }}
+          <span class="text-red-500">*</span>
         </label>
         <textarea
           v-model="form.description.nl"
           :class="inputClass"
           rows="9"
-          placeholder="Schrijf de inhoud in het Nederlands…"
+          :placeholder="t('admin.blogs.descriptionNlPlaceholder')"
           required
         />
       </div>
 
       <div>
-        <label :class="labelClass">English</label>
+        <label :class="labelClass">{{ t("admin.blogs.descriptionEn") }}</label>
         <textarea
           v-model="form.description.en"
           :class="inputClass"
           rows="9"
-          placeholder="Write the content in English…"
+          :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
         />
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
-          Leave blank to copy the Dutch content.
+          {{ t("admin.blogs.descriptionEnRequired") }}
         </p>
       </div>
     </section>
@@ -163,9 +152,11 @@ const sectionHeadingClass =
         :disabled="!isValid || loading"
         class="btn-outline flex-1 justify-center disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        <span v-if="loading">Saving…</span>
-        <span v-else-if="mode === 'create'">Create story</span>
-        <span v-else>Save changes</span>
+        <span v-if="loading">{{ t("admin.saving") }}</span>
+        <span v-else-if="mode === 'create'">{{
+          t("admin.blogs.createBtn")
+        }}</span>
+        <span v-else>{{ t("admin.blogs.saveBtn") }}</span>
       </button>
 
       <button
@@ -173,7 +164,7 @@ const sectionHeadingClass =
         class="btn-outline px-8 shrink-0"
         @click="emit('cancel')"
       >
-        Cancel
+        {{ t("admin.cancel") }}
       </button>
     </div>
   </form>

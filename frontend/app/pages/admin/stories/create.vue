@@ -116,7 +116,7 @@ function finish() {
       </div>
 
       <!-- ── Step 1: form ──────────────────────────────────────────── -->
-      <AdminBlogsAdminBlogForm
+      <AdminBlogsForm
         v-if="!createdBlogId"
         mode="create"
         :loading="saving"
@@ -131,7 +131,7 @@ function finish() {
           skip and do it later from the edit page.
         </p>
 
-        <AdminBlogsAdminBlogImageSection :blog-id="createdBlogId" />
+        <AdminBlogsImageSection :blog-id="createdBlogId" />
 
         <!-- Finish / skip actions -->
         <div class="flex items-center gap-3 pt-2">

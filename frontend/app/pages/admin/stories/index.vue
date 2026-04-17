@@ -10,7 +10,7 @@ useAdminGuard();
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-4xl mx-auto px-6 py-10">
-      <AdminBlogsAdminBlogListView />
+      <AdminBlogsListView />
     </div>
   </div>
 </template>

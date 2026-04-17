@@ -1,14 +1,11 @@
 <!--
-  components/admin/AdminBlogListView.vue
-  ========================================
-  Full admin overview of all blog/story entries.
-  Includes:
-  - Search bar (debounced title filter)
-  - Sort order toggle (newest / oldest)
-  - Date range filter (after / before)
-  - Paginated list using AdminBlogListItem
-  - Empty state and loading skeleton
-  - Delete with confirmation
+  components/admin/blogs/ListView.vue
+
+  Full paginated admin list of blog/story entries.
+  - Debounced search (title filter)
+  - Sort order (newest / oldest)
+  - Per-row delete spinner so the UI stays responsive during deletion
+  - All UI strings come from i18n (admin.blogs.*)
 -->
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
@@ -16,29 +13,33 @@ import { Plus } from "lucide-vue-next";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 
 const { getAll, remove } = useBlogApi();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
-// --- State ---
+// ── Filters & pagination ─────────────────────────────────────────────────────
 const searchQuery = ref("");
 const sortOrder = ref<"newest" | "oldest">("newest");
 const currentPage = ref(0);
 const PAGE_SIZE = 10;
 
+// ── Data ─────────────────────────────────────────────────────────────────────
 const blogs = ref<BlogView[]>([]);
 const totalItems = ref(0);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+// Track which blog IDs are currently being deleted so we can show a spinner
+const deletingIds = ref(new Set<number>());
+
+// ── Derived ──────────────────────────────────────────────────────────────────
 const totalPages = computed(() =>
   Math.max(1, Math.ceil(totalItems.value / PAGE_SIZE)),
 );
-
 const showingStart = computed(() => currentPage.value * PAGE_SIZE + 1);
 const showingEnd = computed(() =>
   Math.min((currentPage.value + 1) * PAGE_SIZE, totalItems.value),
 );
 
-// --- Load ---
+// ── Load ─────────────────────────────────────────────────────────────────────
 async function loadBlogs() {
   loading.value = true;
   error.value = null;
@@ -49,6 +50,7 @@ async function loadBlogs() {
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
+      // Always use locale so titles are already flat strings in the list
       languageFilters: { lang: locale.value as "nl" | "en" },
       blogFilters: searchQuery.value ? { title: searchQuery.value } : {},
     });
@@ -57,13 +59,13 @@ async function loadBlogs() {
     blogs.value = data?.objects ?? [];
     totalItems.value = data?.totalItems ?? 0;
   } catch {
-    error.value = "Failed to load stories.";
+    error.value = t("admin.blogs.fetchError");
   } finally {
     loading.value = false;
   }
 }
 
-// --- Search debounce ---
+// ── Debounced search ─────────────────────────────────────────────────────────
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer);
@@ -73,32 +75,33 @@ watch(searchQuery, () => {
   }, 350);
 });
 
-// --- Watchers ---
-watch([sortOrder, currentPage], loadBlogs);
+watch([sortOrder, currentPage, locale], loadBlogs);
 onMounted(loadBlogs);
 
-// --- Navigation ---
-function handleEdit(blog: BlogView) {
-  navigateTo(ROUTES.admin.stories.edit(blog.id));
-}
-
-// --- Delete ---
+// ── Delete ───────────────────────────────────────────────────────────────────
 async function handleDelete(blog: BlogView) {
-  if (!confirm(`Delete "${blog.titel}"? This cannot be undone.`)) return;
+  const confirmMsg = t("admin.blogs.deleteConfirm", {
+    title: blog.titel ?? blog.id,
+  });
+  if (!confirm(confirmMsg)) return;
+
+  deletingIds.value.add(blog.id);
   try {
     await remove(blog.id);
-    // Stay on current page, or back one if it becomes empty
+    // If the page is now empty, go back one page
     if (blogs.value.length === 1 && currentPage.value > 0) {
       currentPage.value--;
     } else {
       await loadBlogs();
     }
   } catch {
-    alert("Failed to delete story. Please try again.");
+    alert(t("admin.blogs.saveError"));
+  } finally {
+    deletingIds.value.delete(blog.id);
   }
 }
 
-// --- Pagination ---
+// ── Pagination ───────────────────────────────────────────────────────────────
 function prevPage() {
   if (currentPage.value > 0) currentPage.value--;
 }
@@ -115,39 +118,40 @@ function nextPage() {
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
         >
-          Stories
+          {{ t("nav.stories") }}
         </h1>
-        <p v-if="!loading" class="text-sm text-muted-foreground mt-0.5">
-          {{ totalItems }} {{ totalItems === 1 ? "story" : "stories" }}
+        <p
+          v-if="!loading && totalItems > 0"
+          class="text-sm text-muted-foreground mt-0.5"
+        >
+          {{ totalItems }} {{ t("admin.blogs.results") }}
         </p>
       </div>
 
       <NuxtLink :to="ROUTES.admin.stories.create">
         <button class="btn-outline flex items-center gap-2 shrink-0">
           <Plus :size="14" />
-          New story
+          {{ t("admin.blogs.new") }}
         </button>
       </NuxtLink>
     </div>
 
     <!-- Filters row -->
     <div class="flex gap-3 items-stretch flex-wrap">
-      <!-- Search -->
       <div class="flex-1 min-w-48 h-10">
         <SearchBar
           v-model="searchQuery"
           :items="[]"
-          placeholder="Search stories..."
+          :placeholder="t('stories.searchPlaceholder')"
         />
       </div>
 
-      <!-- Sort -->
       <select
         v-model="sortOrder"
         class="h-10 px-3 rounded-md bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 shrink-0"
       >
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
+        <option value="newest">{{ t("stories.sortNewest") }}</option>
+        <option value="oldest">{{ t("stories.sortOldest") }}</option>
       </select>
     </div>
 
@@ -164,7 +168,7 @@ function nextPage() {
       <div
         v-for="i in PAGE_SIZE"
         :key="i"
-        class="h-24 bg-muted rounded-lg animate-pulse"
+        class="h-20 bg-muted rounded-xl animate-pulse"
       />
     </div>
 
@@ -173,27 +177,25 @@ function nextPage() {
       <p
         class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
       >
-        No stories
+        {{ t("stories.noStories") }}
       </p>
       <p
         class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
       >
         {{
-          searchQuery
-            ? "Try a different search term."
-            : "Create your first story to get started."
+          searchQuery ? t("stories.noStoriesDesc") : t("admin.blogs.new") + "?"
         }}
       </p>
     </div>
 
-    <!-- List -->
+    <!-- List — note :blog="blog" (not :story) to match ListItem's prop name -->
     <div v-else class="space-y-3">
-      <AdminBlogsAdminBlogListItem
+      <AdminBlogsListItem
         v-for="blog in blogs"
         :key="blog.id"
         :blog="blog"
-        @edit="handleEdit"
-        @delete="handleDelete"
+        :deleting="deletingIds.has(blog.id)"
+        @delete="handleDelete(blog)"
       />
     </div>
 
@@ -206,7 +208,7 @@ function nextPage() {
         v-if="totalItems > 0 && !loading"
         class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
       >
-        {{ showingStart }}–{{ showingEnd }} of {{ totalItems }}
+        {{ showingStart }}–{{ showingEnd }} / {{ totalItems }}
       </p>
       <div v-else class="h-4 w-24 bg-muted rounded animate-pulse" />
 
