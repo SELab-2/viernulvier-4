@@ -2,7 +2,6 @@
 import { ref } from "vue";
 import type { CreateAccount } from "@repo/common";
 
-const accountApi = useAccountApi();
 const isLoading = ref(false);
 const successMessage = ref<string | null>(null);
 const errorMessage = ref<string | null>(null);
@@ -13,13 +12,10 @@ async function handleSubmit(payload: CreateAccount) {
   errorMessage.value = null;
 
   try {
-    const { data, error } = await accountApi.create(payload);
+    // Mock: simulate async operation
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    if (error || !data) {
-      throw new Error(error ?? "Account creation failed.");
-    }
-
-    successMessage.value = `Account "${data.username}" created successfully.`;
+    successMessage.value = `Account "${payload.username}" created successfully.`;
   } catch (err) {
     errorMessage.value =
       err instanceof Error ? err.message : "Something went wrong.";
