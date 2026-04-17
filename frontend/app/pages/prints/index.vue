@@ -1,3 +1,8 @@
+<!--
+
+ - Max 4 rows before pagination
+-->
+
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../composables/media/usePrintApi";

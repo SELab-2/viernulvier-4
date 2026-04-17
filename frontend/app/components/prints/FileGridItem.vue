@@ -7,7 +7,7 @@
  * Usage:
  * <PrintsFileGridItem
  *    :file="file"
- *    category="Affiche"
+ *    category="affiche"
  * />
  */
 import type { PrintItemView } from "@repo/common";

@@ -1,3 +1,16 @@
+<!--
+PrintsPagination.vue
+
+Pagination control for navigating through a prints category.
+Responsible for:
+- Displaying current page and navigation controls
+- Handling previous/next/first/last navigation
+- Generating a condensed page list with ellipsis for large datasets
+- Updating shared pagination state
+
+Uses:
+- usePrintView: pagination state (currentPage, totalPages, loading)
+-->
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();

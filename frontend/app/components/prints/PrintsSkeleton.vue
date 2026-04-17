@@ -3,10 +3,14 @@
   ====================================
   Animated loading skeleton for the first page fetch.
 -->
+<script setup lang="ts">
+import { PrintTypeValues } from "@repo/common";
+</script>
+
 <template>
   <div class="space-y-8" aria-busy="true" aria-label="Loading prints">
     <!-- Simulate 3 category sections -->
-    <div v-for="i in 3" :key="i" class="space-y-4">
+    <div v-for="i in PrintTypeValues.length" :key="i" class="space-y-4">
       <!-- Header skeleton -->
       <div class="flex items-center gap-3 mb-3">
         <div class="h-7 w-32 bg-muted animate-pulse rounded" />
@@ -28,4 +32,3 @@
     </div>
   </div>
 </template>
-<script setup lang="ts"></script>

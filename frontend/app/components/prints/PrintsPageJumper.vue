@@ -1,3 +1,16 @@
+<!--
+PrintsPageJumper.vue
+
+Input control for navigating directly to a specific page in a prints category.
+Responsible for:
+- Allowing users to enter a page number
+- Validating the input against available pages
+- Updating the current page in the shared archive state
+- Scrolling to the top after navigation
+
+Uses:
+- usePrintView: pagination state (currentPage, totalPages, loading)
+-->
 <script setup lang="ts">
 import { ref } from "vue";
 import { usePrintView } from "../../composables/media/usePrintView";
