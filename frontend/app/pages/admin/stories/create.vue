@@ -6,9 +6,9 @@
   Step 1 — Fill in the bilingual form and click "Create story".
            The blog is saved via POST /blogs and we receive the new ID.
 
-  Step 2 — The form is replaced by the AdminBlogImageSection so the user
+  Step 2 — The form is replaced by AdminBlogsImageSection so the user
            can immediately upload a header image without navigating away.
-           Two buttons: "Upload another" (stays) and "Finish" (→ stories list).
+           "← Edit content" goes to the edit page; "Finish" goes to the list.
 -->
 <script setup lang="ts">
 import type { CreateBlog } from "@repo/common";
@@ -18,34 +18,27 @@ import { useAdminGuard } from "~/composables/useAdminGuard";
 useAdminGuard();
 
 const { create } = useBlogApi();
+const { t } = useI18n();
 
-// --- State ---
 const saving = ref(false);
 const error = ref<string | null>(null);
-const createdBlogId = ref<number | null>(null); // null = still on step 1
+const createdBlogId = ref<number | null>(null);
 
-// --- Step 1: create blog ---
 async function handleSubmit(data: CreateBlog) {
   saving.value = true;
   error.value = null;
-
   try {
     const resp = await create(data);
     if (resp.data) {
       createdBlogId.value = resp.data.id;
     } else {
-      error.value = resp.error ?? "Failed to create story.";
+      error.value = resp.error ?? t("admin.blogs.createError");
     }
   } catch {
-    error.value = "An unexpected error occurred.";
+    error.value = t("admin.blogs.createError");
   } finally {
     saving.value = false;
   }
-}
-
-// --- Step 2: finish ---
-function finish() {
-  navigateTo(ROUTES.admin.stories.base);
 }
 </script>
 
@@ -57,15 +50,15 @@ function finish() {
         :to="ROUTES.admin.stories.base"
         class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
       >
-        ← Back to stories
+        ← {{ t("admin.back") }}
       </NuxtLink>
 
       <!-- Page title -->
       <h1
         class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
       >
-        <template v-if="!createdBlogId">New story</template>
-        <template v-else>Add header image</template>
+        <template v-if="!createdBlogId">{{ t("admin.blogs.new") }}</template>
+        <template v-else>{{ t("admin.blogs.image.multiTitle") }}</template>
       </h1>
 
       <!-- Step indicator -->
@@ -87,7 +80,7 @@ function finish() {
             "
             >1</span
           >
-          Content
+          {{ t("admin.blogs.sectionContent") }}
         </div>
         <div class="flex-1 h-px bg-border" />
         <div
@@ -103,7 +96,7 @@ function finish() {
             "
             >2</span
           >
-          Image
+          {{ t("admin.blogs.image.title") }}
         </div>
       </div>
 
@@ -127,23 +120,28 @@ function finish() {
       <!-- ── Step 2: image upload ──────────────────────────────────── -->
       <template v-else>
         <p class="text-sm text-muted-foreground leading-relaxed">
-          Your story has been created. You can upload a header image now, or
-          skip and do it later from the edit page.
+          {{ t("admin.blogs.image.createSuccessHint") }}
         </p>
 
         <AdminBlogsImageSection :blog-id="createdBlogId" />
 
-        <!-- Finish / skip actions -->
+        <!-- Actions -->
         <div class="flex items-center gap-3 pt-2">
-          <button class="btn-outline flex-1 justify-center" @click="finish">
-            Finish
-          </button>
+          <!-- Back to content — goes to edit page so they can update the text -->
           <NuxtLink
             :to="ROUTES.admin.stories.edit(createdBlogId)"
-            class="btn-outline px-8 shrink-0"
+            class="btn-outline px-6 shrink-0 flex items-center gap-2"
           >
-            Edit more
+            ← {{ t("admin.blogs.image.backToForm") }}
           </NuxtLink>
+
+          <!-- Finish — back to stories list -->
+          <button
+            class="btn-outline flex-1 justify-center"
+            @click="navigateTo(ROUTES.admin.stories.base)"
+          >
+            {{ t("admin.save") }}
+          </button>
         </div>
       </template>
     </div>
