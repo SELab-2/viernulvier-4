@@ -64,6 +64,9 @@ function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   return null;
 }
 
+const isFirstLoad = ref(true); // Only show skeleton on first load, not when going to another page
+// (Or else footer "jumps" a bit since the array with prints is empty for a split second, which causes the grid to
+// lose its height for a while since that part is dynamically computed.)
 async function loadPage() {
   loading.value = true;
   fetchError.value = null;
@@ -90,6 +93,7 @@ async function loadPage() {
     fetchError.value = e as Error;
   } finally {
     loading.value = false;
+    isFirstLoad.value = false;
   }
 }
 
@@ -122,7 +126,7 @@ onMounted(loadPage);
     />
 
     <div class="container mx-auto px-4 max-w-5xl pt-4 pb-8 sm:pt-6 sm:pb-12">
-      <PrintsSkeleton v-if="loading" />
+      <PrintsSkeleton v-if="loading && isFirstLoad" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
         <p
