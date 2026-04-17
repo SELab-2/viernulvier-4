@@ -55,14 +55,14 @@ const grid = computed(() =>
         :category="category"
       />
     </div>
+  </div>
 
-    <!-- No files (empty) -->
-    <div
-      v-if="!files.length"
-      class="text-center text-gray-500 dark:text-gray-400"
-    >
-      {{ t("prints.noFilesCat") }}
-    </div>
+  <!-- No files (empty) -->
+  <div
+    v-if="!files.length"
+    class="text-center text-gray-500 dark:text-gray-400"
+  >
+    {{ t("prints.noFilesCat") }}
   </div>
 </template>
 

@@ -78,11 +78,16 @@ async function loadPage() {
   }
 }
 
-watch([searchQuery, locale, activeFilter], () => {
+watch([searchQuery, locale], () => {
   currentPage.value = 0;
+});
+watch(activeFilter, () => {
+  currentPage.value = 0;
+  loadPage();
 });
 watch(currentCols, () => {
   currentPage.value = 0;
+  loadPage();
 });
 watch(currentPage, loadPage, { immediate: false });
 
@@ -122,16 +127,14 @@ onMounted(loadPage);
         </button>
       </div>
 
-      <div v-else>
-        <FileGrid
-          :category="activeFilter"
-          :files="prints"
-          :total-files="totalItems"
-        />
+      <FileGrid
+        :category="activeFilter"
+        :files="prints"
+        :total-files="totalItems"
+      />
 
-        <!-- Pagination -->
-        <PrintsPagination />
-      </div>
+      <!-- Pagination -->
+      <PrintsPagination />
     </div>
   </div>
 </template>
