@@ -77,6 +77,7 @@ async function loadPage() {
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
       printItemFilters: {
+        ...(searchQuery.value ? { title: searchQuery.value } : {}),
         type: activeFilter.value,
       },
     });
@@ -94,6 +95,7 @@ async function loadPage() {
 
 watch([searchQuery, locale], () => {
   currentPage.value = 0;
+  loadPage();
 });
 watch(activeFilter, () => {
   currentPage.value = 0;
