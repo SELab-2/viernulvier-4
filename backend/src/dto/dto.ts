@@ -56,6 +56,7 @@ import {
   FilterBlogSchema,
   AccountSchema,
   FilterPrintItemSchema,
+  FilterTagSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -91,6 +92,7 @@ export class TagDto extends createZodDto(TagSchema) {}
 export class TagViewDto extends createZodDto(TagViewSchema) {}
 export class CreateTagDto extends createZodDto(CreateTagSchema) {}
 export class ModifyTagDto extends createZodDto(ModifyTagSchema) {}
+export class FilterTagDto extends createZodDto(FilterTagSchema) {}
 
 // Location Wrappers
 export class LocationDto extends createZodDto(LocationSchema) {}

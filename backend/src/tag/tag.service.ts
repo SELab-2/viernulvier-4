@@ -5,6 +5,7 @@ import {
   PaginationFilterDto,
   TagDto,
   ModifyTagDto,
+  FilterTagDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -37,8 +38,9 @@ export class TagService {
    */
   async getAllTags(
     paginationFilter: PaginationFilterDto,
+    tagFilters: FilterTagDto,
   ): Promise<PaginatedResponse<TagDto>> {
-    return await this.dbTagService.getTags(paginationFilter);
+    return await this.dbTagService.getTags(paginationFilter, tagFilters);
   }
 
   /**

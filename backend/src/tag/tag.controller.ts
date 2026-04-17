@@ -18,6 +18,7 @@ import {
   TagDto,
   TagViewDto,
   ModifyTagDto,
+  FilterTagDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -33,6 +34,7 @@ import {
   PaginatedResponse,
   PaginationFilterSchema,
   ModifyTagSchema,
+  FilterTagSchema,
 } from "@repo/common";
 import {
   ApiOkAnyOf,
@@ -60,9 +62,10 @@ export class TagController {
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
+    @Query(new ZodValidationPipe(FilterTagSchema)) tagFilters: FilterTagDto,
   ): Promise<PaginatedResponse<TagDto | TagViewDto>> {
     return this.ls.flattenByLanguage<PaginatedResponse<TagDto | TagViewDto>>(
-      await this.tagService.getAllTags(paginationFilter),
+      await this.tagService.getAllTags(paginationFilter, tagFilters),
       lang.lang,
     );
   }

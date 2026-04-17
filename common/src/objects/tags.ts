@@ -26,8 +26,14 @@ const MutableTagSchema = TagSchema.omit({
 export const CreateTagSchema = MutableTagSchema;
 export const ModifyTagSchema = MutableTagSchema.partial();
 
+// Filtering
+export const FilterTagSchema = z.object({
+  tag: z.string().optional(),
+});
+
 // Type exports.
 export type Tag = z.infer<typeof TagSchema>;
 export type TagView = z.infer<typeof TagViewSchema>;
 export type CreateTag = z.infer<typeof CreateTagSchema>;
 export type ModifyTag = z.infer<typeof ModifyTagSchema>;
+export type FilterTag = z.infer<typeof FilterTagSchema>;
