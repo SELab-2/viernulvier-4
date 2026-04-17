@@ -55,8 +55,5 @@ export default defineNuxtConfig({
         'zod',
       ]
     }
-  },
-  build: {
-    transpile: ['@tiptap/vue-3', '@tiptap/extension-link']
   }
 });
