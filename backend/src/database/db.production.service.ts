@@ -114,6 +114,7 @@ export class ProductionDatabaseService {
     );
 
     const conditions: string[] = [];
+    const havingConditions: string[] = [];
     const values: any[] = [];
     const param = (val: any) => {
       values.push(val);
@@ -128,39 +129,6 @@ export class ProductionDatabaseService {
       param,
       productionPrefix,
     );
-
-    // Filter by location
-    // TODO: Rewrite this filter since it would not work anymore under the new location structure.
-
-    // Filter by event date (start or end date)
-    if (productionFilters.date) {
-      const pDate = param(productionFilters.date);
-      conditions.push(
-        `(DATE(e.starttime) = ${pDate} OR DATE(e.endtime) = ${pDate})`,
-      );
-    }
-
-    // Filter by given date lying between starttime and endtime (inclusive)
-    if (productionFilters.date_between) {
-      // Use explicit timestamp comparison to include time component
-      conditions.push(
-        `${param(productionFilters.date_between)}::timestamp BETWEEN e.starttime AND e.endtime`,
-      );
-    }
-
-    // Filter events whose starttime is before the provided date
-    if (productionFilters.date_before) {
-      conditions.push(
-        `e.starttime < ${param(productionFilters.date_before)}::timestamp`,
-      );
-    }
-
-    // Filter events whose endtime is after the provided date
-    if (productionFilters.date_after) {
-      conditions.push(
-        `e.endtime > ${param(productionFilters.date_after)}::timestamp`,
-      );
-    }
 
     // Filter by titel (case-insensitive)
     // Will look anywhere in the title field for what was searched.
@@ -198,19 +166,45 @@ export class ProductionDatabaseService {
       `);
     }
 
+    // HAVING filters.
+
+    // Filter events whose starttime is before the provided date
+    if (productionFilters.before) {
+      havingConditions.push(
+        `MIN(e.starttime) >= ${param(productionFilters.after)}::date`,
+      );
+    }
+
+    // Filter events whose endtime is after the provided date
+    if (productionFilters.after) {
+      havingConditions.push(
+        // Note: We add one day here to include the day itself too without having to cast the column.
+        `MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day'`,
+      );
+    }
+
     // add more filters here if needed.
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const havingClause =
+      havingConditions.length > 0
+        ? `HAVING ${havingConditions.join(" AND ")}`
+        : "";
 
     // count query uses same filters but no pagination
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
-      SELECT COUNT(DISTINCT p.id) as count
-      FROM productions p
-        LEFT JOIN events e ON e.production_id = p.id
-      ${whereClause}
+      SELECT COUNT(*) as count
+      FROM (
+        SELECT p.id
+        FROM productions p
+          LEFT JOIN events e ON e.production_id = p.id
+        ${whereClause}
+        GROUP BY p.id
+        ${havingClause}
+      ) AS matched_productions;
     `;
 
     // Apply pagination
@@ -225,8 +219,9 @@ export class ProductionDatabaseService {
       ${whereClause}
       GROUP BY
         ${productionPrefix}.id
+      ${havingClause}
       ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
-      ${paginationClause}
+      ${paginationClause};
     `;
 
     const [objects, countResult] = await Promise.all([

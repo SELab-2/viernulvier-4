@@ -56,8 +56,8 @@ async function loadPage(page: number) {
       productionFilters: {
         titel: searchQuery.value || undefined,
         tag_ids: tagIds.value.length ? tagIds.value : undefined,
-        date_after: dateFilter.value.after || undefined,
-        date_before: dateFilter.value.before || undefined,
+        after: dateFilter.value.after || undefined,
+        before: dateFilter.value.before || undefined,
       },
       paginationFilters: {
         page: targetedPage - 1, // backend uses 0-based pagination
