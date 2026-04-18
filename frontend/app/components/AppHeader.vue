@@ -19,6 +19,7 @@ import logoWhite from "~/assets/logo_white.svg";
 
 const { isLoggedIn, logout } = useAuth();
 const isAdmin = ref(true); //isLoggedIn;
+const headerRef = ref(null);
 
 const { t } = useI18n();
 
@@ -72,6 +73,23 @@ const handleScroll = () => {
   lastScrollPosition.value = currentScroll;
 };
 
+// ── Close dropdown menu if a click occurs outside the header.
+const handleClickOutside = (e) => {
+  if (
+    isMenuOpen.value &&
+    headerRef.value &&
+    !headerRef.value.contains(e.target)
+  ) {
+    isMenuOpen.value = false;
+  }
+};
+
+// ── Close dropdown menu when the 'Escape' key is pressed.
+const handleEscape = (e) => {
+  if (e.key === "Escape" && isMenuOpen.value) {
+    isMenuOpen.value = false;
+  }
+};
 const resetHeader = () => {
   isVisible.value = true;
   isInitialLoad = true;
@@ -110,11 +128,16 @@ onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("resize", handleResize);
   handleResize();
+
+  window.addEventListener("click", handleClickOutside);
+  window.addEventListener("keydown", handleEscape);
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("resize", handleResize);
+  window.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("keydown", handleEscape);
 
   if (themeObserver) themeObserver.disconnect();
 });
@@ -138,6 +161,7 @@ const adminNavItems = [
 
 <template>
   <header
+    ref="headerRef"
     :class="{ '-translate-y-full': !isVisible && !isMenuOpen }"
     class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu"
   >
@@ -159,7 +183,7 @@ const adminNavItems = [
 
         <button
           class="lg:hidden text-[var(--foreground)] outline-none"
-          @click="toggleMenu"
+          @click.stop="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
           <X v-else :size="28" />
