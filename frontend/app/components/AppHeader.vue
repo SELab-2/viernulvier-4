@@ -17,11 +17,19 @@ import { LogOut, Menu, X } from "lucide-vue-next";
 import logoBlack from "~/assets/logo_black.svg";
 import logoWhite from "~/assets/logo_white.svg";
 
-const { isLoggedIn, logout } = useAuth();
-const isAdmin = isLoggedIn;
 const headerRef = ref(null);
 
 const { t } = useI18n();
+const route = useRoute();
+
+// ── Admin ────────────────────────────────────────────────────────────────
+
+const { isLoggedIn, logout } = useAuth();
+
+const isAtAdminPath = computed(() => route.path.startsWith("/admin"));
+const showAdminInterface = computed(
+  () => isLoggedIn.value && isAtAdminPath.value,
+);
 
 // ── Dark mode ────────────────────────────────────────────────────────────────
 const isDark = ref(false);
@@ -50,7 +58,6 @@ const handleLogout = async () => {
 const isVisible = ref(true);
 const lastScrollPosition = ref(0);
 let isInitialLoad = true;
-const route = useRoute();
 
 const handleScroll = () => {
   const currentScroll = window.scrollY;
@@ -170,7 +177,10 @@ const adminNavItems = [
     >
       <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
       <div class="flex items-center justify-start">
-        <nav v-if="!isAdmin" class="hidden lg:flex gap-[20px] xl:gap-[30px]">
+        <nav
+          v-if="!showAdminInterface"
+          class="hidden lg:flex gap-[20px] xl:gap-[30px]"
+        >
           <NuxtLink
             v-for="item in navItems"
             :key="item.route"
@@ -194,7 +204,11 @@ const adminNavItems = [
       <div class="flex justify-center">
         <div class="flex items-center gap-[10px]">
           <NuxtLink
-            :to="isAdmin ? ROUTES.admin.dashboard.base : ROUTES.home.base"
+            :to="
+              showAdminInterface
+                ? ROUTES.admin.dashboard.base
+                : ROUTES.home.base
+            "
           >
             <img
               :src="isDark ? logoWhite : logoBlack"
@@ -203,7 +217,7 @@ const adminNavItems = [
             />
           </NuxtLink>
           <span
-            v-if="isAdmin"
+            v-if="showAdminInterface"
             class="text-xl lg:text-2xl font-black text-gray-400 tracking-[-1px]"
             >ADMIN</span
           >
@@ -213,16 +227,16 @@ const adminNavItems = [
       <!-- ── Right: locale + dark-mode + logout ─────────────────────────── -->
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
         <div
-          :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']"
+          :class="[showAdminInterface ? 'hidden md:flex' : 'hidden sm:flex']"
           class="items-center gap-2 lg:gap-[15px]"
         >
           <LocaleSelector />
 
-          <ThemeToggle :is-compact="isAdmin" />
+          <ThemeToggle :is-compact="showAdminInterface" />
         </div>
 
         <button
-          v-if="isAdmin"
+          v-if="showAdminInterface"
           class="hidden md:flex btn-danger"
           @click="handleLogout"
         >
@@ -233,7 +247,7 @@ const adminNavItems = [
     </div>
 
     <nav
-      v-if="isAdmin"
+      v-if="showAdminInterface"
       class="hidden lg:flex border-t-2 border-[var(--foreground)] w-full bg-[var(--background)]"
     >
       <div
@@ -256,7 +270,7 @@ const adminNavItems = [
       class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
     >
       <nav class="flex flex-col gap-6">
-        <template v-if="isAdmin">
+        <template v-if="showAdminInterface">
           <NuxtLink
             v-for="item in adminNavItems"
             :key="item.route"
@@ -280,14 +294,18 @@ const adminNavItems = [
         </template>
 
         <div
-          :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
+          :class="[showAdminInterface ? 'md:hidden' : 'sm:hidden']"
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
         >
           <LocaleSelector />
 
           <ThemeToggle />
 
-          <button v-if="isAdmin" class="btn-danger" @click="handleLogout">
+          <button
+            v-if="showAdminInterface"
+            class="btn-danger"
+            @click="handleLogout"
+          >
             <LogOut :size="16" />
             {{ t("nav.logout") }}
           </button>
