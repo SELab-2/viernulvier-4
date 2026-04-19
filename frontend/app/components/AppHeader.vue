@@ -194,7 +194,7 @@ const adminNavItems = [
       <div class="flex justify-center">
         <div class="flex items-center gap-[10px]">
           <NuxtLink
-            :to="isAdmin ? ROUTES.admin.accounts.base : ROUTES.home.base"
+            :to="isAdmin ? ROUTES.admin.dashboard.base : ROUTES.home.base"
           >
             <img
               :src="isDark ? logoWhite : logoBlack"
@@ -305,7 +305,6 @@ const adminNavItems = [
   @apply text-[var(--foreground)] underline underline-offset-8 decoration-[3px];
 }
 
-/* Admin balk specifieke styling */
 .admin-nav-item {
   flex: 1;
   display: flex;
@@ -322,13 +321,20 @@ const adminNavItems = [
   transition: all 0.2s ease-in-out;
 }
 
-.admin-nav-item:last-child {
-  border-right: none;
-}
-
-.admin-nav-item:hover,
-.admin-nav-item.router-link-active {
+.admin-nav-item:hover {
   background-color: var(--foreground);
   color: var(--background);
+}
+
+.admin-nav-item.router-link-active {
+  background-color: transparent;
+  color: var(--foreground);
+  @apply underline underline-offset-[12px] decoration-[3px];
+}
+
+.admin-nav-item.router-link-active:hover {
+  background-color: var(--foreground);
+  color: var(--background);
+  text-decoration: none;
 }
 </style>
