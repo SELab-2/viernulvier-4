@@ -20,12 +20,6 @@ export function isoYear(iso: string): number {
   return parseInt(iso.split("-")[0] ?? "0", 10);
 }
 
-/** Add n days to an ISO date string, returns a new ISO date string. */
-export function addDays(iso: string, n: number): string {
-  const [y, m, d] = iso.split("-").map(Number) as [number, number, number];
-  return localIso(new Date(y, m - 1, d + n));
-}
-
 /**
  * Validate a YYYY-MM-DD string: checks calendar validity and rejects future dates.
  * Returns the ISO string on success, null on failure.
