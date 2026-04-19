@@ -234,9 +234,11 @@ const adminNavItems = [
 
     <nav
       v-if="isAdmin"
-      class="hidden lg:flex border-t-2 border-[var(--foreground)] w-full"
+      class="hidden lg:flex border-t-2 border-[var(--foreground)] w-full bg-[var(--background)]"
     >
-      <div class="flex w-full">
+      <div
+        class="mx-auto flex w-full max-w-[1400px] justify-between px-6 lg:px-12 2xl:px-[120px]"
+      >
         <NuxtLink
           v-for="item in adminNavItems"
           :key="item.route"
@@ -306,35 +308,29 @@ const adminNavItems = [
 }
 
 .admin-nav-item {
-  flex: 1;
+  /* Gebruik flex zodat padding en alignment altijd werken */
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 50px;
-  text-decoration: none;
-  color: var(--muted-foreground);
-  font-weight: 900;
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border-right: 2px solid var(--foreground);
-  transition: all 0.2s ease-in-out;
+
+  /* Spacing & Font */
+  @apply no-underline text-[var(--muted-foreground)] font-[900] text-[11px] tracking-[2px] uppercase transition-all relative;
+
+  /* Verticale ruimte (vervanger van py-4 die soms weigert) */
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+
+  /* Ruimte tussen de items (in plaats van borders) */
+  margin-right: 2.5rem;
 }
 
+/* Hover: alleen tekstkleur, zoals de normale header */
 .admin-nav-item:hover {
-  background-color: var(--foreground);
-  color: var(--background);
-}
-
-.admin-nav-item.router-link-active {
-  background-color: transparent;
   color: var(--foreground);
-  @apply underline underline-offset-[12px] decoration-[3px];
 }
 
-.admin-nav-item.router-link-active:hover {
-  background-color: var(--foreground);
-  color: var(--background);
-  text-decoration: none;
+/* Active: De bekende underline */
+.admin-nav-item.router-link-active {
+  color: var(--foreground);
+  @apply underline underline-offset-[10px] decoration-[3px];
 }
 </style>
