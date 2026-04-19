@@ -127,7 +127,7 @@ const sectionHeadingClass =
         <label :class="labelClass">{{ t("admin.blogs.descriptionEn") }}</label>
         <AdminEditor
           v-model="form.description.en"
-          :placeholder="t('admin.blogs.descriptionENPlaceholder')"
+          :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
         />
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
           {{ t("admin.blogs.descriptionEnFallback") }}

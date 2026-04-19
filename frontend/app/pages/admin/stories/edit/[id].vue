@@ -10,6 +10,7 @@ useAdminGuard();
 
 const route = useRoute();
 const { getById, modify } = useBlogApi();
+const { t } = useI18n();
 
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
@@ -32,7 +33,7 @@ async function loadBlog() {
     const resp = await getById(blogId.value); // no lang → full localized object
     blog.value = resp.data as Blog;
   } catch {
-    error.value = "Failed to load story. Please try again.";
+    error.value = t("admin.blogs.loadError");
   } finally {
     fetching.value = false;
   }
@@ -46,7 +47,7 @@ async function handleSubmit(data: ModifyBlog) {
     await modify(blogId.value, data);
     navigateTo(ROUTES.admin.stories.base);
   } catch {
-    error.value = "Failed to save changes. Please try again.";
+    error.value = t("admin.blogs.saveError");
   } finally {
     saving.value = false;
   }
@@ -62,13 +63,13 @@ onMounted(loadBlog);
         :to="ROUTES.admin.stories.base"
         class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
       >
-        ← Back to stories
+        ← {{ t("admin.back") }}
       </NuxtLink>
 
       <h1
         class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
       >
-        Edit story
+        {{ t("admin.blogs.edit") }}
       </h1>
 
       <div
@@ -85,7 +86,7 @@ onMounted(loadBlog);
       </template>
 
       <div v-else-if="!blog" class="py-16 text-center text-muted-foreground">
-        Story not found.
+        {{ t("admin.blogs.notFound") }}
       </div>
 
       <template v-else-if="blog && blogId">

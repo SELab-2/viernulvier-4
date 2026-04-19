@@ -204,6 +204,7 @@
       "edit": "Edit Story",
       "results": "results",
       "fetchError": "Something went wrong loading the stories.",
+      "loadError": "Could not load the story. Please try again.",
       "notFound": "Story not found",
       "createBtn": "Create Story",
       "saveBtn": "Save Changes",
@@ -292,6 +293,11 @@
       "color": "Text colour",
       "fontSize": "Font size (inline selection)",
       "sizeNormal": "Normal",
+      "sizeSmall": "Small",
+      "sizeNormalPx": "Normal (14px)",
+      "sizeLarge": "Large",
+      "sizeXLarge": "X-Large",
+      "sizeXXLarge": "XX-Large",
       "hr": "Horizontal line",
       "clearFormat": "Clear formatting"
     }

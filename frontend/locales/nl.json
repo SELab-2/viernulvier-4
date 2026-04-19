@@ -204,6 +204,7 @@
       "edit": "Verhaal Bewerken",
       "results": "resultaten",
       "fetchError": "Er ging iets mis bij het laden van de verhalen.",
+      "loadError": "Het verhaal kon niet worden geladen. Probeer het opnieuw.",
       "notFound": "Verhaal niet gevonden",
       "createBtn": "Verhaal Aanmaken",
       "saveBtn": "Wijzigingen Opslaan",
@@ -292,6 +293,11 @@
       "color": "Tekstkleur",
       "fontSize": "Lettergrootte (selectie)",
       "sizeNormal": "Normaal",
+      "sizeSmall": "Klein",
+      "sizeNormalPx": "Normaal (14px)",
+      "sizeLarge": "Groot",
+      "sizeXLarge": "Extra groot",
+      "sizeXXLarge": "Extra extra groot",
       "hr": "Horizontale lijn",
       "clearFormat": "Opmaak wissen"
     }

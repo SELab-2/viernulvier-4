@@ -17,7 +17,7 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 // ── Inline FontSize extension ─────────────────────────────────────────────
 // Headings are block-level (the whole paragraph changes).
@@ -60,14 +60,29 @@ const FontSize = Extension.create({
   },
 });
 
-const FONT_SIZES = [
+// computed so labels re-evaluate when the locale changes
+const FONT_SIZES = computed(() => [
   { label: t("editor.toolbar.sizeNormal"), value: "" },
-  { label: "Small", value: "12" },
-  { label: "Normal", value: "14" },
-  { label: "Large", value: "18" },
-  { label: "X-Large", value: "24" },
-  { label: "XX-Large", value: "32" },
-];
+  { label: t("editor.toolbar.sizeSmall"), value: "12" },
+  { label: t("editor.toolbar.sizeNormalPx"), value: "14" },
+  { label: t("editor.toolbar.sizeLarge"), value: "18" },
+  { label: t("editor.toolbar.sizeXLarge"), value: "24" },
+  { label: t("editor.toolbar.sizeXXLarge"), value: "32" },
+]);
+
+// TipTap extensions are created once — Placeholder.configure({ placeholder: "..." })
+// bakes the string in at init time. To keep the placeholder in sync with the
+// active locale (and with any prop change), we store the resolved text in a ref
+// and pass a *function* to the extension so it reads the ref on every render.
+// When locale or the prop changes we update the ref and dispatch a no-op
+// transaction, which forces ProseMirror to call the function again.
+const resolvedPlaceholder = ref(props.placeholder || t("editor.placeholder"));
+
+watch([() => props.placeholder, locale], () => {
+  resolvedPlaceholder.value = props.placeholder || t("editor.placeholder");
+  // no-op transaction so ProseMirror re-evaluates the placeholder function
+  editor.value?.view.dispatch(editor.value.view.state.tr);
+});
 
 const editor = useEditor({
   content: props.modelValue,
@@ -85,7 +100,7 @@ const editor = useEditor({
       },
     }),
     Placeholder.configure({
-      placeholder: props.placeholder || t("editor.placeholder"),
+      placeholder: () => resolvedPlaceholder.value,
     }),
   ],
   onUpdate: () => {
