@@ -326,27 +326,19 @@ const adminNavItems = [
 }
 
 .admin-nav-item {
-  /* Gebruik flex zodat padding en alignment altijd werken */
   display: flex;
   align-items: center;
 
-  /* Spacing & Font */
   @apply no-underline text-[var(--muted-foreground)] font-[900] text-[11px] tracking-[2px] uppercase transition-all relative;
 
-  /* Verticale ruimte (vervanger van py-4 die soms weigert) */
   padding-top: 1.25rem;
   padding-bottom: 1.25rem;
-
-  /* Ruimte tussen de items (in plaats van borders) */
-  margin-right: 2.5rem;
 }
 
-/* Hover: alleen tekstkleur, zoals de normale header */
 .admin-nav-item:hover {
   color: var(--foreground);
 }
 
-/* Active: De bekende underline */
 .admin-nav-item.router-link-active {
   color: var(--foreground);
   @apply underline underline-offset-[10px] decoration-[3px];
