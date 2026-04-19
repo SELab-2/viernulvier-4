@@ -18,7 +18,7 @@ import logoBlack from "~/assets/logo_black.svg";
 import logoWhite from "~/assets/logo_white.svg";
 
 const { isLoggedIn, logout } = useAuth();
-const isAdmin = ref(true); //isLoggedIn;
+const isAdmin = isLoggedIn;
 const headerRef = ref(null);
 
 const { t } = useI18n();
