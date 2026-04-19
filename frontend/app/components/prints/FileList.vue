@@ -22,7 +22,7 @@ interface Props {
   category: string;
   files: PrintItemView[];
 }
-const props = defineProps<Props>();
+defineProps<Props>();
 const { t } = useI18n();
 
 // file logic
@@ -30,22 +30,10 @@ const emit = defineEmits<{
   (e: "delete", file: PrintItemView): void;
 }>();
 
-// pagination
-const ITEMS_PER_PAGE = 10;
-const currentPage = ref(1);
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(props.files.length / ITEMS_PER_PAGE)),
-);
-
-const visibleFiles = computed(() => {
-  const start = (currentPage.value - 1) * ITEMS_PER_PAGE;
-  return props.files.slice(start, start + ITEMS_PER_PAGE);
-});
-
 // constants
 const list = computed(() =>
   totalPages.value > 1 ? { minHeight: `${ITEMS_PER_PAGE * 63}px` } : {},
-); // 62 is height of one row (approximately)
+); // 63 is height of one row (approximately)
 </script>
 
 <template>
@@ -57,7 +45,7 @@ const list = computed(() =>
       :style="list"
     >
       <PrintsFileListItem
-        v-for="file in visibleFiles"
+        v-for="file in files"
         :key="file.id"
         :file="file"
         :category="category"
