@@ -74,7 +74,6 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
-    "sortLabel": "Sort",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
@@ -184,13 +183,28 @@
     "protected": "Protected"
   },
   "prints": {
+    "types": {
+      "all": "All",
+      "affiche": "Poster",
+      "brochure": "Brochure",
+      "drukwerk": "Print",
+      "programma": "Program"
+    },
+    "title": "Prints",
+    "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
     "files": "Files",
     "noFilesCat": "This category doesn't contain any files.",
     "noFiles": "No files available.",
     "showMore": "Show more",
     "remaining": "remaining",
     "delete": "Delete",
-    "download": "Download"
+    "download": "Download",
+    "loading": "Loading...",
+    "retry": "Try again",
+    "noPrints": "No prints",
+    "pagination": "Pagination",
+    "page_label": "Page",
+    "of_pages": "of {total}"
   },
   "login": {
     "username": "Username",

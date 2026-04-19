@@ -184,13 +184,28 @@
     "protected": "Beveiligd"
   },
   "prints": {
+    "types": {
+      "all": "Alles",
+      "affiche": "Affiche",
+      "brochure": "Brochure",
+      "drukwerk": "Drukwerk",
+      "programma": "Programma"
+    },
+    "title": "Drukwerk",
+    "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
     "noFiles": "Geen bestanden beschikbaar.",
     "showMore": "Meer tonen",
     "remaining": "resterend",
     "delete": "Verwijder",
-    "download": "Download"
+    "download": "Download",
+    "loading": "Laden...",
+    "retry": "Opnieuw proberen",
+    "noPrints": "Geen drukwerk",
+    "pagination": "Paginering",
+    "page_label": "Pagina",
+    "of_pages": "van {total}"
   },
   "login": {
     "username": "Gebruikersnaam",
