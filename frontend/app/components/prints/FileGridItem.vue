@@ -51,7 +51,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
             'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground',
           ]"
         >
-          {{ t(`prints.types.${category}`) }}
+          {{ category }}
         </span>
         <span
           v-if="file.created_at"

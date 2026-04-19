@@ -47,9 +47,7 @@ const grid = computed(() =>
 <template>
   <!-- Header -->
   <div class="flex items-center gap-3 mb-4">
-    <span class="text-[20px] font-bold uppercase shrink-0">{{
-      t(`prints.types.${category}`)
-    }}</span>
+    <span class="text-[20px] font-bold uppercase shrink-0">{{ category }}</span>
     <span class="flex-1 h-px bg-border" />
     <span class="text-[11px] text-muted-foreground shrink-0"
       >{{ files.length }} {{ t("prints.files") }}</span
