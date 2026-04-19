@@ -60,6 +60,21 @@ describe("BaseInput", () => {
     expect(w.find("input").attributes("required")).toBeUndefined();
   });
 
+  it("sets minlength when minLength prop is provided", () => {
+    const w = mount(BaseInput, {
+      props: {
+        minLength: 8,
+      },
+    });
+
+    expect(w.find("input").attributes("minlength")).toBe("8");
+  });
+
+  it("does not set minlength when minLength prop is not provided", () => {
+    const w = mount(BaseInput);
+    expect(w.find("input").attributes("minlength")).toBeUndefined();
+  });
+
   it("shows password toggle only when type is password", async () => {
     const w = mount(BaseInput, {
       props: {

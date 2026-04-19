@@ -25,6 +25,7 @@ interface Props {
   type?: "text" | "number" | "password"; // input accepts common input variants
   id?: string;
   required?: boolean; // adds a "*" if required
+  minLength?: number; // optional native minlength validation
 }
 const props = withDefaults(defineProps<Props>(), {
   type: "text",
@@ -58,6 +59,7 @@ const inputType = computed(() => {
         :placeholder="placeholder"
         v-model="model"
         :required="required"
+        :minlength="minLength"
         class="px-4 bg-muted border border-border h-12 font-bold text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground placeholder:opacity-100 dark:placeholder:opacity-90"
         :class="props.type === 'password' ? 'pr-12' : ''"
       />

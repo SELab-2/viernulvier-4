@@ -62,6 +62,7 @@ const fields = computed<FormField[]>(() => [
       label: t("accounts.username"),
       placeholder: t("accounts.username_placeholder"),
       required: true,
+      minLength: 3, // enforce minimum length for better UX, can be adjusted as needed
     },
   },
   {
@@ -72,6 +73,7 @@ const fields = computed<FormField[]>(() => [
       type: "password",
       placeholder: t("accounts.password_placeholder"),
       required: true,
+      minLength: 8, // enforce minimum length for better security, can be adjusted as needed
     },
   },
   {
@@ -82,6 +84,7 @@ const fields = computed<FormField[]>(() => [
       type: "password",
       placeholder: t("accounts.confirm_password_placeholder"),
       required: true,
+      minLength: 8, // enforce minimum length for better security, can be adjusted as needed
     },
   },
   /*

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import { nextTick } from "vue";
 import { createI18n } from "vue-i18n";
@@ -42,6 +42,10 @@ const i18n = createI18n({
 });
 
 describe("AccountForm", () => {
+  beforeEach(() => {
+    i18n.global.locale.value = "en";
+  });
+
   it("passes translated fields to BaseForm", () => {
     const wrapper = mount(AccountForm, {
       global: {
