@@ -150,7 +150,7 @@ onMounted(loadPage);
       <FileGrid
         :category="activeFilter"
         :files="prints"
-        :total-files="totalItems"
+        :total-pages="totalPages"
       />
 
       <!-- Pagination -->
