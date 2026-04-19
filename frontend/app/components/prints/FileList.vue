@@ -21,8 +21,9 @@ import type { PrintItemView } from "@repo/common";
 interface Props {
   category: string;
   files: PrintItemView[];
+  totalPages: number;
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 const { t } = useI18n();
 
 // file logic
@@ -32,7 +33,7 @@ const emit = defineEmits<{
 
 // constants
 const list = computed(() =>
-  totalPages.value > 1 ? { minHeight: `${ITEMS_PER_PAGE * 63}px` } : {},
+  props.totalPages > 1 ? { minHeight: `${props.files.length * 63}px` } : {},
 ); // 63 is height of one row (approximately)
 </script>
 

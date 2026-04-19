@@ -1,28 +1,23 @@
 <script setup lang="ts">
+import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
-import type { PrintType, PrintItemView, PaginatedResponse } from "@repo/common";
-import { PrintTypeValues } from "@repo/common";
-import FileList from "../../../components/prints/FileList.vue";
+import { usePrintView } from "../../../composables/media/usePrintView";
 import PrintsToolbar from "../../../components/prints/PrintsToolbar.vue";
-import { ref } from "vue";
-
+import FileList from "../../../components/prints/FileList.vue";
 const { locale } = useI18n();
 const { getAll } = usePrintApi();
+const {
+  searchQuery,
+  activeFilter,
+  currentPage,
+  totalItems,
+  totalPages,
+  loading,
+  fetchError,
+} = usePrintView();
 
 const prints = ref<PrintItemView[]>([]);
-
-//  Pagination
-const currentPage = ref(0);
-const activeFilter = ref<PrintType>(PrintTypeValues[0]);
 const LIMIT = 15;
-
-const totalItems = ref(0);
-const totalPages = ref(1);
-
-const loading = ref(true);
-const fetchError = ref<Error | null>(null);
-
-const searchQuery = ref("");
 
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
@@ -33,6 +28,8 @@ function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
 }
 
 async function loadPage() {
+  loading.value = true;
+  fetchError.value = null;
   try {
     const raw = await getAll({
       paginationFilters: {
@@ -79,11 +76,26 @@ onMounted(() => {
     @update:types="activeFilter = $event"
   />
   <div class="container mx-auto px-4 max-w-5xl py-6">
-    <FileList :category="activeFilter" :files="prints" />
-  </div>
-  <div class="flex items-center justify-between mt-6">
-    <PrintsPageJumper />
-    <PrintsPagination />
+    <FileList
+      :category="activeFilter"
+      :files="prints"
+      :total-pages="totalPages"
+    />
+
+    <div class="flex items-center justify-between mt-6">
+      <PrintsPageJumper
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :loading="loading"
+        @go-to-page="currentPage = $event"
+      />
+      <PrintsPagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :loading="loading"
+        @go-to-page="currentPage = $event"
+      />
+    </div>
   </div>
 </template>
 
