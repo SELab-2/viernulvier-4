@@ -81,7 +81,7 @@ async function loadPage() {
       languageFilters: { lang: locale.value as "nl" | "en" },
       printItemFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
-        type: activeFilter.value,
+        ...(activeFilter.value ? { type: activeFilter.value } : {}),
       },
     });
 
@@ -148,7 +148,7 @@ onMounted(loadPage);
       </div>
 
       <FileGrid
-        :category="activeFilter"
+        :category="activeFilter ?? t('prints.types.all')"
         :files="prints"
         :total-pages="totalPages"
       />

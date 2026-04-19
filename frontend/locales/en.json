@@ -184,6 +184,7 @@
   },
   "prints": {
     "types": {
+      "all": "All",
       "affiche": "Poster",
       "brochure": "Brochure",
       "drukwerk": "Print",
