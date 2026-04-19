@@ -6,6 +6,7 @@
  * - Localized username/password field definitions
  * - BaseForm integration with optional initial values
  * - CreateAccount payload mapping on submit
+ * - Password confirmation with error handling
  *
  * Note: The role field is currently commented out because there currentky only can be one super admin
  *       but can be easily re-enabled if needed in the future.
@@ -26,6 +27,7 @@ const { t } = useI18n();
 interface AccountFormModel {
   username: string;
   password: string;
+  confirmPassword: string;
   // role: AccountRole;
 }
 
@@ -37,6 +39,7 @@ const props = withDefaults(
     initialValues: () => ({
       username: "",
       password: "",
+      confirmPassword: "",
       // role: "Admin" as AccountRole,
     }),
   },
@@ -45,6 +48,11 @@ const props = withDefaults(
 const emit = defineEmits<{
   submit: [CreateAccount];
 }>();
+
+const hasPasswordMismatch = ref(false);
+const passwordMismatchError = computed(() =>
+  hasPasswordMismatch.value ? t("accounts.password_mismatch") : null,
+);
 
 const fields = computed<FormField[]>(() => [
   {
@@ -66,6 +74,16 @@ const fields = computed<FormField[]>(() => [
       required: true,
     },
   },
+  {
+    component: "BaseInput",
+    name: "confirmPassword",
+    props: {
+      label: t("accounts.confirm_password"),
+      type: "password",
+      placeholder: t("accounts.confirm_password_placeholder"),
+      required: true,
+    },
+  },
   /*
   {
     component: "BaseSelect",
@@ -80,6 +98,15 @@ const fields = computed<FormField[]>(() => [
 ]);
 
 function handleFormSubmit(formData: Record<string, any>) {
+  if (
+    String(formData.password ?? "") !== String(formData.confirmPassword ?? "")
+  ) {
+    hasPasswordMismatch.value = true;
+    return;
+  }
+
+  hasPasswordMismatch.value = false;
+
   const payload: CreateAccount = {
     username: String(formData.username ?? ""),
     password: String(formData.password ?? ""),
@@ -91,9 +118,18 @@ function handleFormSubmit(formData: Record<string, any>) {
 </script>
 
 <template>
-  <FormBaseForm
-    :fields="fields"
-    :initial-values="props.initialValues"
-    @submit="handleFormSubmit"
-  />
+  <div>
+    <FormBaseForm
+      :fields="fields"
+      :initial-values="props.initialValues"
+      @submit="handleFormSubmit"
+    />
+
+    <p
+      v-if="passwordMismatchError"
+      class="mx-4 mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
+    >
+      {{ passwordMismatchError }}
+    </p>
+  </div>
 </template>

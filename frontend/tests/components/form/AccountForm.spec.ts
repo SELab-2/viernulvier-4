@@ -9,7 +9,7 @@ const FormBaseFormStub = {
   props: ["fields", "initialValues"],
   emits: ["submit"],
   template:
-    "<div data-testid='form-base-form-stub'><button data-testid='emit-submit' type='button' @click=\"$emit('submit', { username: 'admin-user', password: 'secret123' })\">emit</button></div>",
+    "<div data-testid='form-base-form-stub'><button data-testid='emit-submit' type='button' @click=\"$emit('submit', { username: 'admin-user', password: 'secret123', confirmPassword: 'secret123' })\">emit</button><button data-testid='emit-submit-mismatch' type='button' @click=\"$emit('submit', { username: 'admin-user', password: 'secret123', confirmPassword: 'other' })\">emit-mismatch</button></div>",
 };
 
 const i18n = createI18n({
@@ -22,6 +22,9 @@ const i18n = createI18n({
         username_placeholder: "Enter a username",
         password: "Password",
         password_placeholder: "Enter a secure password",
+        confirm_password: "Confirm password",
+        confirm_password_placeholder: "Repeat your password",
+        password_mismatch: "Passwords do not match.",
       },
     },
     nl: {
@@ -30,6 +33,9 @@ const i18n = createI18n({
         username_placeholder: "Voer een gebruikersnaam in",
         password: "Wachtwoord",
         password_placeholder: "Voer een veilig wachtwoord in",
+        confirm_password: "Bevestig wachtwoord",
+        confirm_password_placeholder: "Herhaal je wachtwoord",
+        password_mismatch: "Wachtwoorden komen niet overeen.",
       },
     },
   },
@@ -52,13 +58,16 @@ describe("AccountForm", () => {
       props?: Record<string, unknown>;
     }>;
 
-    expect(fields).toHaveLength(2);
+    expect(fields).toHaveLength(3);
     expect(fields[0]?.name).toBe("username");
     expect(fields[0]?.props?.label).toBe("Username");
     expect(fields[0]?.props?.placeholder).toBe("Enter a username");
     expect(fields[1]?.name).toBe("password");
     expect(fields[1]?.props?.label).toBe("Password");
     expect(fields[1]?.props?.placeholder).toBe("Enter a secure password");
+    expect(fields[2]?.name).toBe("confirmPassword");
+    expect(fields[2]?.props?.label).toBe("Confirm password");
+    expect(fields[2]?.props?.placeholder).toBe("Repeat your password");
   });
 
   it("updates translated labels when locale changes", async () => {
@@ -83,6 +92,8 @@ describe("AccountForm", () => {
     expect(fields[0]?.props?.placeholder).toBe("Voer een gebruikersnaam in");
     expect(fields[1]?.props?.label).toBe("Wachtwoord");
     expect(fields[1]?.props?.placeholder).toBe("Voer een veilig wachtwoord in");
+    expect(fields[2]?.props?.label).toBe("Bevestig wachtwoord");
+    expect(fields[2]?.props?.placeholder).toBe("Herhaal je wachtwoord");
   });
 
   it("maps form submit payload and re-emits CreateAccount shape", async () => {
@@ -101,5 +112,21 @@ describe("AccountForm", () => {
       username: "admin-user",
       password: "secret123",
     });
+  });
+
+  it("shows mismatch error and does not emit when passwords differ", async () => {
+    const wrapper = mount(AccountForm, {
+      global: {
+        plugins: [i18n],
+        stubs: {
+          FormBaseForm: FormBaseFormStub,
+        },
+      },
+    });
+
+    await wrapper.get("[data-testid='emit-submit-mismatch']").trigger("click");
+
+    expect(wrapper.emitted("submit")).toBeUndefined();
+    expect(wrapper.text()).toContain("Passwords do not match.");
   });
 });
