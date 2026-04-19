@@ -32,32 +32,33 @@ const emit = defineEmits<{
 }>();
 
 // constants
-const list = computed(() =>
-  props.totalPages > 1 ? { minHeight: `${props.files.length * 63}px` } : {},
-); // 63 is height of one row (approximately)
+const list = computed(
+  () =>
+    props.totalPages > 1
+      ? "rounded-lg border border-border overflow-hidden min-h-[945px]" // 63 is height of one row (approximately), then * 15
+      : "rounded-lg border border-border overflow-hidden min-h-[315px]", // min 5 rows so the footer doesn't jump
+);
 </script>
 
 <template>
   <div>
     <!-- List -->
-    <div
-      v-if="files.length"
-      class="rounded-lg border border-border overflow-hidden"
-      :style="list"
-    >
-      <PrintsFileListItem
-        v-for="file in files"
-        :key="file.id"
-        :file="file"
-        :category="category"
-        @delete="emit('delete', file)"
-      />
+    <div v-if="files.length">
+      <div :class="list">
+        <PrintsFileListItem
+          v-for="file in files"
+          :key="file.id"
+          :file="file"
+          :category="category"
+          @delete="emit('delete', file)"
+        />
+      </div>
     </div>
 
     <!-- Empty state -->
     <div
       v-if="!files.length"
-      class="text-center text-gray-500 dark:text-gray-400"
+      class="text-center text-gray-500 dark:text-gray-400 min-h-[315px]"
     >
       {{ t("prints.noFiles") }}
     </div>
