@@ -13,23 +13,30 @@ Uses:
 -->
 <script setup lang="ts">
 import { ref } from "vue";
-import { usePrintView } from "../../composables/media/usePrintView";
-
-const { currentPage, totalPages, loading } = usePrintView();
 const { t } = useI18n();
 
 const jumpInput = ref("");
+
+const props = defineProps<{
+  currentPage: number;
+  totalPages: number;
+  loading: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: "go-to-page", page: number): void;
+}>();
 
 function goToPage(page: number) {
   // Prevent invalid or unnecessary navigation
   if (
     page < 0 ||
-    page >= totalPages.value ||
-    page === currentPage.value ||
-    loading.value
+    page >= props.totalPages ||
+    page === props.currentPage ||
+    props.loading
   )
     return;
-  currentPage.value = page;
+  emit("go-to-page", page);
   // Scroll to top after page change
   window.scrollTo({ top: 0, behavior: "smooth" });
 }

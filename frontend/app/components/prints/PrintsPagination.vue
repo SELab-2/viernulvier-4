@@ -15,19 +15,26 @@ Uses:
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
-import { usePrintView } from "../../composables/media/usePrintView";
-const { currentPage, totalPages, loading } = usePrintView();
+const props = defineProps<{
+  currentPage: number;
+  totalPages: number;
+  loading: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: "go-to-page", page: number): void;
+}>();
 
 function goToPage(page: number) {
   // Prevent invalid or unnecessary navigation
   if (
     page < 0 ||
-    page > totalPages.value ||
-    page === currentPage.value ||
-    loading.value
+    page > props.totalPages ||
+    page === props.currentPage ||
+    props.loading
   )
     return;
-  currentPage.value = page;
+  emit("go-to-page", page);
   // Scroll to top after page change
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -39,7 +46,7 @@ const chevronButton =
 
 <template>
   <nav
-    v-if="totalPages > 1"
+    v-if="props.totalPages > 1"
     class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
     :aria-label="t('prints.pagination')"
   >
