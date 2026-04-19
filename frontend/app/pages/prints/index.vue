@@ -155,8 +155,18 @@ onMounted(loadPage);
 
       <!-- Pagination -->
       <div class="flex items-center justify-between mt-6">
-        <PrintsPageJumper />
-        <PrintsPagination />
+        <PrintsPageJumper
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          :loading="loading"
+          @go-to-page="currentPage = $event"
+        />
+        <PrintsPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          :loading="loading"
+          @go-to-page="currentPage = $event"
+        />
       </div>
     </div>
   </div>
