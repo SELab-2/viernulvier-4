@@ -16,7 +16,6 @@
  * ]
  */
 
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import type { PrintItemView } from "@repo/common";
 
 interface Props {
@@ -43,17 +42,10 @@ const visibleFiles = computed(() => {
   return props.files.slice(start, start + ITEMS_PER_PAGE);
 });
 
-function goToPage(page: number) {
-  if (page < 1 || page > totalPages.value || page === currentPage.value) return;
-  currentPage.value = page;
-}
-
 // constants
 const list = computed(() =>
   totalPages.value > 1 ? { minHeight: `${ITEMS_PER_PAGE * 63}px` } : {},
 ); // 62 is height of one row (approximately)
-const chevronButton =
-  "w-9 h-9 flex items-center justify-center rounded border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors disabled:opacity-0 disabled:cursor-default";
 </script>
 
 <template>
@@ -71,34 +63,6 @@ const chevronButton =
         :category="category"
         @delete="emit('delete', file)"
       />
-    </div>
-
-    <!-- Pagination -->
-    <div
-      v-if="totalPages > 1"
-      class="flex items-center justify-center gap-2 mt-6 h-9"
-    >
-      <button
-        :class="chevronButton"
-        :disabled="currentPage === 1"
-        @click="goToPage(currentPage - 1)"
-      >
-        <ChevronLeft :size="16" />
-      </button>
-
-      <span
-        class="text-[11px] font-bold uppercase tracking-widest text-muted-foreground px-2"
-      >
-        {{ currentPage }} / {{ totalPages }}
-      </span>
-
-      <button
-        :class="chevronButton"
-        :disabled="currentPage === totalPages"
-        @click="goToPage(currentPage + 1)"
-      >
-        <ChevronRight :size="16" />
-      </button>
     </div>
 
     <!-- Empty state -->

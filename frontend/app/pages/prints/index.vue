@@ -31,8 +31,6 @@ const {
   fetchError,
 } = usePrintView();
 
-// Filters
-
 // Responsive columns
 const prints = ref<PrintItemView[]>([]);
 const ROWS_PER_PAGE = 4;
