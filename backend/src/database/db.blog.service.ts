@@ -86,6 +86,8 @@ export class BlogDatabaseService {
     if (blogFilters.before) {
       conditions.push(
         // NOTE: We add + 1 day here for performance and include reasons.
+        // Adding 1 day is a more performant than casting the original column to a
+        // date.
         `created_at < ${param(blogFilters.before)}::date + interval '1 day'`,
       );
     }
