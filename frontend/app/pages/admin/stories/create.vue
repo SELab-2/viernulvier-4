@@ -1,14 +1,18 @@
 <!--
   pages/admin/stories/create.vue
-  =================================
-  Two-step create flow on a single page:
 
-  Step 1 — Fill in the bilingual form and click "Create story".
-           The blog is saved via POST /blogs and we receive the new ID.
+  Two-step story creation flow:
 
-  Step 2 — The form is replaced by AdminBlogsImageSection so the user
-           can immediately upload a header image without navigating away.
-           "← Edit content" goes to the edit page; "Finish" goes to the list.
+  Step 1 — Fill in the bilingual form and click "Next".
+           The blog is created via POST /blogs; we receive the new ID.
+
+  Step 2 — Upload header image crops via AdminBlogsImageSection.
+           "← Edit content" links back to the edit page.
+           "Finish" returns to the story list.
+
+  A live "Site Preview" panel (AdminBlogsPreview) sits alongside the form in
+  Step 1 so editors can see roughly how the story will appear on the public
+  site before saving.
 -->
 <script setup lang="ts">
 import type { CreateBlog } from "@repo/common";
@@ -23,6 +27,15 @@ const { t } = useI18n();
 const saving = ref(false);
 const error = ref<string | null>(null);
 const createdBlogId = ref<number | null>(null);
+
+// Live preview data — kept in sync with the form via v-model on the child form.
+const previewData = ref<{
+  titel: { nl: string; en: string };
+  description: { nl: string; en: string };
+}>({
+  titel: { nl: "", en: "" },
+  description: { nl: "", en: "" },
+});
 
 async function handleSubmit(data: CreateBlog) {
   saving.value = true;
@@ -44,7 +57,7 @@ async function handleSubmit(data: CreateBlog) {
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-3xl mx-auto px-6 py-10 space-y-6">
+    <div class="max-w-6xl mx-auto px-6 py-10 space-y-6">
       <!-- Breadcrumb -->
       <NuxtLink
         :to="ROUTES.admin.stories.base"
@@ -61,7 +74,7 @@ async function handleSubmit(data: CreateBlog) {
         <template v-else>{{ t("admin.blogs.image.multiTitle") }}</template>
       </h1>
 
-      <!-- Step indicator -->
+      <!-- Step indicator: "Content" → "Images" -->
       <div class="flex items-center gap-3">
         <div
           class="flex items-center gap-2 font-brand font-black text-[10px] uppercase tracking-widest"
@@ -108,16 +121,34 @@ async function handleSubmit(data: CreateBlog) {
         {{ error }}
       </div>
 
-      <!-- ── Step 1: form ──────────────────────────────────────────── -->
-      <AdminBlogsForm
+      <!-- ── Step 1: form + live preview side by side ─────────────────── -->
+      <div
         v-if="!createdBlogId"
-        mode="create"
-        :loading="saving"
-        @submit="handleSubmit"
-        @cancel="navigateTo(ROUTES.admin.stories.base)"
-      />
+        class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start"
+      >
+        <!--
+          Left column: the bilingual form.
+          The form emits "preview-update" so we can keep the right column in
+          sync without waiting for the user to submit.
+        -->
+        <AdminBlogsForm
+          mode="create"
+          :loading="saving"
+          @submit="handleSubmit"
+          @cancel="navigateTo(ROUTES.admin.stories.base)"
+          @preview-update="(d) => (previewData = d)"
+        />
 
-      <!-- ── Step 2: image upload ──────────────────────────────────── -->
+        <!--
+          Right column: live site preview.
+          Shows roughly how the story will look on the public stories page.
+        -->
+        <div class="hidden xl:block sticky top-24">
+          <AdminBlogsPreview :data="previewData" />
+        </div>
+      </div>
+
+      <!-- ── Step 2: image upload ──────────────────────────────────────── -->
       <template v-else>
         <p class="text-sm text-muted-foreground leading-relaxed">
           {{ t("admin.blogs.image.createSuccessHint") }}
@@ -127,7 +158,6 @@ async function handleSubmit(data: CreateBlog) {
 
         <!-- Actions -->
         <div class="flex items-center gap-3 pt-2">
-          <!-- Back to content — goes to edit page so they can update the text -->
           <NuxtLink
             :to="ROUTES.admin.stories.edit(createdBlogId)"
             class="btn-outline px-6 shrink-0 flex items-center gap-2"
@@ -135,7 +165,6 @@ async function handleSubmit(data: CreateBlog) {
             ← {{ t("admin.blogs.image.backToForm") }}
           </NuxtLink>
 
-          <!-- Finish — back to stories list -->
           <button
             class="btn-outline flex-1 justify-center"
             @click="navigateTo(ROUTES.admin.stories.base)"

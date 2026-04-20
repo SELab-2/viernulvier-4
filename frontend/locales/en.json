@@ -207,6 +207,7 @@
       "loadError": "Could not load the story. Please try again.",
       "notFound": "Story not found",
       "createBtn": "Create Story",
+      "nextBtn": "Next — Add images →",
       "saveBtn": "Save Changes",
       "createError": "Could not create the story. Please try again.",
       "saveError": "Could not save the changes. Please try again.",
@@ -230,6 +231,12 @@
       "validation": {
         "titleNlRequired": "A Dutch title is required.",
         "descriptionNlRequired": "A Dutch description is required."
+      },
+      "preview": {
+        "label": "Site preview",
+        "badge": "Live preview",
+        "placeholderTitle": "Your title will appear here",
+        "bodyPlaceholder": "Start writing to see a preview of your story…"
       },
       "image": {
         "title": "Header image",

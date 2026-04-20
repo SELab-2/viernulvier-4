@@ -207,6 +207,7 @@
       "loadError": "Het verhaal kon niet worden geladen. Probeer het opnieuw.",
       "notFound": "Verhaal niet gevonden",
       "createBtn": "Verhaal Aanmaken",
+      "nextBtn": "Volgende — Afbeeldingen toevoegen →",
       "saveBtn": "Wijzigingen Opslaan",
       "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
       "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
@@ -230,6 +231,12 @@
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
         "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
+      },
+      "preview": {
+        "label": "Sitevoorbeeld",
+        "badge": "Live voorbeeld",
+        "placeholderTitle": "Jouw titel verschijnt hier",
+        "bodyPlaceholder": "Begin te schrijven om een voorbeeld van je verhaal te zien…"
       },
       "image": {
         "title": "Headerafbeelding",

@@ -1,5 +1,13 @@
 <!--
   components/admin/blogs/Form.vue
+
+  Bilingual story form used on both the create and edit pages.
+
+  Changes vs. original:
+  - In "create" mode the submit button now reads "Next" (→ step 2 images)
+    instead of "Create Story", making the two-step flow more obvious.
+  - Emits a "preview-update" event on every field change so the parent page
+    can show a live site preview alongside the form.
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -25,6 +33,11 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: "submit", data: CreateBlog | ModifyBlog): void;
   (e: "cancel"): void;
+  /** Fired on every keystroke so the parent can render a live preview. */
+  (
+    e: "preview-update",
+    data: { titel: LocalizedPair; description: LocalizedPair },
+  ): void;
 }>();
 
 const { t } = useI18n();
@@ -34,6 +47,7 @@ const form = reactive<{ titel: LocalizedPair; description: LocalizedPair }>({
   description: { nl: "", en: "" },
 });
 
+// Seed form when editing an existing story
 watch(
   () => props.initialData,
   (data) => {
@@ -44,6 +58,18 @@ watch(
     form.description.en = data.description?.en ?? "";
   },
   { immediate: true, deep: true },
+);
+
+// Emit preview on every change so the parent can render a live preview
+watch(
+  form,
+  (val) => {
+    emit("preview-update", {
+      titel: { ...val.titel },
+      description: { ...val.description },
+    });
+  },
+  { deep: true },
 );
 
 const isValid = computed(
@@ -77,6 +103,7 @@ const sectionHeadingClass =
 
 <template>
   <form class="space-y-5" @submit.prevent="handleSubmit">
+    <!-- ── Title section ─────────────────────────────────────────────── -->
     <section :class="sectionClass">
       <h2 :class="sectionHeadingClass">{{ t("admin.blogs.sectionTitle") }}</h2>
 
@@ -107,6 +134,7 @@ const sectionHeadingClass =
       </div>
     </section>
 
+    <!-- ── Content / description section ─────────────────────────────── -->
     <section :class="sectionClass">
       <h2 :class="sectionHeadingClass">
         {{ t("admin.blogs.sectionContent") }}
@@ -135,6 +163,7 @@ const sectionHeadingClass =
       </div>
     </section>
 
+    <!-- ── Actions ───────────────────────────────────────────────────── -->
     <div class="flex items-center gap-3">
       <button
         type="submit"
@@ -142,8 +171,13 @@ const sectionHeadingClass =
         class="btn-outline flex-1 justify-center disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <span v-if="loading">{{ t("admin.saving") }}</span>
+        <!--
+          In create mode the button reads "Next" to communicate that there is
+          a second step (image upload) after the form is saved.
+          In edit mode it remains the normal "Save Changes" wording.
+        -->
         <span v-else-if="mode === 'create'">{{
-          t("admin.blogs.createBtn")
+          t("admin.blogs.nextBtn")
         }}</span>
         <span v-else>{{ t("admin.blogs.saveBtn") }}</span>
       </button>
