@@ -151,7 +151,9 @@
     "stories": "Stories",
     "credits": "Credits",
     "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details"
+    "hidePriceDetails": "hide details",
+    "doors": "doors",
+    "break": "break"
   },
   "general": {
     "back": "Back",

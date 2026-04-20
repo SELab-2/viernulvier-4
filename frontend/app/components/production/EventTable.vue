@@ -144,46 +144,42 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                   {{ formatDate(event.starttime) }}
                 </p>
 
-                <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                <div class="mt-1 space-y-1">
                   <p
-                    class="flex items-center gap-1 text-[10px] font-bold text-foreground"
+                    class="flex items-center gap-1 text-[11px] font-bold text-foreground"
                   >
-                    <Clock :size="10" class="shrink-0" />
-
-                    {{ formatTime(event.starttime) }}
-
-                    <template
-                      v-if="
-                        event.endtime &&
-                        formatTime(event.starttime) !==
-                          formatTime(event.endtime)
-                      "
-                    >
-                      - {{ formatTime(event.endtime) }}
-                    </template>
+                    <Clock :size="11" class="shrink-0" />
+                    <span>
+                      {{ formatTime(event.starttime) }}
+                      <template
+                        v-if="
+                          event.endtime &&
+                          formatTime(event.starttime) !==
+                            formatTime(event.endtime)
+                        "
+                      >
+                        - {{ formatTime(event.endtime) }}
+                      </template>
+                    </span>
                   </p>
 
-                  <p
-                    v-if="event.doors_at"
-                    class="flex items-center gap-1 text-[10px] text-muted-foreground opacity-80"
-                  >
-                    <span
-                      class="font-black uppercase text-[8px] tracking-tighter"
-                      >Doors:</span
+                  <div class="flex flex-wrap gap-3">
+                    <p
+                      v-if="event.doors_at"
+                      class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
-                    {{ formatTime(event.doors_at) }}
-                  </p>
+                      {{ t("production.doors") }}:
+                      {{ formatTime(event.doors_at) }}
+                    </p>
 
-                  <p
-                    v-if="event.intermission_at"
-                    class="flex items-center gap-1 text-[10px] text-muted-foreground opacity-80"
-                  >
-                    <span
-                      class="font-black uppercase text-[8px] tracking-tighter"
-                      >Break:</span
+                    <p
+                      v-if="event.intermission_at"
+                      class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
-                    {{ formatTime(event.intermission_at) }}
-                  </p>
+                      {{ t("production.break") }}:
+                      {{ formatTime(event.intermission_at) }}
+                    </p>
+                  </div>
                 </div>
               </td>
 

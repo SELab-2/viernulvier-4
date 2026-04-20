@@ -152,7 +152,9 @@
     "stories": "Verhalen",
     "credits": "Credits",
     "showExtraPrices": "+ {count} prijzen",
-    "hidePriceDetails": "verberg details"
+    "hidePriceDetails": "verberg details",
+    "doors": "deuren open",
+    "break": "pauze"
   },
   "general": {
     "back": "Terug",
