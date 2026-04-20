@@ -197,6 +197,11 @@
       "drukwerk": "Drukwerk",
       "programma": "Programma"
     },
+    "form": {
+      "title": "Titel",
+      "type": "Printtype",
+      "file": "Bestand"
+    },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
     "files": "Bestanden",
@@ -211,7 +216,8 @@
     "noPrints": "Geen drukwerk",
     "pagination": "Paginering",
     "page_label": "Pagina",
-    "of_pages": "van {total}"
+    "of_pages": "van {total}",
+    "add": "voeg toe"
   },
   "login": {
     "username": "Gebruikersnaam",

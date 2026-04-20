@@ -196,6 +196,11 @@
       "drukwerk": "Print",
       "programma": "Program"
     },
+    "form": {
+      "title": "Title",
+      "type": "Print type",
+      "file": "File"
+    },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
     "files": "Files",
@@ -210,7 +215,8 @@
     "noPrints": "No prints",
     "pagination": "Pagination",
     "page_label": "Page",
-    "of_pages": "of {total}"
+    "of_pages": "of {total}",
+    "add": "add"
   },
   "login": {
     "username": "Username",

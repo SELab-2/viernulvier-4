@@ -4,7 +4,8 @@ import { usePrintApi } from "../../../composables/media/usePrintApi";
 import { usePrintView } from "../../../composables/media/usePrintView";
 import PrintsToolbar from "../../../components/prints/PrintsToolbar.vue";
 import FileList from "../../../components/prints/FileList.vue";
-const { locale } = useI18n();
+
+const { t, locale } = useI18n();
 const { getAll } = usePrintApi();
 const {
   searchQuery,
@@ -71,10 +72,22 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- Add print button -->
+  <div class="container mx-auto px-4 max-w-5xl py-3 flex justify-end">
+    <NuxtLink
+      :to="ROUTES.admin.prints.create"
+      class="btn-outline h-8 gap-2 flex items-center text-[11px] font-black uppercase tracking-widest"
+    >
+      + {{ t("prints.add") }}
+    </NuxtLink>
+  </div>
+
   <PrintsToolbar
     @update:search="searchQuery = $event"
     @update:types="activeFilter = $event"
   />
+
+  <!-- File list -->
   <div class="container mx-auto px-4 max-w-5xl py-6">
     <FileList
       :category="activeFilter"
