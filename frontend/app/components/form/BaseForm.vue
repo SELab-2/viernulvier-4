@@ -82,7 +82,7 @@ function collectMultiSelectRef(el: any) {
 <template>
   <form
     @submit.prevent="submit"
-    class="m-4 border border-border rounded-lg bg-background overflow-hidden"
+    class="m-0 border border-border rounded-lg bg-background overflow-hidden"
   >
     <!-- All components of the form under each other -->
     <component

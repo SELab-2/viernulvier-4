@@ -111,18 +111,14 @@ onMounted(async () => {
         @delete="handleDeleteAccount"
       />
 
-      <section
-        class="rounded-xl border border-card-border bg-card p-4 shadow-sm sm:p-5"
-      >
-        <h2 class="mb-3 text-lg font-semibold text-card-foreground">
-          Create account
-        </h2>
-        <AdminAccountForm @submit="handleCreateAccount" />
+      <h2 class="mb-3 text-lg font-semibold text-card-foreground">
+        Create account
+      </h2>
+      <AdminAccountForm @submit="handleCreateAccount" />
 
-        <p v-if="isSubmitting" class="mt-3 text-sm text-muted-foreground">
-          Creating account...
-        </p>
-      </section>
+      <p v-if="isSubmitting" class="mt-3 text-sm text-muted-foreground">
+        Creating account...
+      </p>
     </div>
   </section>
 </template>
