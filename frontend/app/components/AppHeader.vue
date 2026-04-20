@@ -24,7 +24,7 @@ const route = useRoute();
 
 // ── Admin ────────────────────────────────────────────────────────────────
 
-const { isLoggedIn, logout } = useAuth();
+const { isLoggedIn, isSuperAdmin, logout } = useAuth();
 
 const isAtAdminPath = computed(() => route.path.startsWith("/admin"));
 const showAdminInterface = computed(
@@ -162,7 +162,6 @@ const adminNavItems = [
   { label: "events", route: ROUTES.admin.events.base },
   { label: "stories", route: ROUTES.admin.stories.base },
   { label: "prints", route: ROUTES.admin.prints.base },
-  { label: "accounts", route: ROUTES.admin.accounts.base },
 ];
 </script>
 
@@ -248,10 +247,10 @@ const adminNavItems = [
 
     <nav
       v-if="showAdminInterface"
-      class="hidden lg:flex border-t-2 border-[var(--foreground)] w-full bg-[var(--background)]"
+      class="hidden lg:flex border-t-3 border-[var(--foreground)] w-full bg-[var(--background)]"
     >
       <div
-        class="mx-auto flex w-full max-w-[1400px] justify-between px-6 lg:px-12 2xl:px-[120px]"
+        class="mx-auto flex w-full max-w-[1400px] justify-between items-center px-12 lg:px-20 2xl:px-32"
       >
         <NuxtLink
           v-for="item in adminNavItems"
@@ -260,6 +259,14 @@ const adminNavItems = [
           class="admin-nav-item"
         >
           {{ t("nav." + item.label) }}
+        </NuxtLink>
+
+        <NuxtLink
+          v-if="isSuperAdmin"
+          :to="ROUTES.admin.accounts.base"
+          class="admin-nav-item"
+        >
+          {{ t("nav.accounts") }}
         </NuxtLink>
       </div>
     </nav>
@@ -279,6 +286,15 @@ const adminNavItems = [
             @click="isMenuOpen = false"
           >
             {{ item.label }}
+          </NuxtLink>
+
+          <NuxtLink
+            v-if="isSuperAdmin"
+            :to="ROUTES.admin.accounts.base"
+            class="nav-item text-lg"
+            @click="isMenuOpen = false"
+          >
+            {{ t("nav.accounts") }}
           </NuxtLink>
         </template>
         <template v-else>
