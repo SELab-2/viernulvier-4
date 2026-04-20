@@ -219,5 +219,8 @@
     "signIn": "Inloggen",
     "signingIn": "Inloggen...",
     "error": "Er is iets misgegaan."
+  },
+  "admin-productions": {
+    "header_title": "Producties"
   }
 }

@@ -11,6 +11,8 @@ Responsible for:
 Uses:
 - useArchiveView: shared archive state (filters, pagination, view mode)
 - useProductionApi: API communication
+TODO: The pagination logic is not what I want to be defined here and should be changed in the future.
+      It should be defined elsewhere to be more clear and to prevent bugs that are hard to find.
 -->
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from "vue";
@@ -22,6 +24,19 @@ import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
+
+const props = withDefaults(
+  defineProps<{
+    isAdmin?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+  },
+);
+
+const baseRoute = computed(() =>
+  props.isAdmin ? ROUTES.admin.productions.base : ROUTES.productions.base,
+);
 
 const route = useRoute();
 const router = useRouter();
@@ -111,6 +126,9 @@ onUnmounted(() => {
 });
 
 onMounted(() => {
+  if (props.isAdmin) {
+    viewMode.value = "list";
+  }
   const pageFromUrl = parseInt(route.query.page as string) || 1;
   const safePage = Math.max(1, pageFromUrl);
   currentPage.value = safePage;
@@ -120,7 +138,7 @@ onMounted(() => {
 watch(
   () => route.query.page,
   (newPage) => {
-    if (route.path !== ROUTES.productions.base) return;
+    if (route.path !== baseRoute.value) return;
 
     const pageNum = parseInt(newPage as string) || 1;
 
@@ -135,7 +153,7 @@ watch(
 
 // Reload when pagination changes
 watch(currentPage, (newPage) => {
-  if (route.path !== ROUTES.productions.base) return;
+  if (route.path !== baseRoute.value) return;
 
   if (newPage.toString() !== route.query.page) {
     router.push({
@@ -220,13 +238,16 @@ watch(searchQuery, () => {
       >
         <component
           :is="
-            viewMode === 'grid'
-              ? ProductionGridViewItem
-              : ProductionListViewItem
+            props.isAdmin
+              ? ProductionListViewItem
+              : viewMode === 'grid'
+                ? ProductionGridViewItem
+                : ProductionListViewItem
           "
           v-for="production in productions"
           :key="production.id"
           :productionView="production"
+          :is-admin="props.isAdmin"
         />
       </div>
 

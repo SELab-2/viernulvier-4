@@ -218,5 +218,8 @@
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "error": "Something went wrong."
+  },
+  "admin-productions": {
+    "header_title": "Productions"
   }
 }

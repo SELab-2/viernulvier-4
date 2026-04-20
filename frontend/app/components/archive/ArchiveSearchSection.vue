@@ -13,16 +13,32 @@ Uses:
 - useProductionApi / useEventApi: to derive oldest available date
 - Calendar: date range filtering UI
 - TagFilter: tag selection UI
+
+Modes:
+- Public:
+  search + filters + grid/list toggle
+
+- Admin:
+  search + filters only
+  forced list view
 -->
 <script setup lang="ts">
-import { LayoutGrid, List } from "lucide-vue-next";
+import { LayoutGrid, List, X } from "lucide-vue-next";
 import { useArchiveView } from "../../composables/useArchiveView";
 import Calendar from "~/components/DefaultCalendar.vue";
 import { useProductionApi } from "~/composables/useProductionApi";
 import { useEventApi } from "~/composables/useEventApi";
 import type { ProductionView, Event } from "@repo/common";
 import TagFilter from "./TagFilter.vue";
-import { X } from "lucide-vue-next";
+
+const props = withDefaults(
+  defineProps<{
+    isAdmin?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+  },
+);
 
 const { t, locale } = useI18n();
 
@@ -84,12 +100,16 @@ async function fetchOldestDate() {
         .toISOString()
         .slice(0, 10);
     }
-  } catch {
-    // Non-critical: calendar still works without the oldest date
-  }
+  } catch {}
 }
 
-onMounted(fetchOldestDate);
+onMounted(() => {
+  if (props.isAdmin) {
+    viewMode.value = "list";
+  }
+
+  fetchOldestDate();
+});
 </script>
 
 <template>
@@ -125,8 +145,9 @@ onMounted(fetchOldestDate);
         </button>
       </div>
 
-      <!-- View toggle -->
+      <!-- Public only: grid/list toggle -->
       <button
+        v-if="!props.isAdmin"
         class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground bg-transparent text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
         @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'"
       >

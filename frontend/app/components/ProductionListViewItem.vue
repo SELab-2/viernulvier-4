@@ -1,20 +1,34 @@
 <!--
   This component represents a single item in the production list view.
   It displays the production's title, date range, and associated tags.
+
+  Modes:
+- Public: media display + title + artist + date range + tags
+- Admin: same as public + edit/delete buttons (no link to detail page)
 -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ProductionView, Tag, Event } from "@repo/common";
-import { useProductionApi } from "../composables/useProductionApi";
-import { useEventApi } from "../composables/useEventApi";
-import { ROUTES } from "../utils/routes";
-import { computeDateRangeFromEvents } from "../utils/formatters";
-import TagPill from "./TagPill.vue";
+import { useProductionApi } from "~/composables/useProductionApi";
+import { useEventApi } from "~/composables/useEventApi";
+import { ROUTES } from "~/utils/routes";
+import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
 
-const { productionView } = defineProps<{
-  productionView: ProductionView;
+const props = withDefaults(
+  defineProps<{
+    productionView: ProductionView;
+    isAdmin?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+  },
+);
+
+const emit = defineEmits<{
+  (e: "edit", production: ProductionView): void;
+  (e: "delete", production: ProductionView): void;
 }>();
 
 const tags = ref<Tag[]>([]);
@@ -32,10 +46,10 @@ const { getMainImageCrop } = useGallery();
 const { locale } = useI18n();
 
 async function loadTags() {
-  if (!productionView?.id) return;
+  if (!props.productionView?.id) return;
 
   try {
-    const response = await getTags(productionView.id, locale.value);
+    const response = await getTags(props.productionView.id, locale.value);
     if (response.data) {
       tags.value = (response.data as Tag[]).filter((tag) => {
         const currentTag =
@@ -53,11 +67,11 @@ async function loadTags() {
 }
 
 async function loadEvents() {
-  if (!productionView?.id) return;
+  if (!props.productionView?.id) return;
 
   try {
     const resp = await getAllEvents({
-      eventFilters: { production_id: productionView.id as any },
+      eventFilters: { production_id: props.productionView.id as any },
     });
     if (resp.data && Array.isArray((resp.data as any).objects)) {
       events.value = (resp.data as any).objects as Event[];
@@ -70,8 +84,8 @@ async function loadEvents() {
 }
 
 async function loadGallery() {
-  if (!productionView?.id) return;
-  gallery.value = await getMediaGallery(productionView.id, locale.value);
+  if (!props.productionView?.id) return;
+  gallery.value = await getMediaGallery(props.productionView.id, locale.value);
 }
 
 // Recompute dateRangeText whenever events or locale changes
@@ -86,7 +100,7 @@ onMounted(() => {
 });
 
 watch(
-  () => productionView.id,
+  () => props.productionView.id,
   () => {
     loadEvents();
     loadTags();
@@ -99,15 +113,20 @@ watch(locale, () => loadTags());
 </script>
 
 <template>
-  <NuxtLink
-    :to="ROUTES.productions.byId(productionView.id)"
+  <component
+    :is="props.isAdmin ? 'div' : 'NuxtLink'"
+    :to="
+      !props.isAdmin
+        ? ROUTES.productions.byId(props.productionView.id)
+        : undefined
+    "
     class="group block"
   >
     <div
       class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
     >
       <MediaDisplay
-        :id="productionView.id"
+        :id="props.productionView.id"
         :src="mainCrop"
         size="md"
         :rounded="true"
@@ -121,15 +140,18 @@ watch(locale, () => loadTags());
             <h3
               class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate"
             >
-              {{ productionView.titel }}
+              {{ props.productionView.titel }}
             </h3>
 
             <!-- Artist -->
             <p
-              v-if="productionView.artist && productionView.artist !== 'N/A'"
+              v-if="
+                props.productionView.artist &&
+                props.productionView.artist !== 'N/A'
+              "
               class="text-sm text-muted-foreground leading-normal line-clamp-1"
             >
-              {{ productionView.artist }}
+              {{ props.productionView.artist }}
             </p>
 
             <p
@@ -152,6 +174,19 @@ watch(locale, () => loadTags());
               <span>{{ dateRangeText }}</span>
             </p>
           </div>
+
+          <!-- Admin buttons -->
+          <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
+            <AdminEditButton
+              label="Edit production"
+              @click.stop="emit('edit', props.productionView)"
+            />
+
+            <AdminDeleteButton
+              label="Delete production"
+              @click.stop="emit('delete', props.productionView)"
+            />
+          </div>
         </div>
 
         <!-- Tags container -->
@@ -171,7 +206,7 @@ watch(locale, () => loadTags());
         </div>
       </div>
     </div>
-  </NuxtLink>
+  </component>
 </template>
 
 <style scoped>
