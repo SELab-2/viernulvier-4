@@ -6,6 +6,7 @@
 -->
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
+import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { useGallery } from "~/composables/media/useGallery";
@@ -24,14 +25,6 @@ const mainCrop = computed(() => {
 const { title, description, formattedDate } = useBlogStory(
   computed(() => props.story),
 );
-
-/**
- * Sanitizes raw text by removing escape characters.
- */
-const cleanText = (text: string | null | undefined) => {
-  if (!text) return "";
-  return text.replace(/\\/g, "").trim();
-};
 
 const cleanDescription = computed(() => cleanText(description.value));
 

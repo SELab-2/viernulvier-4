@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ChevronLeft } from "lucide-vue-next";
 import type { BlogView } from "@repo/common";
+import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { useGallery } from "~/composables/media/useGallery";
@@ -23,8 +24,11 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
-    const res = await getById(blogId.value, locale.value as any);
-    return (res as any)?.data ?? res;
+    const res = (await getById(
+      blogId.value,
+      locale.value as "nl" | "en",
+    )) as any;
+    return (res?.data ?? res) as BlogView;
   },
   { watch: [blogId, locale] },
 );
@@ -53,19 +57,6 @@ const readingTime = computed(() => {
   const words = body.value.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 });
-
-/**
- * Sanitizes raw text by removing escape characters and
- * converting newlines to HTML line breaks.
- */
-const cleanText = (text: string | null | undefined) => {
-  if (!text) return "";
-  return text
-    .replace(/\\/g, "")
-    .trim()
-    .replace(/(\r?\n){2,}/g, "\n\n")
-    .replace(/\n/g, "<br />");
-};
 
 const cleanBody = computed(() => cleanText(body.value));
 </script>
