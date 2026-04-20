@@ -1,4 +1,4 @@
-import { UtilsDbConnection } from "./database/db.connection";
+import { ScraperDbService } from "./database/scraper.db.service";
 import { Injectable } from "@nestjs/common";
 import { Command, CommandRunner } from "nest-commander";
 import { AppLogger } from "../logger/logger.service";
@@ -11,7 +11,7 @@ import { AppLogger } from "../logger/logger.service";
 export class ResetDbCommand extends CommandRunner {
   constructor(
     private readonly logger: AppLogger,
-    private readonly dbConnection: UtilsDbConnection,
+    private readonly scraperDbService: ScraperDbService,
   ) {
     super();
   }
@@ -22,7 +22,7 @@ export class ResetDbCommand extends CommandRunner {
 
     // NOTE: Doesn't delete accounts.
     try {
-      await this.dbConnection.query(`
+      await this.scraperDbService.query(`
         TRUNCATE TABLE
           locations, event_locations, tags, production_tag, productions,
           events, event_prices, production_blogs, production_media_gallery,
@@ -33,7 +33,7 @@ export class ResetDbCommand extends CommandRunner {
         RESTART IDENTITY CASCADE;
       `);
 
-      await this.dbConnection.query(`
+      await this.scraperDbService.query(`
         INSERT INTO scraper_dates DEFAULT VALUES;
       `);
 
