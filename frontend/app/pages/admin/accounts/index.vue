@@ -79,9 +79,8 @@ onMounted(async () => {
     return;
   }
 
-  if (account.value && !account.value.superAdmin) {
-    await navigateTo(ROUTES.admin.dashboard.base);
-    return;
+  if (!account.value?.superAdmin) {
+    throw createError({ statusCode: 404, statusMessage: "Page Not Found" });
   }
 
   await loadAccounts();
