@@ -78,7 +78,7 @@ async function handleSubmit(form: Record<string, any>) {
   <div class="container mx-auto px-4 max-w-5xl py-6">
     <div class="flex items-center gap-3 mb-6">
       <NuxtLink
-        to="ROUTES.admin.prints"
+        :to="ROUTES.admin.prints.base"
         class="btn-outline h-9 flex items-center text-[11px] font-black uppercase tracking-widest"
       >
         ←
