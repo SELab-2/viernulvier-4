@@ -14,11 +14,13 @@ import type {
   LanguageQuery,
   ReplaceProduction,
   PrintItem,
+  PrintItemView,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 import type {
   DefaultGallery,
   GalleryWithItems,
+  ItemViewWithCrops,
   ItemWithCrops,
   PrintGallery,
 } from "~/utils/galleryFetcher";
@@ -148,10 +150,20 @@ export function useProductionApi() {
    * Media Galleries
    */
 
-  /** GET /productions/:productionId/media?type=default - Gets a DefaultGallery from the api. */
-  const getMediaGallery = async (
+  /** These overloads make TS happy with the types. */
+  function getMediaGallery(
     productionId: number,
-  ): Promise<GalleryWithItems<ItemWithCrops> | null> => {
+    lang: Language,
+  ): Promise<GalleryWithItems<ItemViewWithCrops> | null>;
+  function getMediaGallery(
+    productionId: number,
+  ): Promise<GalleryWithItems<ItemWithCrops> | null>;
+
+  /** GET /productions/:productionId/media?type=default - Gets a DefaultGallery from the api. */
+  async function getMediaGallery(
+    productionId: number,
+    lang?: Language,
+  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.productions.media(productionId)}?type=default`,
@@ -160,17 +172,18 @@ export function useProductionApi() {
       const gallery = response.data;
       if (!gallery) return null;
 
-      return await fetchFullGallery(gallery);
+      return await fetchFullGallery(gallery, lang);
     } catch {
       // We return null because no gallery exists.
       return null;
     }
-  };
+  }
 
   /** GET /productions/:productionId/media?type=prints - Gets a PrintGallery from the api. */
   const getPrintsGallery = async (
     productionId: number,
-  ): Promise<GalleryWithItems<PrintItem> | null> => {
+    lang?: Language,
+  ): Promise<GalleryWithItems<PrintItem | PrintItemView> | null> => {
     try {
       const response = await get<PrintGallery>(
         `${API_ROUTES.productions.media(productionId)}?type=prints`,
@@ -179,7 +192,7 @@ export function useProductionApi() {
       const gallery = response.data;
       if (!gallery) return null;
 
-      return await fetchFullGallery(gallery);
+      return await fetchFullGallery(gallery, lang);
     } catch {
       // We return null because no gallery exists.
       return null;

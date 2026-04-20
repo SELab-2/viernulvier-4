@@ -1,5 +1,14 @@
-import type { CropName, MediaCrop, PrintItem } from "@repo/common";
-import type { GalleryWithItems, ItemWithCrops } from "~/utils/galleryFetcher";
+import type {
+  CropName,
+  MediaCrop,
+  PrintItem,
+  PrintItemView,
+} from "@repo/common";
+import type {
+  GalleryWithItems,
+  ItemViewWithCrops,
+  ItemWithCrops,
+} from "~/utils/galleryFetcher";
 
 /**
  * These are composables that can be used to select images or prints.
@@ -17,14 +26,19 @@ export function useGallery() {
    * @returns The crop if it was found or null.
    */
   const getMainImageCrop = (
-    gallery: GalleryWithItems<ItemWithCrops> | null | undefined,
+    gallery:
+      | GalleryWithItems<ItemWithCrops>
+      | GalleryWithItems<ItemViewWithCrops>
+      | null
+      | undefined,
     cropName: CropName,
   ): MediaCrop | null => {
     if (!gallery || !gallery.items.length) return null;
 
     const mainItem =
-      gallery.items.find((item: ItemWithCrops) => item.position == "main") ||
-      gallery.items[0];
+      gallery.items.find(
+        (item: ItemWithCrops | ItemViewWithCrops) => item.position == "main",
+      ) || gallery.items[0];
 
     if (!mainItem?.crops) return null;
 
@@ -40,13 +54,17 @@ export function useGallery() {
    * @returns The list of crops that match.
    */
   const getCarouselImageCrops = (
-    gallery: GalleryWithItems<ItemWithCrops> | null | undefined,
+    gallery:
+      | GalleryWithItems<ItemWithCrops>
+      | GalleryWithItems<ItemViewWithCrops>
+      | null
+      | undefined,
     cropName: CropName,
   ): MediaCrop[] => {
     if (!gallery || !gallery.items.length) return [];
 
     const items = gallery.items.filter(
-      (item: ItemWithCrops) => item.position == "carousel",
+      (item: ItemWithCrops | ItemViewWithCrops) => item.position == "carousel",
     );
 
     const crops: MediaCrop[] = [];
@@ -65,8 +83,12 @@ export function useGallery() {
    * @returns A list of all print items.
    */
   const getPrints = (
-    gallery: GalleryWithItems<PrintItem> | null | undefined,
-  ): PrintItem[] => {
+    gallery:
+      | GalleryWithItems<PrintItem>
+      | GalleryWithItems<PrintItemView>
+      | null
+      | undefined,
+  ): PrintItem[] | PrintItemView[] => {
     if (!gallery || !gallery.items.length) return [];
 
     const prints = gallery.items;

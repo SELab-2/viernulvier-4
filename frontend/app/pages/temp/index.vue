@@ -1,76 +1,41 @@
 <template>
-  <div class="p-10">
-    <h1 class="text-2xl font-bold mb-6">Component Playground</h1>
-
-    <div class="grid grid-cols-4 gap-4">
-      <div v-for="(crop, index) in galleryImages" :key="index">
-        <MediaGalleryImage :crop="crop" />
-      </div>
-    </div>
+  <div class="p-8 bg-background min-h-screen">
+    <PrintsFileGrid category="Archive 2026" :files="tempFiles" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import type { PaginatedResponse, ProductionView } from "@repo/common";
-import { useGallery } from "~/composables/media/useGallery";
+import type { PrintItemView } from "@repo/common";
 
-// Assuming you have this composable from our previous setup
-const { getMainImageCrop } = useGallery();
-const { getAll, getMediaGallery } = useProductionApi();
-
-const productions = ref<ProductionView[]>([]);
-const galleries = ref<(GalleryWithItems<ItemWithCrops> | null)[]>([]);
-const totalItems = ref(0);
-const isLoading = ref(false); // Good practice to add a loading state
-
-// 1. Automatically extract the main crops whenever 'galleries' changes
-const galleryImages = computed(() => {
-  return galleries.value.map((gallery) => {
-    const crop = getMainImageCrop(gallery, "hd_ready");
-    return crop;
-  }); // Replace 'default' with your preferred crop name
-});
-
-async function loadPage(page: number) {
-  isLoading.value = true;
-  try {
-    const resp = await getAll({
-      paginationFilters: {
-        page: page - 1, // Fix: Use the passed argument, mapped to 0-based pagination
-        limit: 20,
-        descending: true,
-      },
-      languageFilters: { lang: "en" },
-    });
-
-    if (resp.data) {
-      const data = resp.data as PaginatedResponse<ProductionView>;
-      productions.value = data.objects;
-      totalItems.value = data.totalItems;
-
-      // 2. Load all galleries in parallel!
-      await loadGalleriesForProductions(data.objects);
-    }
-  } catch (err) {
-    console.error("Failed to load page:", err);
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-async function loadGalleriesForProductions(prods: ProductionView[]) {
-  // Create an array of Promises that will fetch concurrently
-  const galleryPromises = prods.map(async (production) => {
-    const fullGallery = await getMediaGallery(production.id);
-    return fullGallery;
-  });
-
-  // Wait for ALL promises to finish simultaneously
-  const resolvedGalleries = await Promise.all(galleryPromises);
-  galleries.value = resolvedGalleries;
-}
-
-// Top-level await is perfectly fine in Nuxt <script setup>
-await loadPage(1);
+// Mocking a list of files to see the grid in action
+const tempFiles: PrintItemView[] = [
+  {
+    id: 1,
+    titel: "Festival Poster",
+    description: "Main event poster",
+    url: "/docs/random_doc_1.pdf", // Your local test PDF
+    print_type: "affiche",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 2,
+    titel: "Program Guide",
+    description: "Full schedule",
+    url: "/docs/random_doc_2.pdf",
+    print_type: "brochure",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 3,
+    titel: "Artist Lineup",
+    description: "Experimental",
+    url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", // External fallback test
+    print_type: "drukwerk",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  // Add more items here if you want to test the pagination (currently set to 4 rows)
+];
 </script>

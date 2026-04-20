@@ -169,13 +169,55 @@
     "delete": "Verwijder",
     "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   },
+  "accounts": {
+    "title": "Accounts",
+    "subtitle": "Beheer de accounts.",
+    "emptyTitle": "Geen accounts gevonden",
+    "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
+    "username": "Gebruikersnaam",
+    "username_placeholder": "Voer een gebruikersnaam in",
+    "password": "Wachtwoord",
+    "password_placeholder": "Voer een veilig wachtwoord in",
+    "confirm_password": "Bevestig wachtwoord",
+    "confirm_password_placeholder": "Herhaal je wachtwoord",
+    "password_mismatch": "Wachtwoorden komen niet overeen.",
+    "accountId": "Account-ID",
+    "role": "Rol",
+    "superAdmin": "Super admin",
+    "admin": "Admin",
+    "actions": "Acties",
+    "delete": "Verwijder",
+    "protected": "Beveiligd"
+  },
   "prints": {
+    "types": {
+      "all": "Alles",
+      "affiche": "Affiche",
+      "brochure": "Brochure",
+      "drukwerk": "Drukwerk",
+      "programma": "Programma"
+    },
+    "title": "Drukwerk",
+    "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
     "noFiles": "Geen bestanden beschikbaar.",
     "showMore": "Meer tonen",
     "remaining": "resterend",
     "delete": "Verwijder",
-    "download": "Download"
+    "download": "Download",
+    "loading": "Laden...",
+    "retry": "Opnieuw proberen",
+    "noPrints": "Geen drukwerk",
+    "pagination": "Paginering",
+    "page_label": "Pagina",
+    "of_pages": "van {total}"
+  },
+  "login": {
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "signIn": "Inloggen",
+    "signingIn": "Inloggen...",
+    "error": "Er is iets misgegaan."
   }
 }

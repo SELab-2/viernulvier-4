@@ -12,7 +12,6 @@ import {
   localIso,
   localTodayIso,
   buildWeekdayLabels,
-  addDays,
 } from "~/utils/formatters";
 import type { CalMode } from "./calendar/CalendarInputs.vue";
 import type { MonthData } from "./calendar/CalendarMonths.vue";
@@ -119,24 +118,24 @@ const filter = computed<DateFilter>(() => {
   switch (mode.value) {
     case "single":
       return selected.value
-        ? { after: selected.value, before: addDays(selected.value, 1) }
+        ? { after: selected.value, before: selected.value }
         : {};
 
     case "range": {
       if (!anchor.value || !selected.value) return {};
       const [a, b] = sorted(anchor.value, selected.value);
-      return { after: a, before: addDays(b, 1) };
+      return { after: a, before: b };
     }
 
     case "after-selected":
       return anchor.value
-        ? { after: anchor.value, before: addDays(todayIso.value, 1) }
+        ? { after: anchor.value, before: todayIso.value }
         : {};
 
     case "before-selected":
       if (!props.oldestDate) return {};
       return selected.value
-        ? { after: props.oldestDate, before: addDays(selected.value, 1) }
+        ? { after: props.oldestDate, before: selected.value }
         : { after: props.oldestDate };
   }
 });

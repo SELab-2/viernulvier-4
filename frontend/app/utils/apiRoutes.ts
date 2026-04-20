@@ -73,6 +73,10 @@ export const API_ROUTES = {
     cropLink: (itemId: number, cropId: number) =>
       `/media/items/${itemId}/crops/${cropId}`,
   },
+  prints: {
+    base: "/prints",
+    byId: (printId: number) => `/prints/${printId}`,
+  },
   crops: {
     base: "/media/crops",
     byId: (cropId: number) => `/media/crops/${cropId}`,
