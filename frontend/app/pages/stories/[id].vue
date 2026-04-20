@@ -57,12 +57,20 @@ const readingTime = computed(() => {
   return Math.max(1, Math.ceil(words / 200));
 });
 
-// Helper om te matchen met production isValid
-const isValid = (val: any) => {
-  if (!val) return false;
-  const s = String(val).trim().toUpperCase();
-  return s !== "" && s !== "N/A" && s !== "UNDEFINED";
+/**
+ * Sanitizes raw text by removing escape characters and
+ * converting newlines to HTML line breaks.
+ */
+const cleanText = (text: string | null | undefined) => {
+  if (!text) return "";
+  return text
+    .replace(/\\/g, "")
+    .trim()
+    .replace(/(\r?\n){2,}/g, "\n\n")
+    .replace(/\n/g, "<br />");
 };
+
+const cleanBody = computed(() => cleanText(body.value));
 </script>
 
 <template>
@@ -116,7 +124,7 @@ const isValid = (val: any) => {
         <div
           class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12"
         >
-          <div class="flex items-center gap-4 mb-8">
+          <div class="flex items-center gap-6 mb-8">
             <NuxtLink
               :to="ROUTES.stories.base"
               class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
@@ -127,12 +135,8 @@ const isValid = (val: any) => {
             </NuxtLink>
 
             <span
-              class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
-              :class="
-                headerCrop
-                  ? 'border-white text-white'
-                  : 'border-foreground text-foreground'
-              "
+              class="text-[9px] font-black uppercase tracking-widest opacity-60"
+              :class="headerCrop ? 'text-white' : 'text-foreground'"
             >
               {{ readingTime }} {{ t("stories.minRead") }}
             </span>
@@ -151,9 +155,10 @@ const isValid = (val: any) => {
             >
               {{ title }}
             </h1>
+
             <p
               v-if="formattedDate"
-              class="text-2xl lg:text-3xl font-medium opacity-80"
+              class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
             >
               {{ formattedDate }}
             </p>
@@ -163,7 +168,7 @@ const isValid = (val: any) => {
 
       <section class="py-20">
         <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
-          <article class="relative max-w-3xl mx-auto">
+          <article class="relative w-full">
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
               style="
@@ -177,12 +182,11 @@ const isValid = (val: any) => {
               aria-hidden="true"
             />
 
-            <div class="md:pl-10">
-              <p
-                class="text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 whitespace-pre-line"
-              >
-                {{ body }}
-              </p>
+            <div class="md:pl-10 w-full">
+              <div
+                class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
+                v-html="cleanBody"
+              ></div>
 
               <div
                 class="mt-20 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
@@ -208,6 +212,17 @@ const isValid = (val: any) => {
 </template>
 
 <style scoped>
+/* make links work */
+.description-content :deep(a) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: var(--accent);
+}
+
+.description-content :deep(a:hover) {
+  opacity: 0.7;
+}
+
 .image-overlay::after {
   content: "";
   position: absolute;

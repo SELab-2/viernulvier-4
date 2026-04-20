@@ -25,6 +25,16 @@ const { title, description, formattedDate } = useBlogStory(
   computed(() => props.story),
 );
 
+/**
+ * Sanitizes raw text by removing escape characters.
+ */
+const cleanText = (text: string | null | undefined) => {
+  if (!text) return "";
+  return text.replace(/\\/g, "").trim();
+};
+
+const cleanDescription = computed(() => cleanText(description.value));
+
 async function loadGallery() {
   if (!props.story?.id) return;
   gallery.value = await getMediaGallery(props.story.id, locale.value);
@@ -77,11 +87,10 @@ watch(
         </h3>
 
         <p
-          v-if="description"
+          v-if="cleanDescription"
           class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400"
-        >
-          {{ description }}
-        </p>
+          v-html="cleanDescription"
+        ></p>
       </div>
 
       <div class="flex items-center mt-3">
