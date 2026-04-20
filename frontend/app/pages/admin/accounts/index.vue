@@ -74,12 +74,10 @@ async function handleDeleteAccount(target: PublicAccount) {
 }
 
 onMounted(async () => {
-  /*
   if (!isLoggedIn.value) {
     await navigateTo(ROUTES.admin.login.base);
     return;
   }
-    */
 
   if (account.value && !account.value.superAdmin) {
     await navigateTo(ROUTES.admin.dashboard.base);
