@@ -16,7 +16,7 @@ export class ScraperRunner {
   constructor(
     private readonly scraperEngine: ScraperEngine,
     private readonly logger: AppLogger,
-    private readonly dbConnection: ScraperDbService,
+    private readonly scraperDbService: ScraperDbService,
     private readonly db: ScraperDbManager,
   ) {}
 
@@ -25,7 +25,7 @@ export class ScraperRunner {
    */
   async runScraper() {
     // Fetch the last scraped date.
-    const dates = await this.dbConnection.query(
+    const dates = await this.scraperDbService.query(
       `
         SELECT date FROM scraper_dates ORDER BY date DESC LIMIT 1;
       `,
@@ -58,7 +58,7 @@ export class ScraperRunner {
     await this.db.event.insertEvents(scrapeResults.events);
 
     // After scraping all data we can update the date in the DB.
-    await this.dbConnection.query(
+    await this.scraperDbService.query(
       `
         INSERT INTO scraper_dates (date) VALUES (NOW());
       `,

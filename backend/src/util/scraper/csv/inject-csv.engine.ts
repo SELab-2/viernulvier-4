@@ -79,7 +79,7 @@ function toOldCsvEvent(
 @Injectable()
 export class InjectCsvEngine {
   constructor(
-    private readonly dbConnection: ScraperDbManager,
+    private readonly scraperDbManager: ScraperDbManager,
     private readonly logger: AppLogger,
     private readonly configService: ConfigService,
     private readonly languageService: LanguageService,
@@ -104,7 +104,9 @@ export class InjectCsvEngine {
     const translatedProductions =
       await this.translateBeforeInsert<vnvProduction[]>(csvProductions);
 
-    await this.dbConnection.production.insertProductions(translatedProductions);
+    await this.scraperDbManager.production.insertProductions(
+      translatedProductions,
+    );
     this.logger.log("Structured productions CSV injection completed.");
   }
 
@@ -131,7 +133,7 @@ export class InjectCsvEngine {
     const translatedLocations =
       await this.translateBeforeInsert<vnvLocation[]>(csvLocations);
 
-    await this.dbConnection.taxonomies.insertLocations(translatedLocations);
+    await this.scraperDbManager.taxonomies.insertLocations(translatedLocations);
 
     // Now that locations are inserted, we can convert events to csvEvents with locationLegacyIds
     const csvEvents: vnvEvent[] = parsedEvents.map((row) => {
@@ -149,7 +151,7 @@ export class InjectCsvEngine {
     const translatedEvents =
       await this.translateBeforeInsert<vnvEvent[]>(csvEvents);
 
-    await this.dbConnection.event.insertEvents(translatedEvents);
+    await this.scraperDbManager.event.insertEvents(translatedEvents);
     this.logger.log("Structured events CSV injection completed.");
   }
 
@@ -167,7 +169,7 @@ export class InjectCsvEngine {
 
       const tagLegacyId = "csv-" + translatedTagData.tag.nl;
 
-      const tagId = await this.dbConnection.taxonomies.insertTag({
+      const tagId = await this.scraperDbManager.taxonomies.insertTag({
         legacy_id: tagLegacyId,
         created_at: DEFAULT_DATE,
         updated_at: DEFAULT_DATE,
@@ -179,10 +181,10 @@ export class InjectCsvEngine {
           this.toCsvLegacyIdFromNumericId(productionId);
         try {
           const production =
-            await this.dbConnection.production.getProductionByLegacyId(
+            await this.scraperDbManager.production.getProductionByLegacyId(
               productionLegacyId,
             );
-          await this.dbConnection.production.linkTag(production.id, tagId);
+          await this.scraperDbManager.production.linkTag(production.id, tagId);
         } catch (error) {
           if (error instanceof ResourceNotFoundException) {
             this.logger.warn(
@@ -218,16 +220,16 @@ export class InjectCsvEngine {
       );
       try {
         const production =
-          await this.dbConnection.production.getProductionByLegacyId(
+          await this.scraperDbManager.production.getProductionByLegacyId(
             productionLegacyId,
           );
 
-        const blog = await this.dbConnection.blog.insertBlog(
+        const blog = await this.scraperDbManager.blog.insertBlog(
           translatedBlogRow.blog.titel,
           translatedBlogRow.blog.description,
         );
 
-        await this.dbConnection.blog.linkBlog(production.id, blog.id);
+        await this.scraperDbManager.blog.linkBlog(production.id, blog.id);
       } catch (error) {
         if (error instanceof ResourceNotFoundException) {
           this.logger.warn(
@@ -260,11 +262,11 @@ export class InjectCsvEngine {
       const eventLegacyId = this.toCsvLegacyIdFromNumericId(row.event_id);
       try {
         const event =
-          await this.dbConnection.event.getEventByLegacyId(eventLegacyId);
+          await this.scraperDbManager.event.getEventByLegacyId(eventLegacyId);
 
         const priceLegacyId = "csv-" + translatedPriceData.name.nl;
 
-        const price = await this.dbConnection.taxonomies.insertPrice({
+        const price = await this.scraperDbManager.taxonomies.insertPrice({
           legacy_id: priceLegacyId,
           created_at: DEFAULT_DATE,
           updated_at: DEFAULT_DATE,
@@ -272,7 +274,7 @@ export class InjectCsvEngine {
           name: translatedPriceData.name,
         });
 
-        await this.dbConnection.event.linkPrice(event.id, price.id);
+        await this.scraperDbManager.event.linkPrice(event.id, price.id);
       } catch (error) {
         if (error instanceof ResourceNotFoundException) {
           this.logger.warn(
@@ -349,12 +351,14 @@ export class InjectCsvEngine {
     );
 
     await Promise.all([
-      this.dbConnection.taxonomies.insertTags(translatedTags),
-      this.dbConnection.taxonomies.insertLocations(translatedLocations),
+      this.scraperDbManager.taxonomies.insertTags(translatedTags),
+      this.scraperDbManager.taxonomies.insertLocations(translatedLocations),
     ]);
 
-    await this.dbConnection.production.insertProductions(translatedProductions);
-    await this.dbConnection.event.insertEvents(translatedEvents);
+    await this.scraperDbManager.production.insertProductions(
+      translatedProductions,
+    );
+    await this.scraperDbManager.event.insertEvents(translatedEvents);
 
     this.logger.log("CSV injection completed.");
   }
