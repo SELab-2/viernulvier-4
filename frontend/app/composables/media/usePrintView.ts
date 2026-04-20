@@ -5,11 +5,10 @@ import { ref } from "vue";
  */
 
 import type { PrintType } from "@repo/common";
-import { PrintTypeValues } from "@repo/common";
 
 // Filters
 const searchQuery = ref("");
-const activeFilter = ref<PrintType>(PrintTypeValues[0]);
+const activeFilter = ref<PrintType | null>(null);
 
 // Pagination
 const currentPage = ref(0);

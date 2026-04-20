@@ -18,18 +18,18 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: "update:search", value: string): void;
-  (e: "update:types", value: PrintType): void;
+  (e: "update:types", value: PrintType | null): void;
 }>();
 
 const searchQuery = ref("");
 const filterOpen = ref(false); // Checks if filter panel is open or not.
-const activeType = ref<PrintType>(PrintTypeValues[0]); // Current selected print-type.
+const activeType = ref<PrintType | null>(null); // Current selected print-type.
 
 watch(searchQuery, (v) => {
   emit("update:search", v);
 });
 
-function selectType(type: PrintType) {
+function selectType(type: PrintType | null) {
   activeType.value = type;
   emit("update:types", type);
 }
@@ -69,6 +69,18 @@ function selectType(type: PrintType) {
     <Transition name="filter-slide">
       <div v-if="filterOpen" class="border-t border-border">
         <div class="container mx-auto px-4 max-w-5xl py-4 flex flex-wrap gap-2">
+          <!-- All -->
+          <button
+            @click="selectType(null)"
+            :class="[
+              'px-3 py-2 rounded border text-xs uppercase tracking-wider font-bold transition',
+              activeType === null
+                ? 'bg-foreground text-background border-foreground'
+                : 'border-border text-muted-foreground hover:border-foreground/40',
+            ]"
+          >
+            {{ t("prints.types.all") }}
+          </button>
           <button
             v-for="type in PrintTypeValues"
             :key="type"

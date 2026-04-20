@@ -175,6 +175,12 @@
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruikersnaam",
+    "username_placeholder": "Voer een gebruikersnaam in",
+    "password": "Wachtwoord",
+    "password_placeholder": "Voer een veilig wachtwoord in",
+    "confirm_password": "Bevestig wachtwoord",
+    "confirm_password_placeholder": "Herhaal je wachtwoord",
+    "password_mismatch": "Wachtwoorden komen niet overeen.",
     "accountId": "Account-ID",
     "role": "Rol",
     "superAdmin": "Super admin",
@@ -185,6 +191,7 @@
   },
   "prints": {
     "types": {
+      "all": "Alles",
       "affiche": "Affiche",
       "brochure": "Brochure",
       "drukwerk": "Drukwerk",

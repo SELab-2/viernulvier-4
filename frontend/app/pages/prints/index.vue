@@ -53,6 +53,9 @@ const currentCols = computed(() => {
   return 2; // grid-cols-2
 });
 const LIMIT = computed(() => ROWS_PER_PAGE * currentCols.value);
+const categoryLabel = computed(
+  () => activeFilter.value ?? t("prints.types.all"),
+);
 
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
@@ -79,7 +82,7 @@ async function loadPage() {
       languageFilters: { lang: locale.value as "nl" | "en" },
       printItemFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
-        type: activeFilter.value,
+        ...(activeFilter.value ? { type: activeFilter.value } : {}),
       },
     });
 
@@ -146,7 +149,7 @@ onMounted(loadPage);
       </div>
 
       <FileGrid
-        :category="activeFilter"
+        :category="categoryLabel"
         :files="prints"
         :total-pages="totalPages"
       />
