@@ -1,5 +1,6 @@
 import type {
   CreatePrintItem,
+  FilterPrintItem,
   Language,
   LanguageQuery,
   ModifyPrintItem,
@@ -7,14 +8,13 @@ import type {
   PaginationFilter,
   PrintItem,
   PrintItemView,
-  PrintType,
   ReplacePrintItem,
 } from "@repo/common";
 
 interface PrintItemListOptions {
   paginationFilters?: PaginationFilter;
   languageFilters?: LanguageQuery;
-  type?: PrintType;
+  printItemFilters?: FilterPrintItem;
 }
 
 /**
@@ -29,12 +29,12 @@ export function usePrintApi() {
   const getAll = ({
     paginationFilters,
     languageFilters,
-    type,
+    printItemFilters,
   }: PrintItemListOptions = {}) => {
     const params = {
       ...paginationFilters,
       ...languageFilters,
-      type,
+      ...printItemFilters,
     };
 
     const cleanParams = Object.fromEntries(
