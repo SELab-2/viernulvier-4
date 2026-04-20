@@ -143,13 +143,48 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                 >
                   {{ formatDate(event.starttime) }}
                 </p>
-                <p
-                  class="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5 truncate"
-                >
-                  <Clock :size="10" class="shrink-0" />{{
-                    formatTime(event.starttime)
-                  }}
-                </p>
+
+                <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                  <p
+                    class="flex items-center gap-1 text-[10px] font-bold text-foreground"
+                  >
+                    <Clock :size="10" class="shrink-0" />
+
+                    {{ formatTime(event.starttime) }}
+
+                    <template
+                      v-if="
+                        event.endtime &&
+                        formatTime(event.starttime) !==
+                          formatTime(event.endtime)
+                      "
+                    >
+                      - {{ formatTime(event.endtime) }}
+                    </template>
+                  </p>
+
+                  <p
+                    v-if="event.doors_at"
+                    class="flex items-center gap-1 text-[10px] text-muted-foreground opacity-80"
+                  >
+                    <span
+                      class="font-black uppercase text-[8px] tracking-tighter"
+                      >Doors:</span
+                    >
+                    {{ formatTime(event.doors_at) }}
+                  </p>
+
+                  <p
+                    v-if="event.intermission_at"
+                    class="flex items-center gap-1 text-[10px] text-muted-foreground opacity-80"
+                  >
+                    <span
+                      class="font-black uppercase text-[8px] tracking-tighter"
+                      >Break:</span
+                    >
+                    {{ formatTime(event.intermission_at) }}
+                  </p>
+                </div>
               </td>
 
               <td :class="cellWide">
