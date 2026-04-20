@@ -191,7 +191,15 @@
     "admin": "Admin",
     "actions": "Acties",
     "delete": "Verwijder",
-    "protected": "Beveiligd"
+    "protected": "Beveiligd",
+    "create": "Account aanmaken",
+    "creating": "Account aanmaken...",
+    "loadError": "Accounts konden niet geladen worden.",
+    "createError": "Account kon niet aangemaakt worden.",
+    "deleteError": "Account kon niet verwijderd worden.",
+    "confirmDelete": "Account \"{username}\" verwijderen? Dit kan niet ongedaan gemaakt worden.",
+    "createSuccess": "Account \"{username}\" aangemaakt.",
+    "deleteSuccess": "Account \"{username}\" verwijderd."
   },
   "prints": {
     "types": {

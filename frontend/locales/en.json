@@ -190,7 +190,15 @@
     "admin": "Admin",
     "actions": "Actions",
     "delete": "Remove",
-    "protected": "Protected"
+    "protected": "Protected",
+    "create": "Create account",
+    "creating": "Creating account...",
+    "loadError": "Could not load accounts.",
+    "createError": "Could not create account.",
+    "deleteError": "Could not delete account.",
+    "confirmDelete": "Delete account \"{username}\"? This cannot be undone.",
+    "createSuccess": "Created account \"{username}\".",
+    "deleteSuccess": "Deleted account \"{username}\"."
   },
   "prints": {
     "types": {

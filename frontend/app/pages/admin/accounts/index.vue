@@ -4,6 +4,7 @@ import { ROUTES } from "~/utils/routes";
 
 const { isLoggedIn, account } = useAuth();
 const { getAll, create, remove } = useAccountApi();
+const { t } = useI18n();
 
 const accounts = ref<PublicAccount[]>([]);
 const isLoading = ref(false);
@@ -18,7 +19,7 @@ async function loadAccounts() {
   const response = await getAll({ page: 0, limit: 100, descending: true });
 
   if (response.error || !response.data) {
-    error.value = response.error ?? "Could not load accounts.";
+    error.value = response.error ?? t("accounts.loadError");
     accounts.value = [];
     isLoading.value = false;
     return;
@@ -36,13 +37,15 @@ async function handleCreateAccount(payload: CreateAccount) {
   const response = await create(payload);
 
   if (response.error || !response.data) {
-    error.value = response.error ?? "Could not create account.";
+    error.value = response.error ?? t("accounts.createError");
     isSubmitting.value = false;
     return;
   }
 
   accounts.value = [response.data, ...accounts.value];
-  message.value = `Created account \"${response.data.username}\".`;
+  message.value = t("accounts.createSuccess", {
+    username: response.data.username,
+  });
   isSubmitting.value = false;
 }
 
@@ -52,7 +55,7 @@ async function handleDeleteAccount(target: PublicAccount) {
   }
 
   const confirmed = confirm(
-    `Delete account \"${target.username}\"? This cannot be undone.`,
+    t("accounts.confirmDelete", { username: target.username }),
   );
   if (!confirmed) {
     return;
@@ -63,14 +66,14 @@ async function handleDeleteAccount(target: PublicAccount) {
 
   const response = await remove(target.id);
   if (response.error) {
-    error.value = response.error ?? "Could not delete account.";
+    error.value = response.error ?? t("accounts.deleteError");
     return;
   }
 
   accounts.value = accounts.value.filter(
     (accountItem) => accountItem.id !== target.id,
   );
-  message.value = `Deleted account \"${target.username}\".`;
+  message.value = t("accounts.deleteSuccess", { username: target.username });
 }
 
 onMounted(async () => {
@@ -109,12 +112,12 @@ onMounted(async () => {
       />
 
       <h2 class="mb-3 text-lg font-semibold text-card-foreground">
-        Create account
+        {{ t("accounts.create") }}
       </h2>
       <AdminAccountForm @submit="handleCreateAccount" />
 
       <p v-if="isSubmitting" class="mt-3 text-sm text-muted-foreground">
-        Creating account...
+        {{ t("accounts.creating") }}
       </p>
     </div>
   </section>
