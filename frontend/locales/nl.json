@@ -200,7 +200,8 @@
     "form": {
       "title": "Titel",
       "type": "Printtype",
-      "file": "Bestand"
+      "file": "Bestand",
+      "fileRequired": "Upload een bestand."
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",

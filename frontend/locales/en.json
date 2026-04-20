@@ -199,7 +199,8 @@
     "form": {
       "title": "Title",
       "type": "Print type",
-      "file": "File"
+      "file": "File",
+      "fileRequired": "Upload a file."
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
