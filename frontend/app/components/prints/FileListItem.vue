@@ -15,7 +15,7 @@ import type { PrintItemView } from "@repo/common";
 
 interface Props {
   file: PrintItemView;
-  category: string;
+  category: string | null;
 }
 defineProps<Props>();
 const { t, locale } = useI18n();

@@ -40,7 +40,7 @@ async function loadPage() {
       languageFilters: { lang: locale.value as "nl" | "en" },
       printItemFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
-        type: activeFilter.value,
+        ...(activeFilter.value ? { type: activeFilter.value } : {}),
       },
     });
 

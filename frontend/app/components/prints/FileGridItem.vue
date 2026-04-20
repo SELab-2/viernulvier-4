@@ -11,7 +11,6 @@
  * />
  */
 import type { PrintItemView } from "@repo/common";
-const { t } = useI18n();
 
 interface Props {
   file: PrintItemView;
