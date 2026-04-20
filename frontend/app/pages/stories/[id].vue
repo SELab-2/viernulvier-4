@@ -19,7 +19,6 @@ const blogId = computed(() => {
   return isFinite(n) ? n : null;
 });
 
-/** 1. Haal blog data op (zoals production) */
 const { data, pending, error } = await useAsyncData<BlogView | null>(
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
@@ -32,7 +31,6 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
 
 const blog = computed(() => data.value);
 
-/** 2. Haal gallery data op met useAsyncData (IDENTIEK aan production) */
 const { data: gallery } = await useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
@@ -45,7 +43,6 @@ const { data: gallery } = await useAsyncData(
 
 const { title, description: body, formattedDate } = useBlogStory(blog);
 
-/** 3. Crop logica */
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
