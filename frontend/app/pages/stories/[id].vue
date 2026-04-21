@@ -113,9 +113,7 @@ const cleanBody = computed(() => cleanText(body.value));
           :src="headerCrop"
         />
 
-        <div
-          class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12"
-        >
+        <div class="relative z-10 page-container pb-12">
           <div class="flex items-center gap-6 mb-8">
             <NuxtLink
               :to="ROUTES.stories.base"
@@ -159,7 +157,7 @@ const cleanBody = computed(() => cleanText(body.value));
       </section>
 
       <section class="py-20">
-        <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
+        <div class="page-container">
           <article class="relative w-full">
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"

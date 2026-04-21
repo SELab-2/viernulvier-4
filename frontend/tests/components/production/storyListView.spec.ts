@@ -2,8 +2,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { createI18n } from "vue-i18n";
 import ProductionStories from "../../../app/components/production/storyListView.vue";
 import type { BlogView } from "@repo/common";
-import { mount } from "@vue/test-utils";
-import type { VueWrapper } from "@vue/test-utils";
+import { mount, type VueWrapper } from "@vue/test-utils";
 
 const i18n = createI18n({
   locale: "nl",
@@ -97,7 +96,7 @@ describe("ProductionStories", () => {
     });
   });
 
-  it("renders only limited stories by default", () => {
+  it("renders 3 stories by default when limit is exceeded", () => {
     expect(wrapper.findAll("[data-testid=data-story]").length).toBe(3);
   });
 
@@ -163,7 +162,7 @@ describe("ProductionStories", () => {
       },
     });
 
-    expect(w.text()).not.toContain("Titel");
+    expect(w.findAll("[data-testid=data-story]").length).toBe(0);
     expect(w.find("[data-testid=data-story]").exists()).toBe(false);
   });
 });
