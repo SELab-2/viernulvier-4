@@ -25,7 +25,7 @@ const { t } = useI18n();
 
 interface Props {
   modelValue: string; // currently selected value
-  fetchSuggestions: (query: string) => Promise<string[]>;
+  fetchSuggestions: (query: string) => Promise<SearchSuggestion[]>;
   loading?: boolean;
   limit?: number; // max suggestions
   scrollLimit?: number; // number of suggestions before scrollbar appears
@@ -60,10 +60,10 @@ const internalQuery = ref(props.modelValue || ""); // so that a user can type wi
 const isFocused = ref(false); // tracks if input is focused (user is typing)
 const inputRef = ref<HTMLInputElement | null>(null); // used for unfocusing the bar after selecting an item
 
-const select = (item: string) => {
+const select = (item: SearchSuggestion) => {
   // handles selecting a suggestion
-  internalQuery.value = item;
-  emit("update:modelValue", item);
+  internalQuery.value = item.searchValue;
+  emit("update:modelValue", item.searchValue);
   isFocused.value = false; // Remove focus when selected.
   inputRef.value?.blur();
 };
@@ -79,7 +79,17 @@ const submit = () => {
   inputRef.value?.blur();
 };
 
-const internalResults = ref<string[]>([]);
+/**
+ * Suggestions
+ */
+
+export interface SearchSuggestion {
+  display: string; // The main text shown.
+  context?: string; // Secondary text.
+  searchValue: string; // The clean text put into the input.
+}
+
+const internalResults = ref<SearchSuggestion[]>([]);
 const isFetching = ref(false);
 
 const doSearch = useDebounceFn(async (query: string) => {
@@ -141,12 +151,23 @@ watch(internalQuery, (newQuery) => {
         class="absolute mt-1 w-full bg-background border border-border rounded-lg shadow-2xl z-10 overflow-y-auto"
       >
         <li
-          v-for="item in internalResults"
-          :key="item"
+          v-for="(item, index) in internalResults"
+          :key="index"
           @mousedown.prevent="select(item)"
           class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-muted text-muted-foreground overflow-hidden truncate"
         >
-          {{ item }}
+          <span
+            class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground truncate"
+          >
+            {{ item.display }}
+          </span>
+
+          <span
+            v-if="item.context"
+            class="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-2 shrink-0"
+          >
+            {{ item.context }}
+          </span>
         </li>
       </ul>
 

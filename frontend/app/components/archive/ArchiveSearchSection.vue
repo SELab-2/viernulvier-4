@@ -23,6 +23,7 @@ import { useEventApi } from "~/composables/useEventApi";
 import type { ProductionView, Event, PaginatedResponse } from "@repo/common";
 import TagFilter from "./TagFilter.vue";
 import { X } from "lucide-vue-next";
+import type { SearchSuggestion } from "../SearchBar.vue";
 
 const { t, locale } = useI18n();
 
@@ -91,26 +92,45 @@ async function fetchOldestDate() {
 
 /**
  * Custom fetch function for suggestions
- * @param newQuery
+ * @param query
  */
-async function fetchSuggestions(newQuery: string): Promise<string[]> {
+async function fetchSuggestions(query: string): Promise<SearchSuggestion[]> {
   const resp = (await getAllProductions({
     // This means we'll use 5 suggestions.
     paginationFilters: { page: 0, limit: 5, descending: true },
     productionFilters: {
-      titelOrArtist: newQuery,
+      titelOrArtist: query,
       is_suggestion: true,
       ...dateFilter.value,
       tag_ids: tagIds.value,
     },
     languageFilters: { lang: locale.value },
-  })) as any;
+  })) as ApiResponse<PaginatedResponse<ProductionView>>;
 
-  return (
-    resp.data?.objects?.map(
-      (p: ProductionView) => `${p.titel} - ${p.artist}`,
-    ) || []
-  );
+  if (!resp.data?.objects) return [];
+
+  const lowerQuery = query.toLowerCase();
+
+  return resp.data.objects.map((p: any): SearchSuggestion => {
+    const title = p.titel || "";
+    const artist = p.artist || "";
+
+    // Check if the user's query matched the artist
+    if (artist.toLowerCase().includes(lowerQuery)) {
+      return {
+        display: artist, // "Sarah Bettens"
+        context: title || "Artist", // Shows the title on the right, or just "Artist"
+        searchValue: artist, // Puts "Sarah Bettens" in the bar when clicked
+      };
+    }
+
+    // Otherwise, assume it matched the title
+    return {
+      display: title,
+      context: artist || "Title",
+      searchValue: title,
+    };
+  });
 }
 
 onMounted(fetchOldestDate);
