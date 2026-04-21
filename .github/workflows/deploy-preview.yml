@@ -30,7 +30,6 @@ jobs:
       - name: Deploy preview
         run: |
           PR=${{ github.event.pull_request.number }}
-          export NUXT_BASE="/previews/$PR/"
           PR_PATH="/home/selab2/project/previews/$PR"
           FRONTEND_PORT="30$PR"
           BACKEND_PORT="40$PR"
@@ -73,7 +72,7 @@ jobs:
           
           export PORT=$BACKEND_PORT
           export NODE_ENV=production
-          export MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR"
+          export MEDIA_BASE_URL="https://sel2-4.ugent.be"
           
           
           pm2 start dist/main.js --name preview-backend-$PR --update-env
@@ -83,10 +82,12 @@ jobs:
           cd $PR_PATH/frontend
           npx nuxi cleanup
           
+          NUXT_APP_BASE_URL="/previews/$PR/archive" \
           NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api" \
-          MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR" \
+          MEDIA_BASE_URL="https://sel2-4.ugent.be" \
           npm run build
           
+          export NUXT_BASE="/previews/$PR/archive"
           pm2 delete preview-$PR || true
           PORT=$FRONTEND_PORT pm2 start .output/server/index.mjs --name preview-$PR
           pm2 save
