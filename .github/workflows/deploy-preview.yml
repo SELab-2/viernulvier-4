@@ -34,20 +34,23 @@ jobs:
           PR_PATH="/home/selab2/project/previews/$PR"
           FRONTEND_PORT="30$PR"
           BACKEND_PORT="40$PR"
-
+          
           mkdir -p $PR_PATH
           rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
-
-          # --- 1. Docs Setup ---
+          
+          # --- 0. Monorepo Setup (THE FIX) ---
           cd $PR_PATH
+          # Run npm ci AT THE ROOT. This correctly installs frontend, backend, and common dependencies!
+          npm ci
+          
+          # --- 1. Docs Setup ---
           python3 -m pip install mkdocs-material
           python3 -m mkdocs build
           mkdir -p frontend/public
           rm -rf frontend/public/docs
           mv site frontend/public/docs
-
+          
           # --- 2. Backend Setup & Deployment ---
-          # Go to root preview folder first!
           cd $PR_PATH
           
           # Create .env in the root folder
@@ -58,39 +61,34 @@ jobs:
           echo "DB_PORT_DEV=2002" >> .env
           echo "TRANSLATE_API_KEY=abcdlalala" >> .env
           echo "MEDIA_BASE_URL=https://sel2-4.ugent.be/previews/$PR" >> .env
-
-          # Copy it to the backend folder so NestJS finds it no matter where it looks
+          
+          # Copy to backend so NestJS finds it
           cp .env backend/.env
-
-          cd backend
-          npm ci
+          
+          cd $PR_PATH/backend
+          # (npm ci removed from here)
           npm run build 
           
           pm2 delete preview-backend-$PR || true
           
-          # EXPORT variables directly into the shell to guarantee PM2 sees them
           export PORT=$BACKEND_PORT
           export NODE_ENV=production
           export MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR"
           
-          # --update-env forces PM2 to dump its cache and read the exports above
-          pm2 start dist/main.js --name preview-backend-$PR --update-env
           
+          pm2 start dist/main.js --name preview-backend-$PR --update-env
           pm2 save
-
+          
           # --- 3. Frontend Setup & Deployment ---
           cd $PR_PATH/frontend
-          npm ci
           npx nuxi cleanup
-
-          # Connect frontend to the NGINX-routed backend preview
+          
           NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api" \
-          MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR/archive" \
+          MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR" \
           npm run build
-
+          
           pm2 delete preview-$PR || true
           PORT=$FRONTEND_PORT pm2 start .output/server/index.mjs --name preview-$PR
-          
           pm2 save
 
       - name: Post preview link
