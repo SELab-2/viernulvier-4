@@ -17,6 +17,7 @@ export interface ApiOptions<TBody = unknown> {
 export interface ApiResponse<TData> {
   data: TData | null;
   error: string | null;
+  errorCode?: string | null;
   status: number | null;
 }
 
@@ -44,15 +45,16 @@ export function useApi() {
         body: body !== undefined ? body : undefined,
       });
 
-      return { data: data ?? null, error: null, status: 200 };
+      return { data: data ?? null, error: null, errorCode: null, status: 200 };
     } catch (err: unknown) {
       // $fetch throws a FetchError on non-ok responses with status and data attached
       const fetchError = err as {
         status?: number;
-        data?: { message?: string };
+        data?: { message?: string; internalCode?: string };
         message?: string;
       };
       const status = fetchError.status ?? null;
+      const errorCode = fetchError.data?.internalCode ?? null;
       const message =
         fetchError.data?.message ??
         fetchError.message ??
@@ -64,7 +66,7 @@ export function useApi() {
         handleDefaultError(status ?? 0, message);
       }
 
-      return { data: null, error: message, status };
+      return { data: null, error: message, errorCode, status };
     }
   }
 

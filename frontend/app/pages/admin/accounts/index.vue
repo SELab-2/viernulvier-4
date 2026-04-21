@@ -10,7 +10,7 @@ const accounts = ref<PublicAccount[]>([]);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const message = ref<{ key: string; params?: any } | null>(null);
-const error = ref<string | null>(null);
+const error = ref<{ text?: string; key?: string; params?: any } | null>(null);
 const accountFormRef = ref<{ reset: () => void } | null>(null);
 
 async function loadAccounts() {
@@ -20,7 +20,9 @@ async function loadAccounts() {
   const response = await getAll({ page: 0, limit: 100, descending: true });
 
   if (response.error || !response.data) {
-    error.value = response.error ?? t("accounts.loadError");
+    error.value = response.error
+      ? { text: response.error }
+      : { key: "accounts.loadError" };
     accounts.value = [];
     isLoading.value = false;
     return;
@@ -38,7 +40,16 @@ async function handleCreateAccount(payload: CreateAccount) {
   const response = await create(payload);
 
   if (response.error || !response.data) {
-    error.value = response.error ?? t("accounts.createError");
+    if (response.errorCode === "ACCOUNT_ALREADY_EXISTS") {
+      error.value = {
+        key: "accounts.alreadyExists",
+        params: { username: payload.username },
+      };
+    } else {
+      error.value = response.error
+        ? { text: response.error }
+        : { key: "accounts.createError" };
+    }
     isSubmitting.value = false;
     return;
   }
@@ -69,7 +80,9 @@ async function handleDeleteAccount(target: PublicAccount) {
 
   const response = await remove(target.id);
   if (response.error) {
-    error.value = response.error ?? t("accounts.deleteError");
+    error.value = response.error
+      ? { text: response.error }
+      : { key: "accounts.deleteError" };
     return;
   }
 
@@ -101,7 +114,7 @@ onMounted(async () => {
       v-if="error"
       class="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
     >
-      {{ error }}
+      {{ error.key ? t(error.key, error.params ?? {}) : error.text }}
     </div>
 
     <div

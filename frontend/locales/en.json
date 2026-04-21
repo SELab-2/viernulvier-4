@@ -195,6 +195,7 @@
     "creating": "Creating account...",
     "loadError": "Could not load accounts.",
     "createError": "Could not create account.",
+    "alreadyExists": "Account \"{username}\" already exists.",
     "deleteError": "Could not delete account.",
     "confirmDelete": "Delete account \"{username}\"? This cannot be undone.",
     "createSuccess": "Created account \"{username}\".",

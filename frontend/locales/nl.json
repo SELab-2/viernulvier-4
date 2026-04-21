@@ -196,6 +196,7 @@
     "creating": "Account aanmaken...",
     "loadError": "Accounts konden niet geladen worden.",
     "createError": "Account kon niet aangemaakt worden.",
+    "alreadyExists": "Account \"{username}\" bestaat al.",
     "deleteError": "Account kon niet verwijderd worden.",
     "confirmDelete": "Account \"{username}\" verwijderen? Dit kan niet ongedaan gemaakt worden.",
     "createSuccess": "Account \"{username}\" aangemaakt.",
