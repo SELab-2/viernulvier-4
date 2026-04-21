@@ -9,7 +9,7 @@ const { t } = useI18n();
 const accounts = ref<PublicAccount[]>([]);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
-const message = ref<string | null>(null);
+const message = ref<{ key: string; params?: any } | null>(null);
 const error = ref<string | null>(null);
 const accountFormRef = ref<{ reset: () => void } | null>(null);
 
@@ -44,9 +44,10 @@ async function handleCreateAccount(payload: CreateAccount) {
   }
 
   accounts.value = [response.data, ...accounts.value];
-  message.value = t("accounts.createSuccess", {
-    username: response.data.username,
-  });
+  message.value = {
+    key: "accounts.createSuccess",
+    params: { username: response.data.username },
+  };
   accountFormRef.value?.reset();
   isSubmitting.value = false;
 }
@@ -75,7 +76,10 @@ async function handleDeleteAccount(target: PublicAccount) {
   accounts.value = accounts.value.filter(
     (accountItem) => accountItem.id !== target.id,
   );
-  message.value = t("accounts.deleteSuccess", { username: target.username });
+  message.value = {
+    key: "accounts.deleteSuccess",
+    params: { username: target.username },
+  };
 }
 
 onMounted(async () => {
@@ -104,7 +108,7 @@ onMounted(async () => {
       v-if="message"
       class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300"
     >
-      {{ message }}
+      {{ t(message.key, message.params ?? {}) }}
     </div>
 
     <div class="space-y-4">
