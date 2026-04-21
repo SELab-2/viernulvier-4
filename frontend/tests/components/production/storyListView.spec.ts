@@ -11,13 +11,11 @@ const i18n = createI18n({
     nl: {
       production: {
         stories: "Verhalen",
-        noStories: "Deze productie bevat geen verhalen.",
       },
     },
     en: {
       production: {
         stories: "Stories",
-        noStories: "This production doesn't contain any stories.",
       },
     },
   },
@@ -44,13 +42,6 @@ const stories: BlogView[] = [
     created_at: "2026-03-05T00:00:00Z",
     updated_at: "2026-03-05T00:00:00Z",
     description: "description 3",
-  },
-  {
-    id: 4,
-    titel: "Titel 4",
-    created_at: "2026-03-12T00:00:00Z",
-    updated_at: "2026-03-12T00:00:00Z",
-    description: "description 4",
   },
 ];
 
