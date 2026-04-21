@@ -5,6 +5,7 @@ import { useStorageApi } from "../../../composables/media/useStorageApi";
 import { PrintTypeValues } from "@repo/common";
 
 const { t } = useI18n();
+const { apiKey } = useAuth();
 const { create } = usePrintApi();
 const { saveMedia } = useStorageApi();
 
@@ -54,10 +55,14 @@ async function handleSubmit(form: Record<string, any>) {
       return;
     }
 
-    const fileName = `prints/${Date.now()}-${file.name}`;
+    const fileName = `/prints/${Date.now()}-${file.name}`;
     const uploadResult = await saveMedia(fileName, file);
-    const url = (uploadResult as any)?.data ?? uploadResult;
-    if (!url || typeof url !== "string") {
+    if (uploadResult.error) {
+      error.value = t("prints.form.uploadError");
+      return;
+    }
+    const url = uploadResult.data;
+    if (!url) {
       error.value = t("prints.form.uploadError");
       return;
     }
