@@ -5,6 +5,13 @@
 import { ZodObject } from "@repo/common";
 
 /**
+ * Interface for handling of postgres error codes like 409 conflicts
+ */
+export interface PostgresError {
+  code: string;
+}
+
+/**
  * Returns whether something is a plain object or not.
  * @param value The value.
  * @returns T/F.

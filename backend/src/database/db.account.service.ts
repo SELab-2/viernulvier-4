@@ -9,6 +9,8 @@ import {
 } from "../dto/dto";
 import * as bcrypt from "bcryptjs"; // note all function should require guarding(except login) and all POST,DELETE,... super_guard
 import { PaginatedResponse } from "@repo/common";
+import { AccountAlreadyExistsException } from "../common/exceptions";
+import { PostgresError } from "./db-utils";
 
 // note all function should require guarding(except login) and all POST,DELETE,... super_guard
 @Injectable()
@@ -56,10 +58,11 @@ export class AccountDatabaseService {
   /**
    * Creates an account in the database
    * @param account is of the type CreateAccount and has password and username defined.
-   * @returns T/F if the account was creates successfully.
+   * @returns The created public account data.
+   * @throws AccountAlreadyExistsException if the username is taken.
    */
   async createAccount(account: CreateAccountDto): Promise<PublicAccountDto> {
-    const hashedPassword = await bcrypt.hash(account.password, 10); // salt rounds = 10
+    const hashedPassword = await bcrypt.hash(account.password, 10);
 
     const query = `
       INSERT INTO accounts (username, password)
@@ -67,13 +70,22 @@ export class AccountDatabaseService {
       RETURNING id, username
     `;
 
-    const result = await this.db.query<PublicAccountDto>(query, [
-      account.username,
-      hashedPassword,
-    ]);
+    try {
+      const result = await this.db.query<PublicAccountDto>(query, [
+        account.username,
+        hashedPassword,
+      ]);
 
-    // note that we do not return the account, simply if it was successful.
-    return result[0];
+      return result[0];
+    } catch (error: unknown) {
+      const dbError = error as PostgresError;
+
+      // catch error code 23505 from psql which is conflict on entry.
+      if (dbError?.code === "23505") {
+        throw new AccountAlreadyExistsException(account.username);
+      }
+      throw error;
+    }
   }
 
   /**
