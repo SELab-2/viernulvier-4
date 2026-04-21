@@ -11,11 +11,16 @@ const { saveMedia } = useStorageApi();
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-const fields: FormField[] = [
+const fields = computed<FormField[]>(() => [
   {
     component: "BaseInput",
-    name: "titel",
-    props: { label: t("prints.form.title"), required: true },
+    name: "titel_nl",
+    props: { label: t("prints.form.title") + " (nl)", required: true },
+  },
+  {
+    component: "BaseInput",
+    name: "titel_en",
+    props: { label: t("prints.form.title") + " (en)" },
   },
   {
     component: "BaseSelect",
@@ -34,17 +39,16 @@ const fields: FormField[] = [
     name: "file",
     props: {
       label: t("prints.form.file"),
-      required: true,
       accept: ".pdf,.png,.jpg,.jpeg",
     },
   },
-];
+]);
 
 async function handleSubmit(form: Record<string, any>) {
   loading.value = true;
   error.value = null;
   try {
-    const file: File | null = form.file?.[0] ?? null;
+    const file: File | null = form.file?.length ? form.file[0] : null;
     if (!file) {
       error.value = t("prints.form.fileRequired");
       return;
@@ -59,7 +63,7 @@ async function handleSubmit(form: Record<string, any>) {
     }
 
     await create({
-      titel: { nl: form.titel, en: form.titel },
+      titel: { nl: form.titel_nl, en: form.titel_en ?? form.titel_nl },
       description: { nl: "", en: "" },
       print_type: form.print_type,
       url,
@@ -83,9 +87,7 @@ async function handleSubmit(form: Record<string, any>) {
       >
         ←
       </NuxtLink>
-      <h1
-        class="font-brand font-black text-2xl uppercase italic tracking-tighter"
-      >
+      <h1 class="font-brand font-black text-2xl uppercase tracking-tighter">
         Upload
       </h1>
     </div>

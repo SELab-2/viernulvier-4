@@ -200,7 +200,8 @@
       "title": "Title",
       "type": "Print type",
       "file": "File",
-      "fileRequired": "Upload a file."
+      "fileRequired": "Upload a file.",
+      "uploadError": "Failed to upload file."
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",

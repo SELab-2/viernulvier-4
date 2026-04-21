@@ -201,7 +201,8 @@
       "title": "Titel",
       "type": "Printtype",
       "file": "Bestand",
-      "fileRequired": "Upload een bestand."
+      "fileRequired": "Upload een bestand.",
+      "uploadError": "Kan het bestand niet uploaden."
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
