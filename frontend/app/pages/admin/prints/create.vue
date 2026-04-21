@@ -5,7 +5,6 @@ import { useStorageApi } from "../../../composables/media/useStorageApi";
 import { PrintTypeValues } from "@repo/common";
 
 const { t } = useI18n();
-const { apiKey } = useAuth();
 const { create } = usePrintApi();
 const { saveMedia } = useStorageApi();
 

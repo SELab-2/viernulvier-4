@@ -6,7 +6,7 @@ import PrintsToolbar from "../../../components/prints/PrintsToolbar.vue";
 import FileList from "../../../components/prints/FileList.vue";
 
 const { t, locale } = useI18n();
-const { getAll } = usePrintApi();
+const { getAll, remove } = usePrintApi();
 const {
   searchQuery,
   activeFilter,
@@ -56,6 +56,16 @@ async function loadPage() {
   }
 }
 
+async function handleDelete(file: PrintItemView) {
+  if (!confirm(t("prints.deleteConfirm", { name: file.titel }))) return;
+  try {
+    await remove(file.id);
+    await loadPage();
+  } catch (e) {
+    fetchError.value = e as Error;
+  }
+}
+
 watch([searchQuery, locale], () => {
   currentPage.value = 0;
   loadPage();
@@ -100,6 +110,7 @@ onMounted(() => {
       :category="activeFilter"
       :files="prints"
       :total-pages="totalPages"
+      @delete="handleDelete"
     />
 
     <div class="flex items-center justify-between mt-6">

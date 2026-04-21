@@ -201,7 +201,8 @@
       "type": "Print type",
       "file": "File",
       "fileRequired": "Upload a file.",
-      "uploadError": "Failed to upload file."
+      "uploadError": "Failed to upload file.",
+      "deleteConfirm": "Are you sure you want to delete {name}?"
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
