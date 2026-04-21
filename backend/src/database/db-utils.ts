@@ -5,6 +5,13 @@
 import { Language, ZodObject } from "@repo/common";
 
 /**
+ * Interface for handling of db error codes i.e. 409.
+ */
+export interface PostgresError {
+  code: string;
+}
+
+/**
  * Returns whether something is a plain object or not.
  * @param value The value.
  * @returns T/F.

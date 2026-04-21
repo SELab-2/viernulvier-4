@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   NotFoundException,
@@ -76,6 +77,20 @@ export class MediaNotFoundException extends NotFoundException {
       error: "Not Found",
       message: `${resourceName}(${resourceId}) currently has no Gallery of type "${galleryType}".`,
       internalCode: "GALLERY_NOT_FOUND",
+    });
+  }
+}
+
+/**
+ * 409 Conflict specifically for duplicate entities.
+ */
+export class AccountAlreadyExistsException extends ConflictException {
+  constructor(username: string) {
+    super({
+      statusCode: HttpStatus.CONFLICT,
+      error: "Conflict",
+      message: `Account with username "${username}" already exists.`,
+      internalCode: "ACCOUNT_ALREADY_EXISTS",
     });
   }
 }
