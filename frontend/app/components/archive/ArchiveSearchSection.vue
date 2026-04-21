@@ -95,7 +95,7 @@ onMounted(fetchOldestDate);
 <template>
   <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
-    <div class="page-container py-6 flex items-center gap-4">
+    <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
       <div class="flex-1 h-12">
         <SearchBar
@@ -108,18 +108,39 @@ onMounted(fetchOldestDate);
       <!-- Filter toggle + badge -->
       <div class="relative">
         <button
-          :class="['btn-outline h-12 px-4']"
+          type="button"
+          :class="[
+            'btn-outline h-12 px-5 gap-2 shrink-0 flex items-center justify-center',
+            filterOpen && '!bg-foreground !text-background !border-foreground',
+          ]"
           :aria-expanded="filterOpen"
           @click="filterOpen = !filterOpen"
         >
-          {{ t("archive.filter") }}
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span
+            class="font-brand font-black text-[10px] uppercase tracking-widest"
+          >
+            {{ t("archive.filter") }}
+          </span>
         </button>
 
-        <!-- Clear filters badge -->
         <button
-          v-if="hasActiveFilters"
+          v-if="hasActiveFilters && !filterOpen"
           @click.stop="clearAllFilters"
-          class="absolute -top-2.25 -right-2.25 w-5.5 h-5.5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition shadow-sm"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition shadow-sm"
         >
           <X class="w-3 h-3" />
         </button>
