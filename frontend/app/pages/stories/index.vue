@@ -165,7 +165,7 @@ onUnmounted(() => io?.disconnect());
       @update:date-filter="dateFilter = $event"
     />
 
-    <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
+    <main class="page-container py-8 sm:py-12">
       <StorySkeleton v-if="pending" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">

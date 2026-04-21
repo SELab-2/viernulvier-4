@@ -95,7 +95,7 @@ onMounted(fetchOldestDate);
 <template>
   <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
-    <div class="max-w-5xl mx-auto px-4 py-6 flex items-center gap-4">
+    <div class="page-container py-6 flex items-center gap-4">
       <!-- Search -->
       <div class="flex-1 h-12">
         <SearchBar

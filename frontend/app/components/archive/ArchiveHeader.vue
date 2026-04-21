@@ -12,7 +12,7 @@ const { t } = useI18n();
 
 <template>
   <header class="w-full border-b border-border bg-muted">
-    <div class="max-w-5xl mx-auto px-4 py-12">
+    <div class="page-container py-12">
       <h1
         class="font-brand text-4xl md:text-5xl font-black tracking-tight text-foreground"
       >

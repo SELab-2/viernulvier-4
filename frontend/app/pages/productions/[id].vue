@@ -192,9 +192,7 @@ onBeforeUnmount(() => {
         :src="headerCrop"
       />
 
-      <div
-        class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12"
-      >
+      <div class="relative z-10 page-container pb-12">
         <div class="flex items-center gap-4 mb-8">
           <button
             @click="goBack()"
@@ -259,7 +257,7 @@ onBeforeUnmount(() => {
     </section>
 
     <section class="py-20">
-      <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
+      <div class="page-container">
         <div class="w-full">
           <div v-if="isValid(production.tagline)" class="mb-10">
             <p

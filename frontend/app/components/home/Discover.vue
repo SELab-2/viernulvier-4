@@ -22,7 +22,7 @@ const { t } = useI18n();
 
 <template>
   <section class="py-24">
-    <div class="px-6 md:px-12 lg:px-20 max-w-7xl mx-auto">
+    <div class="page-container">
       <h2 class="text-3xl md:text-4xl font-display font-black mb-12">
         {{ t("discover.title") }}
       </h2>

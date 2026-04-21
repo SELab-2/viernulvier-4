@@ -461,6 +461,10 @@
   .btn-danger:hover {
     @apply bg-[var(--foreground)] border-[var(--foreground)];
   }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20;
+  }
 }
 /* ── Calendar component ──────────────────────────────────────────────────────
    Used by components/calendar.vue + components/calendar/*.vue

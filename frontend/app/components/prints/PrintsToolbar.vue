@@ -38,7 +38,7 @@ function selectType(type: PrintType | null) {
 <template>
   <div class="border-b border-border bg-background">
     <!-- Toolbar -->
-    <div class="container mx-auto px-4 max-w-5xl py-5 flex gap-3">
+    <div class="page-container py-5 flex gap-3">
       <!-- Search -->
       <div class="flex-1 min-w-0 h-10">
         <SearchBar
