@@ -12,12 +12,18 @@ jobs:
       - name: Stop PR preview
         run: |
           PR=${{ github.event.pull_request.number }}
-          PORT="30$PR"
-          PREVIEW_NAME="preview-$PR"
+          FRONTEND_PREVIEW="preview-$PR"
+          BACKEND_PREVIEW="preview-backend-$PR"
           PREVIEW_PATH="/home/selab2/project/previews/$PR"
 
-          echo "Stopping PM2 preview: $PREVIEW_NAME on port $PORT"
-          pm2 delete $PREVIEW_NAME || echo "No PM2 process found"
+          echo "Stopping Frontend PM2 preview: $FRONTEND_PREVIEW"
+          pm2 delete $FRONTEND_PREVIEW || echo "Frontend process not found or already deleted"
+
+          echo "Stopping Backend PM2 preview: $BACKEND_PREVIEW"
+          pm2 delete $BACKEND_PREVIEW || echo "Backend process not found or already deleted"
+
+          # Save PM2 state so deleted processes don't return on server reboot
+          pm2 save
 
           echo "Removing preview folder: $PREVIEW_PATH"
           rm -rf $PREVIEW_PATH || echo "No folder found"
