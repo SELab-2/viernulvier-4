@@ -9,6 +9,9 @@
 import { ROUTES } from "~/utils/routes";
 
 export default defineNuxtPlugin(() => {
+  const { rehydrate } = useAuth();
+  rehydrate();
+
   const router = useRouter();
 
   router.beforeEach((to) => {
