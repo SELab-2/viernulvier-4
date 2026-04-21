@@ -85,7 +85,7 @@ jobs:
 
           # Connect frontend to the NGINX-routed backend preview
           NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api" \
-          MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR" \
+          MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR/archive" \
           npm run build
 
           pm2 delete preview-$PR || true
@@ -99,7 +99,7 @@ jobs:
           message: |
             🚀 **Preview Build successfully deployed!**
 
-            📱 **Website Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+            📱 **Website Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/archive
             📚 **Docs Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
-            ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api
+            ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api/
           comment_tag: preview_link
