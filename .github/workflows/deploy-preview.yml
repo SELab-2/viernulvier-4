@@ -55,7 +55,7 @@ jobs:
           # Create .env in the root folder
           echo "DB_USER_DEV=selab2" > .env
           echo "DB_HOST_DEV=sel2-4.ugent.be" >> .env
-          echo "DB_NAME_DEV=selab2_dev" >> .env
+          echo "DB_NAME_DEV=selab2_prod" >> .env
           echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> .env
           echo "DB_PORT_DEV=2002" >> .env
           echo "TRANSLATE_API_KEY=abcdlalala" >> .env
