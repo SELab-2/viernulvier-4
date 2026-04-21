@@ -11,7 +11,6 @@ const i18n = createI18n({
     nl: {
       production: {
         stories: "Verhalen",
-        noStories: "Deze productie bevat geen verhalen.",
       },
       general: {
         showMore: "Toon meer",
@@ -21,7 +20,6 @@ const i18n = createI18n({
     en: {
       production: {
         stories: "Stories",
-        noStories: "This production doesn't contain any stories.",
       },
       general: {
         showMore: "Show more",
@@ -63,7 +61,7 @@ const stories: BlogView[] = [
 ];
 
 describe("ProductionStories", () => {
-  let wrapper: VueWrapper<any>;
+  let wrapper: VueWrapper<InstanceType<typeof ProductionStories>>;
 
   beforeEach(() => {
     wrapper = mount(ProductionStories, {
