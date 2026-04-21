@@ -103,6 +103,7 @@ const { data: stories } = await useAsyncData(
   { watch: [productionId, locale], default: () => [] },
 );
 
+/** Gets the production gallery. Handles API nesting and page-specific data fetching.*/
 const { data: gallery } = await useAsyncData<
   GalleryWithItems<ItemViewWithCrops>
 >(
@@ -114,6 +115,7 @@ const { data: gallery } = await useAsyncData<
   },
   { watch: [productionId, locale] },
 );
+
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");

@@ -20,6 +20,7 @@ const blogId = computed(() => {
   return isFinite(n) ? n : null;
 });
 
+/** Get the main blog data and handle API nesting */
 const { data, pending, error } = await useAsyncData<BlogView | null>(
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
@@ -35,6 +36,9 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
 
 const blog = computed(() => data.value);
 
+/** * Get the media gallery.
+ * Uses `(res as any)?.data ?? res` to handle inconsistent API nesting.
+ */
 const { data: gallery } = await useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
