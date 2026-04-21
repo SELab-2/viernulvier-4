@@ -58,7 +58,7 @@ const { t } = useI18n();
 
       <NuxtLink :to="ROUTES.productions.base">
         <button
-          class="group inline-flex items-center gap-3 bg-white text-black px-7 py-3.5 font-bold text-sm tracking-wide hover:bg-white/90 transition-colors"
+          class="group inline-flex items-center gap-3 bg-white text-black px-7 py-3.5 font-bold text-sm tracking-wide hover:bg-white/90 transition-colors rounded-md"
         >
           {{ t("hero.cta") }}
           <ArrowRight
