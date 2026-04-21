@@ -68,7 +68,7 @@ const openFile = (src: string) => window.open(src, "_blank");
         :label="t('prints.download')"
         :size="37"
         :src="file.url"
-        :name="file.url"
+        :name="file.titel"
       />
       <AdminDeleteButton
         :label="t('prints.delete')"
