@@ -11,7 +11,6 @@ import { useEventApi } from "../composables/useEventApi";
 import { ROUTES } from "../utils/routes";
 import { computeDateRangeFromEvents } from "../utils/formatters";
 import TagPill from "./TagPill.vue";
-import ThumbnailPlaceholder from "./ThumbnailPlaceholder.vue";
 import { useGallery } from "~/composables/media/useGallery";
 
 const { productionView } = defineProps<{
@@ -126,6 +125,14 @@ watch(locale, () => loadTags());
         >
           {{ productionView.titel }}
         </h3>
+
+        <!-- Artist -->
+        <p
+          v-if="productionView.artist && productionView.artist !== 'N/A'"
+          class="text-sm text-muted-foreground leading-normal line-clamp-1"
+        >
+          {{ productionView.artist }}
+        </p>
 
         <!-- Date range -->
         <p class="text-sm text-muted-foreground flex items-center gap-2">
