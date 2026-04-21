@@ -1,13 +1,4 @@
-<script setup lang="ts">
-const { isLoggedIn } = useAuth();
-
-// Guard: redirect to login if not authenticated
-onMounted(() => {
-  if (!isLoggedIn.value) {
-    navigateTo(ROUTES.admin.login.base);
-  }
-});
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <section class="min-h-screen bg-gray-50 py-16 px-6">
