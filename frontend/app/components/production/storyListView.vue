@@ -16,28 +16,57 @@
  * ]
  */
 
+import { ref, computed } from "vue";
 import type { BlogView } from "@repo/common";
+import { ChevronDown, ChevronUp } from "lucide-vue-next";
+
 const { t } = useI18n();
 
 interface Props {
   stories: BlogView[];
+  limit?: number;
 }
-const props = defineProps<Props>();
+
+const props = withDefaults(defineProps<Props>(), {
+  limit: 3,
+});
+
+const isExpanded = ref(false);
+
+const hasHiddenStories = computed(() => props.stories.length > props.limit);
+
+const visibleStories = computed(() => {
+  if (isExpanded.value) return props.stories;
+  return props.stories.slice(0, props.limit);
+});
 </script>
 
 <template>
   <div class="w-full">
-    <div v-if="stories.length" class="flex flex-col gap-2">
-      <div v-if="stories.length" class="overflow-y-auto max-h-[25rem]">
-        <div class="flex flex-col gap-2">
-          <BlogsStoryListItem
-            v-for="story in stories"
-            :key="story.id"
-            :story="story"
-            data-testid="data-story"
-          />
-        </div>
+    <div v-if="stories.length" class="flex flex-col items-center">
+      <div class="flex flex-col gap-6 w-full transition-all duration-500">
+        <BlogsStoryListItem
+          v-for="story in visibleStories"
+          :key="story.id"
+          :story="story"
+          data-testid="data-story"
+        />
       </div>
+
+      <button
+        v-if="hasHiddenStories"
+        @click="isExpanded = !isExpanded"
+        class="mt-10 text-[11px] font-black uppercase tracking-[2px] text-accent hover:underline outline-none flex items-center gap-2"
+      >
+        <template v-if="!isExpanded">
+          {{ t("general.showMore") }} ({{ stories.length - limit }})
+          <ChevronDown :size="14" stroke-width="3" />
+        </template>
+        <template v-else>
+          {{ t("general.showLess") }}
+          <ChevronUp :size="14" stroke-width="3" />
+        </template>
+      </button>
     </div>
   </div>
 </template>
