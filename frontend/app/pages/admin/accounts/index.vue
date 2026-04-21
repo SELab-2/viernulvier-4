@@ -11,6 +11,7 @@ const isLoading = ref(false);
 const isSubmitting = ref(false);
 const message = ref<string | null>(null);
 const error = ref<string | null>(null);
+const accountFormRef = ref<{ reset: () => void } | null>(null);
 
 async function loadAccounts() {
   isLoading.value = true;
@@ -46,6 +47,7 @@ async function handleCreateAccount(payload: CreateAccount) {
   message.value = t("accounts.createSuccess", {
     username: response.data.username,
   });
+  accountFormRef.value?.reset();
   isSubmitting.value = false;
 }
 
@@ -114,7 +116,7 @@ onMounted(async () => {
       <h2 class="mb-3 text-lg font-semibold text-card-foreground">
         {{ t("accounts.create") }}
       </h2>
-      <AdminAccountForm @submit="handleCreateAccount" />
+      <AdminAccountForm ref="accountFormRef" @submit="handleCreateAccount" />
 
       <p v-if="isSubmitting" class="mt-3 text-sm text-muted-foreground">
         {{ t("accounts.creating") }}

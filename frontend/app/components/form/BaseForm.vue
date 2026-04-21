@@ -70,6 +70,10 @@ function reset() {
   multiSelectRefs.value = [];
 }
 
+defineExpose({
+  reset,
+});
+
 onBeforeUpdate(() => {
   multiSelectRefs.value = [];
 });
