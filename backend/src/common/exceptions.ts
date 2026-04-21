@@ -1,9 +1,9 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   NotFoundException,
   Type,
-  ConflictException,
 } from "@nestjs/common";
 import { GalleryType } from "@repo/common";
 
@@ -29,8 +29,11 @@ export class AccountAlreadyExistsException extends ConflictException {
       error: "Conflict",
       message: `Account with username "${username}" already exists.`,
       internalCode: "ACCOUNT_ALREADY_EXISTS",
- 
- /**
+    });
+  }
+}
+
+/**
  * 404 not found specific for Resources.
  */
 export class ResourceNotFoundException extends NotFoundException {
