@@ -46,8 +46,7 @@ export class ScraperService implements OnApplicationBootstrap {
    * Ran when the app first starts, runs an initial scrape.
    * @returns Nothing.
    */
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async onApplicationBootstrap() {
+  onApplicationBootstrap() {
     if (!this.isScraperEnabled) {
       this.logger.log("Skipping initial scrape (Scraping is DISABLED).");
       return;
@@ -93,8 +92,7 @@ export class ScraperService implements OnApplicationBootstrap {
    * @returns Nothing.
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async handleDailyScrape() {
+  handleDailyScrape() {
     if (!this.isScraperEnabled) {
       this.logger.log("Skipping scheduled scrape (Scraping is DISABLED).");
       return;
@@ -118,78 +116,112 @@ export class ScraperService implements OnApplicationBootstrap {
       });
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  /**
+   * Cron job that runs every day from 2-4 am. Will run the image fetching process.
+   * stops if the 4 am limit is reached or all 50 fetches fail as a safeguard.
+   * @returns Nothing.
+   */
+  @Cron("0 * 2 * * *")
   async processImages() {
     if (this.isProcessingMedia || !this.doDownloadMedia) return;
 
-    // Start processing.
     this.isProcessingMedia = true;
     this.logger.log(
-      `[PROCESSING] Attempting to process Batch of ${this.downloadAmount} Images...`,
+      `[WINDOW START] Starting nightly image processing window...`,
     );
 
     try {
-      const { batch, totalLeft } = await this.runner.getPendingCrops(
-        this.downloadAmount,
-      );
-      if (batch.length === 0) return;
+      let hasMore = true;
 
-      // Process 50 imgs
-      const results: PromiseSettledResult<number>[] = [];
+      while (hasMore) {
+        const currentHour = new Date().getHours();
+        if (currentHour < 2 || currentHour >= 4) {
+          // end the job.
+          this.logger.log(`[WINDOW END] Time window closed. Stopping.`);
+          break;
+        }
 
-      for (const crop of batch) {
-        try {
-          // download
-          const imageData = await this.getImageBuffer(crop.url);
-          const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
-          const newFileName = `${crop.id}-${crop.name}${ext}`;
-          const finalUrl = `/photos/${newFileName}`;
+        const { batch, totalLeft } = await this.runner.getPendingCrops(
+          this.downloadAmount,
+        );
 
-          // save
-          const savedUrl = await this.mediaStorage.saveMedia(
-            finalUrl,
-            imageData,
-          );
+        if (batch.length === 0) {
+          // end the job.
+          this.logger.log(`[FINISHED] No more images to process.`);
+          hasMore = false;
+          break;
+        }
 
-          // update
-          await this.runner.updatePendingCrop(crop.id, savedUrl);
-          results.push({ status: "fulfilled", value: crop.id });
-          await new Promise((resolve) => setTimeout(resolve, 250));
+        this.logger.log(
+          `[BATCH] Processing ${batch.length} images. ${totalLeft} remaining...`,
+        );
 
-          // catch errors
-        } catch (error) {
-          let errorMessage = "An unknown error occurred";
+        const results: PromiseSettledResult<number>[] = [];
 
-          if (error instanceof Error) {
-            errorMessage = error.message;
-          } else if (typeof error === "string") {
-            errorMessage = error;
+        for (const crop of batch) {
+          try {
+            // download
+            const imageData = await this.getImageBuffer(crop.url);
+            const ext = path.extname(new URL(crop.url).pathname) || ".jpg";
+            const newFileName = `${crop.id}-${crop.name}${ext}`;
+            const finalUrl = `/photos/${newFileName}`;
+
+            // save
+            const savedUrl = await this.mediaStorage.saveMedia(
+              finalUrl,
+              imageData,
+            );
+
+            // update
+            await this.runner.updatePendingCrop(crop.id, savedUrl);
+            results.push({ status: "fulfilled", value: crop.id });
+            await new Promise((resolve) => setTimeout(resolve, 250));
+          } catch (error) {
+            // error handling for image processing
+            let errorMessage = "An unknown error occurred";
+            if (error instanceof Error) {
+              errorMessage = error.message;
+            } else if (typeof error === "string") {
+              errorMessage = error;
+            }
+            results.push({ status: "rejected", reason: errorMessage });
           }
+        }
 
-          results.push({ status: "rejected", reason: errorMessage });
+        const successCount = results.filter(
+          (r) => r.status === "fulfilled",
+        ).length;
+        const failCount = results.length - successCount;
+        const failedItems = results.filter((r) => r.status === "rejected");
+
+        if (failCount > 0) {
+          failedItems.forEach((failure, index) => {
+            const failedCrop = batch[index];
+            this.logger.error(
+              `[IMAGE FAILURE]: Crop ${failedCrop.id} failed. ` +
+                `URL: "${failedCrop.url}" | Reason: ${failure.reason}`,
+            );
+          });
+        }
+
+        this.logger.log(
+          `[BATCH FINISHED] Success: ${successCount}, Failed: ${failCount}. Approx ${totalLeft} left.`,
+        );
+
+        // stop the job if all fetches fail. (save log space)
+        if (failCount === batch.length && batch.length > 0) {
+          this.logger.error(
+            `[CRITICAL ABORT] 100% failure rate detected (${failCount}/${batch.length} failed). Halting tonight's processing to prevent infinite error loops.`,
+          );
+          break;
+        }
+
+        if (totalLeft === 0) {
+          hasMore = false;
         }
       }
-
-      const successCount = results.filter(
-        (r) => r.status === "fulfilled",
-      ).length;
-      const failCount = results.length - successCount;
-      const failedItems = results.filter((r) => r.status === "rejected");
-      if (failCount > 0) {
-        failedItems.forEach((failure, index) => {
-          const failedCrop = batch[index];
-
-          this.logger.error(
-            `[IMAGE FAILURE]: Crop ${failedCrop.id} failed. ` +
-              `URL: "${failedCrop.url}" | Reason: ${failure.reason}`,
-          );
-        });
-      }
-
-      this.logger.log(
-        `[BATCH FINISHED] Success: ${successCount}, Failed: ${failCount}. Approx ${totalLeft} left.`,
-      );
     } catch (globalError) {
+      // global error handling -> errors resulted besides image processing.
       this.logger.error(
         "Global Batch Failure:",
         (globalError as Error).message,
@@ -200,7 +232,7 @@ export class ScraperService implements OnApplicationBootstrap {
   }
 
   /**
-   * Helper that will fetch an image from an URL an put it into
+   * Helper that will fetch an image from a URL and put it into
    * A Buffer object.
    * @param url The URL to the image.
    * @returns The Buffer.
@@ -234,7 +266,7 @@ export class ScraperService implements OnApplicationBootstrap {
         const chunks: Buffer[] = [];
 
         res.on("data", (chunk) => {
-          chunks.push(chunk);
+          chunks.push(chunk as Buffer<ArrayBufferLike>);
         });
 
         res.on("end", () => {

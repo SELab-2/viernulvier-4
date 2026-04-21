@@ -27,8 +27,14 @@ export const CreateLocationSchema = MutableLocationSchema;
 export const ModifyLocationSchema = MutableLocationSchema.partial();
 // Replace is left out here since Location only has ONE field.
 
+// Filtering.
+export const FilterLocationSchema = z.object({
+  location: z.string().optional(),
+});
+
 // Type exports.
 export type Location = z.infer<typeof LocationSchema>;
 export type LocationView = z.infer<typeof LocationViewSchema>;
 export type CreateLocation = z.infer<typeof CreateLocationSchema>;
 export type ModifyLocation = z.infer<typeof ModifyLocationSchema>;
+export type FilterLocation = z.infer<typeof FilterLocationSchema>;

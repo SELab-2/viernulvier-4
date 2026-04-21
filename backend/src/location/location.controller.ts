@@ -19,6 +19,7 @@ import {
   LocationViewDto,
   PaginationFilterDto,
   ModifyLocationDto,
+  FilterLocationDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -34,6 +35,7 @@ import {
   PaginatedResponse,
   PaginationFilterSchema,
   ModifyLocationSchema,
+  FilterLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
@@ -51,6 +53,9 @@ export class LocationController {
 
   /**
    * Responds to a GET to "/locations"
+   * @param paginationFilter Pagination and ordering filters.
+   * @param lang Language filter.
+   * @param locationFilters Filters for the location.
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
@@ -60,10 +65,18 @@ export class LocationController {
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+    @Query(new ZodValidationPipe(FilterLocationSchema))
+    locationFilters: FilterLocationDto,
   ): Promise<PaginatedResponse<LocationDto | LocationViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<LocationDto | LocationViewDto>
-    >(await this.locationService.getLocations(paginationFilter), lang.lang);
+    >(
+      await this.locationService.getLocations(
+        paginationFilter,
+        locationFilters,
+      ),
+      lang.lang,
+    );
   }
 
   /**
