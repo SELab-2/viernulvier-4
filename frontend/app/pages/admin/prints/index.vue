@@ -72,11 +72,18 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Add print button -->
-  <div class="container mx-auto px-4 max-w-5xl py-3 flex justify-end">
+  <!-- Header -->
+  <div
+    class="container mx-auto px-4 max-w-5xl py-3 pt-10 flex items-center justify-between"
+  >
+    <h1
+      class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
+    >
+      {{ t("prints.title") }}
+    </h1>
     <NuxtLink
       :to="ROUTES.admin.prints.create"
-      class="btn-outline h-8 gap-2 flex items-center text-[11px] font-black uppercase tracking-widest"
+      class="h-9 gap-2 flex items-center px-4 rounded-md text-[11px] font-black uppercase tracking-widest transition-all bg-purple-700 hover:bg-purple-500 text-white"
     >
       + {{ t("prints.add") }}
     </NuxtLink>
