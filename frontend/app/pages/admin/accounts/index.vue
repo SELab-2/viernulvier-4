@@ -1,3 +1,20 @@
+<!--
+  Admin Accounts Page
+
+  This page lets super admins view, create, and remove accounts.
+  It handles account loading, creation feedback, and delete confirmations,
+  while keeping all messages available through i18n.
+
+  Features:
+  - List of accounts with delete actions
+  - Account creation form
+  - Success and error feedback
+  - Form reset after successful creation
+  - i18n support
+
+  Notes:
+  - Restricted to super admin users
+-->
 <script lang="ts" setup>
 import type { CreateAccount, PublicAccount } from "@repo/common";
 import { ROUTES } from "~/utils/routes";
@@ -13,6 +30,7 @@ const message = ref<{ key: string; params?: any } | null>(null);
 const error = ref<{ text?: string; key?: string; params?: any } | null>(null);
 const accountFormRef = ref<{ reset: () => void } | null>(null);
 
+// Loads accounts from the API and handles loading state and errors
 async function loadAccounts() {
   isLoading.value = true;
   error.value = null;
@@ -32,6 +50,7 @@ async function loadAccounts() {
   isLoading.value = false;
 }
 
+// Handles account creation, including API call, error handling, success feedback, and form reset
 async function handleCreateAccount(payload: CreateAccount) {
   isSubmitting.value = true;
   error.value = null;
@@ -63,6 +82,7 @@ async function handleCreateAccount(payload: CreateAccount) {
   isSubmitting.value = false;
 }
 
+// Handles account deletion with confirmation, API call, error handling, and success feedback
 async function handleDeleteAccount(target: PublicAccount) {
   if (target.superAdmin) {
     return;
@@ -96,11 +116,7 @@ async function handleDeleteAccount(target: PublicAccount) {
 }
 
 onMounted(async () => {
-  if (!isLoggedIn.value) {
-    await navigateTo(ROUTES.admin.login.base);
-    return;
-  }
-
+  // Redirect to 404 if not super admin
   if (!account.value?.superAdmin) {
     throw createError({ statusCode: 404, statusMessage: "Page Not Found" });
   }
