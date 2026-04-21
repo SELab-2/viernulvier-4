@@ -6,6 +6,7 @@
 -->
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
+import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { useGallery } from "~/composables/media/useGallery";
@@ -24,6 +25,8 @@ const mainCrop = computed(() => {
 const { title, description, formattedDate } = useBlogStory(
   computed(() => props.story),
 );
+
+const cleanDescription = computed(() => cleanText(description.value));
 
 async function loadGallery() {
   if (!props.story?.id) return;
@@ -77,11 +80,10 @@ watch(
         </h3>
 
         <p
-          v-if="description"
+          v-if="cleanDescription"
           class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400"
-        >
-          {{ description }}
-        </p>
+          v-html="cleanDescription"
+        ></p>
       </div>
 
       <div class="flex items-center mt-3">
