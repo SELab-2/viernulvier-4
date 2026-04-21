@@ -99,7 +99,7 @@ async function fetchSuggestions(query: string): Promise<SearchSuggestion[]> {
     // This means we'll use 5 suggestions.
     paginationFilters: { page: 0, limit: 5, descending: true },
     productionFilters: {
-      titel_or_artist: query,
+      titelOrArtist: query,
       is_suggestion: true,
       ...dateFilter.value,
       tag_ids: tagIds.value,

@@ -54,11 +54,12 @@ async function loadPage(page: number) {
   try {
     const resp = await getAll({
       productionFilters: {
-        titel_or_artist: searchQuery.value || undefined,
+        titelOrArtist: searchQuery.value || undefined,
         tag_ids: tagIds.value.length ? tagIds.value : undefined,
         after: dateFilter.value.after || undefined,
         before:
           dateFilter.value.before || new Date().toISOString().split("T")[0],
+        is_suggestion: false,
       },
       paginationFilters: {
         page: targetedPage - 1, // backend uses 0-based pagination
