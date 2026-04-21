@@ -66,8 +66,8 @@ export class BlogDatabaseService {
     const returningClause = generateReturningClause(BlogSchema);
 
     const conditions: string[] = [];
-    const values: any[] = [];
-    const param = (val: any) => {
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
       values.push(val);
       return `$${values.length}`;
     };
@@ -84,19 +84,23 @@ export class BlogDatabaseService {
 
     // Filter blogs that were created before.
     if (blogFilters.before) {
-      conditions.push(`created_at::date <= ${param(blogFilters.before)}::date`);
+      conditions.push(
+        // NOTE: We add + 1 day here for performance and include reasons.
+        // Adding 1 day is a more performant than casting the original column to a
+        // date.
+        `created_at < ${param(blogFilters.before)}::date + interval '1 day'`,
+      );
     }
 
     // Filter blogs that were created after.
     if (blogFilters.after) {
-      conditions.push(`created_at::date >= ${param(blogFilters.after)}::date`);
+      conditions.push(`created_at >= ${param(blogFilters.after)}::date`);
     }
 
     const whereClause = conditions.length
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
       SELECT COUNT(*) as count FROM blogs
