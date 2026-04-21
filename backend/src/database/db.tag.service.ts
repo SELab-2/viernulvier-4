@@ -5,15 +5,19 @@ import {
   TagDto,
   ModifyTagDto,
   PaginationFilterDto,
+  FilterTagDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
-import { PaginatedResponse, TagSchema } from "@repo/common";
 import {
-  generateCountQuery,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+  TagSchema,
+} from "@repo/common";
+import {
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class TagDatabaseService {
@@ -37,35 +41,64 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Tag with ID ${id} not found`);
+      throw new ResourceNotFoundException(TagDto, id);
     }
     return result[0];
   }
 
   /**
    * Get all tags.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
+   * @param paginationFilters Filters for pagination and ordering.
+   * @param tagFilters Filters for tag.
    * @returns The tags if there are any.
    */
   async getTags(
     paginationFilters: PaginationFilterDto,
+    tagFilters: FilterTagDto,
   ): Promise<PaginatedResponse<TagDto>> {
     const returningClause = generateReturningClause(TagSchema);
+
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Filter by the tag itself. (Only used in admin page)
+    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    if (tagFilters.tag) {
+      const tagParam = param(`%${tagFilters.tag}%`);
+      const tagClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `tag->>'${lang}' ILIKE ${tagParam}`,
+      );
+      conditions.push(`(${tagClauses.join(" OR ")})`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM tags
+      ${whereClause};
+    `;
+
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     const query = `
       SELECT ${returningClause}
       FROM tags 
+      ${whereClause}
       ORDER BY id
-      LIMIT $1 OFFSET $2;
+      ${paginationClause};
     `;
-    const countQuery = generateCountQuery("tags");
-
-    const offset = paginationFilters.page * paginationFilters.limit;
 
     const [tags, countResult] = await Promise.all([
-      this.db.query<TagDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery),
+      this.db.query<TagDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
     ]);
 
     return {
@@ -126,7 +159,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Tag with ID ${tagId} not found`);
+      throw new ResourceNotFoundException(TagDto, tagId);
     }
 
     return result[0];
@@ -141,12 +174,8 @@ export class TagDatabaseService {
   async deleteTag(id: number): Promise<void> {
     const query = `DELETE FROM tags WHERE id = $1 RETURNING id;`;
 
-    const result = await this.db.query(query, [id]);
-    if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Cannot Delete: Tag with ID ${id} not found`,
-      );
-    }
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 
   // insert extra functions here if desired

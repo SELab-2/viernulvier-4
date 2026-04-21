@@ -11,7 +11,7 @@ import { useEventApi } from "../composables/useEventApi";
 import { ROUTES } from "../utils/routes";
 import { computeDateRangeFromEvents } from "../utils/formatters";
 import TagPill from "./TagPill.vue";
-import ThumbnailPlaceholder from "./ThumbnailPlaceholder.vue";
+import { useGallery } from "~/composables/media/useGallery";
 
 const { productionView } = defineProps<{
   productionView: ProductionView;
@@ -19,9 +19,15 @@ const { productionView } = defineProps<{
 
 const tags = ref<Tag[]>([]);
 const events = ref<Event[]>([]);
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+const mainCrop = computed(() => {
+  if (!gallery.value) return null;
+  return getMainImageCrop(gallery.value, "hd_ready");
+});
 
-const { getTags } = useProductionApi();
+const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
+const { getMainImageCrop } = useGallery();
 
 const { locale } = useI18n();
 
@@ -63,6 +69,11 @@ async function loadEvents() {
   }
 }
 
+async function loadGallery() {
+  if (!productionView?.id) return;
+  gallery.value = await getMediaGallery(productionView.id, locale.value);
+}
+
 // Recompute dateRangeText whenever events or locale changes
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
@@ -71,6 +82,7 @@ const dateRangeText = computed(() =>
 onMounted(() => {
   loadEvents();
   loadTags();
+  loadGallery();
 });
 
 watch(
@@ -78,6 +90,7 @@ watch(
   () => {
     loadEvents();
     loadTags();
+    loadGallery();
   },
 );
 
@@ -86,14 +99,20 @@ watch(locale, () => loadTags());
 </script>
 
 <template>
-  <NuxtLink :to="ROUTES.archive.byId(productionView.id)" class="group block">
+  <NuxtLink
+    :to="ROUTES.productions.byId(productionView.id)"
+    class="group block"
+  >
     <div
       class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
     >
-      <ThumbnailPlaceholder
+      <MediaDisplay
         :id="productionView.id"
+        :src="mainCrop"
         size="md"
-        :showIcon="true"
+        :rounded="true"
+        :show-icon="true"
+        class="object-cover"
       />
 
       <div class="flex-1 min-w-0">
@@ -104,6 +123,14 @@ watch(locale, () => loadTags());
             >
               {{ productionView.titel }}
             </h3>
+
+            <!-- Artist -->
+            <p
+              v-if="productionView.artist && productionView.artist !== 'N/A'"
+              class="text-sm text-muted-foreground leading-normal line-clamp-1"
+            >
+              {{ productionView.artist }}
+            </p>
 
             <p
               class="mt-2 text-sm text-muted-foreground flex items-center gap-2"

@@ -8,17 +8,13 @@
     text input      → CalendarInputs emits apply-* → parent updates state + navigates
 -->
 <script lang="ts" setup>
-import CalendarTabs from "~/components/calendar/CalendarTabs.vue";
-import CalendarInputs from "~/components/calendar/CalendarInputs.vue";
-import CalendarMonths from "~/components/calendar/CalendarMonths.vue";
-import CalendarFooter from "~/components/calendar/CalendarFooter.vue";
-import type { CalMode } from "~/components/calendar/CalendarInputs.vue";
-import type { MonthData } from "~/components/calendar/CalendarMonths.vue";
 import {
   localIso,
   localTodayIso,
   buildWeekdayLabels,
 } from "~/utils/formatters";
+import type { CalMode } from "./calendar/CalendarInputs.vue";
+import type { MonthData } from "./calendar/CalendarMonths.vue";
 
 interface DateFilter {
   after?: string;

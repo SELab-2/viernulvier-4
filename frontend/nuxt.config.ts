@@ -53,6 +53,7 @@ export default defineNuxtConfig({
         '@vue/devtools-kit',
         'lucide-vue-next',
         'zod',
+        'pdfjs-dist',
       ]
     }
   }

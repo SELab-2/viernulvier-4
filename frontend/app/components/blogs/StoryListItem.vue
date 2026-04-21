@@ -6,12 +6,40 @@
 -->
 <script lang="ts" setup>
 import type { BlogView } from "@repo/common";
+import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogStory } from "~/composables/blogs/useBlogStory";
+import { useGallery } from "~/composables/media/useGallery";
+
+const { getMainImageCrop } = useGallery();
+const { getMediaGallery } = useBlogApi();
+const { locale } = useI18n();
 
 const props = defineProps<{ story: BlogView }>();
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+const mainCrop = computed(() => {
+  if (!gallery.value) return null;
+  return getMainImageCrop(gallery.value, "hd_ready");
+});
 
-const { title, description, image, formattedDate, placeholderGradient } =
-  useBlogStory(computed(() => props.story));
+const { title, description, formattedDate } = useBlogStory(
+  computed(() => props.story),
+);
+
+async function loadGallery() {
+  if (!props.story?.id) return;
+  gallery.value = await getMediaGallery(props.story.id, locale.value);
+}
+
+onMounted(() => {
+  loadGallery();
+});
+
+watch(
+  () => props.story.id,
+  () => {
+    loadGallery();
+  },
+);
 </script>
 
 <template>
@@ -26,21 +54,14 @@ const { title, description, image, formattedDate, placeholderGradient } =
 
     <!-- Thumbnail -->
     <div
-      class="w-28 sm:w-36 shrink-0 relative overflow-hidden"
-      style="aspect-ratio: 4/3; min-height: 84px"
+      class="w-32 sm:w-48 shrink-0 relative overflow-hidden rounded-lg"
+      style="min-height: 84px"
     >
-      <img
-        v-if="image"
-        :src="image"
-        :alt="title"
-        class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        loading="lazy"
-      />
-      <div
-        v-else
-        class="absolute inset-0 transition-opacity duration-300 group-hover:opacity-90"
-        :style="{ background: placeholderGradient }"
-        aria-hidden="true"
+      <MediaDisplay
+        :id="props.story.id"
+        :src="mainCrop"
+        :rounded="true"
+        :show-icon="true"
       />
     </div>
 

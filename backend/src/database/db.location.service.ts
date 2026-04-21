@@ -2,18 +2,22 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreateLocationDto,
+  FilterLocationDto,
   LocationDto,
   ModifyLocationDto,
   PaginationFilterDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
-import { LocationSchema, PaginatedResponse } from "@repo/common";
 import {
-  generateCountQuery,
+  LocationSchema,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
+import {
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -37,35 +41,64 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Location with ID ${id} not found`);
+      throw new ResourceNotFoundException(LocationDto, id);
     }
     return result[0];
   }
 
   /**
    * Get locations with pagination
-   * @param amount number of locations per page (if amount=0, it will default to grabbing all locations)
-   * @param page page index (starts at 0)
+   * @param paginationFilters The pagination filters and ordering filter.
+   * @param locationFilters Filters for the location.
    * @returns locations
    */
   async getLocations(
     paginationFilters: PaginationFilterDto,
+    locationFilters: FilterLocationDto,
   ): Promise<PaginatedResponse<LocationDto>> {
     const returningClause = generateReturningClause(LocationSchema);
 
-    const query = `
-      SELECT ${returningClause}
-      FROM locations
-      ORDER BY id
-      LIMIT $1 OFFSET $2;
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Filter by the location itself. (Only used in admin page)
+    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    if (locationFilters.location) {
+      const locationParam = param(`%${locationFilters.location}%`);
+      const locationClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `location->>'${lang}' ILIKE ${locationParam}`,
+      );
+      conditions.push(`(${locationClauses.join(" OR ")})`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM locations
+      ${whereClause};
     `;
-    const countQuery = generateCountQuery("locations");
 
     const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
+    const query = `
+      SELECT ${returningClause}
+      FROM locations 
+      ${whereClause}
+      ORDER BY id
+      ${paginationClause};
+    `;
 
     const [locations, countResult] = await Promise.all([
-      this.db.query<LocationDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery),
+      this.db.query<LocationDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
     ]);
 
     return {
@@ -129,9 +162,7 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Location with ID ${locationId} not found.`,
-      );
+      throw new ResourceNotFoundException(LocationDto, locationId);
     }
 
     return result[0];
@@ -145,10 +176,9 @@ export class LocationDatabaseService {
    */
   async deleteLocation(id: number): Promise<void> {
     const query = `DELETE FROM locations WHERE id = $1 RETURNING id;`;
-    const result = await this.db.query(query, [id]);
-    if (result.length === 0) {
-      throw new ResourceGoneException(`Location with ID ${id} not found`);
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 
   // insert extra functions here if desired.

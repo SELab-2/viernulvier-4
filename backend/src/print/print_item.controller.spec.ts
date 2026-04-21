@@ -12,6 +12,7 @@ import {
   ReplacePrintItemDto,
   PaginationFilterDto,
   LanguageQueryDto,
+  FilterPrintItemDto,
 } from "../dto/dto";
 
 describe("PrintItemController", () => {
@@ -24,6 +25,7 @@ describe("PrintItemController", () => {
     titel: { en: "Print Title", nl: "Print Titel" },
     description: { en: "Print Desc", nl: "Print Beschrijving" },
     url: "https://example.com/print.pdf",
+    print_type: "affiche",
     created_at: "2026-03-28T14:00:00.000Z",
     updated_at: "2026-03-28T14:00:00.000Z",
   };
@@ -106,16 +108,48 @@ describe("PrintItemController", () => {
       const result = await controller.getPrintItems(
         paginationFilter,
         langQuery,
+        {},
       );
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
+        {},
       );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         paginatedItems,
         "en",
       );
       expect(result).toEqual(expectedFlattened);
+    });
+
+    it("should pass the filters parameter to the service when provided", async () => {
+      const paginationFilter: PaginationFilterDto = {
+        page: 1,
+        limit: 10,
+        descending: true,
+      };
+      const langQuery: LanguageQueryDto = { lang: "en" };
+      const filters: FilterPrintItemDto = {
+        type: "affiche",
+        title: "brugge",
+      };
+
+      const paginatedItems: PaginatedResponse<PrintItemDto> = {
+        objects: [],
+        totalItems: 0,
+        page: 1,
+        limit: 10,
+      };
+
+      printItemService.getPrintItems.mockResolvedValue(paginatedItems);
+      languageService.flattenByLanguage.mockReturnValue(paginatedItems as any);
+
+      await controller.getPrintItems(paginationFilter, langQuery, filters);
+
+      expect(printItemService.getPrintItems).toHaveBeenCalledWith(
+        paginationFilter,
+        filters,
+      );
     });
   });
 
@@ -145,6 +179,7 @@ describe("PrintItemController", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
+        print_type: "affiche",
       };
       printItemService.createPrintItem.mockResolvedValue(mockPrintItem);
 
@@ -163,6 +198,7 @@ describe("PrintItemController", () => {
         titel: { en: "Print Title", nl: "Print Titel" },
         description: { en: "Print Desc", nl: "Print Beschrijving" },
         url: "https://example.com/print.pdf",
+        print_type: "affiche",
       };
       printItemService.replacePrintItem.mockResolvedValue(mockPrintItem);
 

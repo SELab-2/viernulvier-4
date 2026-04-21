@@ -12,7 +12,6 @@
  * are already flat strings (backend returns them localised via the lang param).
  */
 import type { BlogView } from "@repo/common";
-import { pickPlaceholderGradient } from "~/utils/constants";
 import { formatDateShort } from "~/utils/formatters";
 
 export function useBlogStory(story: MaybeRef<BlogView | null>) {
@@ -30,16 +29,10 @@ export function useBlogStory(story: MaybeRef<BlogView | null>) {
     return formatDateShort(s.value.created_at, locale.value);
   });
 
-  const placeholderGradient = computed<string>(() =>
-    pickPlaceholderGradient(storyId.value),
-  );
-
   return {
     title,
     description,
     storyId,
     formattedDate,
-    placeholderGradient,
-    image: null, // TODO: Image Gallery and such have to be fetched seperately.
   };
 }

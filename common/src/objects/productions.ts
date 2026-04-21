@@ -44,8 +44,7 @@ export const ReplaceProductionSchema = MutableProductionSchema;
 
 // Filtering.
 export const FilterProductionSchema = z.object({
-  titel: z.string().optional(),
-  id: z.coerce.number().optional(),
+  titelOrArtist: z.string().optional(),
   tag_ids: z
     .union([z.coerce.number(), z.array(z.coerce.number())])
     .optional()
@@ -55,11 +54,8 @@ export const FilterProductionSchema = z.object({
       return [val];
     }),
   hall: z.string().optional(),
-  date: z.iso.date().optional(),
-  date_between: z.iso.date().optional(),
-  date_before: z.iso.date().optional(),
-  date_after: z.iso.date().optional(),
-  artist: z.string().optional(),
+  before: z.iso.date().optional(),
+  after: z.iso.date().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
 });

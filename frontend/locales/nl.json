@@ -4,6 +4,10 @@
     "archive": "archief",
     "stories": "verhalen",
     "prints": "drukwerk",
+    "productions": "producties",
+    "events": "evenementen",
+    "accounts": "accounts",
+    "dashboard": "dashboard",
     "logout": "uitloggen"
   },
   "auth": {
@@ -74,6 +78,7 @@
     "lightMode": "Lichte modus",
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
+    "sortLabel": "Sorteer",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -99,6 +104,12 @@
         "after-selected": "Na ...",
         "before-selected": "Voor ..."
       }
+    },
+    "filters": {
+      "toggle": "Filters",
+      "year": "Jaar",
+      "dateRange": "Datum",
+      "clear": "Wis"
     }
   },
   "baseform": {
@@ -143,6 +154,16 @@
     "price": "Prijs",
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
+    "credits": "Credits",
+    "showExtraPrices": "+ {count} prijzen",
+    "hidePriceDetails": "verberg details"
+  },
+  "general": {
+    "back": "Terug",
+    "readMore": "Lees meer",
+    "readLess": "Lees minder",
+    "showMore": "Toon meer",
+    "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen."
   },
   "eventlist": {
@@ -152,13 +173,63 @@
     "delete": "Verwijder",
     "confirmDelete": "Ben je zeker dat je dit evenement wil verwijderen?"
   },
+  "accounts": {
+    "title": "Accounts",
+    "subtitle": "Beheer de accounts.",
+    "emptyTitle": "Geen accounts gevonden",
+    "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
+    "username": "Gebruikersnaam",
+    "username_placeholder": "Voer een gebruikersnaam in",
+    "password": "Wachtwoord",
+    "password_placeholder": "Voer een veilig wachtwoord in",
+    "confirm_password": "Bevestig wachtwoord",
+    "confirm_password_placeholder": "Herhaal je wachtwoord",
+    "password_mismatch": "Wachtwoorden komen niet overeen.",
+    "accountId": "Account-ID",
+    "role": "Rol",
+    "superAdmin": "Super admin",
+    "admin": "Admin",
+    "actions": "Acties",
+    "delete": "Verwijder",
+    "protected": "Beveiligd",
+    "create": "Account aanmaken",
+    "creating": "Account aanmaken...",
+    "loadError": "Accounts konden niet geladen worden.",
+    "createError": "Account kon niet aangemaakt worden.",
+    "deleteError": "Account kon niet verwijderd worden.",
+    "confirmDelete": "Account \"{username}\" verwijderen? Dit kan niet ongedaan gemaakt worden.",
+    "createSuccess": "Account \"{username}\" aangemaakt.",
+    "deleteSuccess": "Account \"{username}\" verwijderd."
+  },
   "prints": {
+    "types": {
+      "all": "Alles",
+      "affiche": "Affiche",
+      "brochure": "Brochure",
+      "drukwerk": "Drukwerk",
+      "programma": "Programma"
+    },
+    "title": "Drukwerk",
+    "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
     "noFiles": "Geen bestanden beschikbaar.",
     "showMore": "Meer tonen",
     "remaining": "resterend",
     "delete": "Verwijder",
-    "download": "Download"
+    "download": "Download",
+    "loading": "Laden...",
+    "retry": "Opnieuw proberen",
+    "noPrints": "Geen drukwerk",
+    "pagination": "Paginering",
+    "page_label": "Pagina",
+    "of_pages": "van {total}"
+  },
+  "login": {
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "signIn": "Inloggen",
+    "signingIn": "Inloggen...",
+    "error": "Er is iets misgegaan."
   }
 }

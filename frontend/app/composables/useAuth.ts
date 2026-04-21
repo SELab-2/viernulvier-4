@@ -80,10 +80,22 @@ export function useAuth() {
       sessionStorage.removeItem("apiKey");
       sessionStorage.removeItem("account");
     }
-    void navigateTo(ROUTES.login.base);
+    void navigateTo(ROUTES.admin.login.base);
   }
 
   const isLoggedIn = computed(() => !!apiKey.value);
 
-  return { account, apiKey, isLoggedIn, login, logout, rehydrate };
+  const isSuperAdmin = computed(() => {
+    return account.value?.superAdmin === true;
+  });
+
+  return {
+    account,
+    apiKey,
+    isLoggedIn,
+    isSuperAdmin,
+    login,
+    logout,
+    rehydrate,
+  };
 }

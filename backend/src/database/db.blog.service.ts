@@ -9,7 +9,6 @@ import {
   ModifyBlogDto,
   FilterBlogDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import {
   BlogSchema,
   GalleryType,
@@ -22,6 +21,10 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import {
+  MediaNotFoundException,
+  ResourceNotFoundException,
+} from "../common/exceptions";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -44,7 +47,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Blog with ID ${id} not found`);
+      throw new ResourceNotFoundException(BlogDto, id);
     }
 
     return result[0];
@@ -63,8 +66,8 @@ export class BlogDatabaseService {
     const returningClause = generateReturningClause(BlogSchema);
 
     const conditions: string[] = [];
-    const values: any[] = [];
-    const param = (val: any) => {
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
       values.push(val);
       return `$${values.length}`;
     };
@@ -72,7 +75,7 @@ export class BlogDatabaseService {
     // Title filter
     // NOTE: This is case-insensitive and looks in all languages + matches on parts.
     if (blogFilters.title) {
-      const titleParam = param(blogFilters.title);
+      const titleParam = param(`%${blogFilters.title}%`);
       const titelClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
       );
@@ -81,19 +84,23 @@ export class BlogDatabaseService {
 
     // Filter blogs that were created before.
     if (blogFilters.before) {
-      conditions.push(`created_at < ${param(blogFilters.before)}::timestamp`);
+      conditions.push(
+        // NOTE: We add + 1 day here for performance and include reasons.
+        // Adding 1 day is a more performant than casting the original column to a
+        // date.
+        `created_at < ${param(blogFilters.before)}::date + interval '1 day'`,
+      );
     }
 
     // Filter blogs that were created after.
     if (blogFilters.after) {
-      conditions.push(`created_at > ${param(blogFilters.after)}::timestamp`);
+      conditions.push(`created_at >= ${param(blogFilters.after)}::date`);
     }
 
     const whereClause = conditions.length
       ? `WHERE ${conditions.join(" AND ")}`
       : "";
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
       SELECT COUNT(*) as count FROM blogs
@@ -179,9 +186,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Cannot update: Blog ${blogId} not found`,
-      );
+      throw new ResourceNotFoundException(BlogDto, blogId);
     }
 
     return result[0];
@@ -194,12 +199,9 @@ export class BlogDatabaseService {
    */
   async deleteBlog(blogId: number): Promise<void> {
     const query = `DELETE FROM blogs WHERE id = $1 RETURNING id;`;
-    const result = await this.db.query(query, [blogId]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        `Cannot delete: Blog ${blogId} not found`,
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [blogId]);
   }
 
   /**
@@ -230,9 +232,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<MediaGalleryDto>(query, [blog_id, type]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Blog with ID ${blog_id} has no media gallery of the given type`,
-      );
+      throw new MediaNotFoundException(BlogDto, type, blog_id);
     }
 
     return result[0];

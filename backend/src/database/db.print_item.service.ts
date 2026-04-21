@@ -6,16 +6,16 @@ import {
   ModifyPrintItemDto,
   PaginationFilterDto,
   ReplacePrintItemDto,
+  FilterPrintItemDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
-  generateCountQuery,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
-import { PrintItemSchema } from "@repo/common";
+import { PrintItemSchema, SUPPORTED_LANGUAGES } from "@repo/common";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class PrintItemDatabaseService {
@@ -43,9 +43,7 @@ export class PrintItemDatabaseService {
     const result = await this.db.query<PrintItemDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `No PrintItemDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(PrintItemDto, id);
     }
 
     return result[0];
@@ -54,24 +52,61 @@ export class PrintItemDatabaseService {
   /**
    * Get all print items paginated.
    * @param paginationFilters The Filters regarding ordering and pagination.
+   * @param printItemFilters The filters for the prints.
    * @returns The PrintItems.
    */
   async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
+    printItemFilters: FilterPrintItemDto,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     const returningClause = generateReturningClause(PrintItemSchema);
+
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Title filter
+    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    if (printItemFilters.title) {
+      const titleParam = param(`%${printItemFilters.title}%`);
+      const titelClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
+      );
+      conditions.push(`(${titelClauses.join(" OR ")})`);
+    }
+
+    // Filter for prints of a certain type
+    if (printItemFilters.type) {
+      conditions.push(`print_type = ${param(printItemFilters.type)}`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM print_items
+      ${whereClause};
+    `;
+
+    // pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     const query = `
       SELECT ${returningClause}
       FROM print_items
-      LIMIT $1 OFFSET $2;
+      ${whereClause}
+      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
+      ${paginationClause};
     `;
-    const countQuery = generateCountQuery("print_items");
-    const offset = paginationFilters.page * paginationFilters.limit;
-
     const [objects, countResult] = await Promise.all([
-      this.db.query<PrintItemDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery, []),
+      this.db.query<PrintItemDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
     ]);
 
     return {
@@ -151,9 +186,7 @@ export class PrintItemDatabaseService {
     const result = await this.db.query<PrintItemDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Failed to update print item with ID ${itemId}.`,
-      );
+      throw new ResourceNotFoundException(PrintItemDto, itemId);
     }
     return result[0];
   }
@@ -164,11 +197,8 @@ export class PrintItemDatabaseService {
    */
   async deletePrintItem(id: number): Promise<void> {
     const query = `DELETE FROM print_items WHERE id = $1 RETURNING id`;
-    const result = await this.db.query(query, [id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        `Cannot delete: Print Item ${id} not found.`,
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 }

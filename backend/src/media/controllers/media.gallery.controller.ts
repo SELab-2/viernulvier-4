@@ -14,6 +14,7 @@ import {
 import { MediaGalleryService } from "../services/media.gallery.service";
 import {
   CreateMediaGallerySchema,
+  LanguageQuerySchema,
   ModifyMediaGallerySchema,
   PaginatedResponse,
   PaginationFilterSchema,
@@ -21,11 +22,14 @@ import {
 } from "@repo/common";
 import {
   CreateMediaGalleryDto,
+  LanguageQueryDto,
   MediaGalleryDto,
   MediaItemDto,
+  MediaItemViewDto,
   ModifyMediaGalleryDto,
   PaginationFilterDto,
   PrintItemDto,
+  PrintItemViewDto,
   ReplaceMediaGalleryDto,
 } from "../../dto/dto";
 import { ZodValidationPipe } from "nestjs-zod";
@@ -42,6 +46,7 @@ import {
   ApiOkPaginatedResponseAnyOf,
 } from "../../common/decorators/api.ok";
 import { ApiKeyGuard } from "../../auth/authGuard";
+import { LanguageService } from "../../util/language/language.service";
 
 /**
  * Defines all media gallery related endpoints.
@@ -49,7 +54,10 @@ import { ApiKeyGuard } from "../../auth/authGuard";
 @ApiTags("Media - Galleries")
 @Controller("galleries")
 export class MediaGalleryController {
-  constructor(private readonly mediaGalleryService: MediaGalleryService) {}
+  constructor(
+    private readonly mediaGalleryService: MediaGalleryService,
+    private readonly ls: LanguageService,
+  ) {}
 
   /**
    * Responds to a GET to "/media/galleries".
@@ -178,8 +186,13 @@ export class MediaGalleryController {
   @Get(":galleryId/items")
   async getGalleryItems(
     @Param("galleryId", ParseIntPipe) galleryId: number,
-  ): Promise<MediaItemDto[] | PrintItemDto[]> {
-    return await this.mediaGalleryService.getGalleryItems(galleryId);
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+  ): Promise<
+    MediaItemDto[] | PrintItemDto[] | MediaItemViewDto[] | PrintItemViewDto[]
+  > {
+    return this.ls.flattenByLanguage<
+      MediaItemDto[] | PrintItemDto[] | MediaItemViewDto[] | PrintItemViewDto[]
+    >(await this.mediaGalleryService.getGalleryItems(galleryId), lang.lang);
   }
 
   /**

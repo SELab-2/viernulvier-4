@@ -11,7 +11,6 @@ import {
   ReplaceProductionDto,
   TagDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
 import {
   BlogSchema,
   GalleryType,
@@ -27,6 +26,10 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
+import {
+  MediaNotFoundException,
+  ResourceNotFoundException,
+} from "../common/exceptions";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -49,9 +52,7 @@ export class ProductionDatabaseService {
     const productions = await this.db.query<ProductionDto>(query, [id]);
 
     if (productions.length === 0)
-      throw new ResourceGoneException(
-        `No ProductionDto exists for provided ID(${id})`,
-      );
+      throw new ResourceNotFoundException(ProductionDto, id);
 
     return productions[0]; // There should be a ProductionDto in here if the length is not 0.
   }
@@ -113,8 +114,9 @@ export class ProductionDatabaseService {
     );
 
     const conditions: string[] = [];
-    const values: any[] = [];
-    const param = (val: any) => {
+    const havingConditions: string[] = [];
+    const values: (string | number | number[])[] = [];
+    const param = (val: string | number | number[]) => {
       values.push(val);
       return `$${values.length}`;
     };
@@ -128,58 +130,26 @@ export class ProductionDatabaseService {
       productionPrefix,
     );
 
-    // Filter by location
-    // TODO: Rewrite this filter since it would not work anymore under the new location structure.
-
-    // Filter by event date (start or end date)
-    if (productionFilters.date) {
-      const pDate = param(productionFilters.date);
-      conditions.push(
-        `(DATE(e.starttime) = ${pDate} OR DATE(e.endtime) = ${pDate})`,
-      );
-    }
-
-    // Filter by given date lying between starttime and endtime (inclusive)
-    if (productionFilters.date_between) {
-      // Use explicit timestamp comparison to include time component
-      conditions.push(
-        `${param(productionFilters.date_between)}::timestamp BETWEEN e.starttime AND e.endtime`,
-      );
-    }
-
-    // Filter events whose starttime is before the provided date
-    if (productionFilters.date_before) {
-      conditions.push(
-        `e.starttime < ${param(productionFilters.date_before)}::timestamp`,
-      );
-    }
-
-    // Filter events whose endtime is after the provided date
-    if (productionFilters.date_after) {
-      conditions.push(
-        `e.endtime > ${param(productionFilters.date_after)}::timestamp`,
-      );
-    }
-
-    // Filter by titel (case-insensitive)
+    // Filter by titel or artist (case-insensitive)
+    // * NOTE: Looks through both the artist ant title for the searched sentence.
     // Will look anywhere in the title field for what was searched.
     // For all supported languages.
-    if (productionFilters.titel) {
-      const pTitel = param(`%${productionFilters.titel}%`);
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.titel->>'${lang}' ILIKE ${pTitel}`,
-      );
-      conditions.push(`(${titelClauses.join(" OR ")})`);
-    }
+    if (productionFilters.titelOrArtist) {
+      const pTitelOrArtist = param(`%${productionFilters.titelOrArtist}%`);
 
-    // Will look anywhere in the artist field for what was searched.
-    // This checks all supported languages.
-    if (productionFilters.artist) {
-      const pArtist = param(`%${productionFilters.artist}%`);
       const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.artist->>'${lang}' ILIKE ${pArtist}`,
+        (lang) => `p.titel->>'${lang}' ILIKE ${pTitelOrArtist}`,
       );
-      conditions.push(`(${titelClauses.join(" OR ")})`);
+
+      const artistClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `p.artist->>'${lang}' ILIKE ${pTitelOrArtist}`,
+      );
+
+      // Combine both arrays into one single list
+      const allClauses = [...titelClauses, ...artistClauses];
+
+      // Push them as a single string wrapped in parentheses, joined by OR
+      conditions.push(`(${allClauses.join(" OR ")})`);
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
@@ -197,19 +167,44 @@ export class ProductionDatabaseService {
       `);
     }
 
+    // HAVING filters.
+
+    // Filter events whose starttime is before the provided date
+    if (productionFilters.after) {
+      havingConditions.push(
+        `MIN(e.starttime) >= ${param(productionFilters.after)}::date`,
+      );
+    }
+
+    // Filter events whose endtime is after the provided date
+    if (productionFilters.before) {
+      havingConditions.push(
+        // Note: We add one day here to include the day itself too without having to cast the column.
+        `MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day'`,
+      );
+    }
+
     // add more filters here if needed.
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const havingClause =
+      havingConditions.length > 0
+        ? `HAVING ${havingConditions.join(" AND ")}`
+        : "";
 
     // count query uses same filters but no pagination
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const filterValues = [...values];
     const countQuery = `
-      SELECT COUNT(DISTINCT p.id) as count
-      FROM productions p
-        LEFT JOIN events e ON e.production_id = p.id
-      ${whereClause}
+      SELECT COUNT(*) as count
+      FROM (
+        SELECT p.id
+        FROM productions p
+          LEFT JOIN events e ON e.production_id = p.id
+        ${whereClause}
+        GROUP BY p.id
+        ${havingClause}
+      ) AS matched_productions;
     `;
 
     // Apply pagination
@@ -224,8 +219,9 @@ export class ProductionDatabaseService {
       ${whereClause}
       GROUP BY
         ${productionPrefix}.id
+      ${havingClause}
       ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
-      ${paginationClause}
+      ${paginationClause};
     `;
 
     const [objects, countResult] = await Promise.all([
@@ -299,7 +295,7 @@ export class ProductionDatabaseService {
     const result = await this.db.query<ProductionDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Production not found");
+      throw new ResourceNotFoundException(ProductionDto, productionId);
     }
 
     return result[0];
@@ -337,12 +333,9 @@ export class ProductionDatabaseService {
         AND production_blogs.production_id = $2
         RETURNING *;
     `;
-    const result = await this.db.query(query, [blog_id, production_id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        "Cannot delete: Blog-Production link not found",
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [blog_id, production_id]);
   }
 
   /**
@@ -400,12 +393,9 @@ export class ProductionDatabaseService {
         AND production_tag.production_id = $2
       RETURNING *;
     `;
-    const result = await this.db.query(query, [tag_id, production_id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        "Cannot delete: Tag-Production link not found",
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [tag_id, production_id]);
   }
 
   /**
@@ -436,9 +426,7 @@ export class ProductionDatabaseService {
     const result = await this.db.query<MediaGalleryDto>(query, [prod_id, type]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Production with ID ${prod_id} has no media gallery of the given type`,
-      );
+      throw new MediaNotFoundException(ProductionDto, type, prod_id);
     }
 
     return result[0];

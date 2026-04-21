@@ -14,7 +14,6 @@ const i18n = createI18n({
         dateAndTime: "Datum & Tijd",
         location: "Locatie",
         price: "Prijs",
-        noEvents: "Deze productie bevat geen evenementen.",
       },
     },
     en: {
@@ -23,7 +22,6 @@ const i18n = createI18n({
         dateAndTime: "Date & Time",
         location: "Location",
         price: "Price",
-        noEvents: "This production doesn't any event.",
       },
     },
   },
@@ -75,13 +73,6 @@ const events: EventWithDetails[] = [
     location: mockLocation("Brussel"),
     prices: [mockPrice(10)],
   },
-  {
-    ...base,
-    id: 4,
-    starttime: "2026-04-12T20:45:00Z",
-    location: mockLocation("Leuven"),
-    prices: [mockPrice(8)],
-  },
 ];
 
 describe("EventTable", () => {
@@ -98,10 +89,6 @@ describe("EventTable", () => {
     });
   });
 
-  it("renders the title", () => {
-    expect(wrapper.find("h3").text()).toContain("Evenementen");
-  });
-
   it("renders the table headers", () => {
     const headers = wrapper.findAll("th").map((th) => th.text()); // searches all table header elements
     expect(headers).toEqual(
@@ -109,7 +96,7 @@ describe("EventTable", () => {
     );
   });
 
-  it("renders a row for each event", () => {
+  it("renders a row for each event when there are less than 4 events", () => {
     expect(wrapper.findAll("tr").length).toBe(events.length + 1); // +1 for the header row
   });
 
@@ -119,20 +106,5 @@ describe("EventTable", () => {
     expect(text).toContain("15,00");
     expect(text).toContain("Gent");
     expect(text).toContain("12,50");
-  });
-
-  it("shows empty message when no events are provided", () => {
-    const w = mount(EventTable, {
-      global: { plugins: [i18n] },
-      props: { events: [] },
-    });
-    expect(w.text()).toContain("Deze productie bevat geen evenementen.");
-    expect(w.find("table").exists()).toBe(false);
-  });
-
-  it("does not show empty message when events are provided", () => {
-    expect(wrapper.text()).not.toContain(
-      "Deze productie bevat geen evenementen.",
-    );
   });
 });

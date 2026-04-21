@@ -9,41 +9,50 @@ export const ROUTES = {
   home: {
     base: "/",
   },
-  archive: {
-    // Productions on teh normal page.
-    base: "/archive",
-    byId: (id: number) => `/archive/${id}`,
-  },
   productions: {
-    // Productions on the admin page.
     base: "/productions",
     byId: (id: number) => `/productions/${id}`,
-    create: "/productions/create",
-    edit: (id: number) => `/productions/edit/${id}`,
-    editTags: "/productions/editTags",
   },
   stories: {
     base: "/stories",
     byId: (id: number) => `/stories/${id}`,
-    create: "/stories/create",
-    edit: (id: number) => `/stories/edit/${id}`,
   },
   events: {
     base: "/events",
-    create: "/events/create",
-    edit: (id: number) => `/events/edit/${id}`,
   },
   prints: {
     base: "/prints",
-    create: "/prints/create",
   },
-  accounts: {
-    base: "/accounts",
-  },
-  login: {
-    base: "/login",
-  },
-  parser: {
-    base: "/parser",
+  admin: {
+    login: {
+      base: "/admin/login",
+    },
+    dashboard: {
+      base: "/admin",
+    },
+    productions: {
+      base: "/admin/productions",
+      byId: (id: number) => `/admin/productions/${id}`,
+      create: "/admin/productions/create",
+      edit: (id: number) => `/admin/productions/edit/${id}`,
+      editTags: "/admin/productions/editTags",
+    },
+    stories: {
+      base: "/admin/stories",
+      create: "/admin/stories/create",
+      edit: (id: number) => `/admin/stories/edit/${id}`,
+    },
+    events: {
+      base: "/admin/events",
+      create: "/admin/events/create",
+      edit: (id: number) => `/admin/events/edit/${id}`,
+    },
+    prints: {
+      base: "/admin/prints",
+      create: "/admin/prints/create",
+    },
+    accounts: {
+      base: "/admin/accounts",
+    },
   },
 } as const;

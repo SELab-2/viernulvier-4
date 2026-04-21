@@ -7,10 +7,11 @@
  * Usage:
  * <PrintsFileGridItem
  *    :file="file"
- *    category="Affiche"
+ *    category="affiche"
  * />
  */
 import type { PrintItemView } from "@repo/common";
+const { t } = useI18n();
 
 interface Props {
   file: PrintItemView;
@@ -28,36 +29,9 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
     <!-- Thumbnail -->
     <div
       class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150"
+      @click="openFile(file.url)"
     >
-      <PdfThumbnail
-        v-if="file.url && file.titel.toLowerCase().endsWith('.pdf')"
-        :src="file.url"
-      >
-        <template #fallback>
-          <ThumbnailPlaceholder
-            :id="file.id"
-            size="fill"
-            :show-icon="true"
-            :show-border="false"
-            :rounded="false"
-          />
-        </template>
-      </PdfThumbnail>
-      <img
-        v-else-if="file.url"
-        :src="file.url"
-        :alt="file.titel"
-        class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-        @click.stop="openFile(file.url)"
-      />
-      <ThumbnailPlaceholder
-        v-else
-        :id="file.id"
-        size="fill"
-        :show-icon="true"
-        :show-border="false"
-        :rounded="false"
-      />
+      <MediaDisplay :src="file" size="fill" :show-icon="true" />
     </div>
 
     <!-- File info -->

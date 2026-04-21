@@ -7,12 +7,14 @@ import type {
   PaginationFilter,
   PaginatedResponse,
   LanguageQuery,
+  FilterTag,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 interface TagListOptions {
   paginationFilters?: PaginationFilter;
   languageFilters?: LanguageQuery;
+  tagFilters?: FilterTag;
 }
 
 /**
@@ -29,10 +31,12 @@ export function useTagApi() {
   const getAll = ({
     paginationFilters,
     languageFilters,
+    tagFilters,
   }: TagListOptions = {}) => {
     const params = {
       ...paginationFilters,
       ...languageFilters,
+      ...tagFilters,
     };
 
     const cleanParams = Object.fromEntries(
