@@ -133,26 +133,38 @@ export class ProductionDatabaseService {
       productionPrefix,
     );
 
-    // Filter by titel or artist (case-insensitive)
-    // * NOTE: Looks through both the artist ant title for the searched sentence.
-    // Will look anywhere in the title field for what was searched.
-    // For all supported languages.
-    if (productionFilters.titel_or_artist) {
-      const pTitelOrArtist = param(`%${productionFilters.titel_or_artist}%`);
+    // Filter by either artist or title. The trgm extension in psql
+    if (productionFilters.titelOrArtist) {
+      const searchTerm = productionFilters.titelOrArtist;
 
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.titel->>'${lang}' ILIKE ${pTitelOrArtist}`,
-      );
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
 
-      const artistClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.artist->>'${lang}' ILIKE ${pTitelOrArtist}`,
-      );
+        const titleField = `p.titel->>'${lang}'`;
+        const artistField = `p.artist->>'${lang}'`;
 
-      // Combine both arrays into one single list
-      const allClauses = [...titelClauses, ...artistClauses];
+        // Changes logic whether this is a suggestion request or a full search
+        if (productionFilters.is_suggestion) {
+          // FUZZY SEARCH: Tolerates typos, powered by the trigram index.
+          const pSearch = param(searchTerm);
+          return [
+            `word_similarity(${pSearch}, ${titleField}) > 0.3`,
+            `word_similarity(${pSearch}, ${artistField}) > 0.3`,
+          ];
+        } else {
+          // Exact substring match only
+          const pSearch = param(`%${searchTerm}%`);
+          return [
+            `${titleField} ILIKE ${pSearch}`,
+            `${artistField} ILIKE ${pSearch}`,
+          ];
+        }
+      });
 
       // Push them as a single string wrapped in parentheses, joined by OR
-      conditions.push(`(${allClauses.join(" OR ")})`);
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
@@ -216,18 +228,12 @@ export class ProductionDatabaseService {
 
     // Ordering (relevance vs date)
     let orderClause = "";
-    if (productionFilters.is_suggestion && productionFilters.titel_or_artist) {
+    if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
       const relevanceMath = generateRelevanceClause(
-        productionFilters.titel_or_artist,
+        productionFilters.titelOrArtist,
         [
-          {
-            name: `${productionPrefix}.titel`,
-            weights: { exact: 10, prefix: 5, partial: 2 },
-          },
-          {
-            name: `${productionPrefix}.artist`,
-            weights: { exact: 10, prefix: 5, partial: 2 },
-          },
+          { name: `${productionPrefix}.titel` },
+          { name: `${productionPrefix}.artist` },
         ],
         param,
         language,

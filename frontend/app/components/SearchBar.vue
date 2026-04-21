@@ -109,7 +109,7 @@ const doSearch = useDebounceFn(async (query: string) => {
   } finally {
     isFetching.value = false;
   }
-});
+}, 100);
 
 // Watch the internal query for updates.
 watch(internalQuery, (newQuery) => {

@@ -2,7 +2,7 @@
  * Updating
  */
 
-import { Language, ZodObject } from "@repo/common";
+import { Language, SUPPORTED_LANGUAGES, ZodObject } from "@repo/common";
 
 /**
  * Returns whether something is a plain object or not.
@@ -188,18 +188,12 @@ export function generateCountQuery(tableName: string): string {
 }
 
 /**
- * Sorting
+ * Relevance Sorting
  */
-
-interface MatchWeights {
-  exact: number;
-  prefix: number;
-  partial: number;
-}
 
 interface RelevanceColumn {
   name: string;
-  weights: MatchWeights;
+  weightMultiplier?: number;
 }
 
 /**
@@ -207,6 +201,7 @@ interface RelevanceColumn {
  * @param searchTerm The term to search for.
  * @param columns The columns to search in. (including prefixes)
  * @param param The parameter function that generates the placeholder.
+ * @param lang The language to search in, if undefined searches ALL languages.
  * @returns The generated clause.
  *
  * ! NOTE This could create a significant performance hit for large datasets.
@@ -218,20 +213,18 @@ export function generateRelevanceClause(
   lang?: Language,
 ): string {
   const val = param(searchTerm);
+  const languagesToSearch = lang ? [lang] : SUPPORTED_LANGUAGES;
 
-  // We map each column to a CASE statement and then join them with " + "
-  const scoringParts = columns.map((column) => {
-    // TODO: This will crash is lang is undefined.
-    const jsonField = `${column.name}->>'${lang}'`;
-    return `
-      (CASE
-        WHEN LOWER(${jsonField}) = LOWER(${val}) THEN ${column.weights.exact}
-        WHEN LOWER(${jsonField}) LIKE LOWER(${val}) || '%' THEN ${column.weights.prefix}
-        WHEN LOWER(${jsonField}) LIKE '%' || LOWER(${val}) || '%' THEN ${column.weights.partial}
-        ELSE 0
-      END)
-    `;
+  // We score each column and each language that was asked for (either one or all).
+  const scoringParts = columns.flatMap((column) => {
+    // Apply the weight multiplier.
+    const weightMultiplier = column.weightMultiplier ?? 1;
+    return languagesToSearch.map((searchLang) => {
+      const jsonField = `${column.name}->>'${searchLang}'`;
+      return `(word_similarity(${val}, ${jsonField}) * ${weightMultiplier})`;
+    });
   });
 
+  if (scoringParts.length === 0) return "0";
   return scoringParts.join(" + ");
 }

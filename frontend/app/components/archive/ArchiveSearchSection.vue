@@ -41,7 +41,7 @@ const hasActiveFilters = computed(() => {
   return (
     tagIds.value.length > 0 ||
     !!dateFilter.value.after ||
-    !!dateFilter.value.before
+    dateFilter.value.before !== getToday()
   );
 });
 

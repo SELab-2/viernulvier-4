@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { getToday } from "#imports";
 
 /**
  * Shared state for the Archive feature.
@@ -13,7 +14,18 @@ const viewMode = ref<ArchiveViewMode>("grid");
 // Filters
 const searchQuery = ref("");
 const sortOrder = ref<"newest" | "oldest">("newest");
-const dateFilter = ref<{ after?: string; before?: string }>({});
+
+const _dateFilter = ref<{ after?: string; before?: string }>({});
+const dateFilter = computed<{ after?: string; before?: string }>({
+  get: () => ({
+    after: _dateFilter.value.after,
+    before: _dateFilter.value.before || getToday(),
+  }),
+  set: (newValue) => {
+    _dateFilter.value = newValue;
+  },
+});
+
 const tagIds = ref<number[]>([]);
 
 // Pagination
