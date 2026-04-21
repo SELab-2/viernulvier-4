@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,37 +32,54 @@ jobs:
           PR=${{ github.event.pull_request.number }}
           export NUXT_BASE="/previews/$PR/"
           PR_PATH="/home/selab2/project/previews/$PR"
-          PORT="30$PR"
+          FRONTEND_PORT="30$PR"
+          BACKEND_PORT="40$PR"
 
           mkdir -p $PR_PATH
           rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
 
+          # --- 1. Docs Setup ---
           cd $PR_PATH
           python3 -m pip install mkdocs-material
           python3 -m mkdocs build
-
           mkdir -p frontend/public
           rm -rf frontend/public/docs
           mv site frontend/public/docs
 
+          # --- 2. Backend Setup & Deployment ---
+          cd $PR_PATH/backend
+          
+          # Assuming a Node.js backend
+          npm ci
+          # npm run build # Uncomment if your backend requires a build step (e.g., NestJS or TypeScript)
+          
+          pm2 delete preview-backend-$PR || true
+          
+          # Note: Change 'index.js' below to your actual backend worker file!
+          PORT=$BACKEND_PORT pm2 start index.js --name preview-backend-$PR
+
+          # --- 3. Frontend Setup & Deployment ---
           cd $PR_PATH/frontend
           npm ci
           npx nuxi cleanup
 
-          NUXT_API_BASE="https://sel2-4.ugent.be/api" \
-          MEDIA_BASE_URL="https://sel2-4.ugent.be" \
+          # Connect frontend to the NGINX-routed backend preview
+          NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api" \
+          MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR" \
           npm run build
 
           pm2 delete preview-$PR || true
-          PORT=$PORT pm2 start .output/server/index.mjs --name preview-$PR
+          PORT=$FRONTEND_PORT pm2 start .output/server/index.mjs --name preview-$PR
+          
           pm2 save
 
       - name: Post preview link
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            🚀 **Preview Build succesfully deployed!**
+            🚀 **Preview Build successfully deployed!**
 
-            📱 **Website Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
-            📚 **Docs Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+            📱 **Website Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
+            📚 **Docs Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+            ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api
           comment_tag: preview_link
