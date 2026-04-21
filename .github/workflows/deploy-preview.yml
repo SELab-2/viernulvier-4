@@ -52,8 +52,22 @@ jobs:
           npm ci
           npm run build 
           
+          # 1. Dynamically create the .env file for the preview
+          echo "DB_USER_DEV=selab2" >> .env
+          echo "DB_HOST_DEV=sel2-4.ugent.be" >> .env
+          echo "DB_NAME_DEV=selab2_dev" >> .env
+          echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> .env
+          echo "DB_PORT_DEV=2002" >> .env
+          echo "TRANSLATE_API_KEY=abcdlalala" >> .env
+          echo "MEDIA_BASE_URL=https://sel2-4.ugent.be" >> .env
+          
           pm2 delete preview-backend-$PR || true
-          PORT=$BACKEND_PORT pm2 start dist/main.js --name preview-backend-$PR
+          
+          # 2. Start PM2 with our routing overrides
+          PORT=$BACKEND_PORT \
+          NODE_ENV=production \
+          pm2 start dist/main.js --name preview-backend-$PR
+          
           pm2 save
 
           # --- 3. Frontend Setup & Deployment ---
