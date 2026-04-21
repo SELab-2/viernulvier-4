@@ -128,14 +128,14 @@ onMounted(async () => {
   <section class="mx-auto w-full max-w-6xl space-y-4 px-4 py-6 sm:px-6">
     <div
       v-if="error"
-      class="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-300"
+      class="rounded-md border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
     >
       {{ error.key ? t(error.key, error.params ?? {}) : error.text }}
     </div>
 
     <div
       v-if="message"
-      class="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300"
+      class="rounded-md border border-feedback-success-border bg-feedback-success-bg px-4 py-3 text-sm text-feedback-success-text"
     >
       {{ t(message.key, message.params ?? {}) }}
     </div>

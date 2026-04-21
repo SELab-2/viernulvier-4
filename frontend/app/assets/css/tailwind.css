@@ -109,6 +109,15 @@
   --action-gray-border: #d1d5db;
   --action-gray-icon: #4b5563;
   --action-gray-hover: #f9fafb;
+
+  /* Generic feedback messages */
+  --feedback-error-border: #fecaca;
+  --feedback-error-bg: #fef2f2;
+  --feedback-error-text: #b91c1c;
+
+  --feedback-success-border: #bbf7d0;
+  --feedback-success-bg: #f0fdf4;
+  --feedback-success-text: #15803d;
 }
 
 /* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
@@ -178,6 +187,15 @@
   --action-gray-border: #4b5563;
   --action-gray-icon: #d1d5db;
   --action-gray-hover: #1f2937;
+
+  /* Generic feedback messages */
+  --feedback-error-border: #7f1d1d;
+  --feedback-error-bg: #450a0a;
+  --feedback-error-text: #fca5a5;
+
+  --feedback-success-border: #14532d;
+  --feedback-success-bg: #052e16;
+  --feedback-success-text: #86efac;
 }
 
 /* ── Tailwind theme mapping ──────────────────────────────────────── */
@@ -213,6 +231,12 @@
   --color-action-gray-border: var(--action-gray-border);
   --color-action-gray-icon: var(--action-gray-icon);
   --color-action-gray-hover: var(--action-gray-hover);
+  --color-feedback-error-border: var(--feedback-error-border);
+  --color-feedback-error-bg: var(--feedback-error-bg);
+  --color-feedback-error-text: var(--feedback-error-text);
+  --color-feedback-success-border: var(--feedback-success-border);
+  --color-feedback-success-bg: var(--feedback-success-bg);
+  --color-feedback-success-text: var(--feedback-success-text);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
