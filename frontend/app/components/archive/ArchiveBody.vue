@@ -59,6 +59,7 @@ async function loadPage(page: number) {
         after: dateFilter.value.after || undefined,
         before:
           dateFilter.value.before || new Date().toISOString().split("T")[0],
+        is_suggestion: false,
       },
       paginationFilters: {
         page: targetedPage - 1, // backend uses 0-based pagination
