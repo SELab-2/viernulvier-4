@@ -45,7 +45,7 @@ export const ReplaceProductionSchema = MutableProductionSchema;
 
 // Filtering.
 export const FilterProductionSchema = z.object({
-  titelOrArtist: z.string().optional(),
+  titel_or_artist: z.string().optional(),
   tag_ids: z
     .union([z.coerce.number(), z.array(z.coerce.number())])
     .optional()

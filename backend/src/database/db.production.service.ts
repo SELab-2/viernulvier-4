@@ -137,8 +137,8 @@ export class ProductionDatabaseService {
     // * NOTE: Looks through both the artist ant title for the searched sentence.
     // Will look anywhere in the title field for what was searched.
     // For all supported languages.
-    if (productionFilters.titelOrArtist) {
-      const pTitelOrArtist = param(`%${productionFilters.titelOrArtist}%`);
+    if (productionFilters.titel_or_artist) {
+      const pTitelOrArtist = param(`%${productionFilters.titel_or_artist}%`);
 
       const titelClauses = SUPPORTED_LANGUAGES.map(
         (lang) => `p.titel->>'${lang}' ILIKE ${pTitelOrArtist}`,
@@ -216,9 +216,9 @@ export class ProductionDatabaseService {
 
     // Ordering (relevance vs date)
     let orderClause = "";
-    if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
+    if (productionFilters.is_suggestion && productionFilters.titel_or_artist) {
       const relevanceMath = generateRelevanceClause(
-        productionFilters.titelOrArtist,
+        productionFilters.titel_or_artist,
         [
           {
             name: `${productionPrefix}.titel`,
