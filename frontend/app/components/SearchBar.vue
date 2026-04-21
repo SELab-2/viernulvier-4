@@ -20,11 +20,12 @@
 import { ref, computed } from "vue";
 import type { ComputedRef } from "vue";
 import { Search, X } from "lucide-vue-next";
+import { useDebounceFn } from "@vueuse/core";
 const { t } = useI18n();
 
 interface Props {
   modelValue: string; // currently selected value
-  results: string[]; // list of searchable items
+  fetchSuggestions: (query: string) => Promise<string[]>;
   loading?: boolean;
   limit?: number; // max suggestions
   scrollLimit?: number; // number of suggestions before scrollbar appears
@@ -78,9 +79,31 @@ const submit = () => {
   inputRef.value?.blur();
 };
 
+const internalResults = ref<string[]>([]);
+const isFetching = ref(false);
+
+const doSearch = useDebounceFn(async (query: string) => {
+  if (!props.fetchSuggestions) return;
+
+  if (!query || query.length < 2) {
+    internalResults.value = [];
+    return;
+  }
+
+  isFetching.value = true;
+
+  try {
+    internalResults.value = await props.fetchSuggestions(query);
+  } catch (error) {
+    internalResults.value = [];
+  } finally {
+    isFetching.value = false;
+  }
+});
+
 // Watch the internal query for updates.
 watch(internalQuery, (newQuery) => {
-  emit("search", newQuery);
+  doSearch(newQuery);
 });
 </script>
 
@@ -113,12 +136,12 @@ watch(internalQuery, (newQuery) => {
 
       <!-- Autocompletion suggestions -->
       <ul
-        v-if="isFocused && results.length"
+        v-if="isFocused && internalResults.length"
         :style="dropdownStyle"
         class="absolute mt-1 w-full bg-background border border-border rounded-lg shadow-2xl z-10 overflow-y-auto"
       >
         <li
-          v-for="item in results"
+          v-for="item in internalResults"
           :key="item"
           @mousedown.prevent="select(item)"
           class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-muted text-muted-foreground overflow-hidden truncate"

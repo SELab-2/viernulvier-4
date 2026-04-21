@@ -23,7 +23,6 @@ import { useEventApi } from "~/composables/useEventApi";
 import type { ProductionView, Event, PaginatedResponse } from "@repo/common";
 import TagFilter from "./TagFilter.vue";
 import { X } from "lucide-vue-next";
-import { useDebounceFn } from "@vueuse/core";
 
 const { t, locale } = useI18n();
 
@@ -90,47 +89,28 @@ async function fetchOldestDate() {
   }
 }
 
-// Search suggestions
+/**
+ * Custom fetch function for suggestions
+ * @param newQuery
+ */
+async function fetchSuggestions(newQuery: string): Promise<string[]> {
+  const resp = (await getAllProductions({
+    // This means we'll use 5 suggestions.
+    paginationFilters: { page: 0, limit: 5, descending: true },
+    productionFilters: {
+      titelOrArtist: newQuery,
+      is_suggestion: true,
+      ...dateFilter.value,
+      tag_ids: tagIds.value,
+    },
+    languageFilters: { lang: locale.value },
+  })) as any;
 
-const suggestions = ref<string[]>([]);
-const isSearching = ref(false);
-
-const handleLiveSearch = useDebounceFn(
-  (newQuery: string) => {
-    fetchSuggestions(newQuery);
-  },
-  300, // Wait 300ms between suggestions
-);
-
-async function fetchSuggestions(newQuery: string) {
-  if (!newQuery || newQuery.length < 2) {
-    suggestions.value = [];
-    return;
-  }
-
-  isSearching.value = true;
-  try {
-    const resp = (await getAllProductions({
-      paginationFilters: { page: 0, limit: 5, descending: true },
-      productionFilters: {
-        titelOrArtist: newQuery,
-        is_suggestion: true,
-        ...dateFilter.value,
-        tag_ids: tagIds.value,
-      },
-      languageFilters: { lang: locale.value },
-    })) as any;
-
-    suggestions.value =
-      resp.data?.objects?.map(
-        (p: ProductionView) => `${p.titel} - ${p.artist}`,
-      ) || [];
-    console.log(suggestions.value);
-  } catch (error) {
-    suggestions.value = [];
-  } finally {
-    isSearching.value = false;
-  }
+  return (
+    resp.data?.objects?.map(
+      (p: ProductionView) => `${p.titel} - ${p.artist}`,
+    ) || []
+  );
 }
 
 onMounted(fetchOldestDate);
@@ -144,10 +124,8 @@ onMounted(fetchOldestDate);
       <div class="flex-1 h-12">
         <SearchBar
           v-model="searchQuery"
-          :results="suggestions"
-          :loading="isSearching"
+          :fetch-suggestions="fetchSuggestions"
           :placeholder="t('archive.search_placeholder')"
-          @search="handleLiveSearch"
         />
       </div>
 
