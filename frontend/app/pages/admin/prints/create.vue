@@ -54,8 +54,8 @@ async function handleSubmit(form: Record<string, any>) {
       return;
     }
 
-    const fileName = `/prints/${Date.now()}-${file.name}`;
-    const uploadResult = await saveMedia(fileName, file);
+    const storagePath = `/prints/${Date.now()}-${file.name}`;
+    const uploadResult = await saveMedia(storagePath, file);
     if (uploadResult.error) {
       error.value = t("prints.form.uploadError");
       return;
