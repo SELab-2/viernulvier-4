@@ -47,26 +47,34 @@ jobs:
           mv site frontend/public/docs
 
           # --- 2. Backend Setup & Deployment ---
-          cd $PR_PATH/backend
+          # Go to root preview folder first!
+          cd $PR_PATH
           
-          npm ci
-          npm run build 
-          
-          # 1. Dynamically create the .env file for the preview
-          echo "DB_USER_DEV=selab2" >> .env
+          # Create .env in the root folder
+          echo "DB_USER_DEV=selab2" > .env
           echo "DB_HOST_DEV=sel2-4.ugent.be" >> .env
           echo "DB_NAME_DEV=selab2_dev" >> .env
           echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> .env
           echo "DB_PORT_DEV=2002" >> .env
           echo "TRANSLATE_API_KEY=abcdlalala" >> .env
-          echo "MEDIA_BASE_URL=https://sel2-4.ugent.be" >> .env
+          echo "MEDIA_BASE_URL=https://sel2-4.ugent.be/previews/$PR" >> .env
+
+          # Copy it to the backend folder so NestJS finds it no matter where it looks
+          cp .env backend/.env
+
+          cd backend
+          npm ci
+          npm run build 
           
           pm2 delete preview-backend-$PR || true
           
-          # 2. Start PM2 with our routing overrides
-          PORT=$BACKEND_PORT \
-          NODE_ENV=production \
-          pm2 start dist/main.js --name preview-backend-$PR
+          # EXPORT variables directly into the shell to guarantee PM2 sees them
+          export PORT=$BACKEND_PORT
+          export NODE_ENV=production
+          export MEDIA_BASE_URL="https://sel2-4.ugent.be/previews/$PR"
+          
+          # --update-env forces PM2 to dump its cache and read the exports above
+          pm2 start dist/main.js --name preview-backend-$PR --update-env
           
           pm2 save
 
