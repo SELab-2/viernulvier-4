@@ -186,3 +186,49 @@ export function generateCountQuery(tableName: string): string {
   `;
   return query;
 }
+
+/**
+ * Sorting
+ */
+
+interface MatchWeights {
+  exact: number;
+  prefix: number;
+  partial: number;
+}
+
+interface RelevanceColumn {
+  name: string;
+  weights: MatchWeights;
+}
+
+/**
+ * Generates a relevance clause for scoring search results.
+ * @param searchTerm The term to search for.
+ * @param columns The columns to search in. (including prefixes)
+ * @param param The parameter function that generates the placeholder.
+ * @returns The generated clause.
+ *
+ * ! NOTE This could create a significant performance hit for large datasets.
+ */
+export function generateRelevanceClause(
+  searchTerm: string,
+  columns: RelevanceColumn[],
+  param: (val: any) => string,
+): string {
+  const val = param(searchTerm);
+
+  // We map each column to a CASE statement and then join them with " + "
+  const scoringParts = columns.map((column) => {
+    return `
+      (CASE
+        WHEN LOWER(${column.name}) = LOWER(${val}) THEN ${column.weights.exact}
+        WHEN LOWER(${column.name}) LIKE LOWER(${val}) || '%' THEN ${column.weights.prefix}
+        WHEN LOWER(${column.name}) LIKE '%' || LOWER(${val}) || '%' THEN ${column.weights.partial}
+        ELSE 0
+      END)
+    `;
+  });
+
+  return scoringParts.join(" + ");
+}

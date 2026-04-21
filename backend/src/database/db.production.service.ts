@@ -23,6 +23,7 @@ import {
 import {
   applyExactFilters,
   generateInsertClause,
+  generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
@@ -211,6 +212,35 @@ export class ProductionDatabaseService {
     const offset = paginationFilters.page * paginationFilters.limit;
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
+    // Ordering (relevance vs date)
+    let orderClause = "";
+    if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
+      orderClause = generateRelevanceClause(
+        productionFilters.titelOrArtist,
+        [
+          {
+            name: `${productionPrefix}.titel`,
+            weights: {
+              exact: 10,
+              prefix: 5,
+              partial: 2,
+            },
+          },
+          {
+            name: `${productionPrefix}.artist`,
+            weights: {
+              exact: 10,
+              prefix: 5,
+              partial: 2,
+            },
+          },
+        ],
+        param,
+      );
+    } else {
+      orderClause = `ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST`;
+    }
+
     // The Ordered by the first held event of the production.
     const query = `
       SELECT ${returningClause}
@@ -220,7 +250,7 @@ export class ProductionDatabaseService {
       GROUP BY
         ${productionPrefix}.id
       ${havingClause}
-      ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
+      ${orderClause}
       ${paginationClause};
     `;
 

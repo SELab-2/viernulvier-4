@@ -58,6 +58,8 @@ export const FilterProductionSchema = z.object({
   after: z.iso.date().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
+
+  is_suggestion: z.boolean().default(false),
 });
 
 // Type exports.

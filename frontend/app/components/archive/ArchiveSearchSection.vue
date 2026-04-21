@@ -100,7 +100,7 @@ onMounted(fetchOldestDate);
       <div class="flex-1 h-12">
         <SearchBar
           v-model="searchQuery"
-          :items="[]"
+          :items="['test']"
           :placeholder="t('archive.search_placeholder')"
         />
       </div>
