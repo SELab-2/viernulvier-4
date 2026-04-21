@@ -50,13 +50,9 @@ jobs:
           cd $PR_PATH/backend
           
           npm ci
-          
-          # 1. We MUST run the build step for NestJS to compile TS to JS
           npm run build 
           
           pm2 delete preview-backend-$PR || true
-          
-          # 2. Point PM2 to the compiled main.js file in the dist/ folder
           PORT=$BACKEND_PORT pm2 start dist/main.js --name preview-backend-$PR
           pm2 save
 
