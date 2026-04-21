@@ -82,14 +82,22 @@ jobs:
           cd $PR_PATH/frontend
           npx nuxi cleanup
           
-          NUXT_APP_BASE_URL="/previews/$PR/archive" \
+          # 1. Build the app with your custom base URL variable
+          NUXT_BASE="/previews/$PR/archive" \
           NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api" \
           MEDIA_BASE_URL="https://sel2-4.ugent.be" \
           npm run build
           
-          export NUXT_BASE="/previews/$PR/archive"
           pm2 delete preview-$PR || true
-          PORT=$FRONTEND_PORT pm2 start .output/server/index.mjs --name preview-$PR
+          
+          # 2. Export variables for the runtime
+          export PORT=$FRONTEND_PORT
+          export NUXT_BASE="/previews/$PR/archive"
+          export NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api"
+          export MEDIA_BASE_URL="https://sel2-4.ugent.be"
+          
+          # 3. Start PM2 with --update-env (This is the magic fix!)
+          pm2 start .output/server/index.mjs --name preview-$PR --update-env
           pm2 save
 
       - name: Post preview link
