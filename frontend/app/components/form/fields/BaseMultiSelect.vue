@@ -89,7 +89,7 @@ defineExpose({ clear }); // exposes a clear method to the parent components
       <SearchBar
         ref="searchBarRef"
         v-model="searchQuery"
-        :items="availableOptions"
+        :results="availableOptions"
         :placeholder="placeholder"
         :id="id"
         @update:modelValue="handleSelect"

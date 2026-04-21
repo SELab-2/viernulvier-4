@@ -2,7 +2,7 @@
  * Updating
  */
 
-import { ZodObject } from "@repo/common";
+import { Language, ZodObject } from "@repo/common";
 
 /**
  * Returns whether something is a plain object or not.
@@ -215,16 +215,19 @@ export function generateRelevanceClause(
   searchTerm: string,
   columns: RelevanceColumn[],
   param: (val: any) => string,
+  lang?: Language,
 ): string {
   const val = param(searchTerm);
 
   // We map each column to a CASE statement and then join them with " + "
   const scoringParts = columns.map((column) => {
+    // TODO: This will crash is lang is undefined.
+    const jsonField = `${column.name}->>'${lang}'`;
     return `
       (CASE
-        WHEN LOWER(${column.name}) = LOWER(${val}) THEN ${column.weights.exact}
-        WHEN LOWER(${column.name}) LIKE LOWER(${val}) || '%' THEN ${column.weights.prefix}
-        WHEN LOWER(${column.name}) LIKE '%' || LOWER(${val}) || '%' THEN ${column.weights.partial}
+        WHEN LOWER(${jsonField}) = LOWER(${val}) THEN ${column.weights.exact}
+        WHEN LOWER(${jsonField}) LIKE LOWER(${val}) || '%' THEN ${column.weights.prefix}
+        WHEN LOWER(${jsonField}) LIKE '%' || LOWER(${val}) || '%' THEN ${column.weights.partial}
         ELSE 0
       END)
     `;

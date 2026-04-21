@@ -14,6 +14,7 @@ import {
 import {
   BlogSchema,
   GalleryType,
+  Language,
   MediaGallerySchema,
   PaginatedResponse,
   ProductionSchema,
@@ -107,6 +108,7 @@ export class ProductionDatabaseService {
   async getProductions(
     productionFilters: FilterProductionDto,
     paginationFilters: PaginationFilterDto,
+    language?: Language,
   ): Promise<PaginatedResponse<ProductionDto>> {
     const productionPrefix = "p";
     const returningClause = generateReturningClause(
@@ -215,28 +217,23 @@ export class ProductionDatabaseService {
     // Ordering (relevance vs date)
     let orderClause = "";
     if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
-      orderClause = generateRelevanceClause(
+      const relevanceMath = generateRelevanceClause(
         productionFilters.titelOrArtist,
         [
           {
             name: `${productionPrefix}.titel`,
-            weights: {
-              exact: 10,
-              prefix: 5,
-              partial: 2,
-            },
+            weights: { exact: 10, prefix: 5, partial: 2 },
           },
           {
             name: `${productionPrefix}.artist`,
-            weights: {
-              exact: 10,
-              prefix: 5,
-              partial: 2,
-            },
+            weights: { exact: 10, prefix: 5, partial: 2 },
           },
         ],
         param,
+        language,
       );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
     } else {
       orderClause = `ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST`;
     }

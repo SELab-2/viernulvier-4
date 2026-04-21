@@ -18,6 +18,7 @@
     "@nuxtjs/i18n": "^10.2.3",
     "@repo/common": "*",
     "@tailwindcss/postcss": "^4.0.0",
+    "@vueuse/core": "^14.2.1",
     "happy-dom": "^20.8.9",
     "lucide-vue-next": "^0.469.0",
     "pdfjs-dist": "^4.0.0",

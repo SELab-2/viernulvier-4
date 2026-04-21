@@ -12,7 +12,7 @@ import {
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { GalleryType, PaginatedResponse } from "@repo/common";
+import { GalleryType, Language, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class ProductionService {
@@ -31,10 +31,12 @@ export class ProductionService {
   async getAllProductions(
     productionFilters: FilterProductionDto,
     paginationFilters: PaginationFilterDto,
+    language?: Language,
   ): Promise<PaginatedResponse<ProductionDto>> {
     return await this.productionDBService.getProductions(
       productionFilters,
       paginationFilters,
+      language,
     );
   }
 

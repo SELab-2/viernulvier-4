@@ -24,7 +24,8 @@ const { t } = useI18n();
 
 interface Props {
   modelValue: string; // currently selected value
-  items: string[]; // list of searchable items
+  results: string[]; // list of searchable items
+  loading?: boolean;
   limit?: number; // max suggestions
   scrollLimit?: number; // number of suggestions before scrollbar appears
   label?: string; // label displayed above the input
@@ -51,40 +52,18 @@ const dropdownStyle = computed(() => {
 const emit = defineEmits<{
   // update:modelValue gets called when a new selection is made
   (e: "update:modelValue", value: string): void;
+  (e: "search", query: string): void;
 }>();
 
 const internalQuery = ref(props.modelValue || ""); // so that a user can type without selecting something yet
 const isFocused = ref(false); // tracks if input is focused (user is typing)
 const inputRef = ref<HTMLInputElement | null>(null); // used for unfocusing the bar after selecting an item
 
-const results: ComputedRef<string[]> = computed(() => {
-  // suggestions do not need to appear if user did not click on the bar
-  if (!isFocused.value) return [];
-
-  const query = internalQuery.value.toLowerCase();
-  const filtered = internalQuery.value
-    ? props.items.filter(
-        (
-          item, // filtering based on current query
-        ) => item.toLowerCase().includes(query),
-      )
-    : props.items; // all items when nothing is typed in, to give some suggestions
-
-  const sorted = filtered.sort((a, b) => {
-    const aStarts = a.toLowerCase().startsWith(query);
-    const bStarts = b.toLowerCase().startsWith(query);
-    if (aStarts && !bStarts) return -1; // a starts with current input, b doesn't
-    if (!aStarts && bStarts) return 1; // b starts with current input, a doesn't
-    return a.localeCompare(b); // if neither start with current input, sort alphabetically
-  });
-
-  return sorted.slice(0, props.limit ?? 5);
-});
-
 const select = (item: string) => {
   // handles selecting a suggestion
   internalQuery.value = item;
   emit("update:modelValue", item);
+  isFocused.value = false; // Remove focus when selected.
   inputRef.value?.blur();
 };
 const clear = () => {
@@ -98,6 +77,11 @@ const submit = () => {
   emit("update:modelValue", internalQuery.value);
   inputRef.value?.blur();
 };
+
+// Watch the internal query for updates.
+watch(internalQuery, (newQuery) => {
+  emit("search", newQuery);
+});
 </script>
 
 <template>
@@ -129,7 +113,7 @@ const submit = () => {
 
       <!-- Autocompletion suggestions -->
       <ul
-        v-if="results.length"
+        v-if="isFocused && results.length"
         :style="dropdownStyle"
         class="absolute mt-1 w-full bg-background border border-border rounded-lg shadow-2xl z-10 overflow-y-auto"
       >

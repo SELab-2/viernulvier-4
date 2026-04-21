@@ -119,7 +119,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
       <div class="flex-1 min-w-0 h-10">
         <SearchBar
           v-model="searchQuery"
-          :items="storyTitles"
+          :results="storyTitles"
           :limit="6"
           :scroll-limit="4"
           :placeholder="t('stories.searchPlaceholder')"

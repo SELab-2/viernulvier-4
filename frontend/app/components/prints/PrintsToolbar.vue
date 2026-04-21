@@ -43,7 +43,7 @@ function selectType(type: PrintType | null) {
       <div class="flex-1 min-w-0 h-10">
         <SearchBar
           v-model="searchQuery"
-          :items="titles || []"
+          :results="titles || []"
           :limit="6"
           :scroll-limit="4"
           placeholder="Search prints..."
