@@ -280,6 +280,19 @@
   background-color: var(--story-card-hover);
 }
 
+/* Snackbar colors aligned with existing feedback popup tokens */
+#vue3-snackbar--container .vue3-snackbar-message.success {
+  background-color: var(--feedback-success-bg);
+  border: 1px solid var(--feedback-success-border);
+  color: var(--feedback-success-text);
+}
+
+#vue3-snackbar--container .vue3-snackbar-message.error {
+  background-color: var(--feedback-error-bg);
+  border: 1px solid var(--feedback-error-border);
+  color: var(--feedback-error-text);
+}
+
 /* ── Blog timeline ───────────────────────────────────────────────── */
 
 /* Year section separator */
