@@ -5,6 +5,7 @@
  *  - Configurable result limit (default: 5)
  *  - Optional label and required indicator
  *  - Emits selected value via v-model
+ *  - Arrow key navigation through suggestions
  *
  * Usage:
  * <SearchBar
@@ -50,6 +51,7 @@ const props = withDefaults(defineProps<Props>(), {
 const computedPlaceholder = computed(() => {
   return props.placeholder || t("searchbar.placeholder");
 });
+
 // computes when a scrollbar should be used
 const dropdownStyle = computed(() => {
   const limit = props.scrollLimit ?? props.limit; // is default the same num as max suggestions (there will be no scrollbar then)
@@ -58,48 +60,61 @@ const dropdownStyle = computed(() => {
 });
 
 const emit = defineEmits<{
-  // update:modelValue gets called when a new selection is made
   (e: "update:modelValue", value: string): void;
   (e: "search", query: string): void;
 }>();
 
-/**
- * Internals and actions
- */
+const internalQuery = ref(props.modelValue || "");
+const isFocused = ref(false);
+const inputRef = ref<HTMLInputElement | null>(null);
 
-const internalQuery = ref(props.modelValue || ""); // so that a user can type without selecting something yet
-const isFocused = ref(false); // tracks if input is focused (user is typing)
-const inputRef = ref<HTMLInputElement | null>(null); // used for unfocusing the bar after selecting an item
+// ── Arrow-key navigation ────────────────────────────────────────────────────
+const highlightedIndex = ref(-1); // -1 means nothing highlighted
+const listRef = ref<HTMLUListElement | null>(null); // ref to the <ul> for scrollIntoView
 
-/**
- * When an item is selected.
- * @param item
- */
+/** Move highlight up/down, clamped to list bounds. */
+const moveHighlight = (direction: 1 | -1) => {
+  if (!internalResults.value.length) return;
+  highlightedIndex.value = Math.max(
+    -1,
+    Math.min(
+      internalResults.value.length - 1,
+      highlightedIndex.value + direction,
+    ),
+  );
+  // Scroll the highlighted <li> into view if the dropdown has a scrollbar
+  nextTick(() => {
+    const li = listRef.value?.children[highlightedIndex.value] as
+      | HTMLElement
+      | undefined;
+    li?.scrollIntoView({ block: "nearest" });
+  });
+};
+// ───────────────────────────────────────────────────────────────────────────
+
 const select = (item: SearchSuggestion) => {
-  // handles selecting a suggestion
   internalQuery.value = item.searchValue;
   emit("update:modelValue", item.searchValue);
-  isFocused.value = false; // Remove focus when selected.
+  isFocused.value = false;
+  highlightedIndex.value = -1; // reset on selection
   inputRef.value?.blur();
 };
 
-/**
- * Clears the input.
- */
 const clear = () => {
-  // handles clearing the input
   internalQuery.value = "";
   emit("update:modelValue", "");
 };
-defineExpose({ clear }); // exposes the clear method to the parent components
+defineExpose({ clear });
 
-/**
- * When enter is pressed.
- */
+/** Enter key: select highlighted item if one exists, otherwise plain submit. */
 const submit = () => {
-  // handles input when pressing enter
-  emit("update:modelValue", internalQuery.value);
-  inputRef.value?.blur();
+  const highlighted = internalResults.value[highlightedIndex.value];
+  if (highlighted) {
+    select(highlighted);
+  } else {
+    emit("update:modelValue", internalQuery.value);
+    inputRef.value?.blur();
+  }
 };
 
 /**
@@ -123,8 +138,9 @@ const isFetching = ref(false);
  * @param query The query to search for.
  */
 const executeSearch = async (query: string) => {
+  highlightedIndex.value = -1; // reset highlight whenever results refresh
+
   if (!props.fetchSuggestions) {
-    // Local, synchronous filtering
     const lowerQuery = query.toLowerCase();
     internalResults.value = (props.suggestions ?? []).filter((item) =>
       item.display.toLowerCase().includes(lowerQuery),
@@ -132,17 +148,16 @@ const executeSearch = async (query: string) => {
     return;
   }
 
-  // API, asynchronous fetching
+  // We only fetch results if the string is longer than 2.
   if (!query || query.length < 2) {
     internalResults.value = [];
     return;
   }
 
   isFetching.value = true;
-
   try {
     internalResults.value = await props.fetchSuggestions(query, props.limit);
-  } catch (error) {
+  } catch {
     internalResults.value = [];
   } finally {
     isFetching.value = false;
@@ -187,14 +202,20 @@ watch(internalQuery, (newQuery) => {
           isFocused = true;
           executeSearch(internalQuery);
         "
-        @blur="isFocused = false"
-        @keydown.enter="submit"
+        @blur="
+          isFocused = false;
+          highlightedIndex = -1;
+        "
+        @keydown.enter.prevent="submit"
+        @keydown.down.prevent="moveHighlight(1)"
+        @keydown.up.prevent="moveHighlight(-1)"
         class="pl-12 pr-10 bg-muted border border-border h-full font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground placeholder:opacity-100 dark:placeholder:opacity-90"
       />
 
       <!-- Autocompletion suggestions -->
       <ul
         v-if="isFocused && internalResults.length"
+        ref="listRef"
         :style="dropdownStyle"
         class="absolute mt-1 w-full bg-background border border-border rounded-lg shadow-2xl z-10 overflow-y-auto"
       >
@@ -202,14 +223,16 @@ watch(internalQuery, (newQuery) => {
           v-for="(item, index) in internalResults"
           :key="index"
           @mousedown.prevent="select(item)"
-          class="px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-muted text-muted-foreground overflow-hidden truncate"
+          :class="[
+            'px-4 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer text-muted-foreground overflow-hidden truncate',
+            index === highlightedIndex ? 'bg-muted' : 'hover:bg-muted',
+          ]"
         >
           <span
             class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground truncate"
           >
             {{ item.display }}
           </span>
-
           <span
             v-if="item.context"
             class="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-2 shrink-0"
@@ -219,12 +242,10 @@ watch(internalQuery, (newQuery) => {
         </li>
       </ul>
 
-      <!-- Search icon -->
       <Search
         class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
       />
 
-      <!-- Clear button -->
       <button
         v-if="internalQuery"
         @mousedown.prevent="clear"
