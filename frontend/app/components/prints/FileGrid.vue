@@ -57,12 +57,7 @@ const grid = computed(() =>
   <!-- Grid -->
   <div v-if="files.length">
     <div :class="grid">
-      <PrintsFileGridItem
-        v-for="file in files"
-        :key="file.id"
-        :file="file"
-        :category="category"
-      />
+      <PrintsFileGridItem v-for="file in files" :key="file.id" :file="file" />
     </div>
   </div>
 

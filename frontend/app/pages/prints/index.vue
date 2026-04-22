@@ -31,8 +31,6 @@ const {
   fetchError,
 } = usePrintView();
 
-// Filters
-
 // Responsive columns
 const prints = ref<PrintItemView[]>([]);
 const ROWS_PER_PAGE = 4;
@@ -55,8 +53,10 @@ const currentCols = computed(() => {
   return 2; // grid-cols-2
 });
 const LIMIT = computed(() => ROWS_PER_PAGE * currentCols.value);
-const categoryLabel = computed(
-  () => activeFilter.value ?? t("prints.types.all"),
+const categoryLabel = computed(() =>
+  activeFilter.value
+    ? t(`prints.types.${activeFilter.value}`)
+    : t("prints.types.all"),
 );
 
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
