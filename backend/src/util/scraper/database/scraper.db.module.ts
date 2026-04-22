@@ -1,8 +1,33 @@
 import { Module } from "@nestjs/common";
-import { UtilsDbConnection } from "./db.connection";
+import { ScraperDbService } from "./scraper.db.service";
+import { ScraperProductionDbService } from "./scraper.production.db.service";
+import { ScraperEventDbService } from "./scraper.event.db.service";
+import { ScraperMediaDbService } from "./scraper.media.db.service";
+import { ScraperAttributesDbService } from "./scraper.attributes.db.service";
+import { ScraperBlogDbService } from "./scraper.blog.db.service";
+import { ScraperDbManager } from "./scraper.db.facade";
 
+/**
+ * Scraper db module.
+ */
 @Module({
-  providers: [UtilsDbConnection],
-  exports: [UtilsDbConnection],
+  providers: [
+    ScraperDbService,
+    ScraperProductionDbService,
+    ScraperEventDbService,
+    ScraperMediaDbService,
+    ScraperAttributesDbService,
+    ScraperBlogDbService,
+    ScraperDbManager,
+  ],
+  exports: [
+    ScraperDbService,
+    ScraperProductionDbService,
+    ScraperEventDbService,
+    ScraperAttributesDbService,
+    ScraperMediaDbService,
+    ScraperBlogDbService,
+    ScraperDbManager,
+  ],
 })
 export class ScraperDbModule {}

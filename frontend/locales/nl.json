@@ -4,6 +4,10 @@
     "archive": "archief",
     "stories": "verhalen",
     "prints": "drukwerk",
+    "productions": "producties",
+    "events": "evenementen",
+    "accounts": "accounts",
+    "dashboard": "dashboard",
     "logout": "uitloggen"
   },
   "auth": {

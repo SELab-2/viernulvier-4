@@ -5,6 +5,7 @@ import {
   LocationDto,
   PaginationFilterDto,
   ModifyLocationDto,
+  FilterLocationDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 
@@ -27,12 +28,17 @@ export class LocationService {
   /**
    * Fetches a list of all Location objects.
    * @param paginationFilter is the pagination params requested
+   * @param locationFilters Filters for the location.
    * @returns A list of all Locations.
    */
   async getLocations(
     paginationFilter: PaginationFilterDto,
+    locationFilters: FilterLocationDto,
   ): Promise<PaginatedResponse<LocationDto>> {
-    return await this.locationDbService.getLocations(paginationFilter);
+    return await this.locationDbService.getLocations(
+      paginationFilter,
+      locationFilters,
+    );
   }
 
   /**

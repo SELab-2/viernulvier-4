@@ -26,7 +26,7 @@ export class AccountDatabaseService {
     page: number = 0,
   ): Promise<PaginatedResponse<PublicAccountDto>> {
     let query = `
-      SELECT id, username, super_admin
+      SELECT id, username, super_admin AS "superAdmin"
       FROM accounts
       ORDER BY id
     `;
@@ -64,7 +64,7 @@ export class AccountDatabaseService {
     const query = `
       INSERT INTO accounts (username, password)
       VALUES ($1, $2)
-      RETURNING id, username
+      RETURNING id, username, super_admin AS "superAdmin"
     `;
 
     const result = await this.db.query<PublicAccountDto>(query, [
@@ -86,7 +86,7 @@ export class AccountDatabaseService {
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     // 1. Fetch account by username
     const query = `
-      SELECT id, username, password, super_admin
+      SELECT id, username, password, super_admin AS "superAdmin"
       FROM accounts
       WHERE username = $1
       LIMIT 1
@@ -167,7 +167,7 @@ export class AccountDatabaseService {
       UPDATE accounts
       SET ${updates.join(", ")}
       WHERE id = $${idx}
-      RETURNING id, username, super_admin
+      RETURNING id, username, super_admin AS "superAdmin"
     `;
 
     const result = await this.db.query<PublicAccountDto>(query, values);

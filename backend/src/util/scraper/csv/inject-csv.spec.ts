@@ -1,8 +1,8 @@
 import { InjectCsvEngine } from "./inject-csv.engine";
-import { UtilsDbConnection } from "../database/db.connection";
 import { AppLogger } from "../../logger/logger.service";
 import { ConfigService } from "@nestjs/config";
 import { LanguageService } from "../../language/language.service";
+import { ScraperDbManager } from "../database/scraper.db.facade";
 import { ResourceNotFoundException } from "../../../common/exceptions";
 import { ProductionDto } from "../../../dto/dto";
 
@@ -39,7 +39,7 @@ jest.mock("../../logger/logger", () => ({
 }));
 
 describe("inject-csv structured importers", () => {
-  let dbMock: jest.Mocked<UtilsDbConnection>;
+  let dbMock: jest.Mocked<ScraperDbManager>;
   let languageServiceMock: jest.Mocked<LanguageService>;
   let appLoggerMock: jest.Mocked<AppLogger>;
   let configServiceMock: jest.Mocked<ConfigService>;
@@ -51,18 +51,33 @@ describe("inject-csv structured importers", () => {
 
     // 1. Setup the Database Mock
     dbMock = {
-      insertProductions: jest.fn().mockResolvedValue(undefined),
-      insertLocations: jest.fn().mockResolvedValue(undefined),
-      insertEvents: jest.fn().mockResolvedValue(undefined),
-      insertTag: jest.fn().mockResolvedValue(500),
-      getProductionByLegacyId: jest.fn(),
-      linkTag: jest.fn().mockResolvedValue(true),
-      insertBlog: jest.fn().mockResolvedValue({ id: 99 }),
-      linkBlog: jest.fn().mockResolvedValue(true),
-      getEventByLegacyId: jest.fn(),
-      insertPrice: jest.fn().mockResolvedValue({ id: 66 }),
-      linkPrice: jest.fn().mockResolvedValue(true),
-    } as unknown as jest.Mocked<UtilsDbConnection>;
+      // Domain 1: Productions
+      production: {
+        insertProductions: jest.fn().mockResolvedValue(undefined),
+        getProductionByLegacyId: jest.fn(),
+        linkTag: jest.fn().mockResolvedValue(true),
+      },
+
+      // Domain 2: Events
+      event: {
+        insertEvents: jest.fn().mockResolvedValue(undefined),
+        getEventByLegacyId: jest.fn(),
+        linkPrice: jest.fn().mockResolvedValue(true),
+      },
+
+      // Domain 3: Taxonomies
+      taxonomies: {
+        insertLocations: jest.fn().mockResolvedValue(undefined),
+        insertTag: jest.fn().mockResolvedValue(500),
+        insertPrice: jest.fn().mockResolvedValue({ id: 66 }),
+      },
+
+      // Domain 4: Blogs
+      blog: {
+        insertBlog: jest.fn().mockResolvedValue({ id: 99 }),
+        linkBlog: jest.fn().mockResolvedValue(true),
+      },
+    } as unknown as jest.Mocked<ScraperDbManager>;
 
     // 2. Setup the LanguageService Mock (Just pass the data through unchanged)
     languageServiceMock = {
@@ -112,9 +127,11 @@ describe("inject-csv structured importers", () => {
     expect(mockParseProductionsCSV).toHaveBeenCalledWith(
       "/tmp/productions.csv",
     );
-    expect(dbMock.insertProductions).toHaveBeenCalledTimes(1);
+    expect(dbMock.production.insertProductions).toHaveBeenCalledTimes(1);
 
-    const inserted = dbMock.insertProductions.mock.calls[0][0];
+    const insertMock = jest.mocked(dbMock.production.insertProductions);
+    expect(insertMock).toHaveBeenCalledTimes(1);
+    const inserted = insertMock.mock.calls[0][0];
     expect(inserted).toHaveLength(1);
     expect(inserted[0]).toMatchObject({
       legacy_id: "csv-10",
@@ -155,14 +172,16 @@ describe("inject-csv structured importers", () => {
 
     expect(mockParseEventsCSV).toHaveBeenCalledWith("/tmp/events.csv");
 
-    const insertedLocations = dbMock.insertLocations.mock.calls[0][0];
+    const locationsMock = jest.mocked(dbMock.taxonomies.insertLocations);
+    const insertedLocations = locationsMock.mock.calls[0][0];
     expect(insertedLocations).toHaveLength(1);
     expect(insertedLocations[0]).toMatchObject({
       legacy_id: "csv-Grote Zaal",
       name: { en: "Main Hall", nl: "Grote Zaal" },
     });
 
-    const insertedEvents = dbMock.insertEvents.mock.calls[0][0];
+    const eventsMock = jest.mocked(dbMock.event.insertEvents);
+    const insertedEvents = eventsMock.mock.calls[0][0];
     expect(insertedEvents).toHaveLength(2);
     expect(insertedEvents[0]).toMatchObject({
       legacy_id: "csv-1",
@@ -186,27 +205,30 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    (dbMock.getProductionByLegacyId as jest.Mock)
+    (dbMock.production.getProductionByLegacyId as jest.Mock)
       .mockResolvedValueOnce({ id: 11 })
       .mockRejectedValueOnce(new ResourceNotFoundException(ProductionDto, 0));
 
     await engine.injectTagsCSV("/tmp/tags.csv");
 
-    expect(dbMock.insertTag).toHaveBeenCalledWith(
+    expect(dbMock.taxonomies.insertTag).toHaveBeenCalledWith(
       expect.objectContaining({
         legacy_id: "csv-Theater",
         name: { en: "Theatre", nl: "Theater" },
       }),
     );
 
-    expect(dbMock.getProductionByLegacyId).toHaveBeenNthCalledWith(1, "csv-7");
-    expect(dbMock.getProductionByLegacyId).toHaveBeenNthCalledWith(
+    expect(dbMock.production.getProductionByLegacyId).toHaveBeenNthCalledWith(
+      1,
+      "csv-7",
+    );
+    expect(dbMock.production.getProductionByLegacyId).toHaveBeenNthCalledWith(
       2,
       "csv-999",
     );
 
-    expect(dbMock.linkTag).toHaveBeenCalledTimes(1);
-    expect(dbMock.linkTag).toHaveBeenCalledWith(11, 500);
+    expect(dbMock.production.linkTag).toHaveBeenCalledTimes(1);
+    expect(dbMock.production.linkTag).toHaveBeenCalledWith(11, 500);
     expect(appLoggerMock.warn).toHaveBeenCalled();
   });
 
@@ -222,15 +244,15 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    (dbMock.getProductionByLegacyId as jest.Mock)
+    (dbMock.production.getProductionByLegacyId as jest.Mock)
       .mockResolvedValueOnce({ id: 21 })
       .mockRejectedValueOnce(new ResourceNotFoundException(ProductionDto, 0));
 
     await engine.injectBlogsCSV("/tmp/blogs.csv");
 
-    expect(dbMock.insertBlog).toHaveBeenCalledWith("News", "Some text");
-    expect(dbMock.linkBlog).toHaveBeenCalledTimes(1);
-    expect(dbMock.linkBlog).toHaveBeenCalledWith(21, 99);
+    expect(dbMock.blog.insertBlog).toHaveBeenCalledWith("News", "Some text");
+    expect(dbMock.blog.linkBlog).toHaveBeenCalledTimes(1);
+    expect(dbMock.blog.linkBlog).toHaveBeenCalledWith(21, 99);
     expect(appLoggerMock.warn).toHaveBeenCalled();
   });
 
@@ -252,21 +274,21 @@ describe("inject-csv structured importers", () => {
       },
     ]);
 
-    (dbMock.getEventByLegacyId as jest.Mock)
+    (dbMock.event.getEventByLegacyId as jest.Mock)
       .mockResolvedValueOnce({ id: 8 })
       .mockRejectedValueOnce(new ResourceNotFoundException(ProductionDto, 0));
 
     await engine.injectPricesCSV("/tmp/prices.csv");
 
-    expect(dbMock.insertPrice).toHaveBeenCalledWith(
+    expect(dbMock.taxonomies.insertPrice).toHaveBeenCalledWith(
       expect.objectContaining({
         legacy_id: "csv-Standaard",
         amount: 20,
       }),
     );
 
-    expect(dbMock.linkPrice).toHaveBeenCalledTimes(1);
-    expect(dbMock.linkPrice).toHaveBeenCalledWith(8, 66);
+    expect(dbMock.event.linkPrice).toHaveBeenCalledTimes(1);
+    expect(dbMock.event.linkPrice).toHaveBeenCalledWith(8, 66);
     expect(appLoggerMock.warn).toHaveBeenCalled();
   });
 });

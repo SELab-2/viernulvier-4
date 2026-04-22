@@ -8,6 +8,13 @@
 import { ref, onMounted } from "vue";
 import { Sun, Moon } from "lucide-vue-next";
 
+defineProps<{
+  isCompact: {
+    type: Boolean;
+    default: false;
+  };
+}>();
+
 const isDark = ref(false);
 
 const applyTheme = (dark: boolean) => {
@@ -41,7 +48,7 @@ onMounted(() => {
     <Sun v-if="isDark" :size="16" />
     <Moon v-else :size="16" />
 
-    <span class="hidden sm:inline">
+    <span :class="isCompact ? 'hidden xl:inline' : 'hidden lg:inline'">
       {{ isDark ? "LIGHT" : "DARK" }}
     </span>
   </button>
