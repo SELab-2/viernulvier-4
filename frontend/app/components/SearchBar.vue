@@ -168,6 +168,11 @@ const debouncedSearch = useDebounceFn(executeSearch, 100);
 
 // Watch the internal query for updates.
 watch(internalQuery, (newQuery) => {
+  if (!newQuery) {
+    emit("update:modelValue", "");
+    emit("search", "");
+  }
+
   // Add delay for async based on if a function was passed.
   if (props.fetchSuggestions) {
     debouncedSearch(newQuery);

@@ -217,12 +217,13 @@ export function generateRelevanceClause(
   const val = param(searchTerm);
   const languagesToSearch = lang ? [lang] : SUPPORTED_LANGUAGES;
 
-  // We score each column and each language that was asked for (either one or all).
-  const scoringParts = columns.flatMap((column) => {
-    // Apply the weight multiplier.
+  // We score each column, finding the BEST language match per column
+  const scoringParts = columns.map((column) => {
     const weightMultiplier = column.weightMultiplier ?? 1;
-    return languagesToSearch.map((searchLang) => {
-      const jsonField = `${column.name}->>'${searchLang}'`;
+
+    const langScores = languagesToSearch.map((searchLang) => {
+      // Prevents null poisoning.
+      const jsonField = `COALESCE(${column.name}->>'${searchLang}', '')`;
 
       // Calculate a base score for the whole string.
       const baseScore = `word_similarity(${val}, ${jsonField})`;
@@ -233,8 +234,12 @@ export function generateRelevanceClause(
       // And if the start we also give a bonus.
       const startsWithBonus = `(CASE WHEN ${jsonField} ILIKE (CAST(${val} AS text) || '%') THEN 0.5 ELSE 0.0 END)`;
 
-      return `((${baseScore} + ${exactMatchBonus} + ${startsWithBonus}) * ${weightMultiplier})`;
+      return `(${baseScore} + ${exactMatchBonus} + ${startsWithBonus})`;
     });
+
+    // GREATEST to take the best language score.
+    // Wrap in COALESCE to ensure the column score is never NULL.
+    return `(COALESCE(GREATEST(${langScores.join(", ")}), 0) * ${weightMultiplier})`;
   });
 
   if (scoringParts.length === 0) return "0";
