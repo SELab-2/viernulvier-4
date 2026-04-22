@@ -1,5 +1,7 @@
 import { ref } from "vue";
-import { getToday } from "#imports";
+import { getToday } from "~/utils/constants";
+import type { PaginatedResponse, ProductionView } from "@repo/common";
+import type { SearchSuggestion } from "~/components/SearchBar.vue";
 
 /**
  * Shared state for the Archive feature.
@@ -37,6 +39,52 @@ const loading = ref(false);
 const oldestDate = ref("");
 
 export function useArchiveView() {
+  const { getAll } = useProductionApi();
+  const { locale } = useI18n();
+
+  /**
+   * Custom fetch function for suggestions
+   * @param query
+   */
+  async function fetchSuggestions(query: string): Promise<SearchSuggestion[]> {
+    const resp = (await getAll({
+      // This means we'll use 5 suggestions.
+      paginationFilters: { page: 0, limit: 5, descending: true },
+      productionFilters: {
+        titelOrArtist: query,
+        is_suggestion: true,
+        ...dateFilter.value,
+        tag_ids: tagIds.value,
+      },
+      languageFilters: { lang: locale.value },
+    })) as ApiResponse<PaginatedResponse<ProductionView>>;
+
+    if (!resp.data?.objects) return [];
+
+    const lowerQuery = query.toLowerCase();
+
+    return resp.data.objects.map((p: ProductionView): SearchSuggestion => {
+      const title = p.titel || "";
+      const artist = p.artist || "";
+
+      // Check if the user's query matched the artist
+      if (artist.toLowerCase().includes(lowerQuery)) {
+        return {
+          display: artist, // "Sarah Bettens"
+          context: title || "Artist", // Shows the title on the right, or just "Artist"
+          searchValue: artist, // Puts "Sarah Bettens" in the bar when clicked
+        };
+      }
+
+      // Otherwise, assume it matched the title
+      return {
+        display: title,
+        context: artist || "Title",
+        searchValue: title,
+      };
+    });
+  }
+
   return {
     viewMode,
     searchQuery,
@@ -49,5 +97,7 @@ export function useArchiveView() {
 
     loading,
     oldestDate,
+
+    fetchSuggestions,
   };
 }

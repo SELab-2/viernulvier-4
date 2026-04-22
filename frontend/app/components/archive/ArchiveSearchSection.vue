@@ -20,15 +20,22 @@ import { useArchiveView } from "../../composables/useArchiveView";
 import Calendar from "~/components/DefaultCalendar.vue";
 import { useProductionApi } from "~/composables/useProductionApi";
 import { useEventApi } from "~/composables/useEventApi";
-import type { ProductionView, Event, PaginatedResponse } from "@repo/common";
+import type { ProductionView, Event } from "@repo/common";
 import TagFilter from "./TagFilter.vue";
 import { X } from "lucide-vue-next";
-import type { SearchSuggestion } from "../SearchBar.vue";
+import { getToday } from "~/utils/constants";
 
 const { t, locale } = useI18n();
 
-const { viewMode, searchQuery, sortOrder, dateFilter, oldestDate, tagIds } =
-  useArchiveView();
+const {
+  viewMode,
+  searchQuery,
+  sortOrder,
+  dateFilter,
+  oldestDate,
+  tagIds,
+  fetchSuggestions,
+} = useArchiveView();
 
 const { getAll: getAllProductions } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
@@ -88,49 +95,6 @@ async function fetchOldestDate() {
   } catch {
     // Non-critical: calendar still works without the oldest date
   }
-}
-
-/**
- * Custom fetch function for suggestions
- * @param query
- */
-async function fetchSuggestions(query: string): Promise<SearchSuggestion[]> {
-  const resp = (await getAllProductions({
-    // This means we'll use 5 suggestions.
-    paginationFilters: { page: 0, limit: 5, descending: true },
-    productionFilters: {
-      titelOrArtist: query,
-      is_suggestion: true,
-      ...dateFilter.value,
-      tag_ids: tagIds.value,
-    },
-    languageFilters: { lang: locale.value },
-  })) as ApiResponse<PaginatedResponse<ProductionView>>;
-
-  if (!resp.data?.objects) return [];
-
-  const lowerQuery = query.toLowerCase();
-
-  return resp.data.objects.map((p: any): SearchSuggestion => {
-    const title = p.titel || "";
-    const artist = p.artist || "";
-
-    // Check if the user's query matched the artist
-    if (artist.toLowerCase().includes(lowerQuery)) {
-      return {
-        display: artist, // "Sarah Bettens"
-        context: title || "Artist", // Shows the title on the right, or just "Artist"
-        searchValue: artist, // Puts "Sarah Bettens" in the bar when clicked
-      };
-    }
-
-    // Otherwise, assume it matched the title
-    return {
-      display: title,
-      context: artist || "Title",
-      searchValue: title,
-    };
-  });
 }
 
 onMounted(fetchOldestDate);
