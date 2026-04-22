@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   HttpException,
   HttpStatus,
   NotFoundException,
@@ -15,6 +16,20 @@ import { GalleryType } from "@repo/common";
 export class TeapotException extends HttpException {
   constructor() {
     super("I'm a teapot", HttpStatus.I_AM_A_TEAPOT);
+  }
+}
+
+/**
+ * 409 Conflict specifically for duplicate entities.
+ */
+export class AccountAlreadyExistsException extends ConflictException {
+  constructor(username: string) {
+    super({
+      statusCode: HttpStatus.CONFLICT,
+      error: "Conflict",
+      message: `Account with username "${username}" already exists.`,
+      internalCode: "ACCOUNT_ALREADY_EXISTS",
+    });
   }
 }
 
