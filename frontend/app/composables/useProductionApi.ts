@@ -24,7 +24,7 @@ import type {
   ItemWithCrops,
   PrintGallery,
 } from "~/utils/galleryFetcher";
-import { fetchFullGallery } from "~/utils/galleryFetcher";
+import { fetchFullGallery, onGalleryFetchError } from "~/utils/galleryFetcher";
 
 interface ProductionListOptions {
   productionFilters?: FilterProduction;
@@ -167,6 +167,7 @@ export function useProductionApi() {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.productions.media(productionId)}?type=default`,
+        { onError: onGalleryFetchError },
       );
 
       const gallery = response.data;
@@ -187,6 +188,7 @@ export function useProductionApi() {
     try {
       const response = await get<PrintGallery>(
         `${API_ROUTES.productions.media(productionId)}?type=prints`,
+        { onError: onGalleryFetchError },
       );
 
       const gallery = response.data;

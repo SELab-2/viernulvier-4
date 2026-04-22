@@ -7,12 +7,14 @@ import type {
   PaginationFilter,
   PaginatedResponse,
   LanguageQuery,
+  FilterLocation,
 } from "@repo/common";
 import { API_ROUTES } from "../utils/apiRoutes";
 
 interface LocationListOptions {
   paginationFilters?: PaginationFilter;
   languageFilters?: LanguageQuery;
+  locationFilters?: FilterLocation;
 }
 
 /**
@@ -29,10 +31,12 @@ export function useLocationApi() {
   const getAll = ({
     paginationFilters,
     languageFilters,
+    locationFilters,
   }: LocationListOptions = {}) => {
     const params = {
       ...paginationFilters,
       ...languageFilters,
+      ...locationFilters,
     };
 
     const cleanParams = Object.fromEntries(

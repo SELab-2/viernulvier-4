@@ -184,3 +184,15 @@ export function stripHtml(html: string): string {
     .replace(/\s{2,}/g, " ")
     .trim();
 }
+/**
+ * Sanitizes raw text by removing escape characters and
+ * converting newlines to HTML line breaks for v-html rendering.
+ */
+export const cleanText = (text: string | null | undefined) => {
+  if (!text) return "";
+  return text
+    .replace(/\\/g, "")
+    .trim()
+    .replace(/(\r?\n){2,}/g, "\n\n")
+    .replace(/\n/g, "<br />");
+};

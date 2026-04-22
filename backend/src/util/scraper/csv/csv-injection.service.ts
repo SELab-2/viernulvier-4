@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { UtilsDbConnection } from "../database/db.connection";
+import { ScraperDbService } from "../database/scraper.db.service";
 import { InjectCsvEngine } from "./inject-csv.engine";
 
 @Injectable()
 export class CsvInjectionService {
   constructor(
-    private readonly dbConnection: UtilsDbConnection,
+    private readonly dbConnection: ScraperDbService,
     private readonly engine: InjectCsvEngine,
   ) {}
 

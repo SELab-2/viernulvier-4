@@ -85,5 +85,17 @@ export function useAuth() {
 
   const isLoggedIn = computed(() => !!apiKey.value);
 
-  return { account, apiKey, isLoggedIn, login, logout, rehydrate };
+  const isSuperAdmin = computed(() => {
+    return account.value?.superAdmin === true;
+  });
+
+  return {
+    account,
+    apiKey,
+    isLoggedIn,
+    isSuperAdmin,
+    login,
+    logout,
+    rehydrate,
+  };
 }
