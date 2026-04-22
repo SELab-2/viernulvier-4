@@ -24,8 +24,7 @@ import { useBlogView } from "~/composables/blogs/useBlogView";
 import type { DateFilter } from "~/types/DateFilter";
 
 const { t } = useI18n();
-const { sortOrder, searchQuery, dateFilter, useBlogStory, fetchSuggestions } =
-  useBlogView();
+const { sortOrder, searchQuery, dateFilter, fetchSuggestions } = useBlogView();
 
 const props = defineProps<{
   storyTitles: string[];

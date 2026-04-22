@@ -57,7 +57,7 @@ async function loadPage(page: number) {
         titelOrArtist: searchQuery.value || undefined,
         tag_ids: tagIds.value.length ? tagIds.value : undefined,
         after: dateFilter.value.after || undefined,
-        before: dateFilter.value.before,
+        before: dateFilter.value.before, // before filter will always contain a value (today's date)
         is_suggestion: false,
       },
       paginationFilters: {

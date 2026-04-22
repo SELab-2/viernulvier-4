@@ -59,6 +59,7 @@ export class BlogDatabaseService {
    * Get blogs with pagination
    * @param paginationFilters Filters for pagination and ordering.
    * @param blogFilters Filters for blogs.
+   * @param language Optional language to use for text filtering.
    * @returns blogs
    */
   async getBlogs(

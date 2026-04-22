@@ -48,7 +48,7 @@ const hasActiveFilters = computed(() => {
   return (
     tagIds.value.length > 0 ||
     !!dateFilter.value.after ||
-    dateFilter.value.before !== getToday()
+    dateFilter.value.before !== getToday() // Checks whether the before date is custom or not.
   );
 });
 

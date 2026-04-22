@@ -26,6 +26,7 @@ export class ProductionService {
    * note: pagination is done here via the filters param.
    * @param productionFilters The filters to be applied to the query.
    * @param paginationFilters Filters to do with pagination and ordering.
+   * @param language Optional language.
    * @returns All ProductionDto objects
    */
   async getAllProductions(

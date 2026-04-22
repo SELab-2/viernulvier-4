@@ -191,6 +191,10 @@ export function generateCountQuery(tableName: string): string {
  * Relevance Sorting
  */
 
+/**
+ * A column where relevance needs to be calculated.
+ * With an optional multiplier.
+ */
 interface RelevanceColumn {
   name: string;
   weightMultiplier?: number;

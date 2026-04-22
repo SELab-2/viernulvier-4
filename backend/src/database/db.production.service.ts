@@ -101,6 +101,7 @@ export class ProductionDatabaseService {
    * Generic get function for productions.
    * @param productionFilters gives the freedom to define the filters of the search you want.
    * @param paginationFilters Filters to do with pagination and ordering.
+   * @param language Optional language to use for text ordering/filtering.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.

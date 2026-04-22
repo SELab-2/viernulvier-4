@@ -35,6 +35,7 @@ export const FilterBlogSchema = z.object({
   after: z.iso.date().optional(),
   before: z.iso.date().optional(),
 
+  // Toggle for the backend to treat this request as a suggestion.
   is_suggestion: QueryBoolean.default(false),
 });
 

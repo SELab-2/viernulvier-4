@@ -62,6 +62,7 @@ export const FilterProductionSchema = z.object({
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
 
+  // Toggle for the backend to treat the request as a suggestion.
   is_suggestion: QueryBoolean.default(false),
 });
 

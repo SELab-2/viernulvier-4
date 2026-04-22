@@ -22,14 +22,14 @@ import { X } from "lucide-vue-next";
 import type { SearchSuggestion } from "~/components/SearchBar.vue";
 
 interface Props {
-  label?: string;
+  label?: string; // label displayed above the field
   id?: string;
-  required?: boolean;
+  required?: boolean; // Adds a "*"
   // Allow strings (for your tests) or SearchSuggestions (for the API)
-  options: (SearchSuggestion | string)[];
-  multiple?: boolean;
-  placeholder?: string;
-  freeInput?: boolean;
+  options: (SearchSuggestion | string)[]; // Either SearchSuggestions or strings
+  multiple?: boolean; // Whether multiple can be selected.
+  placeholder?: string; // Placeholder for the selection
+  freeInput?: boolean; // Allows values outside of the options.
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -41,7 +41,6 @@ const model = defineModel<string[]>({ default: [] });
 const searchQuery = ref("");
 const searchBarRef = ref();
 
-// 1. Normalize options so we always consistently work with SearchSuggestion objects internally
 const normalizedOptions = computed<SearchSuggestion[]>(() => {
   return props.options.map((opt) => {
     if (typeof opt === "string") {
@@ -51,7 +50,6 @@ const normalizedOptions = computed<SearchSuggestion[]>(() => {
   });
 });
 
-// 2. FIXED: Compare the string value against the string value, not the object
 const availableOptions = computed(() =>
   normalizedOptions.value.filter((o) => !model.value.includes(o.searchValue)),
 );
@@ -59,7 +57,6 @@ const availableOptions = computed(() =>
 function handleSelect(value: string) {
   if (!value) return;
 
-  // 3. FIXED: Check if the string exists within our normalized objects
   const isValidOption = normalizedOptions.value.some(
     (o) => o.searchValue === value,
   );
