@@ -1,3 +1,10 @@
+<!--
+  pages/stories/[id].vue
+  ========================
+  Fetches a single blog post by ID with the current locale so the backend
+  returns a flat BlogView. Renders the HTML description from the rich-text
+  editor, including blue links, colors, headings, lists etc.
+-->
 <script lang="ts" setup>
 import { ChevronLeft } from "lucide-vue-next";
 import type { BlogView } from "@repo/common";
@@ -37,9 +44,7 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
 
 const blog = computed(() => data.value);
 
-/** * Get the media gallery.
- * Uses `(res as any)?.data ?? res` to handle inconsistent API nesting.
- */
+/** Get the media gallery. */
 const { data: gallery } = await useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
@@ -71,6 +76,7 @@ const cleanBody = computed(() => cleanText(body.value));
     v-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
+    <!-- Loading -->
     <div v-if="pending" class="min-h-screen flex items-center justify-center">
       <svg
         class="w-6 h-6 animate-spin text-gray-400"
@@ -85,6 +91,7 @@ const cleanBody = computed(() => cleanText(body.value));
       </svg>
     </div>
 
+    <!-- Not found -->
     <div
       v-else-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
@@ -103,6 +110,7 @@ const cleanBody = computed(() => cleanText(body.value));
     </div>
 
     <template v-else>
+      <!-- ── Hero banner ─────────────────────────────────────────── -->
       <section
         class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
         :class="{ 'image-overlay text-white': headerCrop }"
@@ -114,9 +122,7 @@ const cleanBody = computed(() => cleanText(body.value));
           :src="headerCrop"
         />
 
-        <div
-          class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12"
-        >
+        <div class="relative z-10 page-container pb-12">
           <div class="flex items-center gap-6 mb-8">
             <NuxtLink
               :to="ROUTES.stories.base"
@@ -160,7 +166,7 @@ const cleanBody = computed(() => cleanText(body.value));
       </section>
 
       <section class="py-20">
-        <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
+        <div class="page-container">
           <article class="relative w-full">
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
@@ -205,15 +211,98 @@ const cleanBody = computed(() => cleanText(body.value));
 </template>
 
 <style scoped>
-/* make links work */
+/*
+  Rich-text body styles — applied to .description-content which wraps
+  HTML produced by the TipTap editor. The class name matches the template above.
+*/
+
+/* Links — blue + underline */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
   color: var(--accent);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  transition: color 0.15s;
 }
-
 .description-content :deep(a:hover) {
   opacity: 0.7;
+}
+
+/* Headings */
+.description-content :deep(h1) {
+  font-size: 1.75rem;
+  font-weight: 900;
+  margin: 1.5rem 0 0.5rem;
+  line-height: 1.2;
+}
+.description-content :deep(h2) {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 1.25rem 0 0.4rem;
+  line-height: 1.25;
+}
+.description-content :deep(h3) {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 1rem 0 0.3rem;
+}
+
+/* Paragraphs */
+.description-content :deep(p) {
+  margin: 0.75rem 0;
+}
+
+/* Lists */
+.description-content :deep(ul) {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.description-content :deep(ol) {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.description-content :deep(li) {
+  margin: 0.25rem 0;
+}
+
+/* Blockquote */
+.description-content :deep(blockquote) {
+  border-left: 3px solid #9333ea;
+  padding: 0.25rem 0 0.25rem 1rem;
+  margin: 1rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+:global(.dark) .description-content :deep(blockquote) {
+  color: #9ca3af;
+}
+
+/* Horizontal rule */
+.description-content :deep(hr) {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+:global(.dark) .description-content :deep(hr) {
+  border-top-color: #374151;
+}
+
+/* Inline formatting */
+.description-content :deep(strong) {
+  font-weight: 700;
+}
+.description-content :deep(em) {
+  font-style: italic;
+}
+.description-content :deep(s) {
+  text-decoration: line-through;
+}
+.description-content :deep(u) {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .image-overlay::after {

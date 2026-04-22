@@ -161,7 +161,7 @@ watch(searchQuery, () => {
 
 <template>
   <section class="w-full bg-background">
-    <div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="page-container py-6">
       <!-- Results count + pagination -->
       <div class="flex items-center justify-between mb-6">
         <p

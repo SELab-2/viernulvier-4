@@ -44,7 +44,7 @@ onMounted(async () => {
 
 <template>
   <section class="bg-background w-full">
-    <div class="px-6 md:px-12 lg:px-20 py-20 max-w-7xl mx-auto">
+    <div class="page-container py-20">
       <!-- Section header with subtitle on the right -->
       <div
         class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12 border-b border-border pb-6"

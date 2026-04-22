@@ -105,14 +105,13 @@
       }
     },
     "filters": {
-      "toggle": "Filters",
       "year": "Year",
       "dateRange": "Date",
       "clear": "Clear"
     }
   },
   "baseform": {
-    "submitbutton": "Submit",
+    "submitbutton": "Create",
     "resetbutton": "Reset"
   },
   "archive": {
@@ -131,7 +130,6 @@
     "next_page": "Next page",
     "loading": "Loading…",
     "search_placeholder": "Search archive...",
-    "filter": "Filter",
     "view_list": "List",
     "view_grid": "Grid",
     "page_label": "Page",
@@ -155,7 +153,9 @@
     "stories": "Stories",
     "credits": "Credits",
     "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details"
+    "hidePriceDetails": "hide details",
+    "doors": "doors",
+    "break": "intermission"
   },
   "general": {
     "back": "Back",
@@ -163,7 +163,8 @@
     "readLess": "Read less",
     "showMore": "Show more",
     "showLess": "Show less",
-    "noStories": "This production doesn't contain any stories."
+    "noStories": "This production doesn't contain any stories.",
+    "filters": "filters"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -190,7 +191,16 @@
     "admin": "Admin",
     "actions": "Actions",
     "delete": "Remove",
-    "protected": "Protected"
+    "protected": "Protected",
+    "create": "Create account",
+    "creating": "Creating account...",
+    "loadError": "Could not load accounts.",
+    "createError": "Could not create account.",
+    "alreadyExists": "Account \"{username}\" already exists.",
+    "deleteError": "Could not delete account.",
+    "confirmDelete": "Delete account \"{username}\"? This cannot be undone.",
+    "createSuccess": "Created account \"{username}\".",
+    "deleteSuccess": "Deleted account \"{username}\"."
   },
   "prints": {
     "types": {
@@ -199,6 +209,14 @@
       "brochure": "Brochure",
       "drukwerk": "Print",
       "programma": "Program"
+    },
+    "form": {
+      "title": "Title",
+      "type": "Print type",
+      "file": "File",
+      "fileRequired": "Upload a file.",
+      "uploadError": "Failed to upload file.",
+      "deleteConfirm": "Are you sure you want to delete {name}?"
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
@@ -214,7 +232,109 @@
     "noPrints": "No prints",
     "pagination": "Pagination",
     "page_label": "Page",
-    "of_pages": "of {total}"
+    "of_pages": "of {total}",
+    "add": "add"
+  },
+  "admin": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "edit": "Edit",
+    "delete": "Delete",
+    "blogs": {
+      "new": "New Story",
+      "edit": "Edit Story",
+      "results": "results",
+      "fetchError": "Something went wrong loading the stories.",
+      "loadError": "Could not load the story. Please try again.",
+      "notFound": "Story not found",
+      "createBtn": "Create Story",
+      "nextBtn": "Next — Add images →",
+      "saveBtn": "Save Changes",
+      "createError": "Could not create the story. Please try again.",
+      "saveError": "Could not save the changes. Please try again.",
+      "sectionTitle": "Title",
+      "sectionContent": "Content",
+      "titleNl": "Title (NL)",
+      "titleNlPlaceholder": "Title in Dutch",
+      "titleEn": "Title (EN)",
+      "titleEnPlaceholder": "Title in English",
+      "titleEnFallback": "Falls back to Dutch title if left empty.",
+      "descriptionNl": "Description (NL)",
+      "descriptionNlPlaceholder": "Write the Dutch description…",
+      "descriptionEn": "Description (EN)",
+      "descriptionEnPlaceholder": "Write the English description…",
+      "descriptionEnFallback": "Falls back to Dutch description if left empty.",
+      "deleteTitle": "Delete Story",
+      "deleteConfirm": "Are you sure you want to permanently delete \"{title}\"? This action cannot be undone.",
+      "deleteConfirmBtn": "Delete",
+      "titleEnRequired": "English title is required",
+      "descriptionEnRequired": "English description is required",
+      "validation": {
+        "titleNlRequired": "A Dutch title is required.",
+        "descriptionNlRequired": "A Dutch description is required."
+      },
+      "preview": {
+        "label": "Site preview",
+        "lang": "Preview",
+        "badge": "Live preview",
+        "placeholderTitle": "Your title will appear here",
+        "bodyPlaceholder": "Start writing to see a preview of your story…"
+      },
+      "image": {
+        "title": "Header image",
+        "subtitle": "PNG, JPG or WebP — shown as the story hero and in the list view.",
+        "currentLabel": "Current header",
+        "noImage": "No image yet",
+        "upload": "Upload",
+        "replace": "Replace",
+        "uploading": "Uploading…",
+        "typeError": "Please select an image file (PNG, JPG, WebP…).",
+        "uploadError": "Upload failed.",
+        "galleryError": "Failed to create media gallery.",
+        "itemError": "Failed to create media item.",
+        "cropError": "Failed to create media crop.",
+        "uploadSuccess": "{name} uploaded successfully.",
+        "removed": "{name} removed.",
+        "deleteConfirmCrop": "Delete the \"{name}\" crop? This cannot be undone.",
+        "uploaded": "uploaded",
+        "allBelongNote": "All crops belong to a single media item linked to this story.",
+        "backToForm": "Edit content",
+        "createSuccessHint": "Your story has been saved. Upload a header image now, or finish and add one later from the edit page.",
+        "multiTitle": "Header images",
+        "multiSubtitle": "Upload up to 6 image crops — only upload the sizes you need.",
+        "cropHdReady": "HD Ready (list / card)",
+        "cropHdReadyHint": "16:9 — used in story list and card views",
+        "cropHeader": "Header (story detail)",
+        "cropHeaderHint": "Wide banner — shown at the top of the story page",
+        "cropThumbnail": "Thumbnail (small)",
+        "cropThumbnailHint": "Square-ish thumbnail for compact contexts",
+        "cropOg": "OG / Social image",
+        "cropOgHint": "Shown when the story is shared on social media",
+        "cropMobile": "Mobile crop",
+        "cropMobileHint": "Portrait crop optimised for narrow screens",
+        "cropNb": "NB Ready",
+        "cropNbHint": "Neutral-background variant"
+      },
+      "linkToProduction": "Link to Production",
+      "linkBtn": "Link",
+      "linkToProductionTitle": "Link to Production",
+      "linkToProductionSearch": "Search productions by title...",
+      "linkToProductionNoResults": "No productions found",
+      "linkToProductionSuccess": "Successfully linked to production",
+      "linkToProductionError": "Failed to link. Please try again.",
+      "shareGallery": "Share images with this production",
+      "shareGalleryHint": "The production will show the same photos as this story.",
+      "linking": "Linking...",
+      "linked": "Linked",
+      "linkedProductions": "Link to Production",
+      "linkedProductionsHint": "Link this story to a production so it appears on the production page.",
+      "linkedThisSession": "Linked this session",
+      "noLinkedProductions": "Not linked to any production yet",
+      "viewProduction": "View production page"
+    }
   },
   "login": {
     "username": "Username",
@@ -222,5 +342,32 @@
     "signIn": "Sign in",
     "signingIn": "Signing in...",
     "error": "Something went wrong."
+  },
+  "editor": {
+    "placeholder": "Write your story...",
+    "toolbar": {
+      "bold": "Bold (Ctrl+B)",
+      "italic": "Italic (Ctrl+I)",
+      "underline": "Underline (Ctrl+U)",
+      "strike": "Strikethrough",
+      "h1": "Heading 1 (block)",
+      "h2": "Heading 2 (block)",
+      "h3": "Heading 3 (block)",
+      "bulletList": "Bullet list",
+      "orderedList": "Numbered list",
+      "blockquote": "Block quote",
+      "link": "Insert / edit link",
+      "linkPrompt": "URL:",
+      "color": "Text colour",
+      "fontSize": "Font size (inline selection)",
+      "sizeNormal": "Normal",
+      "sizeSmall": "Small",
+      "sizeNormalPx": "Normal (14px)",
+      "sizeLarge": "Large",
+      "sizeXLarge": "X-Large",
+      "sizeXXLarge": "XX-Large",
+      "hr": "Horizontal line",
+      "clearFormat": "Clear formatting"
+    }
   }
 }

@@ -21,7 +21,7 @@ const { t } = useI18n();
   <section
     class="bg-black dark:bg-white text-white dark:text-black border-t border-white/5 dark:border-black/5"
   >
-    <div class="px-6 md:px-12 lg:px-20 py-24 max-w-7xl mx-auto">
+    <div class="page-container py-24">
       <div class="grid md:grid-cols-2 gap-16 items-center">
         <!-- Text content -->
         <div>
