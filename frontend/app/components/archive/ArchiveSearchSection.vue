@@ -109,6 +109,8 @@ onMounted(fetchOldestDate);
         <SearchBar
           v-model="searchQuery"
           :fetch-suggestions="fetchSuggestions"
+          :limit="15"
+          :scroll-limit="5"
           :placeholder="t('archive.search_placeholder')"
         />
       </div>

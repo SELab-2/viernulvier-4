@@ -18,16 +18,21 @@
  */
 
 import { ref, computed } from "vue";
-import type { ComputedRef } from "vue";
 import { Search, X } from "lucide-vue-next";
 import { useDebounceFn } from "@vueuse/core";
 const { t } = useI18n();
 
+/**
+ * Definition of props.
+ */
+
 interface Props {
   modelValue: string; // currently selected value
-  fetchSuggestions: (query: string) => Promise<SearchSuggestion[]>;
-  loading?: boolean;
-  limit?: number; // max suggestions
+  fetchSuggestions: (
+    query: string,
+    limit: number,
+  ) => Promise<SearchSuggestion[]>;
+  limit: number; // How many suggestions to fetch.
   scrollLimit?: number; // number of suggestions before scrollbar appears
   label?: string; // label displayed above the input
   placeholder?: string; // placeholder text displayed inside the input
@@ -39,6 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
   // default prop values
   limit: 5,
 });
+
 // default value of placeholder cannot be put in withDefaults, as we're working with i18n
 const computedPlaceholder = computed(() => {
   return props.placeholder || t("searchbar.placeholder");
@@ -56,10 +62,18 @@ const emit = defineEmits<{
   (e: "search", query: string): void;
 }>();
 
+/**
+ * Internals and actions
+ */
+
 const internalQuery = ref(props.modelValue || ""); // so that a user can type without selecting something yet
 const isFocused = ref(false); // tracks if input is focused (user is typing)
 const inputRef = ref<HTMLInputElement | null>(null); // used for unfocusing the bar after selecting an item
 
+/**
+ * When an item is selected.
+ * @param item
+ */
 const select = (item: SearchSuggestion) => {
   // handles selecting a suggestion
   internalQuery.value = item.searchValue;
@@ -67,12 +81,20 @@ const select = (item: SearchSuggestion) => {
   isFocused.value = false; // Remove focus when selected.
   inputRef.value?.blur();
 };
+
+/**
+ * Clears the input.
+ */
 const clear = () => {
   // handles clearing the input
   internalQuery.value = "";
   emit("update:modelValue", "");
 };
 defineExpose({ clear }); // exposes the clear method to the parent components
+
+/**
+ * When enter is pressed.
+ */
 const submit = () => {
   // handles input when pressing enter
   emit("update:modelValue", internalQuery.value);
@@ -89,6 +111,9 @@ export interface SearchSuggestion {
   searchValue: string; // The clean text put into the input.
 }
 
+/**
+ * The internal list of suggestions fetched.
+ */
 const internalResults = ref<SearchSuggestion[]>([]);
 const isFetching = ref(false);
 
@@ -103,7 +128,7 @@ const doSearch = useDebounceFn(async (query: string) => {
   isFetching.value = true;
 
   try {
-    internalResults.value = await props.fetchSuggestions(query);
+    internalResults.value = await props.fetchSuggestions(query, props.limit);
   } catch (error) {
     internalResults.value = [];
   } finally {

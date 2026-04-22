@@ -46,10 +46,13 @@ export function useArchiveView() {
    * Custom fetch function for suggestions
    * @param query
    */
-  async function fetchSuggestions(query: string): Promise<SearchSuggestion[]> {
+  async function fetchSuggestions(
+    query: string,
+    limit: number,
+  ): Promise<SearchSuggestion[]> {
     const resp = (await getAll({
       // This means we'll use 5 suggestions.
-      paginationFilters: { page: 0, limit: 5, descending: true },
+      paginationFilters: { page: 0, limit: limit, descending: true },
       productionFilters: {
         titelOrArtist: query,
         is_suggestion: true,
