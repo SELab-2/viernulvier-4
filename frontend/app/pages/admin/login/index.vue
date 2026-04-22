@@ -18,10 +18,10 @@
   - Authentication is handled via the useAuth composable
 -->
 <script setup lang="ts">
+import { ROUTES } from "~/utils/routes";
 import { Eye, EyeOff } from "lucide-vue-next";
 
 const { login } = useAuth();
-const route = useRoute();
 
 const username = ref("");
 const password = ref("");
