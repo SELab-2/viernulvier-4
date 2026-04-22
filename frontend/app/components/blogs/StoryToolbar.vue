@@ -158,7 +158,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 
         <!-- Clear badge — visible when filter active but panel closed -->
         <button
-          v-if="hasDateFilter && !panelOpen"
+          v-if="hasDateFilter"
           class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
           @click.stop="clearAllFilters"
           :aria-label="t('stories.filters.clear')"

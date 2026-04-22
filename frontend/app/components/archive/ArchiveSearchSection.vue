@@ -138,7 +138,7 @@ onMounted(fetchOldestDate);
         </button>
 
         <button
-          v-if="hasActiveFilters && !filterOpen"
+          v-if="hasActiveFilters"
           @click.stop="clearAllFilters"
           class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition shadow-sm"
         >
