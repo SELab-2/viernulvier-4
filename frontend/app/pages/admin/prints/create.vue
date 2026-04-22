@@ -6,7 +6,7 @@
   Key features include:
   - Dutch title input, English title input with fallback on Dutch
   - Print type selection
-  - File upload required (pdf, png, jpg)
+  - File upload required (pdf, png, jpg, webp)
 
   On submission:
   - A new print entry is created via the API
@@ -60,7 +60,7 @@ const fields = computed<FormField[]>(() => [
     name: "file",
     props: {
       label: t("prints.form.file"),
-      accept: ".pdf,.png,.jpg,.jpeg",
+      accept: ".pdf,.png,.jpg,.jpeg,.webp",
     },
   },
 ]);
