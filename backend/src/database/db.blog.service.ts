@@ -12,6 +12,7 @@ import {
 import {
   BlogSchema,
   GalleryType,
+  Language,
   MediaGallerySchema,
   PaginatedResponse,
   SUPPORTED_LANGUAGES,
@@ -62,6 +63,7 @@ export class BlogDatabaseService {
   async getBlogs(
     paginationFilters: PaginationFilterDto,
     blogFilters: FilterBlogDto,
+    language?: Language,
   ): Promise<PaginatedResponse<BlogDto>> {
     const returningClause = generateReturningClause(BlogSchema);
 
@@ -73,13 +75,29 @@ export class BlogDatabaseService {
     };
 
     // Title filter
-    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    // Looks into the language provided and filters differently based on
+    // Whether the query is a suggestion or not.
     if (blogFilters.title) {
-      const titleParam = param(`%${blogFilters.title}%`);
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
-      );
-      conditions.push(`(${titelClauses.join(" OR ")})`);
+      const searchTerm = blogFilters.title;
+
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
+
+        const titleField = `titel->>'${lang}'`;
+
+        if (blogFilters.is_suggestion) {
+          const pSearch = param(searchTerm);
+          return [`word_similarity(${pSearch}, ${titleField})`];
+        } else {
+          const pSearch = param(`%${searchTerm}%`);
+          return [`${titleField} ILIKE ${pSearch}`];
+        }
+      });
+
+      // Push them as a single string wrapped in parentheses, joined by OR
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
     }
 
     // Filter blogs that were created before.

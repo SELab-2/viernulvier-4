@@ -71,6 +71,7 @@ export class BlogController {
     const result = await this.blogService.getAllBlogs(
       paginationFilter,
       blogFilters,
+      lang.lang,
     );
     return this.ls.flattenByLanguage<PaginatedResponse<BlogDto | BlogViewDto>>(
       result,

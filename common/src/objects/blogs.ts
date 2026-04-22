@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { LocalizedStringSchema } from "./language";
+import { QueryBoolean } from "./pagination";
 
 // Base Blog object.
 export const BlogSchema = z.object({
@@ -33,6 +34,8 @@ export const FilterBlogSchema = z.object({
   title: z.string().optional(),
   after: z.iso.date().optional(),
   before: z.iso.date().optional(),
+
+  is_suggestion: QueryBoolean.default(false),
 });
 
 // Type exports.

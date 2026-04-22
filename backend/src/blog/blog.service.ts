@@ -9,7 +9,7 @@ import {
   ReplaceBlogDto,
   FilterBlogDto,
 } from "../dto/dto";
-import { GalleryType, PaginatedResponse } from "@repo/common";
+import { GalleryType, Language, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogService {
@@ -24,8 +24,13 @@ export class BlogService {
   async getAllBlogs(
     paginationFilters: PaginationFilterDto,
     blogFilters: FilterBlogDto,
+    language?: Language,
   ): Promise<PaginatedResponse<BlogDto>> {
-    return await this.blogDbService.getBlogs(paginationFilters, blogFilters);
+    return await this.blogDbService.getBlogs(
+      paginationFilters,
+      blogFilters,
+      language,
+    );
   }
 
   /**
