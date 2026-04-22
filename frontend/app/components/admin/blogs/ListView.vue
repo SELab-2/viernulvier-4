@@ -11,9 +11,10 @@
   Create button: NuxtLink styled directly.
 -->
 <script setup lang="ts">
-import type { BlogView, FilterBlog, PaginatedResponse } from "@repo/common";
+import type { BlogView, PaginatedResponse } from "@repo/common";
 import { Plus } from "lucide-vue-next";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import type { DateFilter } from "~/types/DateFilter";
 
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
@@ -22,7 +23,7 @@ const { locale, t } = useI18n();
 
 const sortOrder = ref<"newest" | "oldest">("newest");
 const searchQuery = ref("");
-const dateFilter = ref<FilterBlog>({});
+const dateFilter = ref<DateFilter>({});
 
 // Date bounds for calendar + year picker
 const oldestDate = ref("");
@@ -86,6 +87,7 @@ async function loadBlogs() {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
         ...(dateFilter.value.after ? { after: dateFilter.value.after } : {}),
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),
+        is_suggestion: false,
       },
     });
     const data = resp.data as PaginatedResponse<BlogView> | null;
@@ -178,7 +180,7 @@ async function handleDelete(blog: BlogView) {
       This eliminates the large block of duplicated filter UI that was
       previously inlined here.
     -->
-    <StoryToolbar
+    <BlogsStoryToolbar
       v-model:sort-order="sortOrder"
       :story-titles="[]"
       :oldest-date="oldestDate"

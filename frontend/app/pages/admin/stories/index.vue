@@ -21,7 +21,7 @@
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="max-w-5xl mx-auto px-6 py-10">
       <AdminBlogsListView />
     </div>
   </div>
