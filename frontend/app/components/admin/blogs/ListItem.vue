@@ -1,5 +1,22 @@
 <!--
   components/admin/blogs/ListItem.vue
+  This component renders a single blog entry within the admin blog list.
+
+    It displays a compact overview of a blog post, including:
+    - The main (cropped) image from the blog’s media gallery
+    - The localized title based on the current language
+    - A formatted publication date (if available)
+
+    The component automatically:
+    - Fetches and updates the blog’s media gallery on mount and when the blog ID changes
+    - Extracts the appropriate image crop for display
+    - Adapts content to the active locale
+
+    It also provides actions for:
+    - Navigating to the edit page of the blog post
+    - Triggering deletion via an emitted event
+
+    Designed for use in admin lists where multiple blog items are displayed.
 -->
 <script setup lang="ts">
 import type { BlogView } from "@repo/common";

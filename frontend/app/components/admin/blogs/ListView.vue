@@ -13,7 +13,7 @@ import { useBlogApi } from "~/composables/blogs/useBlogApi";
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
 
-// ── Filters ─────────────────────────────────────────────────────────────────
+// Filters
 const searchQuery = ref("");
 const sortOrder = ref<"newest" | "oldest">("newest");
 const dateFilter = ref<FilterBlog>({});
@@ -95,7 +95,7 @@ const hasDateFilter = computed(
 );
 const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 
-// ── Pagination ────────────────────────────────────────────────────────────
+// Pagination
 const PAGE_SIZE = 10;
 const currentPage = ref(1);
 const totalPages = ref(1);
@@ -109,7 +109,7 @@ function handleJump() {
   jumpInput.value = "";
 }
 
-// ── Data ─────────────────────────────────────────────────────────────────
+// Data
 const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -170,7 +170,7 @@ onMounted(async () => {
   loadBlogs();
 });
 
-// ── Delete ────────────────────────────────────────────────────────────────
+// Delete
 async function handleDelete(blog: BlogView) {
   if (
     !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
@@ -188,7 +188,7 @@ async function handleDelete(blog: BlogView) {
   }
 }
 
-// ── Group by year ──────────────────────────────────────────────────────────
+// Group by year
 const byYear = computed(() => {
   const map = new Map<string, BlogView[]>();
   for (const s of blogs.value) {
@@ -205,7 +205,7 @@ const byYear = computed(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <!-- Header -->
     <div class="flex items-center justify-between gap-4">
       <div>
         <h1
@@ -234,7 +234,7 @@ const byYear = computed(() => {
       </NuxtLink>
     </div>
 
-    <!-- ── Search + filters ────────────────────────────────────────────── -->
+    <!-- Search + filters -->
     <div class="border border-border rounded-xl overflow-hidden bg-background">
       <div class="flex items-stretch gap-3 p-4 bg-muted/40 flex-wrap">
         <div class="flex-1 min-w-0 h-10">
@@ -380,7 +380,7 @@ const byYear = computed(() => {
       </section>
     </div>
 
-    <!-- ── Pagination — Page X of Y (identical to archive) ────────────── -->
+    <!-- Pagination — Page X of Y (identical to archive) -->
     <div
       v-if="totalPages > 1 || totalItems > 0"
       class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"

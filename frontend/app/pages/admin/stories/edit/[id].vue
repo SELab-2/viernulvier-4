@@ -1,8 +1,34 @@
 <!--
   pages/admin/stories/edit/[id].vue
 
-  Full story editor. Create page redirects here immediately after saving,
-  so create and edit are always visually identical — zero duplication.
+  Admin Blog Edit Page
+
+  This page provides the full editing experience for an existing blog post.
+  It is also the destination after creating a new blog, ensuring that both
+  create and edit flows share the exact same UI and behavior.
+
+  Key features include:
+  - Client-side rendering only (SSR disabled) due to TipTap editor usage
+  - Fetching and loading blog data based on the route ID
+  - Live preview synchronized with form input
+  - Two-column layout with editor on the left and preview on the right (desktop)
+  - Collapsible preview on mobile for better usability
+
+  The page manages:
+  - Blog content editing (title and description)
+  - Media gallery loading and main image preview
+  - Image upload and cropping via a dedicated section
+  - Linking the blog to related productions
+  - Save state, including loading, error handling, and success feedback
+
+  Additional behavior:
+  - Displays loading skeletons while fetching data
+  - Handles invalid or missing blog IDs gracefully
+  - Updates preview content immediately when the form changes
+  - Refreshes the gallery when new images are uploaded
+
+  Designed as the central hub for managing all aspects of a blog post
+  within the admin panel.
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
@@ -11,20 +37,17 @@ import type {
   ItemViewWithCrops,
 } from "~/utils/galleryFetcher";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
-import { useAdminGuard } from "~/composables/useAdminGuard";
 import { useGallery } from "~/composables/media/useGallery";
 
 // TipTap uses browser-only APIs — disable SSR for this page
 definePageMeta({ ssr: false });
-
-useAdminGuard();
 
 const route = useRoute();
 const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
-// ── Resolved blog ID from the route ─────────────────────────────────────
+// Resolved blog ID from the route
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -33,7 +56,7 @@ const blogId = computed<number | null>(() => {
   return isFinite(n) ? n : null;
 });
 
-// ── State ────────────────────────────────────────────────────────────────
+// State
 const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
@@ -52,7 +75,7 @@ const previewData = ref<{
 // Preview toggle on mobile
 const previewOpen = ref(false);
 
-// ── Gallery (for the preview hero image) ─────────────────────────────────
+// Gallery (for the preview hero image)
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const galleryId = ref<number | null>(null);
 
@@ -76,7 +99,7 @@ async function loadGallery() {
   }
 }
 
-// ── Blog data ─────────────────────────────────────────────────────────────
+// Blog data
 async function loadBlog() {
   if (!blogId.value) return;
   fetching.value = true;
@@ -99,7 +122,7 @@ async function loadBlog() {
   }
 }
 
-// ── Save ─────────────────────────────────────────────────────────────────
+// Save
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
@@ -185,7 +208,7 @@ onMounted(async () => {
       </div>
 
       <template v-else-if="blog && blogId">
-        <!-- ── Mobile preview toggle ──────────────────────────────────── -->
+        <!-- Mobile preview toggle -->
         <div class="xl:hidden">
           <button
             type="button"
@@ -237,7 +260,7 @@ onMounted(async () => {
           </Transition>
         </div>
 
-        <!-- ── Two-column grid ────────────────────────────────────────── -->
+        <!-- Two-column grid -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
           <!-- Left column: all editable sections -->
           <div class="space-y-6">

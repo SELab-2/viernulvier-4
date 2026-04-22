@@ -24,10 +24,10 @@ const props = defineProps<{
 const { t, locale } = useI18n();
 const { getAll, linkBlog, linkMedia } = useProductionApi();
 
-// ── Persistence key (per blog) ─────────────────────────────────────────────
+// Persistence key (per blog)
 const storageKey = computed(() => `vnv-blog-linked-prods-${props.blogId}`);
 
-// ── Linked productions ─────────────────────────────────────────────────────
+// Linked productions
 // Loaded from localStorage on mount so they survive page navigations.
 const linkedProductions = ref<ProductionView[]>([]);
 
@@ -52,20 +52,20 @@ function persistLinked() {
   } catch {}
 }
 
-// ── Search state ────────────────────────────────────────────────────────────
+// Search state
 const search = ref("");
 const productions = ref<ProductionView[]>([]);
 const loadingSearch = ref(false);
 const searchOpen = ref(false);
 
-// ── Options ─────────────────────────────────────────────────────────────────
+// Options
 const shareGallery = ref(true);
 
-// ── Feedback ────────────────────────────────────────────────────────────────
+// Feedback
 const linking = ref<number | null>(null);
 const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
 
-// ── Search ───────────────────────────────────────────────────────────────────
+// Search
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(search, () => {
@@ -95,7 +95,7 @@ function openSearch() {
   fetchProductions();
 }
 
-// ── Link ──────────────────────────────────────────────────────────────────────
+// Link
 const linkedIds = computed(
   () => new Set(linkedProductions.value.map((p) => p.id)),
 );
@@ -225,7 +225,7 @@ onUnmounted(() =>
         </p>
       </div>
 
-      <!-- ── Search + link section ──────────────────────────────────── -->
+      <!-- Search + link section -->
       <div ref="wrapperRef" class="relative">
         <!-- Search input (shows when open) -->
         <div v-if="searchOpen" class="space-y-3">

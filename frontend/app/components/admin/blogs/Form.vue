@@ -1,13 +1,27 @@
 <!--
   components/admin/blogs/Form.vue
+  
+  Bilingual Blog Form Component
 
-  Bilingual story form used on both the create and edit pages.
+  This component provides a reusable form for creating and editing blog posts
+  with support for multiple languages (Dutch and English).
 
-  Changes vs. original:
-  - In "create" mode the submit button now reads "Next" (→ step 2 images)
-    instead of "Create Story", making the two-step flow more obvious.
-  - Emits a "preview-update" event on every field change so the parent page
-    can show a live site preview alongside the form.
+  It manages localized input for title and description fields, including:
+  - Required Dutch fields with optional English translations
+  - Automatic fallback to Dutch content when English is not provided
+  - Live preview updates emitted on every change
+
+  The component supports both "create" and "edit" modes:
+  - In create mode, it prepares data for the next step (e.g., image upload)
+  - In edit mode, it loads and updates existing blog data
+
+  It handles:
+  - Form state initialization from optional initial data
+  - Validation of required fields
+  - Submission of cleaned and normalized data
+  - Cancel and preview events for parent components
+
+  Designed for use within the admin panel for managing blog content.
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -103,7 +117,7 @@ const sectionHeadingClass =
 
 <template>
   <form class="space-y-5" @submit.prevent="handleSubmit">
-    <!-- ── Title section ─────────────────────────────────────────────── -->
+    <!-- Title section  -->
     <section :class="sectionClass">
       <h2 :class="sectionHeadingClass">{{ t("admin.blogs.sectionTitle") }}</h2>
 
@@ -134,7 +148,7 @@ const sectionHeadingClass =
       </div>
     </section>
 
-    <!-- ── Content / description section ─────────────────────────────── -->
+    <!-- Content / description section -->
     <section :class="sectionClass">
       <h2 :class="sectionHeadingClass">
         {{ t("admin.blogs.sectionContent") }}
@@ -163,7 +177,7 @@ const sectionHeadingClass =
       </div>
     </section>
 
-    <!-- ── Actions ───────────────────────────────────────────────────── -->
+    <!-- Actions -->
     <div class="flex items-center gap-3">
       <button
         type="submit"

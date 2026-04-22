@@ -1,8 +1,29 @@
 <!--
   pages/admin/stories/create.vue
 
-  Creates a new blog entry then redirects to the edit page.
-  Shows a live preview alongside the form (same two-column layout as edit).
+  Admin Blog Create Page
+
+  This page handles the creation of a new blog post within the admin panel.
+  It provides a form for entering blog content along with a live preview
+  displayed alongside the form.
+
+  Key features include:
+  - Client-side rendering only (SSR disabled) due to TipTap editor dependencies
+  - Two-column layout with the form on the left and a live preview on the right
+  - Real-time preview updates based on form input
+  - Error handling with user feedback on failed submissions
+
+  On submission:
+  - A new blog entry is created via the API
+  - The user is redirected to the edit page of the newly created blog
+    (where additional steps like image upload can be completed)
+
+  The page coordinates:
+  - Form state and submission handling
+  - Preview synchronization via emitted events
+  - Navigation and error display
+
+  Designed to provide a smooth, guided flow for creating new blog content.
 -->
 <script setup lang="ts">
 import type { CreateBlog } from "@repo/common";

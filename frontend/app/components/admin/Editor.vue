@@ -1,3 +1,32 @@
+<!--
+  components/admin/Editor.vue
+
+  Rich Text Editor Component (TipTap-based)
+
+  This component provides a fully featured rich text editor for the admin panel,
+  built on top of TipTap. It supports structured content editing with a modern,
+  extensible toolbar and real-time data binding.
+
+  Key features include:
+  - Two-way binding via v-model (HTML output)
+  - Localized placeholder support that updates dynamically with the active locale
+  - Inline text styling such as bold, italic, underline, strike, color, and custom font sizes
+  - Block-level formatting including headings, lists, and blockquotes
+  - Link management with user prompts
+  - Content reset and formatting cleanup actions
+
+  A custom FontSize extension is implemented to allow inline font size changes
+  without affecting entire paragraphs (unlike default heading behavior).
+
+  The component automatically:
+  - Syncs external modelValue changes with the editor state
+  - Emits updates on every content change
+  - Reacts to locale changes to keep UI labels and placeholder text in sync
+
+  Designed for use in admin forms where rich, formatted text input is required,
+  such as blog descriptions or content management.
+-->
+
 <script setup lang="ts">
 import { useEditor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
@@ -19,7 +48,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 
-// ── Inline FontSize extension ─────────────────────────────────────────────
+// Inline FontSize extension
 // Headings are block-level (the whole paragraph changes).
 // This extension applies font-size as an inline mark via TextStyle,
 // so you can make a *selection* bigger without affecting the whole line.
@@ -158,7 +187,7 @@ onBeforeUnmount(() => editor.value?.destroy());
   <div
     class="w-full border border-border rounded-xl bg-card overflow-hidden focus-within:ring-2 ring-ring transition-all"
   >
-    <!-- ── Toolbar ──────────────────────────────────────────────────── -->
+    <!-- Toolbar -->
     <div
       v-if="editor"
       class="flex flex-wrap items-center gap-0.5 p-2 border-b border-border bg-muted/40"
@@ -421,7 +450,7 @@ onBeforeUnmount(() => editor.value?.destroy());
       </button>
     </div>
 
-    <!-- ── Editor content ───────────────────────────────────────────── -->
+    <!-- Editor content -->
     <EditorContent
       :editor="editor"
       class="admin-tiptap-content p-5 min-h-[280px] outline-none"
@@ -471,7 +500,7 @@ onBeforeUnmount(() => editor.value?.destroy());
   border-color: var(--accent);
 }
 
-/* ── Editor typography ─────────────────────────────────────────────── */
+/* Editor typography */
 .admin-tiptap-content .tiptap {
   outline: none !important;
 }
