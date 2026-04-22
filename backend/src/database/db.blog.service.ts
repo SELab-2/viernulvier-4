@@ -19,6 +19,7 @@ import {
 } from "@repo/common";
 import {
   generateInsertClause,
+  generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
@@ -87,7 +88,7 @@ export class BlogDatabaseService {
 
         if (blogFilters.is_suggestion) {
           const pSearch = param(searchTerm);
-          return [`word_similarity(${pSearch}, ${titleField})`];
+          return [`word_similarity(${pSearch}, ${titleField}) > 0.3`];
         } else {
           const pSearch = param(`%${searchTerm}%`);
           return [`${titleField} ILIKE ${pSearch}`];
@@ -129,11 +130,26 @@ export class BlogDatabaseService {
     const offset = paginationFilters.page * paginationFilters.limit;
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
+    // Ordering (relevance vs date)
+    let orderClause = "";
+    if (blogFilters.is_suggestion && blogFilters.title) {
+      const relevanceMath = generateRelevanceClause(
+        blogFilters.title,
+        [{ name: `titel` }],
+        param,
+        language,
+      );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
+    } else {
+      orderClause = `ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}`;
+    }
+
     const query = `
       SELECT ${returningClause}
       FROM blogs
       ${whereClause}
-      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
+      ${orderClause}
       ${paginationClause};
     `;
 
