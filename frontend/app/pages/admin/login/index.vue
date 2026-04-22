@@ -1,9 +1,21 @@
 <!--
-  pages/admin/login/index.vue
+  Admin Login Page
 
-  Handles authentication for the admin area.
-  After successful login it navigates to the ?redirect= query param value
-  (if present and safe), otherwise falls back to the admin dashboard.
+  This page handles authentication for accessing the admin area.
+  It provides a username and password form, manages loading and error states,
+  and redirects users after a successful login.
+
+  Features:
+  - Required username and password fields
+  - Error handling with user feedback
+  - Loading state during authentication
+  - Password visibility toggle
+  - Internationalization (i18n support)
+  - Theme and locale switchers (top-right utilities)
+
+  Notes:
+  - Uses a custom layout (no default header/footer)
+  - Authentication is handled via the useAuth composable
 -->
 <script setup lang="ts">
 import { Eye, EyeOff } from "lucide-vue-next";
@@ -18,20 +30,12 @@ const loading = ref(false);
 const showPassword = ref(false);
 const { t } = useI18n();
 
+// This makes sure that the login does not use the default layout with the header and footer.
 definePageMeta({ layout: false });
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
-
-// Derive a safe redirect target from ?redirect= query param.
-// Only allow paths that start with /admin to prevent open-redirect attacks.
-const redirectTarget = computed<string>(() => {
-  const raw =
-    typeof route.query.redirect === "string" ? route.query.redirect : null;
-  if (raw && raw.startsWith("/admin")) return raw;
-  return ROUTES.admin.dashboard.base;
-});
 
 async function handleLogin() {
   showPassword.value = false;
@@ -41,7 +45,7 @@ async function handleLogin() {
   const result = await login(username.value, password.value);
 
   if (result.success) {
-    await navigateTo(redirectTarget.value);
+    await navigateTo(ROUTES.admin.dashboard.base);
   } else {
     error.value = result.error ?? t("login.error");
   }
@@ -128,6 +132,8 @@ async function handleLogin() {
                 :disabled="loading"
                 class="h-10 w-full rounded-md border border-border bg-muted/40 px-3 pr-10 text-[13px] text-foreground placeholder:text-muted-foreground outline-none transition-all focus:border-accent focus:ring-2 focus:ring-ring disabled:opacity-50"
               />
+
+              <!-- Toggle button -->
               <button
                 type="button"
                 @click="togglePassword"
