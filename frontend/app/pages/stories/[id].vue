@@ -183,10 +183,6 @@ const cleanBody = computed(() => cleanText(body.value));
             />
 
             <div class="md:pl-10 w-full">
-              <!--
-                Rich-text body. Styles live in .description-content below.
-                (The .story-body class is not used here — removed to avoid confusion.)
-              -->
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"

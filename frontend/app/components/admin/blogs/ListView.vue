@@ -18,7 +18,7 @@ import { useBlogApi } from "~/composables/blogs/useBlogApi";
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
 
-// ── Filters (same shape as stories/index.vue) ─────────────────────────────
+// Filters
 
 const sortOrder = ref<"newest" | "oldest">("newest");
 const searchQuery = ref("");
@@ -49,7 +49,7 @@ async function fetchDateBounds() {
   }
 }
 
-// ── Pagination ────────────────────────────────────────────────────────────
+// Pagination
 
 const PAGE_SIZE = 10;
 const currentPage = ref(1);
@@ -64,7 +64,7 @@ function handleJump() {
   jumpInput.value = "";
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────
+// Data
 
 const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
@@ -126,7 +126,7 @@ onMounted(async () => {
   loadBlogs();
 });
 
-// ── Delete ────────────────────────────────────────────────────────────────
+// Delete
 
 async function handleDelete(blog: BlogView) {
   if (

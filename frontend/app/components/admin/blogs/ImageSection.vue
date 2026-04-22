@@ -1,16 +1,3 @@
-<!--
-  components/admin/blogs/ImageSection.vue
-
-  Multi-crop image manager for a blog post.
-  One MediaItem is created per blog gallery; up to 6 named crops are linked to it.
-  Each crop can be uploaded or replaced independently.
-
-  Uses useBlogApi.getMediaGallery() to load gallery + items + crops in one call,
-  and MediaDisplay for rendering (handles placeholders automatically).
-
-  Emits `crop-uploaded` after every successful upload or delete so the parent
-  page can refresh the gallery and update the live preview.
--->
 <script setup lang="ts">
 import type { MediaGallery, MediaItem, MediaCrop } from "@repo/common";
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
@@ -74,7 +61,6 @@ const { create: createCrop } = useCropApi();
 const { saveMedia, deleteMedia } = useStorageApi();
 const { getMediaGallery, linkMedia: linkMediaToBlog } = useBlogApi();
 const { getMainImageCrop } = useGallery();
-const { put: apiPut } = useApi();
 
 // Gallery state — loaded via useBlogApi (reuses the standard composable path)
 const fullGallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
@@ -176,7 +162,7 @@ async function ensureGalleryAndItem(): Promise<{
         throw new Error(t("admin.blogs.image.galleryError"));
       gal = createResp.data as MediaGallery;
       gallery.value = gal;
-      await apiPut(`${API_ROUTES.blogs.mediaById(props.blogId, gal.id)}`, {});
+      await linkMediaToBlog(props.blogId, gal.id);
     }
   }
 
