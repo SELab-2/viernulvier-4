@@ -2,8 +2,13 @@
   components/admin/blogs/ListView.vue
 
   Admin overview of all blog stories.
+
+  Reuses the public-facing StoryToolbar (search + filters) and StoryTimeline
+  (year/month grouped list) components to avoid code duplication.
+  Adds admin-only actions (edit, delete) via a slot/wrapper around each item.
+
   Pagination: Page X of Y (identical to archive page).
-  Create button: NuxtLink styled directly (no button inside link).
+  Create button: NuxtLink styled directly.
 -->
 <script setup lang="ts">
 import type { BlogView, FilterBlog, PaginatedResponse } from "@repo/common";
@@ -13,15 +18,13 @@ import { useBlogApi } from "~/composables/blogs/useBlogApi";
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
 
-// Filters
-const searchQuery = ref("");
-const sortOrder = ref<"newest" | "oldest">("newest");
-const dateFilter = ref<FilterBlog>({});
-const selectedYear = ref<number | null>(null);
-const calendarKey = ref(0);
-const skipNextCalendarEmit = ref(false);
-const panelOpen = ref(false);
+// ── Filters (same shape as stories/index.vue) ─────────────────────────────
 
+const sortOrder = ref<"newest" | "oldest">("newest");
+const searchQuery = ref("");
+const dateFilter = ref<FilterBlog>({});
+
+// Date bounds for calendar + year picker
 const oldestDate = ref("");
 const newestDate = ref("");
 
@@ -46,56 +49,8 @@ async function fetchDateBounds() {
   }
 }
 
-function onYearUpdate(year: number | null) {
-  if (year === null) {
-    selectedYear.value = null;
-    calendarKey.value++;
-    dateFilter.value = {};
-  } else {
-    selectedYear.value = year;
-    skipNextCalendarEmit.value = true;
-    dateFilter.value = { after: `${year}-01-01`, before: `${year}-12-31` };
-    calendarKey.value++;
-  }
-}
+// ── Pagination ────────────────────────────────────────────────────────────
 
-function onCalendarFilter(filter: FilterBlog) {
-  if (skipNextCalendarEmit.value) {
-    skipNextCalendarEmit.value = false;
-    return;
-  }
-  selectedYear.value = null;
-  dateFilter.value = filter;
-}
-
-function clearAllFilters() {
-  selectedYear.value = null;
-  calendarKey.value++;
-  dateFilter.value = {};
-}
-
-watch(
-  () => dateFilter.value,
-  (f) => {
-    if (!f.after && !f.before) {
-      selectedYear.value = null;
-      return;
-    }
-    const isFullYear =
-      f.after?.endsWith("-01-01") &&
-      f.before?.endsWith("-12-31") &&
-      f.after?.substring(0, 4) === f.before?.substring(0, 4);
-    if (!isFullYear) selectedYear.value = null;
-  },
-  { deep: true },
-);
-
-const hasDateFilter = computed(
-  () => !!(dateFilter.value.after || dateFilter.value.before),
-);
-const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
-
-// Pagination
 const PAGE_SIZE = 10;
 const currentPage = ref(1);
 const totalPages = ref(1);
@@ -109,7 +64,8 @@ function handleJump() {
   jumpInput.value = "";
 }
 
-// Data
+// ── Data ──────────────────────────────────────────────────────────────────
+
 const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -170,7 +126,8 @@ onMounted(async () => {
   loadBlogs();
 });
 
-// Delete
+// ── Delete ────────────────────────────────────────────────────────────────
+
 async function handleDelete(blog: BlogView) {
   if (
     !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
@@ -187,20 +144,6 @@ async function handleDelete(blog: BlogView) {
     deletingIds.value.delete(blog.id);
   }
 }
-
-// Group by year
-const byYear = computed(() => {
-  const map = new Map<string, BlogView[]>();
-  for (const s of blogs.value) {
-    const year = String(new Date(s.created_at ?? 0).getFullYear());
-    if (!map.has(year)) map.set(year, []);
-    map.get(year)!.push(s);
-  }
-  const keys = [...map.keys()].sort((a, b) =>
-    sortOrder.value === "oldest" ? a.localeCompare(b) : b.localeCompare(a),
-  );
-  return keys.map((year) => ({ year, stories: map.get(year)! }));
-});
 </script>
 
 <template>
@@ -221,10 +164,6 @@ const byYear = computed(() => {
         </p>
       </div>
 
-      <!--
-        NuxtLink styled as a button directly — avoids the wrapping-button
-        pointer-events problem that made the button non-clickable on hover.
-      -->
       <NuxtLink
         :to="ROUTES.admin.stories.create"
         class="inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer"
@@ -234,98 +173,20 @@ const byYear = computed(() => {
       </NuxtLink>
     </div>
 
-    <!-- Search + filters -->
-    <div class="border border-border rounded-xl overflow-hidden bg-background">
-      <div class="flex items-stretch gap-3 p-4 bg-muted/40 flex-wrap">
-        <div class="flex-1 min-w-0 h-10">
-          <SearchBar
-            v-model="searchQuery"
-            :items="[]"
-            :placeholder="t('stories.searchPlaceholder')"
-          />
-        </div>
-
-        <div class="relative">
-          <button
-            type="button"
-            :class="[
-              'btn-outline h-10 gap-2 shrink-0',
-              filterIsActive &&
-                '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
-            ]"
-            :aria-expanded="panelOpen"
-            @click="panelOpen = !panelOpen"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
-                stroke="currentColor"
-                stroke-width="1.2"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <span>{{ t("stories.filters.toggle") }}</span>
-          </button>
-          <button
-            v-if="hasDateFilter && !panelOpen"
-            class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
-            @click.stop="clearAllFilters"
-          >
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <path
-                d="M1 1l6 6M7 1L1 7"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <Transition name="cal-slide">
-        <div v-if="panelOpen" class="border-t border-border">
-          <div class="p-4 flex flex-col gap-6">
-            <div class="flex flex-col gap-2 w-max">
-              <span class="section-label">{{ t("stories.sortLabel") }}</span>
-              <select
-                v-model="sortOrder"
-                class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer w-max"
-              >
-                <option value="newest">{{ t("stories.sortNewest") }}</option>
-                <option value="oldest">{{ t("stories.sortOldest") }}</option>
-              </select>
-            </div>
-            <div class="flex flex-col gap-2">
-              <span class="section-label">{{ t("stories.filters.year") }}</span>
-              <YearPicker
-                :model-value="selectedYear"
-                :oldest-date="oldestDate"
-                :newest-date="newestDate"
-                @update:model-value="onYearUpdate"
-              />
-            </div>
-            <div class="flex flex-col gap-2">
-              <span class="section-label">{{
-                t("stories.filters.dateRange")
-              }}</span>
-              <DefaultCalendar
-                :key="calendarKey"
-                :oldest-date="oldestDate"
-                :model-filter="dateFilter"
-                @update:filter="onCalendarFilter"
-              />
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </div>
+    <!--
+      Reuse the public StoryToolbar for search + sort + date filters.
+      This eliminates the large block of duplicated filter UI that was
+      previously inlined here.
+    -->
+    <StoryToolbar
+      v-model:sort-order="sortOrder"
+      :story-titles="[]"
+      :oldest-date="oldestDate"
+      :newest-date="newestDate"
+      :date-filter="dateFilter"
+      @update:search="searchQuery = $event"
+      @update:date-filter="dateFilter = $event"
+    />
 
     <!-- Error -->
     <div
@@ -358,29 +219,23 @@ const byYear = computed(() => {
       </p>
     </div>
 
-    <!-- Timeline -->
-    <div v-else class="space-y-10">
-      <section v-for="group in byYear" :key="group.year">
-        <div class="blog-year-heading mb-4">
-          <div class="blog-year-accent" aria-hidden="true" />
-          <span class="blog-year-label font-brand select-none">{{
-            group.year
-          }}</span>
-          <div class="flex-1 h-px bg-foreground/15 mx-3" />
-        </div>
-        <div class="space-y-3">
-          <AdminBlogsListItem
-            v-for="blog in group.stories"
-            :key="blog.id"
-            :blog="blog"
-            :deleting="deletingIds.has(blog.id)"
-            @delete="handleDelete(blog)"
-          />
-        </div>
-      </section>
+    <!--
+      Admin blog list: each story rendered as an AdminBlogsListItem
+      (which adds edit/delete actions on top of the standard story card).
+      We intentionally do NOT reuse StoryTimeline here because admin items
+      need the edit/delete buttons that StoryTimeline's StoryListItem doesn't have.
+    -->
+    <div v-else class="space-y-3">
+      <AdminBlogsListItem
+        v-for="blog in blogs"
+        :key="blog.id"
+        :blog="blog"
+        :deleting="deletingIds.has(blog.id)"
+        @delete="handleDelete(blog)"
+      />
     </div>
 
-    <!-- Pagination — Page X of Y (identical to archive) -->
+    <!-- Pagination -->
     <div
       v-if="totalPages > 1 || totalItems > 0"
       class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"
@@ -417,7 +272,7 @@ const byYear = computed(() => {
           >
         </div>
 
-        <!-- Nav buttons -->
+        <!-- Nav buttons — same as archive pagination -->
         <nav
           class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
           :aria-label="t('archive.pagination')"
@@ -464,8 +319,9 @@ const byYear = computed(() => {
           <span class="w-[2px] bg-foreground" />
           <span
             class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
-            >{{ currentPage }}</span
           >
+            {{ currentPage }}
+          </span>
           <span class="w-[2px] bg-foreground" />
           <button
             class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
@@ -511,27 +367,3 @@ const byYear = computed(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.cal-slide-enter-active,
-.cal-slide-leave-active {
-  transition:
-    opacity 0.18s ease,
-    max-height 0.25s ease;
-  overflow: hidden;
-  max-height: 900px;
-}
-.cal-slide-enter-from,
-.cal-slide-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-.section-label {
-  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
-  font-weight: 900;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted-foreground);
-}
-</style>

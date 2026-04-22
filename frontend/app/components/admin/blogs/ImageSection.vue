@@ -5,6 +5,9 @@
   One MediaItem is created per blog gallery; up to 6 named crops are linked to it.
   Each crop can be uploaded or replaced independently.
 
+  Uses useBlogApi.getMediaGallery() to load gallery + items + crops in one call,
+  and MediaDisplay for rendering (handles placeholders automatically).
+
   Emits `crop-uploaded` after every successful upload or delete so the parent
   page can refresh the gallery and update the live preview.
 -->
@@ -14,7 +17,13 @@ import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 import { useCropApi } from "~/composables/media/useCropApi";
 import { useStorageApi } from "~/composables/media/useStorageApi";
+import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useGallery } from "~/composables/media/useGallery";
 import { API_ROUTES } from "~/utils/apiRoutes";
+import type {
+  GalleryWithItems,
+  ItemViewWithCrops,
+} from "~/utils/galleryFetcher";
 
 const CROP_SLOTS = [
   {
@@ -58,13 +67,17 @@ const emit = defineEmits<{
   (e: "crop-uploaded"): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { create: createGallery } = useGalleryApi();
 const { create: createItem } = useItemApi();
 const { create: createCrop } = useCropApi();
 const { saveMedia, deleteMedia } = useStorageApi();
-const { get: apiGet, put: apiPut } = useApi();
+const { getMediaGallery, linkMedia: linkMediaToBlog } = useBlogApi();
+const { getMainImageCrop } = useGallery();
+const { put: apiPut } = useApi();
 
+// Gallery state — loaded via useBlogApi (reuses the standard composable path)
+const fullGallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const gallery = ref<MediaGallery | null>(null);
 const mediaItem = ref<MediaItem | null>(null);
 const existingCrops = ref<Partial<Record<CropName, MediaCrop>>>({});
@@ -81,42 +94,52 @@ function setFeedback(type: "ok" | "err", msg: string) {
   }, 4000);
 }
 
+/**
+ * Load the gallery using the standard useBlogApi composable.
+ * getMediaGallery returns a GalleryWithItems<ItemViewWithCrops> that already
+ * contains items + crops — no need for manual sequential API calls.
+ */
 async function loadGalleryAndItem() {
   loadingGallery.value = true;
   try {
-    const resp = await apiGet<MediaGallery>(
-      `${API_ROUTES.blogs.media(props.blogId)}?type=default`,
-    );
-    if (!resp.data) {
+    fullGallery.value = await getMediaGallery(props.blogId, locale.value);
+
+    if (!fullGallery.value) {
       gallery.value = null;
       mediaItem.value = null;
       existingCrops.value = {};
       return;
     }
-    gallery.value = resp.data;
 
-    const itemsResp = await apiGet<MediaItem[]>(
-      `${API_ROUTES.galleries.items(resp.data.id)}`,
-    );
-    const items: MediaItem[] = itemsResp.data ?? [];
+    // Persist the base gallery reference for gallery ID access
+    gallery.value = fullGallery.value;
+
+    const items = fullGallery.value.items;
     if (!items.length) {
       mediaItem.value = null;
       existingCrops.value = {};
       return;
     }
 
+    // The first item holds all the crops we need
     const item = items[0]!;
-    mediaItem.value = item;
+    // MediaItem shape without the crops dictionary
+    mediaItem.value = {
+      id: item.id,
+      type: item.type,
+      original_filename: item.original_filename,
+      position: item.position,
+      width: item.width,
+      height: item.height,
+      title: item.title,
+      description: item.description,
+      credits: item.credits,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    } as MediaItem;
 
-    const cropsResp = await apiGet<MediaCrop[]>(
-      API_ROUTES.items.crops(item.id),
-    );
-    const crops: MediaCrop[] = cropsResp.data ?? [];
-    const cropMap: Partial<Record<CropName, MediaCrop>> = {};
-    for (const c of crops) {
-      cropMap[c.name as CropName] = c;
-    }
-    existingCrops.value = cropMap;
+    // item.crops is already a Partial<Record<CropName, MediaCrop>> from galleryFetcher
+    existingCrops.value = item.crops as Partial<Record<CropName, MediaCrop>>;
   } catch {
     gallery.value = null;
     mediaItem.value = null;
@@ -128,41 +151,60 @@ async function loadGalleryAndItem() {
 
 onMounted(loadGalleryAndItem);
 
+/**
+ * Ensures a gallery + one MediaItem exist, creating them if needed.
+ * Uses the standard composable helpers instead of raw apiGet calls.
+ */
 async function ensureGalleryAndItem(): Promise<{
   gallery: MediaGallery;
   item: MediaItem;
 }> {
-  // 1. Ensure gallery exists
+  // 1. Ensure gallery exists — try to reload first
   let gal = gallery.value;
   if (!gal) {
-    const checkResp = await apiGet<MediaGallery>(
-      `${API_ROUTES.blogs.media(props.blogId)}?type=default`,
-    );
-    if (checkResp.data) {
-      gal = checkResp.data;
+    const fresh = await getMediaGallery(props.blogId, locale.value);
+    if (fresh) {
+      gallery.value = fresh;
+      gal = fresh;
     } else {
+      // Create a new gallery and link it to the blog
       const createResp = await createGallery({
         name: `blog-${props.blogId}-gallery`,
         type: "default",
       });
       if (!createResp.data)
         throw new Error(t("admin.blogs.image.galleryError"));
-      gal = createResp.data;
+      gal = createResp.data as MediaGallery;
+      gallery.value = gal;
       await apiPut(`${API_ROUTES.blogs.mediaById(props.blogId, gal.id)}`, {});
     }
-    gallery.value = gal;
   }
 
   // 2. Ensure a single MediaItem exists in this gallery
   let item = mediaItem.value;
   if (!item) {
-    const itemsResp = await apiGet<MediaItem[]>(
-      API_ROUTES.galleries.items(gal.id),
-    );
-    const items: MediaItem[] = itemsResp.data ?? [];
-    if (items.length) {
-      item = items[0]!;
+    // Re-fetch via the full gallery to see if an item was created in another session
+    const fresh = await getMediaGallery(props.blogId, locale.value);
+    const freshItem = fresh?.items?.[0];
+
+    if (freshItem) {
+      item = {
+        id: freshItem.id,
+        type: freshItem.type,
+        original_filename: freshItem.original_filename,
+        position: freshItem.position,
+        width: freshItem.width,
+        height: freshItem.height,
+        title: freshItem.title,
+        description: freshItem.description,
+        credits: freshItem.credits,
+        created_at: freshItem.created_at,
+        updated_at: freshItem.updated_at,
+      } as MediaItem;
+      mediaItem.value = item;
     } else {
+      // TODO: expose title, description and credits inputs so editors can fill
+      //       in proper metadata when creating the item, rather than empty strings.
       const createResp = await createItem({
         type: "image",
         original_filename: `blog-${props.blogId}-main`,
@@ -176,8 +218,8 @@ async function ensureGalleryAndItem(): Promise<{
       });
       if (!createResp.data) throw new Error(t("admin.blogs.image.itemError"));
       item = createResp.data as MediaItem;
+      mediaItem.value = item;
     }
-    mediaItem.value = item;
   }
 
   return { gallery: gal, item };
@@ -225,8 +267,6 @@ async function handleFileChange(e: Event, cropName: CropName) {
     };
 
     setFeedback("ok", t("admin.blogs.image.uploadSuccess", { name: cropName }));
-
-    // Notify parent so it can refresh the gallery and update the live preview
     emit("crop-uploaded");
   } catch (err) {
     setFeedback(
@@ -251,8 +291,6 @@ async function handleDeleteCrop(cropName: CropName) {
     delete newMap[cropName];
     existingCrops.value = newMap;
     setFeedback("ok", t("admin.blogs.image.removed", { name: cropName }));
-
-    // Notify parent so it can refresh the gallery and update the live preview
     emit("crop-uploaded");
   } catch (err) {
     setFeedback(
@@ -264,12 +302,13 @@ async function handleDeleteCrop(cropName: CropName) {
   }
 }
 
-function cropUrl(cropName: CropName): string | null {
-  const c = existingCrops.value[cropName];
-  if (!c?.url) return null;
-  const config = useRuntimeConfig();
-  const base = (config.public.mediaBaseUrl as string) ?? "";
-  return c.url.startsWith("http") ? c.url : `${base}${c.url}`;
+/**
+ * Returns a MediaCrop-shaped object (or null) for use with MediaDisplay.
+ * MediaDisplay accepts a null src and handles the placeholder itself,
+ * so we don't need a separate cropUrl() helper.
+ */
+function cropForSlot(cropName: CropName): MediaCrop | null {
+  return existingCrops.value[cropName] ?? null;
 }
 
 const uploadedCount = computed(
@@ -333,54 +372,22 @@ const uploadedCount = computed(
           :key="slot.name"
           class="rounded-lg border border-card-border overflow-hidden bg-background"
         >
-          <!-- Preview area -->
-          <div class="relative aspect-[16/7] bg-muted">
-            <!-- Uploaded image -->
-            <img
-              v-if="cropUrl(slot.name as CropName)"
-              :src="cropUrl(slot.name as CropName)!"
-              class="w-full h-full object-cover"
-              :alt="t(slot.labelKey)"
+          <!-- Preview area — uses MediaDisplay which handles placeholder automatically -->
+          <div class="relative aspect-[16/7]">
+            <MediaDisplay
+              :id="blogId"
+              :src="cropForSlot(slot.name as CropName)"
+              size="fill"
+              :show-icon="true"
+              :show-border="false"
+              :rounded="false"
+              class="w-full h-full"
             />
-
-            <!-- Placeholder when no image yet -->
-            <div
-              v-else
-              class="absolute inset-0 flex flex-col items-center justify-center gap-2"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  rgba(83, 74, 183, 0.15) 0%,
-                  rgba(127, 119, 221, 0.1) 100%
-                );
-              "
-            >
-              <svg
-                class="w-7 h-7"
-                fill="none"
-                stroke="rgba(127,119,221,0.5)"
-                stroke-width="1.5"
-                viewBox="0 0 24 24"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <path
-                  d="m3 15 4-4 6 6 4-5 4 5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <span
-                class="text-[9px] font-brand font-black uppercase tracking-widest"
-                style="color: rgba(127, 119, 221, 0.6)"
-              >
-                {{ t("admin.blogs.image.noImage") }}
-              </span>
-            </div>
 
             <!-- Spinner overlay while uploading / deleting -->
             <div
               v-if="uploadingCrop === slot.name || deletingCrop === slot.name"
-              class="absolute inset-0 bg-black/40 flex items-center justify-center"
+              class="absolute inset-0 bg-black/40 flex items-center justify-center z-10"
             >
               <svg
                 class="w-6 h-6 animate-spin text-white"
@@ -396,7 +403,7 @@ const uploadedCount = computed(
             <!-- Uploaded badge -->
             <span
               v-if="existingCrops[slot.name as CropName]"
-              class="absolute top-1.5 left-1.5 bg-black/60 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded"
+              class="absolute top-1.5 left-1.5 bg-black/60 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded z-10"
             >
               ✓ {{ t("admin.blogs.image.uploaded") }}
             </span>

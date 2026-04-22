@@ -43,9 +43,7 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
 
 const blog = computed(() => data.value);
 
-/** * Get the media gallery.
- * Uses `(res as any)?.data ?? res` to handle inconsistent API nesting.
- */
+/** Get the media gallery. */
 const { data: gallery } = await useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
@@ -185,6 +183,10 @@ const cleanBody = computed(() => cleanText(body.value));
             />
 
             <div class="md:pl-10 w-full">
+              <!--
+                Rich-text body. Styles live in .description-content below.
+                (The .story-body class is not used here — removed to avoid confusion.)
+              -->
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"
@@ -214,115 +216,98 @@ const cleanBody = computed(() => cleanText(body.value));
 </template>
 
 <style scoped>
-/* ── Rich-text body typography ───────────────────────────────────────────
-   Styles every element the TipTap editor can produce.
-   Links are blue — no @tailwindcss/typography required.
-   ──────────────────────────────────────────────────────────────────────── */
+/*
+  Rich-text body styles — applied to .description-content which wraps
+  HTML produced by the TipTap editor. The class name matches the template above.
+*/
 
-/* Links — blue + underline, the main fix for issue 4 */
-.story-body :deep(a) {
-  color: #2563eb;
+/* Links — blue + underline */
+.description-content :deep(a) {
   text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.15s;
+  text-underline-offset: 4px;
+  color: var(--accent);
   overflow-wrap: break-word;
   word-wrap: break-word;
+  transition: color 0.15s;
 }
-.story-body :deep(a:hover) {
-  color: #1d4ed8;
-}
-
-:global(.dark) .story-body :deep(a) {
-  color: #60a5fa;
-}
-:global(.dark) .story-body :deep(a:hover) {
-  color: #93c5fd;
+.description-content :deep(a:hover) {
+  opacity: 0.7;
 }
 
 /* Headings */
-.story-body :deep(h1) {
+.description-content :deep(h1) {
   font-size: 1.75rem;
   font-weight: 900;
   margin: 1.5rem 0 0.5rem;
   line-height: 1.2;
 }
-.story-body :deep(h2) {
+.description-content :deep(h2) {
   font-size: 1.35rem;
   font-weight: 800;
   margin: 1.25rem 0 0.4rem;
   line-height: 1.25;
 }
-.story-body :deep(h3) {
+.description-content :deep(h3) {
   font-size: 1.1rem;
   font-weight: 700;
   margin: 1rem 0 0.3rem;
 }
 
 /* Paragraphs */
-.story-body :deep(p) {
+.description-content :deep(p) {
   margin: 0.75rem 0;
 }
 
 /* Lists */
-.story-body :deep(ul) {
+.description-content :deep(ul) {
   list-style: disc;
   padding-left: 1.5rem;
   margin: 0.75rem 0;
 }
-.story-body :deep(ol) {
+.description-content :deep(ol) {
   list-style: decimal;
   padding-left: 1.5rem;
   margin: 0.75rem 0;
 }
-.story-body :deep(li) {
+.description-content :deep(li) {
   margin: 0.25rem 0;
 }
 
 /* Blockquote */
-.story-body :deep(blockquote) {
+.description-content :deep(blockquote) {
   border-left: 3px solid #9333ea;
   padding: 0.25rem 0 0.25rem 1rem;
   margin: 1rem 0;
   color: #6b7280;
   font-style: italic;
 }
-:global(.dark) .story-body :deep(blockquote) {
+:global(.dark) .description-content :deep(blockquote) {
   color: #9ca3af;
 }
 
 /* Horizontal rule */
-.story-body :deep(hr) {
+.description-content :deep(hr) {
   border: none;
   border-top: 1px solid #e5e7eb;
   margin: 1.5rem 0;
 }
-:global(.dark) .story-body :deep(hr) {
+:global(.dark) .description-content :deep(hr) {
   border-top-color: #374151;
 }
 
 /* Inline formatting */
-.story-body :deep(strong) {
+.description-content :deep(strong) {
   font-weight: 700;
 }
-.story-body :deep(em) {
+.description-content :deep(em) {
   font-style: italic;
 }
-.story-body :deep(s) {
+.description-content :deep(s) {
   text-decoration: line-through;
 }
-.story-body :deep(u) {
+.description-content :deep(u) {
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-/* make links work */
-.description-content :deep(a) {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  color: var(--accent);
-}
-
-.description-content :deep(a:hover) {
-  opacity: 0.7;
 }
 
 .image-overlay::after {
