@@ -49,6 +49,7 @@ const emit = defineEmits<{
   submit: [CreateAccount];
 }>();
 
+const baseFormRef = ref<{ reset: () => void } | null>(null);
 const hasPasswordMismatch = ref(false);
 const passwordMismatchError = computed(() =>
   hasPasswordMismatch.value ? t("accounts.password_mismatch") : null,
@@ -118,11 +119,21 @@ function handleFormSubmit(formData: Record<string, any>) {
 
   emit("submit", payload);
 }
+
+function reset() {
+  baseFormRef.value?.reset();
+  hasPasswordMismatch.value = false;
+}
+
+defineExpose({
+  reset,
+});
 </script>
 
 <template>
   <div>
     <FormBaseForm
+      ref="baseFormRef"
       :fields="fields"
       :initial-values="props.initialValues"
       @submit="handleFormSubmit"
