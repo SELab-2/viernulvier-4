@@ -112,7 +112,7 @@
     }
   },
   "baseform": {
-    "submitbutton": "Submit",
+    "submitbutton": "Create",
     "resetbutton": "Reset"
   },
   "archive": {

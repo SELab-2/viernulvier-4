@@ -113,8 +113,8 @@
     }
   },
   "baseform": {
-    "submitbutton": "Indienen",
-    "resetbutton": "Herstellen"
+    "submitbutton": "Aanmaken",
+    "resetbutton": "Leegmaken"
   },
   "archive": {
     "header_title": "Archief",
