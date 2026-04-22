@@ -59,6 +59,14 @@ export default defineNuxtConfig({
         'lucide-vue-next',
         'zod',
         'pdfjs-dist',
+        '@tiptap/vue-3',
+        '@tiptap/starter-kit',
+        '@tiptap/extension-placeholder',
+        '@tiptap/extension-link',
+        '@tiptap/extension-underline',
+        '@tiptap/extension-color',
+        '@tiptap/extension-text-style',
+        '@tiptap/core',
       ]
     }
   }
