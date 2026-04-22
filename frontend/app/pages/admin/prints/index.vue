@@ -31,14 +31,14 @@ const {
   fetchError,
 } = usePrintView();
 
-const prints = ref<PrintItemView[]>([]);
-const LIMIT = 15;
+const prints = ref<PrintItemView[]>([]); // list of prints for the current page (reactive)
+const LIMIT = 15; // maximum prints per page
 
 function unwrap(result: unknown): PaginatedResponse<PrintItemView> | null {
   if (!result) return null;
   const r = result as any;
-  if (r?.data && "objects" in r.data) return r.data;
-  if ("objects" in (r as object)) return r as any;
+  if (r?.data && "objects" in r.data) return r.data; // unwrap the data if wrapped: { data: { objects: [...] } } -> { objects: [...] }
+  if ("objects" in (r as object)) return r as any; // return the data as it is if not wrapped: { objects: [...] }
   return null;
 }
 
