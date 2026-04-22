@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -32,39 +30,83 @@ jobs:
       - name: Deploy preview
         run: |
           PR=${{ github.event.pull_request.number }}
-          export NUXT_BASE="/previews/$PR/"
           PR_PATH="/home/selab2/project/previews/$PR"
-          PORT="30$PR"
-
+          FRONTEND_PORT="30$PR"
+          BACKEND_PORT="40$PR"
+          
           mkdir -p $PR_PATH
           rsync -av --delete --exclude 'node_modules' --exclude '.git' . $PR_PATH/
-
+          
+          # --- 0. Monorepo Setup (THE FIX) ---
           cd $PR_PATH
+          # Run npm ci AT THE ROOT. This correctly installs frontend, backend, and common dependencies!
+          npm ci
+          
+          # --- 1. Docs Setup ---
           python3 -m pip install mkdocs-material
           python3 -m mkdocs build
-
           mkdir -p frontend/public
           rm -rf frontend/public/docs
           mv site frontend/public/docs
-
+          
+          # --- 2. Backend Setup & Deployment ---
+          cd $PR_PATH
+          
+          # Create .env in the root folder
+          echo "DB_USER_DEV=selab2" > .env
+          echo "DB_HOST_DEV=sel2-4.ugent.be" >> .env
+          echo "DB_NAME_DEV=selab2_prod" >> .env
+          echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> .env
+          echo "DB_PORT_DEV=2002" >> .env
+          echo "TRANSLATE_API_KEY=abcdlalala" >> .env
+          echo "MEDIA_BASE_URL=https://sel2-4.ugent.be/previews/$PR" >> .env
+          
+          # Copy to backend so NestJS finds it
+          cp .env backend/.env
+          
+          cd $PR_PATH/backend
+          # (npm ci removed from here)
+          npm run build 
+          
+          pm2 delete preview-backend-$PR || true
+          
+          export PORT=$BACKEND_PORT
+          export NODE_ENV=production
+          export MEDIA_BASE_URL="https://sel2-4.ugent.be"
+          
+          
+          pm2 start dist/main.js --name preview-backend-$PR --update-env
+          pm2 save
+          
+          # --- 3. Frontend Setup & Deployment ---
           cd $PR_PATH/frontend
-          npm ci
           npx nuxi cleanup
-
-          NUXT_API_BASE="https://sel2-4.ugent.be/api" \
+          
+          # 1. Build the app with your custom base URL variable
+          NUXT_BASE="/previews/$PR/archive" \
+          NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api" \
           MEDIA_BASE_URL="https://sel2-4.ugent.be" \
           npm run build
-
+          
           pm2 delete preview-$PR || true
-          PORT=$PORT pm2 start .output/server/index.mjs --name preview-$PR
+          
+          # 2. Export variables for the runtime
+          export PORT=$FRONTEND_PORT
+          export NUXT_BASE="/previews/$PR/archive"
+          export NUXT_API_BASE="https://sel2-4.ugent.be/previews/$PR/api"
+          export MEDIA_BASE_URL="https://sel2-4.ugent.be"
+          
+          # 3. Start PM2 with --update-env (This is the magic fix!)
+          pm2 start .output/server/index.mjs --name preview-$PR --update-env
           pm2 save
 
       - name: Post preview link
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            🚀 **Preview Build succesfully deployed!**
+            🚀 **Preview Build successfully deployed!**
 
-            📱 **Website Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/
-            📚 **Docs Preview:** http://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+            📱 **Website Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/archive
+            📚 **Docs Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+            ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api/
           comment_tag: preview_link

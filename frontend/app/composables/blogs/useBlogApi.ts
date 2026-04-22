@@ -15,6 +15,7 @@ import type {
 import { API_ROUTES } from "~/utils/apiRoutes";
 import {
   fetchFullGallery,
+  onGalleryFetchError,
   type DefaultGallery,
   type GalleryWithItems,
   type ItemViewWithCrops,
@@ -108,6 +109,7 @@ export function useBlogApi() {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=default`,
+        { onError: onGalleryFetchError },
       );
 
       const gallery = response.data;
@@ -128,6 +130,7 @@ export function useBlogApi() {
     try {
       const response = await get<PrintGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=prints`,
+        { onError: onGalleryFetchError },
       );
 
       const gallery = response.data;
