@@ -28,22 +28,23 @@ const { t } = useI18n();
 const { create } = usePrintApi();
 const { saveMedia } = useStorageApi();
 
-const loading = ref(false);
-const error = ref<string | null>(null);
+const loading = ref(false); // true while the form is being submitted
+const error = ref<string | null>(null); // holds error message (to display in case of error)
 
 const fields = computed<FormField[]>(() => [
+  // Contains all separate input components
   {
-    component: "BaseInput",
+    component: "BaseInput", // Dutch title
     name: "titel_nl",
     props: { label: t("prints.form.title") + " (nl)", required: true },
   },
   {
-    component: "BaseInput",
+    component: "BaseInput", // English title
     name: "titel_en",
     props: { label: t("prints.form.title") + " (en)" },
   },
   {
-    component: "BaseSelect",
+    component: "BaseSelect", // Print type
     name: "print_type",
     props: {
       label: t("prints.form.type"),
@@ -55,7 +56,7 @@ const fields = computed<FormField[]>(() => [
     },
   },
   {
-    component: "BaseFileUpload",
+    component: "BaseFileUpload", // Image
     name: "file",
     props: {
       label: t("prints.form.file"),

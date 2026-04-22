@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // note: credentials: "same-origin" is just to be able to use mock data hosted on third-party sites (with permissive CORS)
-// normally prints should be from our own database, feel free to remove isOwnBackend and set credentials to "include", if
+// normally prints should be from filesystem on the server, feel free to remove isOwnBackend and set credentials to "include", if
 // your prefer to not have the feature above
 const downloadFile = async () => {
   const isOwnBackend =
