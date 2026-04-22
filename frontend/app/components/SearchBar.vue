@@ -28,10 +28,11 @@ const { t } = useI18n();
 
 interface Props {
   modelValue: string; // currently selected value
-  fetchSuggestions: (
+  fetchSuggestions?: (
     query: string,
     limit: number,
   ) => Promise<SearchSuggestion[]>;
+  suggestions?: SearchSuggestion[]; // Optional array of suggestions.
   limit: number; // How many suggestions to fetch.
   scrollLimit?: number; // number of suggestions before scrollbar appears
   label?: string; // label displayed above the input
@@ -116,9 +117,21 @@ export interface SearchSuggestion {
 const internalResults = ref<SearchSuggestion[]>([]);
 const isFetching = ref(false);
 
-const doSearch = useDebounceFn(async (query: string) => {
-  if (!props.fetchSuggestions) return;
+/**
+ * Executes a single search over the suggestion possibilities.
+ * @param query The query to search for.
+ */
+const executeSearch = async (query: string) => {
+  if (!props.fetchSuggestions) {
+    // Local, synchronous filtering
+    const lowerQuery = query.toLowerCase();
+    internalResults.value = (props.suggestions ?? []).filter((item) =>
+      item.display.toLowerCase().includes(lowerQuery),
+    );
+    return;
+  }
 
+  // API, asynchronous fetching
   if (!query || query.length < 2) {
     internalResults.value = [];
     return;
@@ -133,11 +146,18 @@ const doSearch = useDebounceFn(async (query: string) => {
   } finally {
     isFetching.value = false;
   }
-}, 100);
+};
+
+const debouncedSearch = useDebounceFn(executeSearch, 100);
 
 // Watch the internal query for updates.
 watch(internalQuery, (newQuery) => {
-  doSearch(newQuery);
+  // Add delay for async based on if a function was passed.
+  if (props.fetchSuggestions) {
+    debouncedSearch(newQuery);
+  } else {
+    executeSearch(newQuery);
+  }
 });
 </script>
 
@@ -160,7 +180,10 @@ watch(internalQuery, (newQuery) => {
         type="text"
         :placeholder="computedPlaceholder"
         v-model="internalQuery"
-        @focus="isFocused = true"
+        @focus="
+          isFocused = true;
+          executeSearch(internalQuery);
+        "
         @blur="isFocused = false"
         @keydown.enter="submit"
         class="pl-12 pr-10 bg-muted border border-border h-full font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground placeholder:opacity-100 dark:placeholder:opacity-90"
