@@ -1,3 +1,23 @@
+<!--
+  pages/admin/prints/create.vue
+
+  Admin Print Create Page
+
+  Key features include:
+  - Dutch title input, English title input with fallback on Dutch
+  - Print type selection
+  - File upload required (pdf, png, jpg)
+
+  On submission:
+  - A new print entry is created via the API
+  - The user is redirected to the admin prints page
+
+  The page coordinates:
+  - Form state and submission handling
+  - Navigation and error display
+
+-->
+
 <script setup lang="ts">
 import type { FormField } from "../../../types/FormField";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
@@ -54,13 +74,13 @@ async function handleSubmit(form: Record<string, any>) {
       return;
     }
 
-    const storagePath = `/prints/${Date.now()}-${file.name}`;
+    const storagePath = `/prints/${Date.now()}-${file.name}`; // Saving in storage first
     const uploadResult = await saveMedia(storagePath, file);
     if (uploadResult.error) {
       error.value = t("prints.form.uploadError");
       return;
     }
-    const url = uploadResult.data;
+    const url = uploadResult.data; // Retrieving url
     if (!url) {
       error.value = t("prints.form.uploadError");
       return;
@@ -85,17 +105,20 @@ async function handleSubmit(form: Record<string, any>) {
 <template>
   <div class="container mx-auto px-4 max-w-5xl py-6">
     <div class="flex items-center gap-3 mb-6">
+      <!-- Back button -->
       <NuxtLink
         :to="ROUTES.admin.prints.base"
         class="btn-outline h-9 flex items-center text-[11px] font-black uppercase tracking-widest"
       >
         ←
       </NuxtLink>
+      <!-- Title -->
       <h1 class="font-brand font-black text-2xl uppercase tracking-tighter">
         Upload
       </h1>
     </div>
 
+    <!-- Error display -->
     <p
       v-if="error"
       class="text-red-400 text-[11px] font-bold uppercase tracking-widest mb-4"
@@ -103,6 +126,7 @@ async function handleSubmit(form: Record<string, any>) {
       {{ error }}
     </p>
 
+    <!-- Form -->
     <FormBaseForm :fields="fields" @submit="handleSubmit" />
   </div>
 </template>

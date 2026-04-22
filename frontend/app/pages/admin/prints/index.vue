@@ -1,3 +1,17 @@
+<!--
+  pages/admin/prints/index.vue
+
+  Admin Print List Page
+
+  This page serves as the entry point for managing prints
+  within the admin panel.
+
+  It renders the print list view component, which is responsible for:
+  - Displaying all existing prints
+  - Handling actions such as downloading and deleting entries
+  - List items are clickable and can be opened in another tab
+-->
+
 <script setup lang="ts">
 import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
@@ -91,6 +105,7 @@ onMounted(() => {
     >
       {{ t("prints.title") }}
     </h1>
+    <!-- Add button -->
     <NuxtLink
       :to="ROUTES.admin.prints.create"
       class="h-9 gap-2 flex items-center px-4 rounded-md text-[11px] font-black uppercase tracking-widest transition-all bg-purple-700 hover:bg-purple-500 text-white"
