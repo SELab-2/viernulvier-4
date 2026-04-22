@@ -128,7 +128,9 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <section class="mx-auto w-full max-w-6xl space-y-4 px-4 py-6 sm:px-6">
+  <section
+    class="mx-auto min-h-screen w-full max-w-6xl space-y-4 px-4 py-6 sm:px-6"
+  >
     <div class="space-y-4">
       <AdminAccountListView
         :accounts="accounts"
