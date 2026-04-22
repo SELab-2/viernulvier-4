@@ -133,6 +133,7 @@ onMounted(fetchOldestDate);
           <span>{{ t("general.filters") }}</span>
         </button>
 
+        <!-- Clear filters badge -->
         <button
           v-if="hasActiveFilters"
           @click.stop="clearAllFilters"
