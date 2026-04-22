@@ -37,7 +37,6 @@ interface Props {
   label?: string; // label displayed above the input
   placeholder?: string; // placeholder text displayed inside the input
   id?: string;
-  required?: boolean; // adds a "*" if required
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -151,7 +150,6 @@ watch(internalQuery, (newQuery) => {
       class="text-[12px] font-bold uppercase text-muted-foreground mb-1 block"
     >
       {{ props.label }}
-      <span v-if="props.required" class="text-red-500">*</span>
     </label>
 
     <div class="relative h-full">
@@ -162,7 +160,6 @@ watch(internalQuery, (newQuery) => {
         type="text"
         :placeholder="computedPlaceholder"
         v-model="internalQuery"
-        :required="props.required"
         @focus="isFocused = true"
         @blur="isFocused = false"
         @keydown.enter="submit"
