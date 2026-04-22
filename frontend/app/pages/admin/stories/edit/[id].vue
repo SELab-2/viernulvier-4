@@ -1,16 +1,21 @@
 <!--
   pages/admin/stories/edit/[id].vue
+
+  Full story editor. Create page redirects here immediately after saving,
+  so create and edit are always visually identical — zero duplication.
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useAdminGuard } from "~/composables/useAdminGuard";
+import { useGallery } from "~/composables/media/useGallery";
 
 useAdminGuard();
 
 const route = useRoute();
-const { getById, modify } = useBlogApi();
-const { t } = useI18n();
+const { getById, modify, getMediaGallery } = useBlogApi();
+const { getMainImageCrop } = useGallery();
+const { t, locale } = useI18n();
 
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
@@ -24,14 +29,59 @@ const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
 const error = ref<string | null>(null);
+const saved = ref(false);
+
+// Live preview data — updated by form's @preview-update
+const previewData = ref<{
+  titel: { nl: string; en: string };
+  description: { nl: string; en: string };
+}>({
+  titel: { nl: "", en: "" },
+  description: { nl: "", en: "" },
+});
+
+// Preview toggle on mobile
+const previewOpen = ref(false);
+
+// Gallery for the preview hero image
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+const galleryId = ref<number | null>(null);
+
+const headerCropUrl = computed(() => {
+  if (!gallery.value) return null;
+  const crop = getMainImageCrop(gallery.value, "FE3_header");
+  if (!crop?.url) return null;
+  const config = useRuntimeConfig();
+  const base = (config.public.mediaBaseUrl as string) ?? "";
+  return crop.url.startsWith("http") ? crop.url : `${base}${crop.url}`;
+});
+
+async function loadGallery() {
+  if (!blogId.value) return;
+  try {
+    gallery.value = await getMediaGallery(blogId.value, locale.value);
+    galleryId.value = gallery.value?.id ?? null;
+  } catch {
+    gallery.value = null;
+    galleryId.value = null;
+  }
+}
 
 async function loadBlog() {
   if (!blogId.value) return;
   fetching.value = true;
   error.value = null;
   try {
-    const resp = await getById(blogId.value); // no lang → full localized object
+    const resp = await getById(blogId.value);
     blog.value = resp.data as Blog;
+    if (blog.value) {
+      const tl = blog.value.titel as { nl: string; en: string };
+      const dc = blog.value.description as { nl: string; en: string };
+      previewData.value = {
+        titel: { nl: tl.nl ?? "", en: tl.en ?? "" },
+        description: { nl: dc.nl ?? "", en: dc.en ?? "" },
+      };
+    }
   } catch {
     error.value = t("admin.blogs.loadError");
   } finally {
@@ -42,10 +92,12 @@ async function loadBlog() {
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
+  saved.value = false;
   error.value = null;
   try {
     await modify(blogId.value, data);
-    navigateTo(ROUTES.admin.stories.base);
+    saved.value = true;
+    setTimeout(() => (saved.value = false), 3000);
   } catch {
     error.value = t("admin.blogs.saveError");
   } finally {
@@ -53,12 +105,16 @@ async function handleSubmit(data: ModifyBlog) {
   }
 }
 
-onMounted(loadBlog);
+onMounted(async () => {
+  await loadBlog();
+  await loadGallery();
+});
 </script>
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-3xl mx-auto px-6 py-10 space-y-6">
+    <div class="max-w-6xl mx-auto px-6 py-10 space-y-8">
+      <!-- Breadcrumb -->
       <NuxtLink
         :to="ROUTES.admin.stories.base"
         class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
@@ -66,12 +122,34 @@ onMounted(loadBlog);
         ← {{ t("admin.back") }}
       </NuxtLink>
 
-      <h1
-        class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
-      >
-        {{ t("admin.blogs.edit") }}
-      </h1>
+      <!-- Title row -->
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1
+          class="font-brand font-black text-3xl uppercase tracking-tight text-foreground flex-1"
+        >
+          {{ t("admin.blogs.edit") }}
+        </h1>
+        <!-- Saved feedback -->
+        <Transition name="fade">
+          <span
+            v-if="saved"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-black uppercase tracking-widest"
+          >
+            <svg
+              class="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              viewBox="0 0 24 24"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            {{ t("admin.saved") }}
+          </span>
+        </Transition>
+      </div>
 
+      <!-- Error banner -->
       <div
         v-if="error"
         class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
@@ -79,30 +157,125 @@ onMounted(loadBlog);
         {{ error }}
       </div>
 
+      <!-- Loading skeleton -->
       <template v-if="fetching">
         <div class="h-64 bg-muted rounded-xl animate-pulse" />
         <div class="h-48 bg-muted rounded-xl animate-pulse" />
         <div class="h-80 bg-muted rounded-xl animate-pulse" />
       </template>
 
-      <div v-else-if="!blog" class="py-16 text-center text-muted-foreground">
+      <div
+        v-else-if="!blog && !fetching"
+        class="py-16 text-center text-muted-foreground"
+      >
         {{ t("admin.blogs.notFound") }}
       </div>
 
       <template v-else-if="blog && blogId">
-        <AdminBlogsImageSection :blog-id="blogId" />
+        <!-- ── Mobile preview toggle ──────────────────────────────────── -->
+        <div class="xl:hidden">
+          <button
+            type="button"
+            class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-muted/40 hover:bg-muted transition-colors"
+            @click="previewOpen = !previewOpen"
+          >
+            <span
+              class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M3 9h18" stroke-linecap="round" />
+              </svg>
+              {{ t("admin.blogs.preview.label") }}
+            </span>
+            <svg
+              class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+              :class="previewOpen ? 'rotate-180' : ''"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              viewBox="0 0 24 24"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
 
-        <AdminBlogsForm
-          mode="edit"
-          :initial-data="{
-            titel: blog.titel as { nl: string; en: string },
-            description: blog.description as { nl: string; en: string },
-          }"
-          :loading="saving"
-          @submit="handleSubmit"
-          @cancel="navigateTo(ROUTES.admin.stories.base)"
-        />
+          <Transition
+            enter-active-class="transition-all duration-200 ease-out"
+            enter-from-class="opacity-0 max-h-0 overflow-hidden"
+            enter-to-class="opacity-100 max-h-[600px] overflow-hidden"
+            leave-active-class="transition-all duration-150 ease-in"
+            leave-from-class="opacity-100 max-h-[600px] overflow-hidden"
+            leave-to-class="opacity-0 max-h-0 overflow-hidden"
+          >
+            <div v-if="previewOpen" class="mt-3">
+              <AdminBlogsPreview
+                :data="previewData"
+                :header-crop-url="headerCropUrl"
+                :compact="true"
+              />
+            </div>
+          </Transition>
+        </div>
+
+        <!-- ── Two-column grid (form + preview) ──────────────────────── -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+          <!-- Left column: all editable sections -->
+          <div class="space-y-6">
+            <!-- Form -->
+            <AdminBlogsForm
+              mode="edit"
+              :initial-data="{
+                titel: blog.titel as { nl: string; en: string },
+                description: blog.description as { nl: string; en: string },
+              }"
+              :loading="saving"
+              @submit="handleSubmit"
+              @cancel="navigateTo(ROUTES.admin.stories.base)"
+              @preview-update="(d) => (previewData = d)"
+            />
+
+            <!-- Image section -->
+            <AdminBlogsImageSection
+              :blog-id="blogId"
+              @crop-uploaded="loadGallery"
+            />
+
+            <!-- Link to productions -->
+            <AdminBlogsLinkToProduction
+              :blog-id="blogId"
+              :gallery-id="galleryId"
+            />
+          </div>
+
+          <!-- Right column: live preview (desktop only — mobile handled above) -->
+          <div class="hidden xl:block">
+            <div class="sticky top-6">
+              <AdminBlogsPreview
+                :data="previewData"
+                :header-crop-url="headerCropUrl"
+              />
+            </div>
+          </div>
+        </div>
       </template>
     </div>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

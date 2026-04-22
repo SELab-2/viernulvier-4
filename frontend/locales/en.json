@@ -217,6 +217,7 @@
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving…",
+    "saved": "Saved",
     "edit": "Edit",
     "delete": "Delete",
     "blogs": {
@@ -292,7 +293,23 @@
         "cropMobileHint": "Portrait crop optimised for narrow screens",
         "cropNb": "NB Ready",
         "cropNbHint": "Neutral-background variant"
-      }
+      },
+      "linkToProduction": "Link to Production",
+      "linkBtn": "Link",
+      "linkToProductionTitle": "Link to Production",
+      "linkToProductionSearch": "Search productions by title...",
+      "linkToProductionNoResults": "No productions found",
+      "linkToProductionSuccess": "Successfully linked to production",
+      "linkToProductionError": "Failed to link. Please try again.",
+      "shareGallery": "Share images with this production",
+      "shareGalleryHint": "The production will show the same photos as this story.",
+      "linking": "Linking...",
+      "linked": "Linked",
+      "linkedProductions": "Link to Production",
+      "linkedProductionsHint": "Link this story to a production so it appears on the production page.",
+      "linkedThisSession": "Linked this session",
+      "noLinkedProductions": "Not linked to any production yet",
+      "viewProduction": "View production page"
     }
   },
   "login": {

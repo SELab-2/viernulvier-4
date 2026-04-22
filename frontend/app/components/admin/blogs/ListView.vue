@@ -2,14 +2,8 @@
   components/admin/blogs/ListView.vue
 
   Admin overview of all blog stories.
-
-  Features:
-  - Timeline grouped by year (same as public stories page)
-  - Full-text search with debounce
-  - Sort order + year picker + calendar date filter in collapsible panel
-  - Archive-style pagination (ArchivePagination + ArchivePageJumper)
-  - Purple "New Story" CTA button (accent colour) placed prominently in the header
-  - Per-item edit and delete actions
+  Pagination: Page X of Y (identical to archive page).
+  Create button: NuxtLink styled directly (no button inside link).
 -->
 <script setup lang="ts">
 import type { BlogView, FilterBlog, PaginatedResponse } from "@repo/common";
@@ -19,21 +13,21 @@ import { useBlogApi } from "~/composables/blogs/useBlogApi";
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
 
-// ── Filters ──────────────────────────────────────────────────────────────────
+// ── Filters ─────────────────────────────────────────────────────────────────
 const searchQuery = ref("");
 const sortOrder = ref<"newest" | "oldest">("newest");
 const dateFilter = ref<FilterBlog>({});
 const selectedYear = ref<number | null>(null);
 const calendarKey = ref(0);
 const skipNextCalendarEmit = ref(false);
+const panelOpen = ref(false);
 
-// Date bounds for YearPicker / Calendar
 const oldestDate = ref("");
 const newestDate = ref("");
 
 async function fetchDateBounds() {
   try {
-    const [oldestRaw, newestRaw] = await Promise.all([
+    const [o, n] = await Promise.all([
       getAll({
         paginationFilters: { page: 0, limit: 1, descending: false },
         languageFilters: { lang: locale.value as "nl" | "en" },
@@ -43,8 +37,8 @@ async function fetchDateBounds() {
         languageFilters: { lang: locale.value as "nl" | "en" },
       }),
     ]);
-    const first = (oldestRaw.data as PaginatedResponse<BlogView>)?.objects?.[0];
-    const last = (newestRaw.data as PaginatedResponse<BlogView>)?.objects?.[0];
+    const first = (o.data as PaginatedResponse<BlogView>)?.objects?.[0];
+    const last = (n.data as PaginatedResponse<BlogView>)?.objects?.[0];
     if (first?.created_at) oldestDate.value = first.created_at.slice(0, 10);
     if (last?.created_at) newestDate.value = last.created_at.slice(0, 10);
   } catch {
@@ -101,36 +95,33 @@ const hasDateFilter = computed(
 );
 const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 
-// ── Filter panel ─────────────────────────────────────────────────────────────
-const panelOpen = ref(false);
-
-// ── Pagination (mirrors ArchiveBody / ArchivePagination pattern) ─────────────
-// Uses a 1-based currentPage ref exposed to ArchivePagination and
-// ArchivePageJumper components (same as the archive page).
+// ── Pagination ────────────────────────────────────────────────────────────
 const PAGE_SIZE = 10;
-const currentPage = ref(1); // 1-based for UI components
+const currentPage = ref(1);
 const totalPages = ref(1);
-
-// ── Data ─────────────────────────────────────────────────────────────────────
-const blogs = ref<BlogView[]>([]);
 const totalItems = ref(0);
+const jumpInput = ref("");
+
+function handleJump() {
+  const v = parseInt(jumpInput.value, 10);
+  if (!isNaN(v) && v >= 1 && v <= totalPages.value && v !== currentPage.value)
+    currentPage.value = v;
+  jumpInput.value = "";
+}
+
+// ── Data ─────────────────────────────────────────────────────────────────
+const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const deletingIds = ref(new Set<number>());
 
-const showingStart = computed(() => (currentPage.value - 1) * PAGE_SIZE + 1);
-const showingEnd = computed(() =>
-  Math.min(currentPage.value * PAGE_SIZE, totalItems.value),
-);
-
-// ── Load ─────────────────────────────────────────────────────────────────────
 async function loadBlogs() {
   loading.value = true;
   error.value = null;
   try {
     const resp = await getAll({
       paginationFilters: {
-        page: currentPage.value - 1, // backend is 0-based
+        page: currentPage.value - 1,
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
@@ -141,7 +132,6 @@ async function loadBlogs() {
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),
       },
     });
-
     const data = resp.data as PaginatedResponse<BlogView> | null;
     blogs.value = data?.objects ?? [];
     totalItems.value = data?.totalItems ?? 0;
@@ -156,7 +146,6 @@ async function loadBlogs() {
   }
 }
 
-// ── Debounced search ─────────────────────────────────────────────────────────
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer);
@@ -166,8 +155,6 @@ watch(searchQuery, () => {
   }, 350);
 });
 
-// Re-fetch when sort, page, locale, or date filter changes.
-// currentPage is watched separately to allow ArchivePagination to drive it.
 watch(
   [sortOrder, locale, dateFilter],
   () => {
@@ -176,7 +163,6 @@ watch(
   },
   { deep: true },
 );
-
 watch(currentPage, loadBlogs);
 
 onMounted(async () => {
@@ -184,22 +170,17 @@ onMounted(async () => {
   loadBlogs();
 });
 
-// ── Delete ───────────────────────────────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────────────────────────
 async function handleDelete(blog: BlogView) {
-  const confirmMsg = t("admin.blogs.deleteConfirm", {
-    title: blog.titel ?? blog.id,
-  });
-  if (!confirm(confirmMsg)) return;
-
+  if (
+    !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
+  )
+    return;
   deletingIds.value.add(blog.id);
   try {
     await remove(blog.id);
-    // Go back a page if we just deleted the last item on this page
-    if (blogs.value.length === 1 && currentPage.value > 1) {
-      currentPage.value--;
-    } else {
-      await loadBlogs();
-    }
+    if (blogs.value.length === 1 && currentPage.value > 1) currentPage.value--;
+    else await loadBlogs();
   } catch {
     alert(t("admin.blogs.saveError"));
   } finally {
@@ -207,7 +188,7 @@ async function handleDelete(blog: BlogView) {
   }
 }
 
-// ── Group by year for timeline display ────────────────────────────────────────
+// ── Group by year ──────────────────────────────────────────────────────────
 const byYear = computed(() => {
   const map = new Map<string, BlogView[]>();
   for (const s of blogs.value) {
@@ -224,8 +205,8 @@ const byYear = computed(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- ── Page header: title + prominent purple CTA ─────────────────────── -->
-    <div class="flex items-start justify-between gap-4">
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
+    <div class="flex items-center justify-between gap-4">
       <div>
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
@@ -241,23 +222,21 @@ const byYear = computed(() => {
       </div>
 
       <!--
-        "New Story" button uses the accent (purple) fill to stand out clearly.
-        Positioned at the right of the header so it is easy to spot.
+        NuxtLink styled as a button directly — avoids the wrapping-button
+        pointer-events problem that made the button non-clickable on hover.
       -->
-      <NuxtLink :to="ROUTES.admin.stories.create">
-        <button
-          class="inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:bg-accent-hover shadow-md shadow-accent/30"
-        >
-          <Plus :size="14" />
-          {{ t("admin.blogs.new") }}
-        </button>
+      <NuxtLink
+        :to="ROUTES.admin.stories.create"
+        class="inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer"
+      >
+        <Plus :size="14" />
+        {{ t("admin.blogs.new") }}
       </NuxtLink>
     </div>
 
-    <!-- ── Search + filter toolbar ───────────────────────────────────────── -->
+    <!-- ── Search + filters ────────────────────────────────────────────── -->
     <div class="border border-border rounded-xl overflow-hidden bg-background">
       <div class="flex items-stretch gap-3 p-4 bg-muted/40 flex-wrap">
-        <!-- Full-text search -->
         <div class="flex-1 min-w-0 h-10">
           <SearchBar
             v-model="searchQuery"
@@ -266,7 +245,6 @@ const byYear = computed(() => {
           />
         </div>
 
-        <!-- Filter toggle with active indicator -->
         <div class="relative">
           <button
             type="button"
@@ -276,7 +254,6 @@ const byYear = computed(() => {
                 '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
             ]"
             :aria-expanded="panelOpen"
-            :aria-label="t('stories.filters.toggle')"
             @click="panelOpen = !panelOpen"
           >
             <svg
@@ -295,21 +272,12 @@ const byYear = computed(() => {
             </svg>
             <span>{{ t("stories.filters.toggle") }}</span>
           </button>
-
-          <!-- ×-badge to clear date filter without opening panel -->
           <button
             v-if="hasDateFilter && !panelOpen"
             class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
             @click.stop="clearAllFilters"
-            :aria-label="t('stories.filters.clear')"
           >
-            <svg
-              width="8"
-              height="8"
-              viewBox="0 0 8 8"
-              fill="none"
-              aria-hidden="true"
-            >
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
               <path
                 d="M1 1l6 6M7 1L1 7"
                 stroke="currentColor"
@@ -321,23 +289,19 @@ const byYear = computed(() => {
         </div>
       </div>
 
-      <!-- Collapsible filter panel (sort + year + calendar) -->
       <Transition name="cal-slide">
         <div v-if="panelOpen" class="border-t border-border">
           <div class="p-4 flex flex-col gap-6">
-            <!-- Sort order -->
             <div class="flex flex-col gap-2 w-max">
               <span class="section-label">{{ t("stories.sortLabel") }}</span>
               <select
                 v-model="sortOrder"
-                class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
+                class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer w-max"
               >
                 <option value="newest">{{ t("stories.sortNewest") }}</option>
                 <option value="oldest">{{ t("stories.sortOldest") }}</option>
               </select>
             </div>
-
-            <!-- Year picker -->
             <div class="flex flex-col gap-2">
               <span class="section-label">{{ t("stories.filters.year") }}</span>
               <YearPicker
@@ -347,8 +311,6 @@ const byYear = computed(() => {
                 @update:model-value="onYearUpdate"
               />
             </div>
-
-            <!-- Calendar date range picker -->
             <div class="flex flex-col gap-2">
               <span class="section-label">{{
                 t("stories.filters.dateRange")
@@ -365,7 +327,7 @@ const byYear = computed(() => {
       </Transition>
     </div>
 
-    <!-- ── Error state ────────────────────────────────────────────────────── -->
+    <!-- Error -->
     <div
       v-if="error"
       class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
@@ -373,7 +335,7 @@ const byYear = computed(() => {
       {{ error }}
     </div>
 
-    <!-- ── Loading skeleton ───────────────────────────────────────────────── -->
+    <!-- Loading -->
     <div v-if="loading" class="space-y-3">
       <div
         v-for="i in PAGE_SIZE"
@@ -382,7 +344,7 @@ const byYear = computed(() => {
       />
     </div>
 
-    <!-- ── Empty state ────────────────────────────────────────────────────── -->
+    <!-- Empty -->
     <div v-else-if="!blogs.length" class="py-20 text-center">
       <p
         class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
@@ -396,10 +358,9 @@ const byYear = computed(() => {
       </p>
     </div>
 
-    <!-- ── Timeline grouped by year ──────────────────────────────────────── -->
+    <!-- Timeline -->
     <div v-else class="space-y-10">
       <section v-for="group in byYear" :key="group.year">
-        <!-- Year heading (reuses the blog-year-* CSS from tailwind.css) -->
         <div class="blog-year-heading mb-4">
           <div class="blog-year-accent" aria-hidden="true" />
           <span class="blog-year-label font-brand select-none">{{
@@ -407,7 +368,6 @@ const byYear = computed(() => {
           }}</span>
           <div class="flex-1 h-px bg-foreground/15 mx-3" />
         </div>
-
         <div class="space-y-3">
           <AdminBlogsListItem
             v-for="blog in group.stories"
@@ -420,72 +380,48 @@ const byYear = computed(() => {
       </section>
     </div>
 
-    <!-- ── Pagination (archive style) ────────────────────────────────────── -->
-    <!--
-      Mirrors the ArchiveBody pagination row exactly:
-      showing-range on the left, ArchivePagination + ArchivePageJumper on the right.
-      ArchivePagination and ArchivePageJumper read/write the shared `currentPage`
-      and `totalPages` refs from useArchiveView. We bridge those refs here by
-      providing a local wrapper that drives the same behaviour without polluting
-      the archive composable state.
-    -->
+    <!-- ── Pagination — Page X of Y (identical to archive) ────────────── -->
     <div
       v-if="totalPages > 1 || totalItems > 0"
       class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"
     >
-      <!-- Showing x–y of z -->
       <p
         v-if="totalItems > 0 && !loading"
         class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
       >
-        {{ showingStart }}–{{ showingEnd }} / {{ totalItems }}
+        {{ totalItems }} {{ t("admin.blogs.results") }}
       </p>
       <div v-else class="h-4 w-24 bg-muted rounded animate-pulse" />
 
-      <!-- Navigation controls -->
       <div v-if="totalPages > 1" class="flex items-center gap-3">
         <!-- Page jumper -->
         <div class="flex items-center gap-2">
           <span
-            class="text-sm font-black uppercase tracking-wide text-muted-foreground text-[10px]"
+            class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
+            >{{ t("archive.page_label") }}</span
           >
-            {{ t("archive.page_label") }}
-          </span>
           <input
+            v-model="jumpInput"
             type="number"
             :min="1"
             :max="totalPages"
             :placeholder="currentPage.toString()"
             :disabled="loading"
-            @keydown.enter="
-              (e) => {
-                const v = parseInt((e.target as HTMLInputElement).value, 10);
-                if (!isNaN(v) && v >= 1 && v <= totalPages) currentPage = v;
-                (e.target as HTMLInputElement).value = '';
-              }
-            "
-            @blur="
-              (e) => {
-                const v = parseInt((e.target as HTMLInputElement).value, 10);
-                if (!isNaN(v) && v >= 1 && v <= totalPages) currentPage = v;
-                (e.target as HTMLInputElement).value = '';
-              }
-            "
+            @keydown.enter="handleJump"
+            @blur="handleJump"
             class="w-14 h-9 rounded-md border-2 border-foreground/20 bg-background px-1 text-sm text-center font-black text-foreground focus:outline-none focus:border-foreground disabled:opacity-25 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span
             class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
+            >{{ t("archive.of_pages", { total: totalPages }) }}</span
           >
-            {{ t("archive.of_pages", { total: totalPages }) }}
-          </span>
         </div>
 
-        <!-- Prev / next bar (same style as ArchivePagination) -->
+        <!-- Nav buttons -->
         <nav
           class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
           :aria-label="t('archive.pagination')"
         >
-          <!-- First -->
           <button
             class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
             :disabled="currentPage === 1 || loading"
@@ -506,8 +442,6 @@ const byYear = computed(() => {
             </svg>
           </button>
           <span class="w-[2px] bg-foreground" />
-
-          <!-- Prev -->
           <button
             class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
             :disabled="currentPage === 1 || loading"
@@ -528,16 +462,11 @@ const byYear = computed(() => {
             </svg>
           </button>
           <span class="w-[2px] bg-foreground" />
-
-          <!-- Current page indicator -->
           <span
             class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
+            >{{ currentPage }}</span
           >
-            {{ currentPage }}
-          </span>
           <span class="w-[2px] bg-foreground" />
-
-          <!-- Next -->
           <button
             class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
             :disabled="currentPage === totalPages || loading"
@@ -558,8 +487,6 @@ const byYear = computed(() => {
             </svg>
           </button>
           <span class="w-[2px] bg-foreground" />
-
-          <!-- Last -->
           <button
             class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
             :disabled="currentPage === totalPages || loading"
@@ -586,7 +513,6 @@ const byYear = computed(() => {
 </template>
 
 <style scoped>
-/* Slide-down animation for the filter panel */
 .cal-slide-enter-active,
 .cal-slide-leave-active {
   transition:
@@ -600,8 +526,6 @@ const byYear = computed(() => {
   opacity: 0;
   max-height: 0;
 }
-
-/* Small label above filter sections */
 .section-label {
   font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
   font-weight: 900;
