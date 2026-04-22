@@ -6,9 +6,16 @@
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
+import type {
+  GalleryWithItems,
+  ItemViewWithCrops,
+} from "~/utils/galleryFetcher";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useAdminGuard } from "~/composables/useAdminGuard";
 import { useGallery } from "~/composables/media/useGallery";
+
+// TipTap uses browser-only APIs — disable SSR for this page
+definePageMeta({ ssr: false });
 
 useAdminGuard();
 
@@ -17,6 +24,7 @@ const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
+// ── Resolved blog ID from the route ─────────────────────────────────────
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -25,13 +33,14 @@ const blogId = computed<number | null>(() => {
   return isFinite(n) ? n : null;
 });
 
+// ── State ────────────────────────────────────────────────────────────────
 const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
 const error = ref<string | null>(null);
 const saved = ref(false);
 
-// Live preview data — updated by form's @preview-update
+// Live preview data — updated by form's @preview-update event
 const previewData = ref<{
   titel: { nl: string; en: string };
   description: { nl: string; en: string };
@@ -43,7 +52,7 @@ const previewData = ref<{
 // Preview toggle on mobile
 const previewOpen = ref(false);
 
-// Gallery for the preview hero image
+// ── Gallery (for the preview hero image) ─────────────────────────────────
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const galleryId = ref<number | null>(null);
 
@@ -67,6 +76,7 @@ async function loadGallery() {
   }
 }
 
+// ── Blog data ─────────────────────────────────────────────────────────────
 async function loadBlog() {
   if (!blogId.value) return;
   fetching.value = true;
@@ -89,6 +99,7 @@ async function loadBlog() {
   }
 }
 
+// ── Save ─────────────────────────────────────────────────────────────────
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
@@ -114,7 +125,7 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-6xl mx-auto px-6 py-10 space-y-8">
-      <!-- Breadcrumb -->
+      <!-- Back link -->
       <NuxtLink
         :to="ROUTES.admin.stories.base"
         class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
@@ -129,7 +140,8 @@ onMounted(async () => {
         >
           {{ t("admin.blogs.edit") }}
         </h1>
-        <!-- Saved feedback -->
+
+        <!-- Saved feedback badge -->
         <Transition name="fade">
           <span
             v-if="saved"
@@ -164,6 +176,7 @@ onMounted(async () => {
         <div class="h-80 bg-muted rounded-xl animate-pulse" />
       </template>
 
+      <!-- Not found -->
       <div
         v-else-if="!blog && !fetching"
         class="py-16 text-center text-muted-foreground"
@@ -224,11 +237,11 @@ onMounted(async () => {
           </Transition>
         </div>
 
-        <!-- ── Two-column grid (form + preview) ──────────────────────── -->
+        <!-- ── Two-column grid ────────────────────────────────────────── -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
           <!-- Left column: all editable sections -->
           <div class="space-y-6">
-            <!-- Form -->
+            <!-- Content form -->
             <AdminBlogsForm
               mode="edit"
               :initial-data="{
@@ -241,20 +254,22 @@ onMounted(async () => {
               @preview-update="(d) => (previewData = d)"
             />
 
-            <!-- Image section -->
+            <!-- Image section (only when blogId is resolved) -->
             <AdminBlogsImageSection
+              v-if="blogId !== null"
               :blog-id="blogId"
               @crop-uploaded="loadGallery"
             />
 
-            <!-- Link to productions -->
+            <!-- Link to productions (only when blogId is resolved) -->
             <AdminBlogsLinkToProduction
+              v-if="blogId !== null"
               :blog-id="blogId"
               :gallery-id="galleryId"
             />
           </div>
 
-          <!-- Right column: live preview (desktop only — mobile handled above) -->
+          <!-- Right column: live preview (desktop only) -->
           <div class="hidden xl:block">
             <div class="sticky top-6">
               <AdminBlogsPreview

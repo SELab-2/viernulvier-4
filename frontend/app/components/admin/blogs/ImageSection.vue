@@ -4,6 +4,9 @@
   Multi-crop image manager for a blog post.
   One MediaItem is created per blog gallery; up to 6 named crops are linked to it.
   Each crop can be uploaded or replaced independently.
+
+  Emits `crop-uploaded` after every successful upload or delete so the parent
+  page can refresh the gallery and update the live preview.
 -->
 <script setup lang="ts">
 import type { MediaGallery, MediaItem, MediaCrop } from "@repo/common";
@@ -50,6 +53,11 @@ type CropName = (typeof CROP_SLOTS)[number]["name"];
 
 const props = defineProps<{ blogId: number }>();
 
+const emit = defineEmits<{
+  /** Fired after every successful upload or delete — parent should reload gallery */
+  (e: "crop-uploaded"): void;
+}>();
+
 const { t } = useI18n();
 const { create: createGallery } = useGalleryApi();
 const { create: createItem } = useItemApi();
@@ -87,7 +95,6 @@ async function loadGalleryAndItem() {
     }
     gallery.value = resp.data;
 
-    // NOTE: /media/galleries/:id/items — the /media/ prefix is required
     const itemsResp = await apiGet<MediaItem[]>(
       `${API_ROUTES.galleries.items(resp.data.id)}`,
     );
@@ -156,7 +163,6 @@ async function ensureGalleryAndItem(): Promise<{
     if (items.length) {
       item = items[0]!;
     } else {
-      // title / description / credits are required by the backend schema
       const createResp = await createItem({
         type: "image",
         original_filename: `blog-${props.blogId}-main`,
@@ -217,7 +223,11 @@ async function handleFileChange(e: Event, cropName: CropName) {
       ...existingCrops.value,
       [cropName]: cropResp.data as MediaCrop,
     };
+
     setFeedback("ok", t("admin.blogs.image.uploadSuccess", { name: cropName }));
+
+    // Notify parent so it can refresh the gallery and update the live preview
+    emit("crop-uploaded");
   } catch (err) {
     setFeedback(
       "err",
@@ -241,6 +251,9 @@ async function handleDeleteCrop(cropName: CropName) {
     delete newMap[cropName];
     existingCrops.value = newMap;
     setFeedback("ok", t("admin.blogs.image.removed", { name: cropName }));
+
+    // Notify parent so it can refresh the gallery and update the live preview
+    emit("crop-uploaded");
   } catch (err) {
     setFeedback(
       "err",
@@ -322,20 +335,30 @@ const uploadedCount = computed(
         >
           <!-- Preview area -->
           <div class="relative aspect-[16/7] bg-muted">
+            <!-- Uploaded image -->
             <img
               v-if="cropUrl(slot.name as CropName)"
               :src="cropUrl(slot.name as CropName)!"
               class="w-full h-full object-cover"
               :alt="t(slot.labelKey)"
             />
+
+            <!-- Placeholder when no image yet -->
             <div
               v-else
-              class="absolute inset-0 flex items-center justify-center text-muted-foreground/40"
+              class="absolute inset-0 flex flex-col items-center justify-center gap-2"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(83, 74, 183, 0.15) 0%,
+                  rgba(127, 119, 221, 0.1) 100%
+                );
+              "
             >
               <svg
-                class="w-8 h-8"
+                class="w-7 h-7"
                 fill="none"
-                stroke="currentColor"
+                stroke="rgba(127,119,221,0.5)"
                 stroke-width="1.5"
                 viewBox="0 0 24 24"
               >
@@ -346,9 +369,15 @@ const uploadedCount = computed(
                   stroke-linejoin="round"
                 />
               </svg>
+              <span
+                class="text-[9px] font-brand font-black uppercase tracking-widest"
+                style="color: rgba(127, 119, 221, 0.6)"
+              >
+                {{ t("admin.blogs.image.noImage") }}
+              </span>
             </div>
 
-            <!-- Spinner overlay while uploading/deleting -->
+            <!-- Spinner overlay while uploading / deleting -->
             <div
               v-if="uploadingCrop === slot.name || deletingCrop === slot.name"
               class="absolute inset-0 bg-black/40 flex items-center justify-center"

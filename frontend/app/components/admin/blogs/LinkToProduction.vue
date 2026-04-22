@@ -2,8 +2,8 @@
   components/admin/blogs/LinkToProduction.vue
 
   Card section for linking this blog to productions.
-  Shows all productions linked in this session (with name, link to edit).
-  Optionally shares the blog gallery with the production (same photos).
+  Shows all linked productions, persisted in localStorage so they survive
+  navigation away and back within the same browser session.
 -->
 <script setup lang="ts">
 import type { PaginatedResponse, ProductionView } from "@repo/common";
@@ -24,23 +24,48 @@ const props = defineProps<{
 const { t, locale } = useI18n();
 const { getAll, linkBlog, linkMedia } = useProductionApi();
 
-// ── Search state ──────────────────────────────────────────────────────────
+// ── Persistence key (per blog) ─────────────────────────────────────────────
+const storageKey = computed(() => `vnv-blog-linked-prods-${props.blogId}`);
+
+// ── Linked productions ─────────────────────────────────────────────────────
+// Loaded from localStorage on mount so they survive page navigations.
+const linkedProductions = ref<ProductionView[]>([]);
+
+onMounted(() => {
+  if (!import.meta.client) return;
+  try {
+    const stored = localStorage.getItem(storageKey.value);
+    if (stored)
+      linkedProductions.value = JSON.parse(stored) as ProductionView[];
+  } catch {
+    // Ignore parse errors (corrupted storage etc.)
+  }
+});
+
+function persistLinked() {
+  if (!import.meta.client) return;
+  try {
+    localStorage.setItem(
+      storageKey.value,
+      JSON.stringify(linkedProductions.value),
+    );
+  } catch {}
+}
+
+// ── Search state ────────────────────────────────────────────────────────────
 const search = ref("");
 const productions = ref<ProductionView[]>([]);
 const loadingSearch = ref(false);
 const searchOpen = ref(false);
 
-// ── Linked productions (session-tracked) ─────────────────────────────────
-const linkedProductions = ref<ProductionView[]>([]);
-
-// ── Options ───────────────────────────────────────────────────────────────
+// ── Options ─────────────────────────────────────────────────────────────────
 const shareGallery = ref(true);
 
-// ── Feedback ──────────────────────────────────────────────────────────────
+// ── Feedback ────────────────────────────────────────────────────────────────
 const linking = ref<number | null>(null);
 const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
 
-// ── Search ────────────────────────────────────────────────────────────────
+// ── Search ───────────────────────────────────────────────────────────────────
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 watch(search, () => {
@@ -70,7 +95,7 @@ function openSearch() {
   fetchProductions();
 }
 
-// ── Link ──────────────────────────────────────────────────────────────────
+// ── Link ──────────────────────────────────────────────────────────────────────
 const linkedIds = computed(
   () => new Set(linkedProductions.value.map((p) => p.id)),
 );
@@ -85,6 +110,8 @@ async function link(production: ProductionView) {
       await linkMedia(production.id, props.galleryId);
     }
     linkedProductions.value.push(production);
+    persistLinked();
+
     search.value = "";
     searchOpen.value = false;
     feedback.value = {
@@ -186,7 +213,7 @@ onUnmounted(() =>
         </div>
       </div>
 
-      <!-- Empty state (no linked yet) -->
+      <!-- Empty state -->
       <div
         v-else
         class="rounded-lg border border-dashed border-border px-4 py-5 text-center"
@@ -294,7 +321,7 @@ onUnmounted(() =>
                   </p>
                 </div>
 
-                <!-- Already linked this session -->
+                <!-- Already linked -->
                 <span
                   v-if="linkedIds.has(prod.id)"
                   class="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[9px] font-black uppercase tracking-widest"
