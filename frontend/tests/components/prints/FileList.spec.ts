@@ -39,6 +39,7 @@ const files = [
     created_at: "2025-01-01T00:00:00Z",
     updated_at: "2025-01-01T00:00:00Z",
     url: "http://example.com/1.pdf",
+    print_type: "affiche",
   },
   {
     id: 2,
@@ -47,6 +48,7 @@ const files = [
     created_at: "2024-01-01T00:00:00Z",
     updated_at: "2024-01-01T00:00:00Z",
     url: "",
+    print_type: "affiche",
   },
   {
     id: 3,
@@ -55,6 +57,7 @@ const files = [
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z",
     url: "",
+    print_type: "affiche",
   },
 ];
 
