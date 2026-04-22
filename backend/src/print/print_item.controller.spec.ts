@@ -108,16 +108,17 @@ describe("PrintItemController", () => {
       const result = await controller.getPrintItems(
         paginationFilter,
         langQuery,
-        {},
+        { is_suggestion: false },
       );
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
-        {},
+        { is_suggestion: false },
+        langQuery.lang,
       );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         paginatedItems,
-        "en",
+        langQuery.lang,
       );
       expect(result).toEqual(expectedFlattened);
     });
@@ -132,6 +133,7 @@ describe("PrintItemController", () => {
       const filters: FilterPrintItemDto = {
         type: "affiche",
         title: "brugge",
+        is_suggestion: false,
       };
 
       const paginatedItems: PaginatedResponse<PrintItemDto> = {
@@ -149,6 +151,7 @@ describe("PrintItemController", () => {
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
         filters,
+        langQuery.lang,
       );
     });
   });

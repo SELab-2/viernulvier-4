@@ -342,6 +342,10 @@ CREATE TABLE print_items
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- These create GIN indexes for the fields that need them in prints
+CREATE INDEX idx_print_title_en_trgm ON prints USING GIN ((titel->>'en') gin_trgm_ops);
+CREATE INDEX idx_print_title_nl_trgm ON prints USING GIN ((titel->>'nl') gin_trgm_ops);
+
 CREATE TRIGGER trg_print_items_updated_at
     BEFORE UPDATE
     ON print_items

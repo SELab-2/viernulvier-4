@@ -68,7 +68,9 @@ describe("PrintItemService", () => {
         limit: 10,
       };
 
-      const filters = {};
+      const filters: FilterPrintItemDto = {
+        is_suggestion: false,
+      };
 
       printDbService.getAllPrintItems.mockResolvedValue(expectedResponse);
 
@@ -77,6 +79,7 @@ describe("PrintItemService", () => {
       expect(printDbService.getAllPrintItems).toHaveBeenCalledWith(
         paginationFilters,
         filters,
+        undefined,
       );
       expect(result).toEqual(expectedResponse);
     });
@@ -97,6 +100,7 @@ describe("PrintItemService", () => {
 
       const filters: FilterPrintItemDto = {
         type: "drukwerk",
+        is_suggestion: false,
       };
 
       printDbService.getAllPrintItems.mockResolvedValue(expectedResponse);
@@ -106,6 +110,7 @@ describe("PrintItemService", () => {
       expect(printDbService.getAllPrintItems).toHaveBeenCalledWith(
         paginationFilters,
         filters,
+        undefined,
       );
     });
   });
