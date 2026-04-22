@@ -5,7 +5,6 @@
  *
  * Usage:
  * <PrintsFileList
- *    category="Affiche"
  *    :files="files"
  * />
  *
@@ -19,7 +18,6 @@
 import type { PrintItemView } from "@repo/common";
 
 interface Props {
-  category: string | null;
   files: PrintItemView[];
   totalPages: number;
 }
@@ -53,9 +51,6 @@ const whitespace = computed(() => ({
           v-for="file in files"
           :key="file.id"
           :file="file"
-          :category="
-            category ? t(`prints.types.${category}`) : t('prints.types.all')
-          "
           @delete="emit('delete', file)"
         />
       </div>

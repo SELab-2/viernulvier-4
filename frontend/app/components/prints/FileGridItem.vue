@@ -7,14 +7,12 @@
  * Usage:
  * <PrintsFileGridItem
  *    :file="file"
- *    category="affiche"
  * />
  */
 import type { PrintItemView } from "@repo/common";
 
 interface Props {
   file: PrintItemView;
-  category: string;
 }
 defineProps<Props>();
 const { locale } = useI18n();
@@ -50,7 +48,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
             'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground',
           ]"
         >
-          {{ category }}
+          {{ file.print_type }}
         </span>
         <span
           v-if="file.created_at"

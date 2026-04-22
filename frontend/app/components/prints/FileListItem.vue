@@ -7,7 +7,6 @@
  * Usage:
  * <PrintsFileListItem
  *    :file="file"
- *    category="Affiche"
  * />
  */
 import { FileText } from "lucide-vue-next";
@@ -15,7 +14,6 @@ import type { PrintItemView } from "@repo/common";
 
 interface Props {
   file: PrintItemView;
-  category: string | null;
 }
 const props = defineProps<Props>();
 const { t, locale } = useI18n();
@@ -62,7 +60,7 @@ const rowBase =
       <p
         class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5"
       >
-        {{ category }} |
+        {{ file.print_type }} |
         <span v-if="file.created_at">
           {{
             new Date(file.created_at).toLocaleDateString(locale, {
