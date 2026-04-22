@@ -176,7 +176,7 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProductionView);
     });
 
-    it("should throw a ResourceNotFoundException (410) if the production does not exist", async () => {
+    it("should throw a ResourceNotFoundException (404) if the production does not exist", async () => {
       jest
         .spyOn(service, "getProductionById")
         .mockRejectedValue(new ResourceNotFoundException(ProductionDto, 999));
@@ -193,7 +193,7 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should throw a ResourceNotFoundException (410) if trying to replace a non-existent production", async () => {
+    it("should throw a ResourceNotFoundException (404) if trying to replace a non-existent production", async () => {
       jest
         .spyOn(service, "replaceProduction")
         .mockRejectedValue(new ResourceNotFoundException(ProductionDto, 999));
@@ -222,7 +222,7 @@ describe("ProductionController", () => {
       expect(result).toEqual(patchedProduction);
     });
 
-    it("should throw a ResourceNotFoundException (410) if trying to modify a non-existent production", async () => {
+    it("should throw a ResourceNotFoundException (404) if trying to modify a non-existent production", async () => {
       const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
