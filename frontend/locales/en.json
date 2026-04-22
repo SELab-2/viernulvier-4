@@ -105,14 +105,13 @@
       }
     },
     "filters": {
-      "toggle": "Filters",
       "year": "Year",
       "dateRange": "Date",
       "clear": "Clear"
     }
   },
   "baseform": {
-    "submitbutton": "Submit",
+    "submitbutton": "Create",
     "resetbutton": "Reset"
   },
   "archive": {
@@ -131,7 +130,6 @@
     "next_page": "Next page",
     "loading": "Loading…",
     "search_placeholder": "Search archive...",
-    "filter": "Filter",
     "view_list": "List",
     "view_grid": "Grid",
     "page_label": "Page",
@@ -155,7 +153,9 @@
     "stories": "Stories",
     "credits": "Credits",
     "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details"
+    "hidePriceDetails": "hide details",
+    "doors": "doors",
+    "break": "intermission"
   },
   "general": {
     "back": "Back",
@@ -163,7 +163,8 @@
     "readLess": "Read less",
     "showMore": "Show more",
     "showLess": "Show less",
-    "noStories": "This production doesn't contain any stories."
+    "noStories": "This production doesn't contain any stories.",
+    "filters": "filters"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -190,7 +191,16 @@
     "admin": "Admin",
     "actions": "Actions",
     "delete": "Remove",
-    "protected": "Protected"
+    "protected": "Protected",
+    "create": "Create account",
+    "creating": "Creating account...",
+    "loadError": "Could not load accounts.",
+    "createError": "Could not create account.",
+    "alreadyExists": "Account \"{username}\" already exists.",
+    "deleteError": "Could not delete account.",
+    "confirmDelete": "Delete account \"{username}\"? This cannot be undone.",
+    "createSuccess": "Created account \"{username}\".",
+    "deleteSuccess": "Deleted account \"{username}\"."
   },
   "prints": {
     "types": {

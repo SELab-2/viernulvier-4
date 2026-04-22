@@ -128,7 +128,7 @@ onMounted(loadPage);
       @update:types="activeFilter = $event"
     />
 
-    <div class="container mx-auto px-4 max-w-5xl pt-4 pb-8 sm:pt-6 sm:pb-12">
+    <div class="page-container pt-4 pb-8 sm:pt-6 sm:pb-12">
       <PrintsSkeleton v-if="loading && isFirstLoad" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
