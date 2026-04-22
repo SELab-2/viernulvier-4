@@ -107,6 +107,6 @@ jobs:
             🚀 **Preview Build successfully deployed!**
 
             📱 **Website Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/archive
-            📚 **Docs Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/docs/
+            📚 **Docs Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/archive/docs/
             ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api/
           comment_tag: preview_link
