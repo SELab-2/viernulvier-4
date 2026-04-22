@@ -203,8 +203,6 @@ interface RelevanceColumn {
  * @param param The parameter function that generates the placeholder.
  * @param lang The language to search in, if undefined searches ALL languages.
  * @returns The generated clause.
- *
- * ! NOTE This could create a significant performance hit for large datasets.
  */
 export function generateRelevanceClause(
   searchTerm: string,
@@ -221,7 +219,17 @@ export function generateRelevanceClause(
     const weightMultiplier = column.weightMultiplier ?? 1;
     return languagesToSearch.map((searchLang) => {
       const jsonField = `${column.name}->>'${searchLang}'`;
-      return `(word_similarity(${val}, ${jsonField}) * ${weightMultiplier})`;
+
+      // Calculate a base score for the whole string.
+      const baseScore = `word_similarity(${val}, ${jsonField})`;
+
+      // If an exact match big bonus.
+      const exactMatchBonus = `(CASE WHEN ${jsonField} ILIKE ${val} THEN 1.5 ELSE 0.0 END)`;
+
+      // And if the start we also give a bonus.
+      const startsWithBonus = `(CASE WHEN ${jsonField} ILIKE (CAST(${val} AS text) || '%') THEN 0.5 ELSE 0.0 END)`;
+
+      return `((${baseScore} + ${exactMatchBonus} + ${startsWithBonus}) * ${weightMultiplier})`;
     });
   });
 
