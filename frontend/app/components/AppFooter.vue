@@ -65,7 +65,7 @@ const socials = [
   <footer
     class="bg-black dark:bg-white text-white dark:text-black border-t border-white/10 dark:border-black/10"
   >
-    <div class="px-6 md:px-12 lg:px-20 py-12 max-w-7xl mx-auto">
+    <div class="page-container py-12">
       <!-- Three-column grid: brand+contact | navigation | social -->
       <div
         class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 dark:border-black/10"

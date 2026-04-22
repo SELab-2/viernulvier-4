@@ -36,11 +36,11 @@ function selectType(type: PrintType | null) {
 </script>
 
 <template>
-  <div class="border-b border-border bg-background">
+  <div class="w-full border-b border-border bg-background">
     <!-- Toolbar -->
-    <div class="container mx-auto px-4 max-w-5xl py-5 flex gap-3">
+    <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
-      <div class="flex-1 min-w-0 h-10">
+      <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
           :items="titles || []"
@@ -51,18 +51,54 @@ function selectType(type: PrintType | null) {
       </div>
 
       <!-- Filter button -->
-      <button
-        :class="[
-          'btn-outline h-10 gap-2 shrink-0',
-          filterOpen &&
-            '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
-        ]"
-        @click="filterOpen = !filterOpen"
-      >
-        <span>Filters</span>
-        <ChevronUp v-if="filterOpen" class="w-4 h-4" />
-        <ChevronDown v-else class="w-4 h-4" />
-      </button>
+      <div class="relative">
+        <button
+          type="button"
+          :class="[
+            'btn-outline h-12 gap-2 shrink-0',
+            filterOpen &&
+              '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
+          ]"
+          @click="filterOpen = !filterOpen"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>{{ t("general.filters") }}</span>
+        </button>
+
+        <button
+          v-if="activeType !== null"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition shadow-sm"
+          @click.stop="selectType(null)"
+        >
+          <svg
+            width="8"
+            height="8"
+            viewBox="0 0 8 8"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M1 1l6 6M7 1L1 7"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Filter panel -->

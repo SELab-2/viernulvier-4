@@ -498,6 +498,19 @@
   .btn-danger:hover {
     @apply bg-[var(--foreground)] border-[var(--foreground)];
   }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20;
+  }
+
+  .page-header-title {
+    @apply font-brand font-black text-4xl sm:text-6xl uppercase tracking-tighter leading-none text-foreground mb-3;
+  }
+
+  .page-header-subtitle {
+    @apply mt-4 max-w-xl;
+    @apply font-brand font-black text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground;
+  }
 }
 /* ── Calendar component ──────────────────────────────────────────────────────
    Used by components/calendar.vue + components/calendar/*.vue
