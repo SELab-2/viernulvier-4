@@ -261,6 +261,7 @@
       "preview": {
         "label": "Sitevoorbeeld",
         "badge": "Live voorbeeld",
+        "lang": "Voorbeeld",
         "placeholderTitle": "Jouw titel verschijnt hier",
         "bodyPlaceholder": "Begin te schrijven om een voorbeeld van je verhaal te zien…"
       },

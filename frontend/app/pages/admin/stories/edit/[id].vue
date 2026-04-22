@@ -79,13 +79,9 @@ const previewOpen = ref(false);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const galleryId = ref<number | null>(null);
 
-const headerCropUrl = computed(() => {
+const headerCrop = computed(() => {
   if (!gallery.value) return null;
-  const crop = getMainImageCrop(gallery.value, "FE3_header");
-  if (!crop?.url) return null;
-  const config = useRuntimeConfig();
-  const base = (config.public.mediaBaseUrl as string) ?? "";
-  return crop.url.startsWith("http") ? crop.url : `${base}${crop.url}`;
+  return getMainImageCrop(gallery.value, "FE3_header");
 });
 
 async function loadGallery() {
@@ -252,9 +248,8 @@ onMounted(async () => {
           >
             <div v-if="previewOpen" class="mt-3">
               <AdminBlogsPreview
-                :data="previewData"
-                :header-crop-url="headerCropUrl"
-                :compact="true"
+                :data="{ ...previewData, id: blogId ?? undefined }"
+                :header-crop="headerCrop"
               />
             </div>
           </Transition>
@@ -296,8 +291,8 @@ onMounted(async () => {
           <div class="hidden xl:block">
             <div class="sticky top-6">
               <AdminBlogsPreview
-                :data="previewData"
-                :header-crop-url="headerCropUrl"
+                :data="{ ...previewData, id: blogId ?? undefined }"
+                :header-crop="headerCrop"
               />
             </div>
           </div>

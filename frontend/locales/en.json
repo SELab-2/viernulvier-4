@@ -259,6 +259,7 @@
       },
       "preview": {
         "label": "Site preview",
+        "lang": "Preview",
         "badge": "Live preview",
         "placeholderTitle": "Your title will appear here",
         "bodyPlaceholder": "Start writing to see a preview of your story…"

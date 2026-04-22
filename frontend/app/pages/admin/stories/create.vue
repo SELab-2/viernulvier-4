@@ -104,7 +104,7 @@ async function handleSubmit(data: CreateBlog) {
         <!-- Right column: live preview (desktop only) -->
         <div class="hidden xl:block">
           <div class="sticky top-6">
-            <AdminBlogsPreview :data="previewData" :header-crop-url="null" />
+            <AdminBlogsPreview :data="previewData" :header-crop="null" />
           </div>
         </div>
       </div>
