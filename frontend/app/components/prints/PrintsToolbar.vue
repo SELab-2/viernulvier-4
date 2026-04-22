@@ -36,11 +36,11 @@ function selectType(type: PrintType | null) {
 </script>
 
 <template>
-  <div class="border-b border-border bg-background">
+  <div class="w-full border-b border-border bg-background">
     <!-- Toolbar -->
-    <div class="page-container py-5 flex gap-3">
+    <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
-      <div class="flex-1 min-w-0 h-10">
+      <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
           :items="titles || []"
@@ -55,7 +55,7 @@ function selectType(type: PrintType | null) {
         <button
           type="button"
           :class="[
-            'btn-outline h-10 gap-2 shrink-0',
+            'btn-outline h-12 gap-2 shrink-0',
             filterOpen &&
               '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
           ]"
@@ -75,12 +75,12 @@ function selectType(type: PrintType | null) {
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ t("stories.filters.toggle") }}</span>
+          <span>{{ t("general.filters") }}</span>
         </button>
 
         <button
           v-if="activeType !== null"
-          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition shadow-sm"
           @click.stop="selectType(null)"
         >
           <svg

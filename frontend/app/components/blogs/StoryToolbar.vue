@@ -112,11 +112,11 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 </script>
 
 <template>
-  <div class="border-b border-border bg-background">
+  <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
     <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
-      <div class="flex-1 min-w-0 h-10">
+      <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
           :items="storyTitles"
@@ -131,12 +131,12 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
         <button
           type="button"
           :class="[
-            'btn-outline h-10 gap-2 shrink-0',
+            'btn-outline h-12 gap-2 shrink-0',
             panelOpen &&
               '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
           ]"
           :aria-expanded="panelOpen"
-          :aria-label="t('stories.filters.toggle')"
+          :aria-label="t('general.filters')"
           @click="panelOpen = !panelOpen"
         >
           <svg
@@ -153,7 +153,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ t("stories.filters.toggle") }}</span>
+          <span>{{ t("general.filters") }}</span>
         </button>
 
         <!-- Clear badge — visible when filter active -->

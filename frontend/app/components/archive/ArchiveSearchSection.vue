@@ -97,7 +97,7 @@ onMounted(fetchOldestDate);
     <!-- Toolbar row -->
     <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
-      <div class="flex-1 h-12">
+      <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
           :items="[]"
@@ -130,11 +130,7 @@ onMounted(fetchOldestDate);
               stroke-linejoin="round"
             />
           </svg>
-          <span
-            class="font-brand font-black text-[10px] uppercase tracking-widest"
-          >
-            {{ t("archive.filter") }}
-          </span>
+          <span>{{ t("general.filters") }}</span>
         </button>
 
         <button
