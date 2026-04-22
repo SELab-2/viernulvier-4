@@ -101,9 +101,7 @@ describe("PrintItemController", () => {
       };
 
       printItemService.getPrintItems.mockResolvedValue(paginatedItems);
-      languageService.flattenByLanguage.mockReturnValue(
-        expectedFlattened as any,
-      );
+      languageService.flattenByLanguage.mockReturnValue(expectedFlattened);
 
       const result = await controller.getPrintItems(
         paginationFilter,
@@ -142,7 +140,7 @@ describe("PrintItemController", () => {
       };
 
       printItemService.getPrintItems.mockResolvedValue(paginatedItems);
-      languageService.flattenByLanguage.mockReturnValue(paginatedItems as any);
+      languageService.flattenByLanguage.mockReturnValue(paginatedItems);
 
       await controller.getPrintItems(paginationFilter, langQuery, filters);
 
@@ -158,9 +156,7 @@ describe("PrintItemController", () => {
       const langQuery: LanguageQueryDto = { lang: "en" };
 
       printItemService.getPrintItemById.mockResolvedValue(mockPrintItem);
-      languageService.flattenByLanguage.mockReturnValue(
-        mockPrintItemView as any,
-      );
+      languageService.flattenByLanguage.mockReturnValue(mockPrintItemView);
 
       const result = await controller.getPrintItemById(1, langQuery);
 

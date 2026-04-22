@@ -8,12 +8,14 @@
 import { ref, onMounted } from "vue";
 import { Sun, Moon } from "lucide-vue-next";
 
-defineProps<{
-  isCompact: {
-    type: Boolean;
-    default: false;
-  };
-}>();
+withDefaults(
+  defineProps<{
+    isCompact?: boolean;
+  }>(),
+  {
+    isCompact: false,
+  },
+);
 
 const isDark = ref(false);
 
