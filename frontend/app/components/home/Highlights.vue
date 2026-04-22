@@ -27,6 +27,7 @@ onMounted(async () => {
   try {
     const resp = await getAll({
       paginationFilters: { page: 0, limit: 6, descending: true },
+      productionFilters: { before: new Date().toISOString().split("T")[0] },
       languageFilters: { lang: locale.value },
     });
     if (resp.data) {

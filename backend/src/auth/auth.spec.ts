@@ -48,7 +48,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/events")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -57,7 +57,7 @@ describe("AuthGuards tests", () => {
         .get("/events/1")
         .send({})
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -85,7 +85,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/events/1/location")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
   });
@@ -95,7 +95,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/events/1/location")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -117,7 +117,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/events/1/prices")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -139,7 +139,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/productions")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -148,7 +148,7 @@ describe("AuthGuards tests", () => {
         .get("/productions/1")
         .send({})
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -184,7 +184,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/productions/1/blogs")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -207,7 +207,7 @@ describe("AuthGuards tests", () => {
       const response = await request(app.getHttpServer() as Server).get(
         "/productions/1/tags",
       );
-      expect([200, 410]).toContain(response.status);
+      expect([200, 404]).toContain(response.status);
     });
 
     it("PUT /productions/:id/tags/:id should fail without API key", async () => {
@@ -229,7 +229,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/tags")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -245,7 +245,7 @@ describe("AuthGuards tests", () => {
         .get("/tags/1")
         .send({})
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -267,7 +267,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/blogs?descending=true")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -283,7 +283,7 @@ describe("AuthGuards tests", () => {
         .get("/blogs/1")
         .send({})
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -311,7 +311,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/locations")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -319,7 +319,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/locations/1")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -347,7 +347,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/prices")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -355,7 +355,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/prices/2")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -416,7 +416,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/crops")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -424,7 +424,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/crops/1")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -461,7 +461,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/items")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -469,7 +469,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/items/1")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -505,7 +505,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/items/1/crops")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -527,7 +527,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/galleries")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -535,7 +535,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/galleries/1")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 
@@ -557,7 +557,7 @@ describe("AuthGuards tests", () => {
       await request(app.getHttpServer() as Server)
         .get("/media/galleries/1/items")
         .expect((res) => {
-          expect([200, 410]).toContain(res.status);
+          expect([200, 404]).toContain(res.status);
         });
     });
 

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useProductionApi } from "../../app/composables/useProductionApi";
+import { onGalleryFetchError } from "../../app/utils/galleryFetcher";
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();
@@ -159,13 +160,20 @@ describe("useProductionApi", () => {
     it("getMediaGallery calls GET /productions/:id/media?type=default", () => {
       const { getMediaGallery } = useProductionApi();
       void getMediaGallery(1);
-      expect(mockGet).toHaveBeenCalledWith("/productions/1/media?type=default");
+      expect(mockGet).toHaveBeenCalledWith(
+        "/productions/1/media?type=default",
+        {
+          onError: onGalleryFetchError,
+        },
+      );
     });
 
     it("getPrintsGallery calls GET /productions/:id/media?type=prints", () => {
       const { getPrintsGallery } = useProductionApi();
       void getPrintsGallery(1);
-      expect(mockGet).toHaveBeenCalledWith("/productions/1/media?type=prints");
+      expect(mockGet).toHaveBeenCalledWith("/productions/1/media?type=prints", {
+        onError: onGalleryFetchError,
+      });
     });
 
     it("linkMedia calls PUT /productions/:id/media/:galleryId", () => {
