@@ -132,7 +132,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
           type="button"
           :class="[
             'btn-outline h-10 gap-2 shrink-0',
-            filterIsActive &&
+            panelOpen &&
               '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
           ]"
           :aria-expanded="panelOpen"
@@ -156,7 +156,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
           <span>{{ t("stories.filters.toggle") }}</span>
         </button>
 
-        <!-- Clear badge — visible when filter active but panel closed -->
+        <!-- Clear badge — visible when filter active -->
         <button
           v-if="hasDateFilter"
           class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
