@@ -313,6 +313,7 @@ const cleanBody = computed(() => cleanText(body.value));
 .story-body :deep(u) {
   text-decoration: underline;
   text-underline-offset: 2px;
+}
 /* make links work */
 .description-content :deep(a) {
   text-decoration: underline;
