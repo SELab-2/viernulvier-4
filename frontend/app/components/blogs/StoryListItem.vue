@@ -8,11 +8,12 @@
 import type { BlogView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
-import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { useGallery } from "~/composables/media/useGallery";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 
 const { getMainImageCrop } = useGallery();
 const { getMediaGallery } = useBlogApi();
+const { useBlogStory } = useBlogView();
 const { locale } = useI18n();
 
 const props = defineProps<{ story: BlogView }>();

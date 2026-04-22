@@ -20,26 +20,24 @@
 -->
 
 <script lang="ts" setup>
-import type { FilterBlog } from "@repo/common";
+import { useBlogView } from "~/composables/blogs/useBlogView";
+
+const { t } = useI18n();
+const { sortOrder, searchQuery, dateFilter, useBlogStory, fetchSuggestions } =
+  useBlogView();
 
 const props = defineProps<{
   storyTitles: string[];
   oldestDate: string;
   newestDate: string;
-  dateFilter: FilterBlog;
+  dateFilter: { after?: string; before?: string };
 }>();
 
 const emit = defineEmits<{
   (e: "update:search", query: string): void;
-  (e: "update:dateFilter", filter: FilterBlog): void;
+  (e: "update:dateFilter", filter: { after?: string; before?: string }): void;
 }>();
 
-const sortOrder = defineModel<"newest" | "oldest">("sortOrder", {
-  required: true,
-});
-const { t } = useI18n();
-
-const searchQuery = ref("");
 const panelOpen = ref(false);
 const selectedYear = ref<number | null>(null);
 const calendarKey = ref(0);
@@ -70,7 +68,7 @@ function onYearUpdate(year: number | null) {
   }
 }
 
-function onCalendarFilter(filter: FilterBlog) {
+function onCalendarFilter(filter: { after?: string; before?: string }) {
   // Swallow the one synthetic emit that fires when the calendar remounts
   if (skipNextCalendarEmit.value) {
     skipNextCalendarEmit.value = false;
@@ -119,9 +117,9 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
       <div class="flex-1 min-w-0 h-10">
         <SearchBar
           v-model="searchQuery"
-          :results="storyTitles"
-          :limit="6"
-          :scroll-limit="4"
+          :fetch-suggestions="fetchSuggestions"
+          :limit="15"
+          :scroll-limit="5"
           :placeholder="t('stories.searchPlaceholder')"
         />
       </div>
