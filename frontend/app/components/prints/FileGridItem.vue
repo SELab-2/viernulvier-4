@@ -15,7 +15,7 @@ interface Props {
   file: PrintItemView;
 }
 defineProps<Props>();
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 
 const fileLabel = "text-[11px] font-bold uppercase truncate";
 const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
@@ -48,7 +48,7 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
             'tracking-widest border border-border rounded px-1.5 py-0.5 text-muted-foreground',
           ]"
         >
-          {{ file.print_type }}
+          {{ t(`prints.types.${file.print_type}`) }}
         </span>
         <span
           v-if="file.created_at"

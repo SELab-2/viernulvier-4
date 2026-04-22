@@ -60,7 +60,7 @@ const rowBase =
       <p
         class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5"
       >
-        {{ file.print_type }} |
+        {{ t(`prints.types.${file.print_type}`) }} |
         <span v-if="file.created_at">
           {{
             new Date(file.created_at).toLocaleDateString(locale, {
