@@ -74,6 +74,10 @@ CREATE TABLE blogs
     updated_at  TIMESTAMP NOT NULL DEFAULT now()
 );
 
+-- These create GIN indexes for the fields that need them in blogs
+CREATE INDEX idx_blog_title_en_trgm ON blogs USING GIN ((titel->>'en') gin_trgm_ops);
+CREATE INDEX idx_blog_title_nl_trgm ON blogs USING GIN ((titel->>'nl') gin_trgm_ops);
+
 CREATE TRIGGER set_updated_at_blogs
     BEFORE UPDATE
     ON blogs

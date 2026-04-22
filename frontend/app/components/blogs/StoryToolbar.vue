@@ -21,6 +21,7 @@
 
 <script lang="ts" setup>
 import { useBlogView } from "~/composables/blogs/useBlogView";
+import type { DateFilter } from "~/types/DateFilter";
 
 const { t } = useI18n();
 const { sortOrder, searchQuery, dateFilter, useBlogStory, fetchSuggestions } =
@@ -30,12 +31,12 @@ const props = defineProps<{
   storyTitles: string[];
   oldestDate: string;
   newestDate: string;
-  dateFilter: { after?: string; before?: string };
+  dateFilter: DateFilter;
 }>();
 
 const emit = defineEmits<{
   (e: "update:search", query: string): void;
-  (e: "update:dateFilter", filter: { after?: string; before?: string }): void;
+  (e: "update:dateFilter", filter: DateFilter): void;
 }>();
 
 const panelOpen = ref(false);
@@ -68,7 +69,7 @@ function onYearUpdate(year: number | null) {
   }
 }
 
-function onCalendarFilter(filter: { after?: string; before?: string }) {
+function onCalendarFilter(filter: DateFilter) {
   // Swallow the one synthetic emit that fires when the calendar remounts
   if (skipNextCalendarEmit.value) {
     skipNextCalendarEmit.value = false;

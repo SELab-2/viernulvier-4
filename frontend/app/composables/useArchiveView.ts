@@ -1,7 +1,8 @@
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { getToday } from "~/utils/constants";
 import type { PaginatedResponse, ProductionView } from "@repo/common";
 import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { DateFilter } from "~/types/DateFilter";
 
 /**
  * Shared state for the Archive feature.
@@ -17,8 +18,8 @@ const viewMode = ref<ArchiveViewMode>("grid");
 const searchQuery = ref("");
 const sortOrder = ref<"newest" | "oldest">("newest");
 
-const _dateFilter = ref<{ after?: string; before?: string }>({});
-const dateFilter = computed<{ after?: string; before?: string }>({
+const _dateFilter = ref<DateFilter>({});
+const dateFilter = computed<DateFilter>({
   get: () => ({
     after: _dateFilter.value.after,
     before: _dateFilter.value.before || getToday(),
@@ -51,7 +52,6 @@ export function useArchiveView() {
     limit: number,
   ): Promise<SearchSuggestion[]> {
     const resp = (await getAll({
-      // This means we'll use 5 suggestions.
       paginationFilters: { page: 0, limit: limit, descending: true },
       productionFilters: {
         titelOrArtist: query,

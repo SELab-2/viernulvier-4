@@ -15,6 +15,13 @@ import type { BlogView, PaginatedResponse } from "@repo/common";
 import type { SearchSuggestion } from "~/components/SearchBar.vue";
 import { formatDateShort } from "~/utils/formatters";
 import { useBlogApi } from "./useBlogApi";
+import type { DateFilter } from "~/types/DateFilter";
+
+// Filters are globally defined.
+
+const sortOrder = ref<"newest" | "oldest">("newest");
+const searchQuery = ref("");
+const dateFilter = ref<DateFilter>({});
 
 /**
  * Composable for anything related to the generic blog view.
@@ -23,12 +30,6 @@ import { useBlogApi } from "./useBlogApi";
 export function useBlogView() {
   const { locale } = useI18n();
   const { getAll } = useBlogApi();
-
-  // Filters
-
-  const sortOrder = ref<"newest" | "oldest">("newest");
-  const searchQuery = ref("");
-  const dateFilter = ref<{ after?: string; before?: string }>({});
 
   function useBlogStory(story: MaybeRef<BlogView | null | undefined>) {
     // Unwrap to any once so every accessor below stays tidy.
@@ -60,7 +61,6 @@ export function useBlogView() {
     limit: number,
   ): Promise<SearchSuggestion[]> {
     const resp = (await getAll({
-      // This means we'll use 5 suggestions.
       paginationFilters: { page: 0, limit: limit, descending: true },
       blogFilters: {
         title: query,

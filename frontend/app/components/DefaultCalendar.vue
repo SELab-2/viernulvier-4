@@ -15,11 +15,7 @@ import {
 } from "~/utils/formatters";
 import type { CalMode } from "./calendar/CalendarInputs.vue";
 import type { MonthData } from "./calendar/CalendarMonths.vue";
-
-interface DateFilter {
-  after?: string;
-  before?: string;
-}
+import type { DateFilter } from "~/types/DateFilter";
 
 const props = withDefaults(
   defineProps<{
