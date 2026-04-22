@@ -8,6 +8,15 @@ const i18n = createI18n({
   messages: {
     nl: {
       prints: {
+        types: {
+          affiche: "Affiche",
+          brochure: "Brochure",
+          drukwerk: "Drukwerk",
+          programma: "Programma",
+        },
+        title: "Drukwerk",
+        headerDescription:
+          "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
         files: "Bestanden",
         noFilesCat: "Deze categorie bevat geen bestanden.",
         noFiles: "Geen bestanden beschikbaar.",
@@ -15,10 +24,25 @@ const i18n = createI18n({
         remaining: "resterend",
         delete: "Verwijder",
         download: "Download",
+        loading: "Laden...",
+        retry: "Opnieuw proberen",
+        noPrints: "Geen drukwerk",
+        pagination: "Paginering",
+        page_label: "Pagina",
+        of_pages: "van {total}",
       },
     },
     en: {
       prints: {
+        types: {
+          affiche: "Poster",
+          brochure: "Brochure",
+          drukwerk: "Print",
+          programma: "Program",
+        },
+        title: "Prints",
+        headerDescription:
+          "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
         files: "Files",
         noFilesCat: "This category doesn't contain any files.",
         noFiles: "No files available.",
@@ -26,6 +50,12 @@ const i18n = createI18n({
         remaining: "remaining",
         delete: "Delete",
         download: "Download",
+        loading: "Loading...",
+        retry: "Try again",
+        noPrints: "No prints",
+        pagination: "Pagination",
+        page_label: "Page",
+        of_pages: "of {total}",
       },
     },
   },
