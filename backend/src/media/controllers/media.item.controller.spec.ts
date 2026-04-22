@@ -108,9 +108,7 @@ describe("MediaItemController", () => {
       };
 
       mediaItemService.getItems.mockResolvedValue(paginatedItems);
-      languageService.flattenByLanguage.mockReturnValue(
-        expectedFlattened as any,
-      );
+      languageService.flattenByLanguage.mockReturnValue(expectedFlattened);
 
       const result = await controller.getItems(paginationFilter, langQuery);
 
@@ -128,7 +126,7 @@ describe("MediaItemController", () => {
       const langQuery: LanguageQueryDto = { lang: "en" };
 
       mediaItemService.getItemById.mockResolvedValue(mockItem);
-      languageService.flattenByLanguage.mockReturnValue(mockItemView as any);
+      languageService.flattenByLanguage.mockReturnValue(mockItemView);
 
       const result = await controller.getItemById(1, langQuery);
 
