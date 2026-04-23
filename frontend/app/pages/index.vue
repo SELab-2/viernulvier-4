@@ -1,16 +1,22 @@
-<script lang="ts" setup>
-const config = useRuntimeConfig();
+<!--
+  pages/index.vue
 
-const { error } = await useFetch("/", { baseURL: config.public.apiBase });
-const connected = !error.value;
-</script>
+  The home page of the VIERNULVIER archive.
+
+  Composed entirely of standalone section components that are auto-imported
+  by Nuxt from app/components/home/. The layout (AppHeader + AppFooter) is
+  provided by layouts/default.vue and does not need to be included here.
+
+  Section order:
+  1. HomeHero       — full-screen hero with title, subtitle and archive CTA
+  2. HomeHighlights — grid of recent productions
+  3. HomeAbout      — about the archive: text + photo
+  4. HomeDiscover   — two large cards linking to Stories and Prints sections
+-->
 
 <template>
-  <div>
-    <div v-if="connected">API connection established</div>
-    <div v-else style="color: red; border: 1px solid red; padding: 10px">
-      <p><strong>Could not connect to API</strong></p>
-      <pre>{{ error }}</pre>
-    </div>
-  </div>
+  <HomeHero />
+  <HomeHighlights />
+  <HomeAbout />
+  <HomeDiscover />
 </template>

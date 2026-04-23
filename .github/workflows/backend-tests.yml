@@ -1,0 +1,52 @@
+name: Backend Tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  backend-tests:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Create env files
+        run: |
+          write_env() {
+            echo "DB_USER_DEV=selab2" >> $1
+            echo "DB_HOST_DEV=sel2-4.ugent.be" >> $1
+            echo "DB_NAME_DEV=selab2_dev" >> $1
+            echo "DB_PASSWORD_DEV=${{ secrets.DB_PASSWORD_DEV }}" >> $1
+            echo "DB_PORT_DEV=2002" >> $1
+            echo "TRANSLATE_API_KEY=abcdlalala" >> $1
+          }
+          write_env ".env"
+          write_env "backend/.env"
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Run Backend Tests
+        working-directory: ./backend
+        run: npm run test --filter=backend
+        env:
+          DB_USER_DEV: selab2
+          DB_HOST_DEV: sel2-4.ugent.be
+          DB_NAME_DEV: selab2_dev
+          DB_PASSWORD_DEV: ${{ secrets.DB_PASSWORD_DEV }}
+          DB_PORT_DEV: 2002

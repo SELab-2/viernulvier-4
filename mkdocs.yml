@@ -3,16 +3,18 @@ site_name: VierNulVier Archive Documentation
 extra:
   version:
     provider: mike
-theme:  
+theme:
   name: material
 markdown_extensions:
   - admonition
 nav:
   - Home: index.md
   - Build & Run:
-    - Overview: build-run/index.md
-    - Backend: build-run/backend.md
-    - Frontend: build-run/frontend.md
+      - Overview: build-run/index.md
+      - Backend: build-run/backend.md
+      - Frontend: build-run/frontend.md
+  - Pagination:
+      - Overview: pagination/index.md
   - API Reference:
       - Overview & Auth: api/index.md
       - Events: api/events.md
@@ -21,34 +23,56 @@ nav:
       - Tags: api/tags.md
       - Locations: api/locations.md
       - Pricing: api/pricing.md
+      - Media:
+          - Overview: api/media/index.md
+          - Storage: api/media/storage.md
+          - Items: api/media/items.md
+          - Crops: api/media/crops.md
+          - Galleries: api/media/galleries.md
+          - Prints: api/media/prints.md
   - Data Schemas:
       - Overview: schemas/index.md
       - Core Entities: schemas/entities.md
       - Metadata: schemas/metadata.md
+      - Media: schemas/media.md
+      - Authentication: schemas/auth.md
   - Testing:
-    - Overview: testing/index.md
-    - Backend: testing/backend.md
-    - Frontend: testing/frontend.md
+      - Overview: testing/index.md
+      - Backend: testing/backend.md
+      - Frontend: testing/frontend.md
   - Scraping:
-    - Overview: scraping/index.md
+      - Overview: scraping/index.md
+  - CSV Parser:
+      - Overview: csv-parser/index.md
+      - Old Data Parser: csv-parser/old-data-parser.md
+      - New Structured Parser: csv-parser/new-data-parser.md
   - Logging:
-    - Overview: logging/index.md
+      - Overview: logging/index.md
+  - Translation:
+      - Overview: translation/index.md
   - Server:
-    - Overview: server/index.md
-    - Database: server/database.md
-    - Backend: server/backend.md
-    - Frontend: server/frontend.md
+      - Overview: server/index.md
+      - Database: server/database.md
+      - Backend: server/backend.md
+      - Frontend: server/frontend.md
+      - Media: server/media.md
   - Nest Modules:
-    - Overview: modules/index.md
-    - Feature Modules:
-      - Production: modules/production.md
-      - Event: modules/event.md
-      - Tag: modules/tag.md
-      - Blog: modules/blog.md
-      - Location: modules/location.md
-      - Price: modules/price.md
-    - Core Modules:
-      - Database: modules/database.md
-      - Auth: modules/auth.md
-    - Shared Modules:
-      - Util: modules/util.md
+      - Overview: modules/index.md
+      - Feature Modules:
+          - Production: modules/production.md
+          - Event: modules/event.md
+          - Tag: modules/tag.md
+          - Blog: modules/blog.md
+          - Location: modules/location.md
+          - Price: modules/price.md
+          - Media: modules/media.md
+          - Print Item: modules/print.md
+          - Parser: modules/parser.md
+      - Core Modules:
+          - Database: modules/database.md
+          - Auth: modules/auth.md
+          - CLI: modules/cli.md
+      - Shared Modules:
+          - Logger: modules/logger.md
+          - Language: modules/language.md
+          - Scraper: modules/scraper.md

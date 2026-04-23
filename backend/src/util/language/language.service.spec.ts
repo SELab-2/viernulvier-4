@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { LanguageService } from "./language.service";
-import { Language } from "@repo/common";
+import { AppLogger } from "../logger/logger.service";
+import { ConfigService } from "@nestjs/config";
 
 // --- Interfaces for Testing ---
 interface LocalizedText {
@@ -35,8 +36,27 @@ describe("LanguageService", () => {
   let service: LanguageService;
 
   beforeEach(async () => {
+    const mockConfigService = {
+      get: jest.fn().mockReturnValue("development"),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [LanguageService],
+      providers: [
+        LanguageService,
+        {
+          provide: AppLogger,
+          useValue: {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
+      ],
     }).compile();
 
     service = module.get<LanguageService>(LanguageService);
@@ -52,11 +72,9 @@ describe("LanguageService", () => {
     // --- Edge Cases & Early Returns ---
 
     it("should return the original data if data is null or undefined", () => {
+      expect(service.flattenByLanguage<null>(null, "en")).toBeNull();
       expect(
-        service.flattenByLanguage<null>(null, "en" as Language),
-      ).toBeNull();
-      expect(
-        service.flattenByLanguage<undefined>(undefined, "en" as Language),
+        service.flattenByLanguage<undefined>(undefined, "en"),
       ).toBeUndefined();
     });
 
@@ -91,12 +109,12 @@ describe("LanguageService", () => {
         is_active: true,
       };
 
-      expect(
-        service.flattenByLanguage<MockEntityView>(data, "en" as Language),
-      ).toEqual(expectedEn);
-      expect(
-        service.flattenByLanguage<MockEntityView>(data, "nl" as Language),
-      ).toEqual(expectedNl);
+      expect(service.flattenByLanguage<MockEntityView>(data, "en")).toEqual(
+        expectedEn,
+      );
+      expect(service.flattenByLanguage<MockEntityView>(data, "nl")).toEqual(
+        expectedNl,
+      );
     });
 
     it("should set the property to null if the requested language is missing", () => {
@@ -110,9 +128,9 @@ describe("LanguageService", () => {
         titel: null, // Fallback behavior defined in your service
       };
 
-      expect(
-        service.flattenByLanguage<MockEntityView>(data, "en" as Language),
-      ).toEqual(expectedEn);
+      expect(service.flattenByLanguage<MockEntityView>(data, "en")).toEqual(
+        expectedEn,
+      );
     });
 
     // --- Array Flattening ---
@@ -128,9 +146,9 @@ describe("LanguageService", () => {
         { id: 2, tag: "Drama" },
       ];
 
-      expect(
-        service.flattenByLanguage<MockEntityView[]>(data, "en" as Language),
-      ).toEqual(expectedEn);
+      expect(service.flattenByLanguage<MockEntityView[]>(data, "en")).toEqual(
+        expectedEn,
+      );
     });
 
     // --- Data Type Preservation ---
@@ -145,10 +163,7 @@ describe("LanguageService", () => {
         empty_field: null, // Null value
       };
 
-      const result = service.flattenByLanguage<MockEntityView>(
-        data,
-        "en" as Language,
-      );
+      const result = service.flattenByLanguage<MockEntityView>(data, "en");
 
       expect(result.titel).toBe("Title");
       expect(result.created_at).toBeInstanceOf(Date);

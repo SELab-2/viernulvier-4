@@ -1,33 +1,89 @@
 import fs from "fs";
+import { Readable } from "stream";
 import csvParser from "csv-parser";
-import { string, ZodType } from "zod";
-import { CreateEventDto, CreateProductionDto } from "../dto/dto";
-import { CreateEventSchema, CreateProductionSchema } from "@repo/common";
+import { z, string, ZodType } from "zod";
+import {
+  CreateBlogDto,
+  CreateEventDto,
+  CreatePriceDto,
+  CreateProductionDto,
+  CreateTagDto,
+} from "../dto/dto";
+import {
+  CreateBlogSchema,
+  CreateEventSchema,
+  CreatePriceSchema,
+  CreateProductionSchema,
+  CreateTagSchema,
+} from "@repo/common";
 
 /**
- * Type used to structure production import
+ * Internal helper used when parsing localized events.
  */
-type ParsedProductionImport = {
-  productions: CreateProductionDto[];
-  tags: string[];
-  productionTagLinks: { legacyId: string; tagName: string }[];
-};
-
-/**
- * Internal helper used when parsing events.
- */
-type ParsedEventRow = {
+type ParsedLocalizedEventRow = {
   event: CreateEventDto;
-  location: string;
+  location: { en: string; nl: string };
+  legacy_id: string;
 };
+
+/**
+ * Internal helper used when parsing productions.
+ */
+type ParsedProductionRow = {
+  production: CreateProductionDto;
+  legacy_id: string;
+};
+
+/**
+ * Internal helper used when parsing prices.
+ */
+type ParsedPriceRow = {
+  price: CreatePriceDto;
+  event_id: number;
+};
+
+/**
+ * Internal helper used when parsing blogs.
+ */
+type ParsedBlogRow = {
+  blog: CreateBlogDto;
+  production_id: number;
+};
+
+/**
+ * Internal helper used when parsing tags.
+ */
+type ParsedTagRow = {
+  tag: CreateTagDto;
+  productionIds: number[];
+};
+
+/// Type used to describe the CSV input source, can be either a file path or a buffer containing the CSV data.
+export type CsvInputSource = string | Buffer;
 
 export class CSVFileParser {
-  private static toLocalizedString(value: string): { en: string; nl: string } {
-    const normalized = (value || "").trim();
-    return {
-      en: normalized,
-      nl: normalized,
-    };
+  private static toLocalizedString(
+    value_nl: string,
+    value_en: string,
+    required_nl: boolean,
+    required_en: boolean,
+  ): { en: string; nl: string } {
+    const nl = (value_nl || "").trim();
+    const en = (value_en || "").trim();
+
+    if (required_nl && !nl) {
+      throw new Error(`Required Dutch value is missing: ${value_nl}`);
+    }
+    if (required_en && !en) {
+      throw new Error(`Required English value is missing: ${value_en}`);
+    }
+
+    if (!en && nl) {
+      //translating will be done before inserting
+      return { en: "", nl };
+    }
+
+    return { en, nl };
   }
 
   /**
@@ -38,7 +94,7 @@ export class CSVFileParser {
    * @returns A promise that resolves to an array of parsed and validated objects
    */
   static parseCSVWithSchema<T>(
-    filePath: string,
+    input: CsvInputSource,
     schema: ZodType<T>,
     transform: (row: Record<string, string>) => T,
   ): Promise<T[]> {
@@ -46,11 +102,16 @@ export class CSVFileParser {
       const results: T[] = [];
       let settled = false; // prevent multiple resolve/reject calls
 
-      const stream = fs.createReadStream(filePath).pipe(
+      const sourceStream =
+        typeof input === "string"
+          ? fs.createReadStream(input)
+          : Readable.from([input.toString("utf8")]); // converts buffer into a readable stream so parser can process it.
+
+      const stream = sourceStream.pipe(
         csvParser({
           strict: true, // Enable strict mode to catch parsing errors
           mapHeaders: ({ header }) => header.trim(), // Trim whitespace from headers
-          mapValues: ({ value }) => value.trim(), // Trim whitespace from values
+          mapValues: ({ value }) => String(value).trim(), // Trim whitespace from values
         }),
       );
 
@@ -89,9 +150,14 @@ export class CSVFileParser {
     });
   }
 
-  static transformEventRow(
-    row: Record<string, string>,
-  ): CreateEventDto & { location: string } {
+  static transformEventRow(row: Record<string, string>): CreateEventDto & {
+    location: { en: string; nl: string };
+    legacy_id: string;
+  } {
+    const id = Number(row.ID);
+    if (isNaN(id)) {
+      throw new Error(`Invalid production id: ${row.ID}`);
+    }
     let endTime: string | null = null;
 
     // Check for invalid date formats and handle them accordingly
@@ -106,118 +172,301 @@ export class CSVFileParser {
         endTime = endTimeDate.toISOString();
     }
 
+    let doorsAt: string | null = null;
+    if (row.Doors_At) {
+      const doorsAtDate = new Date(row.Doors_At);
+      if (!isNaN(doorsAtDate.getTime()) && doorsAtDate < starttimeDate) {
+        doorsAt = doorsAtDate.toISOString();
+      }
+    }
+
+    let intermissionAt: string | null = null;
+    if (row.Intermission_At) {
+      const intermissionAtDate = new Date(row.Intermission_At);
+      if (!isNaN(intermissionAtDate.getTime())) {
+        intermissionAt = intermissionAtDate.toISOString();
+      }
+    }
+
     const productionId = Number(row.Production);
     if (isNaN(productionId)) {
       throw new Error(`Invalid production id: ${row.Production}`);
     }
 
-    const location = (row.Hall || "").trim();
+    const location = CSVFileParser.toLocalizedString(
+      row.Location_NL,
+      row.Location_EN,
+      false,
+      false,
+    );
 
     return {
       starttime: starttimeDate.toISOString(),
       endtime: endTime,
       production_id: productionId,
-      location: location,
-      doors_at: null, // TODO
-      intermission_at: null, // TODO
-      legacy_id: null,
+      location,
+      doors_at: doorsAt,
+      intermission_at: intermissionAt,
+      legacy_id: `csv-${id}`,
     };
   }
 
   static transformProductionRow(
     row: Record<string, string>,
-  ): CreateProductionDto & { tags: string[] } {
+  ): CreateProductionDto & { legacy_id: string } {
     // validate and convert numeric fields manually to provide clearer errors
     const id = Number(row.ID);
     if (isNaN(id)) {
       throw new Error(`Invalid production id: ${row.ID}`);
     }
 
-    // adds possibility to add tags as a comma separated list in the Genre column, trims whitespace and converts to lowercase for consistency
-    const tags = (row.Genre || "")
-      .split(",")
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean);
+    const titel = CSVFileParser.toLocalizedString(
+      row.Titel_NL,
+      row.Titel_EN,
+      true,
+      false,
+    );
+    const description1 = CSVFileParser.toLocalizedString(
+      row.Description1_NL,
+      row.Description1_EN,
+      true,
+      false,
+    );
+    const description2Value = CSVFileParser.toLocalizedString(
+      row.Description2_NL,
+      row.Description2_EN,
+      false,
+      false,
+    );
+    const description2 =
+      description2Value.en || description2Value.nl ? description2Value : null;
 
-    const tagLine = row.Tagline || row.Ondertitel || null;
+    const artistValue = CSVFileParser.toLocalizedString(
+      row.Artist_NL,
+      row.Artist_EN,
+      false,
+      false,
+    );
+    const artist = artistValue.en || artistValue.nl ? artistValue : null;
 
-    const legacy_id = `csv-${id}`;
+    const taglineValue = CSVFileParser.toLocalizedString(
+      row.Tagline_NL,
+      row.Tagline_EN,
+      false,
+      false,
+    );
+    const tagline = taglineValue.en || taglineValue.nl ? taglineValue : null;
+
+    const creditsValue = CSVFileParser.toLocalizedString(
+      row.Credits_NL,
+      row.Credits_EN,
+      false,
+      false,
+    );
+    const credits = creditsValue.en || creditsValue.nl ? creditsValue : null;
+
+    const performer_type = (row.Performer_Type || "").trim() || null;
+    const attendance_mode = (row.Attendance_Mode || "").trim() || null;
 
     return {
-      titel: CSVFileParser.toLocalizedString(row.Titel),
-      description1: CSVFileParser.toLocalizedString(row.Description1),
-      description2: row.Description2
-        ? CSVFileParser.toLocalizedString(row.Description2)
-        : null,
-      artist: null, // TODO
-      tagline: tagLine ? CSVFileParser.toLocalizedString(tagLine) : null,
-      credits: null, // TODO
-      attendance_mode: null, // TODO
-      performer_type: null, // TODO
-      legacy_id: legacy_id,
-      tags: [...new Set(tags)], // remove duplicate tags
+      titel,
+      description1,
+      description2,
+      artist,
+      tagline,
+      credits,
+      attendance_mode: attendance_mode,
+      performer_type: performer_type,
+      legacy_id: `csv-${id}`,
+    };
+  }
+
+  static transformPriceRow(
+    row: Record<string, string>,
+  ): CreatePriceDto & { event_id: number } {
+    const name = CSVFileParser.toLocalizedString(
+      row.Name_NL,
+      row.Name_EN,
+      true,
+      false,
+    );
+    const price = Number(row.Price);
+    const eventId = Number(row.EventID);
+
+    if (isNaN(price)) {
+      throw new Error(`Invalid price: ${row.Price}`);
+    }
+    if (isNaN(eventId)) {
+      throw new Error(`Invalid event id: ${row.EventID}`);
+    }
+
+    return {
+      name,
+      price,
+      event_id: eventId,
+    };
+  }
+
+  static transformBlogRow(
+    row: Record<string, string>,
+  ): CreateBlogDto & { production_id: number } {
+    const titel = CSVFileParser.toLocalizedString(
+      row.Titel_NL,
+      row.Titel_EN,
+      true,
+      false,
+    );
+    const description = CSVFileParser.toLocalizedString(
+      row.Description_NL,
+      row.Description_EN,
+      true,
+      false,
+    );
+    const productionId = Number(row.ProductionID);
+    if (isNaN(productionId)) {
+      throw new Error(`Invalid production id: ${row.ProductionID}`);
+    }
+
+    return {
+      titel,
+      description,
+      production_id: productionId,
+    };
+  }
+
+  static transformTagRow(
+    row: Record<string, string>,
+  ): CreateTagDto & { productionIds: number[] } {
+    const tag = CSVFileParser.toLocalizedString(
+      row.TagName_NL,
+      row.TagName_EN,
+      true,
+      false,
+    );
+    const productionIds = (row.ProductionIDs || "").split(",").map((id) => {
+      const numId = Number(id.trim());
+      if (isNaN(numId)) {
+        throw new Error(`Invalid production id in ProductionIDs: ${id}`);
+      }
+      return numId;
+    });
+
+    return {
+      tag,
+      productionIds,
     };
   }
 
   /**
-   * Parse events from a CSV file and return them along with a raw location
-   * string.
+   * Parse events from a CSV file and return them along with their localized locations
    * @param filePath - Path to the CSV file containing events
-   * @return A promise that resolves to an array of objects containing the
-   *         event DTO and the value of the `Hall` column (may be empty).
+   * @return A promise that resolves to an array of objects containing the event DTO and their localized locations
    */
-  static async parseEventsCSV(filePath: string): Promise<ParsedEventRow[]> {
+  static async parseEventsCSV(
+    input: CsvInputSource,
+  ): Promise<ParsedLocalizedEventRow[]> {
     const parsed = await this.parseCSVWithSchema<
-      CreateEventDto & { location: string }
+      CreateEventDto & {
+        location: { en: string; nl: string };
+        legacy_id: string;
+      }
     >(
-      filePath,
-      CreateEventSchema.extend({ location: string() }),
-      this.transformEventRow,
+      input,
+      CreateEventSchema.extend({
+        location: z.object({ en: string(), nl: string() }),
+        legacy_id: string(),
+      }),
+      (row) => this.transformEventRow(row),
     );
 
     return parsed.map((r) => {
-      const { location, ...eventData } = r;
-      return { event: eventData, location: location };
+      const { location, legacy_id, ...eventData } = r;
+      return {
+        event: eventData,
+        location: location,
+        legacy_id: legacy_id,
+      };
     });
   }
 
   /**
-   * Parse productions from a CSV file and return structured import data
+   * Parse productions from a CSV file and return them along with their legacy IDs
    * @param filePath - Path to the CSV file containing productions
-   * @return A promise that resolves to an object containing productions, unique tags, and production-tag links
+   * @return A promise that resolves to an array of objects containing the production DTO and their legacy IDs
    */
   static async parseProductionsCSV(
-    filePath: string,
-  ): Promise<ParsedProductionImport> {
-    const productions: CreateProductionDto[] = [];
-    const tagsSet: Set<string> = new Set();
-    const productionTagLinks: { legacyId: string; tagName: string }[] = [];
-
+    input: CsvInputSource,
+  ): Promise<ParsedProductionRow[]> {
     const parsed = await this.parseCSVWithSchema<
-      CreateProductionDto & { tags: string[] }
-    >(
-      filePath,
-      CreateProductionSchema.extend({ tags: string().array() }),
-      this.transformProductionRow,
+      CreateProductionDto & { legacy_id: string }
+    >(input, CreateProductionSchema.extend({ legacy_id: string() }), (row) =>
+      this.transformProductionRow(row),
     );
 
-    for (const production of parsed) {
-      const { tags, ...prodData } = production;
-      productions.push(prodData);
+    return parsed.map((r) => {
+      const { legacy_id, ...productionData } = r;
+      return {
+        production: productionData,
+        legacy_id: legacy_id,
+      };
+    });
+  }
 
-      for (const tag of tags) {
-        tagsSet.add(tag);
-        productionTagLinks.push({
-          legacyId: prodData.legacy_id!,
-          tagName: tag,
-        });
-      }
-    }
+  /**
+   * Parse prices from a CSV file and return them along with their associated event IDs
+   * @param filePath - Path to the CSV file containing prices
+   * @return A promise that resolves to an array of objects containing the price DTO and the associated event ID
+   */
+  static async parsePricesCSV(
+    input: CsvInputSource,
+  ): Promise<ParsedPriceRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreatePriceDto & { event_id: number }
+    >(input, CreatePriceSchema.extend({ event_id: z.number() }), (row) =>
+      this.transformPriceRow(row),
+    );
 
-    return {
-      productions: productions,
-      tags: Array.from(tagsSet),
-      productionTagLinks,
-    };
+    return parsed.map((r) => {
+      const { event_id, ...priceData } = r;
+      return { price: priceData, event_id };
+    });
+  }
+
+  /**
+   * Parse blogs from a CSV file and return them along with their associated production IDs
+   * @param filePath - Path to the CSV file containing blogs
+   * @return A promise that resolves to an array of objects containing the blog DTO and the associated production ID
+   */
+  static async parseBlogsCSV(input: CsvInputSource): Promise<ParsedBlogRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreateBlogDto & { production_id: number }
+    >(input, CreateBlogSchema.extend({ production_id: z.number() }), (row) =>
+      this.transformBlogRow(row),
+    );
+
+    return parsed.map((r) => {
+      const { production_id, ...blogData } = r;
+      return { blog: blogData, production_id };
+    });
+  }
+
+  /**
+   * Parse tags from a CSV file and return them along with their associated production IDs
+   * @param filePath - Path to the CSV file containing tags
+   * @return A promise that resolves to an array of objects containing the tag DTO and an array of associated production IDs
+   */
+  static async parseTagsCSV(input: CsvInputSource): Promise<ParsedTagRow[]> {
+    const parsed = await this.parseCSVWithSchema<
+      CreateTagDto & { productionIds: number[] }
+    >(
+      input,
+      CreateTagSchema.extend({ productionIds: z.number().array() }),
+      (row) => this.transformTagRow(row),
+    );
+
+    return parsed.map((r) => {
+      const { productionIds, ...tagData } = r;
+      return { tag: tagData, productionIds };
+    });
   }
 }

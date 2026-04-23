@@ -3,3 +3,8 @@ node_modules
 coverage
 .env
 logs
+.idea
+.vscode
+
+# Ignores the media
+assets/media/photos

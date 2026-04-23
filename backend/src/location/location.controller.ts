@@ -17,10 +17,9 @@ import {
   LanguageQueryDto,
   LocationDto,
   LocationViewDto,
-  PaginatedLocationDto,
-  PaginatedLocationViewDto,
   PaginationFilterDto,
-  UpdateLocationDto,
+  ModifyLocationDto,
+  FilterLocationDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -33,12 +32,17 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateLocationSchema,
   LanguageQuerySchema,
+  PaginatedResponse,
   PaginationFilterSchema,
-  UpdateLocationSchema,
+  ModifyLocationSchema,
+  FilterLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../common/decorators/api.ok";
 
 @Controller("locations")
 export class LocationController {
@@ -49,19 +53,30 @@ export class LocationController {
 
   /**
    * Responds to a GET to "/locations"
+   * @param paginationFilter Pagination and ordering filters.
+   * @param lang Language filter.
+   * @param locationFilters Filters for the location.
    * @returns A list of all Locations.
    */
   @ApiOperation({ summary: "Fetches a list of all Locations." })
-  @ApiOkArrayAnyOf(LocationDto, LocationViewDto)
+  @ApiOkPaginatedResponseAnyOf(LocationDto, LocationViewDto)
   @Get()
   async getLocations(
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
-  ): Promise<PaginatedLocationDto | PaginatedLocationViewDto> {
+    @Query(new ZodValidationPipe(FilterLocationSchema))
+    locationFilters: FilterLocationDto,
+  ): Promise<PaginatedResponse<LocationDto | LocationViewDto>> {
     return this.ls.flattenByLanguage<
-      PaginatedLocationDto | PaginatedLocationViewDto
-    >(await this.locationService.getLocations(paginationFilter), lang.lang);
+      PaginatedResponse<LocationDto | LocationViewDto>
+    >(
+      await this.locationService.getLocations(
+        paginationFilter,
+        locationFilters,
+      ),
+      lang.lang,
+    );
   }
 
   /**
@@ -104,24 +119,29 @@ export class LocationController {
   }
 
   /**
-   * Responds to a PATCH to "/locations"
-   * @param updateLocation The Location we want to update.
+   * Responds to a PATCH to "/locations/:locationId"
+   * @param locationId The ID of the Location in the URL.
+   * @param modifyLocation The Location we want to update.
    * @returns The newly updated Location.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Updates an existing Location." })
-  @ApiBody({ type: UpdateLocationDto })
+  @ApiBody({ type: ModifyLocationDto })
   @ApiOkResponse({
     type: LocationDto,
     description: "The Location was updated.",
   })
-  @UsePipes(new ZodValidationPipe(UpdateLocationSchema))
-  @Patch()
-  async updateLocation(
-    @Body() updateLocation: UpdateLocationDto,
+  @Patch(":locationId")
+  async modifyLocation(
+    @Param("locationId", ParseIntPipe) locationId: number,
+    @Body(new ZodValidationPipe(ModifyLocationSchema))
+    modifyLocation: ModifyLocationDto,
   ): Promise<LocationDto> {
-    return await this.locationService.updateLocation(updateLocation);
+    return await this.locationService.modifyLocation(
+      locationId,
+      modifyLocation,
+    );
   }
 
   /**

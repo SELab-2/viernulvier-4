@@ -6,11 +6,10 @@ import type {
   CreateProductionDto,
   ProductionDto,
   TagDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
 } from "../dto/dto";
-import { BadRequestException } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
-import { FilterProductionSchema } from "@repo/common";
+import { FilterProductionSchema, PaginationFilterSchema } from "@repo/common";
 
 describe("ProductionService", () => {
   let service: ProductionService;
@@ -27,7 +26,6 @@ describe("ProductionService", () => {
     description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: { en: "fixing", nl: "repareren" },
     artist: { en: "the", nl: "de" },
     credits: { en: "tests :-)", nl: "testen :-)" },
@@ -43,14 +41,12 @@ describe("ProductionService", () => {
       tag: { en: "Drama", nl: "Drama" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
-      legacy_id: "str",
     },
     {
       id: 2,
       tag: { en: "Classical", nl: "Klassiek" },
       created_at: "2025-06-01T22:00:00.000Z",
       updated_at: "2025-06-01T22:00:00.000Z",
-      legacy_id: "str",
     },
   ];
 
@@ -99,27 +95,48 @@ describe("ProductionService", () => {
     it("should return all productions from database", async () => {
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+        undefined,
       );
       expect(result).toEqual(mockProductions);
       expect(dbService.getProductions).toHaveBeenCalledWith(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+        undefined,
       );
     });
 
     it("should call dbService.getProductions with empty filter", async () => {
-      await service.getAllProductions(FilterProductionSchema.parse({}));
+      await service.getAllProductions(
+        FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+        undefined,
+      );
       expect(dbService.getProductions).toHaveBeenCalledWith(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
+        undefined,
       );
       expect(dbService.getProductions).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty array when no productions exist", async () => {
-      jest.spyOn(dbService, "getProductions").mockResolvedValueOnce([]);
+      jest.spyOn(dbService, "getProductions").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
+        PaginationFilterSchema.parse({}),
       );
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
 
     it("should handle database errors", async () => {
@@ -127,7 +144,10 @@ describe("ProductionService", () => {
         .spyOn(dbService, "getProductions")
         .mockRejectedValueOnce(new Error("Database error"));
       await expect(
-        service.getAllProductions(FilterProductionSchema.parse({})),
+        service.getAllProductions(
+          FilterProductionSchema.parse({}),
+          PaginationFilterSchema.parse({}),
+        ),
       ).rejects.toThrow("Database error");
     });
   });
@@ -170,26 +190,20 @@ describe("ProductionService", () => {
   describe("replaceProduction", () => {
     it("should successfully replace and return the production", async () => {
       const result = await service.replaceProduction(1, mockProduction);
-      expect(dbService.upsertProduction).toHaveBeenCalledWith(mockProduction);
+      expect(dbService.updateProduction).toHaveBeenCalledWith(
+        1,
+        mockProduction,
+      );
       expect(result).toEqual(mockProduction);
-    });
-
-    it("should throw BadRequestException if url id and body id do not match", async () => {
-      await expect(
-        service.replaceProduction(2, mockProduction),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        service.replaceProduction(2, mockProduction),
-      ).rejects.toThrow("ID in the URL must match ID in the body.");
     });
   });
 
   describe("modifyProduction", () => {
     it("should fetch, merge, update, and return the modified production", async () => {
-      const patchData: UpdateProductionDto = {
+      const patchData: ModifyProductionDto = {
         titel: { en: "Patched titel", nl: "Bijgewerkte titel" },
       };
-      const expectedMergedProduction = {
+      const expectProduction = {
         ...mockProduction,
         ...patchData,
         id: 1,
@@ -197,34 +211,12 @@ describe("ProductionService", () => {
 
       jest
         .spyOn(dbService, "updateProduction")
-        .mockResolvedValueOnce(expectedMergedProduction);
+        .mockResolvedValueOnce(expectProduction);
 
       const result = await service.modifyProduction(1, patchData);
 
-      expect(dbService.getProductionById).toHaveBeenCalledWith(1);
-      expect(dbService.updateProduction).toHaveBeenCalledWith(
-        expectedMergedProduction,
-      );
-      expect(result).toEqual(expectedMergedProduction);
-    });
-
-    it("should throw an error if the production to modify does not exist", async () => {
-      const patchData: UpdateProductionDto = {
-        titel: { en: "Patched titel", nl: "Bijgewerkte titel" },
-      };
-
-      // Simulate the database failing to find the record
-      jest
-        .spyOn(dbService, "getProductionById")
-        .mockRejectedValueOnce(
-          new Error("No ProductionDto exists for provided ID"),
-        );
-
-      // The service should halt and bubble up the fetch error, never calling updateProduction
-      await expect(service.modifyProduction(999, patchData)).rejects.toThrow(
-        "No ProductionDto exists for provided ID",
-      );
-      expect(dbService.updateProduction).not.toHaveBeenCalled();
+      expect(dbService.updateProduction).toHaveBeenCalledWith(1, patchData);
+      expect(result).toEqual(expectProduction);
     });
   });
 
@@ -474,7 +466,6 @@ describe("ProductionService", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },
@@ -507,7 +498,6 @@ describe("ProductionService", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },

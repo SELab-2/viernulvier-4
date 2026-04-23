@@ -2,11 +2,22 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreateTagDto,
-  PaginatedTagDto,
   TagDto,
-  UpdateTagDto,
+  ModifyTagDto,
+  PaginationFilterDto,
+  FilterTagDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
+import {
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+  TagSchema,
+} from "@repo/common";
+import {
+  generateInsertClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
+import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
 export class TagDatabaseService {
@@ -19,52 +30,80 @@ export class TagDatabaseService {
    * @returns The tag if there is one.
    */
   async getTagById(id: number): Promise<TagDto> {
+    const returningClause = generateReturningClause(TagSchema);
+
     const query = `
-      SELECT
-        id,
-        tag,
-        created_at,
-        updated_at,
-        legacy_id
+      SELECT ${returningClause}
       FROM tags
-      WHERE id = $1
+      WHERE id = $1;
     `;
 
     const result = await this.db.query<TagDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Tag not found");
+      throw new ResourceNotFoundException(TagDto, id);
     }
     return result[0];
   }
 
   /**
    * Get all tags.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
+   * @param paginationFilters Filters for pagination and ordering.
+   * @param tagFilters Filters for tag.
    * @returns The tags if there are any.
    */
   async getTags(
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<PaginatedTagDto> {
-    let query = `SELECT id, tag, created_at, updated_at, legacy_id FROM tags ORDER BY id`;
+    paginationFilters: PaginationFilterDto,
+    tagFilters: FilterTagDto,
+  ): Promise<PaginatedResponse<TagDto>> {
+    const returningClause = generateReturningClause(TagSchema);
 
-    const params: any[] = [];
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
 
-    if (amount > 0) {
-      query += ` LIMIT $1 OFFSET $2`;
-      params.push(amount, page * amount);
+    // Filter by the tag itself. (Only used in admin page)
+    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    if (tagFilters.tag) {
+      const tagParam = param(`%${tagFilters.tag}%`);
+      const tagClauses = SUPPORTED_LANGUAGES.map(
+        (lang) => `tag->>'${lang}' ILIKE ${tagParam}`,
+      );
+      conditions.push(`(${tagClauses.join(" OR ")})`);
     }
 
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM tags
+      ${whereClause};
+    `;
+
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
+    const query = `
+      SELECT ${returningClause}
+      FROM tags 
+      ${whereClause}
+      ORDER BY id
+      ${paginationClause};
+    `;
+
     const [tags, countResult] = await Promise.all([
-      this.db.query<TagDto>(query, params),
-      this.db.query<{ count: string }>(`SELECT COUNT(*) as count FROM tags`),
+      this.db.query<TagDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
     ]);
 
     return {
-      page,
-      limit: amount,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects: tags,
     };
@@ -76,28 +115,19 @@ export class TagDatabaseService {
    * @returns the added tag if it was successful.
    */
   async createTag(tag: CreateTagDto): Promise<TagDto> {
-    if (!tag.tag) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(tag);
+    const returningClause = generateReturningClause(TagSchema);
 
     const query = `
-      INSERT INTO tags (tag, legacy_id)
-      VALUES ($1, $2)
-      RETURNING
-        id,
-        tag,
-        created_at,
-        updated_at,
-        legacy_id
-      ;
+      INSERT INTO tags (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
-
-    const values = [JSON.stringify(tag.tag)];
 
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create tag");
+      throw new Error("Failed to create tag.");
     }
 
     return result[0];
@@ -105,47 +135,31 @@ export class TagDatabaseService {
 
   /**
    * Update function for tags. Updates the tag in the database.
-   * @param tag must be of the type "UpdateTag", gives the freedom to define only what needs to be updated.
+   * @param tag must be of the type "ModifyTag", gives the freedom to define only what needs to be updated.
    * The id field in the tag MUST be defined.
    * @returns the updated tag if successful.
    */
-  async updateTag(tag: UpdateTagDto): Promise<TagDto> {
-    if (!tag.id) {
-      throw new BadRequestException("Tag id is required for update");
+  async updateTag(tagId: number, tag: ModifyTagDto): Promise<TagDto> {
+    const { setClause, values, nextIndex } = generateUpdateClause(tag);
+    const returningClause = generateReturningClause(TagSchema);
+
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
-
-    if (tag.tag !== undefined) {
-      fields.push(`tag = COALESCE(tag, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify(tag.tag));
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
-    }
-
-    values.push(tag.id);
+    values.push(tagId);
 
     const query = `
       UPDATE tags
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING
-        id,
-        tag,
-        created_at,
-        updated_at,
-        legacy_id
-      ;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Tag not found");
+      throw new ResourceNotFoundException(TagDto, tagId);
     }
 
     return result[0];
@@ -160,12 +174,8 @@ export class TagDatabaseService {
   async deleteTag(id: number): Promise<void> {
     const query = `DELETE FROM tags WHERE id = $1 RETURNING id;`;
 
-    const result = await this.db.query(query, [id]);
-    if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Cannot Delete: Tag with ID ${id} not found`,
-      );
-    }
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [id]);
   }
 
   // insert extra functions here if desired

@@ -14,16 +14,18 @@ cp .env.example .env
 
 Then open `.env` and fill in the correct values for your setup:
 
-| Variable         | Description                                                                                             |
-|------------------|---------------------------------------------------------------------------------------------------------|
-| `DB_USER`        | PostgreSQL username                                                                                     |
-| `DB_HOST`        | Database host — use `127.0.0.1` if running locally on the same server                                   |
-| `DB_NAME`        | Name of the PostgreSQL database                                                                         |
-| `DB_PASSWORD`    | Password for the PostgreSQL user                                                                        |
-| `DB_PORT`        | PostgreSQL port — default is `5432`                                                                     |
-| `CLIENT_API_KEY` | API key used for the scraper.                                                                           |
-| `ENABLE_SCRAPER` | Enables the scraper that automatically fetches from the main API at midnight — set to `true` or `false` |
-| `LOGGER_PATH`    | Absolte path to your logging directory                                                                  |
+| Variable            | Description                                                                                             |
+|---------------------|---------------------------------------------------------------------------------------------------------|
+| `DB_USER`           | PostgreSQL username                                                                                     |
+| `DB_HOST`           | Database host — use `127.0.0.1` if running locally on the same server                                   |
+| `DB_NAME`           | Name of the PostgreSQL database                                                                         |
+| `DB_PASSWORD`       | Password for the PostgreSQL user                                                                        |
+| `DB_PORT`           | PostgreSQL port — default is `5432`                                                                     |
+| `CLIENT_API_KEY`    | API key used for the scraper.                                                                           |
+| `ENABLE_SCRAPER`    | Enables the scraper that automatically fetches from the main API at midnight — set to `true` or `false` |
+| `LOGGER_PATH`       | Absolte path to your logging directory                                                                  |
+| `TRANSLATE_API_KEY` | The api key for your translation provider                                                               |
+| `MEDIA_BASE_URL`    | Base URL used to build media URLs (the one saved in the database and served through nginx)              |
 
 > **Note:** Never commit your `.env` file to version control. It is already listed in `.gitignore`, but double-check
 > before pushing.

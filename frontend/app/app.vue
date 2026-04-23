@@ -1,6 +1,17 @@
+<script setup lang="ts">
+const { rehydrate } = useAuth();
+
+onMounted(() => {
+  rehydrate();
+});
+</script>
+
 <template>
   <div>
     <NuxtRouteAnnouncer />
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+      <NuxtSnackbar />
+    </NuxtLayout>
   </div>
 </template>

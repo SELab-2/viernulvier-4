@@ -1,15 +1,18 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginatedProductionDto,
+  MediaGalleryDto,
+  ModifyProductionDto,
+  PaginationFilterDto,
   ProductionDto,
+  ReplaceProductionDto,
   TagDto,
-  UpdateProductionDto,
 } from "../dto/dto";
 import { ProductionDatabaseService } from "../database/db.production.service";
 import { BlogDatabaseService } from "../database/db.blog.service";
+import { GalleryType, Language, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class ProductionService {
@@ -21,13 +24,21 @@ export class ProductionService {
   /**
    * Fetches all ProductionDto objects from the DBService
    * note: pagination is done here via the filters param.
-   * @param filters The filters to be applied to the query.
+   * @param productionFilters The filters to be applied to the query.
+   * @param paginationFilters Filters to do with pagination and ordering.
+   * @param language Optional language.
    * @returns All ProductionDto objects
    */
   async getAllProductions(
-    filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto> {
-    return await this.productionDBService.getProductions(filters);
+    productionFilters: FilterProductionDto,
+    paginationFilters: PaginationFilterDto,
+    language?: Language,
+  ): Promise<PaginatedResponse<ProductionDto>> {
+    return await this.productionDBService.getProductions(
+      productionFilters,
+      paginationFilters,
+      language,
+    );
   }
 
   /**
@@ -42,19 +53,17 @@ export class ProductionService {
   /**
    * Replaces a ProductionDto in the database and returns the updated one.
    * @param id The ID of the production.
-   * @param production The ProductionDto Object itself.
+   * @param replaceProduction The ProductionDto Object itself.
    * @returns The newly updated ProductionDto.
    */
   async replaceProduction(
     id: number,
-    production: ProductionDto,
+    replaceProduction: ReplaceProductionDto,
   ): Promise<ProductionDto> {
-    if (id !== production.id)
-      throw new BadRequestException("ID in the URL must match ID in the body.");
-
-    // * NOTE: Using Upsert here will make sure that
-    // * if the production does not yet exist it is created instead.
-    return await this.productionDBService.upsertProduction(production);
+    return await this.productionDBService.updateProduction(
+      id,
+      replaceProduction,
+    );
   }
 
   /**
@@ -65,18 +74,9 @@ export class ProductionService {
    */
   async modifyProduction(
     id: number,
-    patchData: UpdateProductionDto,
+    patchData: ModifyProductionDto,
   ): Promise<ProductionDto> {
-    const existingProduction: ProductionDto =
-      await this.productionDBService.getProductionById(id);
-
-    const mergedProduction: ProductionDto = {
-      ...existingProduction,
-      ...patchData,
-      id,
-    };
-
-    return await this.productionDBService.updateProduction(mergedProduction);
+    return await this.productionDBService.updateProduction(id, patchData);
   }
 
   /**
@@ -185,5 +185,53 @@ export class ProductionService {
   ): Promise<ProductionDto> {
     await this.productionDBService.removeTagFromProduction(tagId, productionId);
     return await this.productionDBService.getProductionById(productionId);
+  }
+
+  // -- Media -- //
+
+  /**
+   * Returns the media for a certain production.
+   * @param productionId The ID of the production.
+   * @param type is the wanted gallery type.
+   * @returns The gallery linked with this production.
+   */
+  async getProductionMedia(
+    productionId: number,
+    type: GalleryType,
+  ): Promise<MediaGalleryDto> {
+    return await this.productionDBService.getMediaFromProduction(
+      productionId,
+      type,
+    );
+  }
+
+  /**
+   * Links a media gallery to a production.
+   * @param productionId The ID of the production.
+   * @param galleryId The ID of the gallery.
+   */
+  async linkMediaToProduction(
+    productionId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.productionDBService.linkMediaToProduction(
+      productionId,
+      galleryId,
+    );
+  }
+
+  /**
+   * Unlinks a media gallery from a production.
+   * @param productionId The ID of the production.
+   * @param galleryId The ID of the gallery.
+   */
+  async unlinkMediaFromProduction(
+    productionId: number,
+    galleryId: number,
+  ): Promise<void> {
+    await this.productionDBService.unlinkMediaFromProduction(
+      productionId,
+      galleryId,
+    );
   }
 }

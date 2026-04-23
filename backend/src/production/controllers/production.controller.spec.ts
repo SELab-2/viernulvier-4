@@ -6,12 +6,16 @@ import {
   CreateProductionDto,
   ProductionDto,
   ProductionViewDto,
-  UpdateProductionDto,
+  ModifyProductionDto,
   LanguageQueryDto,
 } from "../../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "../../auth/authGuard";
-import { FilterProductionSchema } from "@repo/common";
-import { ResourceGoneException } from "../../common/exceptions";
+import {
+  FilterProductionSchema,
+  LanguageQuerySchema,
+  PaginationFilterSchema,
+} from "@repo/common";
+import { ResourceNotFoundException } from "../../common/exceptions";
 
 describe("ProductionController", () => {
   let controller: ProductionController;
@@ -28,7 +32,6 @@ describe("ProductionController", () => {
     description2: { en: "With great actors", nl: "Met geweldige acteurs" },
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: { en: "fixing", nl: "repareren" },
     artist: { en: "the", nl: "de" },
     credits: { en: "tests :-)", nl: "testen :-)" },
@@ -43,7 +46,6 @@ describe("ProductionController", () => {
     description2: "With great actors",
     performer_type: "happy",
     attendance_mode: "I",
-    legacy_id: "am",
     tagline: "fixing",
     artist: "the",
     credits: "tests :-)",
@@ -99,30 +101,62 @@ describe("ProductionController", () => {
 
   describe("getAllProductions", () => {
     it("should return an array of flattened productions", async () => {
-      const filters = FilterProductionSchema.parse({ lang: "en" });
+      const productionFilters = FilterProductionSchema.parse({});
+      const paginationFilters = PaginationFilterSchema.parse({});
+      const langQuery = LanguageQuerySchema.parse({ lang: "en" });
 
       jest
         .spyOn(languageService, "flattenByLanguage")
         .mockReturnValue(mockProductionViews);
 
-      const result = await controller.getAllProductions(filters);
+      const result = await controller.getAllProductions(
+        langQuery,
+        paginationFilters,
+        productionFilters,
+      );
 
-      expect(service.getAllProductions).toHaveBeenCalledWith(filters);
+      expect(service.getAllProductions).toHaveBeenCalledWith(
+        productionFilters,
+        paginationFilters,
+        langQuery.lang,
+      );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         mockProductions,
-        filters.lang,
+        langQuery.lang,
       );
       expect(result).toEqual(mockProductionViews);
     });
 
     it("should return empty array when no productions exist", async () => {
-      const filters = FilterProductionSchema.parse({ lang: "en" });
-      jest.spyOn(service, "getAllProductions").mockResolvedValueOnce([]);
-      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue([]);
+      const productionFilters = FilterProductionSchema.parse({});
+      const paginationFilters = PaginationFilterSchema.parse({});
+      const langQuery = LanguageQuerySchema.parse({ lang: "en" });
 
-      const result = await controller.getAllProductions(filters);
+      jest.spyOn(service, "getAllProductions").mockResolvedValueOnce({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
+      jest.spyOn(languageService, "flattenByLanguage").mockReturnValue({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
 
-      expect(result).toEqual([]);
+      const result = await controller.getAllProductions(
+        langQuery,
+        paginationFilters,
+        productionFilters,
+      );
+
+      expect(result).toEqual({
+        page: 0,
+        limit: 20,
+        totalItems: 0,
+        objects: [],
+      });
     });
   });
 
@@ -143,12 +177,12 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProductionView);
     });
 
-    it("should throw a ResourceGoneException (410) if the production does not exist", async () => {
+    it("should throw a ResourceNotFoundException (404) if the production does not exist", async () => {
       jest
         .spyOn(service, "getProductionById")
-        .mockRejectedValue(new ResourceGoneException("Production not found"));
+        .mockRejectedValue(new ResourceNotFoundException(ProductionDto, 999));
       await expect(controller.getProductionById(999, {})).rejects.toThrow(
-        ResourceGoneException,
+        ResourceNotFoundException,
       );
     });
   });
@@ -160,19 +194,19 @@ describe("ProductionController", () => {
       expect(result).toEqual(mockProduction);
     });
 
-    it("should throw a ResourceGoneException (410) if trying to replace a non-existent production", async () => {
+    it("should throw a ResourceNotFoundException (404) if trying to replace a non-existent production", async () => {
       jest
         .spyOn(service, "replaceProduction")
-        .mockRejectedValue(new ResourceGoneException("Production not found"));
+        .mockRejectedValue(new ResourceNotFoundException(ProductionDto, 999));
       await expect(
         controller.replaceProduction(999, mockProduction),
-      ).rejects.toThrow(ResourceGoneException);
+      ).rejects.toThrow(ResourceNotFoundException);
     });
   });
 
   describe("modifyProduction", () => {
     it("should modify and return the production", async () => {
-      const patchData: UpdateProductionDto = {
+      const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       const patchedProduction = {
@@ -189,17 +223,17 @@ describe("ProductionController", () => {
       expect(result).toEqual(patchedProduction);
     });
 
-    it("should throw a ResourceGoneException (410) if trying to modify a non-existent production", async () => {
-      const patchData: UpdateProductionDto = {
+    it("should throw a ResourceNotFoundException (404) if trying to modify a non-existent production", async () => {
+      const patchData: ModifyProductionDto = {
         titel: { en: "A New titel", nl: "Nieuwe titel" },
       };
       jest
         .spyOn(service, "modifyProduction")
         .mockRejectedValueOnce(
-          new ResourceGoneException("Production not found"),
+          new ResourceNotFoundException(ProductionDto, 999),
         );
       await expect(controller.modifyProduction(999, patchData)).rejects.toThrow(
-        ResourceGoneException,
+        ResourceNotFoundException,
       );
     });
   });
@@ -209,15 +243,6 @@ describe("ProductionController", () => {
       const result = await controller.deleteProduction(1);
       expect(service.deleteProduction).toHaveBeenCalledWith(1);
       expect(result).toBeUndefined();
-    });
-
-    it("should throw a ResourceGoneException (410) if trying to delete a non-existent production", async () => {
-      jest
-        .spyOn(service, "deleteProduction")
-        .mockRejectedValue(new ResourceGoneException("Production not found"));
-      await expect(controller.deleteProduction(999)).rejects.toThrow(
-        ResourceGoneException,
-      );
     });
   });
 
@@ -232,7 +257,6 @@ describe("ProductionController", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },
@@ -265,7 +289,6 @@ describe("ProductionController", () => {
         description2: { en: "With great actors", nl: "Met geweldige acteurs" },
         performer_type: "happy",
         attendance_mode: "I",
-        legacy_id: "am",
         tagline: { en: "fixing", nl: "repareren" },
         artist: { en: "the", nl: "de" },
         credits: { en: "tests :-)", nl: "testen :-)" },

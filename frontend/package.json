@@ -3,25 +3,39 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt build --dotenv ../.env",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "start:dev": "nuxt dev --port 3001",
-    "start:prod": "PORT=3001 node .output/server/index.mjs",
+    "start:dev": "nuxt dev --port 3001 --dotenv ../.env",
+    "start:prod": "cross-env PORT=3001 node .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "format": "prettier --write \"{app,tests}/**/*.{vue,ts,js,json,css,scss}\"",
+    "lint": "eslint \"{app,tests}/**/*.{vue,ts,js}\" --fix"
   },
   "dependencies": {
+    "@nuxtjs/i18n": "^10.2.3",
     "@repo/common": "*",
-    "vue": "^3.5.28",
-    "vue-router": "^4.6.4"
+    "@tailwindcss/postcss": "^4.0.0",
+    "@vueuse/core": "^14.2.1",
+    "@tiptap/extension-color": "^3.22.3",
+    "@tiptap/extension-link": "^3.22.3",
+    "@tiptap/extension-placeholder": "^3.22.3",
+    "@tiptap/extension-text-style": "^3.22.3",
+    "@tiptap/extension-underline": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
+    "@tiptap/vue-3": "^3.22.3",
+    "happy-dom": "^20.8.9",
+    "lucide-vue-next": "^0.469.0",
+    "pdfjs-dist": "^4.0.0",
+    "nuxt-snackbar": "^1.3.0",
+    "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@nuxt/test-utils": "^4.0.0",
+    "@nuxt/test-utils": "^4.0.2",
     "@vitest/coverage-v8": "^4.0.18",
     "@vue/test-utils": "^2.4.6",
-    "happy-dom": "^20.6.1",
     "nuxt": "^4.3.1",
     "vitest": "^4.0.18"
   }

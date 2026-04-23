@@ -8,6 +8,10 @@ import { LocationDatabaseService } from "./db.location.service";
 import { ApiKeyDatabaseService } from "./db.apiKey.service";
 import { AccountDatabaseService } from "./db.account.service";
 import { PriceDatabaseService } from "./db.price.service";
+import { PrintItemDatabaseService } from "./db.print_item.service";
+import { MediaGalleryDatabaseService } from "./media/db.media_gallery.service";
+import { MediaItemDatabaseService } from "./media/db.media_item.service";
+import { MediaCropDatabaseService } from "./media/db.media_crop.service";
 
 @Module({
   imports: [],
@@ -22,6 +26,10 @@ import { PriceDatabaseService } from "./db.price.service";
     PriceDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
+    MediaGalleryDatabaseService,
+    MediaItemDatabaseService,
+    MediaCropDatabaseService,
+    PrintItemDatabaseService,
   ],
   controllers: [],
   exports: [
@@ -35,6 +43,10 @@ import { PriceDatabaseService } from "./db.price.service";
     PriceDatabaseService,
     ApiKeyDatabaseService,
     AccountDatabaseService,
+    MediaGalleryDatabaseService,
+    MediaItemDatabaseService,
+    MediaCropDatabaseService,
+    PrintItemDatabaseService,
   ],
 })
 export class DbModule {}

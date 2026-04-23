@@ -6,23 +6,42 @@ import winstonLogger from "./logger";
  */
 @Injectable()
 export class AppLogger implements LoggerService {
+  /**
+   * Safely formats a message for the Winston logger.
+   * @param message The message we want to format.
+   * @returns The formatted message as a string.
+   */
+  private formatMessage(message: unknown): string {
+    if (typeof message === "string") {
+      return message;
+    }
+    if (message instanceof Error) {
+      return message.stack || message.message;
+    }
+    try {
+      return JSON.stringify(message);
+    } catch {
+      return String(message);
+    }
+  }
+
   log(message: any, ...optionalParams: any[]) {
-    winstonLogger.info(message, optionalParams);
+    winstonLogger.info(this.formatMessage(message), optionalParams);
   }
 
   error(message: any, trace?: string, context?: string) {
-    winstonLogger.error(message, { trace, context });
+    winstonLogger.error(this.formatMessage(message), { trace, context });
   }
 
   warn(message: any, context?: string) {
-    winstonLogger.warn(message, { context });
+    winstonLogger.warn(this.formatMessage(message), { context });
   }
 
   debug(message: any, context?: string) {
-    winstonLogger.debug(message, { context });
+    winstonLogger.debug(this.formatMessage(message), { context });
   }
 
   verbose(message: any, context?: string) {
-    winstonLogger.verbose(message, { context });
+    winstonLogger.verbose(this.formatMessage(message), { context });
   }
 }

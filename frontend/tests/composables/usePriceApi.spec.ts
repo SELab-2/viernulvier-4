@@ -1,0 +1,98 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { usePriceApi } from "../../app/composables/usePriceApi";
+
+const mockGet = vi.fn();
+const mockPost = vi.fn();
+const mockPatch = vi.fn();
+const mockDel = vi.fn();
+const mockPut = vi.fn();
+
+vi.mock("~/composables/useApi", () => ({
+  useApi: () => ({
+    get: mockGet,
+    post: mockPost,
+    patch: mockPatch,
+    put: mockPut,
+    del: mockDel,
+  }),
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+describe("usePriceApi", () => {
+  it("getAll calls GET /prices", () => {
+    const { getAll } = usePriceApi();
+    void getAll();
+    expect(mockGet).toHaveBeenCalledWith("/prices");
+  });
+
+  it("getAll appends lang query param", () => {
+    const { getAll } = usePriceApi();
+    void getAll({ languageFilters: { lang: "nl" } });
+    expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=nl"));
+  });
+
+  it("getAll appends pagination and lang together", () => {
+    const { getAll } = usePriceApi();
+    void getAll({
+      paginationFilters: { page: 0, limit: 5, descending: true },
+      languageFilters: { lang: "en" },
+    });
+    const url = mockGet.mock.calls[0][0] as string;
+    expect(url).toContain("page=0");
+    expect(url).toContain("limit=5");
+    expect(url).toContain("lang=en");
+  });
+
+  it("getById calls GET /prices/:id", () => {
+    const { getById } = usePriceApi();
+    void getById(1);
+    expect(mockGet).toHaveBeenCalledWith("/prices/1");
+  });
+
+  it("getById appends lang param", () => {
+    const { getById } = usePriceApi();
+    void getById(1, "en");
+    expect(mockGet).toHaveBeenCalledWith("/prices/1?lang=en");
+  });
+
+  it("create calls POST /prices with body", () => {
+    const { create } = usePriceApi();
+    const body = {
+      price: 10.0,
+      name: { nl: "Standaard", en: "Standard" },
+      legacy_id: null,
+    };
+    void create(body);
+    expect(mockPost).toHaveBeenCalledWith("/prices", body);
+  });
+
+  it("replace calls PUT /prices/:priceId with body", () => {
+    const { replace } = usePriceApi();
+    const body = {
+      id: 1,
+      price: 15.0,
+      name: { nl: "Aangepast", en: "Updated" },
+    };
+    void replace(1, body);
+    expect(mockPut).toHaveBeenCalledWith("/prices/1", body);
+  });
+
+  it("modify calls PATCH /prices/:priceId with body", () => {
+    const { modify } = usePriceApi();
+    const body = {
+      id: 1,
+      name: { nl: "Aangepast", en: "Updated" },
+    };
+    void modify(1, body);
+    expect(mockPatch).toHaveBeenCalledWith("/prices/1", body);
+  });
+
+  it("remove calls DELETE /prices/:id", () => {
+    const { remove } = usePriceApi();
+    void remove(1);
+    expect(mockDel).toHaveBeenCalledWith("/prices/1");
+  });
+});

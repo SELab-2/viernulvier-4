@@ -3,7 +3,7 @@
 ## 🎬 Productions
 ### [GET] `/productions`
 Retrieves all productions. Supports filtering by `tag_ids`.
-- **Returns:** Array of `Production`
+- **Returns:** `PaginatedResponse<Production | ProductionView>` a [paginated](../pagination/index.md) list of productions or production views.
 
 ### [GET] `/productions/:productionId`
 Retrieves a specific production by its ID.
@@ -23,7 +23,7 @@ Replaces an entire production object.
 ### [PATCH] `/productions/:productionId`
 Updates specific fields of an existing production.
 - **Security:** `apiKey` required.
-- **Body:** `UpdateProduction`
+- **Body:** `ModifyProduction`
 
 ### [DELETE] `/productions/:productionId`
 Permanently deletes a production.

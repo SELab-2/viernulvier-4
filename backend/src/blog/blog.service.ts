@@ -1,12 +1,15 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import {
   BlogDto,
   CreateBlogDto,
-  PaginatedBlogDto,
+  MediaGalleryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
-  UpdateBlogDto,
+  ReplaceBlogDto,
+  FilterBlogDto,
 } from "../dto/dto";
+import { GalleryType, Language, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class BlogService {
@@ -14,15 +17,20 @@ export class BlogService {
 
   /**
    * Gets all Blogs from the DatabaseService.
-   * @param paginationFilter iq the pagination params.
+   * @param paginationFilters Filters for pagination and ordering.
+   * @param blogFilters Filters for blog dates.
+   * @param language Optional pass of language.
    * @returns A list of all Blog objects.
    */
   async getAllBlogs(
-    paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedBlogDto> {
+    paginationFilters: PaginationFilterDto,
+    blogFilters: FilterBlogDto,
+    language?: Language,
+  ): Promise<PaginatedResponse<BlogDto>> {
     return await this.blogDbService.getBlogs(
-      paginationFilter.limit,
-      paginationFilter.page,
+      paginationFilters,
+      blogFilters,
+      language,
     );
   }
 
@@ -50,13 +58,8 @@ export class BlogService {
    * @param blog The Blog object we want to replace the existing Blog with.
    * @returns The newly replaced Blog.
    */
-  async replaceBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
-    if (blog.id !== id)
-      throw new BadRequestException(
-        "Blog ID and URL ID do not match. Cannot replace Blog.",
-      );
-
-    return await this.blogDbService.updateBlog(blog);
+  async replaceBlog(id: number, blog: ReplaceBlogDto): Promise<BlogDto> {
+    return await this.blogDbService.updateBlog(id, blog);
   }
 
   /**
@@ -65,9 +68,8 @@ export class BlogService {
    * @param blog The Partial Blog object we want to use to modify.
    * @returns The newly modified Blog.
    */
-  async modifyBlog(id: number, blog: UpdateBlogDto): Promise<BlogDto> {
-    blog.id = id;
-    return await this.blogDbService.updateBlog(blog);
+  async modifyBlog(id: number, blog: ModifyBlogDto): Promise<BlogDto> {
+    return await this.blogDbService.updateBlog(id, blog);
   }
 
   /**
@@ -77,5 +79,35 @@ export class BlogService {
    */
   async deleteBlog(id: number): Promise<void> {
     return await this.blogDbService.deleteBlog(id);
+  }
+
+  // -- Media -- //
+
+  /**
+   * Fetches the media related to a blog.
+   * @param blogId The ID of the blog.
+   * @param type is the type of gallery wanted.
+   * @returns The media gallery.
+   */
+  async getMedia(blogId: number, type: GalleryType): Promise<MediaGalleryDto> {
+    return await this.blogDbService.getMediaFromBlog(blogId, type);
+  }
+
+  /**
+   * Link a media gallery to a blog.
+   * @param blogId The ID of the blog.
+   * @param galleryId The ID of the Gallery.
+   */
+  async linkMediaToBlog(blogId: number, galleryId: number): Promise<void> {
+    await this.blogDbService.linkMediaToBlog(blogId, galleryId);
+  }
+
+  /**
+   * Unlink a media gallery from a blog.
+   * @param blogId The ID of the blog.
+   * @param galleryId The ID of the Gallery.
+   */
+  async unlinkMediaFromBlog(blogId: number, galleryId: number): Promise<void> {
+    await this.blogDbService.unlinkMediaFromBlog(blogId, galleryId);
   }
 }

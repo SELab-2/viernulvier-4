@@ -4,13 +4,34 @@ import {
   BlogDto,
   CreateProductionDto,
   FilterProductionDto,
-  PaginatedProductionDto,
+  MediaGalleryDto,
+  ModifyProductionDto,
+  PaginationFilterDto,
   ProductionDto,
+  ReplaceProductionDto,
   TagDto,
-  UpdateProductionDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
-import { FilterProductionSchema, SUPPORTED_LANGUAGES } from "@repo/common";
+import {
+  BlogSchema,
+  GalleryType,
+  Language,
+  MediaGallerySchema,
+  PaginatedResponse,
+  ProductionSchema,
+  SUPPORTED_LANGUAGES,
+  TagSchema,
+} from "@repo/common";
+import {
+  applyExactFilters,
+  generateInsertClause,
+  generateRelevanceClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
+import {
+  MediaNotFoundException,
+  ResourceNotFoundException,
+} from "../common/exceptions";
 
 @Injectable()
 export class ProductionDatabaseService {
@@ -22,258 +43,220 @@ export class ProductionDatabaseService {
    * @returns The production if there is one.
    */
   async getProductionById(id: number): Promise<ProductionDto> {
-    const productions: PaginatedProductionDto = await this.getProductions(
-      FilterProductionSchema.parse({ id: id }),
-    );
+    const returningClause = generateReturningClause(ProductionSchema);
 
-    const production = productions.objects;
-    if (production.length === 0)
-      throw new ResourceGoneException(
-        `No ProductionDto exists for provided ID(${id})`,
-      );
+    const query = `
+      SELECT ${returningClause}
+      FROM productions
+      WHERE id = $1;
+    `;
 
-    return production[0]; // There should be a ProductionDto in here if the length is not 0.
+    const productions = await this.db.query<ProductionDto>(query, [id]);
+
+    if (productions.length === 0)
+      throw new ResourceNotFoundException(ProductionDto, id);
+
+    return productions[0]; // There should be a ProductionDto in here if the length is not 0.
   }
 
   /**
    * Get all tags listed under a given production.
    * @param production the production we want all tags of.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * @returns a list of tags connected to the given production.
    */
-  async getTagsOfProduction(
-    production: ProductionDto,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<TagDto[]> {
-    if (amount === 0) {
-      const query = `
-      SELECT t.id,
-             t.tag,
-             t.legacy_id,
-             t.created_at,
-             t.updated_at
-      FROM tags t
-      JOIN production_tag pt ON t.id = pt.tag_id
-      WHERE pt.production_id = $1
-      `;
-
-      return await this.db.query(query, [production.id]);
-    }
-
-    const offset = page * amount;
+  async getTagsOfProduction(production: ProductionDto): Promise<TagDto[]> {
+    const tagPrefix = "t";
+    const returningClause = generateReturningClause(TagSchema, tagPrefix);
 
     const query = `
-      SELECT t.id,
-             t.tag,
-             t.created_at,
-             t.updated_at,
-             t.legacy_id
-      FROM tags t
-      JOIN production_tag pt ON t.id = pt.tag_id
-      WHERE pt.production_id = $1
-      LIMIT $2 OFFSET $3
-      `;
+      SELECT ${returningClause}
+      FROM tags ${tagPrefix}
+      JOIN production_tag pt ON ${tagPrefix}.id = pt.tag_id
+      WHERE pt.production_id = $1;
+    `;
 
-    return await this.db.query(query, [production.id, amount, offset]);
+    return await this.db.query<TagDto>(query, [production.id]);
   }
 
   /**
    * Get all blogs listed under a given production.
    * @param id the id of the production we want all blogs of.
-   * @param amount is the amount of events per page (returned)
-   * @param page is the page you want (indexed from 0)
    * @returns a list of blogs connected to the given production.
    */
-  async getBlogsOfProduction(
-    id: number,
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<BlogDto[]> {
-    if (amount === 0) {
-      const query = `
-      SELECT b.id, 
-             b.titel, 
-             b.description,
-             b.created_at,
-             b.updated_at
-      FROM blogs b
-      JOIN production_blogs pb ON b.id = pb.blog_id
-      WHERE pb.production_id = $1
-      `;
-
-      return await this.db.query(query, [id]);
-    }
-
-    const offset = page * amount;
+  async getBlogsOfProduction(id: number): Promise<BlogDto[]> {
+    const blogPrefix = "b";
+    const returningClause = generateReturningClause(BlogSchema, blogPrefix);
 
     const query = `
-      SELECT b.id,
-             b.titel,
-             b.description,
-             b.created_at,
-             b.updated_at,
-             b.legacy_id
-      FROM blogs b
-      JOIN production_blogs pb ON b.id = pb.blog_id
-      WHERE pb.production_id = $1
-      LIMIT $2 OFFSET $3
-      `;
+      SELECT ${returningClause}
+      FROM blogs ${blogPrefix}
+      JOIN production_blogs pb ON ${blogPrefix}.id = pb.blog_id
+      WHERE pb.production_id = $1;
+    `;
 
-    return await this.db.query(query, [id, amount, offset]);
+    return await this.db.query(query, [id]);
   }
 
   /**
    * Generic get function for productions.
-   * @param filters gives the freedom to define the filters of the search you want.
+   * @param productionFilters gives the freedom to define the filters of the search you want.
+   * @param paginationFilters Filters to do with pagination and ordering.
+   * @param language Optional language to use for text ordering/filtering.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
    */
   async getProductions(
-    filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto> {
+    productionFilters: FilterProductionDto,
+    paginationFilters: PaginationFilterDto,
+    language?: Language,
+  ): Promise<PaginatedResponse<ProductionDto>> {
+    const productionPrefix = "p";
+    const returningClause = generateReturningClause(
+      ProductionSchema,
+      productionPrefix,
+    );
+
     const conditions: string[] = [];
-    const values: any[] = [];
-    let i = 1;
+    const havingConditions: string[] = [];
+    const values: (string | number | number[])[] = [];
+    const param = (val: string | number | number[]) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
 
-    // Filter by location
-    // TODO: Rewrite this filter since it would not work anymore under the new location structure.
+    // Apply the filters that need exact matches first.
+    applyExactFilters(
+      productionFilters,
+      ["id", "performer_type", "attendance_mode"],
+      conditions,
+      param,
+      productionPrefix,
+    );
 
-    // Filter by event date (start or end date)
-    if (filters.date) {
-      conditions.push(`(DATE(e.starttime) = $${i} OR DATE(e.endtime) = $${i})`);
-      values.push(filters.date);
-      i++;
-    }
+    // Filter by either artist or title. The trgm extension in psql
+    if (productionFilters.titelOrArtist) {
+      const searchTerm = productionFilters.titelOrArtist;
 
-    // Filter by given date lying between starttime and endtime (inclusive)
-    if (filters.date_between) {
-      // Use explicit timestamp comparison to include time component
-      conditions.push(`$${i}::timestamp BETWEEN e.starttime AND e.endtime`);
-      values.push(filters.date_between);
-      i++;
-    }
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
 
-    // Filter events whose starttime is before the provided date
-    if (filters.date_before) {
-      conditions.push(`e.starttime < $${i}::timestamp`);
-      values.push(filters.date_before);
-      i++;
-    }
+        const titleField = `p.titel->>'${lang}'`;
+        const artistField = `p.artist->>'${lang}'`;
 
-    // Filter events whose endtime is after the provided date
-    if (filters.date_after) {
-      conditions.push(`e.endtime > $${i}::timestamp`);
-      values.push(filters.date_after);
-      i++;
-    }
+        // Changes logic whether this is a suggestion request or a full search
+        if (productionFilters.is_suggestion) {
+          // FUZZY SEARCH: Tolerates typos, powered by the trigram index.
+          const pSearch = param(searchTerm);
+          return [
+            `word_similarity(${pSearch}, ${titleField}) > 0.3`,
+            `word_similarity(${pSearch}, ${artistField}) > 0.3`,
+          ];
+        } else {
+          // Exact substring match only
+          const pSearch = param(`%${searchTerm}%`);
+          return [
+            `${titleField} ILIKE ${pSearch}`,
+            `${artistField} ILIKE ${pSearch}`,
+          ];
+        }
+      });
 
-    // Filter by titel (case-insensitive)
-    // Will look anywhere in the title field for what was searched.
-    // For all supported languages.
-    if (filters.titel) {
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.titel->>'${lang}' ILIKE $${i}`,
-      );
-
-      conditions.push(`(${titelClauses.join(" OR ")})`);
-      values.push(`%${filters.titel}%`);
-      i++;
-    }
-
-    // Will look anywhere in the artist field for what was searched.
-    // This checks all supported languages.
-    if (filters.artist) {
-      const artistClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.artist->>'${lang}' ILIKE $${i}`,
-      );
-
-      conditions.push(`(${artistClauses.join(" OR ")})`);
-      values.push(`%${filters.artist}%`);
-      i++;
-    }
-
-    // Filter by performance_type
-    if (filters.performer_type) {
-      conditions.push(`p.performer_type = $${i}`);
-      values.push(`%${filters.performer_type}%`);
-      i++;
-    }
-
-    // Filter by attendance_mode
-    if (filters.attendance_mode) {
-      conditions.push(`p.attendance_mode = $${i}`);
-      values.push(`%${filters.attendance_mode}%`);
-      i++;
-    }
-
-    // Filter by id
-    if (filters.id) {
-      conditions.push(`p.id = $${i}`);
-      values.push(filters.id);
-      i++;
+      // Push them as a single string wrapped in parentheses, joined by OR
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
-    if (filters.tag_ids && filters.tag_ids.length > 0) {
+    // Filter by tag id (Must have AT LEAST ONE tag - "OR" logic)
+    if (
+      productionFilters.tag_ids?.length !== undefined &&
+      productionFilters.tag_ids?.length > 0
+    ) {
       conditions.push(`
         p.id IN (
           SELECT production_id 
           FROM production_tag 
-          WHERE tag_id = ANY($${i}::int[])
-          GROUP BY production_id 
-          HAVING COUNT(DISTINCT tag_id) = ${filters.tag_ids.length}
+          WHERE tag_id = ANY(${param(productionFilters.tag_ids)}::int[])
         )
       `);
-      values.push(filters.tag_ids);
-      i++;
+    }
+
+    // HAVING filters.
+
+    // Filter events whose starttime is before the provided date
+    if (productionFilters.after) {
+      havingConditions.push(
+        `MIN(e.starttime) >= ${param(productionFilters.after)}::date`,
+      );
+    }
+
+    // Filter events whose endtime is after the provided date
+    if (productionFilters.before) {
+      havingConditions.push(
+        // Note: We add one day here to include the day itself too without having to cast the column.
+        `MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day'`,
+      );
     }
 
     // add more filters here if needed.
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const havingClause =
+      havingConditions.length > 0
+        ? `HAVING ${havingConditions.join(" AND ")}`
+        : "";
 
     // count query uses same filters but no pagination
     const filterValues = [...values];
     const countQuery = `
-    SELECT COUNT(DISTINCT p.id) as count
-    FROM productions p
-      LEFT JOIN events e ON e.production_id = p.id
-    ${whereClause}
-  `;
+      SELECT COUNT(*) as count
+      FROM (
+        SELECT p.id
+        FROM productions p
+          LEFT JOIN events e ON e.production_id = p.id
+        ${whereClause}
+        GROUP BY p.id
+        ${havingClause}
+      ) AS matched_productions;
+    `;
 
-    let paginationClause = "";
-    if (filters.limit > 0) {
-      const offset = filters.page * filters.limit;
-      paginationClause = `LIMIT $${i} OFFSET $${i + 1}`;
-      values.push(filters.limit);
-      values.push(offset);
-      i += 2;
+    // Apply pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
+    // Ordering (relevance vs date)
+    let orderClause = "";
+    if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
+      const relevanceMath = generateRelevanceClause(
+        productionFilters.titelOrArtist,
+        [
+          { name: `${productionPrefix}.titel` },
+          { name: `${productionPrefix}.artist` },
+        ],
+        param,
+        language,
+      );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
+    } else {
+      orderClause = `ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST`;
     }
 
+    // The Ordered by the first held event of the production.
     const query = `
-    SELECT DISTINCT
-      p.id,
-      p.titel,
-      p.description1,
-      p.description2,
-      p.artist,
-      p.tagline,
-      p.credits,
-      p.created_at,
-      p.updated_at,
-      p.legacy_id,
-      p.performer_type,
-      p.attendance_mode
-    FROM productions p
-      LEFT JOIN events e ON e.production_id = p.id
-    ${whereClause}
-    ORDER BY p.id
-    ${paginationClause}
-  `;
+      SELECT ${returningClause}
+      FROM productions ${productionPrefix}
+        LEFT JOIN events e ON e.production_id = ${productionPrefix}.id
+      ${whereClause}
+      GROUP BY
+        ${productionPrefix}.id
+      ${havingClause}
+      ${orderClause}
+      ${paginationClause};
+    `;
 
     const [objects, countResult] = await Promise.all([
       this.db.query<ProductionDto>(query, values),
@@ -281,8 +264,8 @@ export class ProductionDatabaseService {
     ]);
 
     return {
-      page: filters.page,
-      limit: filters.limit,
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
       objects,
     };
@@ -297,49 +280,14 @@ export class ProductionDatabaseService {
   async createProduction(
     production: CreateProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.titel) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(production);
+    const returningClause = generateReturningClause(ProductionSchema);
 
     const query = `
-      INSERT INTO productions (
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          legacy_id,
-          performer_type,
-          attendance_mode
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      RETURNING
-          id,
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          created_at,
-          updated_at,
-          legacy_id,
-          performer_type,
-          attendance_mode;
-      `;
-
-    const values = [
-      production.titel,
-      production.description1,
-      production.description2,
-      production.artist,
-      production.tagline,
-      production.credits,
-      production.legacy_id,
-      production.performer_type,
-      production.attendance_mode,
-    ];
+      INSERT INTO productions (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
+    `;
 
     const result = await this.db.query<ProductionDto>(query, values);
 
@@ -351,151 +299,37 @@ export class ProductionDatabaseService {
   }
 
   /**
-   * UNSAFE version of createProduction. Will override if a Production
-   * already exists with the same ID.
-   * @param production The production object that we want to insert.
-   * @returns That same production object but returned from the Database.
-   */
-  async upsertProduction(production: ProductionDto): Promise<ProductionDto> {
-    const query = `
-      INSERT INTO productions (
-        titel,
-        description1,
-        description2,
-        artist,
-        tagline,
-        credits,
-        legacy_id,
-        performer_type,
-        attendance_mode
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-      ON CONFLICT (id)
-      DO UPDATE SET
-        titel = EXCLUDED.titel,
-        description1 = EXCLUDED.description1,
-        description2 = EXCLUDED.description2,
-        artist = EXCLUDED.artist,
-        tagline = EXCLUDED.tagline,
-        credits = EXCLUDED.credits,
-        legacy_id = EXCLUDED.legacy_id,
-        performer_type = EXCLUDED.performer_type,
-        attendance_mode = EXCLUDED.attendance_mode
-        RETURNING
-          id,
-          titel,
-          description1,
-          description2,
-          artist,
-          tagline,
-          credits,
-          created_at,
-          updated_at,
-          legacy_id,
-          performer_type,
-          attendance_mode
-      `;
-
-    const values = [
-      production.titel,
-      production.description1,
-      production.description2,
-      production.artist,
-      production.tagline,
-      production.credits,
-      production.legacy_id ?? null,
-      production.performer_type ?? null,
-      production.attendance_mode ?? null,
-    ];
-
-    const result = await this.db.query<ProductionDto>(query, values);
-
-    if (!result.length) {
-      throw new Error("Failed to insert Production.");
-    }
-
-    return result[0];
-  }
-
-  /**
    * Update function for productions. Updates the production in the database.
    * note: this function can be used to update/add all of a certain language to a prod.
-   * @param production must be of the type "UpdateProduction", gives the freedom to define only what needs to be updated.
+   * @param productionId The ID of the production to update.
+   * @param production must be of the type "ModifyProduction" or "ReplaceProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
    */
   async updateProduction(
-    production: UpdateProductionDto,
+    productionId: number,
+    production: ModifyProductionDto | ReplaceProductionDto,
   ): Promise<ProductionDto> {
-    if (!production.id) {
-      throw new BadRequestException("Production id is required for update");
+    const { setClause, values, nextIndex } = generateUpdateClause(production);
+    const returningClause = generateReturningClause(ProductionSchema);
+
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
+    values.push(productionId);
 
-    const jsonbColumns = [
-      "titel",
-      "description1",
-      "description2",
-      "artist",
-      "tagline",
-      "credits",
-    ] as const;
-    for (const column of jsonbColumns) {
-      if (production[column] !== undefined) {
-        fields.push(
-          `${column} = COALESCE(${column}, '{}'::jsonb) || $${index++}::jsonb`,
-        );
-
-        values.push(JSON.stringify(production[column]));
-      }
-    }
-
-    if (production.legacy_id !== undefined) {
-      fields.push(`legacy_id = $${index++}`);
-      values.push(production.legacy_id);
-    }
-
-    if (production.performer_type !== undefined) {
-      fields.push(`performer_type = $${index++}`);
-      values.push(production.performer_type);
-    }
-
-    if (production.attendance_mode !== undefined) {
-      fields.push(`attendance_mode = $${index++}`);
-      values.push(production.attendance_mode);
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
-    }
-
-    values.push(production.id);
     const query = `
       UPDATE productions
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-      RETURNING
-        id,
-        titel,
-        description1,
-        description2,
-        artist,
-        tagline,
-        credits,
-        created_at,
-        updated_at,
-        legacy_id,
-        performer_type,
-        attendance_mode;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
     `;
 
     const result = await this.db.query<ProductionDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException("Production not found");
+      throw new ResourceNotFoundException(ProductionDto, productionId);
     }
 
     return result[0];
@@ -533,12 +367,9 @@ export class ProductionDatabaseService {
         AND production_blogs.production_id = $2
         RETURNING *;
     `;
-    const result = await this.db.query(query, [blog_id, production_id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        "Cannot delete: Blog-Production link not found",
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [blog_id, production_id]);
   }
 
   /**
@@ -596,11 +427,77 @@ export class ProductionDatabaseService {
         AND production_tag.production_id = $2
       RETURNING *;
     `;
-    const result = await this.db.query(query, [tag_id, production_id]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        "Cannot delete: Tag-Production link not found",
-      );
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [tag_id, production_id]);
+  }
+
+  /**
+   * Gets media gallery linked to a given production.
+   * @param prod_id The ID of the production you want.
+   * @param type is the type of media you want.
+   * @returns The MediaGallery if it exists.
+   */
+  async getMediaFromProduction(
+    prod_id: number,
+    type: GalleryType,
+  ): Promise<MediaGalleryDto> {
+    const galleryPrefix = "mg";
+    const returningClause = generateReturningClause(
+      MediaGallerySchema,
+      galleryPrefix,
+    );
+
+    const query = `
+      SELECT ${returningClause}
+      FROM media_gallery ${galleryPrefix}
+      INNER JOIN production_media_gallery pmg ON pmg.gallery_id = ${galleryPrefix}.id
+      WHERE pmg.production_id = $1 AND ${galleryPrefix}.type = $2
+      ORDER BY ${galleryPrefix}.id
+      LIMIT 1;
+    `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, [prod_id, type]);
+
+    if (result.length === 0) {
+      throw new MediaNotFoundException(ProductionDto, type, prod_id);
     }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given production.
+   * @param prod_id The ID of the production to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   */
+  async linkMediaToProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    INSERT INTO production_media_gallery (production_id, gallery_id)
+    VALUES ($1, $2)
+    ON CONFLICT DO NOTHING
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given production.
+   * @param prod_id The ID of the production.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromProduction(
+    prod_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+    DELETE FROM production_media_gallery
+    WHERE production_id = $1 AND gallery_id = $2
+  `;
+
+    await this.db.query(query, [prod_id, gallery_id]);
   }
 }

@@ -8,7 +8,8 @@ import {
   PaginationFilterDto,
   PriceDto,
   PriceViewDto,
-  UpdatePriceDto,
+  ModifyPriceDto,
+  ReplacePriceDto,
 } from "../dto/dto";
 import { ApiKeyGuard } from "../auth/authGuard";
 
@@ -22,7 +23,8 @@ describe("PriceController", () => {
     getPrices: jest.fn(),
     getPriceById: jest.fn(),
     createPrice: jest.fn(),
-    updatePrice: jest.fn(),
+    modifyPrice: jest.fn(),
+    replacePrice: jest.fn(),
     deletePrice: jest.fn(),
   };
 
@@ -40,7 +42,6 @@ describe("PriceController", () => {
     },
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: null,
   };
 
   // What the LanguageService will output
@@ -50,7 +51,6 @@ describe("PriceController", () => {
     name: "Standard",
     created_at: "2024-01-15T19:00:00Z",
     updated_at: "2024-01-15T19:00:00Z",
-    legacy_id: null,
   };
 
   beforeEach(async () => {
@@ -127,7 +127,6 @@ describe("PriceController", () => {
       const createDto: CreatePriceDto = {
         price: 20.0,
         name: { en: "Standard", nl: "Standaard" },
-        legacy_id: null,
       };
       mockPriceService.createPrice.mockResolvedValue(mockPrice);
 
@@ -138,18 +137,43 @@ describe("PriceController", () => {
     });
   });
 
-  describe("updatePrice", () => {
-    it("should call updatePrice on the service and return the updated price", async () => {
-      const updateDto: UpdatePriceDto = {
-        id: 1,
+  describe("replacePrice", () => {
+    it("should call replacePrice on the service and return the updated price", async () => {
+      const updateDto: ReplacePriceDto = {
+        price: 25.0,
+        name: {
+          en: "test",
+          nl: "test",
+        },
+      };
+      const updatedPrice = {
+        ...mockPrice,
+        price: 25.0,
+        name: {
+          en: "test",
+          nl: "test",
+        },
+      };
+      mockPriceService.replacePrice.mockResolvedValue(updatedPrice);
+
+      const result = await controller.replacePrice(1, updateDto);
+
+      expect(service.replacePrice).toHaveBeenCalledWith(1, updateDto);
+      expect(result).toEqual(updatedPrice);
+    });
+  });
+
+  describe("modifyPrice", () => {
+    it("should call modifyPrice on the service and return the updated price", async () => {
+      const updateDto: ModifyPriceDto = {
         price: 25.0,
       };
       const updatedPrice = { ...mockPrice, price: 25.0 };
-      mockPriceService.updatePrice.mockResolvedValue(updatedPrice);
+      mockPriceService.modifyPrice.mockResolvedValue(updatedPrice);
 
-      const result = await controller.updatePrice(updateDto);
+      const result = await controller.modifyPrice(1, updateDto);
 
-      expect(service.updatePrice).toHaveBeenCalledWith(updateDto);
+      expect(service.modifyPrice).toHaveBeenCalledWith(1, updateDto);
       expect(result).toEqual(updatedPrice);
     });
   });

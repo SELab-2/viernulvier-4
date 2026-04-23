@@ -2,11 +2,12 @@ import { Injectable } from "@nestjs/common";
 import { PriceDatabaseService } from "../database/db.price.service";
 import {
   CreatePriceDto,
-  PaginatedPriceDto,
   PaginationFilterDto,
   PriceDto,
-  UpdatePriceDto,
+  ModifyPriceDto,
+  ReplacePriceDto,
 } from "../dto/dto";
+import { PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class PriceService {
@@ -27,11 +28,8 @@ export class PriceService {
    */
   async getPrices(
     paginationFilter: PaginationFilterDto,
-  ): Promise<PaginatedPriceDto> {
-    return await this.priceDbService.getPrices(
-      paginationFilter.limit,
-      paginationFilter.page,
-    );
+  ): Promise<PaginatedResponse<PriceDto>> {
+    return await this.priceDbService.getPrices(paginationFilter);
   }
 
   /**
@@ -44,12 +42,29 @@ export class PriceService {
   }
 
   /**
+   * Replaces an existing Price in the database.
+   * @param priceId The ID of the price.
+   * @param replacePrice The object to replace the price with.
+   * @returns The newly replaced object.
+   */
+  async replacePrice(
+    priceId: number,
+    replacePrice: ReplacePriceDto,
+  ): Promise<PriceDto> {
+    return await this.priceDbService.updatePrice(priceId, replacePrice);
+  }
+
+  /**
    * Updates an existing Price in the database.
-   * @param updatePrice The needed values to update the Price.
+   * @param priceId The ID of the price.
+   * @param modifyPrice The needed values to update the Price.
    * @returns The newly updated Price object.
    */
-  async updatePrice(updatePrice: UpdatePriceDto): Promise<PriceDto> {
-    return await this.priceDbService.updatePrice(updatePrice);
+  async modifyPrice(
+    priceId: number,
+    modifyPrice: ModifyPriceDto,
+  ): Promise<PriceDto> {
+    return await this.priceDbService.updatePrice(priceId, modifyPrice);
   }
 
   /**

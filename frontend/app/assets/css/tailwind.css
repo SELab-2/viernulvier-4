@@ -1,0 +1,905 @@
+/**
+ * tailwind.css
+ *
+ * Global stylesheet for the VIERNULVIER archive frontend.
+ *
+ * This file is responsible for:
+ * - Importing Tailwind CSS
+ * - Registering the dark mode variant (class-based via `.dark` on <html>)
+ * - Loading the ABCMonumentGrotesk brand font (Heavy + Regular weights)
+ * - Defining CSS custom properties (design tokens) for both light and dark mode
+ * - Exposing those tokens to Tailwind via @theme inline
+ * - Applying base styles to body and html
+ * - Defining the .dropcap utility used in article/about section intros
+ * - Defining the .font-brand utility class for the brand font
+ *
+ * Font files are stored in /public/fonts/.
+ * Dark mode is toggled by adding/removing the `dark` class on <html>.
+ */
+
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ABCMonumentGrotesk — the official VIERNULVIER brand font.
+   Font files live in /public/fonts/ */
+@font-face {
+  font-family: "ABCMonumentGrotesk";
+  src: url("/fonts/ABCMonumentGrotesk-Heavy.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ABCMonumentGrotesk";
+  src: url("/fonts/ABCMonumentGrotesk-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Design tokens: light mode ────────────────────────────────────────────── */
+:root {
+  --font-size: 16px;
+
+  /* Base */
+  --background: #ffffff;
+  --foreground: #0f172a;
+
+  /* Primary */
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+
+  /* Muted / subtle UI */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  /* Borders */
+  --border: #e2e8f0;
+
+  /* Focus ring (accent-tinted) */
+  --ring: rgba(130, 36, 227, 0.35);
+
+  --radius: 0.625rem;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* accent  */
+  --accent: #8224e3;
+  --accent-hover: #6d1fcc;
+  --accent-light: #f3e8ff;
+  --accent-foreground: #ffffff;
+
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --card-border: #e2e8f0;
+  --card-hover: #f8fafc;
+
+  /* Colours used in the gradient placeholder */
+  --thumbnail-bg: #ffffff;
+  --thumbnail-icon: #ffffff;
+
+  /* Blog timeline — purple accent */
+  --blog-purple-strong: #534ab7;
+  --blog-purple-mid: #7f77dd;
+  --blog-purple-soft: #afa9ec;
+  --blog-purple-pale: #cecbf6;
+  --blog-purple-ghost: #eeedfe;
+  --blog-year-rule: #7f77dd;
+  --blog-month-dot: #afa9ec;
+  --blog-accent: #534ab7;
+  --blog-accent-text: #3c3489;
+
+  /* Admin action buttons */
+  --action-blue-border: #bfdbfe;
+  --action-blue-icon: #2563eb;
+  --action-blue-hover: #eff6ff;
+
+  --action-red-border: #fecaca;
+  --action-red-icon: #dc2626;
+  --action-red-hover: #fef2f2;
+  --action-red-text-hover: #991b1b;
+
+  --action-green-border: #bbf7d0;
+  --action-green-icon: #16a34a;
+  --action-green-hover: #f0fdf4;
+
+  --action-gray-border: #d1d5db;
+  --action-gray-icon: #4b5563;
+  --action-gray-hover: #f9fafb;
+
+  /* Generic feedback messages */
+  --feedback-error-border: #fecaca;
+  --feedback-error-bg: #fef2f2;
+  --feedback-error-text: #b91c1c;
+
+  --feedback-success-border: #bbf7d0;
+  --feedback-success-bg: #f0fdf4;
+  --feedback-success-text: #15803d;
+}
+
+/* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
+.dark {
+  /* Base */
+  --background: #0b0f19;
+  --foreground: #e5e7eb;
+
+  /* Primary */
+  --primary: #e5e7eb;
+  --primary-foreground: #0b0f19;
+
+  /* Muted surfaces */
+  --muted: #111827;
+  --muted-foreground: #9ca3af;
+
+  /* Borders */
+  --border: #1f2937;
+
+  /* Focus ring (accent-tinted) */
+  --ring: rgba(130, 36, 227, 0.4);
+
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  /* Accent */
+  --accent: #8224e3;
+  --accent-hover: #9333ea;
+  --accent-light: #1f0f3d;
+  --accent-foreground: #ffffff;
+
+  /* Card */
+  --card: #111827;
+  --card-foreground: #e5e7eb;
+  --card-border: #1f2937;
+  --card-hover: #1a2333;
+
+  /* Thumbnail / placeholders */
+  --thumbnail-bg: #1f2937;
+  --thumbnail-icon: #6b7280;
+
+  /* Blog timeline — purple accent, lighter for dark bg */
+  --blog-purple-strong: #7f77dd;
+  --blog-purple-mid: #afa9ec;
+  --blog-purple-soft: #534ab7;
+  --blog-purple-pale: #3c3489;
+  --blog-purple-ghost: #26215c;
+  --blog-year-rule: #afa9ec;
+  --blog-month-dot: #7f77dd;
+  --blog-accent: #afa9ec;
+  --blog-accent-text: #cecbf6;
+
+  /* Admin action buttons */
+  --action-blue-border: #1d4ed8;
+  --action-blue-icon: #93c5fd;
+  --action-blue-hover: #1e3a8a;
+
+  --action-red-border: #b91c1c;
+  --action-red-icon: #fca5a5;
+  --action-red-hover: #7f1d1d;
+  --action-red-text-hover: #fecdd3;
+
+  --action-green-border: #15803d;
+  --action-green-icon: #86efac;
+  --action-green-hover: #14532d;
+
+  --action-gray-border: #4b5563;
+  --action-gray-icon: #d1d5db;
+  --action-gray-hover: #1f2937;
+
+  /* Generic feedback messages */
+  --feedback-error-border: #7f1d1d;
+  --feedback-error-bg: #450a0a;
+  --feedback-error-text: #fca5a5;
+
+  --feedback-success-border: #14532d;
+  --feedback-success-bg: #052e16;
+  --feedback-success-text: #86efac;
+}
+
+/* ── Tailwind theme mapping ──────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
+  --color-accent: var(--accent);
+  --accent-hover: var(--accent-hover);
+  --accent-light: var(--accent-light);
+  --accent-foreground: var(--accent-foreground);
+  --color-thumbnail-bg: var(--thumbnail-bg);
+  --color-thumbnail-icon: var(--thumbnail-icon);
+  --color-action-blue-border: var(--action-blue-border);
+  --color-action-blue-icon: var(--action-blue-icon);
+  --color-action-blue-hover: var(--action-blue-hover);
+  --color-action-red-border: var(--action-red-border);
+  --color-action-red-icon: var(--action-red-icon);
+  --color-action-red-hover: var(--action-red-hover);
+  --color-action-red-text-hover: var(--action-red-text-hover);
+  --color-action-green-border: var(--action-green-border);
+  --color-action-green-icon: var(--action-green-icon);
+  --color-action-green-hover: var(--action-green-hover);
+  --color-action-gray-border: var(--action-gray-border);
+  --color-action-gray-icon: var(--action-gray-icon);
+  --color-action-gray-hover: var(--action-gray-hover);
+  --color-feedback-error-border: var(--feedback-error-border);
+  --color-feedback-error-bg: var(--feedback-error-bg);
+  --color-feedback-error-text: var(--feedback-error-text);
+  --color-feedback-success-border: var(--feedback-success-border);
+  --color-feedback-success-bg: var(--feedback-success-bg);
+  --color-feedback-success-text: var(--feedback-success-text);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-brand: "ABCMonumentGrotesk", sans-serif;
+}
+
+/* ── Base ────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    font-size: var(--font-size);
+  }
+}
+
+/* ── Utilities ───────────────────────────────────────────────────── */
+.font-brand {
+  font-family: "ABCMonumentGrotesk", sans-serif;
+}
+
+.dropcap::first-letter {
+  float: left;
+  font-size: 4.5rem;
+  line-height: 0.75;
+  font-weight: 700;
+  margin-right: 0.5rem;
+  margin-top: -0.6rem;
+}
+
+/* ── Story card dark-mode surfaces ───────────────────────────────── */
+.story-card {
+  background-color: var(--story-card);
+  border-color: var(--story-card-border);
+}
+.story-card:hover {
+  background-color: var(--story-card-hover);
+}
+
+/* Snackbar colors aligned with existing feedback popup tokens */
+#vue3-snackbar--container .vue3-snackbar-message.success {
+  background-color: var(--feedback-success-bg);
+  border: 1px solid var(--feedback-success-border);
+  color: var(--feedback-success-text);
+}
+
+#vue3-snackbar--container .vue3-snackbar-message.error {
+  background-color: var(--feedback-error-bg);
+  border: 1px solid var(--feedback-error-border);
+  color: var(--feedback-error-text);
+}
+
+/* ── Blog timeline ───────────────────────────────────────────────── */
+
+/* Year section separator */
+.blog-year-section + .blog-year-section {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Year heading row */
+.blog-year-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.blog-year-accent {
+  width: 4px;
+  height: 2rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--blog-purple-strong),
+    var(--blog-purple-soft)
+  );
+}
+
+.blog-year-label {
+  font-size: 2.25rem;
+  font-weight: 900;
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--blog-accent-text);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.blog-year-label:hover {
+  opacity: 0.65;
+}
+
+.blog-year-badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+
+.blog-year-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--blog-purple-pale);
+  opacity: 0.5;
+}
+
+/* Month heading row */
+.blog-month-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.blog-month-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  background: var(--blog-month-dot);
+}
+
+.blog-month-label {
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blog-year-rule);
+  flex-shrink: 0;
+}
+
+.blog-month-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--blog-purple-ghost);
+}
+
+.blog-month-count {
+  font-size: 8px;
+  font-weight: 900;
+  color: var(--blog-purple-soft);
+}
+
+/* Story card group */
+.blog-story-group {
+  border: 1px solid var(--blog-purple-ghost);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.blog-story-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--blog-purple-ghost);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: background-color 0.1s;
+}
+.blog-story-btn:last-child {
+  border-bottom: none;
+}
+.blog-story-btn:hover {
+  background-color: var(--card-hover);
+}
+.blog-story-btn:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--blog-purple-strong);
+}
+
+/* Month group spacing */
+.blog-month-group + .blog-month-group {
+  margin-top: 2rem;
+}
+
+/* ── Mobile year pills ───────────────────────────────────────────── */
+
+.blog-mobile-pill {
+  flex-shrink: 0;
+  height: 1.75rem;
+  padding: 0 0.75rem;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.blog-mobile-pill:hover {
+  border-color: var(--blog-purple-mid);
+  color: var(--blog-purple-mid);
+}
+.blog-mobile-pill--active {
+  background: var(--blog-purple-strong);
+  border-color: var(--blog-purple-strong);
+  color: #ffffff;
+}
+
+/* ── Blog page background ────────────────────────────────────────── */
+.blog-page {
+  background: var(--background);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .blog-year-label {
+    font-size: 1.75rem;
+  }
+  .blog-month-label {
+    font-size: 8px;
+  }
+}
+
+/* ─── Shared Components ─────────────────────────────────────────────────────
+   Reusable UI elements for the application.
+   Ensures consistent button styles across different sections.
+   ---------------------------------------------------------------------- */
+
+@layer components {
+  /* Standard outlined button (used in Header, filters, etc.) */
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border-2 border-[var(--foreground)] bg-transparent px-[21px] py-[7px] text-[11px] font-black text-[var(--foreground)] transition-all uppercase cursor-pointer outline-none;
+  }
+
+  .btn-outline:hover {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  /* Red button for critical actions (e.g., Logout) */
+  .btn-danger {
+    @apply flex items-center gap-2 rounded-md bg-rose-600 border-2 border-rose-600 px-4 py-2 text-[11px] font-black text-white transition-colors uppercase cursor-pointer;
+  }
+
+  .btn-danger:hover {
+    @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20;
+  }
+
+  .page-header-title {
+    @apply font-brand font-black text-4xl sm:text-6xl uppercase tracking-tighter leading-none text-foreground mb-3;
+  }
+
+  .page-header-subtitle {
+    @apply mt-4 max-w-xl;
+    @apply font-brand font-black text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground;
+  }
+}
+/* ── Calendar component ──────────────────────────────────────────────────────
+   Used by components/calendar.vue + components/calendar/*.vue
+   Tokens used: --border, --card, --muted, --muted-foreground, --foreground,
+                --blog-purple-{strong,mid,soft,pale,ghost}, --blog-accent-text
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.cal-root {
+  width: 100%;
+  max-width: 680px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  overflow: hidden;
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+}
+
+/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+
+.cal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.cal-tab {
+  flex: 1;
+  padding: 0.55rem 0.5rem;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.cal-tab:last-child {
+  border-right: none;
+}
+.cal-tab:hover {
+  color: var(--foreground);
+  background: var(--muted);
+}
+.cal-tab--active {
+  color: var(--blog-purple-strong);
+  background: var(--blog-purple-ghost);
+  border-bottom: 2px solid var(--blog-purple-strong);
+  margin-bottom: -1px;
+}
+
+/* ── Manual inputs row ─────────────────────────────────────────────────────── */
+
+.cal-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+  flex-wrap: wrap;
+}
+
+.cal-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 120px;
+}
+
+.cal-input-label {
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cal-input-hint {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.65;
+}
+
+.cal-input-row {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.cal-input {
+  flex: 1;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 400;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.cal-input:focus {
+  border-color: var(--blog-purple-strong);
+}
+.cal-input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+.cal-input-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--blog-purple-strong);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.cal-input-btn:hover {
+  background: var(--blog-purple-mid);
+}
+
+.cal-input-sep {
+  font-size: 14px;
+  color: var(--blog-purple-soft);
+  padding-bottom: 0.3rem;
+  flex-shrink: 0;
+  align-self: flex-end;
+}
+
+/* Shared badge (today / oldest) */
+.cal-badge {
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+  border: 1px solid var(--blog-purple-pale);
+  width: fit-content;
+}
+
+/* ── Two-month grid wrapper ────────────────────────────────────────────────── */
+
+.cal-months {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 1rem 2.5rem;
+}
+
+/* Prev / next navigation arrows */
+.cal-nav {
+  position: absolute;
+  top: 1.1rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+.cal-nav:hover {
+  border-color: var(--blog-purple-strong);
+  color: var(--blog-purple-strong);
+}
+.cal-nav--prev {
+  left: 0.5rem;
+}
+.cal-nav--next {
+  right: 0.5rem;
+}
+
+/* ── Single month panel (CalendarGrid) ─────────────────────────────────────── */
+
+.cal-month {
+  padding: 0 0.5rem;
+}
+.cal-month--right {
+  border-left: 1px solid var(--border);
+  padding-left: 1rem;
+}
+
+.cal-month-label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blog-accent-text);
+  margin-bottom: 0.75rem;
+}
+
+/* Weekday header row */
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.25rem;
+}
+.cal-wd {
+  font-size: 8px;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+  padding: 0.2rem 0;
+}
+
+/* Day grid */
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background 0.1s,
+    color 0.1s;
+  font-family: inherit;
+  outline: none;
+  padding: 0;
+}
+
+.cal-cell--empty {
+  pointer-events: none;
+}
+
+.cal-cell--day:hover:not(:disabled):not(.cal-cell--selected):not(
+    .cal-cell--in-range
+  ) {
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+}
+
+/* Today dot */
+.cal-cell--today::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--blog-purple-strong);
+}
+
+.cal-cell--future {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* Range fill */
+.cal-cell--in-range {
+  background: var(--blog-purple-ghost);
+  color: var(--blog-purple-strong);
+  border-radius: 0;
+}
+
+/* Endpoints share the same solid fill; border-radius differs */
+.cal-cell--range-start,
+.cal-cell--range-end,
+.cal-cell--selected {
+  background: var(--blog-purple-strong) !important;
+  color: #fff !important;
+}
+.cal-cell--range-start {
+  border-radius: 4px 0 0 4px;
+}
+.cal-cell--range-end {
+  border-radius: 0 4px 4px 0;
+}
+.cal-cell--selected {
+  border-radius: 4px !important;
+}
+
+/* Single-day range: both endpoints are the same cell */
+.cal-cell--range-start.cal-cell--range-end {
+  border-radius: 4px !important;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+
+.cal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--muted);
+}
+
+.cal-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  font-family: inherit;
+}
+
+.cal-summary-icon {
+  color: var(--blog-purple-strong);
+  flex-shrink: 0;
+}
+
+.cal-clear {
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1.5px solid var(--foreground);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.15s ease-in-out;
+}
+
+.cal-clear:hover {
+  background-color: var(--foreground);
+  color: var(--background);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cal-clear:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.cal-cell--range-cap-left {
+  border-radius: 4px 0 0 4px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 540px) {
+  .cal-months {
+    grid-template-columns: 1fr;
+    padding: 1rem 2rem;
+  }
+  .cal-month--right {
+    display: none;
+  }
+}

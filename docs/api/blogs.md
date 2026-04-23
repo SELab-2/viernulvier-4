@@ -1,7 +1,7 @@
 # Blogs API
 
 ### [GET] `/blogs`
-- **Returns:** Array of `BlogDto`
+- **Returns:** `PaginatedResponse<Blog | BlogView>` a [paginated](../pagination/index.md) list of blogs or blog views.
 
 ### [GET] `/blogs/:blogId`
 - **Returns:** `BlogDto`
@@ -10,10 +10,10 @@
 - **Security:** `apiKey` required | **Body:** `CreateBlogDto`
 
 ### [PUT] `/blogs/:blogId`
-- **Security:** `apiKey` required | **Body:** `UpdateBlogDto`
+- **Security:** `apiKey` required | **Body:** `ModifyBlogDto`
 
 ### [PATCH] `/blogs/:blogId`
-- **Security:** `apiKey` required | **Body:** `UpdateBlogDto`
+- **Security:** `apiKey` required | **Body:** `ModifyBlogDto`
 
 ### [DELETE] `/blogs/:blogId`
 - **Security:** `apiKey` required

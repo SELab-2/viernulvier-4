@@ -1,7 +1,10 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "tasks": {
-    "scraper:reset": {},
+    "format": {},
+    "lint": {},
+    "scraper:inject:structured:test": {},
+    "db:reset": {},
     "build": {
       "outputs": ["dist/**"]
     },
@@ -20,6 +23,8 @@
     "test": {
       "outputs": [],
       "inputs": [
+        "app/**",
+        "tests/**",
         "src/**",
         "test/**",
         "vitest.config.ts",
@@ -31,6 +36,8 @@
     "test:coverage": {
       "outputs": [],
       "inputs": [
+        "app/**",
+        "tests/**",
         "src/**",
         "test/**",
         "vitest.config.ts",

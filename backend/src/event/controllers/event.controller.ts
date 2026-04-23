@@ -13,20 +13,22 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import EventService from "../event.service";
-import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateEventSchema,
-  EventSchema,
   FilterEventSchema,
-  UpdateEventSchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+  ReplaceEventSchema,
+  ModifyEventSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
-  PaginatedEventDto,
-  UpdateEventDto,
+  PaginationFilterDto,
+  ReplaceEventDto,
+  ModifyEventDto,
 } from "../../dto/dto";
 import {
   ApiBody,
@@ -34,6 +36,8 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
+import { ApiOkPaginatedResponseAnyOf } from "../../common/decorators/api.ok";
+import { ZodValidationPipe } from "nestjs-zod";
 
 @Controller("events")
 export class EventController {
@@ -42,21 +46,23 @@ export class EventController {
   /**
    * Responds to GET /events
    * note: pagination is done via the filters param.
-   * @param filters The filters that should be applied to the query.
+   * @param eventFilters The filters that should be applied to the query.
+   * @param paginationFilters Filters for pagination and ordering.
    * @returns All EventDto objects.
    */
   @ApiOperation({ summary: "Returns all Event objects." })
-  @ApiOkResponse({
-    type: EventDto,
-    isArray: true,
-    description: "All Events returned.",
-  })
+  @ApiOkPaginatedResponseAnyOf(EventDto)
   @Get()
-  @UsePipes(new ZodValidationPipe(FilterEventSchema))
   async getAllEvents(
-    @Query() filters: FilterEventDto,
-  ): Promise<PaginatedEventDto> {
-    return await this.eventService.getAllEvents(filters);
+    @Query(new ZodValidationPipe(FilterEventSchema))
+    eventFilters: FilterEventDto,
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<EventDto>> {
+    return await this.eventService.getAllEvents(
+      eventFilters,
+      paginationFilters,
+    );
   }
 
   /**
@@ -76,18 +82,18 @@ export class EventController {
   /**
    * Responds to a PUT to "/events/:eventId".
    * @param eventId ID in the URL of the request.
-   * @param event The parsed EventDto object.
+   * @param event The parsed ReplaceEvent object.
    * @returns The updated EventDto object.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Replaces an existing Event." })
-  @ApiBody({ type: EventDto })
+  @ApiBody({ type: ReplaceEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event replaced." })
   @Put(":eventId")
   async replaceEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
-    @Body(new ZodValidationPipe(EventSchema)) event: EventDto,
+    @Body(new ZodValidationPipe(ReplaceEventSchema)) event: ReplaceEventDto,
   ): Promise<EventDto> {
     return await this.eventService.replaceEvent(eventId, event);
   }
@@ -101,12 +107,12 @@ export class EventController {
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Event." })
-  @ApiBody({ type: UpdateEventDto })
+  @ApiBody({ type: ModifyEventDto })
   @ApiOkResponse({ type: EventDto, description: "Event modified." })
   @Patch(":eventId")
   async modifyEvent(
     @Param("eventId", ParseIntPipe) eventId: number,
-    @Body(new ZodValidationPipe(UpdateEventSchema)) patchData: UpdateEventDto,
+    @Body(new ZodValidationPipe(ModifyEventSchema)) patchData: ModifyEventDto,
   ): Promise<EventDto> {
     return await this.eventService.modifyEvent(eventId, patchData);
   }

@@ -3,10 +3,30 @@ import { DbService } from "./db.service";
 import {
   BlogDto,
   CreateBlogDto,
-  PaginatedBlogDto,
-  UpdateBlogDto,
+  MediaGalleryDto,
+  PaginationFilterDto,
+  ReplaceBlogDto,
+  ModifyBlogDto,
+  FilterBlogDto,
 } from "../dto/dto";
-import { ResourceGoneException } from "../common/exceptions";
+import {
+  BlogSchema,
+  GalleryType,
+  Language,
+  MediaGallerySchema,
+  PaginatedResponse,
+  SUPPORTED_LANGUAGES,
+} from "@repo/common";
+import {
+  generateInsertClause,
+  generateRelevanceClause,
+  generateReturningClause,
+  generateUpdateClause,
+} from "./db-utils";
+import {
+  MediaNotFoundException,
+  ResourceNotFoundException,
+} from "../common/exceptions";
 
 @Injectable()
 export class BlogDatabaseService {
@@ -19,70 +39,132 @@ export class BlogDatabaseService {
    * @returns The Blog if there is one.
    */
   async getBlogById(id: number): Promise<BlogDto> {
-    const query = `SELECT id, 
-       titel, 
-       description, 
-       created_at, 
-       updated_at
-    FROM blogs WHERE id = $1`;
+    const returningClause = generateReturningClause(BlogSchema);
+
+    const query = `
+      SELECT ${returningClause}
+      FROM blogs WHERE id = $1;
+    `;
 
     const result = await this.db.query<BlogDto>(query, [id]);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(`Blog with ID ${id} not found`);
+      throw new ResourceNotFoundException(BlogDto, id);
     }
+
     return result[0];
   }
 
   /**
    * Get blogs with pagination
-   * @param amount number of blogs per page (if amount=0, it will default to grabbing all blogs)
-   * @param page page index (starts at 0)
+   * @param paginationFilters Filters for pagination and ordering.
+   * @param blogFilters Filters for blogs.
+   * @param language Optional language to use for text filtering.
    * @returns blogs
    */
   async getBlogs(
-    amount: number = 0,
-    page: number = 0,
-  ): Promise<PaginatedBlogDto> {
-    const offset = page * amount;
-    const countResult = await this.db.query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM blogs`,
-    );
-    if (amount === 0) {
-      const query = `
-      SELECT id, 
-             titel, 
-             description,
-             created_at,
-             updated_at
-      FROM blogs
-      ORDER BY id
-      `;
+    paginationFilters: PaginationFilterDto,
+    blogFilters: FilterBlogDto,
+    language?: Language,
+  ): Promise<PaginatedResponse<BlogDto>> {
+    const returningClause = generateReturningClause(BlogSchema);
 
-      return {
-        limit: amount,
-        page: page,
-        totalItems: parseInt(countResult[0].count),
-        objects: await this.db.query<BlogDto>(query, [amount, offset]),
-      };
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Title filter
+    // Looks into the language provided and filters differently based on
+    // Whether the query is a suggestion or not.
+    if (blogFilters.title) {
+      const searchTerm = blogFilters.title;
+
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
+
+        const titleField = `titel->>'${lang}'`;
+
+        if (blogFilters.is_suggestion) {
+          const pSearch = param(searchTerm);
+          return [`word_similarity(${pSearch}, ${titleField}) > 0.3`];
+        } else {
+          const pSearch = param(`%${searchTerm}%`);
+          return [`${titleField} ILIKE ${pSearch}`];
+        }
+      });
+
+      // Push them as a single string wrapped in parentheses, joined by OR
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
+    }
+
+    // Filter blogs that were created before.
+    if (blogFilters.before) {
+      conditions.push(
+        // NOTE: We add + 1 day here for performance and include reasons.
+        // Adding 1 day is a more performant than casting the original column to a
+        // date.
+        `created_at < ${param(blogFilters.before)}::date + interval '1 day'`,
+      );
+    }
+
+    // Filter blogs that were created after.
+    if (blogFilters.after) {
+      conditions.push(`created_at >= ${param(blogFilters.after)}::date`);
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM blogs
+      ${whereClause};
+    `;
+
+    // pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
+    // Ordering (relevance vs date)
+    let orderClause = "";
+    if (blogFilters.is_suggestion && blogFilters.title) {
+      const relevanceMath = generateRelevanceClause(
+        blogFilters.title,
+        [{ name: `titel` }],
+        param,
+        language,
+      );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
+    } else {
+      orderClause = `ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}`;
     }
 
     const query = `
-    SELECT id,
-           titel,
-           description,
-           created_at,
-           updated_at
-    FROM blogs
-    ORDER BY id
-    LIMIT $1 OFFSET $2
+      SELECT ${returningClause}
+      FROM blogs
+      ${whereClause}
+      ${orderClause}
+      ${paginationClause};
     `;
 
+    // Fetch count and objects.
+    const [objects, countResult] = await Promise.all([
+      this.db.query<BlogDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
+    ]);
+
     return {
-      limit: amount,
-      page: page,
+      limit: paginationFilters.limit,
+      page: paginationFilters.page,
       totalItems: parseInt(countResult[0].count),
-      objects: await this.db.query<BlogDto>(query, [amount, offset]),
+      objects: objects,
     };
   }
 
@@ -92,30 +174,19 @@ export class BlogDatabaseService {
    * @returns the added blog if it was successful.
    */
   async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
-    if (!blog.titel || !blog.description) {
-      throw new BadRequestException("Missing required fields");
-    }
+    const { columns, placeholders, values } = generateInsertClause(blog);
+    const returningClause = generateReturningClause(BlogSchema);
 
     const query = `
-      INSERT INTO blogs (titel, description)
-      VALUES ($1, $2)
-      RETURNING
-        id,
-        titel,
-        description,
-        created_at,
-        updated_at;
+      INSERT INTO blogs (${columns})
+      VALUES (${placeholders})
+      RETURNING ${returningClause};
     `;
-
-    const values = [
-      JSON.stringify(blog.titel),
-      JSON.stringify(blog.description),
-    ];
 
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create blog");
+      throw new Error("Failed to create blog.");
     }
 
     return result[0];
@@ -123,55 +194,34 @@ export class BlogDatabaseService {
 
   /**
    * Update function for blogs. Updates the blog in the database.
-   * @param blog must be of the type "UpdateBlog", gives the freedom to define only what needs to be updated.
-   * The id field in the blog MUST be defined.
+   * @param blogId The ID of the blog.
+   * @param blog must be of the type "ModifyBlog" or "ReplaceBlog", gives the freedom to define only what needs to be updated.
    * @returns the updated blog if successful.
    */
-  async updateBlog(blog: UpdateBlogDto): Promise<BlogDto> {
-    if (!blog.id) {
-      throw new BadRequestException("Blog id is required for update");
+  async updateBlog(
+    blogId: number,
+    blog: ModifyBlogDto | ReplaceBlogDto,
+  ): Promise<BlogDto> {
+    const { setClause, values, nextIndex } = generateUpdateClause(blog);
+    const returningClause = generateReturningClause(BlogSchema);
+
+    if (values.length === 0) {
+      throw new BadRequestException("No valid fields provided for update.");
     }
 
-    const fields: string[] = [];
-    const values: any[] = [];
-    let index = 1;
-
-    if (blog.titel !== undefined) {
-      fields.push(`titel = COALESCE(titel, '{}'::jsonb) || $${index++}::jsonb`);
-      values.push(JSON.stringify(blog.titel));
-    }
-
-    if (blog.description !== undefined) {
-      fields.push(
-        `description = COALESCE(description, '{}'::jsonb) || $${index++}::jsonb`,
-      );
-      values.push(JSON.stringify(blog.description));
-    }
-
-    if (fields.length === 0) {
-      throw new BadRequestException("No fields provided to update");
-    }
-
-    values.push(blog.id);
+    values.push(blogId);
 
     const query = `
       UPDATE blogs
-      SET ${fields.join(", ")}
-      WHERE id = $${index}
-    RETURNING
-      id,
-      titel,
-      description,
-      created_at,
-      updated_at;
-  `;
+      SET ${setClause}
+      WHERE id = $${nextIndex}
+      RETURNING ${returningClause};
+    `;
 
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new ResourceGoneException(
-        `Cannot update: Blog ${blog.id} not found`,
-      );
+      throw new ResourceNotFoundException(BlogDto, blogId);
     }
 
     return result[0];
@@ -184,13 +234,75 @@ export class BlogDatabaseService {
    */
   async deleteBlog(blogId: number): Promise<void> {
     const query = `DELETE FROM blogs WHERE id = $1 RETURNING id;`;
-    const result = await this.db.query(query, [blogId]);
-    if (result.length == 0) {
-      throw new ResourceGoneException(
-        `Cannot delete: Blog ${blogId} not found`,
-      );
-    }
+
+    // * NOTE: We don't check for failures here for idempotency.
+    await this.db.query(query, [blogId]);
   }
 
-  // insert extra functions here if desired.
+  /**
+   * Gets media gallery linked to a given blog with the given type.
+   * @param blog_id The ID of the blog you want.
+   * @param type The type of gallery you want.
+   * @returns The MediaGallery of given type if it exists.
+   */
+  async getMediaFromBlog(
+    blog_id: number,
+    type: GalleryType,
+  ): Promise<MediaGalleryDto> {
+    const galleryPrefix = "mg";
+    const returningClause = generateReturningClause(
+      MediaGallerySchema,
+      galleryPrefix,
+    );
+
+    const query = `
+      SELECT ${returningClause}
+      FROM media_gallery ${galleryPrefix}
+      INNER JOIN blog_media_gallery bmg ON bmg.gallery_id = ${galleryPrefix}.id
+      WHERE bmg.blog_id = $1 AND ${galleryPrefix}.type = $2
+      ORDER BY ${galleryPrefix}.id
+      LIMIT 1;
+    `;
+
+    const result = await this.db.query<MediaGalleryDto>(query, [blog_id, type]);
+
+    if (result.length === 0) {
+      throw new MediaNotFoundException(BlogDto, type, blog_id);
+    }
+
+    return result[0];
+  }
+
+  /**
+   * Links a media gallery to a given blog.
+   * @param blog_id The ID of the blog to link to.
+   * @param gallery_id The ID of the media gallery to link.
+   * @returns void
+   */
+  async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
+    const query = `
+      INSERT INTO blog_media_gallery (blog_id, gallery_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING;
+    `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
+
+  /**
+   * Unlinks a media gallery from a given blog.
+   * @param blog_id The ID of the blog.
+   * @param gallery_id The ID of the media gallery to unlink.
+   */
+  async unlinkMediaFromBlog(
+    blog_id: number,
+    gallery_id: number,
+  ): Promise<void> {
+    const query = `
+      DELETE FROM blog_media_gallery
+      WHERE blog_id = $1 AND gallery_id = $2
+    `;
+
+    await this.db.query(query, [blog_id, gallery_id]);
+  }
 }

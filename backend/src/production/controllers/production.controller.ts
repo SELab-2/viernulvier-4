@@ -13,23 +13,24 @@ import {
   UsePipes,
 } from "@nestjs/common";
 import { ProductionService } from "../production.service";
-import { ZodValidationPipe } from "../../common/pipes/zod.validation.pipe";
 import {
   CreateProductionSchema,
   FilterProductionSchema,
   LanguageQuerySchema,
-  ProductionSchema,
-  UpdateProductionSchema,
+  PaginatedResponse,
+  PaginationFilterSchema,
+  ReplaceProductionSchema,
+  ModifyProductionSchema,
 } from "@repo/common";
 import {
   CreateProductionDto,
   FilterProductionDto,
   LanguageQueryDto,
-  PaginatedProductionDto,
-  PaginatedProductionViewDto,
+  PaginationFilterDto,
   ProductionDto,
   ProductionViewDto,
-  UpdateProductionDto,
+  ReplaceProductionDto,
+  ModifyProductionDto,
 } from "../../dto/dto";
 import {
   ApiBody,
@@ -40,7 +41,11 @@ import {
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../../auth/authGuard";
 import { LanguageService } from "../../util/language/language.service";
-import { ApiOkAnyOf, ApiOkArrayAnyOf } from "../../common/decorators/api.ok";
+import {
+  ApiOkAnyOf,
+  ApiOkPaginatedResponseAnyOf,
+} from "../../common/decorators/api.ok";
+import { ZodValidationPipe } from "nestjs-zod";
 
 /**
  * Handles CORE functionality for Productions.
@@ -55,20 +60,32 @@ export class ProductionController {
   /**
    * Responds to GET /productions.
    * note: pagination is done here via the filters param.
-   * @param filters The Filters that should be applied to the query.
+   * @param lang The Language filter for this query.
+   * @param paginationFilters Filters to do with the pagination and ordering of items.
+   * @param productionFilters The Filters that should be applied to the query.
    * @returns All ProductionDto objects
    */
   @ApiOperation({ summary: "Returns all Production objects." })
   @ApiQuery({ name: "tag_ids", required: false, type: Number, isArray: true })
-  @ApiOkArrayAnyOf(ProductionDto, ProductionViewDto)
+  @ApiOkPaginatedResponseAnyOf(ProductionDto, ProductionViewDto)
   @Get()
-  @UsePipes(new ZodValidationPipe(FilterProductionSchema))
   async getAllProductions(
-    @Query() filters: FilterProductionDto,
-  ): Promise<PaginatedProductionDto | PaginatedProductionViewDto> {
+    @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilters: PaginationFilterDto,
+    @Query(new ZodValidationPipe(FilterProductionSchema))
+    productionFilters: FilterProductionDto,
+  ): Promise<PaginatedResponse<ProductionDto | ProductionViewDto>> {
     return this.ls.flattenByLanguage<
-      PaginatedProductionDto | PaginatedProductionViewDto
-    >(await this.productionService.getAllProductions(filters), filters.lang);
+      PaginatedResponse<ProductionDto | ProductionViewDto>
+    >(
+      await this.productionService.getAllProductions(
+        productionFilters,
+        paginationFilters,
+        lang.lang,
+      ),
+      lang.lang,
+    );
   }
 
   /**
@@ -93,7 +110,7 @@ export class ProductionController {
   /**
    * Responds to a PUT to "/productions/:productionId".
    * @param productionId The ID in the URL.
-   * @param production The parsed ProductionDto object.
+   * @param replaceProduction The parsed ProductionDto object.
    * @returns The newly updated ProductionDto.
    */
   @UseGuards(ApiKeyGuard)
@@ -104,30 +121,31 @@ export class ProductionController {
   @Put(":productionId")
   async replaceProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Body(new ZodValidationPipe(ProductionSchema)) production: ProductionDto,
+    @Body(new ZodValidationPipe(ReplaceProductionSchema))
+    replaceProduction: ReplaceProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionService.replaceProduction(
       productionId,
-      production,
+      replaceProduction,
     );
   }
 
   /**
    * Responds to a PATCH to "/productions/:productionId".
    * @param productionId The ID in the URL.
-   * @param patchData The parsed UpdateProductionDto object.
+   * @param patchData The parsed ModifyProductionDto object.
    * @returns The newly updated ProductionDto.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
   @ApiOperation({ summary: "Modifies an existing Production." })
-  @ApiBody({ type: UpdateProductionDto })
+  @ApiBody({ type: ModifyProductionDto })
   @ApiOkResponse({ type: ProductionDto, description: "Production Modified." })
   @Patch(":productionId")
   async modifyProduction(
     @Param("productionId", ParseIntPipe) productionId: number,
-    @Body(new ZodValidationPipe(UpdateProductionSchema))
-    patchData: UpdateProductionDto,
+    @Body(new ZodValidationPipe(ModifyProductionSchema))
+    patchData: ModifyProductionDto,
   ): Promise<ProductionDto> {
     return await this.productionService.modifyProduction(
       productionId,
