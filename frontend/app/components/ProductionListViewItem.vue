@@ -4,7 +4,9 @@
 
   Modes:
 - Public: media display + title + artist + date range + tags
-- Admin: same as public + edit/delete buttons (no link to detail page)
+- Admin:
+  * same as public but the tile itself is not clickable.
+  * edit / delete buttons OR warning button if production has events from the future.
 -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
@@ -93,7 +95,7 @@ const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
 
-// Determine if the production has any events in the future to know if we should display a warning icon in admin mode.
+// Determine if the production has any events in the future to know if we should display a warning button in admin mode.
 const isFutureProduction = computed(() => {
   if (!events.value?.length) return false;
 

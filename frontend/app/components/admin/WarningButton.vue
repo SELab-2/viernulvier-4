@@ -1,4 +1,10 @@
 <script setup lang="ts">
+/**
+ * Reusable warning action button.
+ * Wraps ActionButton with a yellow/orange style and TriangleAlert icon.
+ * On click, opens a popup with a title, description and close button.
+ * Title and description are passed as props.
+ */
 import { ref } from "vue";
 import { TriangleAlert, X } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
@@ -20,7 +26,7 @@ const open = ref(false);
 
 <template>
   <div class="relative">
-    <!-- Trigger -->
+    <!-- Button: opens popup -->
     <AdminActionButton
       :label="props.title"
       :size="props.size"
@@ -37,7 +43,7 @@ const open = ref(false);
       v-if="open"
       class="absolute right-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl p-4 z-50"
     >
-      <!-- Header -->
+      <!-- Header: icon + title + close button "X" -->
       <div class="flex items-start justify-between gap-3 mb-3">
         <div class="flex items-center gap-2 min-h-8">
           <div
@@ -60,12 +66,12 @@ const open = ref(false);
         </button>
       </div>
 
-      <!-- Body -->
+      <!-- Body: description -->
       <p class="text-xs leading-relaxed text-muted-foreground">
         {{ props.description }}
       </p>
 
-      <!-- Footer -->
+      <!-- Footer: close button -->
       <div class="mt-4 flex justify-end">
         <button
           type="button"
