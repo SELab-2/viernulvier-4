@@ -27,7 +27,6 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "edit", production: ProductionView): void;
   (e: "delete", production: ProductionView): void;
 }>();
 
@@ -177,10 +176,14 @@ watch(locale, () => loadTags());
 
           <!-- Admin buttons -->
           <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
-            <AdminEditButton
-              label="Edit production"
-              @click.stop="emit('edit', props.productionView)"
-            />
+            <NuxtLink
+              :to="
+                ROUTES.admin.productions.edit(Number(props.productionView.id))
+              "
+              @click.stop
+            >
+              <AdminEditButton label="Edit production" />
+            </NuxtLink>
 
             <AdminDeleteButton
               label="Delete production"
