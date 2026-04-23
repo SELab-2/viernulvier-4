@@ -11,6 +11,17 @@ import type {
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 
+/**
+ * Replaces the standard Media fetch onError.
+ * We don't have to see 404 because they are handled in code.
+ */
+export function onGalleryFetchError(status: number, message: string) {
+  if (status === 404) return;
+
+  // Print the error to the console if something more severe.
+  console.error(message);
+}
+
 export interface PrintGallery extends MediaGallery {
   type: "prints";
 }

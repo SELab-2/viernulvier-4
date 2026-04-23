@@ -70,6 +70,10 @@ function reset() {
   multiSelectRefs.value = [];
 }
 
+defineExpose({
+  reset,
+});
+
 onBeforeUpdate(() => {
   multiSelectRefs.value = [];
 });
@@ -82,7 +86,7 @@ function collectMultiSelectRef(el: any) {
 <template>
   <form
     @submit.prevent="submit"
-    class="m-4 border border-border rounded-lg bg-background overflow-hidden"
+    class="m-0 border border-border rounded-lg bg-background overflow-hidden"
   >
     <!-- All components of the form under each other -->
     <component
@@ -104,7 +108,7 @@ function collectMultiSelectRef(el: any) {
       <!-- Submit button -->
       <button
         type="submit"
-        class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
+        class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
       >
         {{ t("baseform.submitbutton") }}
       </button>
@@ -112,7 +116,7 @@ function collectMultiSelectRef(el: any) {
       <button
         type="button"
         @click="reset"
-        class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg transition-colors duration-150 hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
+        class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
       >
         {{ t("baseform.resetbutton") }}
       </button>

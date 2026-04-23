@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import ProductionStories from "../../../app/components/production/storyListView.vue";
 import type { BlogView } from "@repo/common";
-import StoryListView from "../../../app/components/production/storyListView.vue";
+import { mount, type VueWrapper } from "@vue/test-utils";
 
 const i18n = createI18n({
   locale: "nl",
@@ -11,13 +10,19 @@ const i18n = createI18n({
     nl: {
       production: {
         stories: "Verhalen",
-        noStories: "Deze productie bevat geen verhalen.",
+      },
+      general: {
+        showMore: "Toon meer",
+        showLess: "Toon minder",
       },
     },
     en: {
       production: {
         stories: "Stories",
-        noStories: "This production doesn't contain any stories.",
+      },
+      general: {
+        showMore: "Show more",
+        showLess: "Show less",
       },
     },
   },
@@ -55,12 +60,35 @@ const stories: BlogView[] = [
 ];
 
 describe("ProductionStories", () => {
-  let wrapper: VueWrapper<InstanceType<typeof StoryListView>>;
+  let wrapper: VueWrapper<InstanceType<typeof ProductionStories>>;
 
   beforeEach(() => {
     wrapper = mount(ProductionStories, {
       global: {
         plugins: [i18n],
+        stubs: {
+          NuxtLink: {
+            template: "<a><slot /></a>",
+          },
+          BlogsStoryListItem: {
+            props: ["story"],
+            template: `
+              <div>
+                <h4>{{ story.titel }}</h4>
+                <p>{{ story.description }}</p>
+              </div>
+            `,
+          },
+          ChevronDown: true,
+          ChevronUp: true,
+        },
+        mocks: {
+          ROUTES: {
+            stories: {
+              byId: (id: number) => `/stories/${id}`,
+            },
+          },
+        },
       },
       props: {
         stories,
@@ -68,17 +96,73 @@ describe("ProductionStories", () => {
     });
   });
 
-  it("renders a card for each story", () => {
-    expect(wrapper.findAll("[data-testid=data-story]").length).toBe(
-      stories.length,
-    );
+  it("renders 3 stories by default when limit is exceeded", () => {
+    expect(wrapper.findAll("[data-testid=data-story]").length).toBe(3);
   });
 
-  it("renders title and description for each story", () => {
+  it("renders title and description for visible stories", () => {
     const text = wrapper.text();
+
     expect(text).toContain("Titel 1");
     expect(text).toContain("description 1");
+
     expect(text).toContain("Titel 2");
     expect(text).toContain("description 2");
+
+    expect(text).toContain("Titel 3");
+    expect(text).toContain("description 3");
+
+    expect(text).not.toContain("Titel 4");
+  });
+
+  it("shows expand button when stories exceed limit", () => {
+    expect(wrapper.text()).toContain("Toon meer");
+  });
+
+  it("shows no button when stories do not exceed limit", () => {
+    const w = mount(ProductionStories, {
+      global: {
+        plugins: [i18n],
+        stubs: {
+          NuxtLink: {
+            template: "<a><slot /></a>",
+          },
+          BlogsStoryListItem: {
+            props: ["story"],
+            template: "<div>{{ story.titel }}</div>",
+          },
+        },
+        mocks: {
+          ROUTES: {
+            stories: {
+              byId: (id: number) => `/stories/${id}`,
+            },
+          },
+        },
+      },
+      props: {
+        stories: stories.slice(0, 3),
+      },
+    });
+
+    expect(w.find("button").exists()).toBe(false);
+  });
+
+  it("shows empty state when no stories are provided", () => {
+    const w = mount(ProductionStories, {
+      global: {
+        plugins: [i18n],
+        stubs: {
+          NuxtLink: true,
+          BlogsStoryListItem: true,
+        },
+      },
+      props: {
+        stories: [],
+      },
+    });
+
+    expect(w.findAll("[data-testid=data-story]").length).toBe(0);
+    expect(w.find("[data-testid=data-story]").exists()).toBe(false);
   });
 });

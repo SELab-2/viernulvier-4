@@ -5,7 +5,12 @@ export default defineNuxtConfig({
   ssr: false, // Disable Server-Side Rendering since we'll have a separate backend.
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ["@nuxtjs/i18n"],
+  modules: ["@nuxtjs/i18n", "nuxt-snackbar"],
+    snackbar: {
+    bottom: true,
+    right: true,
+    duration: 5000
+  },
   i18n: {
     locales: [
       { code: "nl", language: "nl-BE", file: "nl.json", name: "Nederlands" },
@@ -54,6 +59,15 @@ export default defineNuxtConfig({
         'lucide-vue-next',
         'zod',
         'pdfjs-dist',
+        '@vueuse/core',
+        '@tiptap/vue-3',
+        '@tiptap/starter-kit',
+        '@tiptap/extension-placeholder',
+        '@tiptap/extension-link',
+        '@tiptap/extension-underline',
+        '@tiptap/extension-color',
+        '@tiptap/extension-text-style',
+        '@tiptap/core',
       ]
     }
   }

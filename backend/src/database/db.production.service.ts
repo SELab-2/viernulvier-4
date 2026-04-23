@@ -14,6 +14,7 @@ import {
 import {
   BlogSchema,
   GalleryType,
+  Language,
   MediaGallerySchema,
   PaginatedResponse,
   ProductionSchema,
@@ -23,6 +24,7 @@ import {
 import {
   applyExactFilters,
   generateInsertClause,
+  generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
@@ -99,6 +101,7 @@ export class ProductionDatabaseService {
    * Generic get function for productions.
    * @param productionFilters gives the freedom to define the filters of the search you want.
    * @param paginationFilters Filters to do with pagination and ordering.
+   * @param language Optional language to use for text ordering/filtering.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
    * @returns All productions for the given filters.
@@ -106,6 +109,7 @@ export class ProductionDatabaseService {
   async getProductions(
     productionFilters: FilterProductionDto,
     paginationFilters: PaginationFilterDto,
+    language?: Language,
   ): Promise<PaginatedResponse<ProductionDto>> {
     const productionPrefix = "p";
     const returningClause = generateReturningClause(
@@ -130,26 +134,38 @@ export class ProductionDatabaseService {
       productionPrefix,
     );
 
-    // Filter by titel or artist (case-insensitive)
-    // * NOTE: Looks through both the artist ant title for the searched sentence.
-    // Will look anywhere in the title field for what was searched.
-    // For all supported languages.
+    // Filter by either artist or title. The trgm extension in psql
     if (productionFilters.titelOrArtist) {
-      const pTitelOrArtist = param(`%${productionFilters.titelOrArtist}%`);
+      const searchTerm = productionFilters.titelOrArtist;
 
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.titel->>'${lang}' ILIKE ${pTitelOrArtist}`,
-      );
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
 
-      const artistClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `p.artist->>'${lang}' ILIKE ${pTitelOrArtist}`,
-      );
+        const titleField = `p.titel->>'${lang}'`;
+        const artistField = `p.artist->>'${lang}'`;
 
-      // Combine both arrays into one single list
-      const allClauses = [...titelClauses, ...artistClauses];
+        // Changes logic whether this is a suggestion request or a full search
+        if (productionFilters.is_suggestion) {
+          // FUZZY SEARCH: Tolerates typos, powered by the trigram index.
+          const pSearch = param(searchTerm);
+          return [
+            `word_similarity(${pSearch}, ${titleField}) > 0.3`,
+            `word_similarity(${pSearch}, ${artistField}) > 0.3`,
+          ];
+        } else {
+          // Exact substring match only
+          const pSearch = param(`%${searchTerm}%`);
+          return [
+            `${titleField} ILIKE ${pSearch}`,
+            `${artistField} ILIKE ${pSearch}`,
+          ];
+        }
+      });
 
       // Push them as a single string wrapped in parentheses, joined by OR
-      conditions.push(`(${allClauses.join(" OR ")})`);
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
     }
 
     // Filter by tag id (Production should have all tags we're filtering for.)
@@ -211,6 +227,24 @@ export class ProductionDatabaseService {
     const offset = paginationFilters.page * paginationFilters.limit;
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
+    // Ordering (relevance vs date)
+    let orderClause = "";
+    if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
+      const relevanceMath = generateRelevanceClause(
+        productionFilters.titelOrArtist,
+        [
+          { name: `${productionPrefix}.titel` },
+          { name: `${productionPrefix}.artist` },
+        ],
+        param,
+        language,
+      );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
+    } else {
+      orderClause = `ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST`;
+    }
+
     // The Ordered by the first held event of the production.
     const query = `
       SELECT ${returningClause}
@@ -220,7 +254,7 @@ export class ProductionDatabaseService {
       GROUP BY
         ${productionPrefix}.id
       ${havingClause}
-      ORDER BY MIN(e.starttime) ${paginationFilters.descending ? "DESC" : "ASC"} NULLS LAST
+      ${orderClause}
       ${paginationClause};
     `;
 

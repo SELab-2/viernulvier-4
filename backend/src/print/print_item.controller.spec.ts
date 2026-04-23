@@ -101,23 +101,22 @@ describe("PrintItemController", () => {
       };
 
       printItemService.getPrintItems.mockResolvedValue(paginatedItems);
-      languageService.flattenByLanguage.mockReturnValue(
-        expectedFlattened as any,
-      );
+      languageService.flattenByLanguage.mockReturnValue(expectedFlattened);
 
       const result = await controller.getPrintItems(
         paginationFilter,
         langQuery,
-        {},
+        { is_suggestion: false },
       );
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
-        {},
+        { is_suggestion: false },
+        langQuery.lang,
       );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         paginatedItems,
-        "en",
+        langQuery.lang,
       );
       expect(result).toEqual(expectedFlattened);
     });
@@ -132,6 +131,7 @@ describe("PrintItemController", () => {
       const filters: FilterPrintItemDto = {
         type: "affiche",
         title: "brugge",
+        is_suggestion: false,
       };
 
       const paginatedItems: PaginatedResponse<PrintItemDto> = {
@@ -142,13 +142,14 @@ describe("PrintItemController", () => {
       };
 
       printItemService.getPrintItems.mockResolvedValue(paginatedItems);
-      languageService.flattenByLanguage.mockReturnValue(paginatedItems as any);
+      languageService.flattenByLanguage.mockReturnValue(paginatedItems);
 
       await controller.getPrintItems(paginationFilter, langQuery, filters);
 
       expect(printItemService.getPrintItems).toHaveBeenCalledWith(
         paginationFilter,
         filters,
+        langQuery.lang,
       );
     });
   });
@@ -158,9 +159,7 @@ describe("PrintItemController", () => {
       const langQuery: LanguageQueryDto = { lang: "en" };
 
       printItemService.getPrintItemById.mockResolvedValue(mockPrintItem);
-      languageService.flattenByLanguage.mockReturnValue(
-        mockPrintItemView as any,
-      );
+      languageService.flattenByLanguage.mockReturnValue(mockPrintItemView);
 
       const result = await controller.getPrintItemById(1, langQuery);
 

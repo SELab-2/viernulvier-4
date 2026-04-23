@@ -17,10 +17,19 @@ import { LogOut, Menu, X } from "lucide-vue-next";
 import logoBlack from "~/assets/logo_black.svg";
 import logoWhite from "~/assets/logo_white.svg";
 
-const { isLoggedIn, logout } = useAuth();
-const isAdmin = isLoggedIn;
+const headerRef = ref(null);
 
 const { t } = useI18n();
+const route = useRoute();
+
+// ── Admin ────────────────────────────────────────────────────────────────
+
+const { isLoggedIn, isSuperAdmin, logout } = useAuth();
+
+const isAtAdminPath = computed(() => route.path.startsWith("/admin"));
+const showAdminInterface = computed(
+  () => isLoggedIn.value && isAtAdminPath.value,
+);
 
 // ── Dark mode ────────────────────────────────────────────────────────────────
 const isDark = ref(false);
@@ -49,7 +58,6 @@ const handleLogout = async () => {
 const isVisible = ref(true);
 const lastScrollPosition = ref(0);
 let isInitialLoad = true;
-const route = useRoute();
 
 const handleScroll = () => {
   const currentScroll = window.scrollY;
@@ -72,6 +80,23 @@ const handleScroll = () => {
   lastScrollPosition.value = currentScroll;
 };
 
+// ── Close dropdown menu if a click occurs outside the header.
+const handleClickOutside = (e) => {
+  if (
+    isMenuOpen.value &&
+    headerRef.value &&
+    !headerRef.value.contains(e.target)
+  ) {
+    isMenuOpen.value = false;
+  }
+};
+
+// ── Close dropdown menu when the 'Escape' key is pressed.
+const handleEscape = (e) => {
+  if (e.key === "Escape" && isMenuOpen.value) {
+    isMenuOpen.value = false;
+  }
+};
 const resetHeader = () => {
   isVisible.value = true;
   isInitialLoad = true;
@@ -82,7 +107,10 @@ const resetHeader = () => {
 
 watch(
   () => route.fullPath,
-  () => resetHeader(),
+  () => {
+    resetHeader();
+    isMenuOpen.value = false;
+  },
 );
 
 // ── Resize — close mobile menu on desktop ────────────────────────────────────
@@ -107,11 +135,16 @@ onMounted(() => {
   window.addEventListener("scroll", handleScroll);
   window.addEventListener("resize", handleResize);
   handleResize();
+
+  window.addEventListener("click", handleClickOutside);
+  window.addEventListener("keydown", handleEscape);
 });
 
 onUnmounted(() => {
   window.removeEventListener("scroll", handleScroll);
   window.removeEventListener("resize", handleResize);
+  window.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("keydown", handleEscape);
 
   if (themeObserver) themeObserver.disconnect();
 });
@@ -123,19 +156,31 @@ const navItems = [
   { label: "stories", route: ROUTES.stories.base },
   { label: "prints", route: ROUTES.prints.base },
 ];
+
+const adminNavItems = [
+  { label: "dashboard", route: ROUTES.admin.dashboard.base },
+  { label: "productions", route: ROUTES.admin.productions.base },
+  { label: "events", route: ROUTES.admin.events.base },
+  { label: "stories", route: ROUTES.admin.stories.base },
+  { label: "prints", route: ROUTES.admin.prints.base },
+];
 </script>
 
 <template>
   <header
+    ref="headerRef"
     :class="{ '-translate-y-full': !isVisible && !isMenuOpen }"
-    class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu"
+    class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]"
   >
     <div
-      class="mx-auto grid max-w-[1400px] grid-cols-3 items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
+      class="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
       <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
       <div class="flex items-center justify-start">
-        <nav v-if="!isAdmin" class="hidden lg:flex gap-[20px] xl:gap-[30px]">
+        <nav
+          v-if="!showAdminInterface"
+          class="hidden lg:flex gap-[20px] xl:gap-[30px]"
+        >
           <NuxtLink
             v-for="item in navItems"
             :key="item.route"
@@ -147,9 +192,8 @@ const navItems = [
         </nav>
 
         <button
-          :class="[isAdmin ? 'md:hidden' : 'lg:hidden']"
-          class="text-[var(--foreground)] outline-none"
-          @click="toggleMenu"
+          class="lg:hidden text-[var(--foreground)] outline-none"
+          @click.stop="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
           <X v-else :size="28" />
@@ -159,15 +203,21 @@ const navItems = [
       <!-- ── Centre: logo ────────────────────────────────────────────────── -->
       <div class="flex justify-center">
         <div class="flex items-center gap-[10px]">
-          <NuxtLink :to="ROUTES.home.base">
+          <NuxtLink
+            :to="
+              showAdminInterface
+                ? ROUTES.admin.dashboard.base
+                : ROUTES.home.base
+            "
+          >
             <img
               :src="isDark ? logoWhite : logoBlack"
               alt="viernulvier Logo"
-              class="h-10 lg:h-[60px] w-auto transition-all"
+              class="h-12 lg:h-[60px] w-auto transition-all"
             />
           </NuxtLink>
           <span
-            v-if="isAdmin"
+            v-if="showAdminInterface"
             class="text-xl lg:text-2xl font-black text-gray-400 tracking-[-1px]"
             >ADMIN</span
           >
@@ -177,24 +227,50 @@ const navItems = [
       <!-- ── Right: locale + dark-mode + logout ─────────────────────────── -->
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
         <div
-          :class="[isAdmin ? 'hidden md:flex' : 'hidden sm:flex']"
+          :class="[showAdminInterface ? 'hidden md:flex' : 'hidden sm:flex']"
           class="items-center gap-2 lg:gap-[15px]"
         >
           <LocaleSelector />
 
-          <ThemeToggle />
+          <ThemeToggle :is-compact="showAdminInterface" />
         </div>
 
         <button
-          v-if="isAdmin"
+          v-if="showAdminInterface"
           class="hidden md:flex btn-danger"
           @click="handleLogout"
         >
           <LogOut :size="16" />
-          <span class="hidden xl:inline">{{ t("nav.logout") }}</span>
+          <span class="hidden xl:inline ml-2">{{ t("nav.logout") }}</span>
         </button>
       </div>
     </div>
+
+    <nav
+      v-if="showAdminInterface"
+      class="hidden lg:flex border-t-3 border-[var(--foreground)] w-full bg-[var(--background)]"
+    >
+      <div
+        class="mx-auto flex w-full max-w-[1400px] justify-between items-center px-12 lg:px-20 2xl:px-32"
+      >
+        <NuxtLink
+          v-for="item in adminNavItems"
+          :key="item.route"
+          :to="item.route"
+          class="admin-nav-item"
+        >
+          {{ t("nav." + item.label) }}
+        </NuxtLink>
+
+        <NuxtLink
+          v-if="isSuperAdmin"
+          :to="ROUTES.admin.accounts.base"
+          class="admin-nav-item"
+        >
+          {{ t("nav.accounts") }}
+        </NuxtLink>
+      </div>
+    </nav>
 
     <!-- ── Mobile hamburger menu ───────────────────────────────────────────── -->
     <div
@@ -202,7 +278,27 @@ const navItems = [
       class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
     >
       <nav class="flex flex-col gap-6">
-        <template v-if="!isAdmin">
+        <template v-if="showAdminInterface">
+          <NuxtLink
+            v-for="item in adminNavItems"
+            :key="item.route"
+            :to="item.route"
+            class="nav-item text-lg"
+            @click="isMenuOpen = false"
+          >
+            {{ item.label }}
+          </NuxtLink>
+
+          <NuxtLink
+            v-if="isSuperAdmin"
+            :to="ROUTES.admin.accounts.base"
+            class="nav-item text-lg"
+            @click="isMenuOpen = false"
+          >
+            {{ t("nav.accounts") }}
+          </NuxtLink>
+        </template>
+        <template v-else>
           <NuxtLink
             v-for="item in navItems"
             :key="item.route"
@@ -215,14 +311,18 @@ const navItems = [
         </template>
 
         <div
-          :class="[isAdmin ? 'md:hidden' : 'sm:hidden']"
+          :class="[showAdminInterface ? 'md:hidden' : 'sm:hidden']"
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
         >
           <LocaleSelector />
 
           <ThemeToggle />
 
-          <button v-if="isAdmin" class="btn-danger" @click="handleLogout">
+          <button
+            v-if="showAdminInterface"
+            class="btn-danger"
+            @click="handleLogout"
+          >
             <LogOut :size="16" />
             {{ t("nav.logout") }}
           </button>
@@ -240,5 +340,24 @@ const navItems = [
 
 .nav-item.router-link-active {
   @apply text-[var(--foreground)] underline underline-offset-8 decoration-[3px];
+}
+
+.admin-nav-item {
+  display: flex;
+  align-items: center;
+
+  @apply no-underline text-[var(--muted-foreground)] font-[900] text-[11px] tracking-[2px] uppercase transition-all relative;
+
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.admin-nav-item:hover {
+  color: var(--foreground);
+}
+
+.admin-nav-item.router-link-active {
+  color: var(--foreground);
+  @apply underline underline-offset-[10px] decoration-[3px];
 }
 </style>

@@ -34,7 +34,7 @@ const { t } = useI18n();
 
     <!-- Hero content anchored to the bottom of the section -->
     <div
-      class="relative z-20 h-full flex flex-col justify-end px-6 md:px-12 lg:px-20 pb-16 max-w-7xl mx-auto w-full"
+      class="page-container relative z-20 h-full flex flex-col justify-end pb-16"
     >
       <!-- Title: VIERNULVIER bold + Archive/Archief light underneath -->
       <div class="mb-8">
@@ -58,7 +58,7 @@ const { t } = useI18n();
 
       <NuxtLink :to="ROUTES.productions.base">
         <button
-          class="group inline-flex items-center gap-3 bg-white text-black px-7 py-3.5 font-bold text-sm tracking-wide hover:bg-white/90 transition-colors"
+          class="group inline-flex items-center gap-3 bg-white text-black px-7 py-3.5 font-bold text-sm tracking-wide hover:bg-white/90 transition-colors rounded-md"
         >
           {{ t("hero.cta") }}
           <ArrowRight
