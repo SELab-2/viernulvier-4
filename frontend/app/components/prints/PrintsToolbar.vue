@@ -28,7 +28,7 @@ const searchQuery = ref("");
 const filterOpen = ref(false); // Checks if filter panel is open or not.
 const activeType = ref<PrintType | null>(null); // Current selected print-type.
 
-watch(searchQuery, (v) => {
+watch(searchQuery, (v: string) => {
   emit("update:search", v);
 });
 
@@ -49,7 +49,7 @@ function selectType(type: PrintType | null) {
           :fetch-suggestions="fetchSuggestions"
           :limit="15"
           :scroll-limit="5"
-          placeholder="Search prints..."
+          :placeholder="t('searchbar.placeholder')"
         />
       </div>
 
