@@ -118,6 +118,7 @@ describe("ProductionController", () => {
       expect(service.getAllProductions).toHaveBeenCalledWith(
         productionFilters,
         paginationFilters,
+        langQuery.lang,
       );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         mockProductions,

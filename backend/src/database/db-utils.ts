@@ -2,7 +2,7 @@
  * Updating
  */
 
-import { ZodObject } from "@repo/common";
+import { Language, SUPPORTED_LANGUAGES, ZodObject } from "@repo/common";
 
 /**
  * Interface for handling of postgres error codes like 409 conflicts
@@ -192,4 +192,63 @@ export function generateCountQuery(tableName: string): string {
       FROM ${tableName};
   `;
   return query;
+}
+
+/**
+ * Relevance Sorting
+ */
+
+/**
+ * A column where relevance needs to be calculated.
+ * With an optional multiplier.
+ */
+interface RelevanceColumn {
+  name: string;
+  weightMultiplier?: number;
+}
+
+/**
+ * Generates a relevance clause for scoring search results.
+ * @param searchTerm The term to search for.
+ * @param columns The columns to search in. (including prefixes)
+ * @param param The parameter function that generates the placeholder.
+ * @param lang The language to search in, if undefined searches ALL languages.
+ * @returns The generated clause.
+ */
+export function generateRelevanceClause(
+  searchTerm: string,
+  columns: RelevanceColumn[],
+  param: (val: any) => string,
+  lang?: Language,
+): string {
+  const val = param(searchTerm);
+  const languagesToSearch = lang ? [lang] : SUPPORTED_LANGUAGES;
+
+  // We score each column, finding the BEST language match per column
+  const scoringParts = columns.map((column) => {
+    const weightMultiplier = column.weightMultiplier ?? 1;
+
+    const langScores = languagesToSearch.map((searchLang) => {
+      // Prevents null poisoning.
+      const jsonField = `COALESCE(${column.name}->>'${searchLang}', '')`;
+
+      // Calculate a base score for the whole string.
+      const baseScore = `word_similarity(${val}, ${jsonField})`;
+
+      // If an exact match big bonus.
+      const exactMatchBonus = `(CASE WHEN ${jsonField} ILIKE ${val} THEN 1.5 ELSE 0.0 END)`;
+
+      // And if the start we also give a bonus.
+      const startsWithBonus = `(CASE WHEN ${jsonField} ILIKE (CAST(${val} AS text) || '%') THEN 0.5 ELSE 0.0 END)`;
+
+      return `(${baseScore} + ${exactMatchBonus} + ${startsWithBonus})`;
+    });
+
+    // GREATEST to take the best language score.
+    // Wrap in COALESCE to ensure the column score is never NULL.
+    return `(COALESCE(GREATEST(${langScores.join(", ")}), 0) * ${weightMultiplier})`;
+  });
+
+  if (scoringParts.length === 0) return "0";
+  return scoringParts.join(" + ");
 }

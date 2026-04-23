@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import type { BlogView } from "@repo/common";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
-import { useBlogStory } from "~/composables/blogs/useBlogStory";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 import { useGallery } from "~/composables/media/useGallery";
 
 const props = defineProps<{
@@ -33,6 +33,7 @@ const emit = defineEmits<{ (e: "delete"): void }>();
 
 const { getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
+const { useBlogStory } = useBlogView();
 const { locale, t } = useI18n();
 
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);

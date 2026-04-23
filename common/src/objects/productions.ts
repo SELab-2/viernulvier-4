@@ -3,6 +3,7 @@ import {
   LocalizedStringNullableSchema,
   LocalizedStringSchema,
 } from "./language";
+import { QueryBoolean } from "./pagination";
 
 // Base Production object.
 export const ProductionSchema = z.object({
@@ -60,6 +61,9 @@ export const FilterProductionSchema = z.object({
   after: z.iso.date().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
+
+  // Toggle for the backend to treat the request as a suggestion.
+  is_suggestion: QueryBoolean.default(false),
 });
 
 // Type exports.

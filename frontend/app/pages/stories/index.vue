@@ -17,15 +17,11 @@ import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
 import ScrollToTop from "~/components/blogs/ScrollToTop.vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 
 const { t, locale } = useI18n();
 const { getAll } = useBlogApi();
-
-// Filters
-
-const sortOrder = ref<"newest" | "oldest">("newest");
-const searchQuery = ref("");
-const dateFilter = ref<FilterBlog>({});
+const { sortOrder, searchQuery, dateFilter } = useBlogView();
 
 //Oldest date (one-off fetch for Calendar "oldest" mode)
 
@@ -92,6 +88,7 @@ async function loadPage(reset = false) {
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
       blogFilters: {
+        is_suggestion: false, // This is not a suggestion.
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
         ...(dateFilter.value.after ? { after: dateFilter.value.after } : {}),
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),

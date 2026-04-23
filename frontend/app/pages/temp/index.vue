@@ -1,41 +1,99 @@
-<template>
-  <div class="p-8 bg-background min-h-screen">
-    <PrintsFileGrid category="Archive 2026" :files="tempFiles" />
-  </div>
-</template>
-
 <script setup lang="ts">
-import type { PrintItemView } from "@repo/common";
+import { height } from "happy-dom/lib/PropertySymbol";
+import { ref } from "vue";
+// Note: If you put BaseMultiSelect in your `~/components` directory,
+// Nuxt will auto-import it and you don't need this import line!
+import BaseMultiSelect from "~/components/form/fields/BaseMultiSelect.vue";
 
-// Mocking a list of files to see the grid in action
-const tempFiles: PrintItemView[] = [
-  {
-    id: 1,
-    titel: "Festival Poster",
-    description: "Main event poster",
-    url: "/docs/random_doc_1.pdf", // Your local test PDF
-    print_type: "affiche",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    titel: "Program Guide",
-    description: "Full schedule",
-    url: "/docs/random_doc_2.pdf",
-    print_type: "brochure",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    titel: "Artist Lineup",
-    description: "Experimental",
-    url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", // External fallback test
-    print_type: "drukwerk",
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  // Add more items here if you want to test the pagination (currently set to 4 rows)
+// --- State ---
+// Your component defines the model as a string array: defineModel<string[]>({ default: [] })
+const favoriteFruit = ref<string[]>([]);
+const techStack = ref<string[]>([]);
+
+// --- Options Data ---
+
+// Example 1: Simple strings (Your component will normalize these into objects automatically)
+const fruitOptions = [
+  "Apple",
+  "Banana",
+  "Orange",
+  "Mango",
+  "Pineapple",
+  "Strawberry",
+];
+
+// Example 2: Strict objects using your SearchSuggestion interface
+const frameworkOptions = [
+  { display: "Vue.js", searchValue: "Vue.js", context: "Frontend" },
+  { display: "Nuxt.js", searchValue: "Nuxt.js", context: "Fullstack" },
+  { display: "React", searchValue: "React", context: "Frontend" },
+  { display: "Tailwind CSS", searchValue: "Tailwind CSS", context: "Styling" },
+  { display: "PostgreSQL", searchValue: "PostgreSQL", context: "Database" },
 ];
 </script>
+
+<template>
+  <div class="min-h-screen bg-background text-foreground py-12 px-4 sm:px-6">
+    <div class="max-w-2xl mx-auto space-y-12">
+      <div>
+        <h1 class="text-3xl font-black uppercase tracking-widest mb-2">
+          Component Sandbox
+        </h1>
+        <p class="text-muted-foreground text-sm">
+          Testing the BaseMultiSelect implementations.
+        </p>
+      </div>
+
+      <section class="p-6 border border-border rounded-xl bg-card shadow-sm">
+        <h2
+          class="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 border-b border-border pb-2"
+        >
+          1. Single Select (String Array)
+        </h2>
+
+        <BaseMultiSelect
+          v-model="favoriteFruit"
+          :options="fruitOptions"
+          label="Favorite Fruit"
+          placeholder="Search for a fruit..."
+          required
+        />
+
+        <div
+          class="mt-6 p-4 bg-muted/50 rounded-lg border border-border/50 font-mono text-xs"
+        >
+          <span class="text-muted-foreground font-bold"
+            >State (favoriteFruit):</span
+          >
+          {{ favoriteFruit }}
+        </div>
+      </section>
+
+      <section class="p-6 border border-border rounded-xl bg-card shadow-sm">
+        <h2
+          class="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-6 border-b border-border pb-2"
+        >
+          2. Multi Select (Object Array)
+        </h2>
+
+        <BaseMultiSelect
+          v-model="techStack"
+          :options="frameworkOptions"
+          label="Your Tech Stack"
+          placeholder="Search frameworks..."
+          multiple
+          freeInput
+        />
+
+        <div
+          class="mt-6 p-4 bg-muted/50 rounded-lg border border-border/50 font-mono text-xs"
+        >
+          <span class="text-muted-foreground font-bold"
+            >State (techStack):</span
+          >
+          {{ techStack }}
+        </div>
+      </section>
+    </div>
+  </div>
+</template>

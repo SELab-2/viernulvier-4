@@ -82,6 +82,7 @@ export class ProductionController {
       await this.productionService.getAllProductions(
         productionFilters,
         paginationFilters,
+        lang.lang,
       ),
       lang.lang,
     );

@@ -17,19 +17,21 @@
  *   required
  * />
  */
-
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { X } from "lucide-vue-next";
+import type { SearchSuggestion } from "~/components/SearchBar.vue";
 
 interface Props {
   label?: string; // label displayed above the field
   id?: string;
-  required?: boolean; // adds a "*" if required
-  options: string[]; // options where can be selected from
-  multiple?: boolean; // if multiple options can be selected
-  placeholder?: string; // placeholder text displayed inside the field
-  freeInput?: boolean; // allows values outside of given options
+  required?: boolean; // Adds a "*"
+  // Allow strings (for your tests) or SearchSuggestions (for the API)
+  options: (SearchSuggestion | string)[]; // Either SearchSuggestions or strings
+  multiple?: boolean; // Whether multiple can be selected.
+  placeholder?: string; // Placeholder for the selection
+  freeInput?: boolean; // Allows values outside of the options.
 }
+
 const props = withDefaults(defineProps<Props>(), {
   multiple: false,
   freeInput: false,
@@ -37,13 +39,30 @@ const props = withDefaults(defineProps<Props>(), {
 
 const model = defineModel<string[]>({ default: [] });
 const searchQuery = ref("");
-
 const searchBarRef = ref();
 
+const normalizedOptions = computed<SearchSuggestion[]>(() => {
+  return props.options.map((opt) => {
+    if (typeof opt === "string") {
+      return { display: opt, searchValue: opt, context: "" };
+    }
+    return opt;
+  });
+});
+
+const availableOptions = computed(() =>
+  normalizedOptions.value.filter((o) => !model.value.includes(o.searchValue)),
+);
+
 function handleSelect(value: string) {
-  // handles selecting an item
   if (!value) return;
-  if (!props.freeInput && !props.options.includes(value)) return; // reject if not in options
+
+  const isValidOption = normalizedOptions.value.some(
+    (o) => o.searchValue === value,
+  );
+
+  if (!props.freeInput && !isValidOption) return;
+
   if (props.multiple) {
     if (!model.value.includes(value)) {
       model.value = [...model.value, value];
@@ -51,18 +70,12 @@ function handleSelect(value: string) {
   } else {
     model.value = [value];
   }
-  searchBarRef.value?.clear(); // clear search after selecting
+  searchBarRef.value?.clear();
 }
 
 function removeItem(item: string) {
-  // handles removing an item
   model.value = model.value.filter((i) => i !== item);
 }
-
-// filters out already selected items from suggestions
-const availableOptions = computed(() =>
-  props.options.filter((o) => !model.value.includes(o)),
-);
 
 function clear() {
   model.value = [];
@@ -70,7 +83,7 @@ function clear() {
   searchBarRef.value?.clear();
 }
 
-defineExpose({ clear }); // exposes a clear method to the parent components
+defineExpose({ clear });
 </script>
 
 <template>
@@ -85,11 +98,12 @@ defineExpose({ clear }); // exposes a clear method to the parent components
     </label>
 
     <!-- SearchBar -->
-    <div class="-mx-4">
+    <div class="-mx-4 h-12">
       <SearchBar
         ref="searchBarRef"
         v-model="searchQuery"
-        :items="availableOptions"
+        :suggestions="availableOptions"
+        :limit="availableOptions.length"
         :placeholder="placeholder"
         :id="id"
         @update:modelValue="handleSelect"

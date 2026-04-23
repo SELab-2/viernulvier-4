@@ -23,6 +23,7 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const { getAll, linkBlog, linkMedia } = useProductionApi();
+const { fetchSuggestions } = useArchiveView();
 
 // Persistence key (per blog)
 const storageKey = computed(() => `vnv-blog-linked-prods-${props.blogId}`);
@@ -77,7 +78,10 @@ async function fetchProductions() {
   loadingSearch.value = true;
   try {
     const resp = await getAll({
-      productionFilters: search.value ? { titel: search.value } : undefined,
+      productionFilters: {
+        titelOrArtist: search.value,
+        is_suggestion: false,
+      },
       paginationFilters: { page: 0, limit: 10, descending: true },
       languageFilters: { lang: locale.value as "nl" | "en" },
     });
@@ -132,9 +136,14 @@ async function link(production: ProductionView) {
 // Close search dropdown when clicking outside
 const wrapperRef = ref<HTMLElement | null>(null);
 function handleOutsideClick(e: MouseEvent) {
-  if (wrapperRef.value && !wrapperRef.value.contains(e.target as Node)) {
-    searchOpen.value = false;
-  }
+  const target = e.target as Element;
+
+  if (!document.body.contains(target)) return;
+
+  if (wrapperRef.value && wrapperRef.value.contains(target)) return;
+
+  // If none of the rules above hit we can close the menu.
+  searchOpen.value = false;
 }
 onMounted(() => document.addEventListener("mousedown", handleOutsideClick));
 onUnmounted(() =>
@@ -229,26 +238,12 @@ onUnmounted(() =>
       <div ref="wrapperRef" class="relative">
         <!-- Search input (shows when open) -->
         <div v-if="searchOpen" class="space-y-3">
-          <div class="relative">
-            <Search
-              :size="14"
-              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-            />
-            <input
-              v-model="search"
-              type="text"
-              :placeholder="t('admin.blogs.linkToProductionSearch')"
-              autofocus
-              class="w-full pl-9 pr-9 h-10 bg-muted border border-border rounded-lg text-sm outline-none transition-colors focus:border-accent placeholder:text-muted-foreground"
-            />
-            <button
-              type="button"
-              class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-              @click="searchOpen = false"
-            >
-              <X :size="14" />
-            </button>
-          </div>
+          <SearchBar
+            v-model:model-value="search"
+            :fetch-suggestions="fetchSuggestions"
+            :limit="5"
+            class="w-full !h-12"
+          />
 
           <!-- Share gallery option -->
           <label

@@ -11,10 +11,11 @@ import {
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
   generateInsertClause,
+  generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
-import { PrintItemSchema, SUPPORTED_LANGUAGES } from "@repo/common";
+import { Language, PrintItemSchema, SUPPORTED_LANGUAGES } from "@repo/common";
 import { ResourceNotFoundException } from "../common/exceptions";
 
 @Injectable()
@@ -53,11 +54,13 @@ export class PrintItemDatabaseService {
    * Get all print items paginated.
    * @param paginationFilters The Filters regarding ordering and pagination.
    * @param printItemFilters The filters for the prints.
+   * @param language Optional language param used for ordering or searching text.
    * @returns The PrintItems.
    */
   async getAllPrintItems(
     paginationFilters: PaginationFilterDto,
     printItemFilters: FilterPrintItemDto,
+    language?: Language,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     const returningClause = generateReturningClause(PrintItemSchema);
 
@@ -69,13 +72,29 @@ export class PrintItemDatabaseService {
     };
 
     // Title filter
-    // NOTE: This is case-insensitive and looks in all languages + matches on parts.
+    // Looks into the language provided and filters differently based on
+    // Whether the query is a suggestion or not.
     if (printItemFilters.title) {
-      const titleParam = param(`%${printItemFilters.title}%`);
-      const titelClauses = SUPPORTED_LANGUAGES.map(
-        (lang) => `titel->>'${lang}' ILIKE ${titleParam}`,
-      );
-      conditions.push(`(${titelClauses.join(" OR ")})`);
+      const searchTerm = printItemFilters.title;
+
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
+
+        const titleField = `titel->>'${lang}'`;
+
+        if (printItemFilters.is_suggestion) {
+          const pSearch = param(searchTerm);
+          return [`word_similarity(${pSearch}, ${titleField}) > 0.3`];
+        } else {
+          const pSearch = param(`%${searchTerm}%`);
+          return [`${titleField} ILIKE ${pSearch}`];
+        }
+      });
+
+      // Push them as a single string wrapped in parentheses, joined by OR
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
     }
 
     // Filter for prints of a certain type
@@ -97,11 +116,26 @@ export class PrintItemDatabaseService {
     const offset = paginationFilters.page * paginationFilters.limit;
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
+    // Ordering (relevance vs date)
+    let orderClause = "";
+    if (printItemFilters.is_suggestion && printItemFilters.title) {
+      const relevanceMath = generateRelevanceClause(
+        printItemFilters.title,
+        [{ name: `titel` }],
+        param,
+        language,
+      );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
+    } else {
+      orderClause = `ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}`;
+    }
+
     const query = `
       SELECT ${returningClause}
       FROM print_items
       ${whereClause}
-      ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}
+      ${orderClause}
       ${paginationClause};
     `;
     const [objects, countResult] = await Promise.all([

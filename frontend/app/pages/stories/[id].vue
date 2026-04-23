@@ -10,14 +10,15 @@ import { ChevronLeft } from "lucide-vue-next";
 import type { BlogView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
-import { useBlogStory } from "~/composables/blogs/useBlogStory";
 import { useGallery } from "~/composables/media/useGallery";
 import { ROUTES } from "~/utils/routes";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 
 const route = useRoute();
 const { t, locale } = useI18n();
 const { getMainImageCrop } = useGallery();
 const { getById, getMediaGallery } = useBlogApi();
+const { useBlogStory } = useBlogView();
 
 const blogId = computed(() => {
   const raw = Array.isArray(route.params.id)

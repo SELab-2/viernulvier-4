@@ -23,11 +23,19 @@ import { useEventApi } from "~/composables/useEventApi";
 import type { ProductionView, Event } from "@repo/common";
 import TagFilter from "./TagFilter.vue";
 import { X } from "lucide-vue-next";
+import { getToday } from "~/utils/constants";
 
 const { t, locale } = useI18n();
 
-const { viewMode, searchQuery, sortOrder, dateFilter, oldestDate, tagIds } =
-  useArchiveView();
+const {
+  viewMode,
+  searchQuery,
+  sortOrder,
+  dateFilter,
+  oldestDate,
+  tagIds,
+  fetchSuggestions,
+} = useArchiveView();
 
 const { getAll: getAllProductions } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
@@ -40,7 +48,7 @@ const hasActiveFilters = computed(() => {
   return (
     tagIds.value.length > 0 ||
     !!dateFilter.value.after ||
-    !!dateFilter.value.before
+    dateFilter.value.before !== getToday() // Checks whether the before date is custom or not.
   );
 });
 
@@ -100,7 +108,9 @@ onMounted(fetchOldestDate);
       <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
-          :items="[]"
+          :fetch-suggestions="fetchSuggestions"
+          :limit="15"
+          :scroll-limit="5"
           :placeholder="t('archive.search_placeholder')"
         />
       </div>

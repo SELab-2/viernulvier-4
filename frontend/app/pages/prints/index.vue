@@ -29,6 +29,7 @@ const {
   totalPages,
   loading,
   fetchError,
+  fetchSuggestions,
 } = usePrintView();
 
 // Responsive columns
@@ -85,6 +86,7 @@ async function loadPage() {
       printItemFilters: {
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
         ...(activeFilter.value ? { type: activeFilter.value } : {}),
+        is_suggestion: false,
       },
     });
 

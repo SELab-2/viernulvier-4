@@ -11,7 +11,10 @@
 import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { PrintTypeValues, type PrintType } from "@repo/common";
 import { useI18n } from "vue-i18n";
+import { usePrintView } from "~/composables/media/usePrintView";
 const { t } = useI18n();
+const { fetchSuggestions } = usePrintView();
+
 defineProps<{
   titles?: string[];
 }>();
@@ -43,9 +46,9 @@ function selectType(type: PrintType | null) {
       <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
-          :items="titles || []"
-          :limit="6"
-          :scroll-limit="4"
+          :fetch-suggestions="fetchSuggestions"
+          :limit="15"
+          :scroll-limit="5"
           placeholder="Search prints..."
         />
       </div>

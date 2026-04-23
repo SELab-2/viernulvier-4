@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // Needed to apply the query in practice.
-const QueryBoolean = z.preprocess((val) => {
+export const QueryBoolean = z.preprocess((val) => {
   if (typeof val === "string") return val.toLowerCase() === "true";
   return val;
 }, z.boolean());
