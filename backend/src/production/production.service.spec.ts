@@ -96,11 +96,13 @@ describe("ProductionService", () => {
       const result = await service.getAllProductions(
         FilterProductionSchema.parse({}),
         PaginationFilterSchema.parse({}),
+        undefined,
       );
       expect(result).toEqual(mockProductions);
       expect(dbService.getProductions).toHaveBeenCalledWith(
         FilterProductionSchema.parse({}),
         PaginationFilterSchema.parse({}),
+        undefined,
       );
     });
 
@@ -108,10 +110,12 @@ describe("ProductionService", () => {
       await service.getAllProductions(
         FilterProductionSchema.parse({}),
         PaginationFilterSchema.parse({}),
+        undefined,
       );
       expect(dbService.getProductions).toHaveBeenCalledWith(
         FilterProductionSchema.parse({}),
         PaginationFilterSchema.parse({}),
+        undefined,
       );
       expect(dbService.getProductions).toHaveBeenCalledTimes(1);
     });

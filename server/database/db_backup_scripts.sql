@@ -1,3 +1,6 @@
+-- This helps with non exist matches.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TABLE productions
 (
     id              SERIAL PRIMARY KEY,
@@ -15,6 +18,12 @@ CREATE TABLE productions
     attendance_mode TEXT,
     performer_type  TEXT
 );
+
+-- These create GIN indexes for the fields that need them in productions
+CREATE INDEX idx_prod_title_en_trgm ON productions USING GIN ((titel->>'en') gin_trgm_ops);
+CREATE INDEX idx_prod_title_nl_trgm ON productions USING GIN ((titel->>'nl') gin_trgm_ops);
+CREATE INDEX idx_prod_artist_en_trgm ON productions USING GIN ((artist->>'en') gin_trgm_ops);
+CREATE INDEX idx_prod_artist_nl_trgm ON productions USING GIN ((artist->>'nl') gin_trgm_ops);
 
 CREATE OR REPLACE FUNCTION update_updated_at()
     RETURNS TRIGGER AS
@@ -64,6 +73,10 @@ CREATE TABLE blogs
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     updated_at  TIMESTAMP NOT NULL DEFAULT now()
 );
+
+-- These create GIN indexes for the fields that need them in blogs
+CREATE INDEX idx_blog_title_en_trgm ON blogs USING GIN ((titel->>'en') gin_trgm_ops);
+CREATE INDEX idx_blog_title_nl_trgm ON blogs USING GIN ((titel->>'nl') gin_trgm_ops);
 
 CREATE TRIGGER set_updated_at_blogs
     BEFORE UPDATE
@@ -328,6 +341,10 @@ CREATE TABLE print_items
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- These create GIN indexes for the fields that need them in prints
+CREATE INDEX idx_print_title_en_trgm ON prints USING GIN ((titel->>'en') gin_trgm_ops);
+CREATE INDEX idx_print_title_nl_trgm ON prints USING GIN ((titel->>'nl') gin_trgm_ops);
 
 CREATE TRIGGER trg_print_items_updated_at
     BEFORE UPDATE

@@ -82,6 +82,7 @@ export class PrintItemController {
       await this.printItemService.getPrintItems(
         paginationFilter,
         printItemFilters,
+        lang.lang,
       ),
       lang.lang,
     );

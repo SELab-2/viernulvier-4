@@ -8,7 +8,7 @@ import {
   ReplacePrintItemDto,
 } from "../dto/dto";
 import type { FilterPrintItemDto } from "../dto/dto";
-import { PaginatedResponse } from "@repo/common";
+import { Language, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class PrintItemService {
@@ -27,15 +27,18 @@ export class PrintItemService {
    * Fetches all PrintItem objects from the database.
    * @param paginationFilter Filters for pagination and ordering.
    * @param printItemFilters The filters for the prints.
+   * @param language Optional language used for ordering and searching text.
    * @returns All PrintItems.
    */
   async getPrintItems(
     paginationFilter: PaginationFilterDto,
     printItemFilters: FilterPrintItemDto,
+    language?: Language,
   ): Promise<PaginatedResponse<PrintItemDto>> {
     return await this.printItemDbService.getAllPrintItems(
       paginationFilter,
       printItemFilters,
+      language,
     );
   }
 

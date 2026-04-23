@@ -7,7 +7,6 @@
  * Usage:
  * <PrintsFileListItem
  *    :file="file"
- *    category="Affiche"
  * />
  */
 import { FileText } from "lucide-vue-next";
@@ -15,18 +14,26 @@ import type { PrintItemView } from "@repo/common";
 
 interface Props {
   file: PrintItemView;
-  category: string;
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 const { t, locale } = useI18n();
 
 const emit = defineEmits<{
   (e: "delete", file: PrintItemView): void;
 }>();
 
+const openFile = (src: string) => window.open(src, "_blank");
+const fileExtension = computed(() => {
+  // extract file extension based on url
+  if (!props.file.url) return "";
+  // pop takes last element, split("?") to take away query strings
+  // it is assumed the file has a valid extension
+  const ext = props.file.url.split(".").pop()?.split("?")[0];
+  return ext ? `.${ext.toLowerCase()}` : "";
+});
+// constants
 const rowBase =
   "group relative flex items-center gap-4 px-4 py-3 border-t border-border bg-card hover:bg-card-hover transition-colors duration-150 cursor-pointer";
-const openFile = (src: string) => window.open(src, "_blank");
 </script>
 
 <template>
@@ -44,11 +51,16 @@ const openFile = (src: string) => window.open(src, "_blank");
         class="text-[13px] font-bold truncate group-hover:text-accent transition-colors duration-150"
       >
         {{ file.titel }}
+        <span
+          v-if="fileExtension"
+          class="text-[10px] font-normal text-muted-foreground"
+          >{{ fileExtension }}</span
+        >
       </p>
       <p
         class="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5"
       >
-        {{ category }} |
+        {{ t(`prints.types.${file.print_type}`) }} |
         <span v-if="file.created_at">
           {{
             new Date(file.created_at).toLocaleDateString(locale, {
@@ -68,7 +80,7 @@ const openFile = (src: string) => window.open(src, "_blank");
         :label="t('prints.download')"
         :size="37"
         :src="file.url"
-        :name="file.url"
+        :name="file.titel"
       />
       <AdminDeleteButton
         :label="t('prints.delete')"

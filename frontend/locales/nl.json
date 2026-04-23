@@ -4,6 +4,10 @@
     "archive": "archief",
     "stories": "verhalen",
     "prints": "drukwerk",
+    "productions": "producties",
+    "events": "evenementen",
+    "accounts": "accounts",
+    "dashboard": "dashboard",
     "logout": "uitloggen"
   },
   "auth": {
@@ -102,15 +106,14 @@
       }
     },
     "filters": {
-      "toggle": "Filters",
       "year": "Jaar",
       "dateRange": "Datum",
       "clear": "Wis"
     }
   },
   "baseform": {
-    "submitbutton": "Indienen",
-    "resetbutton": "Herstellen"
+    "submitbutton": "Aanmaken",
+    "resetbutton": "Leegmaken"
   },
   "archive": {
     "header_title": "Archief",
@@ -128,7 +131,6 @@
     "next_page": "Volgende pagina",
     "loading": "Laden…",
     "search_placeholder": "Doorzoek archief...",
-    "filter": "Filter",
     "view_list": "Lijst",
     "view_grid": "Raster",
     "page_label": "Pagina",
@@ -152,7 +154,9 @@
     "stories": "Verhalen",
     "credits": "Credits",
     "showExtraPrices": "+ {count} prijzen",
-    "hidePriceDetails": "verberg details"
+    "hidePriceDetails": "verberg details",
+    "doors": "deuren open",
+    "break": "pauze"
   },
   "general": {
     "back": "Terug",
@@ -160,7 +164,8 @@
     "readLess": "Lees minder",
     "showMore": "Toon meer",
     "showLess": "Toon minder",
-    "noStories": "Deze productie bevat geen verhalen."
+    "noStories": "Deze productie bevat geen verhalen.",
+    "filters": "filters"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",
@@ -187,7 +192,16 @@
     "admin": "Admin",
     "actions": "Acties",
     "delete": "Verwijder",
-    "protected": "Beveiligd"
+    "protected": "Beveiligd",
+    "create": "Account aanmaken",
+    "creating": "Account aanmaken...",
+    "loadError": "Accounts konden niet geladen worden.",
+    "createError": "Account kon niet aangemaakt worden.",
+    "alreadyExists": "Account \"{username}\" bestaat al.",
+    "deleteError": "Account kon niet verwijderd worden.",
+    "confirmDelete": "Account \"{username}\" verwijderen? Dit kan niet ongedaan gemaakt worden.",
+    "createSuccess": "Account \"{username}\" aangemaakt.",
+    "deleteSuccess": "Account \"{username}\" verwijderd."
   },
   "prints": {
     "types": {
@@ -196,6 +210,14 @@
       "brochure": "Brochure",
       "drukwerk": "Drukwerk",
       "programma": "Programma"
+    },
+    "form": {
+      "title": "Titel",
+      "type": "Printtype",
+      "file": "Bestand",
+      "fileRequired": "Upload een bestand.",
+      "uploadError": "Kan het bestand niet uploaden.",
+      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?"
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
@@ -211,7 +233,109 @@
     "noPrints": "Geen drukwerk",
     "pagination": "Paginering",
     "page_label": "Pagina",
-    "of_pages": "van {total}"
+    "of_pages": "van {total}",
+    "add": "voeg toe"
+  },
+  "admin": {
+    "back": "Terug",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "blogs": {
+      "new": "Nieuw Verhaal",
+      "edit": "Verhaal Bewerken",
+      "results": "resultaten",
+      "fetchError": "Er ging iets mis bij het laden van de verhalen.",
+      "loadError": "Het verhaal kon niet worden geladen. Probeer het opnieuw.",
+      "notFound": "Verhaal niet gevonden",
+      "createBtn": "Verhaal Aanmaken",
+      "nextBtn": "Volgende — Afbeeldingen toevoegen →",
+      "saveBtn": "Wijzigingen Opslaan",
+      "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
+      "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
+      "sectionTitle": "Titel",
+      "sectionContent": "Inhoud",
+      "titleNl": "Titel (NL)",
+      "titleNlPlaceholder": "Titel in het Nederlands",
+      "titleEn": "Titel (EN)",
+      "titleEnPlaceholder": "Titel in het Engels",
+      "titleEnFallback": "Valt terug op de Nederlandse titel als leeg gelaten.",
+      "descriptionNl": "Omschrijving (NL)",
+      "descriptionNlPlaceholder": "Schrijf de Nederlandstalige omschrijving…",
+      "descriptionEn": "Omschrijving (EN)",
+      "descriptionEnPlaceholder": "Schrijf de Engelstalige omschrijving…",
+      "descriptionEnFallback": "Valt terug op de Nederlandse omschrijving als leeg gelaten.",
+      "deleteTitle": "Verhaal Verwijderen",
+      "deleteConfirm": "Weet je zeker dat je \"{title}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+      "deleteConfirmBtn": "Verwijderen",
+      "titleEnRequired": "Engelse titel is nodig",
+      "descriptionEnRequired": "Engelse beschrijving is nodig",
+      "validation": {
+        "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
+        "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
+      },
+      "preview": {
+        "label": "Sitevoorbeeld",
+        "badge": "Live voorbeeld",
+        "lang": "Voorbeeld",
+        "placeholderTitle": "Jouw titel verschijnt hier",
+        "bodyPlaceholder": "Begin te schrijven om een voorbeeld van je verhaal te zien…"
+      },
+      "image": {
+        "title": "Headerafbeelding",
+        "subtitle": "PNG, JPG of WebP — wordt getoond als story-hero en in de lijstweergave.",
+        "currentLabel": "Huidige header",
+        "noImage": "Nog geen afbeelding",
+        "upload": "Uploaden",
+        "replace": "Vervangen",
+        "uploading": "Uploaden…",
+        "typeError": "Selecteer een afbeeldingsbestand (PNG, JPG, WebP…).",
+        "uploadError": "Upload mislukt.",
+        "galleryError": "Aanmaken van mediagalerij mislukt.",
+        "itemError": "Aanmaken van media-item mislukt.",
+        "cropError": "Aanmaken van media-crop mislukt.",
+        "uploadSuccess": "{name} succesvol geüpload.",
+        "removed": "{name} verwijderd.",
+        "deleteConfirmCrop": "Verwijder de crop \"{name}\"? Dit kan niet ongedaan worden gemaakt.",
+        "uploaded": "geüpload",
+        "allBelongNote": "Alle crops horen bij één media-item dat aan dit verhaal is gekoppeld.",
+        "backToForm": "Inhoud bewerken",
+        "createSuccessHint": "Je verhaal is opgeslagen. Upload nu een headerafbeelding, of sla op en doe dit later via de bewerkpagina.",
+        "multiTitle": "Headerafbeeldingen",
+        "multiSubtitle": "Upload maximaal 6 afbeelding-crops — upload alleen de formaten die je nodig hebt.",
+        "cropHdReady": "HD Ready (lijst / kaart)",
+        "cropHdReadyHint": "16:9 — gebruikt in de verhalenlijst en kaartweergave",
+        "cropHeader": "Header (verhaalpagina)",
+        "cropHeaderHint": "Breed banner — getoond bovenaan de verhaalpagina",
+        "cropThumbnail": "Thumbnail (klein)",
+        "cropThumbnailHint": "Vierkante thumbnail voor compacte contexten",
+        "cropOg": "OG / Social-afbeelding",
+        "cropOgHint": "Getoond wanneer het verhaal gedeeld wordt op sociale media",
+        "cropMobile": "Mobiele crop",
+        "cropMobileHint": "Portretcrop geoptimaliseerd voor smalle schermen",
+        "cropNb": "NB Ready",
+        "cropNbHint": "Variant met neutrale achtergrond"
+      },
+      "linkToProduction": "Koppel aan productie",
+      "linkBtn": "Koppelen",
+      "linkToProductionTitle": "Koppel aan productie",
+      "linkToProductionSearch": "Zoek producties op titel...",
+      "linkToProductionNoResults": "Geen producties gevonden",
+      "linkToProductionSuccess": "Succesvol gekoppeld aan productie",
+      "linkToProductionError": "Koppelen mislukt. Probeer opnieuw.",
+      "shareGallery": "Deel afbeeldingen met deze productie",
+      "shareGalleryHint": "De productie toont dan dezelfde foto's als dit verhaal.",
+      "linking": "Koppelen...",
+      "linked": "Gekoppeld",
+      "linkedProductions": "Koppel aan productie",
+      "linkedProductionsHint": "Koppel dit verhaal aan een productie zodat het verschijnt op de productiepagina.",
+      "linkedThisSession": "Gekoppeld in deze sessie",
+      "noLinkedProductions": "Nog niet gekoppeld aan een productie",
+      "viewProduction": "Bekijk productiepagina"
+    }
   },
   "login": {
     "username": "Gebruikersnaam",
@@ -219,6 +343,33 @@
     "signIn": "Inloggen",
     "signingIn": "Inloggen...",
     "error": "Er is iets misgegaan."
+  },
+  "editor": {
+    "placeholder": "Schrijf je verhaal...",
+    "toolbar": {
+      "bold": "Vet (Ctrl+B)",
+      "italic": "Cursief (Ctrl+I)",
+      "underline": "Onderstrepen (Ctrl+U)",
+      "strike": "Doorhalen",
+      "h1": "Kop 1 (heel alinea)",
+      "h2": "Kop 2 (heel alinea)",
+      "h3": "Kop 3 (heel alinea)",
+      "bulletList": "Opsommingslijst",
+      "orderedList": "Genummerde lijst",
+      "blockquote": "Blokcitaat",
+      "link": "Link invoegen/bewerken",
+      "linkPrompt": "URL:",
+      "color": "Tekstkleur",
+      "fontSize": "Lettergrootte (selectie)",
+      "sizeNormal": "Normaal",
+      "sizeSmall": "Klein",
+      "sizeNormalPx": "Normaal (14px)",
+      "sizeLarge": "Groot",
+      "sizeXLarge": "Extra groot",
+      "sizeXXLarge": "Extra extra groot",
+      "hr": "Horizontale lijn",
+      "clearFormat": "Opmaak wissen"
+    }
   },
   "admin-productions": {
     "header_title": "Producties"
