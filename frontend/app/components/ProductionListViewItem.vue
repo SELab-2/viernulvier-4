@@ -30,6 +30,7 @@ const emit = defineEmits<{
   (e: "delete", production: ProductionView): void;
 }>();
 
+const { t } = useI18n();
 const tags = ref<Tag[]>([]);
 const events = ref<Event[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
@@ -91,6 +92,32 @@ async function loadGallery() {
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
+
+// Determine if the production has any events in the future to know if we should display a warning icon in admin mode.
+const isFutureProduction = computed(() => {
+  if (!events.value?.length) return false;
+
+  const now = Date.now();
+
+  const allTimes: number[] = [];
+
+  for (const e of events.value) {
+    if (e?.starttime) {
+      const t = Date.parse(e.starttime);
+      if (!Number.isNaN(t)) allTimes.push(t);
+    }
+    if (e?.endtime) {
+      const t = Date.parse(e.endtime);
+      if (!Number.isNaN(t)) allTimes.push(t);
+    }
+  }
+
+  if (!allTimes.length) return false;
+
+  const latest = Math.max(...allTimes);
+
+  return latest > now;
+});
 
 onMounted(() => {
   loadEvents();
@@ -176,19 +203,29 @@ watch(locale, () => loadTags());
 
           <!-- Admin buttons -->
           <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
-            <NuxtLink
-              :to="
-                ROUTES.admin.productions.edit(Number(props.productionView.id))
-              "
-              @click.stop
-            >
-              <AdminEditButton label="Edit production" />
-            </NuxtLink>
-
-            <AdminDeleteButton
-              label="Delete production"
-              @click.stop="emit('delete', props.productionView)"
+            <!-- WARNING -->
+            <AdminWarningButton
+              v-if="isFutureProduction"
+              :title="t('admin-productions.warning-title')"
+              :description="t('admin-productions.warning-description')"
             />
+
+            <!-- NORMAL ACTIONS -->
+            <template v-else>
+              <NuxtLink
+                :to="
+                  ROUTES.admin.productions.edit(Number(props.productionView.id))
+                "
+                @click.stop
+              >
+                <AdminEditButton label="Edit production" />
+              </NuxtLink>
+
+              <AdminDeleteButton
+                label="Delete production"
+                @click.stop="emit('delete', props.productionView)"
+              />
+            </template>
           </div>
         </div>
 
