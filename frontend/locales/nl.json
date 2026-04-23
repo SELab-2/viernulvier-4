@@ -372,6 +372,8 @@
     }
   },
   "admin-productions": {
-    "header_title": "Producties"
+    "header_title": "Producties",
+    "create": "Nieuwe productie",
+    "editTags": "Tags bewerken"
   }
 }

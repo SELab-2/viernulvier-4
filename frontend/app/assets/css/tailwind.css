@@ -213,9 +213,9 @@
   --color-card-border: var(--card-border);
   --color-card-hover: var(--card-hover);
   --color-accent: var(--accent);
-  --accent-hover: var(--accent-hover);
-  --accent-light: var(--accent-light);
-  --accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-foreground: var(--accent-foreground);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
   --color-action-blue-border: var(--action-blue-border);

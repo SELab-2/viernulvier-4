@@ -24,6 +24,7 @@ import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
+import { Plus, Edit2 } from "lucide-vue-next";
 
 const props = withDefaults(
   defineProps<{
@@ -193,7 +194,24 @@ watch(searchQuery, () => {
           class="h-7 w-36 bg-muted rounded animate-pulse"
         />
 
-        <ArchivePagination />
+        <ArchivePagination v-if="!isAdmin" />
+        <div v-else class="flex gap-3">
+          <NuxtLink
+            :to="ROUTES.admin.productions.editTags"
+            class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary border-2 border-primary text-primary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-primary transition"
+          >
+            <Edit2 :size="15" />
+            {{ t("admin-productions.editTags") }}
+          </NuxtLink>
+
+          <NuxtLink
+            :to="ROUTES.admin.productions.create"
+            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+          >
+            <Plus :size="20" />
+            {{ t("admin-productions.create") }}
+          </NuxtLink>
+        </div>
       </div>
 
       <!-- Error state -->
