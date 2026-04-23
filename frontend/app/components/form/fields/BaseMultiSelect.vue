@@ -42,7 +42,7 @@ const searchQuery = ref("");
 const searchBarRef = ref();
 
 const normalizedOptions = computed<SearchSuggestion[]>(() => {
-  return props.options.map((opt) => {
+  return props.options.map((opt: unknown) => {
     if (typeof opt === "string") {
       return { display: opt, searchValue: opt, context: "" };
     }
