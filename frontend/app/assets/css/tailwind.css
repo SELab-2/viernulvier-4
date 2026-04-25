@@ -110,6 +110,10 @@
   --action-gray-icon: #4b5563;
   --action-gray-hover: #f9fafb;
 
+  --action-warning-border: #fcd34d;
+  --action-warning-icon: #d97706;
+  --action-warning-hover: #fffbeb;
+
   /* Generic feedback messages */
   --feedback-error-border: #fecaca;
   --feedback-error-bg: #fef2f2;
@@ -188,6 +192,10 @@
   --action-gray-icon: #d1d5db;
   --action-gray-hover: #1f2937;
 
+  --action-warning-border: #b45309;
+  --action-warning-icon: #fbbf24;
+  --action-warning-hover: #451a03;
+
   /* Generic feedback messages */
   --feedback-error-border: #7f1d1d;
   --feedback-error-bg: #450a0a;
@@ -213,9 +221,9 @@
   --color-card-border: var(--card-border);
   --color-card-hover: var(--card-hover);
   --color-accent: var(--accent);
-  --accent-hover: var(--accent-hover);
-  --accent-light: var(--accent-light);
-  --accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-foreground: var(--accent-foreground);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
   --color-action-blue-border: var(--action-blue-border);
@@ -231,6 +239,9 @@
   --color-action-gray-border: var(--action-gray-border);
   --color-action-gray-icon: var(--action-gray-icon);
   --color-action-gray-hover: var(--action-gray-hover);
+  --color-action-warning-border: var(--action-warning-border);
+  --color-action-warning-icon: var(--action-warning-icon);
+  --color-action-warning-hover: var(--action-warning-hover);
   --color-feedback-error-border: var(--feedback-error-border);
   --color-feedback-error-bg: var(--feedback-error-bg);
   --color-feedback-error-text: var(--feedback-error-text);

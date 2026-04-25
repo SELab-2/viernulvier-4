@@ -164,7 +164,8 @@
     "showMore": "Show more",
     "showLess": "Show less",
     "noStories": "This production doesn't contain any stories.",
-    "filters": "filters"
+    "filters": "filters",
+    "close": "close"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -369,5 +370,12 @@
       "hr": "Horizontal line",
       "clearFormat": "Clear formatting"
     }
+  },
+  "admin-productions": {
+    "header_title": "Productions",
+    "create": "Create production",
+    "editTags": "Edit tags",
+    "warning-title": "Future production",
+    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
   }
 }

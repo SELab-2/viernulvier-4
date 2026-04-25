@@ -1,22 +1,38 @@
 <!--
   This component represents a single item in the production list view.
   It displays the production's title, date range, and associated tags.
+
+  Modes:
+- Public: media display + title + artist + date range + tags
+- Admin:
+  * same as public but the tile itself is not clickable.
+  * edit / delete buttons OR warning button if production has events from the future.
 -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ProductionView, Tag, Event } from "@repo/common";
-import { useProductionApi } from "../composables/useProductionApi";
-import { useEventApi } from "../composables/useEventApi";
-import { ROUTES } from "../utils/routes";
-import { computeDateRangeFromEvents } from "../utils/formatters";
-import TagPill from "./TagPill.vue";
+import { useProductionApi } from "~/composables/useProductionApi";
+import { useEventApi } from "~/composables/useEventApi";
+import { ROUTES } from "~/utils/routes";
+import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
 
-const { productionView } = defineProps<{
-  productionView: ProductionView;
+const props = withDefaults(
+  defineProps<{
+    productionView: ProductionView;
+    isAdmin?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+  },
+);
+
+const emit = defineEmits<{
+  (e: "delete", production: ProductionView): void;
 }>();
 
+const { t, locale } = useI18n();
 const tags = ref<Tag[]>([]);
 const events = ref<Event[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
@@ -29,13 +45,11 @@ const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
 const { getMainImageCrop } = useGallery();
 
-const { locale } = useI18n();
-
 async function loadTags() {
-  if (!productionView?.id) return;
+  if (!props.productionView?.id) return;
 
   try {
-    const response = await getTags(productionView.id, locale.value);
+    const response = await getTags(props.productionView.id, locale.value);
     if (response.data) {
       tags.value = (response.data as Tag[]).filter((tag) => {
         const currentTag =
@@ -53,11 +67,11 @@ async function loadTags() {
 }
 
 async function loadEvents() {
-  if (!productionView?.id) return;
+  if (!props.productionView?.id) return;
 
   try {
     const resp = await getAllEvents({
-      eventFilters: { production_id: productionView.id as any },
+      eventFilters: { production_id: props.productionView.id as any },
     });
     if (resp.data && Array.isArray((resp.data as any).objects)) {
       events.value = (resp.data as any).objects as Event[];
@@ -70,14 +84,40 @@ async function loadEvents() {
 }
 
 async function loadGallery() {
-  if (!productionView?.id) return;
-  gallery.value = await getMediaGallery(productionView.id, locale.value);
+  if (!props.productionView?.id) return;
+  gallery.value = await getMediaGallery(props.productionView.id, locale.value);
 }
 
 // Recompute dateRangeText whenever events or locale changes
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
+
+// Determine if the production has any events in the future to know if we should display a warning button in admin mode.
+const isFutureProduction = computed(() => {
+  if (!events.value?.length) return false;
+
+  const now = Date.now();
+
+  const allTimes: number[] = [];
+
+  for (const e of events.value) {
+    if (e?.starttime) {
+      const t = Date.parse(e.starttime);
+      if (!Number.isNaN(t)) allTimes.push(t);
+    }
+    if (e?.endtime) {
+      const t = Date.parse(e.endtime);
+      if (!Number.isNaN(t)) allTimes.push(t);
+    }
+  }
+
+  if (!allTimes.length) return false;
+
+  const latest = Math.max(...allTimes);
+
+  return latest > now;
+});
 
 onMounted(() => {
   loadEvents();
@@ -86,7 +126,7 @@ onMounted(() => {
 });
 
 watch(
-  () => productionView.id,
+  () => props.productionView.id,
   () => {
     loadEvents();
     loadTags();
@@ -99,15 +139,20 @@ watch(locale, () => loadTags());
 </script>
 
 <template>
-  <NuxtLink
-    :to="ROUTES.productions.byId(productionView.id)"
+  <component
+    :is="props.isAdmin ? 'div' : 'NuxtLink'"
+    :to="
+      !props.isAdmin
+        ? ROUTES.productions.byId(props.productionView.id)
+        : undefined
+    "
     class="group block"
   >
     <div
       class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
     >
       <MediaDisplay
-        :id="productionView.id"
+        :id="props.productionView.id"
         :src="mainCrop"
         size="md"
         :rounded="true"
@@ -121,15 +166,18 @@ watch(locale, () => loadTags());
             <h3
               class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate"
             >
-              {{ productionView.titel }}
+              {{ props.productionView.titel }}
             </h3>
 
             <!-- Artist -->
             <p
-              v-if="productionView.artist && productionView.artist !== 'N/A'"
+              v-if="
+                props.productionView.artist &&
+                props.productionView.artist !== 'N/A'
+              "
               class="text-sm text-muted-foreground leading-normal line-clamp-1"
             >
-              {{ productionView.artist }}
+              {{ props.productionView.artist }}
             </p>
 
             <p
@@ -152,6 +200,33 @@ watch(locale, () => loadTags());
               <span>{{ dateRangeText }}</span>
             </p>
           </div>
+
+          <!-- Admin buttons -->
+          <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
+            <!-- WARNING -->
+            <AdminWarningButton
+              v-if="isFutureProduction"
+              :title="t('admin-productions.warning-title')"
+              :description="t('admin-productions.warning-description')"
+            />
+
+            <!-- NORMAL ACTIONS -->
+            <template v-else>
+              <NuxtLink
+                :to="
+                  ROUTES.admin.productions.edit(Number(props.productionView.id))
+                "
+                @click.stop
+              >
+                <AdminEditButton label="Edit production" />
+              </NuxtLink>
+
+              <AdminDeleteButton
+                label="Delete production"
+                @click.stop="emit('delete', props.productionView)"
+              />
+            </template>
+          </div>
         </div>
 
         <!-- Tags container -->
@@ -171,7 +246,7 @@ watch(locale, () => loadTags());
         </div>
       </div>
     </div>
-  </NuxtLink>
+  </component>
 </template>
 
 <style scoped>
