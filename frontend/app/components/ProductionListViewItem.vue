@@ -32,7 +32,7 @@ const emit = defineEmits<{
   (e: "delete", production: ProductionView): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const tags = ref<Tag[]>([]);
 const events = ref<Event[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
@@ -44,8 +44,6 @@ const mainCrop = computed(() => {
 const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
 const { getMainImageCrop } = useGallery();
-
-const { locale } = useI18n();
 
 async function loadTags() {
   if (!props.productionView?.id) return;
