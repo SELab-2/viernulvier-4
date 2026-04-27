@@ -166,8 +166,8 @@ CREATE TABLE api_keys
 
 CREATE TABLE account_api_keys
 (
-    account_id INT     NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
-    api_key_id INT     NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
+    account_id INT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    api_key_id INT NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
     PRIMARY KEY (account_id, api_key_id)
 );
 CREATE INDEX idx_account_api_keys_api_key_id ON account_api_keys (api_key_id);
@@ -203,7 +203,7 @@ CREATE TYPE crop_name AS ENUM (
     'FE3_header',
     'FE3_2by1',
     'FE3_grid'
-);
+    );
 
 CREATE TYPE gallery_type AS ENUM (
     'prints',
@@ -312,11 +312,11 @@ CREATE TABLE blog_media_gallery
 CREATE INDEX idx_blog_media_gallery_gallery_id ON blog_media_gallery (gallery_id);
 
 CREATE TYPE print_enum AS ENUM (
-    'affiche', 
+    'affiche',
     'brochure',
-    'drukwerk', 
+    'drukwerk',
     'programma'
-);
+    );
 
 CREATE TABLE print_items
 (
@@ -341,3 +341,37 @@ CREATE TABLE print_item_media_gallery
     media_gallery_id INT NOT NULL REFERENCES media_gallery (id) ON DELETE CASCADE,
     PRIMARY KEY (print_item_id, media_gallery_id)
 );
+
+-- Create the series table
+CREATE TABLE series
+(
+    id          SERIAL PRIMARY KEY,
+    titel       JSONB     NOT NULL,
+    description JSONB,
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Create the join table for productions and series
+CREATE TABLE production_series
+(
+    production_id INT NOT NULL,
+    series_id     INT NOT NULL,
+    PRIMARY KEY (production_id, series_id),
+    CONSTRAINT fk_production
+        FOREIGN KEY (production_id)
+            REFERENCES productions (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_series
+        FOREIGN KEY (series_id)
+            REFERENCES series (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX idx_production_series_series_id ON production_series (series_id);
+
+CREATE TRIGGER trg_series_updated_at
+    BEFORE UPDATE
+    ON media_gallery
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
