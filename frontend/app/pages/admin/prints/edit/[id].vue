@@ -1,7 +1,7 @@
 <!--
-  pages/admin/prints/create.vue
+  pages/admin/prints/edit/[id].vue
 
-  Admin Print Create Page
+  Admin Print Edit Page
 
   Key features include:
   - Dutch title input, English title input with fallback on Dutch
@@ -10,7 +10,7 @@
   - File upload required (pdf, png, jpg, webp)
 
   On submission:
-  - A new print entry is created via the API
+  - An existing print entry will be modified via the API
   - The user is redirected to the admin prints page
 
   The page coordinates:
@@ -20,17 +20,37 @@
 -->
 
 <script setup lang="ts">
-import type { FormField } from "../../../types/FormField";
-import { usePrintApi } from "../../../composables/media/usePrintApi";
-import { useStorageApi } from "../../../composables/media/useStorageApi";
-import { PrintTypeValues } from "@repo/common";
+import type { FormField } from "../../../../types/FormField";
+import { usePrintApi } from "../../../../composables/media/usePrintApi";
+import { useStorageApi } from "../../../../composables/media/useStorageApi";
+import { type PrintItemView, PrintTypeValues } from "@repo/common";
 
+const route = useRoute();
 const { t } = useI18n();
-const { create } = usePrintApi();
+const { getById, modify } = usePrintApi();
 const { saveMedia } = useStorageApi();
 
+// Resolved print ID from the route
+const printId = computed<number | null>(() => {
+  const raw = Array.isArray(route.params.id)
+    ? route.params.id[0]
+    : route.params.id;
+  const n = parseInt(raw ?? "", 10);
+  return isFinite(n) ? n : null;
+});
+
+// State
+const print = ref<PrintItemView | null>(null);
 const loading = ref(false); // true while the form is being submitted
+const fetching = ref(false); // true while loading existing print data
 const error = ref<string | null>(null); // holds error message (to display in case of error)
+const saved = ref(false);
+const titel = computed(
+  () => print.value?.titel as { nl: string; en: string } | undefined,
+);
+const description = computed(
+  () => print.value?.description as { nl: string; en: string } | undefined,
+);
 
 const fields = computed<FormField[]>(() => [
   // Contains all separate input components
@@ -76,35 +96,63 @@ const fields = computed<FormField[]>(() => [
   },
 ]);
 
+// Print data
+async function loadPrint() {
+  if (!printId.value) return;
+  fetching.value = true;
+  error.value = null;
+  try {
+    const resp = await getById(printId.value);
+    print.value = resp.data as PrintItemView;
+  } catch {
+    error.value = t("admin.form.loadError");
+  } finally {
+    fetching.value = false;
+  }
+}
+
+// Save
 async function handleSubmit(form: Record<string, any>) {
+  if (!printId.value || !print.value) return;
   loading.value = true;
+  saved.value = false;
   error.value = null;
   try {
     const file: File | null = form.file?.length ? form.file[0] : null;
+    let url = print.value.url; // reuse existing url by default
+
     if (!file) {
       error.value = t("prints.form.fileRequired");
       return;
     }
 
-    const storagePath = `/prints/${Date.now()}-${file.name}`; // Saving in storage first
-    const uploadResult = await saveMedia(storagePath, file);
-    if (uploadResult.error) {
-      error.value = t("prints.form.uploadError");
-      return;
+    if (file) {
+      const storagePath = `/prints/${Date.now()}-${file.name}`; // Saving in storage first
+      const uploadResult = await saveMedia(storagePath, file);
+      if (uploadResult.error) {
+        error.value = t("prints.form.uploadError");
+        return;
+      }
+      if (uploadResult.error || !uploadResult.data) {
+        error.value = t("prints.form.uploadError");
+        return;
+      }
+      url = uploadResult.data; // Retrieving url
     }
-    const url = uploadResult.data; // Retrieving url
+
     if (!url) {
       error.value = t("prints.form.uploadError");
       return;
     }
 
-    await create({
+    await modify(printId.value, {
       titel: { nl: form.titel_nl, en: form.titel_en ?? form.titel_nl }, // Fallback on Dutch
       description: { nl: "", en: "" },
       print_type: form.print_type,
       url,
     });
 
+    saved.value = true;
     await navigateTo(ROUTES.admin.prints.base);
   } catch (e) {
     error.value = (e as Error).message;
@@ -112,6 +160,8 @@ async function handleSubmit(form: Record<string, any>) {
     loading.value = false;
   }
 }
+
+onMounted(loadPrint);
 </script>
 
 <template>
@@ -139,7 +189,18 @@ async function handleSubmit(form: Record<string, any>) {
     </p>
 
     <!-- Form -->
-    <FormBaseForm :fields="fields" @submit="handleSubmit" />
+    <FormBaseForm
+      v-if="print"
+      :fields="fields"
+      @submit="handleSubmit"
+      :initial-values="{
+        titel_nl: titel?.nl,
+        titel_en: titel?.en,
+        description_nl: description?.nl,
+        description_en: description?.en,
+        print_type: print.print_type,
+      }"
+    />
   </div>
 </template>
 
