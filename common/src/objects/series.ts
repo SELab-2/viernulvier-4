@@ -5,7 +5,7 @@ import { LocalizedStringSchema } from "./language";
 export const SeriesSchema = z.object({
   id: z.number(),
   titel: LocalizedStringSchema,
-  desc: LocalizedStringSchema,
+  description: LocalizedStringSchema,
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   // Legacy ID is omitted here because the API doesn't use it.
@@ -14,7 +14,7 @@ export const SeriesSchema = z.object({
 // Localized Series object.
 export const SeriesViewSchema = SeriesSchema.extend({
   titel: z.string(),
-  desc: z.string(),
+  description: z.string(),
 });
 
 // Omits read-only fields.
