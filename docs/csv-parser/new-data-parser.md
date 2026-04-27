@@ -128,7 +128,7 @@ ID,Titel_NL,Titel_EN,Description1_NL,Description1_EN,Description2_NL,Description
 **Template header:**
 
 ```
-ID,Starttime,Endtime,Doors_At,Intermission_At,Location_NL,Location_EN,Production
+ID,Starttime,Endtime,Doors_At,Intermission_At,Location_NL,Location_EN,ProductionID
 ```
 
 **Example row:**
@@ -148,7 +148,7 @@ ID,Starttime,Endtime,Doors_At,Intermission_At,Location_NL,Location_EN,Production
 | `Intermission_At` | No       | Can be empty                              |
 | `Location_NL`     | No       | Can be empty                              |
 | `Location_EN`     | No       | Will be translated if empty and NL exists |
-| `Production`      | Yes      | Must reference a production ID like `101` |
+| `ProductionID`    | Yes      | Must reference a production ID like `101` |
 
 ### Tags
 

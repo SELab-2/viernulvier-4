@@ -204,9 +204,9 @@ export class CSVFileParser {
       }
     }
 
-    const productionId = Number(row.Production);
+    const productionId = Number(row.ProductionID);
     if (isNaN(productionId)) {
-      throw new Error(`Invalid production id: ${row.Production}`);
+      throw new Error(`Invalid production id: ${row.ProductionID}`);
     }
 
     const location = CSVFileParser.toLocalizedString(
@@ -401,7 +401,7 @@ export class CSVFileParser {
         "Intermission_At",
         "Location_NL",
         "Location_EN",
-        "Production",
+        "ProductionID",
       ],
     );
 
