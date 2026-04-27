@@ -20,10 +20,11 @@
 -->
 
 <script setup lang="ts">
+import type { PrintItemView } from "@repo/common";
+import { PrintTypeValues } from "@repo/common";
 import type { FormField } from "../../../../types/FormField";
 import { usePrintApi } from "../../../../composables/media/usePrintApi";
 import { useStorageApi } from "../../../../composables/media/useStorageApi";
-import { type PrintItemView, PrintTypeValues } from "@repo/common";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -41,8 +42,8 @@ const printId = computed<number | null>(() => {
 
 // State
 const print = ref<PrintItemView | null>(null);
-const loading = ref(false); // true while the form is being submitted
 const fetching = ref(false); // true while loading existing print data
+const loading = ref(false); // true while the form is being submitted
 const error = ref<string | null>(null); // holds error message (to display in case of error)
 const saved = ref(false);
 const titel = computed(
