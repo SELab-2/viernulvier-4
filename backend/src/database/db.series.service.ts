@@ -6,11 +6,16 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
-import { PaginatedResponse, SeriesSchema } from "@repo/common";
+import {
+  PaginatedResponse,
+  ProductionSchema,
+  SeriesSchema,
+} from "@repo/common";
 import {
   CreateSeriesDto,
   ModifySeriesDto,
   PaginationFilterDto,
+  ProductionDto,
   ReplaceSeriesDto,
   SeriesDto,
 } from "../dto/dto";
@@ -181,6 +186,55 @@ export class SeriesDatabaseService {
   ): Promise<void> {
     const query = `DELETE FROM production_series WHERE production_id = $1 AND series_id = $2`;
     await this.db.query(query, [productionId, seriesId]);
+  }
+
+  /**
+   * Get all productions linked to a series with pagination.
+   * @param seriesId is the series you want the productions from
+   * @param paginationFilters are the filters you want to use in the pagination.
+   * @returns a paginated response of Productions
+   */
+  async getProductionsFromSeries(
+    seriesId: number,
+    paginationFilters: PaginationFilterDto,
+  ): Promise<PaginatedResponse<ProductionDto>> {
+    const returningClause = generateReturningClause(ProductionSchema);
+    const offset = paginationFilters.page * paginationFilters.limit;
+
+    // Main query with JOIN, parameterized WHERE clause, and pagination
+    const query = `
+    SELECT ${returningClause}
+    FROM productions
+    LEFT JOIN production_series AS ps ON productions.id = ps.production_id
+    WHERE ps.series_id = $1
+    ORDER BY productions.id
+    LIMIT $2 OFFSET $3;
+  `;
+
+    // Count query must include the same JOIN and WHERE clause to be accurate
+    const countQuery = `
+    SELECT COUNT(*) as count 
+    FROM productions 
+    LEFT JOIN production_series AS ps ON productions.id = ps.production_id 
+    WHERE ps.series_id = $1;
+  `;
+
+    // Execute both queries in parallel
+    const [productions, countResult] = await Promise.all([
+      this.db.query<ProductionDto>(query, [
+        seriesId,
+        paginationFilters.limit,
+        offset,
+      ]),
+      this.db.query<{ count: string }>(countQuery, [seriesId]),
+    ]);
+
+    return {
+      page: paginationFilters.page,
+      limit: paginationFilters.limit,
+      totalItems: parseInt(countResult[0].count),
+      objects: productions,
+    };
   }
 
   // insert extra functions here if desired.
