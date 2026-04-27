@@ -193,6 +193,7 @@ onMounted(loadPrint);
     <FormBaseForm
       v-if="print"
       :fields="fields"
+      :submit-label="t('prints.form.edit')"
       @submit="handleSubmit"
       :initial-values="{
         titel_nl: titel?.nl,

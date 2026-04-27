@@ -37,6 +37,7 @@ const { t } = useI18n();
 interface Props {
   fields: FormField[]; // Can store multiple fields, allows us to have multiple of the same type
   initialValues?: Record<string, any>; // Optional pre-filled values
+  submitLabel?: string; // Text on the submit button
 }
 
 const { fields, initialValues } = defineProps<Props>();
@@ -110,7 +111,7 @@ function collectMultiSelectRef(el: any) {
         type="submit"
         class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
       >
-        {{ t("baseform.submitbutton") }}
+        {{ submitLabel ?? t("baseform.submitbutton") }}
       </button>
       <!-- Reset button -->
       <button

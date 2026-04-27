@@ -219,7 +219,8 @@
       "fileRequired": "Upload een bestand.",
       "uploadError": "Kan het bestand niet uploaden.",
       "loadError": "Kan drukwerk niet laden.",
-      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?"
+      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?",
+      "edit": "Pas wijzigingen toe"
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
