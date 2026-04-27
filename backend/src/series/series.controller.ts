@@ -161,11 +161,8 @@ export class SeriesController {
   @ApiOperation({ summary: "Deletes a Series." })
   @ApiOkResponse({ description: "Series Deleted." })
   @Delete(":seriesId")
-  async deleteSeries(
-    @Param("seriesId", ParseIntPipe) seriesId: number,
-  ): Promise<{ message: string }> {
+  async deleteSeries(@Param("seriesId", ParseIntPipe) seriesId: number) {
     await this.seriesService.deleteSeries(seriesId);
-    return { message: "Series successfully deleted." };
   }
 
   // ====================================================================
