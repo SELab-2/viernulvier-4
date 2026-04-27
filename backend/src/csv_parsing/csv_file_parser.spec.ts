@@ -2,6 +2,7 @@ import fs, { ReadStream } from "fs";
 import { Readable } from "stream";
 import { z } from "zod";
 import { CSVFileParser } from "./csv_file_parser";
+import { CsvMissingHeadersException } from "../common/exceptions";
 
 jest.mock("fs");
 
@@ -105,6 +106,17 @@ describe("CSVFileParser", () => {
       await expect(
         CSVFileParser.parseCSVWithSchema("dummy.csv", z.any(), (row) => row),
       ).rejects.toThrow("Stream failure");
+    });
+
+    it("should reject when required headers are missing", async () => {
+      const csvBuffer = Buffer.from("name\nJohn\n", "utf8");
+
+      await expect(
+        CSVFileParser.parseCSVWithSchema(csvBuffer, z.any(), (row) => row, [
+          "name",
+          "age",
+        ]),
+      ).rejects.toBeInstanceOf(CsvMissingHeadersException);
     });
   });
 
