@@ -183,10 +183,18 @@ export class SeriesController {
   async getSeriesProductions(
     @Param("seriesId", ParseIntPipe) seriesId: number,
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
+    @Query(new ZodValidationPipe(PaginationFilterSchema))
+    paginationFilters: PaginationFilterDto,
   ): Promise<PaginatedResponse<ProductionDto | ProductionViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<ProductionDto | ProductionViewDto>
-    >(await this.seriesService.getSeriesProductions(seriesId), lang.lang);
+    >(
+      await this.seriesService.getSeriesProductions(
+        seriesId,
+        paginationFilters,
+      ),
+      lang.lang,
+    );
   }
 
   /**

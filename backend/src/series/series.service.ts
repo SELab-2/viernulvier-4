@@ -68,11 +68,20 @@ export class SeriesService {
    * Adding Productions.
    */
 
-  async getSeriesProductions(seriesId: number): Promise<ProductionDto[]> {
-    await Promise.resolve();
-    console.log(seriesId);
-    // TODO: Call db service when it exists.
-    return [];
+  /**
+   * Return all productions tied to a single series paginated.
+   * @param seriesId The ID of the series.
+   * @param paginationFilter The filters applied to pagination.
+   * @returns The paginated list of productions.
+   */
+  async getSeriesProductions(
+    seriesId: number,
+    paginationFilter: PaginationFilterDto,
+  ): Promise<PaginatedResponse<ProductionDto>> {
+    return await this.seriesDbService.getProductionsFromSeries(
+      seriesId,
+      paginationFilter,
+    );
   }
 
   /**
