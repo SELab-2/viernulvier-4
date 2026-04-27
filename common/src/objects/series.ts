@@ -1,6 +1,5 @@
 import z from "zod";
 import { LocalizedStringSchema } from "./language";
-import { PriceSchema } from "./prices";
 
 // Base Series object.
 export const SeriesSchema = z.object({
@@ -13,13 +12,13 @@ export const SeriesSchema = z.object({
 });
 
 // Localized Series object.
-export const SeriesViewSchema = PriceSchema.extend({
+export const SeriesViewSchema = SeriesSchema.extend({
   titel: z.string(),
   desc: z.string(),
 });
 
 // Omits read-only fields.
-const MutableSeriesSchema = PriceSchema.omit({
+const MutableSeriesSchema = SeriesSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
