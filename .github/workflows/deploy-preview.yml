@@ -108,5 +108,5 @@ jobs:
 
             📱 **Website Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/archive
             📚 **Docs Preview:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/archive/docs/
-            ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api/
+            ⚙️ **Backend API Base:** https://sel2-4.ugent.be/previews/${{ github.event.pull_request.number }}/api/docs/
           comment_tag: preview_link
