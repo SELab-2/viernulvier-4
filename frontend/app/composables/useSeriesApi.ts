@@ -20,7 +20,7 @@ interface SeriesListOptions {
 /**
  * Frontend API calls for series.
  */
-export function useItemApi() {
+export function useSeriesApi() {
   const { get, post, patch, put, del } = useApi();
 
   /**
