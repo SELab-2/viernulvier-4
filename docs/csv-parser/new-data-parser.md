@@ -226,6 +226,7 @@ Standaard,Standard,25,201
 - IDs and references must be numeric where expected.
 - Invalid rows are skipped; import continues for valid rows.
 - Legacy IDs are generated as `csv-<id>` for imported records.
+- All header fields of the corresponding template should be present in the uploaded CSV.
 
 ### Localization
 
