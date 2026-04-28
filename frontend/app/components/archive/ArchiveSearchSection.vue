@@ -13,21 +13,45 @@ Uses:
 - useProductionApi / useEventApi: to derive oldest available date
 - Calendar: date range filtering UI
 - TagFilter: tag selection UI
+
+Modes:
+- Public:
+  search + filters + grid/list toggle
+
+- Admin:
+  search + filters only
+  forced list view
 -->
 <script setup lang="ts">
-import { LayoutGrid, List } from "lucide-vue-next";
+import { LayoutGrid, List, X } from "lucide-vue-next";
 import { useArchiveView } from "../../composables/useArchiveView";
 import Calendar from "~/components/DefaultCalendar.vue";
 import { useProductionApi } from "~/composables/useProductionApi";
 import { useEventApi } from "~/composables/useEventApi";
 import type { ProductionView, Event } from "@repo/common";
 import TagFilter from "./TagFilter.vue";
-import { X } from "lucide-vue-next";
+import { getToday } from "~/utils/constants";
+
+const props = withDefaults(
+  defineProps<{
+    isAdmin?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+  },
+);
 
 const { t, locale } = useI18n();
 
-const { viewMode, searchQuery, sortOrder, dateFilter, oldestDate, tagIds } =
-  useArchiveView();
+const {
+  viewMode,
+  searchQuery,
+  sortOrder,
+  dateFilter,
+  oldestDate,
+  tagIds,
+  fetchSuggestions,
+} = useArchiveView();
 
 const { getAll: getAllProductions } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
@@ -40,7 +64,7 @@ const hasActiveFilters = computed(() => {
   return (
     tagIds.value.length > 0 ||
     !!dateFilter.value.after ||
-    !!dateFilter.value.before
+    dateFilter.value.before !== getToday() // Checks whether the before date is custom or not.
   );
 });
 
@@ -89,18 +113,26 @@ async function fetchOldestDate() {
   }
 }
 
-onMounted(fetchOldestDate);
+onMounted(() => {
+  if (props.isAdmin) {
+    viewMode.value = "list";
+  }
+
+  fetchOldestDate();
+});
 </script>
 
 <template>
   <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
-    <div class="max-w-5xl mx-auto px-4 py-6 flex items-center gap-4">
+    <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
-      <div class="flex-1 h-12">
+      <div class="flex-1 min-w-0 h-12">
         <SearchBar
           v-model="searchQuery"
-          :items="[]"
+          :fetch-suggestions="fetchSuggestions"
+          :limit="15"
+          :scroll-limit="5"
           :placeholder="t('archive.search_placeholder')"
         />
       </div>
@@ -108,25 +140,44 @@ onMounted(fetchOldestDate);
       <!-- Filter toggle + badge -->
       <div class="relative">
         <button
-          :class="['btn-outline h-12 px-4']"
+          type="button"
+          :class="[
+            'btn-outline h-12 px-5 gap-2 shrink-0 flex items-center justify-center',
+            filterOpen && '!bg-foreground !text-background !border-foreground',
+          ]"
           :aria-expanded="filterOpen"
           @click="filterOpen = !filterOpen"
         >
-          {{ t("archive.filter") }}
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>{{ t("general.filters") }}</span>
         </button>
 
         <!-- Clear filters badge -->
         <button
           v-if="hasActiveFilters"
           @click.stop="clearAllFilters"
-          class="absolute -top-2.25 -right-2.25 w-5.5 h-5.5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] transition shadow-sm"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition shadow-sm"
         >
           <X class="w-3 h-3" />
         </button>
       </div>
 
-      <!-- View toggle -->
+      <!-- Public only: grid/list toggle -->
       <button
+        v-if="!props.isAdmin"
         class="w-12 h-12 flex items-center justify-center rounded-md border-2 border-foreground bg-transparent text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
         @click="viewMode = viewMode === 'grid' ? 'list' : 'grid'"
       >

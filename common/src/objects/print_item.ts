@@ -4,6 +4,7 @@
 
 import z from "zod";
 import { LocalizedStringSchema } from "./language";
+import { QueryBoolean } from "./pagination";
 
 // Allowed print types.
 export const PrintTypeValues = [
@@ -52,6 +53,9 @@ export const ReplacePrintItemSchema = MutablePrintItemSchema;
 export const FilterPrintItemSchema = z.object({
   title: z.string().optional(),
   type: PrintTypeSchema.optional(),
+
+  // Toggle for the backend to treat the request as a suggestion.
+  is_suggestion: QueryBoolean.default(false),
 });
 
 // Type exports.

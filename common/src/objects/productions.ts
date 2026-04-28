@@ -3,6 +3,7 @@ import {
   LocalizedStringNullableSchema,
   LocalizedStringSchema,
 } from "./language";
+import { QueryBoolean } from "./pagination";
 
 // Base Production object.
 export const ProductionSchema = z.object({
@@ -45,19 +46,24 @@ export const ReplaceProductionSchema = MutableProductionSchema;
 // Filtering.
 export const FilterProductionSchema = z.object({
   titelOrArtist: z.string().optional(),
-  tag_ids: z
-    .union([z.coerce.number(), z.array(z.coerce.number())])
-    .optional()
-    .transform((val) => {
-      if (val === undefined) return undefined;
-      if (Array.isArray(val)) return val;
-      return [val];
-    }),
+  tag_ids: z.preprocess((val) => {
+    // 1. Handle missing, null, or empty string -> undefined
+    if (val === undefined || val === null || val === "") return undefined;
+
+    // 2. Normalize single value to array
+    if (!Array.isArray(val)) return [Number(val)];
+
+    // 3. Ensure array elements are numbers
+    return val.map(Number);
+  }, z.array(z.number()).optional()),
   hall: z.string().optional(),
   before: z.iso.date().optional(),
   after: z.iso.date().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
+
+  // Toggle for the backend to treat the request as a suggestion.
+  is_suggestion: QueryBoolean.default(false),
 });
 
 // Type exports.

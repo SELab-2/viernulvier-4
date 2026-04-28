@@ -6,11 +6,10 @@
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ProductionView, Tag, Event } from "@repo/common";
-import { useProductionApi } from "../composables/useProductionApi";
-import { useEventApi } from "../composables/useEventApi";
-import { ROUTES } from "../utils/routes";
-import { computeDateRangeFromEvents } from "../utils/formatters";
-import TagPill from "./TagPill.vue";
+import { useProductionApi } from "~/composables/useProductionApi";
+import { useEventApi } from "~/composables/useEventApi";
+import { ROUTES } from "~/utils/routes";
+import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
 
 const { productionView } = defineProps<{

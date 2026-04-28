@@ -17,15 +17,11 @@ import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
 import ScrollToTop from "~/components/blogs/ScrollToTop.vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 
 const { t, locale } = useI18n();
 const { getAll } = useBlogApi();
-
-// Filters
-
-const sortOrder = ref<"newest" | "oldest">("newest");
-const searchQuery = ref("");
-const dateFilter = ref<FilterBlog>({});
+const { sortOrder, searchQuery, dateFilter } = useBlogView();
 
 //Oldest date (one-off fetch for Calendar "oldest" mode)
 
@@ -92,6 +88,7 @@ async function loadPage(reset = false) {
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
       blogFilters: {
+        is_suggestion: false, // This is not a suggestion.
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
         ...(dateFilter.value.after ? { after: dateFilter.value.after } : {}),
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),
@@ -165,7 +162,7 @@ onUnmounted(() => io?.disconnect());
       @update:date-filter="dateFilter = $event"
     />
 
-    <main class="container mx-auto px-4 max-w-5xl py-8 sm:py-12">
+    <main class="page-container py-8 sm:py-12">
       <StorySkeleton v-if="pending" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">

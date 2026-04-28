@@ -31,9 +31,7 @@ const showPassword = ref(false);
 const { t } = useI18n();
 
 // This makes sure that the login does not use the default layout with the header and footer.
-definePageMeta({
-  layout: false,
-});
+definePageMeta({ layout: false });
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value;

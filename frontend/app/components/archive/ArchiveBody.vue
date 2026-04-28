@@ -11,6 +11,9 @@ Responsible for:
 Uses:
 - useArchiveView: shared archive state (filters, pagination, view mode)
 - useProductionApi: API communication
+TODO: The pagination logic is not what I want to be defined here and should be changed in the future.
+      It should be defined elsewhere to be more clear and to prevent bugs that are hard to find.
+      By pagination logic I mean the logic that handles the parameters that are used to know on witch page the user is.
 -->
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from "vue";
@@ -22,6 +25,20 @@ import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
+import { Plus, Edit2 } from "lucide-vue-next";
+
+const props = withDefaults(
+  defineProps<{
+    isAdmin?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+  },
+);
+
+const baseRoute = computed(() =>
+  props.isAdmin ? ROUTES.admin.productions.base : ROUTES.productions.base,
+);
 
 const route = useRoute();
 const router = useRouter();
@@ -57,8 +74,8 @@ async function loadPage(page: number) {
         titelOrArtist: searchQuery.value || undefined,
         tag_ids: tagIds.value.length ? tagIds.value : undefined,
         after: dateFilter.value.after || undefined,
-        before:
-          dateFilter.value.before || new Date().toISOString().split("T")[0],
+        before: dateFilter.value.before, // before filter will always contain a value (today's date)
+        is_suggestion: false,
       },
       paginationFilters: {
         page: targetedPage - 1, // backend uses 0-based pagination
@@ -112,6 +129,9 @@ onUnmounted(() => {
 });
 
 onMounted(() => {
+  if (props.isAdmin) {
+    viewMode.value = "list";
+  }
   const pageFromUrl = parseInt(route.query.page as string) || 1;
   const safePage = Math.max(1, pageFromUrl);
   currentPage.value = safePage;
@@ -121,7 +141,7 @@ onMounted(() => {
 watch(
   () => route.query.page,
   (newPage) => {
-    if (route.path !== ROUTES.productions.base) return;
+    if (route.path !== baseRoute.value) return;
 
     const pageNum = parseInt(newPage as string) || 1;
 
@@ -136,7 +156,7 @@ watch(
 
 // Reload when pagination changes
 watch(currentPage, (newPage) => {
-  if (route.path !== ROUTES.productions.base) return;
+  if (route.path !== baseRoute.value) return;
 
   if (newPage.toString() !== route.query.page) {
     router.push({
@@ -161,7 +181,7 @@ watch(searchQuery, () => {
 
 <template>
   <section class="w-full bg-background">
-    <div class="max-w-5xl mx-auto px-4 py-6">
+    <div class="page-container py-6">
       <!-- Results count + pagination -->
       <div class="flex items-center justify-between mb-6">
         <p
@@ -175,7 +195,24 @@ watch(searchQuery, () => {
           class="h-7 w-36 bg-muted rounded animate-pulse"
         />
 
-        <ArchivePagination />
+        <ArchivePagination v-if="!isAdmin" />
+        <div v-else class="flex gap-3">
+          <NuxtLink
+            :to="ROUTES.admin.productions.editTags"
+            class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary border-2 border-primary text-primary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-primary transition"
+          >
+            <Edit2 :size="15" />
+            {{ t("admin-productions.editTags") }}
+          </NuxtLink>
+
+          <NuxtLink
+            :to="ROUTES.admin.productions.create"
+            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+          >
+            <Plus :size="20" />
+            {{ t("admin-productions.create") }}
+          </NuxtLink>
+        </div>
       </div>
 
       <!-- Error state -->
@@ -221,13 +258,16 @@ watch(searchQuery, () => {
       >
         <component
           :is="
-            viewMode === 'grid'
-              ? ProductionGridViewItem
-              : ProductionListViewItem
+            props.isAdmin
+              ? ProductionListViewItem
+              : viewMode === 'grid'
+                ? ProductionGridViewItem
+                : ProductionListViewItem
           "
           v-for="production in productions"
           :key="production.id"
           :productionView="production"
+          :is-admin="props.isAdmin"
         />
       </div>
 

@@ -7,11 +7,11 @@ import z from "zod";
 // All names a CROP can have.
 export const CROP_NAMES = [
   "hd_ready",
-  "nb_ready",
+  "hd_ready_square",
+  "hd_ready_portrait",
   "FE3_header",
-  "thumbnail",
-  "og_image",
-  "mobile",
+  "FE3_2by1",
+  "FE3_grid",
 ] as const;
 export const CropNameEnum = z.enum(CROP_NAMES);
 

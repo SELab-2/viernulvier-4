@@ -16,11 +16,27 @@ const props = withDefaults(defineProps<Props>(), {
   size: 44,
 });
 
+// note: credentials: "same-origin" is just to be able to use mock data hosted on third-party sites (with permissive CORS)
+// normally prints should be from filesystem on the server, feel free to remove isOwnBackend and set credentials to "include", if
+// your prefer to not have the feature above
 const downloadFile = async () => {
+  const isOwnBackend =
+    props.src.startsWith("/") ||
+    new URL(props.src).hostname === window.location.hostname;
+
+  const response = await fetch(props.src, {
+    credentials: isOwnBackend ? "include" : "same-origin",
+  });
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob); // temporary URL, lives in browser's memory
+
   const a = document.createElement("a"); // creates a temporary html <a> element
-  a.href = props.src;
-  a.download = props.name ?? "";
+  a.href = blobUrl;
+  a.download = props.name ?? props.src.split("/").pop() ?? "download";
   a.click();
+
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 100); // cleaning up temporary URL
 };
 </script>
 

@@ -18,9 +18,18 @@
     "@nuxtjs/i18n": "^10.2.3",
     "@repo/common": "*",
     "@tailwindcss/postcss": "^4.0.0",
+    "@vueuse/core": "^14.2.1",
+    "@tiptap/extension-color": "^3.22.3",
+    "@tiptap/extension-link": "^3.22.3",
+    "@tiptap/extension-placeholder": "^3.22.3",
+    "@tiptap/extension-text-style": "^3.22.3",
+    "@tiptap/extension-underline": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
+    "@tiptap/vue-3": "^3.22.3",
     "happy-dom": "^20.8.9",
     "lucide-vue-next": "^0.469.0",
     "pdfjs-dist": "^4.0.0",
+    "nuxt-snackbar": "^1.3.0",
     "tailwindcss": "^4.0.0"
   },
   "devDependencies": {

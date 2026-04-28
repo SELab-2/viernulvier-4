@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
+import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
 
 const { t, locale } = useI18n();
@@ -102,6 +103,7 @@ const { data: stories } = await useAsyncData(
   { watch: [productionId, locale], default: () => [] },
 );
 
+/** Gets the production gallery. Handles API nesting and page-specific data fetching.*/
 const { data: gallery } = await useAsyncData<
   GalleryWithItems<ItemViewWithCrops>
 >(
@@ -113,6 +115,7 @@ const { data: gallery } = await useAsyncData<
   },
   { watch: [productionId, locale] },
 );
+
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
@@ -125,19 +128,6 @@ const isValid = (val: any) => {
   if (!val) return false;
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
-};
-
-/**
- * Sanitizes raw text by removing escape characters and
- * converting newlines to HTML line breaks for v-html rendering.
- */
-const cleanText = (text: string | null | undefined) => {
-  if (!text) return "";
-  return text
-    .replace(/\\/g, "")
-    .trim()
-    .replace(/(\r?\n){2,}/g, "\n\n")
-    .replace(/\n/g, "<br />");
 };
 
 const fullDescription = computed(
@@ -192,9 +182,7 @@ onBeforeUnmount(() => {
         :src="headerCrop"
       />
 
-      <div
-        class="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20 pb-12"
-      >
+      <div class="relative z-10 page-container pb-12">
         <div class="flex items-center gap-4 mb-8">
           <button
             @click="goBack()"
@@ -259,7 +247,7 @@ onBeforeUnmount(() => {
     </section>
 
     <section class="py-20">
-      <div class="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20">
+      <div class="page-container">
         <div class="w-full">
           <div v-if="isValid(production.tagline)" class="mb-10">
             <p

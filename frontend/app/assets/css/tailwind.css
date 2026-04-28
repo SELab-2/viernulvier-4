@@ -109,6 +109,19 @@
   --action-gray-border: #d1d5db;
   --action-gray-icon: #4b5563;
   --action-gray-hover: #f9fafb;
+
+  --action-warning-border: #fcd34d;
+  --action-warning-icon: #d97706;
+  --action-warning-hover: #fffbeb;
+
+  /* Generic feedback messages */
+  --feedback-error-border: #fecaca;
+  --feedback-error-bg: #fef2f2;
+  --feedback-error-text: #b91c1c;
+
+  --feedback-success-border: #bbf7d0;
+  --feedback-success-bg: #f0fdf4;
+  --feedback-success-text: #15803d;
 }
 
 /* ─── Design tokens: dark mode ─────────────────────────────────────────────── */
@@ -178,6 +191,19 @@
   --action-gray-border: #4b5563;
   --action-gray-icon: #d1d5db;
   --action-gray-hover: #1f2937;
+
+  --action-warning-border: #b45309;
+  --action-warning-icon: #fbbf24;
+  --action-warning-hover: #451a03;
+
+  /* Generic feedback messages */
+  --feedback-error-border: #7f1d1d;
+  --feedback-error-bg: #450a0a;
+  --feedback-error-text: #fca5a5;
+
+  --feedback-success-border: #14532d;
+  --feedback-success-bg: #052e16;
+  --feedback-success-text: #86efac;
 }
 
 /* ── Tailwind theme mapping ──────────────────────────────────────── */
@@ -195,9 +221,9 @@
   --color-card-border: var(--card-border);
   --color-card-hover: var(--card-hover);
   --color-accent: var(--accent);
-  --accent-hover: var(--accent-hover);
-  --accent-light: var(--accent-light);
-  --accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-accent-foreground: var(--accent-foreground);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
   --color-action-blue-border: var(--action-blue-border);
@@ -213,6 +239,15 @@
   --color-action-gray-border: var(--action-gray-border);
   --color-action-gray-icon: var(--action-gray-icon);
   --color-action-gray-hover: var(--action-gray-hover);
+  --color-action-warning-border: var(--action-warning-border);
+  --color-action-warning-icon: var(--action-warning-icon);
+  --color-action-warning-hover: var(--action-warning-hover);
+  --color-feedback-error-border: var(--feedback-error-border);
+  --color-feedback-error-bg: var(--feedback-error-bg);
+  --color-feedback-error-text: var(--feedback-error-text);
+  --color-feedback-success-border: var(--feedback-success-border);
+  --color-feedback-success-bg: var(--feedback-success-bg);
+  --color-feedback-success-text: var(--feedback-success-text);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -254,6 +289,19 @@
 }
 .story-card:hover {
   background-color: var(--story-card-hover);
+}
+
+/* Snackbar colors aligned with existing feedback popup tokens */
+#vue3-snackbar--container .vue3-snackbar-message.success {
+  background-color: var(--feedback-success-bg);
+  border: 1px solid var(--feedback-success-border);
+  color: var(--feedback-success-text);
+}
+
+#vue3-snackbar--container .vue3-snackbar-message.error {
+  background-color: var(--feedback-error-bg);
+  border: 1px solid var(--feedback-error-border);
+  color: var(--feedback-error-text);
 }
 
 /* ── Blog timeline ───────────────────────────────────────────────── */
@@ -460,6 +508,19 @@
 
   .btn-danger:hover {
     @apply bg-[var(--foreground)] border-[var(--foreground)];
+  }
+
+  .page-container {
+    @apply mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-20;
+  }
+
+  .page-header-title {
+    @apply font-brand font-black text-4xl sm:text-6xl uppercase tracking-tighter leading-none text-foreground mb-3;
+  }
+
+  .page-header-subtitle {
+    @apply mt-4 max-w-xl;
+    @apply font-brand font-black text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground;
   }
 }
 /* ── Calendar component ──────────────────────────────────────────────────────

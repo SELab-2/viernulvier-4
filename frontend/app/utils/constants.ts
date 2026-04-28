@@ -21,3 +21,7 @@ export function pickPlaceholderGradient(id?: number): string {
   const idx = Math.abs(id) % list.length;
   return list[idx] ?? list[0] ?? fallback;
 }
+
+export function getToday(): string {
+  return new Date().toISOString().split("T")[0] ?? "1970-01-01";
+}

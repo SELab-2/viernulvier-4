@@ -17,11 +17,16 @@
 
 import { ChevronDown } from "lucide-vue-next";
 
+interface Option {
+  label: string;
+  value: string;
+}
+
 interface Props {
   label?: string; // label displayed above the field
   id?: string;
   required?: boolean; // adds a "*" if required
-  options: string[]; // options where can be selected from
+  options: string[] | Option[]; // options where can be selected from
 }
 defineProps<Props>();
 
@@ -51,8 +56,12 @@ const model = defineModel<string>();
         ]"
       >
         <option value="" disabled selected hidden>Select an option</option>
-        <option v-for="option in options" :key="option" :value="option">
-          {{ option }}
+        <option
+          v-for="option in options"
+          :key="typeof option === 'string' ? option : option.value"
+          :value="typeof option === 'string' ? option : option.value"
+        >
+          {{ typeof option === "string" ? option : option.label }}
         </option>
       </select>
 
