@@ -45,3 +45,4 @@ Belangrijke commandos (allemaal uitgevoerd in de *root* map):
 
 Alle relevante informatie over de technische stack, deployment en code documentatie is te vinden op
 de [GitHub Pages](https://selab-2.github.io/viernulvier-4/).
+
