@@ -29,7 +29,6 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
-  ApiTags,
 } from "@nestjs/swagger";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
@@ -47,7 +46,6 @@ import {
   ApiOkPaginatedResponseAnyOf,
 } from "../common/decorators/api.ok";
 
-@ApiTags("series")
 @Controller("series")
 export class SeriesController {
   constructor(
