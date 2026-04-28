@@ -376,6 +376,12 @@
     "create": "Create production",
     "editTags": "Edit tags",
     "warning-title": "Future production",
-    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
+    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled.",
+    "form-title": "Title",
+    "form-description1": "Description 1",
+    "form-description2": "Description 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artists"
   }
 }
