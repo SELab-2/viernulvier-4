@@ -335,6 +335,23 @@
       "linkedThisSession": "Linked this session",
       "noLinkedProductions": "Not linked to any production yet",
       "viewProduction": "View production page"
+    },
+    "parser": {
+      "title": "CSV parser",
+      "description": "Upload a CSV file for parsing.",
+      "uploadCsv": "Upload {target} CSV",
+      "uploading": "Uploading...",
+      "uploadSuccess": "Successfully uploaded {target} CSV.",
+      "uploadError": "Could not upload {target} CSV.",
+      "headerError": "{target} CSV is missing required headers: {fields}.",
+      "headerFallbackFields": "unknown headers",
+      "targets": {
+        "productions": "productions",
+        "events": "events",
+        "tags": "tags",
+        "blogs": "stories",
+        "prices": "prices"
+      }
     }
   },
   "login": {
