@@ -2,10 +2,10 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreatePriceDto,
-  PriceDto,
   ModifyPriceDto,
-  ReplacePriceDto,
   PaginationFilterDto,
+  PriceDto,
+  ReplacePriceDto,
 } from "../dto/dto";
 import { PaginatedResponse, PriceSchema } from "@repo/common";
 import {
@@ -46,8 +46,7 @@ export class PriceDatabaseService {
 
   /**
    * Get prices with pagination
-   * @param amount number of prices per page (if amount=0, it will default to grabbing all prices)
-   * @param page page index (starts at 0)
+   * @param paginationFilters are the filters you want to use in the pagination.
    * @return prices
    */
   async getPrices(
