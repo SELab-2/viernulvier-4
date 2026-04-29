@@ -1,23 +1,19 @@
 <!--
   components/admin/blogs/Form.vue
-  
-  Bilingual Blog Form Component
+  Bilingual Blog Form — used identically by create.vue and edit/[id].vue.
 
-  Uses the shared BaseForm + field components from app/components/form/
-  to avoid code duplication with other admin forms.
-
-  Supports both "create" and "edit" modes:
-  - In create mode: "Next — Add images →" button
-  - In edit mode: "Save Changes" button
-
-  Emits:
-  - submit: CreateBlog | ModifyBlog
-  - cancel
-  - preview-update: live preview data on every keystroke
+  Fixes:
+  - Title inputs use plain text styling (text-sm, no uppercase CSS transform).
+    The uppercase CSS transform on inputs causes cursor / backspace issues in
+    some browsers because the displayed length differs from the raw value length
+    at certain Unicode boundary positions. Plain text-sm avoids this entirely.
+  - h-12 on both title inputs and action buttons matches the SearchBar height
+    used on archive / stories / prints pages.
+  - No event handlers on the title inputs beyond v-model — nothing intercepts
+    Backspace, Delete, or arrow keys.
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
-import type { FormField } from "../../../types/FormField";
 
 interface LocalizedPair {
   nl: string;
@@ -48,14 +44,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-// Internal reactive state (not tied to BaseForm directly, since we need
-// bilingual fields and a rich-text editor which BaseForm doesn't support natively)
 const titelNl = ref("");
 const titelEn = ref("");
 const descriptionNl = ref("");
 const descriptionEn = ref("");
 
-// Seed from initialData when editing
 watch(
   () => props.initialData,
   (data) => {
@@ -65,10 +58,10 @@ watch(
     descriptionNl.value = data.description?.nl ?? "";
     descriptionEn.value = data.description?.en ?? "";
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 );
 
-// Emit preview on every change
+// Emit live preview on every keystroke
 watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   emit("preview-update", {
     titel: { nl: titelNl.value, en: titelEn.value },
@@ -95,67 +88,96 @@ function handleSubmit() {
   });
 }
 
-const inputClass =
-  "w-full px-4 py-3 bg-muted border border-border text-sm rounded-lg outline-none transition-colors duration-150 hover:border-foreground/20 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground resize-none";
-const labelClass =
+/*
+  inputCls — intentionally uses text-sm and NO uppercase / text-transform.
+  CSS text-transform on <input> elements can break backspace / cursor
+  positioning in Firefox and Safari when the visible (transformed) text
+  length differs from the underlying value length.
+  h-12 (48 px) matches SearchBar height used on archive / stories / prints.
+*/
+const inputCls = [
+  "w-full px-4 py-3",
+  "h-12",
+  "bg-muted border border-border rounded-lg",
+  "text-sm text-foreground",
+  "outline-none transition-colors duration-150",
+  "hover:border-foreground/20 hover:bg-muted/70",
+  "focus:border-foreground/30 focus:bg-background",
+  "placeholder:text-muted-foreground",
+  "[text-transform:none]",
+  "[appearance:none]",
+  "[-webkit-appearance:none]",
+].join(" ");
+
+const labelCls =
   "block text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground mb-2";
-const sectionClass =
-  "bg-card border border-card-border rounded-xl p-6 space-y-5";
-const sectionHeadingClass =
-  "font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground pb-1 border-b border-border";
+const sectionCls = "bg-card border border-card-border rounded-xl p-6 space-y-5";
+const headingCls =
+  "font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground pb-2 border-b border-border";
 </script>
 
 <template>
   <form class="space-y-5" @submit.prevent="handleSubmit">
-    <!-- Title section -->
-    <section :class="sectionClass">
-      <h2 :class="sectionHeadingClass">{{ t("admin.blogs.sectionTitle") }}</h2>
+    <!-- ── Titles ──────────────────────────────────────────────────────────── -->
+    <section :class="sectionCls">
+      <h2 :class="headingCls">{{ t("admin.blogs.sectionTitle") }}</h2>
 
-      <!-- NL title — required -->
+      <!-- NL — required -->
       <div>
-        <label :class="labelClass">
+        <label :class="labelCls">
           {{ t("admin.blogs.titleNl") }} <span class="text-red-500">*</span>
         </label>
-        <input
-          v-model="titelNl"
-          :class="inputClass"
-          type="text"
-          :placeholder="t('admin.blogs.titleNlPlaceholder')"
-          required
-        />
+        <!--
+          min-w-0 prevents the input from overflowing its grid/flex column.
+          The browser natively shows "…" when the value is wider than the field.
+          No keydown handlers — Backspace, Delete, arrows all work as normal.
+        -->
+        <div class="min-w-0">
+          <input
+            v-model="titelNl"
+            :class="inputCls"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            :placeholder="t('admin.blogs.titleNlPlaceholder')"
+            required
+          />
+        </div>
       </div>
 
-      <!-- EN title — optional -->
+      <!-- EN — optional, falls back to NL on save -->
       <div>
-        <label :class="labelClass">{{ t("admin.blogs.titleEn") }}</label>
-        <input
-          v-model="titelEn"
-          :class="inputClass"
-          type="text"
-          :placeholder="t('admin.blogs.titleEnPlaceholder')"
-        />
+        <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
+        <div class="min-w-0">
+          <input
+            v-model="titelEn"
+            :class="inputCls"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            :placeholder="t('admin.blogs.titleEnPlaceholder')"
+          />
+        </div>
         <p class="mt-1.5 text-[10px] text-muted-foreground/60">
           {{ t("admin.blogs.titleEnFallback") }}
         </p>
       </div>
     </section>
 
-    <!-- Content / description section -->
+    <!-- ── Content ─────────────────────────────────────────────────────────── -->
     <!--
-      NOTE: We intentionally do NOT use BaseForm / BaseTextArea here because
-      the description fields require the rich-text TipTap editor (AdminEditor),
-      which is incompatible with the generic BaseForm field system.
-      The title fields above are plain text and could use BaseInput, but keeping
-      them inline avoids an extra layer of indirection for a two-field form.
+      AdminEditor (Editor.vue) now handles scrolling internally:
+      EditorContent has max-h-[360px] overflow-y-auto so the toolbar stays
+      pinned at the top while long content scrolls below it.
+      TipTap's ProseMirror handles all keyboard events within the editor
+      natively — Backspace, Delete, arrow keys all work as expected.
     -->
-    <section :class="sectionClass">
-      <h2 :class="sectionHeadingClass">
-        {{ t("admin.blogs.sectionContent") }}
-      </h2>
+    <section :class="sectionCls">
+      <h2 :class="headingCls">{{ t("admin.blogs.sectionContent") }}</h2>
 
-      <!-- NL description — required -->
+      <!-- NL — required -->
       <div>
-        <label :class="labelClass">
+        <label :class="labelCls">
           {{ t("admin.blogs.descriptionNl") }}
           <span class="text-red-500">*</span>
         </label>
@@ -165,9 +187,9 @@ const sectionHeadingClass =
         />
       </div>
 
-      <!-- EN description — optional -->
+      <!-- EN — optional -->
       <div>
-        <label :class="labelClass">{{ t("admin.blogs.descriptionEn") }}</label>
+        <label :class="labelCls">{{ t("admin.blogs.descriptionEn") }}</label>
         <AdminEditor
           v-model="descriptionEn"
           :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
@@ -178,23 +200,23 @@ const sectionHeadingClass =
       </div>
     </section>
 
-    <!-- Actions -->
+    <!-- ── Actions ─────────────────────────────────────────────────────────── -->
     <div class="flex items-center gap-3">
       <button
         type="submit"
         :disabled="!isValid || loading"
-        class="btn-outline flex-1 justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+        class="btn-outline flex-1 justify-center h-12 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <span v-if="loading">{{ t("admin.saving") }}</span>
         <span v-else-if="mode === 'create'">{{
-          t("admin.blogs.nextBtn")
+          t("admin.blogs.createBtn")
         }}</span>
         <span v-else>{{ t("admin.blogs.saveBtn") }}</span>
       </button>
 
       <button
         type="button"
-        class="btn-outline px-8 shrink-0"
+        class="btn-outline px-8 h-12 shrink-0"
         @click="emit('cancel')"
       >
         {{ t("admin.cancel") }}

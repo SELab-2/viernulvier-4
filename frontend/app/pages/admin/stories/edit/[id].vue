@@ -1,34 +1,17 @@
 <!--
   pages/admin/stories/edit/[id].vue
 
-  Admin Blog Edit Page
+  Admin Blog Edit Page — two-step timeline layout.
 
-  This page provides the full editing experience for an existing blog post.
-  It is also the destination after creating a new blog, ensuring that both
-  create and edit flows share the exact same UI and behavior.
+  Step 1 — Content: title (NL/EN) + description (NL/EN) + live preview.
+  Step 2 — Photos:  media-item metadata + 6 crop slots + live preview.
 
-  Key features include:
-  - Client-side rendering only (SSR disabled) due to TipTap editor usage
-  - Fetching and loading blog data based on the route ID
-  - Live preview synchronized with form input
-  - Two-column layout with editor on the left and preview on the right (desktop)
-  - Collapsible preview on mobile for better usability
-
-  The page manages:
-  - Blog content editing (title and description)
-  - Media gallery loading and main image preview
-  - Image upload and cropping via a dedicated section
-  - Linking the blog to related productions
-  - Save state, including loading, error handling, and success feedback
-
-  Additional behavior:
-  - Displays loading skeletons while fetching data
-  - Handles invalid or missing blog IDs gracefully
-  - Updates preview content immediately when the form changes
-  - Refreshes the gallery when new images are uploaded
-
-  Designed as the central hub for managing all aspects of a blog post
-  within the admin panel.
+  Preview column:
+  - Sticky below the AppHeader (top: calc(110px + 1.5rem)).
+  - Has overflow-y-auto + max-height so it never overflows the viewport
+    and scrolls independently from the left column.
+  - items-start on the grid row is critical — without it the right column
+    stretches to match the left column and sticky stops working.
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
@@ -47,7 +30,7 @@ const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
-// Resolved blog ID from the route
+// ── Route param ──────────────────────────────────────────────────────────────
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -56,34 +39,39 @@ const blogId = computed<number | null>(() => {
   return isFinite(n) ? n : null;
 });
 
-// State
+// ── State ────────────────────────────────────────────────────────────────────
 const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
 const error = ref<string | null>(null);
 const saved = ref(false);
 
-// Live preview data — updated by form's @preview-update event
+/** Which step is currently visible */
+const step = ref<"content" | "photos">("content");
+
+/** Live preview data — updated by the form's @preview-update event */
 const previewData = ref<{
   titel: { nl: string; en: string };
   description: { nl: string; en: string };
-}>({
-  titel: { nl: "", en: "" },
-  description: { nl: "", en: "" },
+}>({ titel: { nl: "", en: "" }, description: { nl: "", en: "" } });
+
+const initialBlogData = computed(() => {
+  if (!blog.value) return undefined;
+  return {
+    titel: blog.value.titel as { nl: string; en: string },
+    description: blog.value.description as { nl: string; en: string },
+  };
 });
 
-// Preview toggle on mobile
-const previewOpen = ref(false);
-
-// Gallery (for the preview hero image)
+/** Gallery for the preview hero image */
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const galleryId = ref<number | null>(null);
 
-const headerCrop = computed(() => {
-  if (!gallery.value) return null;
-  return getMainImageCrop(gallery.value, "FE3_header");
-});
+const headerCrop = computed(() =>
+  gallery.value ? getMainImageCrop(gallery.value, "FE3_header") : null,
+);
 
+// ── Data loading ─────────────────────────────────────────────────────────────
 async function loadGallery() {
   if (!blogId.value) return;
   try {
@@ -95,7 +83,6 @@ async function loadGallery() {
   }
 }
 
-// Blog data
 async function loadBlog() {
   if (!blogId.value) return;
   fetching.value = true;
@@ -118,7 +105,7 @@ async function loadBlog() {
   }
 }
 
-// Save
+// ── Save ─────────────────────────────────────────────────────────────────────
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
@@ -143,19 +130,18 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-6xl mx-auto px-6 py-10 space-y-8">
-      <!-- Back link -->
-      <NuxtLink
-        :to="ROUTES.admin.stories.base"
-        class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-      >
-        ← {{ t("admin.back") }}
-      </NuxtLink>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <!-- ── Top bar ─────────────────────────────────────────────────────── -->
+      <div class="flex items-center gap-4 flex-wrap">
+        <NuxtLink
+          :to="ROUTES.admin.stories.base"
+          class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← {{ t("admin.back") }}
+        </NuxtLink>
 
-      <!-- Title row -->
-      <div class="flex items-center gap-3 flex-wrap">
         <h1
-          class="font-brand font-black text-3xl uppercase tracking-tight text-foreground flex-1"
+          class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
         >
           {{ t("admin.blogs.edit") }}
         </h1>
@@ -164,7 +150,7 @@ onMounted(async () => {
         <Transition name="fade">
           <span
             v-if="saved"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-black uppercase tracking-widest"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-black uppercase tracking-widest shrink-0"
           >
             <svg
               class="w-3 h-3"
@@ -180,7 +166,65 @@ onMounted(async () => {
         </Transition>
       </div>
 
-      <!-- Error banner -->
+      <!-- ── Step indicator ─────────────────────────────────────────────── -->
+      <!--
+        Both steps are clickable — the user can freely jump between them.
+        Active step gets the filled (foreground) style; inactive gets muted.
+      -->
+      <div
+        class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
+      >
+        <!-- Step 1 -->
+        <button
+          type="button"
+          :class="[
+            'flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-brand font-black uppercase tracking-widest transition-colors',
+            step === 'content'
+              ? 'bg-foreground text-background'
+              : 'bg-background text-muted-foreground hover:text-foreground',
+          ]"
+          @click="step = 'content'"
+        >
+          <span
+            :class="[
+              'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black border-2 shrink-0',
+              step === 'content'
+                ? 'border-background'
+                : 'border-muted-foreground',
+            ]"
+            >1</span
+          >
+          {{ t("admin.blogs.sectionTitle") }} &amp;
+          {{ t("admin.blogs.sectionContent") }}
+        </button>
+
+        <span class="w-px bg-border self-stretch" />
+
+        <!-- Step 2 -->
+        <button
+          type="button"
+          :class="[
+            'flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-brand font-black uppercase tracking-widest transition-colors',
+            step === 'photos'
+              ? 'bg-foreground text-background'
+              : 'bg-background text-muted-foreground hover:text-foreground',
+          ]"
+          @click="step = 'photos'"
+        >
+          <span
+            :class="[
+              'w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black border-2 shrink-0',
+              step === 'photos'
+                ? 'border-background'
+                : 'border-muted-foreground',
+            ]"
+            >2</span
+          >
+          {{ t("admin.blogs.image.multiTitle") }}
+        </button>
+      </div>
+
+      <!-- ── Error banner ────────────────────────────────────────────────── -->
       <div
         v-if="error"
         class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
@@ -188,14 +232,23 @@ onMounted(async () => {
         {{ error }}
       </div>
 
-      <!-- Loading skeleton -->
+      <!-- ── Loading skeleton ────────────────────────────────────────────── -->
       <template v-if="fetching">
-        <div class="h-64 bg-muted rounded-xl animate-pulse" />
-        <div class="h-48 bg-muted rounded-xl animate-pulse" />
-        <div class="h-80 bg-muted rounded-xl animate-pulse" />
+        <div
+          class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
+        >
+          <div class="space-y-4">
+            <div class="h-52 bg-muted rounded-xl animate-pulse" />
+            <div class="h-80 bg-muted rounded-xl animate-pulse" />
+            <div class="h-80 bg-muted rounded-xl animate-pulse" />
+          </div>
+          <div
+            class="hidden xl:block h-[600px] bg-muted rounded-xl animate-pulse"
+          />
+        </div>
       </template>
 
-      <!-- Not found -->
+      <!-- ── Not found ───────────────────────────────────────────────────── -->
       <div
         v-else-if="!blog && !fetching"
         class="py-16 text-center text-muted-foreground"
@@ -203,13 +256,132 @@ onMounted(async () => {
         {{ t("admin.blogs.notFound") }}
       </div>
 
+      <!-- ── Main content ────────────────────────────────────────────────── -->
       <template v-else-if="blog && blogId">
-        <!-- Mobile preview toggle -->
-        <div class="xl:hidden">
-          <button
-            type="button"
-            class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-muted/40 hover:bg-muted transition-colors"
-            @click="previewOpen = !previewOpen"
+        <!--
+          Two-column layout.
+
+          items-start: each column is only as tall as its own content.
+          This is REQUIRED for position: sticky to work in the right column.
+          If items-stretch (default) is used, the sticky element fills the full
+          row height and never needs to scroll → sticky has no effect.
+        -->
+        <div
+          class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
+        >
+          <!-- ── Left: active step ─────────────────────────────────────── -->
+          <div class="space-y-5 min-w-0">
+            <!-- Step 1 — Content -->
+            <template v-if="step === 'content'">
+              <AdminBlogsForm
+                mode="edit"
+                :initial-data="initialBlogData"
+                :loading="saving"
+                @submit="handleSubmit"
+                @cancel="navigateTo(ROUTES.admin.stories.base)"
+                @preview-update="(d) => (previewData = d)"
+              />
+
+              <!-- "Next: photos" shortcut link -->
+              <div class="flex">
+                <button
+                  type="button"
+                  class="btn-outline h-12 flex items-center gap-2 px-6 text-[10px]"
+                  @click="step = 'photos'"
+                >
+                  {{ t("admin.blogs.image.multiTitle") }}
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </template>
+
+            <!-- Step 2 — Photos -->
+            <template v-if="step === 'photos'">
+              <AdminBlogsImageSection
+                :blog-id="blogId"
+                @crop-uploaded="loadGallery"
+              />
+
+              <AdminBlogsLinkToProduction
+                :blog-id="blogId"
+                :gallery-id="galleryId"
+              />
+
+              <!-- "Back to content" link -->
+              <div class="flex">
+                <button
+                  type="button"
+                  class="btn-outline h-12 flex items-center gap-2 px-6 text-[10px]"
+                  @click="step = 'content'"
+                >
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15.75 19.5 8.25 12l7.5-7.5"
+                    />
+                  </svg>
+                  {{ t("admin.blogs.sectionTitle") }} &amp;
+                  {{ t("admin.blogs.sectionContent") }}
+                </button>
+              </div>
+            </template>
+          </div>
+
+          <!-- ── Right: sticky live preview (desktop only) ─────────────── -->
+          <!--
+            top: calc(110px + 1.5rem)
+              AppHeader is sticky at top-0 with min-h-[110px] on desktop.
+              Adding 1.5 rem gap ensures the preview never slides under the
+              header even when the header expands (mobile menu, etc.).
+
+            max-height: calc(100vh - 110px - 3rem)
+              Keeps the preview inside the viewport; it scrolls internally
+              when taller than the available space.
+
+            overflow-y-auto:
+              Lets the preview content scroll without the whole page scrolling.
+          -->
+          <div class="hidden xl:block">
+            <div
+              class="sticky overflow-y-auto"
+              style="
+                top: calc(110px + 1.5rem);
+                max-height: calc(100vh - 110px - 3rem);
+              "
+            >
+              <AdminBlogsPreview
+                :data="{ ...previewData, id: blogId ?? undefined }"
+                :header-crop="headerCrop"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile preview — collapsible below the form -->
+        <details
+          class="xl:hidden group border border-border rounded-xl overflow-hidden"
+        >
+          <summary
+            class="flex items-center justify-between px-4 py-3 bg-muted/40 cursor-pointer list-none select-none"
           >
             <span
               class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-2"
@@ -227,8 +399,7 @@ onMounted(async () => {
               {{ t("admin.blogs.preview.label") }}
             </span>
             <svg
-              class="w-4 h-4 text-muted-foreground transition-transform duration-200"
-              :class="previewOpen ? 'rotate-180' : ''"
+              class="w-4 h-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
               fill="none"
               stroke="currentColor"
               stroke-width="2.5"
@@ -236,67 +407,14 @@ onMounted(async () => {
             >
               <polyline points="6 9 12 15 18 9" />
             </svg>
-          </button>
-
-          <Transition
-            enter-active-class="transition-all duration-200 ease-out"
-            enter-from-class="opacity-0 max-h-0 overflow-hidden"
-            enter-to-class="opacity-100 max-h-[600px] overflow-hidden"
-            leave-active-class="transition-all duration-150 ease-in"
-            leave-from-class="opacity-100 max-h-[600px] overflow-hidden"
-            leave-to-class="opacity-0 max-h-0 overflow-hidden"
-          >
-            <div v-if="previewOpen" class="mt-3">
-              <AdminBlogsPreview
-                :data="{ ...previewData, id: blogId ?? undefined }"
-                :header-crop="headerCrop"
-              />
-            </div>
-          </Transition>
-        </div>
-
-        <!-- Two-column grid -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-          <!-- Left column: all editable sections -->
-          <div class="space-y-6">
-            <!-- Content form -->
-            <AdminBlogsForm
-              mode="edit"
-              :initial-data="{
-                titel: blog.titel as { nl: string; en: string },
-                description: blog.description as { nl: string; en: string },
-              }"
-              :loading="saving"
-              @submit="handleSubmit"
-              @cancel="navigateTo(ROUTES.admin.stories.base)"
-              @preview-update="(d) => (previewData = d)"
-            />
-
-            <!-- Image section (only when blogId is resolved) -->
-            <AdminBlogsImageSection
-              v-if="blogId !== null"
-              :blog-id="blogId"
-              @crop-uploaded="loadGallery"
-            />
-
-            <!-- Link to productions (only when blogId is resolved) -->
-            <AdminBlogsLinkToProduction
-              v-if="blogId !== null"
-              :blog-id="blogId"
-              :gallery-id="galleryId"
+          </summary>
+          <div class="p-4">
+            <AdminBlogsPreview
+              :data="{ ...previewData, id: blogId ?? undefined }"
+              :header-crop="headerCrop"
             />
           </div>
-
-          <!-- Right column: live preview (desktop only) -->
-          <div class="hidden xl:block">
-            <div class="sticky top-6">
-              <AdminBlogsPreview
-                :data="{ ...previewData, id: blogId ?? undefined }"
-                :header-crop="headerCrop"
-              />
-            </div>
-          </div>
-        </div>
+        </details>
       </template>
     </div>
   </div>

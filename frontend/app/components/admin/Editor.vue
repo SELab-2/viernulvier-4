@@ -1,32 +1,12 @@
 <!--
   components/admin/Editor.vue
+  Rich Text Editor (TipTap-based)
 
-  Rich Text Editor Component (TipTap-based)
-
-  This component provides a fully featured rich text editor for the admin panel,
-  built on top of TipTap. It supports structured content editing with a modern,
-  extensible toolbar and real-time data binding.
-
-  Key features include:
-  - Two-way binding via v-model (HTML output)
-  - Localized placeholder support that updates dynamically with the active locale
-  - Inline text styling such as bold, italic, underline, strike, color, and custom font sizes
-  - Block-level formatting including headings, lists, and blockquotes
-  - Link management with user prompts
-  - Content reset and formatting cleanup actions
-
-  A custom FontSize extension is implemented to allow inline font size changes
-  without affecting entire paragraphs (unlike default heading behavior).
-
-  The component automatically:
-  - Syncs external modelValue changes with the editor state
-  - Emits updates on every content change
-  - Reacts to locale changes to keep UI labels and placeholder text in sync
-
-  Designed for use in admin forms where rich, formatted text input is required,
-  such as blog descriptions or content management.
+  Key change vs original:
+  - EditorContent now has max-h-[360px] + overflow-y-auto so long articles
+    scroll within the editor while the toolbar stays pinned at the top.
+  - overflow-hidden removed from outer div so the inner scroll isn't clipped.
 -->
-
 <script setup lang="ts">
 import { useEditor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
@@ -48,10 +28,6 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n();
 
-// Inline FontSize extension
-// Headings are block-level (the whole paragraph changes).
-// This extension applies font-size as an inline mark via TextStyle,
-// so you can make a *selection* bigger without affecting the whole line.
 const FontSize = Extension.create({
   name: "fontSize",
   addGlobalAttributes() {
@@ -89,7 +65,6 @@ const FontSize = Extension.create({
   },
 });
 
-// computed so labels re-evaluate when the locale changes
 const FONT_SIZES = computed(() => [
   { label: t("editor.toolbar.sizeNormal"), value: "" },
   { label: t("editor.toolbar.sizeSmall"), value: "12" },
@@ -99,17 +74,10 @@ const FONT_SIZES = computed(() => [
   { label: t("editor.toolbar.sizeXXLarge"), value: "32" },
 ]);
 
-// TipTap extensions are created once — Placeholder.configure({ placeholder: "..." })
-// bakes the string in at init time. To keep the placeholder in sync with the
-// active locale (and with any prop change), we store the resolved text in a ref
-// and pass a *function* to the extension so it reads the ref on every render.
-// When locale or the prop changes we update the ref and dispatch a no-op
-// transaction, which forces ProseMirror to call the function again.
 const resolvedPlaceholder = ref(props.placeholder || t("editor.placeholder"));
 
 watch([() => props.placeholder, locale], () => {
   resolvedPlaceholder.value = props.placeholder || t("editor.placeholder");
-  // no-op transaction so ProseMirror re-evaluates the placeholder function
   editor.value?.view.dispatch(editor.value.view.state.tr);
 });
 
@@ -184,15 +152,18 @@ onBeforeUnmount(() => editor.value?.destroy());
 </script>
 
 <template>
+  <!--
+    overflow-hidden intentionally removed from the outer div:
+    it would clip the inner scroll container in EditorContent.
+  -->
   <div
-    class="w-full border border-border rounded-xl bg-card overflow-hidden focus-within:ring-2 ring-ring transition-all"
+    class="w-full border border-border rounded-xl bg-card focus-within:ring-2 ring-ring transition-all"
   >
-    <!-- Toolbar -->
+    <!-- Toolbar — always visible above the scroll area -->
     <div
       v-if="editor"
-      class="flex flex-wrap items-center gap-0.5 p-2 border-b border-border bg-muted/40"
+      class="flex flex-wrap items-center gap-0.5 p-2 border-b border-border bg-muted/40 rounded-t-xl"
     >
-      <!-- Font size (inline — only selected text changes) -->
       <div class="flex items-center gap-0.5 pr-2 mr-1 border-r border-border">
         <select
           :title="t('editor.toolbar.fontSize')"
@@ -206,7 +177,6 @@ onBeforeUnmount(() => editor.value?.destroy());
         </select>
       </div>
 
-      <!-- Text formatting -->
       <div class="flex items-center gap-0.5 pr-2 mr-1 border-r border-border">
         <button
           type="button"
@@ -245,7 +215,6 @@ onBeforeUnmount(() => editor.value?.destroy());
         </button>
       </div>
 
-      <!-- Headings (block-level — whole paragraph) -->
       <div class="flex items-center gap-0.5 pr-2 mr-1 border-r border-border">
         <button
           type="button"
@@ -282,7 +251,6 @@ onBeforeUnmount(() => editor.value?.destroy());
         </button>
       </div>
 
-      <!-- Lists -->
       <div class="flex items-center gap-0.5 pr-2 mr-1 border-r border-border">
         <button
           type="button"
@@ -350,7 +318,6 @@ onBeforeUnmount(() => editor.value?.destroy());
         </button>
       </div>
 
-      <!-- Link + color -->
       <div class="flex items-center gap-0.5 pr-2 mr-1 border-r border-border">
         <button
           type="button"
@@ -411,7 +378,6 @@ onBeforeUnmount(() => editor.value?.destroy());
         </div>
       </div>
 
-      <!-- Misc -->
       <button
         type="button"
         :title="t('editor.toolbar.hr')"
@@ -450,10 +416,14 @@ onBeforeUnmount(() => editor.value?.destroy());
       </button>
     </div>
 
-    <!-- Editor content -->
+    <!--
+      Scrollable content area.
+      min-h: comfortable empty state.
+      max-h + overflow-y-auto: long articles scroll here; toolbar stays visible.
+    -->
     <EditorContent
       :editor="editor"
-      class="admin-tiptap-content p-5 min-h-[280px] outline-none"
+      class="admin-tiptap-content p-5 min-h-[200px] max-h-[360px] overflow-y-auto outline-none"
     />
   </div>
 </template>
@@ -500,11 +470,9 @@ onBeforeUnmount(() => editor.value?.destroy());
   border-color: var(--accent);
 }
 
-/* Editor typography */
 .admin-tiptap-content .tiptap {
   outline: none !important;
 }
-
 .admin-tiptap-content .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -512,7 +480,6 @@ onBeforeUnmount(() => editor.value?.destroy());
   pointer-events: none;
   height: 0;
 }
-
 .admin-tiptap-content .tiptap h1 {
   font-size: 1.75rem;
   font-weight: 900;
@@ -566,5 +533,16 @@ onBeforeUnmount(() => editor.value?.destroy());
 }
 .dark .admin-tiptap-content .tiptap a {
   color: #60a5fa;
+}
+/* slim scrollbar */
+.admin-tiptap-content::-webkit-scrollbar {
+  width: 4px;
+}
+.admin-tiptap-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-tiptap-content::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 </style>
