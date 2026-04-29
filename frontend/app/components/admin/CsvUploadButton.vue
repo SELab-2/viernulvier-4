@@ -1,4 +1,15 @@
 <script setup lang="ts">
+/**
+ * CSV upload button for admin parser endpoints.
+ *
+ * Props:
+ * - `target` (productions|events|tags|blogs|prices) — selects which parser endpoint to call.
+ *
+ * Usage:
+ * <CsvUploadButton target="productions" />
+ *
+ * Shows localized success/error snackbars via `useSnackbar` and uses `useParserApi` to upload.
+ */
 import { computed, ref } from "vue";
 import { Upload } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
