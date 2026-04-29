@@ -24,6 +24,7 @@ const buttonLabel = computed(() =>
   }),
 );
 
+// Formats the list of missing headers for display in the snackbar.
 function formatMissingHeaders(errorData: unknown): string | null {
   if (!errorData || typeof errorData !== "object") {
     return null;
@@ -109,17 +110,17 @@ async function handleFileChange(event: Event) {
 </script>
 
 <template>
-  <div class="rounded-xl border border-card-border bg-card p-5 shadow-sm">
+  <div class="rounded-xl border border-card-border bg-card p-6 shadow-sm">
     <div
       class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
     >
-      <div class="space-y-1">
+      <div class="space-y-2">
         <p
-          class="text-xs font-black uppercase tracking-[0.22em] text-muted-foreground"
+          class="text-xs font-black uppercase tracking-widest text-muted-foreground"
         >
           {{ t("admin.parser.title") }}
         </p>
-        <h2 class="text-lg font-semibold text-card-foreground">
+        <h2 class="text-lg font-bold text-card-foreground">
           {{ targetLabel }}
         </h2>
         <p class="text-sm text-muted-foreground">
@@ -130,7 +131,7 @@ async function handleFileChange(event: Event) {
       <div class="flex items-center gap-3">
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-[11px] font-black uppercase tracking-widest text-foreground transition hover:border-foreground/30 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+          class="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground transition-colors duration-200 hover:border-foreground/30 hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="isUploading"
           @click="openFilePicker"
         >

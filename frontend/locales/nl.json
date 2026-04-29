@@ -339,7 +339,7 @@
     },
     "parser": {
       "title": "CSV parser",
-      "description": "Upload een CSV-bestand om de parser te voeden.",
+      "description": "Upload een CSV-bestand om te parsen.",
       "uploadCsv": "Upload {target} CSV",
       "uploading": "Uploaden...",
       "uploadSuccess": "{target} CSV succesvol geüpload.",
