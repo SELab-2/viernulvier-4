@@ -305,7 +305,9 @@ onMounted(async () => {
           </div>
 
           <!-- Right: preview — just a plain div, scrolls with the page -->
-          <div class="hidden xl:block">
+          <div
+            class="hidden xl:block self-start sticky top-[8.5rem] mt-5 xl:mt-8"
+          >
             <AdminBlogsPreview
               :data="{ ...previewData, id: blogId ?? undefined }"
               :header-crop="headerCrop"

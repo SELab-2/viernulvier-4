@@ -72,9 +72,11 @@ const { title, formattedDate } = useBlogStory(computed(() => props.blog));
     </div>
 
     <div class="flex-1 min-w-0">
-      <p class="text-sm font-semibold text-card-foreground truncate">
-        {{ title || "—" }}
-      </p>
+      <div class="title-scroll-wrap title-scroll-fade">
+        <p class="title-scroll-text text-sm font-semibold text-card-foreground">
+          {{ title || "—" }}
+        </p>
+      </div>
       <p
         v-if="formattedDate"
         class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground mt-0.5"
@@ -99,3 +101,28 @@ const { title, formattedDate } = useBlogStory(computed(() => props.blog));
     </div>
   </article>
 </template>
+
+<style scoped>
+.title-scroll-wrap {
+  max-width: 100%;
+  max-height: 2.4rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.title-scroll-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.title-scroll-fade {
+  mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+}
+
+.title-scroll-text {
+  display: block;
+  line-height: 1.2;
+}
+</style>

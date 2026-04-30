@@ -130,7 +130,9 @@ async function handleSubmit(data: CreateBlog) {
         />
 
         <!-- Right: inline preview (desktop only, scrolls with page) -->
-        <div class="hidden xl:block">
+        <div
+          class="hidden xl:block self-start sticky top-[8.5rem] mt-5 xl:mt-8"
+        >
           <AdminBlogsPreview :data="previewData" :header-crop="null" />
         </div>
       </div>

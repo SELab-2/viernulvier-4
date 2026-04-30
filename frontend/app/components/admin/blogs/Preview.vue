@@ -165,15 +165,25 @@ const titleIsLong = computed(() => title.value.length > 55);
 
           <div class="relative z-10 px-5 pb-5 w-full">
             <!--
-              Title: line-clamp-3 + bottom fade mask when too long.
-              Matches the production detail page .should-fade technique.
+              Title: vertical scroll with a soft bottom fade.
+              This keeps a consistent title area while long titles stay readable.
             -->
-            <h1
-              class="font-brand font-black uppercase tracking-tighter leading-[0.9] text-white italic title-clamp"
-              :class="[titleSizeClass, titleIsLong ? 'should-fade' : '']"
+            <div
+              class="title-scroll-wrap"
+              :class="[
+                previewMode === 'phone'
+                  ? 'title-scroll-wrap-phone'
+                  : 'title-scroll-wrap-desktop',
+                titleIsLong ? 'title-scroll-fade' : '',
+              ]"
             >
-              {{ title }}
-            </h1>
+              <h1
+                class="font-brand font-black uppercase tracking-tighter leading-[0.9] text-white italic title-scroll-text"
+                :class="titleSizeClass"
+              >
+                {{ title }}
+              </h1>
+            </div>
 
             <div
               class="flex items-center gap-3 mt-3 font-brand font-black text-[9px] uppercase tracking-widest text-white/70"
@@ -203,7 +213,7 @@ const titleIsLong = computed(() => title.value.length > 55);
 
           <div
             v-else
-            class="story-body text-sm leading-relaxed text-gray-800 dark:text-gray-200 break-words"
+            class="story-body story-body-scroll text-base md:text-lg leading-relaxed text-gray-800 dark:text-gray-200 break-words"
             v-html="body"
           />
 
@@ -230,18 +240,35 @@ const titleIsLong = computed(() => title.value.length > 55);
 </template>
 
 <style scoped>
-/* Title: clamp to 3 lines */
-.title-clamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+/* Long-title scroller with a soft fade. */
+.title-scroll-wrap {
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Fade mask — identical to production detail page .should-fade */
-.title-clamp.should-fade {
-  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+.title-scroll-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.title-scroll-wrap-phone {
+  max-height: 5.6rem;
+}
+
+.title-scroll-wrap-desktop {
+  max-height: 8.6rem;
+}
+
+.title-scroll-fade {
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+.title-scroll-text {
+  display: block;
+  white-space: normal;
 }
 
 .animate-spin-slow {
@@ -261,6 +288,31 @@ const titleIsLong = computed(() => title.value.length > 55);
   text-decoration: underline;
   text-underline-offset: 3px;
   overflow-wrap: break-word;
+}
+
+.story-body-scroll {
+  max-height: 24rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.25rem;
+  scrollbar-width: thin;
+}
+
+.story-body-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.story-body-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.story-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 9999px;
+}
+
+:global(.dark) .story-body-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
 }
 .story-body :deep(h1) {
   font-size: 1.5rem;
