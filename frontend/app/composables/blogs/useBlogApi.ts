@@ -13,6 +13,7 @@ import type {
   PrintItemView,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
 import {
   fetchFullGallery,
   onGalleryFetchError,
@@ -32,9 +33,6 @@ interface BlogListOptions {
 /**
  * Composable for blog endpoints.
  * getAll and getById are public. All other endpoints require an API key.
- *
- * Pass a `lang` code to receive flattened string values (BlogView) instead of
- * the full localized objects (Blog). Without a lang, the raw localized object is returned.
  */
 export function useBlogApi() {
   const { get, post, put, patch, del } = useApi();
@@ -66,17 +64,7 @@ export function useBlogApi() {
       ...languageFilters,
       ...blogFilters,
     };
-
-    const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(params).filter(([_, value]) => value != null),
-    );
-
-    const queryString = new URLSearchParams(
-      cleanParams as Record<string, string>,
-    ).toString();
-
-    const query = queryString ? `?${queryString}` : "";
+    const query = buildQueryString(params);
 
     return get<PaginatedResponse<Blog | BlogView>>(
       `${API_ROUTES.blogs.base}${query}`,

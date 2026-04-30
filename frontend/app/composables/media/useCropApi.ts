@@ -6,65 +6,90 @@ import type {
   PaginationFilter,
   ReplaceMediaCrop,
 } from "@repo/common";
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
+
+interface CropListOptions {
+  paginationFilters?: PaginationFilter;
+}
 
 /**
- * Frontend API calls for media crops.
+ * Composable for media crop endpoints.
+ * getAll and getById are public. All other endpoints require an API key.
  */
 export function useCropApi() {
   const { get, post, patch, put, del } = useApi();
 
   /**
-   * Get all media crops.
+   * GET "/crops{filters}"
+   *
+   * Returns a paginated list of media crops.
    */
-  const getAll = (paginationFilters: PaginationFilter) => {
-    const params = {
-      ...paginationFilters,
-    };
 
-    const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(params).filter(([_, value]) => value != null),
-    );
-
-    const queryString = new URLSearchParams(
-      cleanParams as unknown as Record<string, string>,
-    ).toString();
-
-    const query = queryString ? `?${queryString}` : "";
+  function getAll({ paginationFilters }: CropListOptions = {}) {
+    const params = { ...paginationFilters };
+    const query = buildQueryString(params);
 
     return get<PaginatedResponse<MediaCrop>>(
       `${API_ROUTES.crops.base}${query}`,
     );
-  };
+  }
 
   /**
-   * Get a specific crop by it's ID.
+   * GET "/crops/:cropId"
+   *
+   * Returns a specific crop by its ID.
    */
-  const getById = (cropId: number) =>
-    get<MediaCrop>(API_ROUTES.crops.byId(cropId));
+
+  function getById(cropId: number) {
+    return get<MediaCrop>(API_ROUTES.crops.byId(cropId));
+  }
 
   /**
-   * Create a new crop.
+   * POST "/crops"
+   *
+   * Creates a new crop.
    */
-  const create = (body: CreateMediaCrop) =>
-    post<MediaCrop, CreateMediaCrop>(API_ROUTES.crops.base, body);
+
+  function create(body: CreateMediaCrop) {
+    return post<MediaCrop, CreateMediaCrop>(API_ROUTES.crops.base, body);
+  }
 
   /**
-   * Replace a crop.
+   * PUT "/crops/:cropId"
+   *
+   * Replaces an existing crop.
    */
-  const replace = (cropId: number, body: ReplaceMediaCrop) =>
-    put<MediaCrop, ReplaceMediaCrop>(API_ROUTES.crops.byId(cropId), body);
+
+  function replace(cropId: number, body: ReplaceMediaCrop) {
+    return put<MediaCrop, ReplaceMediaCrop>(
+      API_ROUTES.crops.byId(cropId),
+      body,
+    );
+  }
 
   /**
+   * PATCH "/crops/:cropId"
+   *
    * Modifies an existing crop.
    */
-  const modify = (cropId: number, body: ModifyMediaCrop) =>
-    patch<MediaCrop, ModifyMediaCrop>(API_ROUTES.crops.byId(cropId), body);
+
+  function modify(cropId: number, body: ModifyMediaCrop) {
+    return patch<MediaCrop, ModifyMediaCrop>(
+      API_ROUTES.crops.byId(cropId),
+      body,
+    );
+  }
 
   /**
+   * DELETE "/crops/:cropId"
+   *
    * Removes an existing crop.
    */
-  const remove = (cropId: number) => del(API_ROUTES.crops.byId(cropId));
+
+  function remove(cropId: number) {
+    return del(API_ROUTES.crops.byId(cropId));
+  }
 
   return {
     getAll,
