@@ -11,6 +11,8 @@ import type {
   Series,
   SeriesView,
 } from "@repo/common";
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
 
 interface SeriesListOptions {
   paginationFilters?: PaginationFilter;
@@ -19,94 +21,133 @@ interface SeriesListOptions {
 
 /**
  * Frontend API calls for series.
+ * All GET requests are public. All other endpoints require an API key.
  */
 export function useSeriesApi() {
   const { get, post, patch, put, del } = useApi();
 
   /**
-   * Get all series paginated.
+   * GET "/series{filters}"
+   *
+   * Returns a paginated list of series.
+   * Returns View objects if a language is passed, otherwise standard Series objects.
    */
-  const getAll = ({
+  function getAll(options?: {
+    paginationFilters?: PaginationFilter;
+  }): Promise<ApiResponse<PaginatedResponse<Series>>>;
+  function getAll(options: {
+    paginationFilters?: PaginationFilter;
+    languageFilters: LanguageQuery;
+  }): Promise<ApiResponse<PaginatedResponse<SeriesView>>>;
+  function getAll({
     paginationFilters,
     languageFilters,
-  }: SeriesListOptions = {}) => {
-    const params = {
-      ...paginationFilters,
-      ...languageFilters,
-    };
-
-    const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(params).filter(([_, value]) => value != null),
-    );
-
-    const queryString = new URLSearchParams(
-      cleanParams as unknown as Record<string, string>,
-    ).toString();
-
-    const query = queryString ? `?${queryString}` : "";
+  }: SeriesListOptions = {}) {
+    const params = { ...paginationFilters, ...languageFilters };
+    const query = buildQueryString(params);
 
     return get<PaginatedResponse<Series | SeriesView>>(
       `${API_ROUTES.series.base}${query}`,
     );
-  };
+  }
 
   /**
-   * Get a specific series by it's ID.
+   * GET "/series/:seriesId"
+   *
+   * Returns a specific series by its ID.
+   * Returns a View object if a language is passed, otherwise a standard Series object.
    */
-  const getById = (seriesId: number, lang?: Language) => {
+  function getById(seriesId: number): Promise<ApiResponse<Series>>;
+  function getById(
+    seriesId: number,
+    lang: Language,
+  ): Promise<ApiResponse<SeriesView>>;
+  function getById(seriesId: number, lang?: Language) {
     const query = lang ? `?lang=${lang}` : "";
     return get<Series | SeriesView>(
       `${API_ROUTES.series.byId(seriesId)}${query}`,
     );
-  };
+  }
 
   /**
-   * Create a new series.
+   * POST "/series"
+   *
+   * Creates a new series.
    */
-  const create = (body: CreateSeries) =>
-    post<Series, CreateSeries>(API_ROUTES.series.base, body);
+  function create(body: CreateSeries) {
+    return post<Series, CreateSeries>(API_ROUTES.series.base, body);
+  }
 
   /**
-   * Replace an existing series.
+   * PUT "/series/:seriesId"
+   *
+   * Replaces an existing series.
    */
-  const replace = (seriesId: number, body: ReplaceSeries) =>
-    put<Series, ReplaceSeries>(API_ROUTES.series.byId(seriesId), body);
+  function replace(seriesId: number, body: ReplaceSeries) {
+    return put<Series, ReplaceSeries>(API_ROUTES.series.byId(seriesId), body);
+  }
 
   /**
+   * PATCH "/series/:seriesId"
+   *
    * Modifies an existing series.
    */
-  const modify = (seriesId: number, body: ModifySeries) =>
-    patch<Series, ModifySeries>(API_ROUTES.series.byId(seriesId), body);
+  function modify(seriesId: number, body: ModifySeries) {
+    return patch<Series, ModifySeries>(API_ROUTES.series.byId(seriesId), body);
+  }
 
   /**
+   * DELETE "/series/:seriesId"
+   *
    * Removes an existing series.
    */
-  const remove = (seriesId: number) => del(API_ROUTES.series.byId(seriesId));
+  function remove(seriesId: number) {
+    return del(API_ROUTES.series.byId(seriesId));
+  }
 
   /**
-   * --  Production + Series links
+   * ==============================
+   * Production + Series links
+   * ==============================
    */
 
   /**
+   * GET "/series/:seriesId/productions"
+   *
    * Returns all productions linked to a series paginated.
+   * Returns View objects if a language is passed, otherwise standard Production objects.
    */
-  const getSeriesProductions = (seriesId: number) =>
-    get<PaginatedResponse<Production | ProductionView>>(
-      API_ROUTES.series.productions(seriesId),
+  function getSeriesProductions(
+    seriesId: number,
+  ): Promise<ApiResponse<PaginatedResponse<Production>>>;
+  function getSeriesProductions(
+    seriesId: number,
+    lang: Language,
+  ): Promise<ApiResponse<PaginatedResponse<ProductionView>>>;
+  function getSeriesProductions(seriesId: number, lang?: Language) {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<PaginatedResponse<Production | ProductionView>>(
+      `${API_ROUTES.series.productions(seriesId)}${query}`,
     );
+  }
 
   /**
+   * PUT "/series/:seriesId/productions/:productionId"
+   *
    * Links a production to a series.
    */
-  const linkProductionToSeries = (seriesId: number, productionId: number) =>
-    put(API_ROUTES.series.productionById(seriesId, productionId), {});
+  function linkProductionToSeries(seriesId: number, productionId: number) {
+    return put(API_ROUTES.series.productionById(seriesId, productionId), {});
+  }
 
   /**
+   * DELETE "/series/:seriesId/productions/:productionId"
+   *
    * Unlinks a production from a series.
    */
-  const unlinkProductionFromSeries = (seriesId: number, productionId: number) =>
-    del(API_ROUTES.series.productionById(seriesId, productionId));
+  function unlinkProductionFromSeries(seriesId: number, productionId: number) {
+    return del(API_ROUTES.series.productionById(seriesId, productionId));
+  }
 
   return {
     getAll,
