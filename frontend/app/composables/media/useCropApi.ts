@@ -25,7 +25,6 @@ export function useCropApi() {
    *
    * Returns a paginated list of media crops.
    */
-
   function getAll({ paginationFilters }: CropListOptions = {}) {
     const params = { ...paginationFilters };
     const query = buildQueryString(params);
@@ -40,7 +39,6 @@ export function useCropApi() {
    *
    * Returns a specific crop by its ID.
    */
-
   function getById(cropId: number) {
     return get<MediaCrop>(API_ROUTES.crops.byId(cropId));
   }
@@ -50,7 +48,6 @@ export function useCropApi() {
    *
    * Creates a new crop.
    */
-
   function create(body: CreateMediaCrop) {
     return post<MediaCrop, CreateMediaCrop>(API_ROUTES.crops.base, body);
   }
@@ -60,7 +57,6 @@ export function useCropApi() {
    *
    * Replaces an existing crop.
    */
-
   function replace(cropId: number, body: ReplaceMediaCrop) {
     return put<MediaCrop, ReplaceMediaCrop>(
       API_ROUTES.crops.byId(cropId),
@@ -73,7 +69,6 @@ export function useCropApi() {
    *
    * Modifies an existing crop.
    */
-
   function modify(cropId: number, body: ModifyMediaCrop) {
     return patch<MediaCrop, ModifyMediaCrop>(
       API_ROUTES.crops.byId(cropId),
@@ -86,7 +81,6 @@ export function useCropApi() {
    *
    * Removes an existing crop.
    */
-
   function remove(cropId: number) {
     return del(API_ROUTES.crops.byId(cropId));
   }

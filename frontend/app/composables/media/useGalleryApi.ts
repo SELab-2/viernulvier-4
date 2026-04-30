@@ -30,7 +30,6 @@ export function useGalleryApi() {
    *
    * Returns a paginated list of media galleries.
    */
-
   function getAll({ paginationFilters }: GalleryListOptions = {}) {
     const params = { ...paginationFilters };
     const query = buildQueryString(params);
@@ -45,7 +44,6 @@ export function useGalleryApi() {
    *
    * Get a specific gallery by its ID.
    */
-
   function getById(galleryId: number) {
     return get<MediaGallery>(API_ROUTES.galleries.byId(galleryId));
   }
@@ -55,7 +53,6 @@ export function useGalleryApi() {
    *
    * Create a new gallery.
    */
-
   function create(body: CreateMediaGallery) {
     return post<MediaGallery, CreateMediaGallery>(
       API_ROUTES.galleries.base,
@@ -68,7 +65,6 @@ export function useGalleryApi() {
    *
    * Replace a gallery.
    */
-
   function replace(galleryId: number, body: ReplaceMediaGallery) {
     return put<MediaGallery, ReplaceMediaGallery>(
       API_ROUTES.galleries.byId(galleryId),
@@ -81,7 +77,6 @@ export function useGalleryApi() {
    *
    * Modifies an existing gallery.
    */
-
   function modify(galleryId: number, body: ModifyMediaGallery) {
     return patch<MediaGallery, ModifyMediaGallery>(
       API_ROUTES.galleries.byId(galleryId),
@@ -94,7 +89,6 @@ export function useGalleryApi() {
    *
    * Removes an existing gallery.
    */
-
   function remove(galleryId: number) {
     return del(API_ROUTES.galleries.byId(galleryId));
   }
@@ -109,7 +103,6 @@ export function useGalleryApi() {
    * Returns all items linked to a gallery.
    * Returns View objects if a language is passed, otherwise standard Item objects.
    */
-
   function getGalleryItems(
     galleryId: number,
   ): Promise<ApiResponse<MediaItem[] | PrintItem[]>>;
@@ -129,7 +122,6 @@ export function useGalleryApi() {
    *
    * Links an item to a gallery.
    */
-
   function linkItemToGallery(galleryId: number, itemId: number) {
     return put(API_ROUTES.galleries.itemLink(galleryId, itemId), {});
   }
@@ -139,7 +131,6 @@ export function useGalleryApi() {
    *
    * Unlinks an item from a gallery.
    */
-
   function unlinkItemFromGallery(galleryId: number, itemId: number) {
     return del(API_ROUTES.galleries.itemLink(galleryId, itemId));
   }

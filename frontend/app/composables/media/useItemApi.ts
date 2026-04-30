@@ -10,6 +10,8 @@ import type {
   PaginationFilter,
   ReplaceMediaItem,
 } from "@repo/common";
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
 
 interface MediaItemListOptions {
   paginationFilters?: PaginationFilter;
@@ -17,93 +19,130 @@ interface MediaItemListOptions {
 }
 
 /**
- * Frontend API calls for media items.
+ * Composable for media items endpoints.
+ * All GET requests are public. All other endpoints require an API key.
  */
 export function useItemApi() {
   const { get, post, patch, put, del } = useApi();
 
   /**
-   * Get all media items.
+   * GET "/items{filters}"
+   *
+   * Returns a paginated list of media items.
+   * Returns View objects if a language is passed, otherwise standard Item objects.
    */
-  const getAll = ({
+  function getAll(options?: {
+    paginationFilters?: PaginationFilter;
+  }): Promise<ApiResponse<PaginatedResponse<MediaItem>>>;
+  function getAll(options: {
+    paginationFilters?: PaginationFilter;
+    languageFilters: LanguageQuery;
+  }): Promise<ApiResponse<PaginatedResponse<MediaItemView>>>;
+  function getAll({
     paginationFilters,
     languageFilters,
-  }: MediaItemListOptions = {}) => {
-    const params = {
-      ...paginationFilters,
-      ...languageFilters,
-    };
-
-    const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(params).filter(([_, value]) => value != null),
-    );
-
-    const queryString = new URLSearchParams(
-      cleanParams as unknown as Record<string, string>,
-    ).toString();
-
-    const query = queryString ? `?${queryString}` : "";
+  }: MediaItemListOptions = {}) {
+    const params = { ...paginationFilters, ...languageFilters };
+    const query = buildQueryString(params);
 
     return get<PaginatedResponse<MediaItem | MediaItemView>>(
       `${API_ROUTES.items.base}${query}`,
     );
-  };
+  }
 
   /**
-   * Get a specific item by it's ID.
+   * GET "/items/:itemId"
+   *
+   * Get a specific item by its ID.
+   * Returns a View object if a language is passed, otherwise a standard Item object.
    */
-  const getById = (itemId: number, lang?: Language) => {
+  function getById(itemId: number): Promise<ApiResponse<MediaItem>>;
+  function getById(
+    itemId: number,
+    lang: Language,
+  ): Promise<ApiResponse<MediaItemView>>;
+  function getById(
+    itemId: number,
+    lang?: Language,
+  ): Promise<ApiResponse<MediaItem | MediaItemView>> {
     const query = lang ? `?lang=${lang}` : "";
     return get<MediaItem | MediaItemView>(
       `${API_ROUTES.items.byId(itemId)}${query}`,
     );
-  };
+  }
 
   /**
+   * POST "/items"
+   *
    * Create a new item.
    */
-  const create = (body: CreateMediaItem) =>
-    post<MediaItem, CreateMediaItem>(API_ROUTES.items.base, body);
+  function create(body: CreateMediaItem) {
+    return post<MediaItem, CreateMediaItem>(API_ROUTES.items.base, body);
+  }
 
   /**
+   * PUT "/items/:itemId"
+   *
    * Replace an existing item.
    */
-  const replace = (itemId: number, body: ReplaceMediaItem) =>
-    put<MediaItem, ReplaceMediaItem>(API_ROUTES.items.byId(itemId), body);
+  function replace(itemId: number, body: ReplaceMediaItem) {
+    return put<MediaItem, ReplaceMediaItem>(
+      API_ROUTES.items.byId(itemId),
+      body,
+    );
+  }
 
   /**
+   * PATCH "/items/:itemId"
+   *
    * Modifies an existing item.
    */
-  const modify = (itemId: number, body: ModifyMediaItem) =>
-    patch<MediaItem, ModifyMediaItem>(API_ROUTES.items.byId(itemId), body);
+  function modify(itemId: number, body: ModifyMediaItem) {
+    return patch<MediaItem, ModifyMediaItem>(
+      API_ROUTES.items.byId(itemId),
+      body,
+    );
+  }
 
   /**
+   * DELETE "/items/:itemId"
+   *
    * Removes an existing item.
    */
-  const remove = (itemId: number) => del(API_ROUTES.items.byId(itemId));
+  function remove(itemId: number) {
+    return del(API_ROUTES.items.byId(itemId));
+  }
 
   /**
    * -- Crop links.
    */
 
   /**
+   * GET "/items/:itemId/crops"
+   *
    * Returns all crops linked to an item.
    */
-  const getItemCrops = (itemId: number) =>
-    get<MediaCrop[]>(API_ROUTES.items.crops(itemId));
+  function getItemCrops(itemId: number) {
+    return get<MediaCrop[]>(API_ROUTES.items.crops(itemId));
+  }
 
   /**
+   * PUT "/items/:itemId/crops/:cropId"
+   *
    * Links a crop to an item.
    */
-  const linkCropToItem = (itemId: number, cropId: number) =>
-    put(API_ROUTES.items.cropLink(itemId, cropId), {});
+  function linkCropToItem(itemId: number, cropId: number) {
+    return put(API_ROUTES.items.cropLink(itemId, cropId), {});
+  }
 
   /**
+   * DELETE "/items/:itemId/crops/:cropId"
+   *
    * Unlinks a crop from an item.
    */
-  const unlinkCropFromItem = (itemId: number, cropId: number) =>
-    del(API_ROUTES.items.cropLink(itemId, cropId));
+  function unlinkCropFromItem(itemId: number, cropId: number) {
+    return del(API_ROUTES.items.cropLink(itemId, cropId));
+  }
 
   return {
     getAll,
