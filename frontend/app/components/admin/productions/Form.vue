@@ -5,6 +5,16 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
+interface Props {
+  language?: "nl" | "en";
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  language: "nl",
+});
+
+const isRequired = computed(() => props.language === "nl");
+
 const emit = defineEmits<{
   submit: [Record<string, any>];
 }>();
@@ -15,7 +25,7 @@ const fields = computed<FormField[]>(() => [
     name: "titel",
     props: {
       label: t("admin-productions.form-title"),
-      required: true,
+      required: isRequired.value,
     },
   },
   {
@@ -23,7 +33,7 @@ const fields = computed<FormField[]>(() => [
     name: "description1",
     props: {
       label: t("admin-productions.form-description1"),
-      required: true,
+      required: isRequired.value,
     },
   },
   {
@@ -31,7 +41,7 @@ const fields = computed<FormField[]>(() => [
     name: "description2",
     props: {
       label: t("admin-productions.form-description2"),
-      required: true,
+      required: isRequired.value,
     },
   },
   {

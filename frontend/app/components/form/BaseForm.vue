@@ -37,9 +37,13 @@ const { t } = useI18n();
 interface Props {
   fields: FormField[]; // Can store multiple fields, allows us to have multiple of the same type
   initialValues?: Record<string, any>; // Optional pre-filled values
+  showActions?: boolean; // Whether to show submit/reset buttons, default is true
 }
 
-const { fields, initialValues } = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showActions: true,
+});
+const { fields, initialValues } = props;
 const form = reactive<Record<string, any>>({ ...initialValues }); // form will hold all dynamic values, will be prefilled with initialValues
 const components: Record<FieldComponent, any> = {
   // mapping
@@ -104,7 +108,7 @@ function collectMultiSelectRef(el: any) {
     />
 
     <!-- Buttons -->
-    <div class="p-4 flex gap-3">
+    <div v-if="props.showActions" class="p-4 flex gap-3">
       <!-- Submit button -->
       <button
         type="submit"
