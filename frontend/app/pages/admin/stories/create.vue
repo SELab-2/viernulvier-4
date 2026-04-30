@@ -2,12 +2,9 @@
   pages/admin/stories/create.vue
 
   Admin Blog Create Page.
-
-  Changes:
-  - Preview is no longer sticky — it scrolls naturally with the page.
-  - No "cancel" button in the form (navigate back via the breadcrumb link).
+  - Preview scrolls naturally with the page.
   - Step 2 is locked until the blog is saved.
-  - Cleaner two-column layout: left = form, right = preview (inline, not sticky).
+  - Two-column layout: left = form, right = preview (inline, not sticky).
   - On mobile: collapsible preview at the bottom.
 -->
 <script setup lang="ts">
@@ -130,9 +127,7 @@ async function handleSubmit(data: CreateBlog) {
         />
 
         <!-- Right: inline preview (desktop only, scrolls with page) -->
-        <div
-          class="hidden xl:block self-start sticky top-[8.5rem] mt-5 xl:mt-8"
-        >
+        <div class="hidden xl:block self-start sticky top-28">
           <AdminBlogsPreview :data="previewData" :header-crop="null" />
         </div>
       </div>

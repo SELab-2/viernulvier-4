@@ -202,7 +202,27 @@ const sectionCls =
     </section>
 
     <!-- ── Save button ─────────────────────────────────────────────────────── -->
-    <div class="flex items-center gap-3 pt-1">
+    <div class="flex flex-wrap items-center gap-3 pt-1">
+      <NuxtLink
+        :to="ROUTES.admin.stories.base"
+        class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-foreground text-background font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-black/10"
+      >
+        <svg
+          class="w-3.5 h-3.5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.75 19.5 8.25 12l7.5-7.5"
+          />
+        </svg>
+        {{ t("admin.back") }}
+      </NuxtLink>
+
       <button
         type="submit"
         :disabled="!isValid || loading"
