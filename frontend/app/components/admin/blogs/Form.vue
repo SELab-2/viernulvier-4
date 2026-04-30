@@ -1,16 +1,9 @@
 <!--
   components/admin/blogs/Form.vue
-  Bilingual Blog Form — used identically by create.vue and edit/[id].vue.
+  Bilingual Blog Form.
 
-  Fixes:
-  - Title inputs use plain text styling (text-sm, no uppercase CSS transform).
-    The uppercase CSS transform on inputs causes cursor / backspace issues in
-    some browsers because the displayed length differs from the raw value length
-    at certain Unicode boundary positions. Plain text-sm avoids this entirely.
-  - h-12 on both title inputs and action buttons matches the SearchBar height
-    used on archive / stories / prints pages.
-  - No event handlers on the title inputs beyond v-model — nothing intercepts
-    Backspace, Delete, or arrow keys.
+  Fix: title fields are now <textarea> with ~3 rows and resize-none + overflow-y-auto,
+  so long titles scroll within the field instead of being hidden or stretching the layout.
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -35,7 +28,6 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: "submit", data: CreateBlog | ModifyBlog): void;
-  (e: "cancel"): void;
   (
     e: "preview-update",
     data: { titel: LocalizedPair; description: LocalizedPair },
@@ -61,7 +53,6 @@ watch(
   { immediate: true },
 );
 
-// Emit live preview on every keystroke
 watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   emit("preview-update", {
     titel: { nl: titelNl.value, en: titelEn.value },
@@ -89,124 +80,154 @@ function handleSubmit() {
 }
 
 /*
-  inputCls — intentionally uses text-sm and NO uppercase / text-transform.
-  CSS text-transform on <input> elements can break backspace / cursor
-  positioning in Firefox and Safari when the visible (transformed) text
-  length differs from the underlying value length.
-  h-12 (48 px) matches SearchBar height used on archive / stories / prints.
+  Shared textarea class for title fields.
+  - min-h-[72px]: ~3 rows visible (comfortable for most titles)
+  - max-h-[140px]: caps growth so it doesn't become a description field
+  - overflow-y-auto: scrollbar appears when content exceeds max-h
+  - resize-none: no manual resize handle (auto-grow is handled by max-h)
+  - text-sm, no text-transform: cursor/backspace safe in all browsers
 */
-const inputCls = [
+const titleTextareaCls = [
   "w-full px-4 py-3",
-  "h-12",
+  "min-h-[72px] max-h-[140px]",
   "bg-muted border border-border rounded-lg",
   "text-sm text-foreground",
   "outline-none transition-colors duration-150",
   "hover:border-foreground/20 hover:bg-muted/70",
   "focus:border-foreground/30 focus:bg-background",
   "placeholder:text-muted-foreground",
+  "resize-none overflow-y-auto",
   "[text-transform:none]",
-  "[appearance:none]",
-  "[-webkit-appearance:none]",
+  "leading-snug",
 ].join(" ");
 
 const labelCls =
-  "block text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground mb-2";
-const sectionCls = "bg-card border border-card-border rounded-xl p-6 space-y-5";
-const headingCls =
-  "font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground pb-2 border-b border-border";
+  "block text-[9px] font-brand font-black uppercase tracking-widest text-muted-foreground mb-2";
+
+const sectionCls =
+  "bg-card border border-card-border rounded-xl overflow-hidden";
 </script>
 
 <template>
-  <form class="space-y-5" @submit.prevent="handleSubmit">
+  <form class="space-y-4" @submit.prevent="handleSubmit">
     <!-- ── Titles ──────────────────────────────────────────────────────────── -->
     <section :class="sectionCls">
-      <h2 :class="headingCls">{{ t("admin.blogs.sectionTitle") }}</h2>
+      <div
+        class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
+      >
+        <div class="w-1 h-5 rounded-full bg-accent shrink-0" />
+        <h2
+          class="font-brand font-black text-[11px] uppercase tracking-widest text-foreground"
+        >
+          {{ t("admin.blogs.sectionTitle") }}
+        </h2>
+      </div>
 
-      <!-- NL — required -->
-      <div>
-        <label :class="labelCls">
-          {{ t("admin.blogs.titleNl") }} <span class="text-red-500">*</span>
-        </label>
-        <!--
-          min-w-0 prevents the input from overflowing its grid/flex column.
-          The browser natively shows "…" when the value is wider than the field.
-          No keydown handlers — Backspace, Delete, arrows all work as normal.
-        -->
-        <div class="min-w-0">
-          <input
+      <div class="p-5 space-y-4">
+        <!-- NL — required -->
+        <div>
+          <label :class="labelCls">
+            {{ t("admin.blogs.titleNl") }}
+            <span class="text-red-500 ml-0.5">*</span>
+          </label>
+          <!--
+            Textarea instead of input: scrollable when title is long.
+            min-h shows ~3 lines, max-h caps at ~6 lines before scrolling.
+          -->
+          <textarea
             v-model="titelNl"
-            :class="inputCls"
-            type="text"
+            :class="titleTextareaCls"
             autocomplete="off"
             spellcheck="false"
             :placeholder="t('admin.blogs.titleNlPlaceholder')"
             required
           />
         </div>
-      </div>
 
-      <!-- EN — optional, falls back to NL on save -->
-      <div>
-        <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
-        <div class="min-w-0">
-          <input
+        <!-- EN — optional -->
+        <div>
+          <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
+          <textarea
             v-model="titelEn"
-            :class="inputCls"
-            type="text"
+            :class="titleTextareaCls"
             autocomplete="off"
             spellcheck="false"
             :placeholder="t('admin.blogs.titleEnPlaceholder')"
           />
+          <p class="mt-1.5 text-[9px] text-muted-foreground/60">
+            {{ t("admin.blogs.titleEnFallback") }}
+          </p>
         </div>
-        <p class="mt-1.5 text-[10px] text-muted-foreground/60">
-          {{ t("admin.blogs.titleEnFallback") }}
-        </p>
       </div>
     </section>
 
     <!-- ── Content ─────────────────────────────────────────────────────────── -->
-    <!--
-      AdminEditor (Editor.vue) now handles scrolling internally:
-      EditorContent has max-h-[360px] overflow-y-auto so the toolbar stays
-      pinned at the top while long content scrolls below it.
-      TipTap's ProseMirror handles all keyboard events within the editor
-      natively — Backspace, Delete, arrow keys all work as expected.
-    -->
     <section :class="sectionCls">
-      <h2 :class="headingCls">{{ t("admin.blogs.sectionContent") }}</h2>
-
-      <!-- NL — required -->
-      <div>
-        <label :class="labelCls">
-          {{ t("admin.blogs.descriptionNl") }}
-          <span class="text-red-500">*</span>
-        </label>
-        <AdminEditor
-          v-model="descriptionNl"
-          :placeholder="t('admin.blogs.descriptionNlPlaceholder')"
-        />
+      <div
+        class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
+      >
+        <div class="w-1 h-5 rounded-full bg-accent shrink-0" />
+        <h2
+          class="font-brand font-black text-[11px] uppercase tracking-widest text-foreground"
+        >
+          {{ t("admin.blogs.sectionContent") }}
+        </h2>
       </div>
 
-      <!-- EN — optional -->
-      <div>
-        <label :class="labelCls">{{ t("admin.blogs.descriptionEn") }}</label>
-        <AdminEditor
-          v-model="descriptionEn"
-          :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
-        />
-        <p class="mt-1.5 text-[10px] text-muted-foreground/60">
-          {{ t("admin.blogs.descriptionEnFallback") }}
-        </p>
+      <div class="p-5 space-y-5">
+        <!-- NL — required -->
+        <div>
+          <label :class="labelCls">
+            {{ t("admin.blogs.descriptionNl") }}
+            <span class="text-red-500 ml-0.5">*</span>
+          </label>
+          <AdminEditor
+            v-model="descriptionNl"
+            :placeholder="t('admin.blogs.descriptionNlPlaceholder')"
+          />
+        </div>
+
+        <!-- EN — optional -->
+        <div>
+          <label :class="labelCls">{{ t("admin.blogs.descriptionEn") }}</label>
+          <AdminEditor
+            v-model="descriptionEn"
+            :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
+          />
+          <p class="mt-1.5 text-[9px] text-muted-foreground/60">
+            {{ t("admin.blogs.descriptionEnFallback") }}
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- ── Actions ─────────────────────────────────────────────────────────── -->
-    <div class="flex items-center gap-3">
+    <!-- ── Save button ─────────────────────────────────────────────────────── -->
+    <div class="flex items-center gap-3 pt-1">
       <button
         type="submit"
         :disabled="!isValid || loading"
-        class="btn-outline flex-1 justify-center h-12 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-accent/20"
       >
+        <svg
+          v-if="loading"
+          class="w-3.5 h-3.5 animate-spin shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+        </svg>
+        <svg
+          v-else
+          class="w-3.5 h-3.5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
+        >
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
         <span v-if="loading">{{ t("admin.saving") }}</span>
         <span v-else-if="mode === 'create'">{{
           t("admin.blogs.createBtn")
@@ -214,13 +235,12 @@ const headingCls =
         <span v-else>{{ t("admin.blogs.saveBtn") }}</span>
       </button>
 
-      <button
-        type="button"
-        class="btn-outline px-8 h-12 shrink-0"
-        @click="emit('cancel')"
+      <p
+        v-if="!isValid"
+        class="text-[10px] text-muted-foreground/60 font-brand font-black uppercase tracking-widest"
       >
-        {{ t("admin.cancel") }}
-      </button>
+        {{ t("admin.blogs.validation.titleNlRequired") }}
+      </p>
     </div>
   </form>
 </template>

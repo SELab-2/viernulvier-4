@@ -1,19 +1,14 @@
 <!--
   pages/admin/stories/create.vue
 
-  Admin Blog Create Page — identical two-column layout as edit/[id].vue.
+  Admin Blog Create Page.
 
-  After successful save, navigates to the edit page with ?step=photos so the
-  user lands directly on the image upload step (Step 2).
-
-  Preview column:
-  - position: sticky on the inner div (NOT the outer column div)
-  - top accounts for the AppHeader height (min-h-[110px] on desktop)
-  - NO overflow-y on the sticky element itself — that would create a new
-    scroll context and break sticky. The AdminBlogsPreview component has
-    its own internal scroll at 650px fixed height.
-  - items-start on the grid row is essential: without it the right column
-    stretches to match the left column height, removing the need to stick.
+  Changes:
+  - Preview is no longer sticky — it scrolls naturally with the page.
+  - No "cancel" button in the form (navigate back via the breadcrumb link).
+  - Step 2 is locked until the blog is saved.
+  - Cleaner two-column layout: left = form, right = preview (inline, not sticky).
+  - On mobile: collapsible preview at the bottom.
 -->
 <script setup lang="ts">
 import type { CreateBlog } from "@repo/common";
@@ -38,7 +33,6 @@ async function handleSubmit(data: CreateBlog) {
   try {
     const resp = await create(data);
     if (resp.data) {
-      // Navigate to edit page, landing directly on the photos step
       await navigateTo({
         path: ROUTES.admin.stories.edit(resp.data.id),
         query: { step: "photos" },
@@ -57,7 +51,7 @@ async function handleSubmit(data: CreateBlog) {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- ── Top bar ─────────────────────────────────────────────────────── -->
+      <!-- ── Top bar ──────────────────────────────────────────────────────── -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -73,7 +67,7 @@ async function handleSubmit(data: CreateBlog) {
         </h1>
       </div>
 
-      <!-- ── Step indicator ─────────────────────────────────────────────── -->
+      <!-- ── Step indicator ──────────────────────────────────────────────── -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
@@ -91,7 +85,7 @@ async function handleSubmit(data: CreateBlog) {
 
         <span class="w-px bg-border self-stretch" />
 
-        <!-- Step 2 — locked until blog is saved -->
+        <!-- Step 2 — locked -->
         <div
           class="flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-brand font-black uppercase tracking-widest bg-background text-muted-foreground/40 cursor-not-allowed select-none"
         >
@@ -113,18 +107,18 @@ async function handleSubmit(data: CreateBlog) {
         </div>
       </div>
 
-      <!-- ── Error banner ────────────────────────────────────────────────── -->
+      <!-- ── Error ───────────────────────────────────────────────────────── -->
       <div
         v-if="error"
-        class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
+        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
       >
         {{ error }}
       </div>
 
       <!--
         Two-column grid.
-        items-start: each column is only as tall as its own content — required
-        for position:sticky to work in the right column.
+        Preview column is NOT sticky — it scrolls with the page naturally.
+        items-start: prevents the right column from stretching.
       -->
       <div class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
         <!-- Left: form -->
@@ -132,29 +126,16 @@ async function handleSubmit(data: CreateBlog) {
           mode="create"
           :loading="saving"
           @submit="handleSubmit"
-          @cancel="navigateTo(ROUTES.admin.stories.base)"
           @preview-update="(d) => (previewData = d)"
         />
 
-        <!--
-          Right: sticky preview.
-
-          IMPORTANT: position:sticky is on the INNER div, not the column div.
-          The outer column div has no overflow set — that would break sticky.
-          top: calc(110px + 1.5rem)  →  clears the AppHeader (min-h 110px) + gap.
-
-          AdminBlogsPreview has h-[650px] and its own internal scroll container,
-          so we do NOT add overflow-y here (that would create a new scroll
-          context and immediately break sticky).
-        -->
+        <!-- Right: inline preview (desktop only, scrolls with page) -->
         <div class="hidden xl:block">
-          <div class="sticky" style="top: calc(110px + 1.5rem)">
-            <AdminBlogsPreview :data="previewData" :header-crop="null" />
-          </div>
+          <AdminBlogsPreview :data="previewData" :header-crop="null" />
         </div>
       </div>
 
-      <!-- Mobile preview — collapsible -->
+      <!-- Mobile: collapsible preview -->
       <details
         class="xl:hidden group border border-border rounded-xl overflow-hidden"
       >

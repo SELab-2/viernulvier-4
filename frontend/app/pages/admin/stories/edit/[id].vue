@@ -1,17 +1,7 @@
 <!--
   pages/admin/stories/edit/[id].vue
-
-  Admin Blog Edit Page — two-step timeline layout.
-
-  Step 1 — Content: title (NL/EN) + description (NL/EN) + live preview.
-  Step 2 — Photos:  media-item metadata + 6 crop slots + live preview.
-
-  Preview column:
-  - Sticky below the AppHeader (top: calc(110px + 1.5rem)).
-  - Has overflow-y-auto + max-height so it never overflows the viewport
-    and scrolls independently from the left column.
-  - items-start on the grid row is critical — without it the right column
-    stretches to match the left column and sticky stops working.
+  Admin Blog Edit Page — two-step layout.
+  Preview is NOT sticky — scrolls naturally with the page.
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
@@ -22,7 +12,6 @@ import type {
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useGallery } from "~/composables/media/useGallery";
 
-// TipTap uses browser-only APIs — disable SSR for this page
 definePageMeta({ ssr: false });
 
 const route = useRoute();
@@ -30,7 +19,6 @@ const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
-// ── Route param ──────────────────────────────────────────────────────────────
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -39,17 +27,13 @@ const blogId = computed<number | null>(() => {
   return isFinite(n) ? n : null;
 });
 
-// ── State ────────────────────────────────────────────────────────────────────
 const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
 const error = ref<string | null>(null);
 const saved = ref(false);
-
-/** Which step is currently visible */
 const step = ref<"content" | "photos">("content");
 
-/** Live preview data — updated by the form's @preview-update event */
 const previewData = ref<{
   titel: { nl: string; en: string };
   description: { nl: string; en: string };
@@ -63,15 +47,12 @@ const initialBlogData = computed(() => {
   };
 });
 
-/** Gallery for the preview hero image */
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const galleryId = ref<number | null>(null);
-
 const headerCrop = computed(() =>
   gallery.value ? getMainImageCrop(gallery.value, "FE3_header") : null,
 );
 
-// ── Data loading ─────────────────────────────────────────────────────────────
 async function loadGallery() {
   if (!blogId.value) return;
   try {
@@ -105,7 +86,6 @@ async function loadBlog() {
   }
 }
 
-// ── Save ─────────────────────────────────────────────────────────────────────
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
@@ -123,6 +103,7 @@ async function handleSubmit(data: ModifyBlog) {
 }
 
 onMounted(async () => {
+  if (route.query.step === "photos") step.value = "photos";
   await loadBlog();
   await loadGallery();
 });
@@ -131,7 +112,7 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- ── Top bar ─────────────────────────────────────────────────────── -->
+      <!-- Top bar -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -139,18 +120,15 @@ onMounted(async () => {
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
-
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
         >
           {{ t("admin.blogs.edit") }}
         </h1>
-
-        <!-- Saved feedback badge -->
         <Transition name="fade">
           <span
             v-if="saved"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-black uppercase tracking-widest shrink-0"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-feedback-success-bg text-feedback-success-text border border-feedback-success-border text-[10px] font-black uppercase tracking-widest shrink-0"
           >
             <svg
               class="w-3 h-3"
@@ -166,15 +144,10 @@ onMounted(async () => {
         </Transition>
       </div>
 
-      <!-- ── Step indicator ─────────────────────────────────────────────── -->
-      <!--
-        Both steps are clickable — the user can freely jump between them.
-        Active step gets the filled (foreground) style; inactive gets muted.
-      -->
+      <!-- Step indicator -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
-        <!-- Step 1 -->
         <button
           type="button"
           :class="[
@@ -197,10 +170,7 @@ onMounted(async () => {
           {{ t("admin.blogs.sectionTitle") }} &amp;
           {{ t("admin.blogs.sectionContent") }}
         </button>
-
         <span class="w-px bg-border self-stretch" />
-
-        <!-- Step 2 -->
         <button
           type="button"
           :class="[
@@ -224,15 +194,15 @@ onMounted(async () => {
         </button>
       </div>
 
-      <!-- ── Error banner ────────────────────────────────────────────────── -->
+      <!-- Error -->
       <div
         v-if="error"
-        class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
+        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
       >
         {{ error }}
       </div>
 
-      <!-- ── Loading skeleton ────────────────────────────────────────────── -->
+      <!-- Loading skeleton -->
       <template v-if="fetching">
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
@@ -242,13 +212,11 @@ onMounted(async () => {
             <div class="h-80 bg-muted rounded-xl animate-pulse" />
             <div class="h-80 bg-muted rounded-xl animate-pulse" />
           </div>
-          <div
-            class="hidden xl:block h-[600px] bg-muted rounded-xl animate-pulse"
-          />
+          <div class="hidden xl:block h-96 bg-muted rounded-xl animate-pulse" />
         </div>
       </template>
 
-      <!-- ── Not found ───────────────────────────────────────────────────── -->
+      <!-- Not found -->
       <div
         v-else-if="!blog && !fetching"
         class="py-16 text-center text-muted-foreground"
@@ -256,33 +224,27 @@ onMounted(async () => {
         {{ t("admin.blogs.notFound") }}
       </div>
 
-      <!-- ── Main content ────────────────────────────────────────────────── -->
+      <!-- Main content -->
       <template v-else-if="blog && blogId">
         <!--
-          Two-column layout.
-
+          Two-column grid.
           items-start: each column is only as tall as its own content.
-          This is REQUIRED for position: sticky to work in the right column.
-          If items-stretch (default) is used, the sticky element fills the full
-          row height and never needs to scroll → sticky has no effect.
+          Right column: plain div, NO sticky, NO position, NO top, NO overflow.
+          The preview simply sits next to the form and scrolls with the page.
         -->
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
         >
-          <!-- ── Left: active step ─────────────────────────────────────── -->
+          <!-- Left: active step -->
           <div class="space-y-5 min-w-0">
-            <!-- Step 1 — Content -->
             <template v-if="step === 'content'">
               <AdminBlogsForm
                 mode="edit"
                 :initial-data="initialBlogData"
                 :loading="saving"
                 @submit="handleSubmit"
-                @cancel="navigateTo(ROUTES.admin.stories.base)"
                 @preview-update="(d) => (previewData = d)"
               />
-
-              <!-- "Next: photos" shortcut link -->
               <div class="flex">
                 <button
                   type="button"
@@ -307,19 +269,15 @@ onMounted(async () => {
               </div>
             </template>
 
-            <!-- Step 2 — Photos -->
             <template v-if="step === 'photos'">
               <AdminBlogsImageSection
                 :blog-id="blogId"
                 @crop-uploaded="loadGallery"
               />
-
               <AdminBlogsLinkToProduction
                 :blog-id="blogId"
                 :gallery-id="galleryId"
               />
-
-              <!-- "Back to content" link -->
               <div class="flex">
                 <button
                   type="button"
@@ -346,39 +304,18 @@ onMounted(async () => {
             </template>
           </div>
 
-          <!-- ── Right: sticky live preview (desktop only) ─────────────── -->
-          <!--
-            top: calc(110px + 1.5rem)
-              AppHeader is sticky at top-0 with min-h-[110px] on desktop.
-              Adding 1.5 rem gap ensures the preview never slides under the
-              header even when the header expands (mobile menu, etc.).
-
-            max-height: calc(100vh - 110px - 3rem)
-              Keeps the preview inside the viewport; it scrolls internally
-              when taller than the available space.
-
-            overflow-y-auto:
-              Lets the preview content scroll without the whole page scrolling.
-          -->
+          <!-- Right: preview — just a plain div, scrolls with the page -->
           <div class="hidden xl:block">
-            <div
-              class="sticky overflow-y-auto"
-              style="
-                top: calc(110px + 1.5rem);
-                max-height: calc(100vh - 110px - 3rem);
-              "
-            >
-              <AdminBlogsPreview
-                :data="{ ...previewData, id: blogId ?? undefined }"
-                :header-crop="headerCrop"
-              />
-            </div>
+            <AdminBlogsPreview
+              :data="{ ...previewData, id: blogId ?? undefined }"
+              :header-crop="headerCrop"
+            />
           </div>
         </div>
 
-        <!-- Mobile preview — collapsible below the form -->
+        <!-- Mobile: collapsible preview -->
         <details
-          class="xl:hidden group border border-border rounded-xl overflow-hidden"
+          class="xl:hidden group border border-border rounded-xl overflow-hidden mt-6"
         >
           <summary
             class="flex items-center justify-between px-4 py-3 bg-muted/40 cursor-pointer list-none select-none"

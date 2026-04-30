@@ -2,30 +2,25 @@
   components/admin/blogs/ListView.vue
 
   Admin overview of all blog stories.
-
-  Reuses the public-facing StoryToolbar (search + filters) and StoryTimeline
-  (year/month grouped list) components to avoid code duplication.
-  Adds admin-only actions (edit, delete) via a slot/wrapper around each item.
-
-  Pagination: Page X of Y (identical to archive page).
-  Create button: NuxtLink styled directly.
+  Fix: search bar area is now h-14 (taller) for better usability.
 -->
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
 import { Plus } from "lucide-vue-next";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 import type { DateFilter } from "~/types/DateFilter";
 
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
+const { fetchSuggestions } = useBlogView();
 
 // Filters
-
 const sortOrder = ref<"newest" | "oldest">("newest");
 const searchQuery = ref("");
 const dateFilter = ref<DateFilter>({});
 
-// Date bounds for calendar + year picker
+// Date bounds
 const oldestDate = ref("");
 const newestDate = ref("");
 
@@ -51,7 +46,6 @@ async function fetchDateBounds() {
 }
 
 // Pagination
-
 const PAGE_SIZE = 10;
 const currentPage = ref(1);
 const totalPages = ref(1);
@@ -66,7 +60,6 @@ function handleJump() {
 }
 
 // Data
-
 const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -129,7 +122,6 @@ onMounted(async () => {
 });
 
 // Delete
-
 async function handleDelete(blog: BlogView) {
   if (
     !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
@@ -146,12 +138,15 @@ async function handleDelete(blog: BlogView) {
     deletingIds.value.delete(blog.id);
   }
 }
+
+// Filter panel state (local — not delegated to StoryToolbar so we can control height)
+const filterOpen = ref(false);
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between gap-4">
+  <div class="space-y-0">
+    <!-- ── Page header ───────────────────────────────────────────────────── -->
+    <div class="flex items-center justify-between gap-4 mb-6">
       <div>
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
@@ -168,204 +163,310 @@ async function handleDelete(blog: BlogView) {
 
       <NuxtLink
         :to="ROUTES.admin.stories.create"
-        class="inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer"
+        class="inline-flex items-center gap-2 shrink-0 px-5 py-3 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer"
       >
         <Plus :size="14" />
         {{ t("admin.blogs.new") }}
       </NuxtLink>
     </div>
 
-    <!--
-      Reuse the public StoryToolbar for search + sort + date filters.
-      This eliminates the large block of duplicated filter UI that was
-      previously inlined here.
-    -->
-    <BlogsStoryToolbar
-      v-model:sort-order="sortOrder"
-      :story-titles="[]"
-      :oldest-date="oldestDate"
-      :newest-date="newestDate"
-      :date-filter="dateFilter"
-      @update:search="searchQuery = $event"
-      @update:date-filter="dateFilter = $event"
-    />
-
-    <!-- Error -->
-    <div
-      v-if="error"
-      class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
-    >
-      {{ error }}
-    </div>
-
-    <!-- Loading -->
-    <div v-if="loading" class="space-y-3">
-      <div
-        v-for="i in PAGE_SIZE"
-        :key="i"
-        class="h-20 bg-muted rounded-xl animate-pulse"
-      />
-    </div>
-
-    <!-- Empty -->
-    <div v-else-if="!blogs.length" class="py-20 text-center">
-      <p
-        class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
-      >
-        {{ t("stories.noStories") }}
-      </p>
-      <p
-        class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
-      >
-        {{ t("stories.noStoriesDesc") }}
-      </p>
-    </div>
-
-    <!--
-      Admin blog list: each story rendered as an AdminBlogsListItem
-      (which adds edit/delete actions on top of the standard story card).
-      We intentionally do NOT reuse StoryTimeline here because admin items
-      need the edit/delete buttons that StoryTimeline's StoryListItem doesn't have.
-    -->
-    <div v-else class="space-y-3">
-      <AdminBlogsListItem
-        v-for="blog in blogs"
-        :key="blog.id"
-        :blog="blog"
-        :deleting="deletingIds.has(blog.id)"
-        @delete="handleDelete(blog)"
-      />
-    </div>
-
-    <!-- Pagination -->
-    <div
-      v-if="totalPages > 1 || totalItems > 0"
-      class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"
-    >
-      <p
-        v-if="totalItems > 0 && !loading"
-        class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
-      >
-        {{ totalItems }} {{ t("admin.blogs.results") }}
-      </p>
-      <div v-else class="h-4 w-24 bg-muted rounded animate-pulse" />
-
-      <div v-if="totalPages > 1" class="flex items-center gap-3">
-        <!-- Page jumper -->
-        <div class="flex items-center gap-2">
-          <span
-            class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
-            >{{ t("archive.page_label") }}</span
-          >
-          <input
-            v-model="jumpInput"
-            type="number"
-            :min="1"
-            :max="totalPages"
-            :placeholder="currentPage.toString()"
-            :disabled="loading"
-            @keydown.enter="handleJump"
-            @blur="handleJump"
-            class="w-14 h-9 rounded-md border-2 border-foreground/20 bg-background px-1 text-sm text-center font-black text-foreground focus:outline-none focus:border-foreground disabled:opacity-25 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+    <!-- ── Toolbar: search + filters ────────────────────────────────────── -->
+    <div class="w-full border-b border-border bg-background">
+      <div class="py-4 flex items-stretch gap-3">
+        <!-- Search — h-14 for a taller, more comfortable input -->
+        <div class="flex-1 min-w-0 h-14">
+          <SearchBar
+            v-model="searchQuery"
+            :fetch-suggestions="fetchSuggestions"
+            :limit="15"
+            :scroll-limit="5"
+            :placeholder="t('stories.searchPlaceholder')"
           />
-          <span
-            class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
-            >{{ t("archive.of_pages", { total: totalPages }) }}</span
-          >
         </div>
 
-        <!-- Nav buttons — same as archive pagination -->
-        <nav
-          class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
-          :aria-label="t('archive.pagination')"
+        <!-- Filters toggle -->
+        <button
+          type="button"
+          :class="[
+            'btn-outline h-14 gap-2 shrink-0 px-5',
+            filterOpen && '!bg-foreground !text-background !border-foreground',
+          ]"
+          :aria-expanded="filterOpen"
+          @click="filterOpen = !filterOpen"
         >
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === 1 || loading"
-            @click="currentPage = 1"
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            aria-hidden="true"
           >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
+            <path
+              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
               stroke="currentColor"
-              stroke-width="2.65"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>{{ t("general.filters") }}</span>
+        </button>
+      </div>
+
+      <!-- Filter panel -->
+      <Transition name="cal-slide">
+        <div v-if="filterOpen" class="border-t border-border">
+          <div class="py-6 flex flex-col gap-6">
+            <!-- Sort order -->
+            <div class="flex flex-col gap-2 w-max">
+              <span class="section-label">{{ t("stories.sortLabel") }}</span>
+              <select
+                v-model="sortOrder"
+                class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
+              >
+                <option value="newest">{{ t("stories.sortNewest") }}</option>
+                <option value="oldest">{{ t("stories.sortOldest") }}</option>
+              </select>
+            </div>
+
+            <!-- Year picker -->
+            <div class="flex flex-col gap-2">
+              <span class="section-label">{{ t("stories.filters.year") }}</span>
+              <YearPicker
+                :model-value="null"
+                :oldest-date="oldestDate"
+                :newest-date="newestDate"
+                @update:model-value="
+                  (year) => {
+                    if (year) {
+                      dateFilter = {
+                        after: `${year}-01-01`,
+                        before: `${year}-12-31`,
+                      };
+                    } else {
+                      dateFilter = {};
+                    }
+                  }
+                "
               />
-            </svg>
-          </button>
-          <span class="w-[2px] bg-foreground" />
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === 1 || loading"
-            @click="currentPage--"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
+            </div>
+
+            <!-- Calendar -->
+            <div class="flex flex-col gap-2">
+              <span class="section-label">{{
+                t("stories.filters.dateRange")
+              }}</span>
+              <DefaultCalendar
+                :oldest-date="oldestDate"
+                :model-filter="dateFilter"
+                @update:filter="dateFilter = $event"
               />
-            </svg>
-          </button>
-          <span class="w-[2px] bg-foreground" />
-          <span
-            class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
-          >
-            {{ currentPage }}
-          </span>
-          <span class="w-[2px] bg-foreground" />
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === totalPages || loading"
-            @click="currentPage++"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- ── Content ───────────────────────────────────────────────────────── -->
+    <div class="pt-6 space-y-4">
+      <!-- Error -->
+      <div
+        v-if="error"
+        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
+      >
+        {{ error }}
+      </div>
+
+      <!-- Loading -->
+      <div v-if="loading" class="space-y-3">
+        <div
+          v-for="i in PAGE_SIZE"
+          :key="i"
+          class="h-20 bg-muted rounded-xl animate-pulse"
+        />
+      </div>
+
+      <!-- Empty -->
+      <div v-else-if="!blogs.length" class="py-20 text-center">
+        <p
+          class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
+        >
+          {{ t("stories.noStories") }}
+        </p>
+        <p
+          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
+        >
+          {{ t("stories.noStoriesDesc") }}
+        </p>
+      </div>
+
+      <!-- List -->
+      <div v-else class="space-y-2">
+        <AdminBlogsListItem
+          v-for="blog in blogs"
+          :key="blog.id"
+          :blog="blog"
+          :deleting="deletingIds.has(blog.id)"
+          @delete="handleDelete(blog)"
+        />
+      </div>
+
+      <!-- ── Pagination ──────────────────────────────────────────────────── -->
+      <div
+        v-if="totalPages > 1 || totalItems > 0"
+        class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"
+      >
+        <p
+          v-if="totalItems > 0 && !loading"
+          class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
+        >
+          {{ totalItems }} {{ t("admin.blogs.results") }}
+        </p>
+        <div v-else class="h-4 w-24 bg-muted rounded animate-pulse" />
+
+        <div v-if="totalPages > 1" class="flex items-center gap-3">
+          <!-- Page jumper -->
+          <div class="flex items-center gap-2">
+            <span
+              class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m8.25 4.5 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-          <span class="w-[2px] bg-foreground" />
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === totalPages || loading"
-            @click="currentPage = totalPages"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
+              {{ t("archive.page_label") }}
+            </span>
+            <input
+              v-model="jumpInput"
+              type="number"
+              :min="1"
+              :max="totalPages"
+              :placeholder="currentPage.toString()"
+              :disabled="loading"
+              @keydown.enter="handleJump"
+              @blur="handleJump"
+              class="w-14 h-9 rounded-md border-2 border-foreground/20 bg-background px-1 text-sm text-center font-black text-foreground focus:outline-none focus:border-foreground disabled:opacity-25 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            />
+            <span
+              class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-        </nav>
+              {{ t("archive.of_pages", { total: totalPages }) }}
+            </span>
+          </div>
+
+          <!-- Nav buttons -->
+          <nav
+            class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
+            :aria-label="t('archive.pagination')"
+          >
+            <button
+              class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+              :disabled="currentPage === 1 || loading"
+              @click="currentPage = 1"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.65"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
+                />
+              </svg>
+            </button>
+            <span class="w-[2px] bg-foreground" />
+            <button
+              class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+              :disabled="currentPage === 1 || loading"
+              @click="currentPage--"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.65"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+            <span class="w-[2px] bg-foreground" />
+            <span
+              class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
+            >
+              {{ currentPage }}
+            </span>
+            <span class="w-[2px] bg-foreground" />
+            <button
+              class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+              :disabled="currentPage === totalPages || loading"
+              @click="currentPage++"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.65"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
+            <span class="w-[2px] bg-foreground" />
+            <button
+              class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+              :disabled="currentPage === totalPages || loading"
+              @click="currentPage = totalPages"
+            >
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.65"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
+          </nav>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.cal-slide-enter-active,
+.cal-slide-leave-active {
+  transition:
+    opacity 0.18s ease,
+    max-height 0.25s ease;
+  overflow: hidden;
+  max-height: 900px;
+}
+.cal-slide-enter-from,
+.cal-slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+
+.section-label {
+  font-family: var(--font-brand, "ABCMonumentGrotesk", sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+</style>
