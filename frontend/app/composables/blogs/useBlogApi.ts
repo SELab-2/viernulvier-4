@@ -43,13 +43,13 @@ export function useBlogApi() {
    * Returns a paginated list of either Blog or BlogView objects depending on
    * whether a language query was passed.
    */
-  function getAll(options: {
-    paginationFilters: PaginationFilter;
-    blogFilters: FilterBlog;
+  function getAll(options?: {
+    paginationFilters?: PaginationFilter;
+    blogFilters?: FilterBlog;
   }): Promise<ApiResponse<PaginatedResponse<Blog>>>;
   function getAll(options: {
-    paginationFilters: PaginationFilter;
-    blogFilters: FilterBlog;
+    paginationFilters?: PaginationFilter;
+    blogFilters?: FilterBlog;
     languageFilters: LanguageQuery;
   }): Promise<ApiResponse<PaginatedResponse<BlogView>>>;
   function getAll({

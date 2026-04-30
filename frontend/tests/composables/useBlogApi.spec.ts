@@ -31,8 +31,10 @@ describe("useBlogApi", () => {
 
   it("getAll appends lang query param", () => {
     const { getAll } = useBlogApi();
-    void getAll({ languageFilters: { lang: "en" } });
-    expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=en"));
+    void getAll({
+      languageFilters: { lang: "nl" },
+    });
+    expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("lang=nl"));
   });
 
   it("getAll appends pagination and lang together", () => {
