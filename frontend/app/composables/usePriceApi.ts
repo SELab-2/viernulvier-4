@@ -9,8 +9,8 @@ import type {
   LanguageQuery,
   ReplacePrice,
 } from "@repo/common";
-import { API_ROUTES } from "~/utils/apiRoutes"; // Updated to use path alias
-import { buildQueryString } from "~/utils/formatters"; // Adjust path as needed
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
 
 interface PriceListOptions {
   paginationFilters?: PaginationFilter;
