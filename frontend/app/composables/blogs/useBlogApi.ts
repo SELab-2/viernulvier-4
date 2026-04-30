@@ -38,7 +38,7 @@ export function useBlogApi() {
   const { get, post, put, patch, del } = useApi();
 
   /**
-   * GET "/blogs/{filters}"
+   * GET "/blogs{filters}"
    *
    * Returns a paginated list of either Blog or BlogView objects depending on
    * whether a language query was passed.
