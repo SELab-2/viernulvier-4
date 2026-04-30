@@ -39,12 +39,28 @@ interface BlogListOptions {
 export function useBlogApi() {
   const { get, post, put, patch, del } = useApi();
 
-  /** GET /blogs — returns a paginated list of blogs. */
-  const getAll = ({
+  /**
+   * GET "/blogs/{filters}"
+   *
+   * Returns a paginated list of either Blog or BlogView objects depending on
+   * whether a language query was passed.
+   */
+
+  function getAll(options: {
+    paginationFilters: PaginationFilter;
+    blogFilters: FilterBlog;
+  }): Promise<ApiResponse<PaginatedResponse<Blog>>>;
+  function getAll(options: {
+    paginationFilters: PaginationFilter;
+    blogFilters: FilterBlog;
+    languageFilters: LanguageQuery;
+  }): Promise<ApiResponse<PaginatedResponse<BlogView>>>;
+
+  function getAll({
     paginationFilters,
     languageFilters,
     blogFilters,
-  }: BlogListOptions = {}) => {
+  }: BlogListOptions = {}) {
     const params = {
       ...paginationFilters,
       ...languageFilters,
@@ -65,34 +81,76 @@ export function useBlogApi() {
     return get<PaginatedResponse<Blog | BlogView>>(
       `${API_ROUTES.blogs.base}${query}`,
     );
-  };
+  }
 
-  /** GET /blogs/:blogId — returns a single blog. */
-  const getById = (blogId: number, lang?: Language) => {
+  /**
+   * GET "/blogs/:blogId"
+   *
+   * Returns a Blog or BlogView object depending on
+   * whether a language query was passed.
+   */
+
+  function getById(blogId: number): Promise<ApiResponse<Blog>>;
+  function getById(
+    blogId: number,
+    lang: Language,
+  ): Promise<ApiResponse<BlogView>>;
+
+  function getById(blogId: number, lang?: Language) {
     const query = lang ? `?lang=${lang}` : "";
     return get<Blog | BlogView>(`${API_ROUTES.blogs.byId(blogId)}${query}`);
-  };
+  }
 
-  /** POST /blogs — creates a new blog. */
-  const create = (body: CreateBlog) =>
-    post<Blog, CreateBlog>(API_ROUTES.blogs.base, body);
+  /**
+   * POST "/blogs"
+   *
+   * Creates a new blog.
+   */
 
-  /** PUT /blogs/:blogId — fully replaces an existing blog. */
-  const replace = (blogId: number, body: ReplaceBlog) =>
-    put<Blog, ReplaceBlog>(API_ROUTES.blogs.byId(blogId), body);
+  function create(body: CreateBlog) {
+    return post<Blog, CreateBlog>(API_ROUTES.blogs.base, body);
+  }
 
-  /** PATCH /blogs/:blogId — partially updates an existing blog. */
-  const modify = (blogId: number, body: ModifyBlog) =>
-    patch<Blog, ModifyBlog>(API_ROUTES.blogs.byId(blogId), body);
+  /**
+   * PUT "/blogs/:blogId"
+   *
+   * Replaces an existing blog.
+   */
 
-  /** DELETE /blogs/:blogId — deletes a blog. */
-  const remove = (blogId: number) => del(API_ROUTES.blogs.byId(blogId));
+  function replace(blogId: number, body: ReplaceBlog) {
+    return put<Blog, ReplaceBlog>(API_ROUTES.blogs.byId(blogId), body);
+  }
+
+  /**
+   * PATCH "/blogs/:blogId"
+   *
+   * Modifies an existing blog.
+   */
+
+  function modify(blogId: number, body: ModifyBlog) {
+    return patch<Blog, ModifyBlog>(API_ROUTES.blogs.byId(blogId), body);
+  }
+
+  /**
+   * DELETE "/blogs/:blogId"
+   *
+   * Deletes a blog.
+   */
+
+  function remove(blogId: number) {
+    return del(API_ROUTES.blogs.byId(blogId));
+  }
 
   /**
    * Media Galleries
    */
 
-  /** These overloads make TS happy with the types. */
+  /**
+   * GET "/blogs/:blogId/media?type=default"
+   *
+   * Retrieves the media gallery for a blog. null if none.
+   */
+
   function getMediaGallery(
     blogId: number,
     lang: Language,
@@ -101,11 +159,7 @@ export function useBlogApi() {
     blogId: number,
   ): Promise<GalleryWithItems<ItemWithCrops> | null>;
 
-  /** GET /blogs/:blogId/media?type=default - Gets a DefaultGallery from the api. */
-  async function getMediaGallery(
-    blogId: number,
-    lang?: Language,
-  ): Promise<GalleryWithItems<ItemWithCrops | ItemViewWithCrops> | null> {
+  async function getMediaGallery(blogId: number, lang?: Language) {
     try {
       const response = await get<DefaultGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=default`,
@@ -122,11 +176,21 @@ export function useBlogApi() {
     }
   }
 
-  /** GET /blogs/:blogId/media?type=prints - Gets a PrintGallery from the api. */
-  const getPrintsGallery = async (
+  /**
+   * GET "/blogs/:blogId/media?type=prints"
+   *
+   * Retrieves the prints gallery for a blog. null if none.
+   */
+
+  function getPrintsGallery(
     blogId: number,
-    lang?: Language,
-  ): Promise<GalleryWithItems<PrintItem | PrintItemView> | null> => {
+  ): Promise<GalleryWithItems<PrintItem> | null>;
+  function getPrintsGallery(
+    blogId: number,
+    lang: Language,
+  ): Promise<GalleryWithItems<PrintItemView> | null>;
+
+  async function getPrintsGallery(blogId: number, lang?: Language) {
     try {
       const response = await get<PrintGallery>(
         `${API_ROUTES.blogs.media(blogId)}?type=prints`,
@@ -141,15 +205,27 @@ export function useBlogApi() {
       // We return null because no gallery exists.
       return null;
     }
-  };
+  }
 
-  /** PUT /blogs/:blogId/media/:galleryId — links a MediaGallery to a blog. */
-  const linkMedia = (productionId: number, galleryId: number) =>
-    put(API_ROUTES.blogs.mediaById(productionId, galleryId), {});
+  /**
+   * PUT "/blogs/:blogId/media/:galleryId"
+   *
+   * Links a specific gallery to this blog.
+   */
 
-  /** DELETE /blogs/:blogId/media/:galleryId — unlinks a MediaGallery from a blog. */
-  const unlinkMedia = (productionId: number, galleryId: number) =>
-    del(API_ROUTES.blogs.mediaById(productionId, galleryId));
+  function linkMedia(productionId: number, galleryId: number) {
+    return put(API_ROUTES.blogs.mediaById(productionId, galleryId), {});
+  }
+
+  /**
+   * DELETE "/blogs/:blogId/media/:galleryId"
+   *
+   * Unlinks a specific gallery from this blog.
+   */
+
+  function unlinkMedia(productionId: number, galleryId: number) {
+    return del(API_ROUTES.blogs.mediaById(productionId, galleryId));
+  }
 
   return {
     getAll,
