@@ -48,7 +48,7 @@ async function handleSubmit(data: CreateBlog) {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- ── Top bar ──────────────────────────────────────────────────────── -->
+      <!-- Top bar -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -64,7 +64,7 @@ async function handleSubmit(data: CreateBlog) {
         </h1>
       </div>
 
-      <!-- ── Step indicator ──────────────────────────────────────────────── -->
+      <!-- Step indicator -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
@@ -104,7 +104,7 @@ async function handleSubmit(data: CreateBlog) {
         </div>
       </div>
 
-      <!-- ── Error ───────────────────────────────────────────────────────── -->
+      <!-- Error -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"

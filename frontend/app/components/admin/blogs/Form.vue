@@ -103,7 +103,7 @@ const sectionCls =
 
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
-    <!-- ── Titles ─────────────────────────────────────────────────── -->
+    <!-- Titles -->
     <section :class="sectionCls">
       <div
         class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
@@ -148,7 +148,7 @@ const sectionCls =
       </div>
     </section>
 
-    <!-- ── Content ────────────────────────────────────────────────── -->
+    <!-- Content -->
     <section :class="sectionCls">
       <div
         class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
@@ -186,7 +186,7 @@ const sectionCls =
       </div>
     </section>
 
-    <!-- ── Save button ────────────────────────────────────────────── -->
+    <!-- Save button -->
     <div class="flex items-center justify-between gap-3 pt-1">
       <p
         v-if="!isValid"

@@ -18,7 +18,7 @@ import type {
   ItemViewWithCrops,
 } from "~/utils/galleryFetcher";
 
-// ── Crop slot definitions ──────────────────────────────────────────────────
+// Crop slot definitions
 const CROP_SLOTS = [
   {
     name: "hd_ready",
@@ -54,11 +54,11 @@ const CROP_SLOTS = [
 
 type CropName = (typeof CROP_SLOTS)[number]["name"];
 
-// ── Props / emits ──────────────────────────────────────────────────────────
+//  Props / emits
 const props = defineProps<{ blogId: number }>();
 const emit = defineEmits<{ (e: "crop-uploaded"): void }>();
 
-// ── Composables ────────────────────────────────────────────────────────────
+// Composables
 const { t, locale } = useI18n();
 const { create: createGallery } = useGalleryApi();
 const { create: createItem } = useItemApi();
@@ -66,7 +66,7 @@ const { create: createCrop } = useCropApi();
 const { saveMedia, deleteMedia } = useStorageApi();
 const { getMediaGallery, linkMedia: linkMediaToBlog } = useBlogApi();
 
-// ── Reactive state ─────────────────────────────────────────────────────────
+// Reactive state
 const fullGallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const gallery = ref<MediaGallery | null>(null);
 const mediaItem = ref<MediaItem | null>(null);
@@ -77,7 +77,7 @@ const uploadingCrop = ref<CropName | null>(null);
 const deletingCrop = ref<CropName | null>(null);
 const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// Helpers
 function setFeedback(type: "ok" | "err", msg: string) {
   feedback.value = { type, msg };
   setTimeout(() => {
@@ -85,7 +85,7 @@ function setFeedback(type: "ok" | "err", msg: string) {
   }, 4000);
 }
 
-// ── Load gallery ───────────────────────────────────────────────────────────
+// Load gallery
 async function loadGalleryAndItem() {
   loadingGallery.value = true;
   try {
@@ -132,7 +132,7 @@ async function loadGalleryAndItem() {
 
 onMounted(loadGalleryAndItem);
 
-// ── Ensure gallery + item exist (lazy create) ──────────────────────────────
+// Ensure gallery + item exist (lazy create)
 async function ensureGalleryAndItem(): Promise<{
   gallery: MediaGallery;
   item: MediaItem;
@@ -194,7 +194,7 @@ async function ensureGalleryAndItem(): Promise<{
   return { gallery: gal, item };
 }
 
-// ── Upload a crop ──────────────────────────────────────────────────────────
+// Upload a crop
 const fileInputs = ref<Partial<Record<CropName, HTMLInputElement | null>>>({});
 
 function triggerUpload(cropName: CropName) {
@@ -246,7 +246,7 @@ async function handleFileChange(e: Event, cropName: CropName) {
   }
 }
 
-// ── Delete a crop ──────────────────────────────────────────────────────────
+// Delete a crop
 async function handleDeleteCrop(cropName: CropName) {
   const crop = existingCrops.value[cropName];
   if (!crop) return;
@@ -282,7 +282,7 @@ const uploadedCount = computed(
 
 <template>
   <div class="space-y-4">
-    <!-- ── Main card ─────────────────────────────────────────────────────── -->
+    <!-- Main card -->
     <div class="rounded-xl border border-card-border bg-card overflow-hidden">
       <!-- Header -->
       <div

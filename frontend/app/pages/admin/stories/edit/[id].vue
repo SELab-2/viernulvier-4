@@ -126,7 +126,7 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- ── Top bar ─────────────────────────────────────────────── -->
+      <!-- Top bar -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -161,7 +161,7 @@ onMounted(async () => {
         </Transition>
       </div>
 
-      <!-- ── Step indicator ──────────────────────────────────────── -->
+      <!-- Step indicator -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
@@ -213,7 +213,7 @@ onMounted(async () => {
         </button>
       </div>
 
-      <!-- ── Error ───────────────────────────────────────────────── -->
+      <!-- Error -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
@@ -221,7 +221,7 @@ onMounted(async () => {
         {{ error }}
       </div>
 
-      <!-- ── Loading skeleton ────────────────────────────────────── -->
+      <!-- Loading skeleton -->
       <template v-if="fetching">
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
@@ -235,7 +235,7 @@ onMounted(async () => {
         </div>
       </template>
 
-      <!-- ── Not found ───────────────────────────────────────────── -->
+      <!-- Not found -->
       <div
         v-else-if="!blog && !fetching"
         class="py-16 text-center text-muted-foreground"
@@ -243,14 +243,14 @@ onMounted(async () => {
         {{ t("admin.blogs.notFound") }}
       </div>
 
-      <!-- ── Main content ────────────────────────────────────────── -->
+      <!-- Main content -->
       <template v-else-if="blog && blogId">
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
         >
           <!-- Left: active step -->
           <div class="space-y-5 min-w-0">
-            <!-- ── Step 1: Content ─────────────────────────────── -->
+            <!--  Step 1: Content -->
             <template v-if="step === 'content'">
               <AdminBlogsForm
                 mode="edit"
@@ -319,7 +319,7 @@ onMounted(async () => {
               </div>
             </template>
 
-            <!-- ── Step 2: Photos ──────────────────────────────── -->
+            <!-- Step 2: Photos -->
             <template v-if="step === 'photos'">
               <AdminBlogsImageSection
                 :blog-id="blogId"

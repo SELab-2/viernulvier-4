@@ -1,8 +1,23 @@
 <!--
   components/admin/blogs/ListView.vue
 
-  Admin overview of all blog stories.
-  Fix: search bar area is now h-14 (taller) for better usability.
+  Overzichtspagina in het admin panel voor het beheren van blog stories.
+
+  Functionaliteiten:
+  - Ophalen en tonen van een gepagineerde lijst blogs
+  - Zoeken met debounce + suggesties
+  - Filteren op datum (range + jaar)
+  - Sorteren (nieuwste / oudste)
+  - Paginatie met "jump to page"
+  - Verwijderen van blogs met loading state
+
+  Extra gedrag:
+  - Bepaalt automatisch oudste en nieuwste blogdatum
+  - Reageert op taal (locale) wijzigingen
+  - Toont loading, error en empty states
+
+  Gebruik:
+  - Admin → Stories overzicht
 -->
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
@@ -145,7 +160,7 @@ const filterOpen = ref(false);
 
 <template>
   <div class="space-y-0">
-    <!-- ── Page header ───────────────────────────────────────────────────── -->
+    <!--  Page header  -->
     <div class="flex items-center justify-between gap-4 mb-6">
       <div>
         <h1
@@ -170,7 +185,7 @@ const filterOpen = ref(false);
       </NuxtLink>
     </div>
 
-    <!-- ── Toolbar: search + filters ────────────────────────────────────── -->
+    <!-- Toolbar: search + filters -->
     <div class="w-full border-b border-border bg-background">
       <div class="py-4 flex items-stretch gap-3">
         <!-- Search — h-14 for a taller, more comfortable input -->
@@ -266,7 +281,7 @@ const filterOpen = ref(false);
       </Transition>
     </div>
 
-    <!-- ── Content ───────────────────────────────────────────────────────── -->
+    <!-- Content -->
     <div class="pt-6 space-y-4">
       <!-- Error -->
       <div
@@ -310,7 +325,7 @@ const filterOpen = ref(false);
         />
       </div>
 
-      <!-- ── Pagination ──────────────────────────────────────────────────── -->
+      <!-- Pagination -->
       <div
         v-if="totalPages > 1 || totalItems > 0"
         class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"

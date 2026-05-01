@@ -29,7 +29,7 @@ const { title, description, formattedDate } = useBlogStory(
 );
 
 // Hard-truncate at this many characters so cards stay visually uniform.
-const MAX_TITLE_CHARS = 72;
+const MAX_TITLE_CHARS = 80;
 
 const displayTitle = computed(() => {
   const t = title.value;
@@ -55,7 +55,7 @@ watch(
 
 <template>
   <article
-    class="group flex overflow-hidden rounded-lg border transition-all duration-150 bg-white border-gray-200 hover:border-purple-400/60 dark:bg-[#1e2130]/60 dark:border-[#2e3347] dark:hover:border-purple-500/50 shadow-sm hover:shadow-md hover:shadow-purple-500/10 dark:shadow-none relative"
+    class="group flex overflow-hidden rounded-lg border transition-all duration-150 bg-white border-gray-200 hover:border-purple-400/60 dark:bg-[#1e2130]/60 dark:border-[#2e3347] dark:hover:border-purple-500/50 shadow-sm hover:shadow-md hover:shadow-purple-500/10 dark:shadow-none relative h-[88px] sm:h-[100px]"
   >
     <!-- Purple left accent bar -->
     <div
@@ -64,15 +64,17 @@ watch(
     />
 
     <!-- Thumbnail -->
-    <div class="w-32 sm:w-48 shrink-0 self-stretch relative overflow-hidden rounded-lg">
-    <MediaDisplay
-      :id="props.story.id"
-      :src="mainCrop"
-      :rounded="false"
-      :show-icon="true"
-      size="fill"
-    />
-  </div>
+    <div
+      class="w-32 sm:w-48 shrink-0 self-stretch relative overflow-hidden rounded-lg"
+    >
+      <MediaDisplay
+        :id="props.story.id"
+        :src="mainCrop"
+        :rounded="false"
+        :show-icon="true"
+        size="fill"
+      />
+    </div>
 
     <!-- Text content -->
     <div
