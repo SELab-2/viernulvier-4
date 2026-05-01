@@ -2,8 +2,9 @@
   components/admin/blogs/Form.vue
   Bilingual Blog Form.
 
-  Fix: title fields are now <textarea> with ~3 rows and resize-none + overflow-y-auto,
-  so long titles scroll within the field instead of being hidden or stretching the layout.
+  Renders title (textarea) and description (AdminEditor) fields for both NL
+  and EN. Navigation (back, restore, step transitions) is the responsibility
+  of the parent page — this component only emits `submit` and `preview-update`.
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -79,14 +80,6 @@ function handleSubmit() {
   });
 }
 
-/*
-  Shared textarea class for title fields.
-  - min-h-[72px]: ~3 rows visible (comfortable for most titles)
-  - max-h-[140px]: caps growth so it doesn't become a description field
-  - overflow-y-auto: scrollbar appears when content exceeds max-h
-  - resize-none: no manual resize handle (auto-grow is handled by max-h)
-  - text-sm, no text-transform: cursor/backspace safe in all browsers
-*/
 const titleTextareaCls = [
   "w-full px-4 py-3",
   "min-h-[72px] max-h-[140px]",
@@ -110,7 +103,7 @@ const sectionCls =
 
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
-    <!-- ── Titles ──────────────────────────────────────────────────────────── -->
+    <!-- ── Titles ─────────────────────────────────────────────────── -->
     <section :class="sectionCls">
       <div
         class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
@@ -124,16 +117,11 @@ const sectionCls =
       </div>
 
       <div class="p-5 space-y-4">
-        <!-- NL — required -->
         <div>
           <label :class="labelCls">
             {{ t("admin.blogs.titleNl") }}
             <span class="text-red-500 ml-0.5">*</span>
           </label>
-          <!--
-            Textarea instead of input: scrollable when title is long.
-            min-h shows ~3 lines, max-h caps at ~6 lines before scrolling.
-          -->
           <textarea
             v-model="titelNl"
             :class="titleTextareaCls"
@@ -144,7 +132,6 @@ const sectionCls =
           />
         </div>
 
-        <!-- EN — optional -->
         <div>
           <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
           <textarea
@@ -161,7 +148,7 @@ const sectionCls =
       </div>
     </section>
 
-    <!-- ── Content ─────────────────────────────────────────────────────────── -->
+    <!-- ── Content ────────────────────────────────────────────────── -->
     <section :class="sectionCls">
       <div
         class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
@@ -175,7 +162,6 @@ const sectionCls =
       </div>
 
       <div class="p-5 space-y-5">
-        <!-- NL — required -->
         <div>
           <label :class="labelCls">
             {{ t("admin.blogs.descriptionNl") }}
@@ -187,7 +173,6 @@ const sectionCls =
           />
         </div>
 
-        <!-- EN — optional -->
         <div>
           <label :class="labelCls">{{ t("admin.blogs.descriptionEn") }}</label>
           <AdminEditor
@@ -201,32 +186,19 @@ const sectionCls =
       </div>
     </section>
 
-    <!-- ── Save button ─────────────────────────────────────────────────────── -->
-    <div class="flex flex-wrap items-center gap-3 pt-1">
-      <NuxtLink
-        :to="ROUTES.admin.stories.base"
-        class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-foreground text-background font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-black/10"
+    <!-- ── Save button ────────────────────────────────────────────── -->
+    <div class="flex items-center justify-between gap-3 pt-1">
+      <p
+        v-if="!isValid"
+        class="text-[10px] text-muted-foreground/60 font-brand font-black uppercase tracking-widest"
       >
-        <svg
-          class="w-3.5 h-3.5 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M15.75 19.5 8.25 12l7.5-7.5"
-          />
-        </svg>
-        {{ t("admin.back") }}
-      </NuxtLink>
+        {{ t("admin.blogs.validation.titleNlRequired") }}
+      </p>
 
       <button
         type="submit"
         :disabled="!isValid || loading"
-        class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-accent/20"
+        class="ml-auto inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-accent/20"
       >
         <svg
           v-if="loading"
@@ -254,13 +226,6 @@ const sectionCls =
         }}</span>
         <span v-else>{{ t("admin.blogs.saveBtn") }}</span>
       </button>
-
-      <p
-        v-if="!isValid"
-        class="text-[10px] text-muted-foreground/60 font-brand font-black uppercase tracking-widest"
-      >
-        {{ t("admin.blogs.validation.titleNlRequired") }}
-      </p>
     </div>
   </form>
 </template>

@@ -1,7 +1,11 @@
 <!--
   pages/admin/stories/edit/[id].vue
   Admin Blog Edit Page — two-step layout.
-  Preview is NOT sticky — scrolls naturally with the page.
+  Preview scrolls naturally with the page.
+
+  Button layout:
+  - Content step: [← List] [Restore]  …  [Save ✓]  [Next: Photos →]
+  - Photos step:  [← List]            …             [← Content]
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
@@ -102,6 +106,16 @@ async function handleSubmit(data: ModifyBlog) {
   }
 }
 
+async function restoreToSaved() {
+  if (
+    !confirm(
+      t("admin.blogs.restoreConfirm") || "Restore to last saved version?",
+    )
+  )
+    return;
+  await loadBlog();
+}
+
 onMounted(async () => {
   if (route.query.step === "photos") step.value = "photos";
   await loadBlog();
@@ -112,7 +126,7 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- Top bar -->
+      <!-- ── Top bar ─────────────────────────────────────────────── -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -120,11 +134,14 @@ onMounted(async () => {
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
+
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
         >
           {{ t("admin.blogs.edit") }}
         </h1>
+
+        <!-- Saved confirmation badge -->
         <Transition name="fade">
           <span
             v-if="saved"
@@ -144,7 +161,7 @@ onMounted(async () => {
         </Transition>
       </div>
 
-      <!-- Step indicator -->
+      <!-- ── Step indicator ──────────────────────────────────────── -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
@@ -170,7 +187,9 @@ onMounted(async () => {
           {{ t("admin.blogs.sectionTitle") }} &amp;
           {{ t("admin.blogs.sectionContent") }}
         </button>
+
         <span class="w-px bg-border self-stretch" />
+
         <button
           type="button"
           :class="[
@@ -194,7 +213,7 @@ onMounted(async () => {
         </button>
       </div>
 
-      <!-- Error -->
+      <!-- ── Error ───────────────────────────────────────────────── -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
@@ -202,7 +221,7 @@ onMounted(async () => {
         {{ error }}
       </div>
 
-      <!-- Loading skeleton -->
+      <!-- ── Loading skeleton ────────────────────────────────────── -->
       <template v-if="fetching">
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
@@ -216,7 +235,7 @@ onMounted(async () => {
         </div>
       </template>
 
-      <!-- Not found -->
+      <!-- ── Not found ───────────────────────────────────────────── -->
       <div
         v-else-if="!blog && !fetching"
         class="py-16 text-center text-muted-foreground"
@@ -224,19 +243,14 @@ onMounted(async () => {
         {{ t("admin.blogs.notFound") }}
       </div>
 
-      <!-- Main content -->
+      <!-- ── Main content ────────────────────────────────────────── -->
       <template v-else-if="blog && blogId">
-        <!--
-          Two-column grid.
-          items-start: each column is only as tall as its own content.
-          Right column: plain div, NO sticky, NO position, NO top, NO overflow.
-          The preview simply sits next to the form and scrolls with the page.
-        -->
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
         >
           <!-- Left: active step -->
           <div class="space-y-5 min-w-0">
+            <!-- ── Step 1: Content ─────────────────────────────── -->
             <template v-if="step === 'content'">
               <AdminBlogsForm
                 mode="edit"
@@ -245,15 +259,51 @@ onMounted(async () => {
                 @submit="handleSubmit"
                 @preview-update="(d) => (previewData = d)"
               />
-              <div class="flex">
+
+              <!--
+                Bottom nav for content step.
+                Left:  [← Back to list]  [Restore]
+                Right: [Next: Photos →]
+              -->
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <NuxtLink
+                    :to="ROUTES.admin.stories.base"
+                    class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
+                  >
+                    <svg
+                      class="w-3 h-3 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15.75 19.5 8.25 12l7.5-7.5"
+                      />
+                    </svg>
+                    {{ t("admin.back") }}
+                  </NuxtLink>
+
+                  <button
+                    type="button"
+                    class="btn-outline h-10 px-5 text-[10px]"
+                    @click="restoreToSaved"
+                  >
+                    {{ t("admin.blogs.restoreBtn") || "Restore" }}
+                  </button>
+                </div>
+
                 <button
                   type="button"
-                  class="btn-outline h-12 flex items-center gap-2 px-6 text-[10px]"
+                  class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
                   @click="step = 'photos'"
                 >
                   {{ t("admin.blogs.image.multiTitle") }}
                   <svg
-                    class="w-3.5 h-3.5"
+                    class="w-3 h-3 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2.5"
@@ -269,23 +319,51 @@ onMounted(async () => {
               </div>
             </template>
 
+            <!-- ── Step 2: Photos ──────────────────────────────── -->
             <template v-if="step === 'photos'">
               <AdminBlogsImageSection
                 :blog-id="blogId"
                 @crop-uploaded="loadGallery"
               />
+
               <AdminBlogsLinkToProduction
                 :blog-id="blogId"
                 :gallery-id="galleryId"
               />
-              <div class="flex">
+
+              <!--
+                Bottom nav for photos step.
+                Left:  [← Back to list]
+                Right: [← Content]
+              -->
+              <div class="flex items-center justify-between gap-3">
+                <NuxtLink
+                  :to="ROUTES.admin.stories.base"
+                  class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
+                >
+                  <svg
+                    class="w-3 h-3 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15.75 19.5 8.25 12l7.5-7.5"
+                    />
+                  </svg>
+                  {{ t("admin.back") }}
+                </NuxtLink>
+
                 <button
                   type="button"
-                  class="btn-outline h-12 flex items-center gap-2 px-6 text-[10px]"
+                  class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
                   @click="step = 'content'"
                 >
                   <svg
-                    class="w-3.5 h-3.5"
+                    class="w-3 h-3 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2.5"
@@ -304,7 +382,7 @@ onMounted(async () => {
             </template>
           </div>
 
-          <!-- Right: preview — just a plain div, scrolls with the page -->
+          <!-- Right: preview (sticky, desktop only) -->
           <div class="hidden xl:block self-start sticky top-28">
             <AdminBlogsPreview
               :data="{ ...previewData, id: blogId ?? undefined }"

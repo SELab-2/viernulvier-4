@@ -274,6 +274,8 @@
       "deleteConfirmBtn": "Verwijderen",
       "titleEnRequired": "Engelse titel is nodig",
       "descriptionEnRequired": "Engelse beschrijving is nodig",
+      "restoreConfirm": "Ben je zeker dat je wil herstellen naar de laatste versie ?",
+      "restoreBtn": "Herstellen",
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
         "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
