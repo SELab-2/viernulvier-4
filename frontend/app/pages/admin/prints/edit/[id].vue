@@ -148,7 +148,10 @@ async function handleSubmit(form: Record<string, any>) {
 
     await modify(printId.value, {
       titel: { nl: form.titel_nl, en: form.titel_en ?? form.titel_nl }, // Fallback on Dutch
-      description: { nl: "", en: "" },
+      description: {
+        nl: form.description_nl,
+        en: form.description_en ?? form.description_nl,
+      }, // Fallback on Dutch
       print_type: form.print_type,
       url,
     });

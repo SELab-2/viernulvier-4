@@ -26,6 +26,7 @@ interface Props {
   required?: boolean; // adds a "*" if required
   accept?: string; // accepted file types
   multiple?: boolean; // if multiple files are accepted
+  existingUrl?: string; // for showing existing image if there is one
 }
 const props = withDefaults(defineProps<Props>(), {
   accept: "",
@@ -70,6 +71,21 @@ function removeFile(index: number) {
       {{ props.label }}
       <span v-if="props.required" class="text-red-500">*</span>
     </label>
+
+    <!-- Existing file preview (for edit page) -->
+    <div
+      v-if="existingUrl && !model.length"
+      class="mt-2 border border-border rounded-lg overflow-hidden"
+    >
+      <a
+        :href="existingUrl"
+        target="_blank"
+        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted border-b border-border last:border-b-0"
+      >
+        <span class="truncate mr-4">{{ existingUrl.split("/").pop() }}</span>
+        <Paperclip class="w-3 h-3 shrink-0 text-muted-foreground" />
+      </a>
+    </div>
 
     <!-- File input -->
     <div class="relative flex items-center">
