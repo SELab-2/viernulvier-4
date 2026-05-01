@@ -220,7 +220,8 @@
       "uploadError": "Failed to upload file.",
       "loadError": "Failed to load print.",
       "deleteConfirm": "Are you sure you want to delete {name}?",
-      "edit": "Apply changes"
+      "edit": "Apply changes",
+      "reset": "Reset"
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",

@@ -72,21 +72,6 @@ function removeFile(index: number) {
       <span v-if="props.required" class="text-red-500">*</span>
     </label>
 
-    <!-- Existing file preview (for edit page) -->
-    <div
-      v-if="existingUrl && !model.length"
-      class="mt-2 border border-border rounded-lg overflow-hidden"
-    >
-      <a
-        :href="existingUrl"
-        target="_blank"
-        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted border-b border-border last:border-b-0"
-      >
-        <span class="truncate mr-4">{{ existingUrl.split("/").pop() }}</span>
-        <Paperclip class="w-3 h-3 shrink-0 text-muted-foreground" />
-      </a>
-    </div>
-
     <!-- File input -->
     <div class="relative flex items-center">
       <input
@@ -122,6 +107,18 @@ function removeFile(index: number) {
           class="w-3 h-3 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
           @click="removeFile(index)"
         />
+      </div>
+    </div>
+    <!-- Existing file preview (for edit page) -->
+    <div
+      v-if="existingUrl && !model.length"
+      data-testid="file-container"
+      class="mt-2 border border-border rounded-lg overflow-hidden"
+    >
+      <div
+        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors duration-150 hover:bg-muted border-b border-border last:border-b-0"
+      >
+        <span class="truncate mr-4">{{ existingUrl.split("/").pop() }}</span>
       </div>
     </div>
   </div>

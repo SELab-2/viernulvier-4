@@ -29,7 +29,7 @@ import { useStorageApi } from "../../../../composables/media/useStorageApi";
 const route = useRoute();
 const { t } = useI18n();
 const { getById, modify } = usePrintApi();
-const { saveMedia } = useStorageApi();
+const { saveMedia, deleteMedia } = useStorageApi();
 
 // Resolved print ID from the route
 const printId = computed<number | null>(() => {
@@ -93,6 +93,7 @@ const fields = computed<FormField[]>(() => [
     props: {
       label: t("prints.form.file"),
       accept: ".pdf,.png,.jpg,.jpeg,.webp",
+      existingUrl: print.value?.url,
     },
   },
 ]);
@@ -156,6 +157,10 @@ async function handleSubmit(form: Record<string, any>) {
       url,
     });
 
+    if (url !== print.value.url) {
+      await deleteMedia(print.value.url);
+    }
+
     saved.value = true;
     await navigateTo(ROUTES.admin.prints.base);
   } catch (e) {
@@ -197,6 +202,7 @@ onMounted(loadPrint);
       v-if="print"
       :fields="fields"
       :submit-label="t('prints.form.edit')"
+      :reset-label="t('prints.form.reset')"
       @submit="handleSubmit"
       :initial-values="{
         titel_nl: titel?.nl,
