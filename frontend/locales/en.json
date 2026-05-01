@@ -213,6 +213,7 @@
     },
     "form": {
       "title": "Title",
+      "description": "Description",
       "type": "Print type",
       "file": "File",
       "fileRequired": "Upload a file.",

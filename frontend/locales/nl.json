@@ -214,6 +214,7 @@
     },
     "form": {
       "title": "Titel",
+      "description": "Beschrijving",
       "type": "Printtype",
       "file": "Bestand",
       "fileRequired": "Upload een bestand.",
