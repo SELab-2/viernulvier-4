@@ -1,9 +1,8 @@
 <!--
   pages/stories/[id].vue
   ========================
-  Fetches a single blog post by ID with the current locale so the backend
-  returns a flat BlogView. Renders the HTML description from the rich-text
-  editor, including blue links, colors, headings, lists etc.
+  Single blog post page. Title uses the same scrollable + fade pattern as the
+  admin preview so very long titles don't overflow the hero section.
 -->
 <script lang="ts" setup>
 import { ChevronLeft } from "lucide-vue-next";
@@ -28,7 +27,6 @@ const blogId = computed(() => {
   return isFinite(n) ? n : null;
 });
 
-/** Get the main blog data and handle API nesting */
 const { data, pending, error } = await useAsyncData<BlogView | null>(
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
@@ -44,7 +42,6 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
 
 const blog = computed(() => data.value);
 
-/** Get the media gallery. */
 const { data: gallery } = await useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
@@ -69,6 +66,19 @@ const readingTime = computed(() => {
 });
 
 const cleanBody = computed(() => cleanText(body.value));
+
+// Show the fade mask once a title gets long enough to risk overflowing.
+const titleIsLong = computed(() => title.value.length > 50);
+
+// Dynamic font size — same breakpoints as the production detail page.
+const titleSizeClass = computed(() => {
+  const len = title.value.length;
+  return len > 35
+    ? "text-4xl lg:text-6xl"
+    : len > 25
+      ? "text-5xl lg:text-7xl"
+      : "text-6xl lg:text-8xl";
+});
 </script>
 
 <template>
@@ -110,7 +120,7 @@ const cleanBody = computed(() => cleanText(body.value));
     </div>
 
     <template v-else>
-      <!-- ── Hero banner ─────────────────────────────────────────── -->
+      <!-- ── Hero banner ──────────────────────────────────────────── -->
       <section
         class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
         :class="{ 'image-overlay text-white': headerCrop }"
@@ -123,6 +133,7 @@ const cleanBody = computed(() => cleanText(body.value));
         />
 
         <div class="relative z-10 page-container pb-12">
+          <!-- Back + reading time -->
           <div class="flex items-center gap-6 mb-8">
             <NuxtLink
               :to="ROUTES.stories.base"
@@ -141,30 +152,29 @@ const cleanBody = computed(() => cleanText(body.value));
             </span>
           </div>
 
-          <div>
+          <!-- Scrollable title -->
+          <div
+            class="title-scroll-wrap mb-4"
+            :class="titleIsLong ? 'title-scroll-fade' : ''"
+          >
             <h1
-              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
-              :class="[
-                title.length > 35
-                  ? 'text-4xl lg:text-6xl'
-                  : title.length > 25
-                    ? 'text-5xl lg:text-7xl'
-                    : 'text-6xl lg:text-8xl',
-              ]"
+              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
+              :class="titleSizeClass"
             >
               {{ title }}
             </h1>
-
-            <p
-              v-if="formattedDate"
-              class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
-            >
-              {{ formattedDate }}
-            </p>
           </div>
+
+          <p
+            v-if="formattedDate"
+            class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
+          >
+            {{ formattedDate }}
+          </p>
         </div>
       </section>
 
+      <!-- ── Body ────────────────────────────────────────────────── -->
       <section class="py-20">
         <div class="page-container">
           <article class="relative w-full">
@@ -185,7 +195,7 @@ const cleanBody = computed(() => cleanText(body.value));
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"
-              ></div>
+              />
 
               <div
                 class="mt-20 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
@@ -211,12 +221,24 @@ const cleanBody = computed(() => cleanText(body.value));
 </template>
 
 <style scoped>
-/*
-  Rich-text body styles — applied to .description-content which wraps
-  HTML produced by the TipTap editor. The class name matches the template above.
-*/
+/* ── Scrollable hero title ─────────────────────────────────────── */
+.title-scroll-wrap {
+  max-width: 100%;
+  max-height: 13rem; /* ~3 lines at the largest font size */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.title-scroll-wrap::-webkit-scrollbar {
+  display: none;
+}
+.title-scroll-fade {
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
 
-/* Links — blue + underline */
+/* ── Rich-text body ────────────────────────────────────────────── */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -229,7 +251,6 @@ const cleanBody = computed(() => cleanText(body.value));
   opacity: 0.7;
 }
 
-/* Headings */
 .description-content :deep(h1) {
   font-size: 1.75rem;
   font-weight: 900;
@@ -247,13 +268,9 @@ const cleanBody = computed(() => cleanText(body.value));
   font-weight: 700;
   margin: 1rem 0 0.3rem;
 }
-
-/* Paragraphs */
 .description-content :deep(p) {
   margin: 0.75rem 0;
 }
-
-/* Lists */
 .description-content :deep(ul) {
   list-style: disc;
   padding-left: 1.5rem;
@@ -267,8 +284,6 @@ const cleanBody = computed(() => cleanText(body.value));
 .description-content :deep(li) {
   margin: 0.25rem 0;
 }
-
-/* Blockquote */
 .description-content :deep(blockquote) {
   border-left: 3px solid #9333ea;
   padding: 0.25rem 0 0.25rem 1rem;
@@ -279,8 +294,6 @@ const cleanBody = computed(() => cleanText(body.value));
 :global(.dark) .description-content :deep(blockquote) {
   color: #9ca3af;
 }
-
-/* Horizontal rule */
 .description-content :deep(hr) {
   border: none;
   border-top: 1px solid #e5e7eb;
@@ -289,8 +302,6 @@ const cleanBody = computed(() => cleanText(body.value));
 :global(.dark) .description-content :deep(hr) {
   border-top-color: #374151;
 }
-
-/* Inline formatting */
 .description-content :deep(strong) {
   font-weight: 700;
 }
