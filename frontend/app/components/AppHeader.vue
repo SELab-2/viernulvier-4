@@ -153,6 +153,7 @@ onUnmounted(() => {
 const navItems = [
   { label: "home", route: ROUTES.home.base },
   { label: "archive", route: ROUTES.productions.base },
+  { label: "series", route: ROUTES.series.base },
   { label: "stories", route: ROUTES.stories.base },
   { label: "prints", route: ROUTES.prints.base },
 ];

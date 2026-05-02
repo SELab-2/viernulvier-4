@@ -19,6 +19,8 @@
 
 import { ref, computed } from "vue";
 import type { EventWithDetails } from "../../types/EventWithDetails";
+import { formatDateShort, formatTime, formatPrice } from "~/utils/formatters";
+
 import {
   CalendarDays,
   MapPin,
@@ -53,32 +55,6 @@ const visibleEvents = computed(() => {
 
 const hasHiddenEvents = computed(() => props.events.length > props.limit);
 
-// Formatter functies
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString(locale.value, {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const formatTime = (dateStr: string) => {
-  return new Date(dateStr).toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-//TODO: doors_at? intermission_at?
-
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat(locale.value, {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
-
 const expandedPriceIds = ref(new Set<number>());
 
 const togglePrices = (id: number) => {
@@ -87,6 +63,22 @@ const togglePrices = (id: number) => {
   } else {
     expandedPriceIds.value.add(id);
   }
+};
+
+const isLogicalTime = (timeStr: string, event: EventWithDetails) => {
+  const date = new Date(timeStr);
+  const start_date = new Date(event.starttime);
+
+  if (isNaN(date.getTime())) return false;
+
+  // endtime -> check if start <= date <= end
+  if (event.endtime) {
+    const end_date = new Date(event.endtime);
+    return date >= start_date && date <= end_date;
+  }
+
+  // no endtime: check if same date as start
+  return date.toDateString() === date.toDateString();
 };
 
 // Styling constanten
@@ -141,7 +133,7 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                 <p
                   class="font-brand font-black text-sm uppercase tracking-tight truncate"
                 >
-                  {{ formatDate(event.starttime) }}
+                  {{ formatDateShort(event.starttime) }}
                 </p>
 
                 <div class="mt-1 space-y-1">
@@ -165,7 +157,9 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
 
                   <div class="flex flex-wrap gap-3">
                     <p
-                      v-if="event.doors_at"
+                      v-if="
+                        event.doors_at && isLogicalTime(event.doors_at, event)
+                      "
                       class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
                       {{ t("production.doors") }}:
@@ -173,7 +167,10 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                     </p>
 
                     <p
-                      v-if="event.intermission_at"
+                      v-if="
+                        event.intermission_at &&
+                        isLogicalTime(event.intermission_at, event)
+                      "
                       class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
                       {{ t("production.break") }}:
@@ -192,7 +189,7 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
               <td :class="cellNarrow">
                 <div v-if="event.prices && event.prices.length">
                   <p class="text-sm font-brand font-black tracking-tight">
-                    {{ formatPrice(event.prices[0]?.price || 0) }}
+                    {{ formatPrice(event.prices[0]?.price || 0, locale) }}
                   </p>
 
                   <button

@@ -13,6 +13,9 @@ export const ROUTES = {
     base: "/productions",
     byId: (id: number) => `/productions/${id}`,
   },
+  series: {
+    base: "/series",
+  },
   stories: {
     base: "/stories",
     byId: (id: number) => `/stories/${id}`,
