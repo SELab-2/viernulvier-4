@@ -186,7 +186,7 @@ onMounted(loadPrint);
       </NuxtLink>
       <!-- Title -->
       <h1 class="font-brand font-black text-2xl uppercase tracking-tighter">
-        Upload
+        {{ t("prints.edit") }}
       </h1>
     </div>
 
@@ -199,20 +199,32 @@ onMounted(loadPrint);
     </p>
 
     <!-- Form -->
-    <FormBaseForm
-      v-if="print"
-      :fields="fields"
-      :submit-label="t('prints.form.edit')"
-      :reset-label="t('prints.form.reset')"
-      @submit="handleSubmit"
-      :initial-values="{
-        titel_nl: titel?.nl,
-        titel_en: titel?.en,
-        description_nl: description?.nl,
-        description_en: description?.en,
-        print_type: print.print_type,
-      }"
-    />
+    <div class="min-h-[720px]">
+      <!-- Minimum height so the footer doesn't jump -->
+      <div v-if="fetching" class="flex flex-col gap-4">
+        <!-- TODO possibly replaced by loading skeleton later on -->
+        <div
+          v-for="i in 6"
+          :key="i"
+          class="h-10 rounded-md bg-muted animate-pulse"
+        />
+      </div>
+
+      <FormBaseForm
+        v-else-if="print"
+        :fields="fields"
+        :submit-label="t('prints.form.edit')"
+        :reset-label="t('prints.form.reset')"
+        @submit="handleSubmit"
+        :initial-values="{
+          titel_nl: titel?.nl,
+          titel_en: titel?.en,
+          description_nl: description?.nl,
+          description_en: description?.en,
+          print_type: print.print_type,
+        }"
+      />
+    </div>
   </div>
 </template>
 
