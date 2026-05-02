@@ -8,6 +8,9 @@
  *  - Selected filenames displayed below the input
  *  - Binds File objects via v-model
  *
+ *  In contrast to other base components, this component does not handle requirement check itself !!
+ *  Please check requirement in the parent component.
+ *
  * Usage:
  * <BaseFileUpload
  *   v-model="attachment"
@@ -28,6 +31,7 @@ interface Props {
   multiple?: boolean; // if multiple files are accepted
   existingUrl?: string; // for showing existing image if there is one
 }
+
 const props = withDefaults(defineProps<Props>(), {
   accept: "",
   multiple: false,
@@ -77,7 +81,6 @@ function removeFile(index: number) {
       <input
         :id="props.id"
         type="file"
-        :required="props.required"
         :accept="props.accept"
         :multiple="props.multiple"
         @change="handleFileChange"
