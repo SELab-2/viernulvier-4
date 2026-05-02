@@ -67,18 +67,19 @@ const togglePrices = (id: number) => {
 
 const isLogicalTime = (timeStr: string, event: EventWithDetails) => {
   const date = new Date(timeStr);
-  const start_date = new Date(event.starttime);
+  const startDate = new Date(event.starttime);
 
   if (isNaN(date.getTime())) return false;
 
-  // endtime -> check if start <= date <= end
+  const isSameDayAsStart = date.toDateString() === startDate.toDateString();
+
+  let isSameDayAsEnd = false;
   if (event.endtime) {
-    const end_date = new Date(event.endtime);
-    return date >= start_date && date <= end_date;
+    const endDate = new Date(event.endtime);
+    isSameDayAsEnd = date.toDateString() === endDate.toDateString();
   }
 
-  // no endtime: check if same date as start
-  return date.toDateString() === date.toDateString();
+  return isSameDayAsStart || isSameDayAsEnd;
 };
 
 // Styling constanten
