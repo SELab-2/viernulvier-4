@@ -16,6 +16,7 @@ import { LanguageModule } from "./util/language/LanguageModule";
 import { ScraperModule } from "./util/scraper/scraper.module";
 import { ParserModule } from "./parser/parser.module";
 import { PrintItemModule } from "./print/print_item.module";
+import { SeriesModule } from "./series/series.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PrintItemModule } from "./print/print_item.module";
       isGlobal: true,
       envFilePath: "../.env",
     }),
+    SeriesModule,
     ProductionModule,
     EventModule,
     TagModule,

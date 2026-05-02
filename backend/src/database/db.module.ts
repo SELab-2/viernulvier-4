@@ -12,6 +12,7 @@ import { PrintItemDatabaseService } from "./db.print_item.service";
 import { MediaGalleryDatabaseService } from "./media/db.media_gallery.service";
 import { MediaItemDatabaseService } from "./media/db.media_item.service";
 import { MediaCropDatabaseService } from "./media/db.media_crop.service";
+import { SeriesDatabaseService } from "./db.series.service";
 
 @Module({
   imports: [],
@@ -30,6 +31,7 @@ import { MediaCropDatabaseService } from "./media/db.media_crop.service";
     MediaItemDatabaseService,
     MediaCropDatabaseService,
     PrintItemDatabaseService,
+    SeriesDatabaseService,
   ],
   controllers: [],
   exports: [
@@ -47,6 +49,7 @@ import { MediaCropDatabaseService } from "./media/db.media_crop.service";
     MediaItemDatabaseService,
     MediaCropDatabaseService,
     PrintItemDatabaseService,
+    SeriesDatabaseService,
   ],
 })
 export class DbModule {}

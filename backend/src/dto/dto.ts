@@ -1,4 +1,5 @@
 import {
+  AccountSchema,
   ApiKeySchema,
   BlogSchema,
   BlogViewSchema,
@@ -10,11 +11,17 @@ import {
   CreateMediaGallerySchema,
   CreateMediaItemSchema,
   CreatePriceSchema,
+  CreatePrintItemSchema,
   CreateProductionSchema,
+  CreateSeriesSchema,
   CreateTagSchema,
   EventSchema,
+  FilterBlogSchema,
   FilterEventSchema,
+  FilterLocationSchema,
+  FilterPrintItemSchema,
   FilterProductionSchema,
+  FilterTagSchema,
   LanguageQuerySchema,
   LocationSchema,
   LocationViewSchema,
@@ -29,16 +36,15 @@ import {
   ModifyMediaGallerySchema,
   ModifyMediaItemSchema,
   ModifyPriceSchema,
+  ModifyPrintItemSchema,
   ModifyProductionSchema,
+  ModifySeriesSchema,
   ModifyTagSchema,
   PaginationFilterSchema,
   PriceSchema,
   PriceViewSchema,
   PrintItemSchema,
   PrintItemViewSchema,
-  CreatePrintItemSchema,
-  ModifyPrintItemSchema,
-  ReplacePrintItemSchema,
   ProductionSchema,
   ProductionViewSchema,
   PublicAccountSchema,
@@ -48,16 +54,15 @@ import {
   ReplaceMediaGallerySchema,
   ReplaceMediaItemSchema,
   ReplacePriceSchema,
+  ReplacePrintItemSchema,
   ReplaceProductionSchema,
+  ReplaceSeriesSchema,
+  SeriesSchema,
+  SeriesViewSchema,
   TagSchema,
   TagViewSchema,
   UpdateAccountSchema,
   VerifyApiKeySchema,
-  FilterBlogSchema,
-  AccountSchema,
-  FilterPrintItemSchema,
-  FilterTagSchema,
-  FilterLocationSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -153,6 +158,13 @@ export class CreatePrintItemDto extends createZodDto(CreatePrintItemSchema) {}
 export class ModifyPrintItemDto extends createZodDto(ModifyPrintItemSchema) {}
 export class ReplacePrintItemDto extends createZodDto(ReplacePrintItemSchema) {}
 export class FilterPrintItemDto extends createZodDto(FilterPrintItemSchema) {}
+
+// Series
+export class SeriesDto extends createZodDto(SeriesSchema) {}
+export class SeriesViewDto extends createZodDto(SeriesViewSchema) {}
+export class CreateSeriesDto extends createZodDto(CreateSeriesSchema) {}
+export class ModifySeriesDto extends createZodDto(ModifySeriesSchema) {}
+export class ReplaceSeriesDto extends createZodDto(ReplaceSeriesSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {

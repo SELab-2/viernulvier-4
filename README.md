@@ -24,6 +24,8 @@ To log into the admin mockup:
 * **Jill Van Ham:** front-end verantwoordelijke
 * **Diana Dendauw:** front-end verantwoordelijke
 
+![group photo](assets/vnv_goats.jpg)
+
 ## Frameworks
 
 * **Back-end:** Typescript + NestJS

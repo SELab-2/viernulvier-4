@@ -69,6 +69,10 @@ server {
     location /prints {
         alias /var/www/prints;
 
+        dav_methods PUT DELETE;
+        create_full_put_path on;
+        dav_access group:rw all:r;
+
         # Only allow modifications from backend (localhost)
         limit_except GET HEAD {
             allow 127.0.0.1;
@@ -91,7 +95,11 @@ server {
         }
     }
 
-    # Admin page - removed as no longer needed to restrict access.
+    # robots file.
+    location = /robots.txt {
+        add_header Content-Type text/plain;
+        return 200 "User-agent: *\nDisallow: /\n";
+    }
 
     # Redirect root to frontend
     location = / {
