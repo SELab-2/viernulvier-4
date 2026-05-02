@@ -72,8 +72,6 @@ const isValidDoors = (doorsStr: string, startStr: string) => {
   const doors = new Date(doorsStr);
   const start = new Date(startStr);
 
-  if (isNaN(doors.getTime()) || doors.getFullYear() < 2000) return false;
-
   return doors.toDateString() === start.toDateString();
 };
 
@@ -86,9 +84,6 @@ const isValidIntermission = (
 ) => {
   const breakTime = new Date(intermissionStr);
   const start = new Date(event.starttime);
-
-  if (isNaN(breakTime.getTime()) || breakTime.getFullYear() < 2000)
-    return false;
 
   if (event.endtime) {
     const end = new Date(event.endtime);
