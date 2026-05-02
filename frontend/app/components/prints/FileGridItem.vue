@@ -35,6 +35,7 @@ const showInfo = ref(false); // if the info (description) section is opened or i
       </div>
       <!-- Info button -->
       <button
+        v-if="file.description && file.description != ''"
         @click.stop="showInfo = true"
         class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
       >
@@ -44,7 +45,7 @@ const showInfo = ref(false); // if the info (description) section is opened or i
       <Teleport to="body">
         <Transition name="fade">
           <div
-            v-if="showInfo && file.description && file.description != ''"
+            v-if="showInf"
             class="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-35"
           >
             <div
