@@ -49,7 +49,7 @@ const showInfo = ref(false); // if the info (description) section is opened or i
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
           >
             <div
-              class="relative bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-xl max-h-[80vh] flex flex-col"
+              class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full mx-4 shadow-xl max-h-[80vh] flex flex-col"
             >
               <!-- Close button -->
               <button
@@ -66,7 +66,7 @@ const showInfo = ref(false); // if the info (description) section is opened or i
               </p>
               <!-- Description -->
               <p
-                class="text-sm leading-relaxed text-muted-foreground overflow-y-auto"
+                class="text-sm leading-relaxed text-muted-foreground overflow-y-auto break-words"
               >
                 {{ file.description }}
               </p>
