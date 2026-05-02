@@ -1,9 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="p-6">
-    <AdminProductionsForm />
-  </div>
+  <AdminProductionsFormPage mode="edit" />
 </template>
 
 <style scoped></style>

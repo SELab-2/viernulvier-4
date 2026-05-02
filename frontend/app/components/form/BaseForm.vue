@@ -5,13 +5,16 @@
  *  - Multiple instances of the same component type are supported
  *  - Pre-filled values supported (the key needs to match the name of the field you want to fill in)
  *  - Emits all field values on submit via @submit
- *  - Resets all field values to inital values via a reset-button
+ *  - When liveUpdate is true, also emits @update on every field change (for live previews)
+ *  - Resets all field values to initial values via a reset-button
  *
  * Usage:
  * <FormBaseForm
  *   :fields="fields"
  *   :initialValues="{ title: 'Default title' }"
+ *   :liveUpdate="true"
  *   @submit="handleSubmit"
+ *   @update="handleLiveUpdate"
  * />
  *
  * Example fields config:
@@ -21,7 +24,7 @@
  * ]
  */
 
-import { reactive } from "vue"; // reactive instead of ref so we don't have to add ".value" every time
+import { reactive, watch } from "vue";
 import type { FieldComponent, FormField } from "../../types/FormField";
 
 // Nuxt auto-import only works for direct template usage, therefore manual imports are needed here (since we use the components in script section)
@@ -32,16 +35,21 @@ import BaseFileUpload from "./fields/BaseFileUpload.vue";
 import BaseTagInput from "./fields/BaseTagInput.vue";
 import BaseSelect from "./fields/BaseSelect.vue";
 import BaseMultiSelect from "./fields/BaseMultiSelect.vue";
+
 const { t } = useI18n();
 
 interface Props {
   fields: FormField[]; // Can store multiple fields, allows us to have multiple of the same type
   initialValues?: Record<string, any>; // Optional pre-filled values
   showActions?: boolean; // Whether to show submit/reset buttons, default is true
+  /** When true, emits @update with the full form state on every field change.
+   *  Use this when a live preview is listening. */
+  liveUpdate?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showActions: true,
+  liveUpdate: false,
 });
 const { fields, initialValues } = props;
 const form = reactive<Record<string, any>>({ ...initialValues }); // form will hold all dynamic values, will be prefilled with initialValues
@@ -58,12 +66,26 @@ const components: Record<FieldComponent, any> = {
 
 const emit = defineEmits<{
   submit: [Record<string, any>];
+  /** Fired on every field change when liveUpdate prop is true */
+  update: [Record<string, any>];
 }>();
+
+// ─── Live update watcher ─────────────────────────────────────────────────────
+// Only active when liveUpdate is true, so pages without a preview pay no cost.
+watch(
+  () => ({ ...form }),
+  (newVal) => {
+    if (props.liveUpdate) {
+      emit("update", newVal);
+    }
+  },
+  { deep: true },
+);
 
 const multiSelectRefs = ref<InstanceType<typeof BaseMultiSelect>[]>([]); // references all instances of BaseMultiSelect
 
 function submit() {
-  emit("submit", form); // current state of the form will be send to parent component
+  emit("submit", { ...form }); // current state of the form will be sent to parent component
 }
 
 function reset() {

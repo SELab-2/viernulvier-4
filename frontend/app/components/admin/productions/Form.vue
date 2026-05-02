@@ -7,16 +7,23 @@ const { t } = useI18n();
 
 interface Props {
   language?: "nl" | "en";
+  showActions?: boolean;
+  /** Forwarded to FormBaseForm — triggers @update on every keystroke */
+  liveUpdate?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   language: "nl",
+  showActions: false,
+  liveUpdate: false,
 });
 
 const isRequired = computed(() => props.language === "nl");
 
 const emit = defineEmits<{
   submit: [Record<string, any>];
+  /** Bubbled up from FormBaseForm when liveUpdate is true */
+  update: [Record<string, any>];
 }>();
 
 const fields = computed<FormField[]>(() => [
@@ -69,5 +76,11 @@ const fields = computed<FormField[]>(() => [
 </script>
 
 <template>
-  <FormBaseForm :fields="fields" @submit="emit('submit', $event)" />
+  <FormBaseForm
+    :fields="fields"
+    :showActions="props.showActions"
+    :liveUpdate="props.liveUpdate"
+    @submit="emit('submit', $event)"
+    @update="emit('update', $event)"
+  />
 </template>
