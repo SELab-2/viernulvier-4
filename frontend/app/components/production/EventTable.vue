@@ -65,21 +65,37 @@ const togglePrices = (id: number) => {
   }
 };
 
-const isLogicalTime = (timeStr: string, event: EventWithDetails) => {
-  const date = new Date(timeStr);
-  const startDate = new Date(event.starttime);
+/**
+ * Check if doors_at is logical: same day as starttime
+ */
+const isValidDoors = (doorsStr: string, startStr: string) => {
+  const doors = new Date(doorsStr);
+  const start = new Date(startStr);
 
-  if (isNaN(date.getTime())) return false;
+  if (isNaN(doors.getTime()) || doors.getFullYear() < 2000) return false;
 
-  const isSameDayAsStart = date.toDateString() === startDate.toDateString();
+  return doors.toDateString() === start.toDateString();
+};
 
-  let isSameDayAsEnd = false;
+/**
+ * Check if break is logical: between start and endtime
+ */
+const isValidIntermission = (
+  intermissionStr: string,
+  event: EventWithDetails,
+) => {
+  const breakTime = new Date(intermissionStr);
+  const start = new Date(event.starttime);
+
+  if (isNaN(breakTime.getTime()) || breakTime.getFullYear() < 2000)
+    return false;
+
   if (event.endtime) {
-    const endDate = new Date(event.endtime);
-    isSameDayAsEnd = date.toDateString() === endDate.toDateString();
+    const end = new Date(event.endtime);
+    return breakTime >= start && breakTime <= end;
   }
 
-  return isSameDayAsStart || isSameDayAsEnd;
+  return breakTime.toDateString() === start.toDateString();
 };
 
 // Styling constanten
@@ -134,7 +150,7 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                 <p
                   class="font-brand font-black text-sm uppercase tracking-tight truncate"
                 >
-                  {{ formatDateShort(event.starttime) }}
+                  {{ formatDateShort(event.starttime, locale) }}
                 </p>
 
                 <div class="mt-1 space-y-1">
@@ -143,15 +159,15 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                   >
                     <Clock :size="11" class="shrink-0" />
                     <span>
-                      {{ formatTime(event.starttime) }}
+                      {{ formatTime(event.starttime, locale) }}
                       <template
                         v-if="
                           event.endtime &&
-                          formatTime(event.starttime) !==
-                            formatTime(event.endtime)
+                          formatTime(event.starttime, locale) !==
+                            formatTime(event.endtime, locale)
                         "
                       >
-                        - {{ formatTime(event.endtime) }}
+                        - {{ formatTime(event.endtime, locale) }}
                       </template>
                     </span>
                   </p>
@@ -159,23 +175,24 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                   <div class="flex flex-wrap gap-3">
                     <p
                       v-if="
-                        event.doors_at && isLogicalTime(event.doors_at, event)
+                        event.doors_at &&
+                        isValidDoors(event.doors_at, event.starttime)
                       "
                       class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
                       {{ t("production.doors") }}:
-                      {{ formatTime(event.doors_at) }}
+                      {{ formatTime(event.doors_at, locale) }}
                     </p>
 
                     <p
                       v-if="
                         event.intermission_at &&
-                        isLogicalTime(event.intermission_at, event)
+                        isValidIntermission(event.intermission_at, event)
                       "
                       class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
                       {{ t("production.break") }}:
-                      {{ formatTime(event.intermission_at) }}
+                      {{ formatTime(event.intermission_at, locale) }}
                     </p>
                   </div>
                 </div>
@@ -231,7 +248,7 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                       {{ p.name }}
                     </span>
                     <span class="text-sm font-brand font-black">
-                      {{ formatPrice(p.price) }}
+                      {{ formatPrice(p.price, locale) }}
                     </span>
                   </div>
                 </div>
