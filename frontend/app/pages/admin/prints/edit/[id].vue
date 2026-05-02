@@ -92,6 +92,7 @@ const fields = computed<FormField[]>(() => [
     name: "file",
     props: {
       label: t("prints.form.file"),
+      required: true,
       accept: ".pdf,.png,.jpg,.jpeg,.webp",
       existingUrl: print.value?.url,
     },
@@ -123,7 +124,7 @@ async function handleSubmit(form: Record<string, any>) {
     const file: File | null = form.file?.length ? form.file[0] : null;
     let url = print.value.url; // reuse existing url by default
 
-    if (!file) {
+    if (!file && !url) {
       error.value = t("prints.form.fileRequired");
       return;
     }
