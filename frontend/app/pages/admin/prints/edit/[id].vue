@@ -92,6 +92,7 @@ const fields = computed<FormField[]>(() => [
     name: "file",
     props: {
       label: t("prints.form.file"),
+      required: true,
       accept: ".pdf,.png,.jpg,.jpeg,.webp",
       existingUrl: print.value?.url,
     },

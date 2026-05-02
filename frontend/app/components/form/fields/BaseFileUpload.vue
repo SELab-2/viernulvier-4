@@ -10,6 +10,7 @@
  *
  *  In contrast to other base components, this component does not handle requirement check itself !!
  *  Please check requirement in the parent component.
+ *  "Required" here is only for rendering the required star.
  *
  * Usage:
  * <BaseFileUpload
