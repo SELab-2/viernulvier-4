@@ -159,6 +159,7 @@ async function handleSubmit(form: Record<string, any>) {
     });
 
     if (url !== print.value.url) {
+      // Remove original image if replaced
       await deleteMedia(print.value.url);
     }
 
