@@ -49,23 +49,25 @@ const showInfo = ref(false); // if the info (description) section is opened or i
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
           >
             <div
-              class="relative bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+              class="relative bg-background border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-xl max-h-[80vh] flex flex-col"
             >
               <!-- Close button -->
               <button
                 @click.stop="showInfo = false"
-                class="absolute top-3 right-3 w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors"
+                class="absolute top-3 right-3 w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
               <!-- Title -->
               <p
-                class="text-[11px] font-bold uppercase tracking-widest mb-3 pr-8"
+                class="text-[11px] font-bold uppercase tracking-widest mb-3 pr-8 shrink-0"
               >
                 {{ file.titel }}
               </p>
               <!-- Description -->
-              <p class="text-sm leading-relaxed text-muted-foreground">
+              <p
+                class="text-sm leading-relaxed text-muted-foreground overflow-y-auto"
+              >
                 {{ file.description }}
               </p>
             </div>
