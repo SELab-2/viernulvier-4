@@ -157,7 +157,8 @@
     "showExtraPrices": "+ {count} prices",
     "hidePriceDetails": "hide details",
     "doors": "doors",
-    "break": "intermission"
+    "break": "intermission",
+    "gallery": "gallery"
   },
   "general": {
     "back": "Back",

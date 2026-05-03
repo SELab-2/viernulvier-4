@@ -158,7 +158,8 @@
     "showExtraPrices": "+ {count} prijzen",
     "hidePriceDetails": "verberg details",
     "doors": "deuren open",
-    "break": "pauze"
+    "break": "pauze",
+    "gallery": "galerij"
   },
   "general": {
     "back": "Terug",

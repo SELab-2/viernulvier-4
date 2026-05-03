@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from "vue";
-import { ChevronLeft } from "lucide-vue-next";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
@@ -8,7 +8,7 @@ import { useGallery } from "~/composables/media/useGallery";
 const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
-const { getMainImageCrop } = useGallery();
+const { getMainImageCrop, getCarouselImageCrops } = useGallery();
 const route = useRoute();
 
 const goBack = () => {
@@ -120,6 +120,25 @@ const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
 });
+
+// carousel
+
+const carouselImages = computed(() => {
+  if (!gallery.value || !gallery.value.items) return [];
+  return getCarouselImageCrops(gallery.value, "hd_ready"); // of FE3_2by1
+});
+
+const currentSlide = ref(0);
+const nextSlide = () => {
+  if (carouselImages.value.length === 0) return;
+  currentSlide.value = (currentSlide.value + 1) % carouselImages.value.length;
+};
+const prevSlide = () => {
+  if (carouselImages.value.length === 0) return;
+  currentSlide.value =
+    (currentSlide.value - 1 + carouselImages.value.length) %
+    carouselImages.value.length;
+};
 
 /**
  * Check if a string is useful (not "N/A" or empty)
@@ -316,6 +335,66 @@ onBeforeUnmount(() => {
             {{ t("production.stories") }}
           </h1>
           <ProductionStoryListView :stories="stories" />
+        </div>
+
+        <div v-if="carouselImages && carouselImages.length > 0" class="my-16">
+          <h2 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+            {{ t("production.gallery") }}
+          </h2>
+
+          <div
+            class="relative group overflow-hidden rounded-2xl bg-gray-100 dark:bg-white/5"
+          >
+            <div class="aspect-[2/1] w-full overflow-hidden">
+              <MediaDisplay
+                :id="production.id"
+                :src="carouselImages[currentSlide] ?? null"
+                size="fill"
+                :rounded="false"
+                class="w-full h-full object-cover"
+              />
+            </div>
+
+            <template v-if="carouselImages.length > 1">
+              <button
+                @click="prevSlide"
+                class="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+              >
+                <ChevronLeft :size="24" />
+              </button>
+
+              <button
+                @click="nextSlide"
+                class="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+              >
+                <ChevronRight :size="24" />
+              </button>
+
+              <div
+                class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2"
+              >
+                <button
+                  v-for="(_, index) in carouselImages"
+                  :key="index"
+                  @click="currentSlide = index"
+                  class="h-1.5 transition-all duration-300 rounded-full"
+                  :class="
+                    currentSlide === index
+                      ? 'bg-white w-6'
+                      : 'bg-white/40 w-1.5'
+                  "
+                ></button>
+              </div>
+            </template>
+          </div>
+
+          <div class="mt-4 flex justify-center">
+            <span
+              class="text-[11px] font-black opacity-50 uppercase tracking-[2px]"
+            >
+              {{ currentSlide + 1 }} / {{ carouselImages.length }}
+            </span>
+          </div>
         </div>
 
         <div
