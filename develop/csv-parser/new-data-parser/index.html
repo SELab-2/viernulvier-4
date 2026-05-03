@@ -3241,7 +3241,7 @@
 </table>
 <h3 id="events">Events</h3>
 <p><strong>Template header:</strong></p>
-<pre><code>ID,Starttime,Endtime,Doors_At,Intermission_At,Location_NL,Location_EN,Production
+<pre><code>ID,Starttime,Endtime,Doors_At,Intermission_At,Location_NL,Location_EN,ProductionID
 </code></pre>
 <p><strong>Example row:</strong></p>
 <pre><code>201,2026-04-10 20:00:00,2026-04-10 22:00:00,2026-04-10 18:00:00,2026-04-10 21:00:00,Grote Zaal,Main Hall,101
@@ -3292,7 +3292,7 @@
 <td>Will be translated if empty and NL exists</td>
 </tr>
 <tr>
-<td><code>Production</code></td>
+<td><code>ProductionID</code></td>
 <td>Yes</td>
 <td>Must reference a production ID like <code>101</code></td>
 </tr>
@@ -3421,6 +3421,7 @@
 <li>IDs and references must be numeric where expected.</li>
 <li>Invalid rows are skipped; import continues for valid rows.</li>
 <li>Legacy IDs are generated as <code>csv-&lt;id&gt;</code> for imported records.</li>
+<li>All header fields of the corresponding template should be present in the uploaded CSV.</li>
 </ul>
 <h3 id="localization">Localization</h3>
 <ul>
