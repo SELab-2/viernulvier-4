@@ -10,27 +10,28 @@ import {
 } from "../../dto/dto";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
+  executeWithReferenceCheck,
   generateCountQuery,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
 } from "../db-utils";
 import { MediaCropSchema, MediaItemSchema } from "@repo/common";
-import { ResourceNotFoundException } from "../../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../../common/exceptions";
 
 @Injectable()
 export class MediaItemDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
-  // ----------------------------------------------------------------
-  // Media Item
-  // ----------------------------------------------------------------
-
   /**
    * Get a single media item by its ID.
    * @param id The ID we're trying to fetch.
    * @returns The MediaItem if there is one.
+   * @throws ResourceNotFoundException if there is no item by the given id. (404)
    */
   async getItemById(id: number): Promise<MediaItemDto> {
     const returnClause = generateReturningClause(MediaItemSchema);
@@ -84,8 +85,8 @@ export class MediaItemDatabaseService {
   /**
    * Create a new media item and link it to 1 or more gallery(s).
    * @param item Must be of type CreateMediaItemDto.
-   * @param galleryIds a list of galleryIds you want to link this item to. (if left empty it will link to none)
    * @returns The created media item.
+   * @throws SystemFailureException if something goes wrong while creating the object. (500)
    */
   async createItem(item: CreateMediaItemDto): Promise<MediaItemDto> {
     const { gallery_ids, ...itemData } = item;
@@ -116,7 +117,7 @@ export class MediaItemDatabaseService {
     );
 
     if (result.length === 0) {
-      throw new Error("Failed to create media item");
+      throw new SystemFailureException("Failed to create media item");
     }
 
     return result[0];
@@ -127,6 +128,8 @@ export class MediaItemDatabaseService {
    * @param itemId The item to update.
    * @param item Fields to update, all optional.
    * @returns The updated media item.
+   * @throws BadRequestException if no valid fields are provided to be updated. (400)
+   * @throws ResourceNotFoundException if the given id is not linked to ant media item. (404)
    */
   async updateItem(
     itemId: number,
@@ -166,8 +169,6 @@ export class MediaItemDatabaseService {
     await this.db.query(query, [id]);
   }
 
-  //--------------------- crops: ------------------------//
-
   /**
    * Get all crops linked to a media item.
    * @param itemId The item to fetch crops for.
@@ -199,7 +200,8 @@ export class MediaItemDatabaseService {
    */
   async linkCropToItem(itemId: number, cropId: number): Promise<void> {
     const query = `INSERT INTO item_crop (item_id, crop_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`;
-    await this.db.query(query, [itemId, cropId]);
+
+    await executeWithReferenceCheck(this.db.query(query, [itemId, cropId]));
   }
 
   /**
