@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -91,6 +92,21 @@ export class MediaNotFoundException extends NotFoundException {
       error: "Not Found",
       message: `${resourceName}(${resourceId}) currently has no Gallery of type "${galleryType}".`,
       internalCode: "GALLERY_NOT_FOUND",
+    });
+  }
+}
+
+/**
+ * 400 Bad Request specifically for CSV uploads with missing required headers.
+ */
+export class CsvMissingHeadersException extends BadRequestException {
+  constructor(missingHeaders: string[]) {
+    super({
+      statusCode: HttpStatus.BAD_REQUEST,
+      error: "Bad Request",
+      message: "CSV file is missing required headers.",
+      internalCode: "CSV_MISSING_HEADERS",
+      missingHeaders,
     });
   }
 }
