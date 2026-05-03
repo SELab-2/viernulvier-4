@@ -5,7 +5,7 @@
 import { Language, SUPPORTED_LANGUAGES, ZodObject } from "@repo/common";
 
 /**
- * Interface for handling of postgres error codes like 409 conflicts
+ * Interface for handling of postgres error codes.
  */
 export interface PostgresError {
   code: string;

@@ -2,8 +2,10 @@ import {
   ConflictException,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Type,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { GalleryType } from "@repo/common";
 
@@ -12,23 +14,16 @@ import { GalleryType } from "@repo/common";
  * from withing the backend if something goes wrong.
  */
 
-// 418 I'm a teapot easter egg
-export class TeapotException extends HttpException {
-  constructor() {
-    super("I'm a teapot", HttpStatus.I_AM_A_TEAPOT);
-  }
-}
-
 /**
- * 409 Conflict specifically for duplicate entities.
+ * 401 Unauthorized for failed authentication attempts.
  */
-export class AccountAlreadyExistsException extends ConflictException {
-  constructor(username: string) {
+export class InvalidCredentialsException extends UnauthorizedException {
+  constructor() {
     super({
-      statusCode: HttpStatus.CONFLICT,
-      error: "Conflict",
-      message: `Account with username "${username}" already exists.`,
-      internalCode: "ACCOUNT_ALREADY_EXISTS",
+      statusCode: HttpStatus.UNAUTHORIZED,
+      error: "Unauthorized",
+      message: "Invalid username or password",
+      internalCode: "INVALID_CREDENTIALS",
     });
   }
 }
@@ -91,6 +86,59 @@ export class MediaNotFoundException extends NotFoundException {
       error: "Not Found",
       message: `${resourceName}(${resourceId}) currently has no Gallery of type "${galleryType}".`,
       internalCode: "GALLERY_NOT_FOUND",
+    });
+  }
+}
+
+/**
+ * 404 Not Found specifically for foreign key violations.
+ */
+export class InvalidReferenceException extends NotFoundException {
+  constructor() {
+    super({
+      statusCode: HttpStatus.NOT_FOUND,
+      error: "Not Found",
+      message: "The provided account or API key does not exist.",
+      internalCode: "REFERENCE_NOT_FOUND",
+    });
+  }
+}
+
+/**
+ * 409 Conflict specifically for duplicate entities.
+ */
+export class AccountAlreadyExistsException extends ConflictException {
+  constructor(username: string) {
+    super({
+      statusCode: HttpStatus.CONFLICT,
+      error: "Conflict",
+      message: `Account with username "${username}" already exists.`,
+      internalCode: "ACCOUNT_ALREADY_EXISTS",
+    });
+  }
+}
+
+/**
+ * I'm a teapot easter-egg error. :-)
+ */
+export class TeapotException extends HttpException {
+  constructor() {
+    super("I'm a teapot", HttpStatus.I_AM_A_TEAPOT);
+  }
+}
+
+/**
+ * 500 Internal Server Error for unexpected/unhandled issues.
+ */
+export class SystemFailureException extends InternalServerErrorException {
+  constructor(message?: string) {
+    super({
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      error: "Internal Server Error",
+      // Always provide a safe default message so you never leak stack traces
+      message:
+        message || "An unexpected error occurred. Please try again later.",
+      internalCode: "INTERNAL_SYSTEM_ERROR",
     });
   }
 }
