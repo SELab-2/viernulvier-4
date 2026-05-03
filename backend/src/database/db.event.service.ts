@@ -21,18 +21,16 @@ import {
   PriceSchema,
 } from "@repo/common";
 import {
+  executeWithReferenceCheck,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
-  PostgresError,
 } from "./db-utils";
 import {
-  InvalidReferenceException,
   LinkNotFoundException,
   ResourceNotFoundException,
   SystemFailureException,
 } from "../common/exceptions";
-import { QueryResultRow } from "pg";
 
 @Injectable()
 export class EventDatabaseService {
@@ -281,8 +279,6 @@ export class EventDatabaseService {
    * @param event_id The ID of the event.
    * @param location_id The ID of the location.
    * @throws ConflictException if the event already had a location linked to it. (409)
-   * @throws InvalidReferenceException if invalid ids were provided. (404)
-   * @throws SystemFailureException if something else goes wrong. (500)
    */
   async linkEventToLocation(
     event_id: number,
@@ -297,22 +293,9 @@ export class EventDatabaseService {
       RETURNING event_id;
     `;
 
-    // it is just 2 numbers as a link.
-    let result: QueryResultRow[];
-
-    try {
-      result = await this.db.query(query, [event_id, location_id]);
-    } catch (error: unknown) {
-      const dbError = error as PostgresError;
-
-      // Catch Postgres code 23503: foreign_key_violation
-      // (Meaning the event_id or location_id doesn't exist at all)
-      if (dbError?.code === "23503") {
-        throw new InvalidReferenceException();
-      }
-
-      throw SystemFailureException;
-    }
+    const result = await executeWithReferenceCheck(
+      this.db.query(query, [event_id, location_id]),
+    );
 
     // If length is 0, the WHERE NOT EXISTS clause blocked the insert
     if (result.length === 0) {

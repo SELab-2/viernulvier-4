@@ -18,14 +18,13 @@ import {
   SUPPORTED_LANGUAGES,
 } from "@repo/common";
 import {
+  executeWithReferenceCheck,
   generateInsertClause,
   generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
-  PostgresError,
 } from "./db-utils";
 import {
-  InvalidReferenceException,
   MediaNotFoundException,
   ResourceNotFoundException,
   SystemFailureException,
@@ -286,8 +285,6 @@ export class BlogDatabaseService {
    * @param blog_id The ID of the blog to link to.
    * @param gallery_id The ID of the media gallery to link.
    * @returns void
-   * @throws InvalidReferenceException if you try to link with one or more invalid ids. (404)
-   * @throws SystemFailureException if something else goes wrong. (500)
    */
   async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
     const query = `
@@ -296,18 +293,9 @@ export class BlogDatabaseService {
       ON CONFLICT DO NOTHING;
     `;
 
-    try {
-      await this.db.query(query, [blog_id, gallery_id]);
-    } catch (error: unknown) {
-      const dbError = error as PostgresError;
-
-      // Catch Postgres error code 23503: foreign_key_violation
-      if (dbError?.code === "23503") {
-        throw new InvalidReferenceException();
-      }
-
-      throw SystemFailureException;
-    }
+    await executeWithReferenceCheck(
+      this.db.query(query, [blog_id, gallery_id]),
+    );
   }
 
   /**

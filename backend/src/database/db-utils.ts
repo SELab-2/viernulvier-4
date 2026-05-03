@@ -3,6 +3,10 @@
  */
 
 import { Language, SUPPORTED_LANGUAGES, ZodObject } from "@repo/common";
+import {
+  InvalidReferenceException,
+  SystemFailureException,
+} from "../common/exceptions";
 
 /**
  * Interface for handling of postgres error codes.
@@ -251,4 +255,29 @@ export function generateRelevanceClause(
 
   if (scoringParts.length === 0) return "0";
   return scoringParts.join(" + ");
+}
+
+/**
+ * Executes a query and translates standard database constraints into HTTP exceptions.
+ * @throws InvalidReferenceException if one or more of the provided ids are faulty.
+ * @throws SystemFailureException if something else goes wrong.
+ */
+export async function executeWithReferenceCheck<T>(
+  queryPromise: Promise<T>,
+): Promise<T> {
+  try {
+    return await queryPromise;
+  } catch (error: unknown) {
+    const dbError = error as PostgresError;
+
+    // Standardize the 404 translation across your whole app
+    if (dbError?.code === "23503") {
+      throw new InvalidReferenceException();
+    }
+
+    // add extra errors here if desired
+
+    // backup 500 error
+    throw SystemFailureException;
+  }
 }
