@@ -93,6 +93,7 @@ export interface InsertClause {
 /**
  * Generates and InsertClause for inserting an object into the database.
  * @param data The object we want to insert.
+ * @param startingIndex is the starting index for list insert.
  * @returns InsertClause object with the needed values.
  */
 export function generateInsertClause(
@@ -191,11 +192,10 @@ export function generateReturningClause(
  * @returns The query.
  */
 export function generateCountQuery(tableName: string): string {
-  const query = `
+  return `
       SELECT COUNT(id) as count
       FROM ${tableName};
   `;
-  return query;
 }
 
 /**
