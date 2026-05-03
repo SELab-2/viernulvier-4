@@ -15,6 +15,7 @@ export class ApiKeyGuard implements CanActivate {
    * Verifies that the user can execute a certain function (guard)
    * @param context is the context in which this function was called.
    * @returns T/F depending on if the user is allowed to execute or not.
+   * @throws UnauthorizedException if there is no provided apikey. (401)
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();
@@ -39,6 +40,7 @@ export class SuperApiKeyGuard implements CanActivate {
    * Verifies that the user can execute a certain function (guard)
    * @param context is the context in which this function was called.
    * @returns T/F depending on if the user is allowed to execute or not.
+   * @throws UnauthorizedException if there is no provided api key. (401)
    */
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: Request = context.switchToHttp().getRequest();

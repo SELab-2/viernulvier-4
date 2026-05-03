@@ -136,7 +136,7 @@ export class BlogDatabaseService {
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     // Ordering (relevance vs date)
-    let orderClause = "";
+    let orderClause: string;
     if (blogFilters.is_suggestion && blogFilters.title) {
       const relevanceMath = generateRelevanceClause(
         blogFilters.title,
@@ -202,7 +202,7 @@ export class BlogDatabaseService {
    * @param blogId The ID of the blog.
    * @param blog must be of the type "ModifyBlog" or "ReplaceBlog", gives the freedom to define only what needs to be updated.
    * @returns the updated blog if successful.
-   * @throws BadRequestException if there were no fields provided for updating. (401)
+   * @throws BadRequestException if there were no fields provided for updating. (400)
    * @throws ResourceNotFoundException if there was no blog with the provided id. (404)
    */
   async updateBlog(

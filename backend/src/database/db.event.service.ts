@@ -67,6 +67,7 @@ export class EventDatabaseService {
    * @param eventFilters gives the freedom to define the filters of the search you want.
    * All filters are filtered by equals except for date filters (see function).
    * Not all filters need to be defined, only the ones you want to use.
+   * @param paginationFilters is the filters required for pagination.
    * @returns All events for the given filters.
    */
   async getEvents(
@@ -195,10 +196,11 @@ export class EventDatabaseService {
 
   /**
    * Update function for events. Updates the event in the database.
+   * @param eventId the id of the event you want to update
    * @param event must be of the type "ModifyEvent" or "ReplaceEventDto", gives the freedom to define only what needs to be updated.
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
-   * @throws BadRequestException if no fields were provided for updating. (401)
+   * @throws BadRequestException if no fields were provided for updating. (400)
    * @throws ResourceNotFoundException if there is no event with the provided id. (404)
    */
   async updateEvent(
