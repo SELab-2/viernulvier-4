@@ -41,6 +41,7 @@ export class ProductionTagController {
   /**
    * Responds to GET /productions/:productionId/tags
    * @param productionId ID in the URL of the request.
+   * @param lang is the desired language.
    * @returns The list of Tag objects for the Production
    */
   @ApiOperation({

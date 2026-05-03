@@ -8,7 +8,6 @@ import {
   ReplaceMediaCropDto,
 } from "../../dto/dto";
 import { MediaCropDatabaseService } from "../../database/media/db.media_crop.service";
-import { ConfigService } from "@nestjs/config";
 
 /**
  * Defines the connection between controller and database service
@@ -16,17 +15,7 @@ import { ConfigService } from "@nestjs/config";
  */
 @Injectable()
 export class MediaCropService {
-  constructor(
-    private readonly mediaDbService: MediaCropDatabaseService,
-    private readonly configService: ConfigService,
-  ) {}
-
-  private get baseUrl() {
-    return this.configService.get<string>(
-      "MEDIA_BASE_URL",
-      "http://127.0.0.1/photos",
-    );
-  }
+  constructor(private readonly mediaDbService: MediaCropDatabaseService) {}
 
   /**
    * Fetches a paginated list of crops.

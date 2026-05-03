@@ -15,6 +15,17 @@ import { GalleryType } from "@repo/common";
  */
 
 /**
+ * Fatal startup error for missing environment variables.
+ * Extends native Error, NOT an HttpException.
+ */
+export class MissingEnvVariableError extends Error {
+  constructor(variableName: string) {
+    super(`🛑 FATAL: Forgot to set ${variableName} in your .env file?`);
+    this.name = "MissingEnvVariableError";
+  }
+}
+
+/**
  * 401 Unauthorized for failed authentication attempts.
  */
 export class InvalidCredentialsException extends UnauthorizedException {
