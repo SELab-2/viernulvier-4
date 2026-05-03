@@ -161,7 +161,8 @@ const navItems = [
 const adminNavItems = [
   { label: "dashboard", route: ROUTES.admin.dashboard.base },
   { label: "productions", route: ROUTES.admin.productions.base },
-  { label: "events", route: ROUTES.admin.events.base },
+  { label: "series", route: ROUTES.admin.series.base },
+  { label: "tags", route: ROUTES.admin.tags.base },
   { label: "stories", route: ROUTES.admin.stories.base },
   { label: "prints", route: ROUTES.admin.prints.base },
 ];
@@ -249,7 +250,7 @@ const adminNavItems = [
 
     <nav
       v-if="showAdminInterface"
-      class="hidden lg:flex border-t-3 border-[var(--foreground)] w-full bg-[var(--background)]"
+      class="hidden lg:flex border-t-1 border-[var(--muted-foreground)] w-full bg-[var(--background)]"
     >
       <div
         class="mx-auto flex w-full max-w-[1400px] justify-between items-center px-12 lg:px-20 2xl:px-32"

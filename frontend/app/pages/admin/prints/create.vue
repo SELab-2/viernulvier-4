@@ -104,7 +104,7 @@ async function handleSubmit(form: Record<string, any>) {
 </script>
 
 <template>
-  <div class="container mx-auto px-4 max-w-5xl py-6">
+  <div class="page-container py-6">
     <div class="flex items-center gap-3 mb-6">
       <!-- Back button -->
       <NuxtLink

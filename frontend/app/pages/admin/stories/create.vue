@@ -67,7 +67,7 @@ async function handleSubmit(data: CreateBlog) {
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-6xl mx-auto px-6 py-10 space-y-6">
+    <div class="page-container py-10 space-y-6">
       <!-- Back link -->
       <NuxtLink
         :to="ROUTES.admin.stories.base"

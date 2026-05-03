@@ -98,9 +98,7 @@ onMounted(() => {
 
 <template>
   <!-- Header -->
-  <div
-    class="container mx-auto px-4 max-w-5xl py-3 pt-10 flex items-center justify-between"
-  >
+  <div class="page-container py-3 pt-10 flex items-center justify-between">
     <h1
       class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
     >
@@ -121,7 +119,7 @@ onMounted(() => {
   />
 
   <!-- File list -->
-  <div class="container mx-auto px-4 max-w-5xl py-6">
+  <div class="page-container py-6">
     <FileList
       :category="activeFilter"
       :files="prints"

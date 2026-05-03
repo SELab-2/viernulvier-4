@@ -40,6 +40,12 @@ export const ROUTES = {
       edit: (id: number) => `/admin/productions/edit/${id}`,
       editTags: "/admin/productions/editTags",
     },
+    series: {
+      base: "/admin/series",
+    },
+    tags: {
+      base: "/tags/series",
+    },
     stories: {
       base: "/admin/stories",
       create: "/admin/stories/create",

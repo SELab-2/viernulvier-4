@@ -9,7 +9,8 @@
     "events": "evenementen",
     "accounts": "accounts",
     "dashboard": "dashboard",
-    "logout": "uitloggen"
+    "logout": "uitloggen",
+    "tags": "tags"
   },
   "auth": {
     "confirmLogout": "Succesvol uitgelogd"
