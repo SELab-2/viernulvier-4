@@ -3,11 +3,11 @@ import { DbService } from "./db.service";
 import {
   BlogDto,
   CreateBlogDto,
+  FilterBlogDto,
   MediaGalleryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
-  ModifyBlogDto,
-  FilterBlogDto,
 } from "../dto/dto";
 import {
   BlogSchema,
@@ -22,10 +22,13 @@ import {
   generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
+  PostgresError,
 } from "./db-utils";
 import {
+  InvalidReferenceException,
   MediaNotFoundException,
   ResourceNotFoundException,
+  SystemFailureException,
 } from "../common/exceptions";
 
 @Injectable()
@@ -37,6 +40,7 @@ export class BlogDatabaseService {
    * Get a single Blog by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The Blog if there is one.
+   * @throws ResourceNotFoundException if there is no blog with the asked id. (404)
    */
   async getBlogById(id: number): Promise<BlogDto> {
     const returningClause = generateReturningClause(BlogSchema);
@@ -172,6 +176,7 @@ export class BlogDatabaseService {
    * Create blog function, creates a blog in the database.
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
    * @returns the added blog if it was successful.
+   * @throws SystemFailureException if something went wrong while creating the blog.(500)
    */
   async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
     const { columns, placeholders, values } = generateInsertClause(blog);
@@ -186,7 +191,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create blog.");
+      throw new SystemFailureException("Failed to create blog.");
     }
 
     return result[0];
@@ -197,6 +202,8 @@ export class BlogDatabaseService {
    * @param blogId The ID of the blog.
    * @param blog must be of the type "ModifyBlog" or "ReplaceBlog", gives the freedom to define only what needs to be updated.
    * @returns the updated blog if successful.
+   * @throws BadRequestException if there were no fields provided for updating. (401)
+   * @throws ResourceNotFoundException if there was no blog with the provided id. (404)
    */
   async updateBlog(
     blogId: number,
@@ -244,6 +251,7 @@ export class BlogDatabaseService {
    * @param blog_id The ID of the blog you want.
    * @param type The type of gallery you want.
    * @returns The MediaGallery of given type if it exists.
+   * @throws MediaNotFoundException if there was no media linked to the blog.(404)
    */
   async getMediaFromBlog(
     blog_id: number,
@@ -278,6 +286,8 @@ export class BlogDatabaseService {
    * @param blog_id The ID of the blog to link to.
    * @param gallery_id The ID of the media gallery to link.
    * @returns void
+   * @throws InvalidReferenceException if you try to link with one or more invalid ids. (404)
+   * @throws SystemFailureException if something else goes wrong. (500)
    */
   async linkMediaToBlog(blog_id: number, gallery_id: number): Promise<void> {
     const query = `
@@ -286,7 +296,18 @@ export class BlogDatabaseService {
       ON CONFLICT DO NOTHING;
     `;
 
-    await this.db.query(query, [blog_id, gallery_id]);
+    try {
+      await this.db.query(query, [blog_id, gallery_id]);
+    } catch (error: unknown) {
+      const dbError = error as PostgresError;
+
+      // Catch Postgres error code 23503: foreign_key_violation
+      if (dbError?.code === "23503") {
+        throw new InvalidReferenceException();
+      }
+
+      throw SystemFailureException;
+    }
   }
 
   /**

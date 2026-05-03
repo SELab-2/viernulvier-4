@@ -47,6 +47,8 @@ export class ResourceNotFoundException extends NotFoundException {
 
 /**
  * 404 Not Found specifically for links between two objects.
+ * note: not to be confused with InvalidReferenceException which is thrown when you try to link
+ * 2 objects with each-other.
  */
 export class LinkNotFoundException extends NotFoundException {
   constructor(
@@ -92,6 +94,7 @@ export class MediaNotFoundException extends NotFoundException {
 
 /**
  * 404 Not Found specifically for foreign key violations.
+ * note: not to be confused with LinkNotFoundException where you try to get a linked object.
  */
 export class InvalidReferenceException extends NotFoundException {
   constructor() {
