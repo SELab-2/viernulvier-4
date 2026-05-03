@@ -1,14 +1,18 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreateEventDto,
   EventDto,
   FilterEventDto,
   LocationDto,
+  ModifyEventDto,
   PaginationFilterDto,
   PriceDto,
   ReplaceEventDto,
-  ModifyEventDto,
 } from "../dto/dto";
 import {
   EventSchema,
@@ -20,11 +24,15 @@ import {
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
+  PostgresError,
 } from "./db-utils";
 import {
+  InvalidReferenceException,
   LinkNotFoundException,
   ResourceNotFoundException,
+  SystemFailureException,
 } from "../common/exceptions";
+import { QueryResultRow } from "pg";
 
 @Injectable()
 export class EventDatabaseService {
@@ -35,6 +43,7 @@ export class EventDatabaseService {
    * Get a single EventDto by their ID.
    * @param eventId The ID we're trying to fetch.
    * @returns The EventDto if there is one.
+   * @throws ResourceNotFoundException if no event is linked to the asked id. (404)
    */
   async getEventById(eventId: number): Promise<EventDto> {
     const returningClause = generateReturningClause(EventSchema);
@@ -162,6 +171,7 @@ export class EventDatabaseService {
    * Create event function, creates an event in the database.
    * @param event must be of the type "CreateEvent" which has all fields defined besides the primary key id.
    * @returns the added event if it was successful.
+   * @throws SystemFailureException if something went wrong while creating. (500)
    */
   async createEvent(event: CreateEventDto): Promise<EventDto> {
     const { columns, placeholders, values } = generateInsertClause(event);
@@ -177,7 +187,7 @@ export class EventDatabaseService {
 
     // Validate output
     if (!result || result.length === 0) {
-      throw new Error("Failed to create event.");
+      throw new SystemFailureException("Failed to create event.");
     }
 
     return result[0];
@@ -188,6 +198,8 @@ export class EventDatabaseService {
    * @param event must be of the type "ModifyEvent" or "ReplaceEventDto", gives the freedom to define only what needs to be updated.
    * The id field in the event MUST be defined.
    * @returns the updated event if successful.
+   * @throws BadRequestException if no fields were provided for updating. (401)
+   * @throws ResourceNotFoundException if there is no event with the provided id. (404)
    */
   async updateEvent(
     eventId: number,
@@ -236,6 +248,7 @@ export class EventDatabaseService {
    * get the location linked with an event
    * @param id the ID of the event we want the location of.
    * @returns the LocationDto of the event.
+   * @throws LinkNotFoundException if there is no location linked to the event. (404)
    */
   async getLocationOfEvent(id: number): Promise<LocationDto> {
     const locationPrefix = "l";
@@ -262,31 +275,49 @@ export class EventDatabaseService {
   }
 
   /**
-   * link a location to an event
-   * @param event_id the ID of the event you want to link
-   * @param location_id the ID of the location you want to link
-   * @returns T/F whether if the linking was successful.
+   * Links a location to an event.
+   * @param event_id The ID of the event.
+   * @param location_id The ID of the location.
+   * @throws ConflictException if the event already had a location linked to it. (409)
+   * @throws InvalidReferenceException if invalid ids were provided. (404)
+   * @throws SystemFailureException if something else goes wrong. (500)
    */
   async linkEventToLocation(
     event_id: number,
     location_id: number,
-  ): Promise<boolean> {
-    // note an event can only have 1 location linked to it.
-
+  ): Promise<void> {
     const query = `
-    INSERT INTO event_locations (event_id, location_id)
-    SELECT $1, $2
-    WHERE NOT EXISTS (
-      SELECT 1
-      FROM event_locations
-      WHERE event_id = $1
-    )
-    RETURNING event_id
-  `;
+      INSERT INTO event_locations (event_id, location_id)
+      SELECT $1, $2
+      WHERE NOT EXISTS (
+        SELECT 1 FROM event_locations WHERE event_id = $1
+      )
+      RETURNING event_id;
+    `;
 
-    const result = await this.db.query(query, [event_id, location_id]);
+    // it is just 2 numbers as a link.
+    let result: QueryResultRow[];
 
-    return result.length !== 0;
+    try {
+      result = await this.db.query(query, [event_id, location_id]);
+    } catch (error: unknown) {
+      const dbError = error as PostgresError;
+
+      // Catch Postgres code 23503: foreign_key_violation
+      // (Meaning the event_id or location_id doesn't exist at all)
+      if (dbError?.code === "23503") {
+        throw new InvalidReferenceException();
+      }
+
+      throw SystemFailureException;
+    }
+
+    // If length is 0, the WHERE NOT EXISTS clause blocked the insert
+    if (result.length === 0) {
+      throw new ConflictException(
+        "This event is already linked to a location.",
+      );
+    }
   }
 
   /**
@@ -296,8 +327,6 @@ export class EventDatabaseService {
    */
   async deleteLocationFromEvent(event_id: number): Promise<void> {
     const query = `DELETE FROM event_locations WHERE event_id = $1 RETURNING event_id;`;
-
-    // * NOTE: We don't check for failures here for idempotency.
     await this.db.query(query, [event_id]);
   }
 
