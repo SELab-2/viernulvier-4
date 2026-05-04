@@ -2,6 +2,7 @@ import fs, { ReadStream } from "fs";
 import { Readable } from "stream";
 import { z } from "zod";
 import { CSVFileParser } from "./csv_file_parser";
+import { CsvMissingHeadersException } from "../common/exceptions";
 
 jest.mock("fs");
 
@@ -106,6 +107,17 @@ describe("CSVFileParser", () => {
         CSVFileParser.parseCSVWithSchema("dummy.csv", z.any(), (row) => row),
       ).rejects.toThrow("Stream failure");
     });
+
+    it("should reject when required headers are missing", async () => {
+      const csvBuffer = Buffer.from("name\nJohn\n", "utf8");
+
+      await expect(
+        CSVFileParser.parseCSVWithSchema(csvBuffer, z.any(), (row) => row, [
+          "name",
+          "age",
+        ]),
+      ).rejects.toBeInstanceOf(CsvMissingHeadersException);
+    });
   });
 
   describe("CSVFileParser.transformEventRow", () => {
@@ -114,7 +126,7 @@ describe("CSVFileParser", () => {
         ID: "42",
         Starttime: "2024-03-15 19:00:00",
         Endtime: "2024-03-15 21:00:00",
-        Production: "7",
+        ProductionID: "7",
         Location_NL: "Grote Zaal",
         Location_EN: "Main Hall",
         Doors_At: "2024-03-15 18:30:00",
@@ -139,7 +151,7 @@ describe("CSVFileParser", () => {
         ID: "1",
         Starttime: "2024-01-01 10:00:00",
         Endtime: "0000-00-00 00:00:00",
-        Production: "5",
+        ProductionID: "5",
         Location_NL: "",
         Location_EN: "",
         Doors_At: "",
@@ -156,7 +168,7 @@ describe("CSVFileParser", () => {
         ID: "invalid",
         Starttime: "2024-01-01 10:00:00",
         Endtime: "",
-        Production: "5",
+        ProductionID: "5",
         Location_NL: "",
         Location_EN: "",
       };
