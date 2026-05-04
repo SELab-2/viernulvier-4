@@ -61,9 +61,11 @@ onUnmounted(() => {
           <div
             v-if="showInfo"
             class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+            @click="showInfo = false"
           >
             <div
               class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full shadow-xl max-h-[85vh] flex flex-col"
+              @click.stop
             >
               <!-- Close button -->
               <button
