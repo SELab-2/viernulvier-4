@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -43,7 +44,7 @@ export class InvalidCredentialsException extends UnauthorizedException {
  * 404 not found specific for Resources.
  */
 export class ResourceNotFoundException extends NotFoundException {
-  constructor(dtoClass: Type<any>, resourceId?: number | string) {
+  constructor(dtoClass: Type, resourceId?: number | string) {
     // Extract the class name.
     const resourceName = dtoClass.name.replace("Dto", "");
 
@@ -62,11 +63,7 @@ export class ResourceNotFoundException extends NotFoundException {
  * 2 objects with each-other.
  */
 export class LinkNotFoundException extends NotFoundException {
-  constructor(
-    dtoClass1: Type<any>,
-    dtoClass2: Type<any>,
-    resourceId1?: number | string,
-  ) {
+  constructor(dtoClass1: Type, dtoClass2: Type, resourceId1?: number | string) {
     // Extract the class name.
     const resourceName1 = dtoClass1.name.replace("Dto", "");
     const resourceName2 = dtoClass2.name.replace("Dto", "");
@@ -87,7 +84,7 @@ export class LinkNotFoundException extends NotFoundException {
  */
 export class MediaNotFoundException extends NotFoundException {
   constructor(
-    dtoClass: Type<any>,
+    dtoClass: Type,
     galleryType: GalleryType,
     resourceId?: number | string,
   ) {
@@ -153,6 +150,21 @@ export class SystemFailureException extends InternalServerErrorException {
       message:
         message || "An unexpected error occurred. Please try again later.",
       internalCode: "INTERNAL_SYSTEM_ERROR",
+    });
+  }
+}
+
+/**
+ * 400 Bad Request specifically for CSV uploads with missing required headers.
+ */
+export class CsvMissingHeadersException extends BadRequestException {
+  constructor(missingHeaders: string[]) {
+    super({
+      statusCode: HttpStatus.BAD_REQUEST,
+      error: "Bad Request",
+      message: "CSV file is missing required headers.",
+      internalCode: "CSV_MISSING_HEADERS",
+      missingHeaders,
     });
   }
 }

@@ -8,7 +8,7 @@ on:
 jobs:
   check-quality:
     name: Lint & Format
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
