@@ -24,15 +24,19 @@ const showInfo = ref(false); // if the info (description) section is opened or i
 
 watch(showInfo, (val) => {
   // Prevents scrolling when description is opened
+  // (paddingRight compensates for the scrollbar width to prevent the layout from shifting)
   if (val) {
+    document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
     document.body.style.overflow = "hidden";
   } else {
+    document.body.style.paddingRight = "";
     document.body.style.overflow = "";
   }
 });
 
 onUnmounted(() => {
   document.body.style.overflow = "";
+  document.body.style.paddingRight = "";
 });
 </script>
 
