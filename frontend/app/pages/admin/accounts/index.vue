@@ -46,7 +46,9 @@ function showSuccess(text: string) {
 async function loadAccounts() {
   isLoading.value = true;
 
-  const response = await getAll({ page: 0, limit: 100, descending: true });
+  const response = await getAll({
+    paginationFilters: { page: 0, limit: 100, descending: true },
+  });
 
   if (response.error || !response.data) {
     showError(response.error ?? t("accounts.loadError"));

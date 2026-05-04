@@ -92,7 +92,7 @@ function handleSubmit() {
       nl: descriptionNl.value.trim(),
       en: descriptionEn.value.trim() || descriptionNl.value.trim(),
     },
-  });
+  } as CreateBlog);
 }
 
 const inputClass =

@@ -25,14 +25,18 @@ beforeEach(() => {
 describe("useCropApi", () => {
   it("getAll calls GET /media/crops", () => {
     const { getAll } = useCropApi();
-    void getAll({ page: 0, limit: 10, descending: true });
+    void getAll({
+      paginationFilters: { page: 0, limit: 10, descending: true },
+    });
     const url = mockGet.mock.calls[0][0] as string;
     expect(url).toContain("/media/crops");
   });
 
   it("getAll appends filter query params", () => {
     const { getAll } = useCropApi();
-    void getAll({ page: 0, limit: 10, descending: true });
+    void getAll({
+      paginationFilters: { page: 0, limit: 10, descending: true },
+    });
     const url = mockGet.mock.calls[0][0] as string;
     expect(url).toContain("page=0");
     expect(url).toContain("limit=10");
@@ -58,7 +62,7 @@ describe("useCropApi", () => {
   it("replace calls PUT /media/crops/:id with body", () => {
     const { replace } = useCropApi();
     const body: ReplaceMediaCrop = {
-      name: "thumbnail",
+      name: "hd_ready",
       url: "https://example.com/thumb.jpg",
     };
     void replace(1, body);
@@ -67,9 +71,9 @@ describe("useCropApi", () => {
 
   it("modify calls PATCH /media/crops/:id with body", () => {
     const { modify } = useCropApi();
-    void modify(1, { name: "mobile" });
+    void modify(1, { name: "hd_ready" });
     expect(mockPatch).toHaveBeenCalledWith("/media/crops/1", {
-      name: "mobile",
+      name: "hd_ready",
     });
   });
 

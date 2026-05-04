@@ -96,7 +96,7 @@ async function handleSubmit(data: CreateBlog) {
         <AdminBlogsForm
           mode="create"
           :loading="saving"
-          @submit="handleSubmit"
+          @submit="(data) => handleSubmit(data as CreateBlog)"
           @cancel="navigateTo(ROUTES.admin.stories.base)"
           @preview-update="(d) => (previewData = d)"
         />

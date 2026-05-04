@@ -46,7 +46,7 @@ const normalizedOptions = computed<SearchSuggestion[]>(() => {
     if (typeof opt === "string") {
       return { display: opt, searchValue: opt, context: "" };
     }
-    return opt;
+    return opt as SearchSuggestion;
   });
 });
 
