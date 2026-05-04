@@ -46,10 +46,10 @@ const showInfo = ref(false); // if the info (description) section is opened or i
         <Transition name="fade">
           <div
             v-if="showInfo"
-            class="fixed inset-0 z-50 flex items-start justify-center bg-black/60 pt-36"
+            class="fixed inset-x-0 bottom-0 top-[80px] lg:top-[110px] z-50 flex items-center justify-center bg-black/60 p-4"
           >
             <div
-              class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full mx-4 shadow-xl max-h-[80vh] flex flex-col"
+              class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full shadow-xl max-h-[85vh] flex flex-col"
             >
               <!-- Close button -->
               <button
