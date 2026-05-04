@@ -21,6 +21,19 @@ const { t, locale } = useI18n();
 const fileLabel = "text-[11px] font-bold uppercase truncate";
 const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
 const showInfo = ref(false); // if the info (description) section is opened or if not
+
+watch(showInfo, (val) => {
+  // Prevents scrolling when description is opened
+  if (val) {
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+  }
+});
+
+onUnmounted(() => {
+  document.body.style.overflow = "";
+});
 </script>
 
 <template>
@@ -44,9 +57,10 @@ const showInfo = ref(false); // if the info (description) section is opened or i
       <!-- Info/description section -->
       <Teleport to="body">
         <Transition name="fade">
+          <!-- z-index is set to very high so the header doesn't cover it -->
           <div
             v-if="showInfo"
-            class="fixed inset-x-0 bottom-0 top-[80px] lg:top-[110px] z-50 flex items-center justify-center bg-black/60 p-4"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
           >
             <div
               class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full shadow-xl max-h-[85vh] flex flex-col"
