@@ -336,6 +336,23 @@
       "linkedThisSession": "Gekoppeld in deze sessie",
       "noLinkedProductions": "Nog niet gekoppeld aan een productie",
       "viewProduction": "Bekijk productiepagina"
+    },
+    "parser": {
+      "title": "CSV parser",
+      "description": "Upload een CSV-bestand om te parsen.",
+      "uploadCsv": "Upload {target} CSV",
+      "uploading": "Uploaden...",
+      "uploadSuccess": "{target} CSV succesvol geüpload.",
+      "uploadError": "{target} CSV kon niet worden geüpload.",
+      "headerError": "{target} CSV mist verplichte kolommen: {fields}.",
+      "headerFallbackFields": "onbekende kolommen",
+      "targets": {
+        "productions": "producties",
+        "events": "evenementen",
+        "tags": "tags",
+        "blogs": "verhalen",
+        "prices": "prijzen"
+      }
     }
   },
   "login": {
