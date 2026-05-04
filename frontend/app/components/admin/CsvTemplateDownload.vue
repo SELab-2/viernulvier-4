@@ -79,12 +79,25 @@ const fileName = computed(() => `${props.target}_template.csv`);
 
 <template>
   <section class="rounded-2xl border border-card-border bg-card p-6 shadow-sm">
-    <div class="mb-6 space-y-2">
-      <AdminDownloadButton
-        :label="`Download ${template.title.toLowerCase()}`"
-        :name="fileName"
-        :src="src"
-      />
+    <div class="mb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div class="space-y-1">
+          <h3 class="text-lg font-bold text-card-foreground">
+            {{ template.title }}
+          </h3>
+          <p class="text-sm text-muted-foreground">
+            {{ template.description }}
+          </p>
+        </div>
+
+        <div class="flex-shrink-0">
+          <AdminDownloadButton
+            :label="`Download ${template.title.toLowerCase()}`"
+            :name="fileName"
+            :src="src"
+          />
+        </div>
+      </div>
     </div>
 
     <div class="space-y-4">
