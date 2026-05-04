@@ -233,6 +233,7 @@
     "delete": "Delete",
     "download": "Download",
     "edit": "Edit print",
+    "create": "Upload",
     "loading": "Loading...",
     "retry": "Try again",
     "noPrints": "No prints",

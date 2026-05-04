@@ -111,54 +111,80 @@ async function loadPrint() {
 
 // Save
 async function handleSubmit(form: Record<string, any>) {
-  if (!printId.value || !print.value) return;
   loading.value = true;
   saved.value = false;
   error.value = null;
   try {
     const file: File | null = form.file?.length ? form.file[0] : null;
-    let url = print.value.url; // reuse existing url by default
+    if (props.mode === "create") {
+      if (!file) {
+        error.value = t("prints.form.fileRequired");
+        return;
+      }
 
-    if (!file && !url) {
-      error.value = t("prints.form.fileRequired");
-      return;
-    }
-
-    if (file) {
       const storagePath = `/prints/${Date.now()}-${file.name}`; // Saving in storage first
       const uploadResult = await saveMedia(storagePath, file);
       if (uploadResult.error) {
         error.value = t("prints.form.uploadError");
         return;
       }
-      if (uploadResult.error || !uploadResult.data) {
+      const url = uploadResult.data; // Retrieving url
+      if (!url) {
         error.value = t("prints.form.uploadError");
         return;
       }
-      url = uploadResult.data; // Retrieving url
+
+      await create({
+        titel: { nl: form.titel_nl, en: form.titel_en ?? form.titel_nl }, // Fallback on Dutch
+        description: {
+          nl: form.description_nl,
+          en: form.description_en ?? form.description_nl,
+        }, // Fallback on Dutch
+        print_type: form.print_type,
+        url,
+      });
+    } else {
+      if (!printId.value || !print.value) return;
+      let url = print.value.url; // reuse existing url by default
+
+      if (!file && !url) {
+        error.value = t("prints.form.fileRequired");
+        return;
+      }
+
+      if (file) {
+        const storagePath = `/prints/${Date.now()}-${file.name}`; // Saving in storage first
+        const uploadResult = await saveMedia(storagePath, file);
+        if (uploadResult.error || !uploadResult.data) {
+          error.value = t("prints.form.uploadError");
+          return;
+        }
+        url = uploadResult.data; // Retrieving url
+      }
+
+      if (!url) {
+        error.value = t("prints.form.uploadError");
+        return;
+      }
+
+      await modify(printId.value, {
+        titel: { nl: form.titel_nl, en: form.titel_en ?? form.titel_nl }, // Fallback on Dutch
+        description: {
+          nl: form.description_nl,
+          en: form.description_en ?? form.description_nl,
+        }, // Fallback on Dutch
+        print_type: form.print_type,
+        url,
+      });
+
+      if (url !== print.value.url) {
+        // Remove original image if replaced
+        await deleteMedia(print.value.url);
+      }
+
+      saved.value = true;
     }
 
-    if (!url) {
-      error.value = t("prints.form.uploadError");
-      return;
-    }
-
-    await modify(printId.value, {
-      titel: { nl: form.titel_nl, en: form.titel_en ?? form.titel_nl }, // Fallback on Dutch
-      description: {
-        nl: form.description_nl,
-        en: form.description_en ?? form.description_nl,
-      }, // Fallback on Dutch
-      print_type: form.print_type,
-      url,
-    });
-
-    if (url !== print.value.url) {
-      // Remove original image if replaced
-      await deleteMedia(print.value.url);
-    }
-
-    saved.value = true;
     await navigateTo(ROUTES.admin.prints.base);
   } catch (e) {
     error.value = (e as Error).message;
@@ -188,7 +214,7 @@ onMounted(async () => {
         <h1
           class="font-brand font-black text-3xl uppercase tracking-tight text-foreground flex-1"
         >
-          {{ mode === "edit" ? t("prints.edit") : "Upload" }}
+          {{ mode === "edit" ? t("prints.edit") : t("prints.create") }}
         </h1>
 
         <!-- Saved feedback badge -->
@@ -256,7 +282,7 @@ onMounted(async () => {
         />
 
         <div
-          v-else-if="!print && !fetching"
+          v-else-if="mode === 'edit' && !print && !fetching"
           class="py-16 text-center text-muted-foreground"
         >
           {{ t("admin.prints.notFound") }}
