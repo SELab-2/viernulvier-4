@@ -3,7 +3,9 @@
 
   Admin Blog Create Page.
   - Preview scrolls naturally with the page.
-  - Step 2 is locked until the blog is saved.
+  - Step 2 (photos) is locked until the blog is saved.
+  - After saving, redirects to edit page at step=content so the user
+    can immediately link productions without an extra click.
   - Two-column layout: left = form, right = preview (inline, not sticky).
   - On mobile: collapsible preview at the bottom.
 -->
@@ -30,9 +32,11 @@ async function handleSubmit(data: CreateBlog) {
   try {
     const resp = await create(data);
     if (resp.data) {
+      // Redirect to edit > content step so LinkToProduction is immediately
+      // available and the user can link productions right away.
       await navigateTo({
         path: ROUTES.admin.stories.edit(resp.data.id),
-        query: { step: "photos" },
+        query: { step: "content" },
       });
     } else {
       error.value = resp.error ?? t("admin.blogs.createError");
@@ -118,13 +122,21 @@ async function handleSubmit(data: CreateBlog) {
         items-start: prevents the right column from stretching.
       -->
       <div class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
-        <!-- Left: form -->
+        <!-- Left: form + link-to-production (locked until saved) -->
         <AdminBlogsForm
           mode="create"
           :loading="saving"
           @submit="handleSubmit"
           @preview-update="(d) => (previewData = d)"
-        />
+        >
+          <template #extra>
+            <!--
+              No blogId yet — component shows the friendly "save first" hint.
+              After save we redirect to edit where it becomes fully functional.
+            -->
+            <AdminBlogsLinkToProduction />
+          </template>
+        </AdminBlogsForm>
 
         <!-- Right: inline preview (desktop only, scrolls with page) -->
         <div class="hidden xl:block self-start sticky top-28">

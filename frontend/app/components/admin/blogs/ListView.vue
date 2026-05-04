@@ -4,15 +4,11 @@
   Admin overview for managing blog stories. Reuses StoryToolbar for
   search/filter/sort and StoryListItem (with isAdmin) for each row.
 
-  Responsibilities:
-  - Fetch paginated blogs (with search, date, sort filters)
-  - Delete blogs with a confirmation prompt
-  - Show loading, error, and empty states
-  - Provide pagination controls
+  Fix: toolbar now renders correctly with the add button aligned inline
+  with the search bar inside the StoryToolbar's #action slot.
 -->
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
-import { Plus } from "lucide-vue-next";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogView } from "~/composables/blogs/useBlogView";
 
@@ -132,7 +128,6 @@ async function handleDelete(blog: BlogView) {
   deletingIds.value.add(blog.id);
   try {
     await remove(blog.id);
-    // If the last item on a non-first page was deleted, go back one page.
     if (blogs.value.length === 1 && currentPage.value > 1) currentPage.value--;
     else await loadBlogs();
   } catch {
@@ -160,29 +155,44 @@ async function handleDelete(blog: BlogView) {
           {{ totalItems }} {{ t("admin.blogs.results") }}
         </p>
       </div>
-
-      <NuxtLink
-        :to="ROUTES.admin.stories.create"
-        class="inline-flex items-center gap-2 shrink-0 px-5 py-3 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer"
-      >
-        <Plus :size="14" />
-        {{ t("admin.blogs.new") }}
-      </NuxtLink>
     </div>
 
     <!--
-      Re-use the public StoryToolbar for search/filter/sort.
-      The toolbar writes directly into the shared useBlogView refs so
-      loadBlogs() picks them up via its watchers automatically.
+      StoryToolbar: search + filters + add button all in one row.
+      The #action slot renders flush inside the toolbar row, aligned with the
+      search bar height (h-11 in dense mode).
     -->
     <StoryToolbar
+      :dense="true"
       :story-titles="[]"
       :oldest-date="oldestDate"
       :newest-date="newestDate"
       :date-filter="dateFilter"
       @update:search="searchQuery = $event"
       @update:date-filter="dateFilter = $event"
-    />
+    >
+      <template #action>
+        <NuxtLink
+          :to="ROUTES.admin.stories.create"
+          class="inline-flex items-center justify-center gap-2 shrink-0 px-4 h-11 rounded-lg bg-accent text-white font-brand font-black text-[10px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer whitespace-nowrap"
+        >
+          <svg
+            class="w-3.5 h-3.5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 5v14m-7-7h14"
+            />
+          </svg>
+          {{ t("admin.blogs.new") }}
+        </NuxtLink>
+      </template>
+    </StoryToolbar>
 
     <!-- Content -->
     <div class="pt-6 space-y-4">
@@ -199,7 +209,7 @@ async function handleDelete(blog: BlogView) {
         <div
           v-for="i in PAGE_SIZE"
           :key="i"
-          class="h-20 bg-muted rounded-xl animate-pulse"
+          class="h-[136px] bg-muted rounded-xl animate-pulse"
         />
       </div>
 
@@ -217,7 +227,7 @@ async function handleDelete(blog: BlogView) {
         </p>
       </div>
 
-      <!-- Story list — reuses the unified StoryListItem with isAdmin=true -->
+      <!-- Story list -->
       <div v-else class="space-y-2">
         <NuxtLink
           v-for="blog in blogs"

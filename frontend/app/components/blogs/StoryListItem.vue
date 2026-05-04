@@ -44,15 +44,6 @@ const { title, description, formattedDate } = useBlogStory(
   computed(() => props.story),
 );
 
-// Truncate so all cards stay the same height regardless of title length.
-const MAX_TITLE_CHARS = 80;
-const displayTitle = computed(() => {
-  const t = title.value;
-  if (t.length <= MAX_TITLE_CHARS) return t;
-  const cut = t.slice(0, MAX_TITLE_CHARS).replace(/\s+\S*$/, "");
-  return cut + "…";
-});
-
 const cleanDescription = computed(() => cleanText(description.value));
 
 async function loadGallery() {
@@ -70,29 +61,25 @@ watch(() => props.story.id, loadGallery);
 
 <template>
   <article
-    class="group flex overflow-hidden rounded-lg border transition-all duration-150 relative"
+    class="group flex overflow-hidden rounded-lg border transition-all duration-150 relative h-[120px] sm:h-[136px]"
     :class="[
       isAdmin
-        ? 'h-auto min-h-[88px] bg-card border-card-border hover:bg-card-hover'
-        : 'h-[120px] sm:h-[136px] bg-white border-gray-200 hover:border-purple-400/60 dark:bg-[#1e2130]/60 dark:border-[#2e3347] dark:hover:border-purple-500/50 shadow-sm hover:shadow-md hover:shadow-purple-500/10 dark:shadow-none',
+        ? 'bg-card border-card-border hover:border-accent shadow-sm hover:shadow-md'
+        : 'bg-white border-gray-200 hover:border-purple-400/60 dark:bg-[#1e2130]/60 dark:border-[#2e3347] dark:hover:border-purple-500/50 shadow-sm hover:shadow-md hover:shadow-purple-500/10 dark:shadow-none',
     ]"
   >
-    <!-- Purple left accent bar (public view only) -->
+    <!-- Purple left accent bar -->
     <div
-      v-if="!isAdmin"
       class="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-lg bg-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
       aria-hidden="true"
     />
 
-    <!-- Thumbnail -->
-    <div
-      class="shrink-0 self-stretch relative overflow-hidden"
-      :class="isAdmin ? 'w-24 h-16 my-auto ml-3 rounded-lg' : 'w-36 sm:w-52'"
-    >
+    <!-- Identical Thumbnail Size for both views -->
+    <div class="shrink-0 self-stretch relative overflow-hidden w-36 sm:w-52">
       <MediaDisplay
         :id="story.id"
         :src="mainCrop"
-        :rounded="isAdmin"
+        :rounded="false"
         :show-icon="true"
         size="fill"
       />
@@ -103,19 +90,21 @@ watch(() => props.story.id, loadGallery);
       class="flex-1 min-w-0 flex flex-col justify-between px-4 py-3 sm:px-5 sm:py-4"
     >
       <div class="overflow-hidden">
+        <!-- We use line-clamp-2 here to native CSS truncate the text cleanly -->
         <h3
-          class="font-brand font-black text-sm sm:text-base uppercase tracking-tight leading-snug mb-1 transition-colors duration-150 break-words"
+          class="font-brand font-black text-sm sm:text-base uppercase tracking-tight leading-snug mb-1 transition-colors duration-150 break-words line-clamp-2"
           :class="
             isAdmin
               ? 'text-card-foreground group-hover:text-accent'
               : 'text-gray-900 dark:text-gray-100 group-hover:text-purple-500 dark:group-hover:text-purple-400'
           "
         >
-          {{ displayTitle }}
+          {{ title }}
         </h3>
 
+        <!-- Description is now also visible in Admin to keep height consistent -->
         <p
-          v-if="cleanDescription && !isAdmin"
+          v-if="cleanDescription"
           class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400"
           v-html="cleanDescription"
         />

@@ -23,6 +23,7 @@ definePageMeta({ ssr: false });
 
 const route = useRoute();
 const { getById, modify, getMediaGallery } = useBlogApi();
+const { getAll, linkBlog, unlinkBlog, getBlogs } = useProductionApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
@@ -258,7 +259,15 @@ onMounted(async () => {
                 :loading="saving"
                 @submit="handleSubmit"
                 @preview-update="(d) => (previewData = d)"
-              />
+              >
+                <!-- Link to production komt nu BOVEN de save knop via de extra slot -->
+                <template #extra>
+                  <AdminBlogsLinkToProduction
+                    :blog-id="blogId"
+                    :gallery-id="galleryId"
+                  />
+                </template>
+              </AdminBlogsForm>
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                   <NuxtLink
@@ -318,17 +327,6 @@ onMounted(async () => {
                 :blog-id="blogId"
                 @crop-uploaded="loadGallery"
               />
-
-              <!--
-                Link to production sits below the image section — it is
-                related to the media step (shared gallery) but is its own
-                concern so it gets its own clearly labelled card.
-              -->
-              <AdminBlogsLinkToProduction
-                :blog-id="blogId"
-                :gallery-id="galleryId"
-              />
-
               <div class="flex items-center justify-between gap-3">
                 <NuxtLink
                   :to="ROUTES.admin.stories.base"

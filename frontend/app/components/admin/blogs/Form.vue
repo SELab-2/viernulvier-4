@@ -175,6 +175,9 @@ const labelCls =
       </div>
     </section>
 
+    <!-- Slot for extra elements above the save button -->
+    <slot name="extra" />
+
     <!-- Save / validation row -->
     <div class="flex items-center justify-between gap-3 pt-1">
       <p

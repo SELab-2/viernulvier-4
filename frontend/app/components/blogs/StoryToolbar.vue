@@ -31,6 +31,7 @@ const props = defineProps<{
   oldestDate: string;
   newestDate: string;
   dateFilter: DateFilter;
+  dense?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -112,9 +113,12 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 <template>
   <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
-    <div class="page-container py-5 flex items-stretch gap-3">
+    <div
+      class="page-container flex items-stretch gap-3"
+      :class="props.dense ? 'py-4' : 'py-5'"
+    >
       <!-- Search -->
-      <div class="flex-1 min-w-0 h-12">
+      <div :class="props.dense ? 'flex-1 min-w-0 h-11' : 'flex-1 min-w-0 h-12'">
         <SearchBar
           v-model="searchQuery"
           :fetch-suggestions="fetchSuggestions"
@@ -129,7 +133,9 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
         <button
           type="button"
           :class="[
-            'btn-outline h-12 gap-2 shrink-0',
+            props.dense
+              ? 'btn-outline h-11 gap-2 shrink-0'
+              : 'btn-outline h-12 gap-2 shrink-0',
             panelOpen &&
               '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
           ]"
@@ -177,6 +183,8 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
           </svg>
         </button>
       </div>
+
+      <slot name="action" />
     </div>
 
     <!-- Filter panel — vertical layout -->
