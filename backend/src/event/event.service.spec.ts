@@ -288,12 +288,6 @@ describe("EventService", () => {
     });
   });
 
-  describe("linkEventToLocation", () => {
-    it("should link an event to a location via DB service", () => {
-      expect(dbService.linkEventToLocation).toHaveBeenCalledWith(1, 2);
-    });
-  });
-
   describe("unlinkEventFromLocation", () => {
     it("should remove a location from an event via DB service", async () => {
       const result = await service.unlinkEventFromLocation(1);

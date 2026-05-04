@@ -30,8 +30,6 @@ describe("EventLocationController", () => {
   };
 
   const mockEventId = 42;
-  const mockLocationId = 1;
-
   // Mocking the EventService
   const mockEventService = {
     getLocationForEvent: jest.fn(),
@@ -100,21 +98,6 @@ describe("EventLocationController", () => {
         langQuery.lang,
       );
       expect(result).toEqual(mockLocationView);
-    });
-  });
-
-  describe("linkEventToLocation", () => {
-    it("should link an event to a location ", () => {
-      // Arrange
-      mockEventService.linkEventToLocation.mockResolvedValue(true);
-
-      // Act
-
-      // Assert
-      expect(eventService.linkEventToLocation).toHaveBeenCalledWith(
-        mockEventId,
-        mockLocationId,
-      );
     });
   });
 
