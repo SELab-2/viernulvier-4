@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { createI18n } from "vue-i18n";
-import CsvUploadButton from "../../../app/components/admin/CsvUploadButton.vue";
+import CsvUploadComponent from "../../../app/components/admin/CsvUploadComponent.vue";
 
 const mockUploadCsv = vi.fn();
 const mockSnackbarAdd = vi.fn();
@@ -74,7 +74,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("CsvUploadButton", () => {
+describe("CsvUploadComponent", () => {
   it("shows a localized snackbar when headers are missing", async () => {
     mockUploadCsv.mockResolvedValueOnce({
       data: null,
@@ -84,7 +84,7 @@ describe("CsvUploadButton", () => {
       status: 400,
     });
 
-    const wrapper = mount(CsvUploadButton, {
+    const wrapper = mount(CsvUploadComponent, {
       global: {
         plugins: [i18n],
       },
@@ -116,7 +116,7 @@ describe("CsvUploadButton", () => {
   });
 
   it("renders the upload button with the selected target label", () => {
-    const wrapper = mount(CsvUploadButton, {
+    const wrapper = mount(CsvUploadComponent, {
       global: {
         plugins: [i18n],
       },

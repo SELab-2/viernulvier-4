@@ -1,12 +1,12 @@
 <script setup lang="ts">
 /**
- * CSV upload button for admin parser endpoints.
+ * CSV upload component for admin parser endpoints.
  *
  * Props:
  * - `target` (productions|events|tags|blogs|prices) — selects which parser endpoint to call.
  *
  * Usage:
- * <CsvUploadButton target="productions" />
+ * <CsvUploadComponent target="productions" />
  *
  * Shows localized success/error snackbars via `useSnackbar` and uses `useParserApi` to upload.
  */
