@@ -25,14 +25,18 @@ beforeEach(() => {
 describe("useGalleryApi", () => {
   it("getAll calls GET /media/galleries", () => {
     const { getAll } = useGalleryApi();
-    void getAll({ page: 0, limit: 10, descending: true });
+    void getAll({
+      paginationFilters: { page: 0, limit: 10, descending: true },
+    });
     const url = mockGet.mock.calls[0][0] as string;
     expect(url).toContain("/media/galleries");
   });
 
   it("getAll appends filter query params", () => {
     const { getAll } = useGalleryApi();
-    void getAll({ page: 0, limit: 10, descending: true });
+    void getAll({
+      paginationFilters: { page: 0, limit: 10, descending: true },
+    });
     const url = mockGet.mock.calls[0][0] as string;
     expect(url).toContain("page=0");
     expect(url).toContain("limit=10");

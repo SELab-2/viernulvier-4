@@ -141,7 +141,7 @@ watch(
   () => props.modelValue,
   (value) => {
     if (editor.value && editor.value.getHTML() !== value) {
-      editor.value.commands.setContent(value, false);
+      editor.value.commands.setContent(value, { errorOnInvalidContent: false });
     }
   },
 );
@@ -386,7 +386,7 @@ onBeforeUnmount(() => editor.value?.destroy());
             @input="
               (e) =>
                 editor
-                  .chain()
+                  ?.chain()
                   .focus()
                   .setColor((e.target as HTMLInputElement).value)
                   .run()
