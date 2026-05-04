@@ -21,7 +21,7 @@ import { GalleryType } from "@repo/common";
  */
 export class MissingEnvVariableError extends Error {
   constructor(variableName: string) {
-    super(`🛑 FATAL: Forgot to set ${variableName} in your .env file?`);
+    super(`FATAL: Forgot to set ${variableName} in your .env file?`);
     this.name = "MissingEnvVariableError";
   }
 }
