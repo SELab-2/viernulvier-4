@@ -17,7 +17,7 @@ import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
 import { usePrintView } from "../../../composables/media/usePrintView";
 import PrintsToolbar from "../../../components/prints/PrintsToolbar.vue";
-import FileList from "../../../components/prints/FileList.vue";
+import FileList from "../../../components/admin/prints/FileList.vue";
 
 const { t, locale } = useI18n();
 const { getAll, remove } = usePrintApi();
