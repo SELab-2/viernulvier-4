@@ -235,7 +235,6 @@ onMounted(async () => {
         <FormBaseForm
           v-else-if="mode === 'create'"
           :fields="fields"
-          :submit-label="t('prints.form.create')"
           :reset-label="t('prints.form.reset')"
           @submit="handleSubmit"
         />
