@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProductionView, Tag, Event, TagView } from "@repo/common";
+import type { ProductionView, Event, TagView } from "@repo/common";
 import { useProductionApi } from "~/composables/useProductionApi";
 import { useEventApi } from "~/composables/useEventApi";
 import { ROUTES } from "~/utils/routes";
