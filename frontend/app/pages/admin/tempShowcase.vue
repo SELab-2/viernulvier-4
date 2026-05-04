@@ -19,16 +19,19 @@ onMounted(() => {
         Temporary showcase
       </p>
       <h1 class="text-3xl font-semibold text-card-foreground sm:text-4xl">
-        CSV upload button
+        CSV templates
       </h1>
       <p class="max-w-2xl text-sm text-muted-foreground">
-        A simple sandbox page for the parser upload button. It keeps the page
-        height balanced so the footer stays at the bottom.
+        A simple sandbox page for the CSV template downloads component.
       </p>
     </div>
 
-    <div class="flex-1">
-      <AdminCsvUploadButton target="productions" />
+    <div class="flex-1 space-y-6">
+      <AdminCsvTemplateDownload target="productions" />
+      <AdminCsvTemplateDownload target="events" />
+      <AdminCsvTemplateDownload target="tags" />
+      <AdminCsvTemplateDownload target="blogs" />
+      <AdminCsvTemplateDownload target="prices" />
     </div>
   </section>
 </template>
