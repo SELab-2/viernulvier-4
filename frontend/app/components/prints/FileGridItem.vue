@@ -70,7 +70,7 @@ onUnmounted(() => {
               <!-- Close button -->
               <button
                 @click.stop="showInfo = false"
-                class="absolute top-3 right-3 w-7 h-7 rounded-full bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0"
+                class="absolute top-3 right-3 w-7 h-7 rounded-full bg-foreground/10 hover:bg-foreground/20 border border-border flex items-center justify-center transition-colors shrink-0"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
