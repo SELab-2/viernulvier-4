@@ -178,12 +178,12 @@ onMounted(loadPrint);
 <template>
   <div class="container mx-auto px-4 max-w-5xl py-6">
     <div class="flex items-center gap-3 mb-6">
-      <!-- Back button -->
+      <!-- Back link -->
       <NuxtLink
         :to="ROUTES.admin.prints.base"
-        class="btn-outline h-9 flex items-center text-[11px] font-black uppercase tracking-widest"
+        class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
       >
-        ←
+        ← {{ t("admin.back") }}
       </NuxtLink>
       <!-- Title -->
       <h1 class="font-brand font-black text-2xl uppercase tracking-tighter">
