@@ -320,7 +320,13 @@
         "cropMobile": "Mobiele crop",
         "cropMobileHint": "Portretcrop geoptimaliseerd voor smalle schermen",
         "cropNb": "NB Ready",
-        "cropNbHint": "Variant met neutrale achtergrond"
+        "cropNbHint": "Variant met neutrale achtergrond",
+        "metadataTitle": "Afbeeldingsmetadata",
+        "itemTitleNl": "Afbeeldingstitel (NL)",
+        "itemTitleEn": "Afbeeldingstitel (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata opgeslagen."
       },
       "linkToProduction": "Koppel aan productie",
       "linkBtn": "Koppelen",

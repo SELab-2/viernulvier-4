@@ -1,35 +1,34 @@
 <!--
   components/admin/blogs/LinkToProduction.vue
+  ===========================================
 
-  Card section for linking this blog to productions.
-  Shows all linked productions, persisted in localStorage so they survive
-  navigation away and back within the same browser session.
+  Links this blog to one or more productions. Placed on Step 1 (Content tab)
+  rather than Step 2 (Photos) because it is a content decision, not image work.
+
+  When linked, the blog appears on the production's detail page under "Stories".
+  Optionally, the blog's media gallery is shared with the production so both
+  display the same images.
+
+  Session persistence: linked productions are stored in localStorage keyed by
+  blog ID. The API has no reverse-lookup endpoint so we track what we linked.
+
+  Props:
+    blogId     ID of the blog being edited
+    galleryId  ID of the blog's gallery (used for the share-gallery option)
 -->
 <script setup lang="ts">
 import type { PaginatedResponse, ProductionView } from "@repo/common";
-import {
-  Link2,
-  Search,
-  Check,
-  Loader2,
-  X,
-  ExternalLink,
-} from "lucide-vue-next";
+import { Link2, Check, Loader2, ExternalLink } from "lucide-vue-next";
 
-const props = defineProps<{
-  blogId: number;
-  galleryId?: number | null;
-}>();
+const props = defineProps<{ blogId: number; galleryId?: number | null }>();
 
 const { t, locale } = useI18n();
 const { getAll, linkBlog, linkMedia } = useProductionApi();
 const { fetchSuggestions } = useArchiveView();
 
-// Persistence key (per blog)
 const storageKey = computed(() => `vnv-blog-linked-prods-${props.blogId}`);
 
-// Linked productions
-// Loaded from localStorage on mount so they survive page navigations.
+// Productions linked in this or a previous session, rehydrated from localStorage
 const linkedProductions = ref<ProductionView[]>([]);
 
 onMounted(() => {
@@ -39,7 +38,7 @@ onMounted(() => {
     if (stored)
       linkedProductions.value = JSON.parse(stored) as ProductionView[];
   } catch {
-    // Ignore parse errors (corrupted storage etc.)
+    /* corrupted storage — start fresh */
   }
 });
 
@@ -58,17 +57,15 @@ const search = ref("");
 const productions = ref<ProductionView[]>([]);
 const loadingSearch = ref(false);
 const searchOpen = ref(false);
-
-// Options
 const shareGallery = ref(true);
-
-// Feedback
 const linking = ref<number | null>(null);
 const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
 
-// Search
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
+const linkedIds = computed(
+  () => new Set(linkedProductions.value.map((p) => p.id)),
+);
 
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(search, () => {
   if (searchTimer) clearTimeout(searchTimer);
   searchTimer = setTimeout(fetchProductions, 300);
@@ -78,15 +75,12 @@ async function fetchProductions() {
   loadingSearch.value = true;
   try {
     const resp = await getAll({
-      productionFilters: {
-        titelOrArtist: search.value,
-        is_suggestion: false,
-      },
+      productionFilters: { titelOrArtist: search.value, is_suggestion: false },
       paginationFilters: { page: 0, limit: 10, descending: true },
       languageFilters: { lang: locale.value as "nl" | "en" },
     });
-    const data = resp.data as PaginatedResponse<ProductionView> | null;
-    productions.value = (data?.objects ?? []) as ProductionView[];
+    productions.value = ((resp.data as PaginatedResponse<ProductionView> | null)
+      ?.objects ?? []) as ProductionView[];
   } finally {
     loadingSearch.value = false;
   }
@@ -99,11 +93,6 @@ function openSearch() {
   fetchProductions();
 }
 
-// Link
-const linkedIds = computed(
-  () => new Set(linkedProductions.value.map((p) => p.id)),
-);
-
 async function link(production: ProductionView) {
   if (linkedIds.value.has(production.id)) return;
   linking.value = production.id;
@@ -115,14 +104,15 @@ async function link(production: ProductionView) {
     }
     linkedProductions.value.push(production);
     persistLinked();
-
     search.value = "";
     searchOpen.value = false;
     feedback.value = {
       type: "ok",
       msg: t("admin.blogs.linkToProductionSuccess"),
     };
-    setTimeout(() => (feedback.value = null), 3000);
+    setTimeout(() => {
+      feedback.value = null;
+    }, 3000);
   } catch {
     feedback.value = {
       type: "err",
@@ -133,16 +123,12 @@ async function link(production: ProductionView) {
   }
 }
 
-// Close search dropdown when clicking outside
+// Close the dropdown when clicking outside
 const wrapperRef = ref<HTMLElement | null>(null);
 function handleOutsideClick(e: MouseEvent) {
   const target = e.target as Element;
-
   if (!document.body.contains(target)) return;
-
-  if (wrapperRef.value && wrapperRef.value.contains(target)) return;
-
-  // If none of the rules above hit we can close the menu.
+  if (wrapperRef.value?.contains(target)) return;
   searchOpen.value = false;
 }
 onMounted(() => document.addEventListener("mousedown", handleOutsideClick));
@@ -152,37 +138,14 @@ onUnmounted(() =>
 </script>
 
 <template>
-  <div class="rounded-xl border border-card-border bg-card overflow-hidden">
-    <!-- Header -->
-    <div class="px-5 py-4 border-b border-card-border bg-card-hover">
-      <h2
-        class="font-brand font-black text-[13px] uppercase tracking-widest text-card-foreground flex items-center gap-2"
-      >
-        <Link2 :size="13" class="text-accent opacity-80" />
-        {{ t("admin.blogs.linkedProductions") }}
-      </h2>
-      <p class="text-xs text-muted-foreground mt-0.5">
-        {{ t("admin.blogs.linkedProductionsHint") }}
-      </p>
-    </div>
-
+  <AdminBlogsSectionCard
+    :title="t('admin.blogs.linkedProductions')"
+    :subtitle="t('admin.blogs.linkedProductionsHint')"
+  >
     <div class="p-5 space-y-4">
-      <!-- Feedback banner -->
-      <Transition name="slide-down">
-        <div
-          v-if="feedback"
-          :class="[
-            'rounded-lg border px-4 py-2.5 text-sm',
-            feedback.type === 'ok'
-              ? 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900 text-green-700 dark:text-green-400'
-              : 'border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 text-red-600 dark:text-red-400',
-          ]"
-        >
-          {{ feedback.msg }}
-        </div>
-      </Transition>
+      <AdminBlogsFeedbackBanner :feedback="feedback" />
 
-      <!-- Linked productions list -->
+      <!-- Previously linked productions list -->
       <div v-if="linkedProductions.length" class="space-y-2">
         <p
           class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
@@ -198,6 +161,7 @@ onUnmounted(() =>
             <Check
               :size="13"
               class="text-green-600 dark:text-green-400 shrink-0"
+              aria-hidden="true"
             />
             <div class="flex-1 min-w-0">
               <p class="text-sm font-semibold text-foreground truncate">
@@ -234,9 +198,8 @@ onUnmounted(() =>
         </p>
       </div>
 
-      <!-- Search + link section -->
+      <!-- Search + link panel -->
       <div ref="wrapperRef" class="relative">
-        <!-- Search input (shows when open) -->
         <div v-if="searchOpen" class="space-y-3">
           <SearchBar
             v-model:model-value="search"
@@ -258,9 +221,15 @@ onUnmounted(() =>
                   ? 'bg-accent border-accent'
                   : 'border-border bg-background group-hover:border-accent/50'
               "
+              :aria-pressed="shareGallery"
               @click="shareGallery = !shareGallery"
             >
-              <Check v-if="shareGallery" :size="9" class="text-white" />
+              <Check
+                v-if="shareGallery"
+                :size="9"
+                class="text-white"
+                aria-hidden="true"
+              />
             </button>
             <div>
               <p
@@ -274,30 +243,25 @@ onUnmounted(() =>
             </div>
           </label>
 
-          <!-- Results dropdown -->
+          <!-- Results list -->
           <div
             class="rounded-lg border border-border bg-background overflow-hidden"
           >
-            <!-- Loading -->
             <div
               v-if="loadingSearch"
               class="flex items-center justify-center gap-2 py-6 text-muted-foreground"
             >
-              <Loader2 :size="14" class="animate-spin" />
+              <Loader2 :size="14" class="animate-spin" aria-hidden="true" />
               <span
                 class="text-[11px] font-brand font-black uppercase tracking-widest"
                 >{{ t("stories.loading") }}</span
               >
             </div>
-
-            <!-- No results -->
             <div v-else-if="!productions.length" class="py-6 text-center">
               <p class="text-sm text-muted-foreground">
                 {{ t("admin.blogs.linkToProductionNoResults") }}
               </p>
             </div>
-
-            <!-- Production list -->
             <div v-else class="divide-y divide-border max-h-56 overflow-y-auto">
               <div
                 v-for="prod in productions"
@@ -315,16 +279,13 @@ onUnmounted(() =>
                     {{ prod.artist }}
                   </p>
                 </div>
-
-                <!-- Already linked -->
                 <span
                   v-if="linkedIds.has(prod.id)"
                   class="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[9px] font-black uppercase tracking-widest"
                 >
-                  <Check :size="8" /> {{ t("admin.blogs.linked") }}
+                  <Check :size="8" aria-hidden="true" />
+                  {{ t("admin.blogs.linked") }}
                 </span>
-
-                <!-- Link button -->
                 <button
                   v-else
                   type="button"
@@ -336,8 +297,9 @@ onUnmounted(() =>
                     v-if="linking === prod.id"
                     :size="10"
                     class="animate-spin"
+                    aria-hidden="true"
                   />
-                  <Link2 v-else :size="10" />
+                  <Link2 v-else :size="10" aria-hidden="true" />
                   {{
                     linking === prod.id
                       ? t("admin.blogs.linking")
@@ -349,7 +311,7 @@ onUnmounted(() =>
           </div>
         </div>
 
-        <!-- Open search button (shows when closed) -->
+        <!-- Closed state trigger button -->
         <button
           v-else
           type="button"
@@ -371,22 +333,10 @@ onUnmounted(() =>
           "
           @click="openSearch"
         >
-          <Link2 :size="13" />
+          <Link2 :size="13" aria-hidden="true" />
           {{ t("admin.blogs.linkToProduction") }}
         </button>
       </div>
     </div>
-  </div>
+  </AdminBlogsSectionCard>
 </template>
-
-<style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.2s ease;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-</style>

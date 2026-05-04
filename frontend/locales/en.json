@@ -319,7 +319,13 @@
         "cropMobile": "Mobile crop",
         "cropMobileHint": "Portrait crop optimised for narrow screens",
         "cropNb": "NB Ready",
-        "cropNbHint": "Neutral-background variant"
+        "cropNbHint": "Neutral-background variant",
+        "metadataTitle": "Image metadata",
+        "itemTitleNl": "Image title (NL)",
+        "itemTitleEn": "Image title (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata saved."
       },
       "linkToProduction": "Link to Production",
       "linkBtn": "Link",

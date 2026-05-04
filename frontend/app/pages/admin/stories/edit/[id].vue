@@ -1,11 +1,14 @@
 <!--
   pages/admin/stories/edit/[id].vue
-  Admin Blog Edit Page — two-step layout.
-  Preview scrolls naturally with the page.
+  ====================================
+  Admin blog edit page — two-step layout.
 
-  Button layout:
-  - Content step: [← List] [Restore]  …  [Save ✓]  [Next: Photos →]
-  - Photos step:  [← List]            …             [← Content]
+  Step 1 (content): title + description form with live preview panel.
+  Step 2 (photos):  crop upload grid + item metadata + link-to-production card.
+
+  "Link to production" lives in step 2 because it relates to the media
+  being shared with a production, but is shown as its own separate card
+  below the crop grid so it doesn't feel buried inside image management.
 -->
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
@@ -41,7 +44,10 @@ const step = ref<"content" | "photos">("content");
 const previewData = ref<{
   titel: { nl: string; en: string };
   description: { nl: string; en: string };
-}>({ titel: { nl: "", en: "" }, description: { nl: "", en: "" } });
+}>({
+  titel: { nl: "", en: "" },
+  description: { nl: "", en: "" },
+});
 
 const initialBlogData = computed(() => {
   if (!blog.value) return undefined;
@@ -134,14 +140,11 @@ onMounted(async () => {
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
-
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
         >
           {{ t("admin.blogs.edit") }}
         </h1>
-
-        <!-- Saved confirmation badge -->
         <Transition name="fade">
           <span
             v-if="saved"
@@ -161,7 +164,7 @@ onMounted(async () => {
         </Transition>
       </div>
 
-      <!-- Step indicator -->
+      <!-- Step indicator tabs -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
@@ -187,9 +190,7 @@ onMounted(async () => {
           {{ t("admin.blogs.sectionTitle") }} &amp;
           {{ t("admin.blogs.sectionContent") }}
         </button>
-
         <span class="w-px bg-border self-stretch" />
-
         <button
           type="button"
           :class="[
@@ -213,7 +214,7 @@ onMounted(async () => {
         </button>
       </div>
 
-      <!-- Error -->
+      <!-- Error banner -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
@@ -228,7 +229,6 @@ onMounted(async () => {
         >
           <div class="space-y-4">
             <div class="h-52 bg-muted rounded-xl animate-pulse" />
-            <div class="h-80 bg-muted rounded-xl animate-pulse" />
             <div class="h-80 bg-muted rounded-xl animate-pulse" />
           </div>
           <div class="hidden xl:block h-96 bg-muted rounded-xl animate-pulse" />
@@ -248,9 +248,9 @@ onMounted(async () => {
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
         >
-          <!-- Left: active step -->
+          <!-- Left column: active step content -->
           <div class="space-y-5 min-w-0">
-            <!--  Step 1: Content -->
+            <!-- Step 1: Content -->
             <template v-if="step === 'content'">
               <AdminBlogsForm
                 mode="edit"
@@ -259,12 +259,6 @@ onMounted(async () => {
                 @submit="handleSubmit"
                 @preview-update="(d) => (previewData = d)"
               />
-
-              <!--
-                Bottom nav for content step.
-                Left:  [← Back to list]  [Restore]
-                Right: [Next: Photos →]
-              -->
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                   <NuxtLink
@@ -286,16 +280,14 @@ onMounted(async () => {
                     </svg>
                     {{ t("admin.back") }}
                   </NuxtLink>
-
                   <button
                     type="button"
                     class="btn-outline h-10 px-5 text-[10px]"
                     @click="restoreToSaved"
                   >
-                    {{ t("admin.blogs.restoreBtn") || "Restore" }}
+                    {{ t("admin.blogs.restoreBtn") }}
                   </button>
                 </div>
-
                 <button
                   type="button"
                   class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
@@ -319,23 +311,24 @@ onMounted(async () => {
               </div>
             </template>
 
-            <!-- Step 2: Photos -->
+            <!-- Step 2: Photos + metadata + link to production -->
             <template v-if="step === 'photos'">
+              <!-- Crop grid and item metadata -->
               <AdminBlogsImageSection
                 :blog-id="blogId"
                 @crop-uploaded="loadGallery"
               />
 
+              <!--
+                Link to production sits below the image section — it is
+                related to the media step (shared gallery) but is its own
+                concern so it gets its own clearly labelled card.
+              -->
               <AdminBlogsLinkToProduction
                 :blog-id="blogId"
                 :gallery-id="galleryId"
               />
 
-              <!--
-                Bottom nav for photos step.
-                Left:  [← Back to list]
-                Right: [← Content]
-              -->
               <div class="flex items-center justify-between gap-3">
                 <NuxtLink
                   :to="ROUTES.admin.stories.base"
@@ -356,7 +349,6 @@ onMounted(async () => {
                   </svg>
                   {{ t("admin.back") }}
                 </NuxtLink>
-
                 <button
                   type="button"
                   class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
@@ -382,7 +374,7 @@ onMounted(async () => {
             </template>
           </div>
 
-          <!-- Right: preview (sticky, desktop only) -->
+          <!-- Right column: sticky preview (desktop only) -->
           <div class="hidden xl:block self-start sticky top-28">
             <AdminBlogsPreview
               :data="{ ...previewData, id: blogId ?? undefined }"
@@ -391,7 +383,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Mobile: collapsible preview -->
+        <!-- Mobile collapsible preview -->
         <details
           class="xl:hidden group border border-border rounded-xl overflow-hidden mt-6"
         >

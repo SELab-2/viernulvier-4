@@ -1,10 +1,13 @@
 <!--
   components/admin/blogs/Form.vue
-  Bilingual Blog Form.
+  =================================
+  Bilingual blog form for title (NL + EN) and description (NL + EN).
+  Reuses BaseTextArea for the title fields and AdminEditor for the rich-text
+  description fields so no custom styling is duplicated here.
 
-  Renders title (textarea) and description (AdminEditor) fields for both NL
-  and EN. Navigation (back, restore, step transitions) is the responsibility
-  of the parent page — this component only emits `submit` and `preview-update`.
+  Emits:
+  - submit(data)          — when the user clicks Save / Create
+  - preview-update(data)  — on every keystroke so the preview panel stays live
 -->
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
@@ -13,6 +16,7 @@ interface LocalizedPair {
   nl: string;
   en: string;
 }
+
 interface InitialData {
   titel?: LocalizedPair;
   description?: LocalizedPair;
@@ -42,6 +46,7 @@ const titelEn = ref("");
 const descriptionNl = ref("");
 const descriptionEn = ref("");
 
+// Populate fields when editing an existing blog.
 watch(
   () => props.initialData,
   (data) => {
@@ -54,6 +59,7 @@ watch(
   { immediate: true },
 );
 
+// Keep the live preview panel up to date.
 watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   emit("preview-update", {
     titel: { nl: titelNl.value, en: titelEn.value },
@@ -80,30 +86,15 @@ function handleSubmit() {
   });
 }
 
-const titleTextareaCls = [
-  "w-full px-4 py-3",
-  "min-h-[72px] max-h-[140px]",
-  "bg-muted border border-border rounded-lg",
-  "text-sm text-foreground",
-  "outline-none transition-colors duration-150",
-  "hover:border-foreground/20 hover:bg-muted/70",
-  "focus:border-foreground/30 focus:bg-background",
-  "placeholder:text-muted-foreground",
-  "resize-none overflow-y-auto",
-  "[text-transform:none]",
-  "leading-snug",
-].join(" ");
-
-const labelCls =
-  "block text-[9px] font-brand font-black uppercase tracking-widest text-muted-foreground mb-2";
-
 const sectionCls =
   "bg-card border border-card-border rounded-xl overflow-hidden";
+const labelCls =
+  "block text-[9px] font-brand font-black uppercase tracking-widest text-muted-foreground mb-2 px-4 pt-4";
 </script>
 
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
-    <!-- Titles -->
+    <!-- Title section -->
     <section :class="sectionCls">
       <div
         class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
@@ -116,39 +107,33 @@ const sectionCls =
         </h2>
       </div>
 
-      <div class="p-5 space-y-4">
-        <div>
-          <label :class="labelCls">
-            {{ t("admin.blogs.titleNl") }}
-            <span class="text-red-500 ml-0.5">*</span>
-          </label>
-          <textarea
-            v-model="titelNl"
-            :class="titleTextareaCls"
-            autocomplete="off"
-            spellcheck="false"
-            :placeholder="t('admin.blogs.titleNlPlaceholder')"
-            required
-          />
-        </div>
+      <div class="pb-2">
+        <!-- Dutch title is required -->
+        <label :class="labelCls">
+          {{ t("admin.blogs.titleNl") }}
+          <span class="text-red-500 ml-0.5">*</span>
+        </label>
+        <FormFieldsBaseTextArea
+          v-model="titelNl"
+          :placeholder="t('admin.blogs.titleNlPlaceholder')"
+          :rows="2"
+          required
+        />
 
-        <div>
-          <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
-          <textarea
-            v-model="titelEn"
-            :class="titleTextareaCls"
-            autocomplete="off"
-            spellcheck="false"
-            :placeholder="t('admin.blogs.titleEnPlaceholder')"
-          />
-          <p class="mt-1.5 text-[9px] text-muted-foreground/60">
-            {{ t("admin.blogs.titleEnFallback") }}
-          </p>
-        </div>
+        <!-- English title falls back to Dutch when empty -->
+        <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
+        <FormFieldsBaseTextArea
+          v-model="titelEn"
+          :placeholder="t('admin.blogs.titleEnPlaceholder')"
+          :rows="2"
+        />
+        <p class="px-4 pb-2 text-[9px] text-muted-foreground/60">
+          {{ t("admin.blogs.titleEnFallback") }}
+        </p>
       </div>
     </section>
 
-    <!-- Content -->
+    <!-- Description section -->
     <section :class="sectionCls">
       <div
         class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
@@ -162,8 +147,9 @@ const sectionCls =
       </div>
 
       <div class="p-5 space-y-5">
+        <!-- Dutch description is required -->
         <div>
-          <label :class="labelCls">
+          <label :class="labelCls.replace('px-4 pt-4', '')">
             {{ t("admin.blogs.descriptionNl") }}
             <span class="text-red-500 ml-0.5">*</span>
           </label>
@@ -173,8 +159,11 @@ const sectionCls =
           />
         </div>
 
+        <!-- English description falls back to Dutch when empty -->
         <div>
-          <label :class="labelCls">{{ t("admin.blogs.descriptionEn") }}</label>
+          <label :class="labelCls.replace('px-4 pt-4', '')">
+            {{ t("admin.blogs.descriptionEn") }}
+          </label>
           <AdminEditor
             v-model="descriptionEn"
             :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
@@ -186,7 +175,7 @@ const sectionCls =
       </div>
     </section>
 
-    <!-- Save button -->
+    <!-- Save / validation row -->
     <div class="flex items-center justify-between gap-3 pt-1">
       <p
         v-if="!isValid"
