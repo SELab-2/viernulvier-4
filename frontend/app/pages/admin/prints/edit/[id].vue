@@ -176,8 +176,8 @@ onMounted(loadPrint);
 </script>
 
 <template>
-  <div class="container mx-auto px-4 max-w-5xl py-6">
-    <div class="flex items-center gap-3 mb-6">
+  <div class="min-h-screen bg-background">
+    <div class="max-w-6xl mx-auto px-6 py-10 space-y-8">
       <!-- Back link -->
       <NuxtLink
         :to="ROUTES.admin.prints.base"
@@ -185,46 +185,75 @@ onMounted(loadPrint);
       >
         ← {{ t("admin.back") }}
       </NuxtLink>
-      <!-- Title -->
-      <h1 class="font-brand font-black text-2xl uppercase tracking-tighter">
-        {{ t("prints.edit") }}
-      </h1>
-    </div>
 
-    <!-- Error display -->
-    <p
-      v-if="error"
-      class="text-red-400 text-[11px] font-bold uppercase tracking-widest mb-4"
-    >
-      {{ error }}
-    </p>
+      <!-- Title row -->
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1
+          class="font-brand font-black text-3xl uppercase tracking-tight text-foreground flex-1"
+        >
+          {{ t("prints.edit") }}
+        </h1>
 
-    <!-- Form -->
-    <div class="min-h-[720px]">
-      <!-- Minimum height so the footer doesn't jump -->
-      <div v-if="fetching" class="flex flex-col gap-4">
-        <!-- TODO possibly replaced by loading skeleton later on -->
-        <div
-          v-for="i in 6"
-          :key="i"
-          class="h-10 rounded-md bg-muted animate-pulse"
-        />
+        <!-- Saved feedback badge -->
+        <Transition name="fade">
+          <span
+            v-if="saved"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-black uppercase tracking-widest"
+          >
+            <svg
+              class="w-3 h-3"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              viewBox="0 0 24 24"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            {{ t("admin.saved") }}
+          </span>
+        </Transition>
       </div>
 
-      <FormBaseForm
-        v-else-if="print"
-        :fields="fields"
-        :submit-label="t('prints.form.edit')"
-        :reset-label="t('prints.form.reset')"
-        @submit="handleSubmit"
-        :initial-values="{
-          titel_nl: titel?.nl,
-          titel_en: titel?.en,
-          description_nl: description?.nl,
-          description_en: description?.en,
-          print_type: print.print_type,
-        }"
-      />
+      <!-- Error banner -->
+      <div
+        v-if="error"
+        class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
+      >
+        {{ error }}
+      </div>
+
+      <!-- Form -->
+      <div class="min-h-[720px]">
+        <div v-if="fetching" class="flex flex-col gap-4">
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="h-10 rounded-md bg-muted animate-pulse"
+          />
+        </div>
+
+        <FormBaseForm
+          v-else-if="print"
+          :fields="fields"
+          :submit-label="t('prints.form.edit')"
+          :reset-label="t('prints.form.reset')"
+          @submit="handleSubmit"
+          :initial-values="{
+            titel_nl: titel?.nl,
+            titel_en: titel?.en,
+            description_nl: description?.nl,
+            description_en: description?.en,
+            print_type: print.print_type,
+          }"
+        />
+
+        <div
+          v-else-if="!print && !fetching"
+          class="py-16 text-center text-muted-foreground"
+        >
+          {{ t("admin.prints.notFound") }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
