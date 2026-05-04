@@ -50,6 +50,7 @@ export const ROUTES = {
     prints: {
       base: "/admin/prints",
       create: "/admin/prints/create",
+      edit: (id: number) => `/admin/prints/edit/${id}`,
     },
     accounts: {
       base: "/admin/accounts",

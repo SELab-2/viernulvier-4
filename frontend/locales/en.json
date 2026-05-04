@@ -213,11 +213,15 @@
     },
     "form": {
       "title": "Title",
+      "description": "Description",
       "type": "Print type",
       "file": "File",
       "fileRequired": "Upload a file.",
       "uploadError": "Failed to upload file.",
-      "deleteConfirm": "Are you sure you want to delete {name}?"
+      "loadError": "Failed to load print.",
+      "deleteConfirm": "Are you sure you want to delete {name}?",
+      "edit": "Apply changes",
+      "reset": "Reset"
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
@@ -228,6 +232,8 @@
     "remaining": "remaining",
     "delete": "Delete",
     "download": "Download",
+    "edit": "Edit print",
+    "create": "Upload",
     "loading": "Loading...",
     "retry": "Try again",
     "noPrints": "No prints",
