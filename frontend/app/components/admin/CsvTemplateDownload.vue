@@ -12,6 +12,7 @@ const props = defineProps<Props>();
 type TemplateData = {
   mandatoryFields: string[];
   nullableFields: string[];
+  example: string;
 };
 
 const templates: Record<ParserTarget, TemplateData> = {
@@ -31,6 +32,8 @@ const templates: Record<ParserTarget, TemplateData> = {
       "Performer_Type",
       "Attendance_Mode",
     ],
+    example:
+      '101,"De Grote Show","The Big Show","Een spectaculaire show voor het hele gezin","A spectacular show for the whole family","Met acrobaten, clowns en magische acts","Featuring acrobats, clowns and magical acts","Circus de Zon","Circus of the Sun","Een onvergetelijke ervaring voor jong en oud","An unforgettable experience for young and old","Gemaakt door Circus de Zon","Created by Circus of the Sun","Live","In-person"',
   },
   events: {
     mandatoryFields: ["ID", "Starttime", "ProductionID"],
@@ -41,18 +44,24 @@ const templates: Record<ParserTarget, TemplateData> = {
       "Location_NL",
       "Location_EN",
     ],
+    example:
+      '1,"2024-07-01 19:00:00","2024-07-01 21:00:00","2024-07-01 18:30:00","2024-07-01 20:00:00","Amsterdam Arena","Amsterdam Arena",101',
   },
   tags: {
     mandatoryFields: ["TagName_NL", "ProductionIDs"],
     nullableFields: ["TagName_EN"],
+    example: '"Tag1_NL","Tag1_EN","1;2;3"',
   },
   blogs: {
     mandatoryFields: ["Titel_NL", "Description_NL", "ProductionID"],
     nullableFields: ["Titel_EN", "Description_EN"],
+    example:
+      '"Blogpost 1 NL","Blogpost 1 EN","Nederlandse beschrijving","English description",1',
   },
   prices: {
     mandatoryFields: ["Name_NL", "Price", "EventID"],
     nullableFields: ["Name_EN"],
+    example: '"Prijs 1","Price 1",10,1',
   },
 };
 
@@ -68,6 +77,7 @@ const downloadTitle = computed(
 const templateDescription = computed(() =>
   t(`csv.templates.${props.target}.description`),
 );
+const templateExample = computed(() => templates[props.target].example);
 </script>
 
 <template>
@@ -137,6 +147,19 @@ const templateDescription = computed(() =>
               {{ field }}
             </span>
           </div>
+        </div>
+
+        <div
+          class="rounded-xl border border-border bg-muted/40 p-4 overflow-x-auto"
+        >
+          <p
+            class="mb-2 text-xs font-bold uppercase tracking-widest text-foreground"
+          >
+            {{ t("csv.templates.labels.example") }}
+          </p>
+          <pre
+            class="min-w-max whitespace-pre text-xs leading-6 text-foreground"
+          ><code class="block">{{ templateExample }}</code></pre>
         </div>
       </div>
     </div>

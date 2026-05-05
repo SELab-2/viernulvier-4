@@ -415,7 +415,8 @@
       },
       "labels": {
         "mandatory": "Verplicht",
-        "nullable": "Optioneel"
+        "nullable": "Optioneel",
+        "example": "Voorbeeld"
       },
       "general": {
         "header": "Enkele disclaimers:",

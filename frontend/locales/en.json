@@ -414,7 +414,8 @@
       },
       "labels": {
         "mandatory": "Mandatory",
-        "nullable": "Optional"
+        "nullable": "Optional",
+        "example": "Example"
       },
       "general": {
         "header": "A few disclaimers:",
