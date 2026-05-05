@@ -1,4 +1,18 @@
 <script setup lang="ts">
+/**
+ * CSV template download card component.
+ *
+ * Displays template information for CSV imports including mandatory/optional fields,
+ * a realistic example row, and a download button for the template file.
+ *
+ * Props:
+ * - `target` (productions|events|tags|blogs|prices) — selects which CSV template to display.
+ *
+ * Usage:
+ * <CsvTemplateDownload target="productions" />
+ *
+ * Template data includes field metadata, examples, and handles localization for descriptions.
+ */
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ParserTarget } from "~/composables/useParserApi";
