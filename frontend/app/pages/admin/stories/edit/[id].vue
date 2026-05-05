@@ -3,13 +3,31 @@
   ====================================
   Admin blog edit page — two-step layout.
 
-  Step 1 (content): title + description form with live preview panel.
-  Step 2 (photos):  crop upload grid + item metadata + link-to-production card.
+  Steps:
+  1. "Title & Content"  — bilingual title + rich-text description + link-to-production.
+                          Live preview panel (sticky on desktop, collapsible on mobile).
+  2. "Header images"    — crop upload grid + item metadata card.
 
-  "Link to production" lives in step 2 because it relates to the media
-  being shared with a production, but is shown as its own separate card
-  below the crop grid so it doesn't feel buried inside image management.
+  Navigation between steps is handled by tab buttons at the top of the page.
+  The step can be pre-selected via `?step=photos` in the URL (used by the
+  create page after saving, so the user lands on step 2 immediately).
+
+  Component breakdown:
+  ┌─ edit/[id].vue (this file) ─────────────────────────────────────────────┐
+  │  Data: loads blog, gallery, headerCrop. Handles save + restore.         │
+  │                                                                         │
+  │  Step 1 tab                                                             │
+  │  ├── AdminBlogsForm         — title + description fields + submit       │
+  │  ├── AdminBlogsLinkToProduction — link/unlink production cards          │
+  │  └── AdminBlogsPreview      — live preview panel                        │
+  │                                                                         │
+  │  Step 2 tab                                                             │
+  │  └── AdminBlogsImageSection — crop grid + item metadata                 │
+  │      ├── AdminBlogsCropGrid                                             │
+  │      └── AdminBlogsItemMetadata                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
 -->
+
 <script setup lang="ts">
 import type { Blog, ModifyBlog } from "@repo/common";
 import type {
@@ -21,12 +39,16 @@ import { useGallery } from "~/composables/media/useGallery";
 
 definePageMeta({ ssr: false });
 
+// Composables
+
 const route = useRoute();
 const { getById, modify, getMediaGallery } = useBlogApi();
-const { getAll, linkBlog, unlinkBlog, getBlogs } = useProductionApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
+// Route param
+
+/** Parse the blog ID from the dynamic route segment. */
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -35,21 +57,45 @@ const blogId = computed<number | null>(() => {
   return isFinite(n) ? n : null;
 });
 
+// Page state
+
 const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
 const error = ref<string | null>(null);
+/** True for 3 s after a successful save — drives the "Saved ✓" badge. */
 const saved = ref(false);
+
+/** Active step tab ('content' | 'photos'). */
 const step = ref<"content" | "photos">("content");
 
+/**
+ * Live data fed into the preview panel.
+ * Updated on every keystroke via the 'preview-update' event from AdminBlogsForm.
+ */
 const previewData = ref<{
   titel: { nl: string; en: string };
   description: { nl: string; en: string };
-}>({
-  titel: { nl: "", en: "" },
-  description: { nl: "", en: "" },
-});
+}>({ titel: { nl: "", en: "" }, description: { nl: "", en: "" } });
 
+// Gallery state
+
+/** Full gallery with items — used to extract the header crop for the preview. */
+const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+/** Gallery ID passed to LinkToProduction so it can link via the correct gallery. */
+const galleryId = ref<number | null>(null);
+
+/** The FE3_header crop shown in the preview hero. */
+const headerCrop = computed(() =>
+  gallery.value ? getMainImageCrop(gallery.value, "FE3_header") : null,
+);
+
+// Derived initial data for AdminBlogsForm
+
+/**
+ * Unwrap the localised titel + description from the fetched Blog object.
+ * AdminBlogsForm uses this as its `initial-data` prop to pre-populate fields.
+ */
 const initialBlogData = computed(() => {
   if (!blog.value) return undefined;
   return {
@@ -58,12 +104,9 @@ const initialBlogData = computed(() => {
   };
 });
 
-const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
-const galleryId = ref<number | null>(null);
-const headerCrop = computed(() =>
-  gallery.value ? getMainImageCrop(gallery.value, "FE3_header") : null,
-);
+// Data fetching
 
+/** Load the gallery and extract the header crop + gallery ID. */
 async function loadGallery() {
   if (!blogId.value) return;
   try {
@@ -75,6 +118,7 @@ async function loadGallery() {
   }
 }
 
+/** Fetch the raw Blog object (not localised, so we get both NL and EN). */
 async function loadBlog() {
   if (!blogId.value) return;
   fetching.value = true;
@@ -82,6 +126,8 @@ async function loadBlog() {
   try {
     const resp = await getById(blogId.value);
     blog.value = resp.data as Blog;
+
+    // Seed the preview panel with the freshly fetched data.
     if (blog.value) {
       const tl = blog.value.titel as { nl: string; en: string };
       const dc = blog.value.description as { nl: string; en: string };
@@ -97,6 +143,19 @@ async function loadBlog() {
   }
 }
 
+// Lifecycle
+
+onMounted(async () => {
+  // Allow the create page to redirect to step 2 via ?step=photos.
+  if (route.query.step === "photos") step.value = "photos";
+
+  // Load data in parallel for speed.
+  await Promise.all([loadBlog(), loadGallery()]);
+});
+
+// Save / restore
+
+/** Submit the form — PATCH the blog and show a transient "Saved" badge. */
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
@@ -113,6 +172,10 @@ async function handleSubmit(data: ModifyBlog) {
   }
 }
 
+/**
+ * Restore the form to the last saved state by re-fetching the blog.
+ * Requires confirmation because unsaved changes will be lost.
+ */
 async function restoreToSaved() {
   if (
     !confirm(
@@ -122,18 +185,12 @@ async function restoreToSaved() {
     return;
   await loadBlog();
 }
-
-onMounted(async () => {
-  if (route.query.step === "photos") step.value = "photos";
-  await loadBlog();
-  await loadGallery();
-});
 </script>
 
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- Top bar -->
+      <!-- Top bar: back link + title + "Saved" badge -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -146,6 +203,8 @@ onMounted(async () => {
         >
           {{ t("admin.blogs.edit") }}
         </h1>
+
+        <!-- Transient "Saved ✓" badge — fades in for 3 s after a successful save -->
         <Transition name="fade">
           <span
             v-if="saved"
@@ -169,6 +228,7 @@ onMounted(async () => {
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
+        <!-- Step 1: Title & Content -->
         <button
           type="button"
           :class="[
@@ -191,7 +251,10 @@ onMounted(async () => {
           {{ t("admin.blogs.sectionTitle") }} &amp;
           {{ t("admin.blogs.sectionContent") }}
         </button>
+
         <span class="w-px bg-border self-stretch" />
+
+        <!-- Step 2: Header Images -->
         <button
           type="button"
           :class="[
@@ -246,12 +309,19 @@ onMounted(async () => {
 
       <!-- Main content -->
       <template v-else-if="blog && blogId">
+        <!--
+          Two-column grid on XL screens.
+          Left  = active step (form or image section).
+          Right = sticky live preview (desktop only).
+          items-start prevents the preview column from stretching to match
+          the left column's height.
+        -->
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
         >
-          <!-- Left column: active step content -->
+          <!-- Left column: active step -->
           <div class="space-y-5 min-w-0">
-            <!-- Step 1: Content -->
+            <!-- Step 1: Title + Description + Link to production -->
             <template v-if="step === 'content'">
               <AdminBlogsForm
                 mode="edit"
@@ -260,7 +330,7 @@ onMounted(async () => {
                 @submit="handleSubmit"
                 @preview-update="(d) => (previewData = d)"
               >
-                <!-- Link to production komt nu BOVEN de save knop via de extra slot -->
+                <!-- Link-to-production card is rendered above the Save button via the #extra slot -->
                 <template #extra>
                   <AdminBlogsLinkToProduction
                     :blog-id="blogId"
@@ -268,6 +338,8 @@ onMounted(async () => {
                   />
                 </template>
               </AdminBlogsForm>
+
+              <!-- Step 1 footer nav: Back | Restore | → Photos -->
               <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                   <NuxtLink
@@ -297,6 +369,7 @@ onMounted(async () => {
                     {{ t("admin.blogs.restoreBtn") }}
                   </button>
                 </div>
+
                 <button
                   type="button"
                   class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
@@ -320,13 +393,18 @@ onMounted(async () => {
               </div>
             </template>
 
-            <!-- Step 2: Photos + metadata + link to production -->
+            <!-- Step 2: Crop grid + item metadata -->
             <template v-if="step === 'photos'">
-              <!-- Crop grid and item metadata -->
+              <!--
+                ImageSection now delegates crop rendering to CropGrid and
+                metadata to ItemMetadata — it only owns the API orchestration.
+              -->
               <AdminBlogsImageSection
                 :blog-id="blogId"
                 @crop-uploaded="loadGallery"
               />
+
+              <!-- Step 2 footer nav: Back to list | ← Content -->
               <div class="flex items-center justify-between gap-3">
                 <NuxtLink
                   :to="ROUTES.admin.stories.base"
@@ -347,6 +425,7 @@ onMounted(async () => {
                   </svg>
                   {{ t("admin.back") }}
                 </NuxtLink>
+
                 <button
                   type="button"
                   class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
@@ -372,7 +451,7 @@ onMounted(async () => {
             </template>
           </div>
 
-          <!-- Right column: sticky preview (desktop only) -->
+          <!-- Right column: sticky live preview (desktop only) -->
           <div class="hidden xl:block self-start sticky top-28">
             <AdminBlogsPreview
               :data="{ ...previewData, id: blogId ?? undefined }"
@@ -381,7 +460,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- Mobile collapsible preview -->
+        <!-- Mobile: collapsible preview -->
         <details
           class="xl:hidden group border border-border rounded-xl overflow-hidden mt-6"
         >
@@ -426,6 +505,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* Fade transition for the "Saved ✓" badge */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;

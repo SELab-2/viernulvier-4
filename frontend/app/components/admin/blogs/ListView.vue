@@ -1,18 +1,50 @@
 <!--
   components/admin/blogs/ListView.vue
+  ======================================
+  Admin blog list — orchestrates fetching, filtering, pagination and deletion.
+
+  Responsibility split:
+  - This file owns all *state* and *business logic*:
+      fetching blogs, handling deletes, managing pagination, filter state.
+  - Presentation is delegated to sub-components:
+      AdminBlogsToolbar    — search + filter toggle + "New story" button
+      BlogsStoryListItem   — individual row card (shared with public page)
+      AdminBlogsPagination — page-nav bar
+
+  Sub-components are all auto-imported by Nuxt (no explicit imports needed).
 -->
+
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogView } from "~/composables/blogs/useBlogView";
 
+// Composables
+
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
+
+/**
+ * Pull shared filter refs from useBlogView.
+ * sortOrder and searchQuery are module-level refs shared with the public
+ * stories page; dateFilter is also module-level so filters persist across
+ * navigation within the admin section.
+ */
 const { sortOrder, searchQuery, dateFilter, fetchSuggestions } = useBlogView();
 
+// Date bounds (for year picker + calendar)
+
+/** ISO date string of the oldest existing blog (fetched once on mount). */
 const oldestDate = ref("");
+/** ISO date string of the newest existing blog. */
 const newestDate = ref("");
 
+/**
+ * Fetch the oldest and newest blog dates in parallel.
+ * These are used to populate the YearPicker and DefaultCalendar lower/upper
+ * bounds so the user can't select dates outside the available range.
+ * Non-critical: the calendar still works if this fails.
+ */
 async function fetchDateBounds() {
   try {
     const [o, n] = await Promise.all([
@@ -30,96 +62,59 @@ async function fetchDateBounds() {
     if (first?.created_at) oldestDate.value = first.created_at.slice(0, 10);
     if (last?.created_at) newestDate.value = last.created_at.slice(0, 10);
   } catch {
-    /* non-critical */
+    /* Non-critical — calendar still works without bounds */
   }
 }
-
-// Filters panel
-const panelOpen = ref(false);
-const selectedYear = ref<number | null>(null);
-const calendarKey = ref(0);
-const skipNextCalendarEmit = ref(false);
-
-function onYearUpdate(year: number | null) {
-  if (year === null) {
-    selectedYear.value = null;
-    calendarKey.value++;
-    dateFilter.value = {};
-  } else {
-    selectedYear.value = year;
-    skipNextCalendarEmit.value = true;
-    dateFilter.value = { after: `${year}-01-01`, before: `${year}-12-31` };
-    calendarKey.value++;
-  }
-}
-
-function onCalendarFilter(filter: { after?: string; before?: string }) {
-  if (skipNextCalendarEmit.value) {
-    skipNextCalendarEmit.value = false;
-    return;
-  }
-  selectedYear.value = null;
-  dateFilter.value = filter;
-}
-
-function clearAllFilters() {
-  selectedYear.value = null;
-  calendarKey.value++;
-  dateFilter.value = {};
-}
-
-const hasDateFilter = computed(
-  () => !!(dateFilter.value.after || dateFilter.value.before),
-);
-
-watch(
-  () => dateFilter.value,
-  (f) => {
-    if (!f.after && !f.before) {
-      selectedYear.value = null;
-      return;
-    }
-    const isFullYear =
-      f.after?.endsWith("-01-01") &&
-      f.before?.endsWith("-12-31") &&
-      f.after?.substring(0, 4) === f.before?.substring(0, 4);
-    if (!isFullYear) selectedYear.value = null;
-  },
-  { deep: true },
-);
 
 // Pagination
+
 const PAGE_SIZE = 10;
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
+
+/** Value bound to the page-jump input. Reset to '' after each jump attempt. */
 const jumpInput = ref("");
 
+/** Jump to a specific page if the value is valid and different from current. */
 function handleJump() {
   const v = parseInt(jumpInput.value, 10);
-  if (!isNaN(v) && v >= 1 && v <= totalPages.value && v !== currentPage.value)
+  if (!isNaN(v) && v >= 1 && v <= totalPages.value && v !== currentPage.value) {
     currentPage.value = v;
+  }
   jumpInput.value = "";
 }
 
 // Blog data
+
 const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+
+/**
+ * IDs of blogs currently being deleted.
+ * Passed to StoryListItem so it can show a spinner or disabled state while
+ * the delete request is in flight.
+ */
 const deletingIds = ref(new Set<number>());
 
+/**
+ * Fetch the current page of blogs, applying all active filters.
+ * Called on mount, on page changes, and whenever filters change.
+ */
 async function loadBlogs() {
   loading.value = true;
   error.value = null;
   try {
     const resp = await getAll({
       paginationFilters: {
-        page: currentPage.value - 1,
+        page: currentPage.value - 1, // backend uses 0-based pages
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
       blogFilters: {
+        // Only pass filters that are actually set to avoid unnecessary query params.
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
         ...(dateFilter.value.after ? { after: dateFilter.value.after } : {}),
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),
@@ -140,6 +135,12 @@ async function loadBlogs() {
   }
 }
 
+// Watchers
+
+/**
+ * Debounce search input changes so we don't fire a request on every keystroke.
+ * 350 ms matches the public stories page behaviour.
+ */
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer);
@@ -149,6 +150,7 @@ watch(searchQuery, () => {
   }, 350);
 });
 
+/** Reset to page 1 and reload whenever sort order, locale, or date filter changes. */
 watch(
   [sortOrder, locale, dateFilter],
   () => {
@@ -158,23 +160,40 @@ watch(
   { deep: true },
 );
 
+/** Reload when the user navigates to a different page. */
 watch(currentPage, loadBlogs);
 
+// Lifecycle
+
 onMounted(async () => {
+  // Fetch date bounds first so the calendar/year-picker is ready before the
+  // first blog page renders.
   await fetchDateBounds();
   loadBlogs();
 });
 
+// Delete
+
+/**
+ * Delete a blog after asking for confirmation.
+ * If the deleted item was the only one on the current page, navigates to the
+ * previous page rather than showing an empty list.
+ */
 async function handleDelete(blog: BlogView) {
   if (
     !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
   )
     return;
+
   deletingIds.value.add(blog.id);
   try {
     await remove(blog.id);
-    if (blogs.value.length === 1 && currentPage.value > 1) currentPage.value--;
-    else await loadBlogs();
+
+    if (blogs.value.length === 1 && currentPage.value > 1) {
+      currentPage.value--; // triggers loadBlogs via watcher
+    } else {
+      await loadBlogs();
+    }
   } catch {
     alert(t("admin.blogs.saveError"));
   } finally {
@@ -185,7 +204,7 @@ async function handleDelete(blog: BlogView) {
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
+    <!-- Header: title + result count -->
     <div>
       <h1
         class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
@@ -200,128 +219,21 @@ async function handleDelete(blog: BlogView) {
       </p>
     </div>
 
-    <!-- Toolbar: search + filters + add -->
-    <div class="flex items-center gap-3">
-      <!-- Search -->
-      <div class="flex-1 min-w-0 h-11">
-        <SearchBar
-          v-model="searchQuery"
-          :fetch-suggestions="fetchSuggestions"
-          :limit="15"
-          :scroll-limit="5"
-          :placeholder="t('stories.searchPlaceholder')"
-          class="h-full w-full"
-        />
-      </div>
+    <!--
+      Toolbar: search input + filter toggle + "New story" button.
+      AdminBlogsToolbar wraps StoryToolbar, which now accepts fetchSuggestions
+      as a prop so this admin context doesn't pollute the shared composable.
+    -->
+    <AdminBlogsToolbar
+      :oldest-date="oldestDate"
+      :newest-date="newestDate"
+      :date-filter="dateFilter"
+      :fetch-suggestions="fetchSuggestions"
+      @update:search="searchQuery = $event"
+      @update:date-filter="dateFilter = $event"
+    />
 
-      <!-- Filters button -->
-      <div class="relative shrink-0">
-        <button
-          type="button"
-          :class="[
-            'btn-outline h-11 gap-2',
-            panelOpen && '!bg-foreground !text-background !border-foreground',
-          ]"
-          @click="panelOpen = !panelOpen"
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path
-              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linejoin="round"
-            />
-          </svg>
-          {{ t("general.filters") }}
-        </button>
-
-        <!-- Active filter badge -->
-        <button
-          v-if="hasDateFilter"
-          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
-          @click.stop="clearAllFilters"
-          :aria-label="t('stories.filters.clear')"
-        >
-          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-            <path
-              d="M1 1l6 6M7 1L1 7"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-      </div>
-
-      <!-- Add button -->
-      <NuxtLink
-        :to="ROUTES.admin.stories.create"
-        class="shrink-0 inline-flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-accent text-white font-brand font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all hover:opacity-80 shadow-md shadow-accent/30"
-      >
-        <svg
-          class="w-3.5 h-3.5 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 5v14m-7-7h14"
-          />
-        </svg>
-        {{ t("admin.blogs.new") }}
-      </NuxtLink>
-    </div>
-
-    <!-- Filter panel -->
-    <Transition name="cal-slide">
-      <div
-        v-if="panelOpen"
-        class="rounded-xl border border-border bg-card overflow-hidden"
-      >
-        <div class="p-6 flex flex-col gap-6">
-          <!-- Sort -->
-          <div class="flex flex-col gap-2 w-max">
-            <span class="section-label">{{ t("stories.sortLabel") }}</span>
-            <select
-              v-model="sortOrder"
-              class="h-10 px-3 rounded-lg bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer hover:border-foreground/30 transition-colors w-max"
-            >
-              <option value="newest">{{ t("stories.sortNewest") }}</option>
-              <option value="oldest">{{ t("stories.sortOldest") }}</option>
-            </select>
-          </div>
-
-          <!-- Year picker -->
-          <div class="flex flex-col gap-2">
-            <span class="section-label">{{ t("stories.filters.year") }}</span>
-            <YearPicker
-              :model-value="selectedYear"
-              :oldest-date="oldestDate"
-              :newest-date="newestDate"
-              @update:model-value="onYearUpdate"
-            />
-          </div>
-
-          <!-- Calendar -->
-          <div class="flex flex-col gap-2">
-            <span class="section-label">{{
-              t("stories.filters.dateRange")
-            }}</span>
-            <DefaultCalendar
-              :key="calendarKey"
-              :oldest-date="oldestDate"
-              :model-filter="dateFilter"
-              @update:filter="onCalendarFilter"
-            />
-          </div>
-        </div>
-      </div>
-    </Transition>
-
-    <!-- Error -->
+    <!-- Error banner -->
     <div
       v-if="error"
       class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
@@ -329,7 +241,7 @@ async function handleDelete(blog: BlogView) {
       {{ error }}
     </div>
 
-    <!-- Loading skeleton -->
+    <!-- Loading skeleton: one placeholder per PAGE_SIZE slot -->
     <div v-if="loading" class="space-y-3">
       <div
         v-for="i in PAGE_SIZE"
@@ -352,7 +264,7 @@ async function handleDelete(blog: BlogView) {
       </p>
     </div>
 
-    <!-- Story list -->
+    <!-- Story list: each item links to the edit page -->
     <div v-else class="space-y-2">
       <NuxtLink
         v-for="blog in blogs"
@@ -360,6 +272,11 @@ async function handleDelete(blog: BlogView) {
         :to="ROUTES.admin.stories.edit(blog.id)"
         class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
       >
+        <!--
+          BlogsStoryListItem is the same card used on the public stories page.
+          `is-admin` switches it to show edit/delete buttons instead of a link.
+          `deleting` disables the delete button while the API call is in flight.
+        -->
         <BlogsStoryListItem
           :story="blog"
           :is-admin="true"
@@ -369,7 +286,7 @@ async function handleDelete(blog: BlogView) {
       </NuxtLink>
     </div>
 
-    <!-- Pagination -->
+    <!-- Pagination bar (hidden when there is only one page and no items yet) -->
     <AdminBlogsPagination
       v-if="totalPages > 1 || totalItems > 0"
       :current-page="currentPage"
@@ -383,27 +300,3 @@ async function handleDelete(blog: BlogView) {
     />
   </div>
 </template>
-
-<style scoped>
-.cal-slide-enter-active,
-.cal-slide-leave-active {
-  transition:
-    opacity 0.18s ease,
-    max-height 0.25s ease;
-  overflow: hidden;
-  max-height: 900px;
-}
-.cal-slide-enter-from,
-.cal-slide-leave-to {
-  opacity: 0;
-  max-height: 0;
-}
-.section-label {
-  font-family: var(--font-brand, sans-serif);
-  font-weight: 900;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted-foreground);
-}
-</style>

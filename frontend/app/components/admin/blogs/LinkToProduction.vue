@@ -299,7 +299,7 @@ const showDropdown = computed(
           v-else
           class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground/40 text-center py-1"
         >
-          {{ t("admin.blogs.noLinkedProductionsYet") }}
+          {{ t("admin.blogs.noLinkedProductions") }}
         </p>
 
         <!-- Search -->

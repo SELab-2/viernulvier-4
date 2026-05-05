@@ -1,15 +1,35 @@
 <!--
   components/admin/blogs/ImageSection.vue
-  =========================================
-  Step 2 of the blog edit flow: manages all image crops for a blog's media
-  gallery. Each blog has one MediaGallery → one MediaItem → up to 6 named crops.
+  ==========================================
+  Step 2 of the blog edit flow: manages the media gallery and all image crops
+  for a blog post.
 
-  Also allows editing the media item's title, description, and credits using
-  the shared BaseInput and BaseTextArea form components.
+  Architecture overview:
+  ┌─ ImageSection (this file) ──────────────────────────────────────────────┐
+  │  Owns: gallery lifecycle, item lifecycle, upload/delete API calls,      │
+  │         feedback state, metadata save.                                  │
+  │                                                                         │
+  │  ┌── AdminBlogsCropGrid ──────────────────────────────────────────┐     │
+  │  │  Renders the 6 named crop slots, wires hidden file inputs,     │     │
+  │  │  emits 'upload' and 'delete' back up.                          │     │
+  │  └────────────────────────────────────────────────────────────────┘     │
+  │                                                                         │
+  │  ┌── AdminBlogsItemMetadata ──────────────────────────────────────┐     │
+  │  │  Form for title (NL/EN) + credits (NL/EN) on the media item.   │     │
+  │  │  Emits 'save' back up.                                         │     │
+  │  └────────────────────────────────────────────────────────────────┘     │
+  └─────────────────────────────────────────────────────────────────────────┘
 
-  Note: "Link to production" has been moved to its own card in the edit page
-  to keep concerns separated and reduce the size of this component.
+  Data model:
+  - One blog  →  one MediaGallery (type "default")
+                     →  one MediaItem (position "main")
+                             →  up to 6 named MediaCrops
+
+  Lazy creation:
+  The gallery and item are created on-demand the first time the user uploads a
+  crop, so a freshly created blog doesn't need a gallery until photos are added.
 -->
+
 <script setup lang="ts">
 import type { MediaGallery, MediaItem, MediaCrop } from "@repo/common";
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
@@ -22,44 +42,38 @@ import type {
   ItemViewWithCrops,
 } from "~/utils/galleryFetcher";
 
-// All six crop slots with their i18n label and hint keys.
-const CROP_SLOTS = [
-  {
-    name: "hd_ready",
-    labelKey: "admin.blogs.image.cropHdReady",
-    hintKey: "admin.blogs.image.cropHdReadyHint",
-  },
-  {
-    name: "FE3_header",
-    labelKey: "admin.blogs.image.cropHeader",
-    hintKey: "admin.blogs.image.cropHeaderHint",
-  },
-  {
-    name: "thumbnail",
-    labelKey: "admin.blogs.image.cropThumbnail",
-    hintKey: "admin.blogs.image.cropThumbnailHint",
-  },
-  {
-    name: "og_image",
-    labelKey: "admin.blogs.image.cropOg",
-    hintKey: "admin.blogs.image.cropOgHint",
-  },
-  {
-    name: "mobile",
-    labelKey: "admin.blogs.image.cropMobile",
-    hintKey: "admin.blogs.image.cropMobileHint",
-  },
-  {
-    name: "nb_ready",
-    labelKey: "admin.blogs.image.cropNb",
-    hintKey: "admin.blogs.image.cropNbHint",
-  },
+// Crop names
+
+/**
+ * All six named crop slots that can be uploaded for a blog's media item.
+ * These must match the CropName enum on the backend.
+ */
+const CROP_NAMES = [
+  "hd_ready",
+  "FE3_header",
+  "thumbnail",
+  "og_image",
+  "mobile",
+  "nb_ready",
 ] as const;
+type CropName = (typeof CROP_NAMES)[number];
 
-type CropName = (typeof CROP_SLOTS)[number]["name"];
+// Props & emits
 
-const props = defineProps<{ blogId: number }>();
-const emit = defineEmits<{ (e: "crop-uploaded"): void }>();
+const props = defineProps<{
+  /** ID of the blog post whose images we are managing. */
+  blogId: number;
+}>();
+
+const emit = defineEmits<{
+  /**
+   * Fired after any crop is successfully uploaded or deleted.
+   * The parent edit page listens to this to refresh its headerCrop preview.
+   */
+  (e: "crop-uploaded"): void;
+}>();
+
+// Composables
 
 const { t, locale } = useI18n();
 const { create: createGallery } = useGalleryApi();
@@ -69,21 +83,37 @@ const { saveMedia, deleteMedia } = useStorageApi();
 const { getMediaGallery, linkMedia: linkMediaToBlog } = useBlogApi();
 
 // State
+
+/** The MediaGallery linked to this blog (null until loaded or lazily created). */
 const gallery = ref<MediaGallery | null>(null);
+/** The single MediaItem inside the gallery. */
 const mediaItem = ref<MediaItem | null>(null);
+/** Map of currently uploaded crops keyed by CropName. */
 const existingCrops = ref<Partial<Record<CropName, MediaCrop>>>({});
+
 const loadingGallery = ref(false);
+/** Name of the crop currently being uploaded (drives per-slot spinners). */
 const uploadingCrop = ref<CropName | null>(null);
+/** Name of the crop currently being deleted. */
 const deletingCrop = ref<CropName | null>(null);
+
+/** Inline feedback message shown below the card header. */
 const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
 
-// Editable item metadata fields — populated from the fetched item.
+// Editable metadata fields — populated from the fetched item on load.
 const itemTitleNl = ref("");
 const itemTitleEn = ref("");
 const itemCreditsNl = ref("");
 const itemCreditsEn = ref("");
 const savingMetadata = ref(false);
 
+// Feedback helpers
+
+/**
+ * Show a transient feedback banner for 4 seconds then auto-dismiss it.
+ * @param type  'ok' = green success, 'err' = red error
+ * @param msg   localised message string
+ */
 function setFeedback(type: "ok" | "err", msg: string) {
   feedback.value = { type, msg };
   setTimeout(() => {
@@ -91,12 +121,18 @@ function setFeedback(type: "ok" | "err", msg: string) {
   }, 4000);
 }
 
-// Load the existing gallery and its first item (if any).
+// Gallery / item loading
+
+/**
+ * Load the gallery and its first media item on mount.
+ * Populates `gallery`, `mediaItem`, `existingCrops`, and the metadata fields.
+ */
 async function loadGalleryAndItem() {
   loadingGallery.value = true;
   try {
     const fullGallery = await getMediaGallery(props.blogId, locale.value);
     if (!fullGallery) {
+      // No gallery linked yet — that's fine, we create one lazily on first upload.
       gallery.value = null;
       mediaItem.value = null;
       existingCrops.value = {};
@@ -113,6 +149,8 @@ async function loadGalleryAndItem() {
     }
 
     // Build a plain MediaItem from the view so we can call modifyItem later.
+    // The gallery returns MediaItemView (flattened strings), but modifyItem
+    // expects a MediaItem — the shape is compatible for the fields we use.
     mediaItem.value = {
       id: firstItem.id,
       type: firstItem.type,
@@ -127,7 +165,7 @@ async function loadGalleryAndItem() {
       updated_at: firstItem.updated_at,
     } as MediaItem;
 
-    // Populate metadata form fields from the fetched item.
+    // Populate the metadata form from the fetched item.
     const title = firstItem.title as { nl?: string; en?: string } | null;
     const credits = firstItem.credits as { nl?: string; en?: string } | null;
     itemTitleNl.value = title?.nl ?? "";
@@ -135,6 +173,7 @@ async function loadGalleryAndItem() {
     itemCreditsNl.value = credits?.nl ?? "";
     itemCreditsEn.value = credits?.en ?? "";
 
+    // existingCrops is a dictionary keyed by CropName (see galleryFetcher.ts).
     existingCrops.value = (firstItem as ItemViewWithCrops).crops as Partial<
       Record<CropName, MediaCrop>
     >;
@@ -149,17 +188,26 @@ async function loadGalleryAndItem() {
 
 onMounted(loadGalleryAndItem);
 
-// Ensure a gallery and item exist before uploading, creating them lazily.
+// Lazy gallery / item creation
+
+/**
+ * Ensure a gallery and media item exist before uploading a crop.
+ * Creates them if they don't exist yet, re-fetching from the server first
+ * to handle races (e.g. two crops uploaded in quick succession).
+ *
+ * Returns the gallery and item that are safe to use.
+ */
 async function ensureGalleryAndItem(): Promise<{
   gallery: MediaGallery;
   item: MediaItem;
 }> {
+  // 1. Ensure gallery
   let gal = gallery.value;
   if (!gal) {
-    const freshGallery = await getMediaGallery(props.blogId, locale.value);
-    if (freshGallery) {
-      gallery.value = freshGallery;
-      gal = freshGallery;
+    const fresh = await getMediaGallery(props.blogId, locale.value);
+    if (fresh) {
+      gallery.value = fresh;
+      gal = fresh;
     } else {
       const result = await createGallery({
         name: `blog-${props.blogId}-gallery`,
@@ -172,25 +220,13 @@ async function ensureGalleryAndItem(): Promise<{
     }
   }
 
+  // 2. Ensure item
   let item = mediaItem.value;
   if (!item) {
-    // Check again after possibly creating the gallery.
-    const freshGallery = await getMediaGallery(props.blogId, locale.value);
-    const freshItem = freshGallery?.items?.[0];
+    const fresh = await getMediaGallery(props.blogId, locale.value);
+    const freshItem = fresh?.items?.[0];
     if (freshItem) {
-      item = {
-        id: freshItem.id,
-        type: freshItem.type,
-        original_filename: freshItem.original_filename,
-        position: freshItem.position,
-        width: freshItem.width,
-        height: freshItem.height,
-        title: freshItem.title,
-        description: freshItem.description,
-        credits: freshItem.credits,
-        created_at: freshItem.created_at,
-        updated_at: freshItem.updated_at,
-      } as MediaItem;
+      item = freshItem as unknown as MediaItem;
       mediaItem.value = item;
     } else {
       const result = await createItem({
@@ -209,10 +245,107 @@ async function ensureGalleryAndItem(): Promise<{
       mediaItem.value = item;
     }
   }
+
   return { gallery: gal, item };
 }
 
-// Save the title and credits fields on the media item.
+// Upload
+
+/**
+ * Handle a file upload for a specific crop slot.
+ * Called by CropGrid via the 'upload' event.
+ *
+ * Flow:
+ * 1. Validate file type (image only)
+ * 2. Ensure gallery + item exist (lazy creation)
+ * 3. Upload file to storage via useStorageApi
+ * 4. Create a MediaCrop record linking the file to the item
+ * 5. Update local state and emit 'crop-uploaded' to parent
+ */
+async function handleUpload(cropName: CropName, file: File) {
+  if (!file.type.startsWith("image/")) {
+    setFeedback("err", t("admin.blogs.image.typeError"));
+    return;
+  }
+
+  uploadingCrop.value = cropName;
+  feedback.value = null;
+
+  try {
+    const { item } = await ensureGalleryAndItem();
+
+    // Build a unique storage path to avoid collisions across blogs / crops.
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const storagePath = `/photos/blog-${props.blogId}-${cropName}-${Date.now()}.${ext}`;
+
+    const storeResult = await saveMedia(storagePath, file);
+    if (storeResult.error) throw new Error(storeResult.error);
+
+    const cropResult = await createCrop({
+      name: cropName as any,
+      url: storagePath,
+      item_id: item.id,
+    });
+    if (!cropResult.data) throw new Error(t("admin.blogs.image.cropError"));
+
+    // Merge the new crop into the local map without a full reload.
+    existingCrops.value = {
+      ...existingCrops.value,
+      [cropName]: cropResult.data as MediaCrop,
+    };
+    setFeedback("ok", t("admin.blogs.image.uploadSuccess", { name: cropName }));
+    emit("crop-uploaded");
+  } catch (err) {
+    setFeedback(
+      "err",
+      err instanceof Error ? err.message : t("admin.blogs.image.uploadError"),
+    );
+  } finally {
+    uploadingCrop.value = null;
+  }
+}
+
+// Delete
+
+/**
+ * Delete a crop slot after confirmation.
+ * Removes the file from storage and clears it from the local map.
+ * Called by CropGrid via the 'delete' event.
+ */
+async function handleDeleteCrop(cropName: CropName) {
+  const crop = existingCrops.value[cropName];
+  if (!crop) return;
+
+  if (!confirm(t("admin.blogs.image.deleteConfirmCrop", { name: cropName })))
+    return;
+
+  deletingCrop.value = cropName;
+  try {
+    if (crop.url) await deleteMedia(crop.url);
+
+    // Remove from local map.
+    const updated = { ...existingCrops.value };
+    delete updated[cropName];
+    existingCrops.value = updated;
+
+    setFeedback("ok", t("admin.blogs.image.removed", { name: cropName }));
+    emit("crop-uploaded");
+  } catch (err) {
+    setFeedback(
+      "err",
+      err instanceof Error ? err.message : t("admin.blogs.image.uploadError"),
+    );
+  } finally {
+    deletingCrop.value = null;
+  }
+}
+
+// Metadata save
+
+/**
+ * Save the title and credits fields on the media item.
+ * English fields fall back to Dutch when left empty (consistent with blog titles).
+ */
 async function saveMetadata() {
   if (!mediaItem.value) return;
   savingMetadata.value = true;
@@ -234,96 +367,13 @@ async function saveMetadata() {
     savingMetadata.value = false;
   }
 }
-
-// File input refs keyed by crop name.
-const fileInputs = ref<Partial<Record<CropName, HTMLInputElement | null>>>({});
-
-function triggerUpload(cropName: CropName) {
-  fileInputs.value[cropName]?.click();
-}
-
-async function handleFileChange(e: Event, cropName: CropName) {
-  const input = e.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-  input.value = "";
-
-  if (!file.type.startsWith("image/")) {
-    setFeedback("err", t("admin.blogs.image.typeError"));
-    return;
-  }
-
-  uploadingCrop.value = cropName;
-  feedback.value = null;
-
-  try {
-    const { item } = await ensureGalleryAndItem();
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const storagePath = `/photos/blog-${props.blogId}-${cropName}-${Date.now()}.${ext}`;
-
-    const storeResult = await saveMedia(storagePath, file);
-    if (storeResult.error) throw new Error(storeResult.error);
-
-    const cropResult = await createCrop({
-      name: cropName as any,
-      url: storagePath,
-      item_id: item.id,
-    });
-    if (!cropResult.data) throw new Error(t("admin.blogs.image.cropError"));
-
-    existingCrops.value = {
-      ...existingCrops.value,
-      [cropName]: cropResult.data as MediaCrop,
-    };
-    setFeedback("ok", t("admin.blogs.image.uploadSuccess", { name: cropName }));
-    emit("crop-uploaded");
-  } catch (err) {
-    setFeedback(
-      "err",
-      err instanceof Error ? err.message : t("admin.blogs.image.uploadError"),
-    );
-  } finally {
-    uploadingCrop.value = null;
-  }
-}
-
-async function handleDeleteCrop(cropName: CropName) {
-  const crop = existingCrops.value[cropName];
-  if (!crop) return;
-  if (!confirm(t("admin.blogs.image.deleteConfirmCrop", { name: cropName })))
-    return;
-
-  deletingCrop.value = cropName;
-  try {
-    if (crop.url) await deleteMedia(crop.url);
-    const updated = { ...existingCrops.value };
-    delete updated[cropName];
-    existingCrops.value = updated;
-    setFeedback("ok", t("admin.blogs.image.removed", { name: cropName }));
-    emit("crop-uploaded");
-  } catch (err) {
-    setFeedback(
-      "err",
-      err instanceof Error ? err.message : t("admin.blogs.image.uploadError"),
-    );
-  } finally {
-    deletingCrop.value = null;
-  }
-}
-
-const cropForSlot = (cropName: CropName): MediaCrop | null =>
-  existingCrops.value[cropName] ?? null;
-
-const uploadedCount = computed(
-  () => CROP_SLOTS.filter((s) => !!existingCrops.value[s.name]).length,
-);
 </script>
 
 <template>
   <div class="space-y-4">
-    <!-- Crops card -->
+    <!-- Crop grid card -->
     <div class="rounded-xl border border-card-border bg-card overflow-hidden">
-      <!-- Header with circular progress indicator -->
+      <!-- Card header -->
       <div
         class="flex items-center justify-between gap-4 px-5 py-4 border-b border-card-border bg-card-hover"
       >
@@ -340,36 +390,9 @@ const uploadedCount = computed(
             </p>
           </div>
         </div>
-        <div class="shrink-0 relative w-10 h-10">
-          <svg class="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
-            <circle
-              cx="18"
-              cy="18"
-              r="15.5"
-              fill="none"
-              stroke-width="3"
-              class="stroke-border"
-            />
-            <circle
-              cx="18"
-              cy="18"
-              r="15.5"
-              fill="none"
-              stroke-width="3"
-              class="stroke-accent transition-all duration-500"
-              stroke-linecap="round"
-              :stroke-dasharray="`${(uploadedCount / CROP_SLOTS.length) * 97.4} 97.4`"
-            />
-          </svg>
-          <span
-            class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-foreground"
-          >
-            {{ uploadedCount }}/{{ CROP_SLOTS.length }}
-          </span>
-        </div>
       </div>
 
-      <!-- Feedback banner -->
+      <!-- Transient feedback banner (success or error) -->
       <Transition name="slide-down">
         <div
           v-if="feedback"
@@ -384,98 +407,39 @@ const uploadedCount = computed(
         </div>
       </Transition>
 
-      <!-- Loading skeleton -->
-      <div
-        v-if="loadingGallery"
-        class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4"
-      >
-        <div
-          v-for="i in 6"
-          :key="i"
-          class="h-40 bg-muted rounded-lg animate-pulse"
+      <!--
+        CropGrid handles the 6 crop slots, file-input wiring, and per-slot
+        spinners. It emits 'upload' and 'delete' which we handle above.
+      -->
+      <div class="p-5">
+        <AdminBlogsCropGrid
+          :blog-id="blogId"
+          :existing-crops="existingCrops"
+          :uploading-crop="uploadingCrop"
+          :deleting-crop="deletingCrop"
+          :loading="loadingGallery"
+          @upload="handleUpload"
+          @delete="handleDeleteCrop"
         />
-      </div>
-
-      <!-- Crop grid -->
-      <div v-else class="p-5">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <AdminBlogsCropSlot
-            v-for="slot in CROP_SLOTS"
-            :key="slot.name"
-            :crop-name="slot.name"
-            :label="t(slot.labelKey)"
-            :hint="t(slot.hintKey)"
-            :crop="cropForSlot(slot.name as CropName)"
-            :uploading="uploadingCrop === slot.name"
-            :deleting="deletingCrop === slot.name"
-            :blog-id="blogId"
-            @trigger-upload="triggerUpload(slot.name as CropName)"
-            @delete="handleDeleteCrop(slot.name as CropName)"
-          >
-            <input
-              :ref="
-                (el) => {
-                  fileInputs[slot.name as CropName] =
-                    el as HTMLInputElement | null;
-                }
-              "
-              type="file"
-              accept="image/*"
-              class="hidden"
-              @change="(e) => handleFileChange(e, slot.name as CropName)"
-            />
-          </AdminBlogsCropSlot>
-        </div>
-        <p class="text-[9px] text-muted-foreground text-center pt-4">
-          {{ t("admin.blogs.image.allBelongNote") }}
-        </p>
       </div>
     </div>
 
-    <!-- Item metadata card — title and credits for the media item -->
-    <div
-      v-if="mediaItem || !loadingGallery"
-      class="rounded-xl border border-card-border bg-card overflow-hidden"
-    >
-      <div
-        class="flex items-center gap-3 px-5 py-4 border-b border-card-border bg-card-hover"
-      >
-        <div class="w-1 h-5 rounded-full bg-accent shrink-0" />
-        <h2
-          class="font-brand font-black text-[11px] uppercase tracking-widest text-foreground"
-        >
-          {{ t("admin.blogs.image.metadataTitle") }}
-        </h2>
-      </div>
-      <div class="p-5 space-y-0">
-        <FormFieldsBaseInput
-          v-model="itemTitleNl"
-          :label="t('admin.blogs.image.itemTitleNl')"
-        />
-        <FormFieldsBaseInput
-          v-model="itemTitleEn"
-          :label="t('admin.blogs.image.itemTitleEn')"
-        />
-        <FormFieldsBaseInput
-          v-model="itemCreditsNl"
-          :label="t('admin.blogs.image.itemCreditsNl')"
-        />
-        <FormFieldsBaseInput
-          v-model="itemCreditsEn"
-          :label="t('admin.blogs.image.itemCreditsEn')"
-        />
-        <div class="flex justify-end px-4 pb-2">
-          <button
-            type="button"
-            :disabled="savingMetadata || !mediaItem"
-            class="inline-flex items-center gap-2 h-10 px-6 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed"
-            @click="saveMetadata"
-          >
-            {{ savingMetadata ? t("admin.saving") : t("admin.save") }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Item metadata card -->
+    <!--
+      Only shown once the loading phase is complete (even if no item exists yet).
+      AdminBlogsItemMetadata is disabled when mediaItem is null so the user
+      can't save before the item has been created by the first upload.
+    -->
+    <AdminBlogsItemMetadata
+      v-if="!loadingGallery"
+      v-model:title-nl="itemTitleNl"
+      v-model:title-en="itemTitleEn"
+      v-model:credits-nl="itemCreditsNl"
+      v-model:credits-en="itemCreditsEn"
+      :disabled="!mediaItem"
+      :saving="savingMetadata"
+      @save="saveMetadata"
+    />
   </div>
 </template>
 
