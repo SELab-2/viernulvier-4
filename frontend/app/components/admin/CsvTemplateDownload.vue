@@ -62,6 +62,9 @@ const fileName = computed(() => `${props.target}_template.csv`);
 
 const { t } = useI18n();
 const templateTitle = computed(() => t(`admin.parser.targets.${props.target}`));
+const downloadTitle = computed(
+  () => `Download ${templateTitle.value} template`,
+);
 const templateDescription = computed(() =>
   t(`csv.templates.${props.target}.description`),
 );
@@ -73,7 +76,7 @@ const templateDescription = computed(() =>
       <div class="flex items-start justify-between gap-4">
         <div class="space-y-1">
           <h3 class="text-lg font-bold text-card-foreground capitalize">
-            {{ templateTitle }}
+            {{ downloadTitle }}
           </h3>
           <p class="text-sm text-muted-foreground">
             {{ templateDescription }}
@@ -92,7 +95,7 @@ const templateDescription = computed(() =>
 
         <div class="flex-shrink-0">
           <AdminDownloadButton
-            :label="`Download ${templateTitle}`"
+            :label="downloadTitle"
             :name="fileName"
             :src="src"
           />
