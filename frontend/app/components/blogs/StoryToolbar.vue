@@ -12,11 +12,13 @@
         emits a range we clear any active year pill, and vice-versa.
   - A small ×-badge on the filter button when a date filter is active but the
     panel is closed, allowing one-click reset without reopening the panel.
+  - An optional #action slot rendered flush-right in the toolbar row,
+    aligned to the same height as the search bar.
 
-  The calendar is remounted (via `calendarKey`) whenever a year pill is
-  toggled so its internal range state stays in sync. A `skipNextCalendarEmit`
-  flag swallows the synthetic `update:filter` that DefaultCalendar fires on
-  mount, preventing it from immediately wiping the year we just set.
+  Props:
+  - noContainer: when true the inner row uses full width (no page-container
+    padding/max-width). Set this when the component is already inside a
+    page layout that handles its own padding (e.g. admin pages).
 -->
 
 <script lang="ts" setup>
@@ -32,6 +34,7 @@ const props = defineProps<{
   newestDate: string;
   dateFilter: DateFilter;
   dense?: boolean;
+  noContainer?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -43,22 +46,16 @@ const panelOpen = ref(false);
 const selectedYear = ref<number | null>(null);
 const calendarKey = ref(0);
 
-// When we remount the calendar via calendarKey++, DefaultCalendar fires an
-// initial @update:filter({}) on mount. This flag lets onCalendarFilter know
-// to ignore that one synthetic emit so it doesn't wipe selectedYear.
 const skipNextCalendarEmit = ref(false);
 
 watch(searchQuery, (val) => emit("update:search", val));
 
 function onYearUpdate(year: number | null) {
   if (year === null) {
-    // Deselect — full reset; calendar emit on remount is fine (filter is empty)
     selectedYear.value = null;
     calendarKey.value++;
     emit("update:dateFilter", {});
   } else {
-    // Select — remount calendar to clear its internal range state, but
-    // suppress the resulting mount-emit so it doesn't clear selectedYear.
     selectedYear.value = year;
     skipNextCalendarEmit.value = true;
     emit("update:dateFilter", {
@@ -70,7 +67,6 @@ function onYearUpdate(year: number | null) {
 }
 
 function onCalendarFilter(filter: DateFilter) {
-  // Swallow the one synthetic emit that fires when the calendar remounts
   if (skipNextCalendarEmit.value) {
     skipNextCalendarEmit.value = false;
     return;
@@ -103,39 +99,43 @@ watch(
   { deep: true },
 );
 
-// Active state
 const hasDateFilter = computed(
   () => !!(props.dateFilter.after || props.dateFilter.before),
 );
 const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
+
+const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
 </script>
 
 <template>
   <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
     <div
-      class="page-container flex items-stretch gap-3"
-      :class="props.dense ? 'py-4' : 'py-5'"
+      :class="[
+        'flex items-center gap-3',
+        props.dense ? 'py-4' : 'py-5',
+        props.noContainer ? 'w-full' : 'page-container',
+      ]"
     >
       <!-- Search -->
-      <div :class="props.dense ? 'flex-1 min-w-0 h-11' : 'flex-1 min-w-0 h-12'">
+      <div :class="['flex-1 min-w-0', rowHeight]">
         <SearchBar
           v-model="searchQuery"
           :fetch-suggestions="fetchSuggestions"
           :limit="15"
           :scroll-limit="5"
           :placeholder="t('stories.searchPlaceholder')"
+          class="h-full"
         />
       </div>
 
       <!-- Filters toggle -->
-      <div class="relative">
+      <div class="relative shrink-0">
         <button
           type="button"
           :class="[
-            props.dense
-              ? 'btn-outline h-11 gap-2 shrink-0'
-              : 'btn-outline h-12 gap-2 shrink-0',
+            'btn-outline gap-2 shrink-0',
+            rowHeight,
             panelOpen &&
               '!bg-[var(--foreground)] !text-[var(--background)] !border-[var(--foreground)]',
           ]"
@@ -160,7 +160,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
           <span>{{ t("general.filters") }}</span>
         </button>
 
-        <!-- Clear badge — visible when filter active -->
+        <!-- Clear badge -->
         <button
           v-if="hasDateFilter"
           class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
@@ -184,10 +184,13 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
         </button>
       </div>
 
-      <slot name="action" />
+      <!-- Action slot (e.g. "New story" button) — same height as search -->
+      <div v-if="$slots.action" class="shrink-0" :class="rowHeight">
+        <slot name="action" />
+      </div>
     </div>
 
-    <!-- Filter panel — vertical layout -->
+    <!-- Filter panel -->
     <Transition name="cal-slide">
       <div v-if="panelOpen" class="border-t border-border">
         <div class="container mx-auto px-4 max-w-5xl py-6 flex flex-col gap-6">

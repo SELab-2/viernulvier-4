@@ -1,15 +1,5 @@
 <!--
   components/admin/blogs/LinkToProduction.vue
-  ===========================================
-
-  Links a story to one or more productions.
-
-  Design:
-  - Single search bar — no default production list shown on load.
-  - Search results appear only when the user types.
-  - Linked productions shown in a clean scrollable chip/card list above.
-  - Each linked production has a preview link + unlink button.
-  - On create (no blogId): friendly locked state with explanation.
 -->
 <script setup lang="ts">
 import type { PaginatedResponse, ProductionView } from "@repo/common";
@@ -39,8 +29,7 @@ const linkedProductionIds = computed(
   () => new Set(linkedProductions.value.map((p) => p.id)),
 );
 
-// ── Persistence ──────────────────────────────────────────────────────────────
-
+// Persistence
 const storageKey = computed(() =>
   hasBlogId.value ? `vnv-blog-linked-prods-${props.blogId}` : null,
 );
@@ -67,8 +56,7 @@ async function restoreFromStorage() {
   }
 }
 
-// ── Search ────────────────────────────────────────────────────────────────────
-
+// Search
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 async function runSearch(reset = true) {
@@ -116,18 +104,17 @@ watch(search, (val) => {
   searchTimer = setTimeout(() => runSearch(true), 250);
 });
 
-async function loadMore() {
-  if (!hasMore.value || searching.value) return;
-  await runSearch(false);
-}
-
 function handleResultsScroll(e: Event) {
   const el = e.target as HTMLElement;
-  if (el.scrollHeight - el.scrollTop <= el.clientHeight + 40) loadMore();
+  if (
+    el.scrollHeight - el.scrollTop <= el.clientHeight + 40 &&
+    hasMore.value &&
+    !searching.value
+  )
+    runSearch(false);
 }
 
-// ── Link / unlink ─────────────────────────────────────────────────────────────
-
+// Link / unlink
 async function handleLink(production: ProductionView) {
   if (!hasBlogId.value || linkedProductionIds.value.has(production.id)) return;
   linking.value = production.id;
@@ -158,22 +145,19 @@ async function handleUnlink(productionId: number) {
   }
 }
 
-// ── Close dropdown on outside click ──────────────────────────────────────────
-
+// Click outside
 function handleClickOutside(e: MouseEvent) {
-  if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node)) {
+  if (dropdownRef.value && !dropdownRef.value.contains(e.target as Node))
     searchFocused.value = false;
-  }
 }
 
 onMounted(async () => {
   await restoreFromStorage();
   document.addEventListener("mousedown", handleClickOutside);
 });
-
-onUnmounted(() => {
-  document.removeEventListener("mousedown", handleClickOutside);
-});
+onUnmounted(() =>
+  document.removeEventListener("mousedown", handleClickOutside),
+);
 
 const showDropdown = computed(
   () => searchFocused.value && search.value.trim().length > 0,
@@ -185,7 +169,7 @@ const showDropdown = computed(
     :title="t('admin.blogs.linkedProductions')"
     :subtitle="t('admin.blogs.linkedProductionsHint')"
   >
-    <!-- Locked state (create page, no blogId yet) -->
+    <!-- Locked state -->
     <div
       v-if="!hasBlogId"
       class="flex items-start gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-4"
@@ -205,10 +189,9 @@ const showDropdown = computed(
       </p>
     </div>
 
-    <!-- Active state -->
     <template v-else>
       <div class="space-y-4">
-        <!-- ── Linked productions ── -->
+        <!-- Linked productions -->
         <div v-if="linkedProductions.length" class="space-y-2">
           <p
             class="text-[9px] font-brand font-black uppercase tracking-widest text-muted-foreground"
@@ -216,32 +199,26 @@ const showDropdown = computed(
             {{ t("admin.blogs.linkedThisSession") }}
           </p>
 
-          <!-- Scrollable list of linked items -->
           <div
-            class="max-h-52 overflow-y-auto space-y-1.5 pr-0.5 overscroll-contain"
+            class="max-h-60 overflow-y-auto space-y-1.5 pr-0.5 overscroll-contain"
           >
             <div
               v-for="prod in linkedProductions"
               :key="prod.id"
-              class="group flex items-center gap-3 rounded-lg border border-feedback-success-border bg-feedback-success-bg px-3 py-2.5 transition-colors hover:bg-feedback-success-bg/70"
+              class="flex items-center gap-3 rounded-lg border border-feedback-success-border bg-feedback-success-bg px-3 py-2.5"
             >
-              <!-- Icon -->
+              <!-- Check icon -->
               <div
-                class="w-7 h-7 rounded-md bg-feedback-success-text/10 flex items-center justify-center shrink-0"
+                class="w-6 h-6 rounded-md bg-feedback-success-text/10 flex items-center justify-center shrink-0"
               >
                 <svg
-                  class="w-3.5 h-3.5 text-feedback-success-text"
+                  class="w-3 h-3 text-feedback-success-text"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
+                  stroke-width="2.5"
                   viewBox="0 0 24 24"
                 >
-                  <path
-                    d="M9 12l2 2 4-4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                  <circle cx="12" cy="12" r="9" />
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
 
@@ -259,17 +236,15 @@ const showDropdown = computed(
                 </p>
               </div>
 
-              <!-- Actions -->
-              <div
-                class="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-              >
+              <!-- Actions — always visible -->
+              <div class="flex items-center gap-3 shrink-0">
                 <NuxtLink
                   :to="ROUTES.productions.byId(prod.id)"
                   target="_blank"
                   class="inline-flex items-center gap-1 text-[9px] font-brand font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <svg
-                    class="w-3 h-3"
+                    class="w-3 h-3 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -299,7 +274,7 @@ const showDropdown = computed(
                 <button
                   type="button"
                   :disabled="unlinking === prod.id"
-                  class="inline-flex items-center gap-1 text-[9px] font-brand font-black uppercase tracking-widest text-feedback-error-text hover:underline disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
+                  class="inline-flex items-center gap-1 text-[9px] font-brand font-black uppercase tracking-widest text-feedback-error-text hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
                   @click="handleUnlink(prod.id)"
                 >
                   <svg
@@ -319,9 +294,16 @@ const showDropdown = computed(
           </div>
         </div>
 
-        <!-- ── Search ── -->
+        <!-- Empty hint -->
+        <p
+          v-else
+          class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground/40 text-center py-1"
+        >
+          {{ t("admin.blogs.noLinkedProductionsYet") }}
+        </p>
+
+        <!-- Search -->
         <div ref="dropdownRef" class="relative">
-          <!-- Search input -->
           <div class="relative">
             <svg
               class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none"
@@ -340,7 +322,6 @@ const showDropdown = computed(
               class="w-full h-10 pl-9 pr-9 rounded-lg bg-muted border border-border text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
               @focus="searchFocused = true"
             />
-            <!-- Clear button -->
             <button
               v-if="search"
               type="button"
@@ -362,13 +343,12 @@ const showDropdown = computed(
             </button>
           </div>
 
-          <!-- Dropdown results -->
+          <!-- Dropdown -->
           <Transition name="dropdown">
             <div
               v-if="showDropdown"
               class="absolute z-50 left-0 right-0 mt-1.5 rounded-xl border border-border bg-card shadow-xl shadow-black/10 overflow-hidden"
             >
-              <!-- Loading -->
               <div
                 v-if="searching && !searchResults.length"
                 class="flex items-center justify-center gap-2 py-5 text-muted-foreground"
@@ -384,12 +364,10 @@ const showDropdown = computed(
                 </svg>
                 <span
                   class="text-[10px] font-brand font-black uppercase tracking-widest"
+                  >{{ t("stories.loading") }}</span
                 >
-                  {{ t("stories.loading") }}
-                </span>
               </div>
 
-              <!-- No results -->
               <div
                 v-else-if="!searching && !searchResults.length"
                 class="py-5 text-center text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
@@ -397,7 +375,6 @@ const showDropdown = computed(
                 {{ t("admin.blogs.linkToProductionNoResults") }}
               </div>
 
-              <!-- Results list -->
               <div
                 v-else
                 class="max-h-56 overflow-y-auto overscroll-contain divide-y divide-border/50"
@@ -413,7 +390,6 @@ const showDropdown = computed(
                       : ''
                   "
                 >
-                  <!-- Name + ID -->
                   <div class="min-w-0 flex-1">
                     <p
                       class="truncate text-sm font-semibold text-foreground leading-tight"
@@ -427,7 +403,6 @@ const showDropdown = computed(
                     </p>
                   </div>
 
-                  <!-- Already linked badge -->
                   <span
                     v-if="linkedProductionIds.has(prod.id)"
                     class="inline-flex items-center gap-1 text-[9px] font-brand font-black uppercase tracking-widest text-feedback-success-text shrink-0"
@@ -444,7 +419,6 @@ const showDropdown = computed(
                     {{ t("admin.blogs.linked") }}
                   </span>
 
-                  <!-- Link button -->
                   <button
                     v-else
                     type="button"
@@ -480,13 +454,12 @@ const showDropdown = computed(
                   </button>
                 </div>
 
-                <!-- Load more indicator -->
                 <div
                   v-if="hasMore"
-                  class="flex items-center justify-center gap-2 py-3 text-muted-foreground"
+                  class="flex items-center justify-center gap-2 py-3"
                 >
                   <svg
-                    class="w-3 h-3 animate-spin"
+                    class="w-3 h-3 animate-spin text-muted-foreground"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -494,24 +467,11 @@ const showDropdown = computed(
                   >
                     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                   </svg>
-                  <span
-                    class="text-[9px] font-brand font-black uppercase tracking-widest"
-                  >
-                    {{ t("stories.loading") }}
-                  </span>
                 </div>
               </div>
             </div>
           </Transition>
         </div>
-
-        <!-- Empty linked state hint -->
-        <p
-          v-if="!linkedProductions.length"
-          class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground/50 text-center py-1"
-        >
-          {{ t("admin.blogs.noLinkedProductionsYet") }}
-        </p>
       </div>
     </template>
   </AdminBlogsSectionCard>

@@ -1,11 +1,5 @@
 <!--
   components/admin/blogs/ListView.vue
-  =====================================
-  Admin overview for managing blog stories. Reuses StoryToolbar for
-  search/filter/sort and StoryListItem (with isAdmin) for each row.
-
-  Fix: toolbar now renders correctly with the add button aligned inline
-  with the search bar inside the StoryToolbar's #action slot.
 -->
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
@@ -16,7 +10,6 @@ const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
 const { sortOrder, searchQuery, dateFilter, fetchSuggestions } = useBlogView();
 
-// Date bounds are needed by StoryToolbar's YearPicker and DefaultCalendar.
 const oldestDate = ref("");
 const newestDate = ref("");
 
@@ -37,9 +30,63 @@ async function fetchDateBounds() {
     if (first?.created_at) oldestDate.value = first.created_at.slice(0, 10);
     if (last?.created_at) newestDate.value = last.created_at.slice(0, 10);
   } catch {
-    /* Non-critical — toolbar still works without date bounds. */
+    /* non-critical */
   }
 }
+
+// Filters panel
+const panelOpen = ref(false);
+const selectedYear = ref<number | null>(null);
+const calendarKey = ref(0);
+const skipNextCalendarEmit = ref(false);
+
+function onYearUpdate(year: number | null) {
+  if (year === null) {
+    selectedYear.value = null;
+    calendarKey.value++;
+    dateFilter.value = {};
+  } else {
+    selectedYear.value = year;
+    skipNextCalendarEmit.value = true;
+    dateFilter.value = { after: `${year}-01-01`, before: `${year}-12-31` };
+    calendarKey.value++;
+  }
+}
+
+function onCalendarFilter(filter: { after?: string; before?: string }) {
+  if (skipNextCalendarEmit.value) {
+    skipNextCalendarEmit.value = false;
+    return;
+  }
+  selectedYear.value = null;
+  dateFilter.value = filter;
+}
+
+function clearAllFilters() {
+  selectedYear.value = null;
+  calendarKey.value++;
+  dateFilter.value = {};
+}
+
+const hasDateFilter = computed(
+  () => !!(dateFilter.value.after || dateFilter.value.before),
+);
+
+watch(
+  () => dateFilter.value,
+  (f) => {
+    if (!f.after && !f.before) {
+      selectedYear.value = null;
+      return;
+    }
+    const isFullYear =
+      f.after?.endsWith("-01-01") &&
+      f.before?.endsWith("-12-31") &&
+      f.after?.substring(0, 4) === f.before?.substring(0, 4);
+    if (!isFullYear) selectedYear.value = null;
+  },
+  { deep: true },
+);
 
 // Pagination
 const PAGE_SIZE = 10;
@@ -93,7 +140,6 @@ async function loadBlogs() {
   }
 }
 
-// Debounce search input to avoid firing on every keystroke.
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer);
@@ -119,7 +165,6 @@ onMounted(async () => {
   loadBlogs();
 });
 
-// Delete a blog after user confirmation.
 async function handleDelete(blog: BlogView) {
   if (
     !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
@@ -139,123 +184,226 @@ async function handleDelete(blog: BlogView) {
 </script>
 
 <template>
-  <div class="space-y-0">
-    <!-- Page header -->
-    <div class="flex items-center justify-between gap-4 mb-6">
-      <div>
-        <h1
-          class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
-        >
-          {{ t("nav.stories") }}
-        </h1>
-        <p
-          v-if="!loading && totalItems > 0"
-          class="text-sm text-muted-foreground mt-0.5"
-        >
-          {{ totalItems }} {{ t("admin.blogs.results") }}
-        </p>
-      </div>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div>
+      <h1
+        class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
+      >
+        {{ t("nav.stories") }}
+      </h1>
+      <p
+        v-if="!loading && totalItems > 0"
+        class="text-sm text-muted-foreground mt-0.5"
+      >
+        {{ totalItems }} {{ t("admin.blogs.results") }}
+      </p>
     </div>
 
-    <!--
-      StoryToolbar: search + filters + add button all in one row.
-      The #action slot renders flush inside the toolbar row, aligned with the
-      search bar height (h-11 in dense mode).
-    -->
-    <StoryToolbar
-      :dense="true"
-      :story-titles="[]"
-      :oldest-date="oldestDate"
-      :newest-date="newestDate"
-      :date-filter="dateFilter"
-      @update:search="searchQuery = $event"
-      @update:date-filter="dateFilter = $event"
-    >
-      <template #action>
-        <NuxtLink
-          :to="ROUTES.admin.stories.create"
-          class="inline-flex items-center justify-center gap-2 shrink-0 px-4 h-11 rounded-lg bg-accent text-white font-brand font-black text-[10px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer whitespace-nowrap"
-        >
-          <svg
-            class="w-3.5 h-3.5 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M12 5v14m-7-7h14"
-            />
-          </svg>
-          {{ t("admin.blogs.new") }}
-        </NuxtLink>
-      </template>
-    </StoryToolbar>
-
-    <!-- Content -->
-    <div class="pt-6 space-y-4">
-      <!-- Error banner -->
-      <div
-        v-if="error"
-        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
-      >
-        {{ error }}
-      </div>
-
-      <!-- Loading skeleton -->
-      <div v-if="loading" class="space-y-3">
-        <div
-          v-for="i in PAGE_SIZE"
-          :key="i"
-          class="h-[136px] bg-muted rounded-xl animate-pulse"
+    <!-- Toolbar: search + filters + add -->
+    <div class="flex items-center gap-3">
+      <!-- Search -->
+      <div class="flex-1 min-w-0 h-11">
+        <SearchBar
+          v-model="searchQuery"
+          :fetch-suggestions="fetchSuggestions"
+          :limit="15"
+          :scroll-limit="5"
+          :placeholder="t('stories.searchPlaceholder')"
+          class="h-full w-full"
         />
       </div>
 
-      <!-- Empty state -->
-      <div v-else-if="!blogs.length" class="py-20 text-center">
-        <p
-          class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
+      <!-- Filters button -->
+      <div class="relative shrink-0">
+        <button
+          type="button"
+          :class="[
+            'btn-outline h-11 gap-2',
+            panelOpen && '!bg-foreground !text-background !border-foreground',
+          ]"
+          @click="panelOpen = !panelOpen"
         >
-          {{ t("stories.noStories") }}
-        </p>
-        <p
-          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path
+              d="M1 2h10L7 6.5V10.5L5 9.5V6.5L1 2z"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linejoin="round"
+            />
+          </svg>
+          {{ t("general.filters") }}
+        </button>
+
+        <!-- Active filter badge -->
+        <button
+          v-if="hasDateFilter"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
+          @click.stop="clearAllFilters"
+          :aria-label="t('stories.filters.clear')"
         >
-          {{ t("stories.noStoriesDesc") }}
-        </p>
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <path
+              d="M1 1l6 6M7 1L1 7"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
       </div>
 
-      <!-- Story list -->
-      <div v-else class="space-y-2">
-        <NuxtLink
-          v-for="blog in blogs"
-          :key="blog.id"
-          :to="ROUTES.admin.stories.edit(blog.id)"
-          class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
+      <!-- Add button -->
+      <NuxtLink
+        :to="ROUTES.admin.stories.create"
+        class="shrink-0 inline-flex items-center justify-center gap-2 h-11 px-4 rounded-lg bg-accent text-white font-brand font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all hover:opacity-80 shadow-md shadow-accent/30"
+      >
+        <svg
+          class="w-3.5 h-3.5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          viewBox="0 0 24 24"
         >
-          <BlogsStoryListItem
-            :story="blog"
-            :is-admin="true"
-            :deleting="deletingIds.has(blog.id)"
-            @delete.stop="handleDelete(blog)"
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 5v14m-7-7h14"
           />
-        </NuxtLink>
-      </div>
+        </svg>
+        {{ t("admin.blogs.new") }}
+      </NuxtLink>
+    </div>
 
-      <!-- Pagination -->
-      <AdminBlogsPagination
-        v-if="totalPages > 1 || totalItems > 0"
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        :total-items="totalItems"
-        :loading="loading"
-        :jump-input="jumpInput"
-        @update:current-page="currentPage = $event"
-        @jump="handleJump"
-        @update:jump-input="jumpInput = $event"
+    <!-- Filter panel -->
+    <Transition name="cal-slide">
+      <div
+        v-if="panelOpen"
+        class="rounded-xl border border-border bg-card overflow-hidden"
+      >
+        <div class="p-6 flex flex-col gap-6">
+          <!-- Sort -->
+          <div class="flex flex-col gap-2 w-max">
+            <span class="section-label">{{ t("stories.sortLabel") }}</span>
+            <select
+              v-model="sortOrder"
+              class="h-10 px-3 rounded-lg bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer hover:border-foreground/30 transition-colors w-max"
+            >
+              <option value="newest">{{ t("stories.sortNewest") }}</option>
+              <option value="oldest">{{ t("stories.sortOldest") }}</option>
+            </select>
+          </div>
+
+          <!-- Year picker -->
+          <div class="flex flex-col gap-2">
+            <span class="section-label">{{ t("stories.filters.year") }}</span>
+            <YearPicker
+              :model-value="selectedYear"
+              :oldest-date="oldestDate"
+              :newest-date="newestDate"
+              @update:model-value="onYearUpdate"
+            />
+          </div>
+
+          <!-- Calendar -->
+          <div class="flex flex-col gap-2">
+            <span class="section-label">{{
+              t("stories.filters.dateRange")
+            }}</span>
+            <DefaultCalendar
+              :key="calendarKey"
+              :oldest-date="oldestDate"
+              :model-filter="dateFilter"
+              @update:filter="onCalendarFilter"
+            />
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Error -->
+    <div
+      v-if="error"
+      class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
+    >
+      {{ error }}
+    </div>
+
+    <!-- Loading skeleton -->
+    <div v-if="loading" class="space-y-3">
+      <div
+        v-for="i in PAGE_SIZE"
+        :key="i"
+        class="h-[136px] bg-muted rounded-xl animate-pulse"
       />
     </div>
+
+    <!-- Empty state -->
+    <div v-else-if="!blogs.length" class="py-20 text-center">
+      <p
+        class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
+      >
+        {{ t("stories.noStories") }}
+      </p>
+      <p
+        class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
+      >
+        {{ t("stories.noStoriesDesc") }}
+      </p>
+    </div>
+
+    <!-- Story list -->
+    <div v-else class="space-y-2">
+      <NuxtLink
+        v-for="blog in blogs"
+        :key="blog.id"
+        :to="ROUTES.admin.stories.edit(blog.id)"
+        class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
+      >
+        <BlogsStoryListItem
+          :story="blog"
+          :is-admin="true"
+          :deleting="deletingIds.has(blog.id)"
+          @delete.stop="handleDelete(blog)"
+        />
+      </NuxtLink>
+    </div>
+
+    <!-- Pagination -->
+    <AdminBlogsPagination
+      v-if="totalPages > 1 || totalItems > 0"
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      :total-items="totalItems"
+      :loading="loading"
+      :jump-input="jumpInput"
+      @update:current-page="currentPage = $event"
+      @jump="handleJump"
+      @update:jump-input="jumpInput = $event"
+    />
   </div>
 </template>
+
+<style scoped>
+.cal-slide-enter-active,
+.cal-slide-leave-active {
+  transition:
+    opacity 0.18s ease,
+    max-height 0.25s ease;
+  overflow: hidden;
+  max-height: 900px;
+}
+.cal-slide-enter-from,
+.cal-slide-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.section-label {
+  font-family: var(--font-brand, sans-serif);
+  font-weight: 900;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+</style>
