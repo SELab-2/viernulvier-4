@@ -1,14 +1,26 @@
 <!--
   components/admin/blogs/Form.vue
   =================================
-  Bilingual blog form for title (NL + EN) and description (NL + EN).
-  Reuses BaseTextArea for the title fields and AdminEditor for the rich-text
-  description fields so no custom styling is duplicated here.
+  Bilingual blog form — title (NL + EN) and description (NL + EN).
+
+  Composition:
+  - AdminBlogsFormTitleSection       two BaseTextArea fields for the titles
+  - AdminBlogsFormDescriptionSection two AdminEditor fields for the rich-text body
+  - AdminBlogsFormFormActions        submit button with spinner and validation hint
+
+  The component is intentionally thin: it owns only the reactive field values,
+  the validation computed, and the submit handler. All markup lives in the
+  three sub-components above so this file stays easy to scan.
 
   Emits:
-  - submit(data)          — when the user clicks Save / Create
-  - preview-update(data)  — on every keystroke so the preview panel stays live
+  - submit(data)         when the user clicks Save / Create
+  - preview-update(data) on every keystroke so the live preview panel stays current
+
+  Slots:
+  - #extra               rendered between DescriptionSection and FormActions,
+                         used by the parent to inject LinkToProduction
 -->
+
 <script setup lang="ts">
 import type { CreateBlog, ModifyBlog } from "@repo/common";
 
@@ -39,8 +51,7 @@ const emit = defineEmits<{
   ): void;
 }>();
 
-const { t } = useI18n();
-
+// Reactive field values, one ref per localised field.
 const titelNl = ref("");
 const titelEn = ref("");
 const descriptionNl = ref("");
@@ -59,7 +70,7 @@ watch(
   { immediate: true },
 );
 
-// Keep the live preview panel up to date.
+// Keep the live preview panel up to date on every keystroke.
 watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   emit("preview-update", {
     titel: { nl: titelNl.value, en: titelEn.value },
@@ -67,6 +78,7 @@ watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   });
 });
 
+// The form is valid as soon as both required Dutch fields have content.
 const isValid = computed(
   () =>
     titelNl.value.trim().length > 0 && descriptionNl.value.trim().length > 0,
@@ -74,6 +86,7 @@ const isValid = computed(
 
 function handleSubmit() {
   if (!isValid.value || props.loading) return;
+
   emit("submit", {
     titel: {
       nl: titelNl.value.trim(),
@@ -85,139 +98,34 @@ function handleSubmit() {
     },
   });
 }
-
-const sectionCls =
-  "bg-card border border-card-border rounded-xl overflow-hidden";
-const labelCls =
-  "block text-[9px] font-brand font-black uppercase tracking-widest text-muted-foreground mb-2 px-4 pt-4";
 </script>
 
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
-    <!-- Title section -->
-    <section :class="sectionCls">
-      <div
-        class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
-      >
-        <div class="w-1 h-5 rounded-full bg-accent shrink-0" />
-        <h2
-          class="font-brand font-black text-[11px] uppercase tracking-widest text-foreground"
-        >
-          {{ t("admin.blogs.sectionTitle") }}
-        </h2>
-      </div>
+    <!-- Title fields (NL + EN) -->
+    <AdminBlogsFormTitleSection
+      v-model:titelNl="titelNl"
+      v-model:titelEn="titelEn"
+    />
 
-      <div class="pb-2">
-        <!-- Dutch title is required -->
-        <label :class="labelCls">
-          {{ t("admin.blogs.titleNl") }}
-          <span class="text-red-500 ml-0.5">*</span>
-        </label>
-        <FormFieldsBaseTextArea
-          v-model="titelNl"
-          :placeholder="t('admin.blogs.titleNlPlaceholder')"
-          :rows="2"
-          required
-        />
+    <!-- Rich-text description fields (NL + EN) -->
+    <AdminBlogsFormDescriptionSection
+      v-model:descriptionNl="descriptionNl"
+      v-model:descriptionEn="descriptionEn"
+    />
 
-        <!-- English title falls back to Dutch when empty -->
-        <label :class="labelCls">{{ t("admin.blogs.titleEn") }}</label>
-        <FormFieldsBaseTextArea
-          v-model="titelEn"
-          :placeholder="t('admin.blogs.titleEnPlaceholder')"
-          :rows="2"
-        />
-        <p class="px-4 pb-2 text-[9px] text-muted-foreground/60">
-          {{ t("admin.blogs.titleEnFallback") }}
-        </p>
-      </div>
-    </section>
-
-    <!-- Description section -->
-    <section :class="sectionCls">
-      <div
-        class="flex items-center gap-3 px-5 py-3 border-b border-card-border bg-card-hover"
-      >
-        <div class="w-1 h-5 rounded-full bg-accent shrink-0" />
-        <h2
-          class="font-brand font-black text-[11px] uppercase tracking-widest text-foreground"
-        >
-          {{ t("admin.blogs.sectionContent") }}
-        </h2>
-      </div>
-
-      <div class="p-5 space-y-5">
-        <!-- Dutch description is required -->
-        <div>
-          <label :class="labelCls.replace('px-4 pt-4', '')">
-            {{ t("admin.blogs.descriptionNl") }}
-            <span class="text-red-500 ml-0.5">*</span>
-          </label>
-          <AdminEditor
-            v-model="descriptionNl"
-            :placeholder="t('admin.blogs.descriptionNlPlaceholder')"
-          />
-        </div>
-
-        <!-- English description falls back to Dutch when empty -->
-        <div>
-          <label :class="labelCls.replace('px-4 pt-4', '')">
-            {{ t("admin.blogs.descriptionEn") }}
-          </label>
-          <AdminEditor
-            v-model="descriptionEn"
-            :placeholder="t('admin.blogs.descriptionEnPlaceholder')"
-          />
-          <p class="mt-1.5 text-[9px] text-muted-foreground/60">
-            {{ t("admin.blogs.descriptionEnFallback") }}
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Slot for extra elements above the save button -->
+    <!--
+      Extra slot: LinkToProduction is injected here by the parent
+      so it sits between the description card and the submit button.
+    -->
     <slot name="extra" />
 
-    <!-- Save / validation row -->
-    <div class="flex items-center justify-between gap-3 pt-1">
-      <p
-        v-if="!isValid"
-        class="text-[10px] text-muted-foreground/60 font-brand font-black uppercase tracking-widest"
-      >
-        {{ t("admin.blogs.validation.titleNlRequired") }}
-      </p>
-
-      <button
-        type="submit"
-        :disabled="!isValid || loading"
-        class="ml-auto inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-accent/20"
-      >
-        <svg
-          v-if="loading"
-          class="w-3.5 h-3.5 animate-spin shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
-        <svg
-          v-else
-          class="w-3.5 h-3.5 shrink-0"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          viewBox="0 0 24 24"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <span v-if="loading">{{ t("admin.saving") }}</span>
-        <span v-else-if="mode === 'create'">{{
-          t("admin.blogs.createBtn")
-        }}</span>
-        <span v-else>{{ t("admin.blogs.saveBtn") }}</span>
-      </button>
-    </div>
+    <!-- Submit / validation row -->
+    <AdminBlogsFormFormActions
+      :is-valid="isValid"
+      :loading="loading"
+      :mode="mode"
+      @submit="handleSubmit"
+    />
   </form>
 </template>
