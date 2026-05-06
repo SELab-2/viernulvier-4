@@ -188,14 +188,7 @@ onMounted(restoreFromStorage);
       <AdminBlogsLinkLockedHint v-if="!hasBlogId" />
 
       <template v-else>
-        <!-- List of productions linked during this session -->
-        <AdminBlogsLinkLinkedList
-          :productions="linkedProductions"
-          :unlinking-id="unlinking"
-          @unlink="handleUnlink"
-        />
-
-        <!-- Search input + autocomplete dropdown -->
+        <!-- Search input + autocomplete dropdown (at the top) -->
         <AdminBlogsLinkSearchDropdown
           v-model:search="search"
           :search-results="searchResults"
@@ -205,6 +198,13 @@ onMounted(restoreFromStorage);
           :linking-id="linking"
           @link="handleLink"
           @load-more="runSearch(false)"
+        />
+
+        <!-- List of productions linked during this session -->
+        <AdminBlogsLinkLinkedList
+          :productions="linkedProductions"
+          :unlinking-id="unlinking"
+          @unlink="handleUnlink"
         />
       </template>
     </div>

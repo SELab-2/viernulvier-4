@@ -4,9 +4,9 @@
   Bilingual blog form — title (NL + EN) and description (NL + EN).
 
   Composition:
-  - AdminBlogsFormTitleSection       two BaseTextArea fields for the titles
-  - AdminBlogsFormDescriptionSection two AdminEditor fields for the rich-text body
-  - AdminBlogsFormFormActions        submit button with spinner and validation hint
+  - FormSectionsTitleSection        two BaseTextArea fields for the titles
+  - FormSectionsDescriptionSection  two rich-text or plain-text fields (configurable)
+  - FormFormActions                 submit button with spinner and validation hint
 
   The component is intentionally thin: it owns only the reactive field values,
   the validation computed, and the submit handler. All markup lives in the
@@ -39,8 +39,10 @@ const props = withDefaults(
     initialData?: InitialData;
     loading?: boolean;
     mode?: "create" | "edit";
+    richText?: boolean;
+    backUrl?: string;
   }>(),
-  { mode: "create", loading: false },
+  { mode: "create", loading: false, richText: true },
 );
 
 const emit = defineEmits<{
@@ -49,6 +51,7 @@ const emit = defineEmits<{
     e: "preview-update",
     data: { titel: LocalizedPair; description: LocalizedPair },
   ): void;
+  (e: "reset"): void;
 }>();
 
 // Reactive field values, one ref per localised field.
@@ -98,20 +101,29 @@ function handleSubmit() {
     },
   });
 }
+
+function handleReset() {
+  titelNl.value = "";
+  titelEn.value = "";
+  descriptionNl.value = "";
+  descriptionEn.value = "";
+  emit("reset");
+}
 </script>
 
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
     <!-- Title fields (NL + EN) -->
-    <AdminBlogsFormTitleSection
+    <FormSectionsTitleSection
       v-model:titelNl="titelNl"
       v-model:titelEn="titelEn"
     />
 
-    <!-- Rich-text description fields (NL + EN) -->
-    <AdminBlogsFormDescriptionSection
+    <!-- Description fields (NL + EN) — supports both rich-text and plain mode -->
+    <FormSectionsDescriptionSection
       v-model:descriptionNl="descriptionNl"
       v-model:descriptionEn="descriptionEn"
+      :rich-text="props.richText"
     />
 
     <!--
@@ -121,11 +133,13 @@ function handleSubmit() {
     <slot name="extra" />
 
     <!-- Submit / validation row -->
-    <AdminBlogsFormFormActions
+    <FormFormActions
       :is-valid="isValid"
       :loading="loading"
       :mode="mode"
+      :back-url="backUrl"
       @submit="handleSubmit"
+      @reset="handleReset"
     />
   </form>
 </template>

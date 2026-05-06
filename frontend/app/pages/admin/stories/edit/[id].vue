@@ -327,6 +327,7 @@ async function restoreToSaved() {
                 mode="edit"
                 :initial-data="initialBlogData"
                 :loading="saving"
+                :back-url="ROUTES.admin.stories.base"
                 @submit="handleSubmit"
                 @preview-update="(d) => (previewData = d)"
               >
@@ -339,40 +340,11 @@ async function restoreToSaved() {
                 </template>
               </AdminBlogsForm>
 
-              <!-- Step 1 footer nav: Back | Restore | → Photos -->
-              <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                  <NuxtLink
-                    :to="ROUTES.admin.stories.base"
-                    class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
-                  >
-                    <svg
-                      class="w-3 h-3 shrink-0"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2.5"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M15.75 19.5 8.25 12l7.5-7.5"
-                      />
-                    </svg>
-                    {{ t("admin.back") }}
-                  </NuxtLink>
-                  <button
-                    type="button"
-                    class="btn-outline h-10 px-5 text-[10px]"
-                    @click="restoreToSaved"
-                  >
-                    {{ t("admin.blogs.restoreBtn") }}
-                  </button>
-                </div>
-
+              <!-- Step navigation: → Photos -->
+              <div class="pt-2 border-t border-border">
                 <button
                   type="button"
-                  class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
+                  class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                   @click="step = 'photos'"
                 >
                   {{ t("admin.blogs.image.multiTitle") }}
@@ -404,31 +376,11 @@ async function restoreToSaved() {
                 @crop-uploaded="loadGallery"
               />
 
-              <!-- Step 2 footer nav: Back to list | ← Content -->
-              <div class="flex items-center justify-between gap-3">
-                <NuxtLink
-                  :to="ROUTES.admin.stories.base"
-                  class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
-                >
-                  <svg
-                    class="w-3 h-3 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15.75 19.5 8.25 12l7.5-7.5"
-                    />
-                  </svg>
-                  {{ t("admin.back") }}
-                </NuxtLink>
-
+              <!-- Step navigation: ← Content -->
+              <div class="pt-2 border-t border-border">
                 <button
                   type="button"
-                  class="btn-outline h-10 flex items-center gap-1.5 px-5 text-[10px]"
+                  class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                   @click="step = 'content'"
                 >
                   <svg
