@@ -1,25 +1,24 @@
 <!--
   components/admin/productions/Preview.vue
 
-  Live "site preview" panel for the production create/edit flow (step 1).
-
-  Mirrors the public /productions/[id] page layout so editors can see their
-  content take shape in real time as they type.
-
-  Since step 1 has no images yet, a stylised placeholder is shown instead of a
-  real hero banner. Tags, events and stories are also step-2+ concerns and are
-  omitted here.
+  Live preview mirroring the public /productions/[id] page.
+  Updated to show:
+    - Tags row (below hero, matching public page style)
+    - Series badge (shown if any series are selected)
+    - Media placeholder with hint chip
+    - All existing content (title, artist, tagline, descriptions, credits)
 
   Props:
-    data — previewData from useProductionForm composable.
-           Shape: { titel, description1, description2, tagline, credits, artist,
-                    performer_type, id? } — each text field is { nl: string, en: string }
-
-  The component renders NL content by default (the required language) and
-  features a language toggle (NL / EN) and a device toggle (phone / desktop).
+    data    — previewData from useProductionForm
+    tags    — selected TagItem[] from composable
+    series  — selected SeriesItem[] from composable
 -->
 <script setup lang="ts">
 import { Smartphone, Monitor, ArrowUp } from "lucide-vue-next";
+import type {
+  TagItem,
+  SeriesItem,
+} from "~/composables/productions/useProductionForm";
 
 interface LocalizedPair {
   nl: string;
@@ -39,15 +38,15 @@ interface PreviewData {
 
 const props = defineProps<{
   data: PreviewData;
+  tags?: TagItem[];
+  series?: SeriesItem[];
 }>();
 
 const { t } = useI18n();
 
-// ─── Language / device toggles ───────────────────────────────────────────────
 const previewLang = ref<"nl" | "en">("nl");
 const previewMode = ref<"phone" | "desktop">("phone");
 
-// ─── Derived display values ──────────────────────────────────────────────────
 const get = (pair: LocalizedPair) =>
   pair[previewLang.value]?.trim() || pair.nl?.trim() || "";
 
@@ -61,13 +60,13 @@ const tagline = computed(() => get(props.data.tagline));
 const description1 = computed(() => get(props.data.description1));
 const description2 = computed(() => get(props.data.description2));
 const credits = computed(() => get(props.data.credits));
+const visibleTags = computed(() => props.tags?.filter((t) => t.tag) ?? []);
+const visibleSeries = computed(() => props.series ?? []);
 
-// Is any content present yet?
 const hasContent = computed(() =>
   [title.value, artist.value, tagline.value, description1.value].some(Boolean),
 );
 
-// ─── Internal scroll / scroll-to-top ─────────────────────────────────────────
 const scrollArea = ref<HTMLElement | null>(null);
 const showScrollTop = ref(false);
 
@@ -75,7 +74,6 @@ function handleScroll() {
   if (!scrollArea.value) return;
   showScrollTop.value = scrollArea.value.scrollTop > 200;
 }
-
 function scrollToTop() {
   scrollArea.value?.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -87,7 +85,6 @@ function scrollToTop() {
     <div
       class="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-xl border border-border"
     >
-      <!-- Device toggle -->
       <div
         class="flex items-center gap-0.5 bg-background border border-border rounded-lg p-0.5"
       >
@@ -108,7 +105,6 @@ function scrollToTop() {
         </button>
       </div>
 
-      <!-- Language toggle -->
       <div class="flex items-center gap-2">
         <span
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
@@ -144,25 +140,22 @@ function scrollToTop() {
           : 'w-full rounded-2xl'
       "
     >
-      <!-- Phone notch -->
       <div
         v-if="previewMode === 'phone'"
         class="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-background rounded-b-2xl z-30"
       />
 
-      <!-- Scrollable content -->
       <div
         ref="scrollArea"
         class="h-full w-full overflow-y-auto overflow-x-hidden relative preview-scroll"
         :class="previewMode === 'phone' ? 'rounded-[2.2rem]' : 'rounded-xl'"
         @scroll="handleScroll"
       >
-        <!-- ── Hero section ───────────────────────────────────────────── -->
+        <!-- ── Hero ──────────────────────────────────────────────────────── -->
         <section
           class="relative flex items-end overflow-hidden shrink-0"
           :class="previewMode === 'phone' ? 'h-52' : 'h-72'"
         >
-          <!-- MediaDisplay handles both the real crop (future steps) and the placeholder automatically -->
           <MediaDisplay
             :id="data.id"
             :src="null"
@@ -172,18 +165,29 @@ function scrollToTop() {
             :rounded="false"
             class="absolute inset-0 w-full h-full object-cover z-0"
           />
-
-          <!-- Overlay gradient (mirrors public page .image-overlay::after) -->
           <div
             class="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/75 z-[1]"
           />
 
-          <!-- Content over hero -->
           <div class="relative z-10 px-5 pb-5 w-full">
-            <!-- Performer type badge -->
+            <!-- Series badge -->
+            <div
+              v-if="visibleSeries.length > 0"
+              class="mb-2 flex flex-wrap gap-1"
+            >
+              <span
+                v-for="s in visibleSeries"
+                :key="s.id"
+                class="inline-flex items-center px-2 py-0.5 rounded-sm border border-white/40 text-white/70 text-[8px] font-black uppercase tracking-widest"
+              >
+                {{ s.name }}
+              </span>
+            </div>
+
+            <!-- Performer type -->
             <div
               v-if="data.performer_type"
-              class="mb-3 inline-block border border-white/60 text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-sm"
+              class="mb-2 inline-block border border-white/60 text-white px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-sm"
             >
               {{ data.performer_type }}
             </div>
@@ -213,8 +217,28 @@ function scrollToTop() {
               {{ artist }}
             </p>
 
-            <!-- Step-2 hint chip -->
+            <!-- Tags row (matches public page) -->
             <div
+              v-if="visibleTags.length > 0"
+              class="flex flex-wrap gap-1.5 mt-3"
+            >
+              <span
+                v-for="tag in visibleTags"
+                :key="tag.id"
+                class="bg-accent text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest"
+                :class="
+                  tag.isNew
+                    ? 'opacity-70 border border-dashed border-white/40'
+                    : ''
+                "
+              >
+                {{ tag.tag }}
+              </span>
+            </div>
+
+            <!-- Media hint (when no tags and no media yet) -->
+            <div
+              v-if="visibleTags.length === 0"
               class="mt-3 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1"
             >
               <span class="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
@@ -224,7 +248,7 @@ function scrollToTop() {
                 {{
                   t(
                     "admin.productions.preview.imageHint",
-                    "Images added in step 2",
+                    "Images & tags added in later steps",
                   )
                 }}
               </span>
@@ -232,7 +256,7 @@ function scrollToTop() {
           </div>
         </section>
 
-        <!-- ── Body ──────────────────────────────────────────────────── -->
+        <!-- ── Body ──────────────────────────────────────────────────────── -->
         <div
           class="px-5 py-7 bg-white dark:bg-[#1e2230]"
           :class="previewMode === 'desktop' ? 'md:px-10 md:py-10' : ''"
@@ -258,7 +282,7 @@ function scrollToTop() {
           </div>
 
           <template v-else>
-            <!-- Tagline (left-border accent, matches public page) -->
+            <!-- Tagline -->
             <div v-if="tagline" class="mb-7">
               <p
                 class="border-l-4 border-accent pl-4 text-gray-900 dark:text-white font-black italic leading-relaxed"
@@ -268,7 +292,7 @@ function scrollToTop() {
               </p>
             </div>
 
-            <!-- Description 1 (HTML from rich text editor) -->
+            <!-- Description 1 -->
             <div
               v-if="description1"
               class="prod-body text-gray-800 dark:text-gray-200 leading-relaxed mb-6 line-clamp-[8]"
@@ -276,7 +300,7 @@ function scrollToTop() {
               v-html="description1"
             />
 
-            <!-- Description 2 (styled block, mirrors public page) -->
+            <!-- Description 2 -->
             <div
               v-if="description2"
               class="prod-body p-5 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic text-gray-700 dark:text-gray-300 rounded-2xl mb-6 line-clamp-[5]"
@@ -284,17 +308,18 @@ function scrollToTop() {
               v-html="description2"
             />
 
-            <!-- Events placeholder chip (step 2) -->
+            <!-- Media placeholder -->
             <div
-              class="my-6 py-4 border border-dashed border-border rounded-xl flex items-center justify-center gap-2"
+              class="my-6 py-6 border border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 text-center"
             >
+              <span class="text-xl opacity-30">🖼</span>
               <span
-                class="text-[9px] font-black uppercase tracking-widest text-muted-foreground/40"
+                class="text-[9px] font-black uppercase tracking-widest text-muted-foreground/30"
               >
                 {{
                   t(
-                    "admin.productions.preview.eventsHint",
-                    "Events linked in a later step",
+                    "admin.productions.preview.mediaHint",
+                    "Media added in step 3",
                   )
                 }}
               </span>
@@ -319,7 +344,7 @@ function scrollToTop() {
         </div>
       </div>
 
-      <!-- Scroll-to-top FAB inside the preview shell -->
+      <!-- Scroll to top FAB -->
       <Transition
         enter-active-class="transition-all duration-300"
         enter-from-class="opacity-0 translate-y-3"
@@ -340,7 +365,6 @@ function scrollToTop() {
 </template>
 
 <style scoped>
-/* Custom slim scrollbar */
 .preview-scroll::-webkit-scrollbar {
   width: 4px;
 }
@@ -354,8 +378,6 @@ function scrollToTop() {
 :global(.dark) .preview-scroll::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.08);
 }
-
-/* Rich-text body styles (mirrors public page .description-content) */
 .prod-body :deep(a) {
   text-decoration: underline;
   text-underline-offset: 3px;

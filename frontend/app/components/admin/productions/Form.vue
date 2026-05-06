@@ -48,7 +48,6 @@ const fields = computed<FormField[]>(() => [
     name: "description2",
     props: {
       label: t("admin-productions.form-description2"),
-      required: isRequired.value,
     },
   },
   {
