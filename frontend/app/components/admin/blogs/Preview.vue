@@ -269,6 +269,9 @@ const titleIsLong = computed(() => title.value.length > 55);
 .title-scroll-text {
   display: block;
   white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 .animate-spin-slow {

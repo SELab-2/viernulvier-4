@@ -328,6 +328,12 @@ const titleSizeClass = computed(() => {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
+.title-scroll-wrap h1 {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
 .title-scroll-wrap::-webkit-scrollbar {
   display: none;
 }
