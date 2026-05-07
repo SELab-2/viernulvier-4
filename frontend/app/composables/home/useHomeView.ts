@@ -2,6 +2,8 @@ import { SearchAssociation, type SearchSuggestion } from "~/types/Search";
 import { usePrintView } from "../media/usePrintView";
 import { useBlogView } from "../blogs/useBlogView";
 import { useArchiveView } from "../useArchiveView";
+import { useCropApi } from "../media/useCropApi";
+import type { MediaCrop } from "@repo/common";
 
 export function useHomeView() {
   const {
@@ -12,6 +14,8 @@ export function useHomeView() {
     usePrintView();
   const { searchQuery: blogQuery, fetchSuggestions: fetchBlogSuggestions } =
     useBlogView();
+
+  const { getAll: getCrops } = useCropApi();
 
   /**
    * Custom fetch function for suggestions
@@ -86,10 +90,22 @@ export function useHomeView() {
     blogQuery.value = query;
   }
 
+  // Media
+
+  async function fetchRandomImages(): Promise<MediaCrop[]> {
+    const res = await getCrops({
+      paginationFilters: { limit: 10, page: 0, descending: true },
+    });
+
+    const crops: MediaCrop[] = res.data?.objects ?? [];
+    return crops;
+  }
+
   return {
     fetchSuggestions,
     applyProductionSearch,
     applyPrintQuery,
     applyBlogQuery,
+    fetchRandomImages,
   };
 }
