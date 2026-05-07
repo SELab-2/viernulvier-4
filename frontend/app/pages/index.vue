@@ -24,6 +24,7 @@ onMounted(async () => {
 onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
+
 const activeCrop = computed(() => crops.value[currentIndex.value]);
 </script>
 
