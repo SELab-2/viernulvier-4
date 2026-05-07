@@ -47,15 +47,6 @@ watch(locale, loadRandomTags);
 
 <template>
   <div class="space-y-4">
-    <div
-      class="flex items-center gap-2 text-muted-foreground border-b border-border/30 pb-2"
-    >
-      <Tag :size="14" stroke-width="3" class="text-accent" />
-      <span class="font-brand text-[10px] font-black uppercase tracking-widest">
-        Ontdek Thema's
-      </span>
-    </div>
-
     <div class="flex flex-wrap gap-2.5">
       <button
         v-for="tag in randomTags"
