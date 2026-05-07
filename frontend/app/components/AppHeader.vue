@@ -175,7 +175,7 @@ const adminNavItems = [
     class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]"
   >
     <div
-      class="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
+      class="grid page-container grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
       <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
       <div class="flex items-center justify-start">
