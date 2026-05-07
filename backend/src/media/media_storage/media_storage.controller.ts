@@ -53,7 +53,7 @@ export class MediaStorageController {
     const buffer = await this.mediaStorageService.getMedia(url);
 
     let contentType: string;
-    const parsedUrl = new URL(url, "http://dummybase.com"); // uses a dummy url in case of relative pathing just to build a temp dummy url
+    const parsedUrl = new URL(url, "https://dummybase.com"); // uses a dummy url in case of relative pathing just to build a temp dummy url
     const filename = path.basename(parsedUrl.pathname);
     const ext = path.extname(parsedUrl.pathname);
     switch (ext) {
@@ -116,7 +116,7 @@ export class MediaStorageController {
 
   /**
    * Responds to a DELETE to "media/storage"
-   * @param body The URL of the media we want to delete.
+   * @param url is the url of the media you want to delete.
    */
   @UseGuards(ApiKeyGuard)
   @ApiSecurity("apiKey")
