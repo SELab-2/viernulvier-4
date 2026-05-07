@@ -11,27 +11,41 @@ export type ProductionTranslationForm = {
 
 export type ProductionCoreForm = {
   nl: ProductionTranslationForm;
+
   en: ProductionTranslationForm;
 };
+
+function createEmptyTranslation(): ProductionTranslationForm {
+  return {
+    titel: "",
+    description1: "",
+    description2: null,
+    artist: null,
+    tagline: null,
+    credits: null,
+  };
+}
 
 export function useProductionCore(): ProductionFormStep<
   ProductionCoreForm,
   ProductionCoreForm
 > {
-  function reset(
-    draft: ProductionCoreForm,
-    original: ProductionCoreForm | null,
-  ): void {
-    if (!original) return;
+  const draft = reactive<ProductionCoreForm>({
+    nl: createEmptyTranslation(),
 
-    Object.assign(draft, structuredClone(original));
+    en: createEmptyTranslation(),
+  });
+
+  const original = ref<ProductionCoreForm | null>(null);
+
+  function reset(): void {
+    if (!original.value) return;
+
+    Object.assign(draft, structuredClone(original.value));
   }
 
-  function getChangedFields(
-    draft: ProductionCoreForm,
-    original: ProductionCoreForm | null,
-  ): string[] {
-    if (!original) return [];
+  function getChangedFields(): string[] {
+    if (!original.value) return [];
 
     const changed: string[] = [];
 
@@ -39,7 +53,7 @@ export function useProductionCore(): ProductionFormStep<
       for (const key of Object.keys(draft[locale])) {
         const typedKey = key as keyof ProductionCoreForm[typeof locale];
 
-        if (draft[locale][typedKey] !== original[locale][typedKey]) {
+        if (draft[locale][typedKey] !== original.value[locale][typedKey]) {
           changed.push(`${locale}.${typedKey}`);
         }
       }
@@ -48,14 +62,14 @@ export function useProductionCore(): ProductionFormStep<
     return changed;
   }
 
-  function extractPayload(
-    draft: ProductionCoreForm,
-    _original: ProductionCoreForm | null,
-  ): ProductionCoreForm {
+  function extractPayload(): ProductionCoreForm {
     return structuredClone(draft);
   }
 
   return {
+    id: "core",
+    draft,
+    original: original.value,
     reset,
     getChangedFields,
     extractPayload,

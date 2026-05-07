@@ -26,23 +26,21 @@ export function useProductionTags(): ProductionFormStep<
   ProductionTagsForm,
   ProductionTagsPayload
 > {
-  function reset(
-    draft: ProductionTagsForm,
-    original: ProductionTagsForm | null,
-  ): void {
-    draft.splice(
+  const draft = ref<ProductionTagsForm>([]);
+
+  const original = ref<ProductionTagsForm | null>(null);
+
+  function reset(): void {
+    draft.value.splice(
       0,
-      draft.length,
-      ...(original ?? []).map((tag) => ({ ...tag })),
+      draft.value.length,
+      ...(original.value ?? []).map((tag) => ({ ...tag })),
     );
   }
 
-  function getChangedFields(
-    draft: ProductionTagsForm,
-    original: ProductionTagsForm | null,
-  ): string[] {
-    if (!original) {
-      return draft.map((tag) => {
+  function getChangedFields(): string[] {
+    if (!original.value) {
+      return draft.value.map((tag) => {
         if (tag.type === "new") {
           return `new:${tag.label}`;
         }
@@ -53,19 +51,17 @@ export function useProductionTags(): ProductionFormStep<
 
     const changes: string[] = [];
 
-    const current = new Map(draft.map((tag) => [tag.label, tag]));
+    const current = new Map(draft.value.map((tag) => [tag.label, tag]));
 
-    const previous = new Map(original.map((tag) => [tag.label, tag]));
+    const previous = new Map(original.value.map((tag) => [tag.label, tag]));
 
-    // Added
     for (const [label, tag] of current) {
       if (!previous.has(label)) {
         changes.push(tag.type === "new" ? `new:${label}` : `selected:${label}`);
       }
     }
 
-    // Removed
-    for (const [label, _tag] of previous) {
+    for (const [label] of previous) {
       if (!current.has(label)) {
         changes.push(`unselected:${label}`);
       }
@@ -74,18 +70,15 @@ export function useProductionTags(): ProductionFormStep<
     return changes;
   }
 
-  function extractPayload(
-    draft: ProductionTagsForm,
-    original: ProductionTagsForm | null,
-  ): ProductionTagsPayload {
+  function extractPayload(): ProductionTagsPayload {
     const originalExistingIds = new Set(
-      (original ?? [])
+      (original.value ?? [])
         .filter((tag): tag is ExistingTag => tag.type === "existing")
         .map((tag) => tag.id),
     );
 
     const currentExistingIds = new Set(
-      draft
+      draft.value
         .filter((tag): tag is ExistingTag => tag.type === "existing")
         .map((tag) => tag.id),
     );
@@ -98,7 +91,7 @@ export function useProductionTags(): ProductionFormStep<
       (id) => !currentExistingIds.has(id),
     );
 
-    const create = draft
+    const create = draft.value
       .filter((tag): tag is NewTag => tag.type === "new")
       .map((tag) => tag.label);
 
@@ -110,6 +103,9 @@ export function useProductionTags(): ProductionFormStep<
   }
 
   return {
+    id: "tags",
+    draft: draft.value,
+    original: original.value,
     reset,
     getChangedFields,
     extractPayload,
