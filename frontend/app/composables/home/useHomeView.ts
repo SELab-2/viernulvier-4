@@ -1,4 +1,4 @@
-import type { SearchSuggestion } from "~/types/Search";
+import { SearchAssociation, type SearchSuggestion } from "~/types/Search";
 import { usePrintView } from "../media/usePrintView";
 import { useBlogView } from "../blogs/useBlogView";
 import { useArchiveView } from "../useArchiveView";
@@ -26,9 +26,18 @@ export function useHomeView() {
       ...prodRes.map((p: SearchSuggestion) => ({
         ...p,
         context: "production",
+        association: SearchAssociation.Production,
       })),
-      ...printRes.map((p: SearchSuggestion) => ({ ...p, context: "print" })),
-      ...blogRes.map((p: SearchSuggestion) => ({ ...p, context: "story" })),
+      ...printRes.map((p: SearchSuggestion) => ({
+        ...p,
+        context: "print",
+        association: SearchAssociation.Print,
+      })),
+      ...blogRes.map((p: SearchSuggestion) => ({
+        ...p,
+        context: "story",
+        association: SearchAssociation.Blog,
+      })),
     ];
 
     const lowerQuery = query.toLowerCase();

@@ -63,6 +63,7 @@ const dropdownStyle = computed(() => {
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
   (e: "search", query: string): void;
+  (e: "select", item: SearchSuggestion): void; // Emits the whole object.
 }>();
 
 const internalQuery = ref(props.modelValue || "");
@@ -96,6 +97,7 @@ const moveHighlight = (direction: 1 | -1) => {
 const select = (item: SearchSuggestion) => {
   internalQuery.value = item.searchValue;
   emit("update:modelValue", item.searchValue);
+  emit("select", item);
   isFocused.value = false;
   highlightedIndex.value = -1; // reset on selection
   inputRef.value?.blur();
@@ -114,6 +116,7 @@ const submit = () => {
     select(highlighted);
   } else {
     emit("update:modelValue", internalQuery.value);
+    emit("search", internalQuery.value);
     inputRef.value?.blur();
   }
 };
