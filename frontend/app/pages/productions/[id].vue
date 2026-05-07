@@ -38,23 +38,24 @@ const productionId = computed(() => {
 });
 
 /** Get the main production data */
-const { data: production, error: prodError } =
-  await useAsyncData<ProductionView>(
-    `prod-v3-${route.params.id}-${locale.value}`,
-    async () => {
-      if (!productionId.value) return null;
-      const res = await getById(productionId.value, locale.value as any);
-      return (res as any)?.data ?? res;
-    },
-    { watch: [productionId, locale] },
-  );
+const { data: production } = await useAsyncData<ProductionView>(
+  `prod-v3-${route.params.id}-${locale.value}`,
+  async () => {
+    if (!productionId.value) return null;
+    const res = await getById(productionId.value, locale.value as any);
+    return (res as any)?.data ?? res;
+  },
+  { watch: [productionId, locale] },
+);
 
 /** throws error if we must. */
-if (prodError.value || !production.value || !productionId.value) {
+const prodRes = production.value as any; // Bypass TS strict typing for a moment
+
+if (!productionId.value || !prodRes || prodRes.error) {
   throw createError({
-    statusCode: prodError.value?.status || 404,
-    statusMessage: "Not Found",
-    fatal: true, // Forces Nuxt to show the error page immediately
+    status: prodRes?.status || 404,
+    statusText: prodRes?.error || "Not Found",
+    fatal: true,
   });
 }
 
