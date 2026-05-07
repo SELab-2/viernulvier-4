@@ -4,9 +4,14 @@ import { useBlogView } from "../blogs/useBlogView";
 import { useArchiveView } from "../useArchiveView";
 
 export function useHomeView() {
-  const { fetchSuggestions: fetchProductionSuggestions } = useArchiveView();
-  const { fetchSuggestions: fetchPrintSuggestions } = usePrintView();
-  const { fetchSuggestions: fetchBlogSuggestions } = useBlogView();
+  const {
+    searchQuery: productionQuery,
+    fetchSuggestions: fetchProductionSuggestions,
+  } = useArchiveView();
+  const { searchQuery: printQuery, fetchSuggestions: fetchPrintSuggestions } =
+    usePrintView();
+  const { searchQuery: blogQuery, fetchSuggestions: fetchBlogSuggestions } =
+    useBlogView();
 
   /**
    * Custom fetch function for suggestions
@@ -69,7 +74,22 @@ export function useHomeView() {
     });
   }
 
+  function applyProductionSearch(query: string) {
+    productionQuery.value = query;
+  }
+
+  function applyPrintQuery(query: string) {
+    printQuery.value = query;
+  }
+
+  function applyBlogQuery(query: string) {
+    blogQuery.value = query;
+  }
+
   return {
     fetchSuggestions,
+    applyProductionSearch,
+    applyPrintQuery,
+    applyBlogQuery,
   };
 }

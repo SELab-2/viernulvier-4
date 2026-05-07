@@ -5,7 +5,12 @@ import { useRouter } from "vue-router";
 import { useHomeView } from "~/composables/home/useHomeView";
 import { SearchAssociation, type SearchSuggestion } from "~/types/Search";
 
-const { fetchSuggestions } = useHomeView();
+const {
+  fetchSuggestions,
+  applyProductionSearch,
+  applyPrintQuery,
+  applyBlogQuery,
+} = useHomeView();
 
 const router = useRouter();
 const searchQuery = ref("");
@@ -31,15 +36,19 @@ function executeSearch(queryText: string, association?: SearchAssociation) {
   // Will route based on selection if there is an association, otherwise go straight to archive page.
   switch (association) {
     case SearchAssociation.Production:
+      applyProductionSearch(queryText);
       router.push({ path: ROUTES.productions.base });
       break;
     case SearchAssociation.Blog:
+      applyBlogQuery(queryText);
       router.push({ path: ROUTES.stories.base });
       break;
     case SearchAssociation.Print:
+      applyPrintQuery(queryText);
       router.push({ path: ROUTES.prints.base });
       break;
     default:
+      applyProductionSearch(queryText);
       router.push({ path: ROUTES.productions.base });
       break;
   }
