@@ -27,7 +27,7 @@ export class PriceDatabaseService {
   /**
    * Get a single price by their ID.
    * @param id The ID we're trying to fetch.
-   * @returns The Price if there is one.µ
+   * @returns The Price if there is one.
    * @throws ResourceNotFoundException if there is no price with the provided id. (404)
    */
   async getPriceById(id: number): Promise<PriceDto> {
