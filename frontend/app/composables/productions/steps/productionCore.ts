@@ -11,7 +11,6 @@ export type ProductionTranslationForm = {
 
 export type ProductionCoreForm = {
   nl: ProductionTranslationForm;
-
   en: ProductionTranslationForm;
 };
 
@@ -30,18 +29,64 @@ export function useProductionCore(): ProductionFormStep<
   ProductionCoreForm,
   ProductionCoreForm
 > {
-  const draft = reactive<ProductionCoreForm>({
-    nl: createEmptyTranslation(),
+  const api = useProductionApi();
 
+  const draft = ref<ProductionCoreForm>({
+    nl: createEmptyTranslation(),
     en: createEmptyTranslation(),
   });
 
   const original = ref<ProductionCoreForm | null>(null);
 
+  async function initialize(context: {
+    mode: "create" | "edit";
+    id?: string;
+  }): Promise<void> {
+    if (context.mode === "create") {
+      original.value = null;
+      return;
+    }
+
+    if (!context.id) return;
+
+    const id = Number(context.id);
+
+    const [nlRes, enRes] = await Promise.all([
+      api.getById(id, "nl"),
+      api.getById(id, "en"),
+    ]);
+
+    const nl = nlRes.data;
+    const en = enRes.data;
+
+    if (!nl || !en) return;
+
+    const mapped = {
+      nl: {
+        titel: nl.titel,
+        description1: nl.description1,
+        description2: nl.description2,
+        artist: nl.artist,
+        tagline: nl.tagline,
+        credits: nl.credits,
+      },
+      en: {
+        titel: en.titel,
+        description1: en.description1,
+        description2: en.description2,
+        artist: en.artist,
+        tagline: en.tagline,
+        credits: en.credits,
+      },
+    };
+
+    original.value = mapped;
+    draft.value = structuredClone(mapped);
+  }
+
   function reset(): void {
     if (!original.value) return;
-
-    Object.assign(draft, structuredClone(original.value));
+    draft.value = structuredClone(original.value);
   }
 
   function getChangedFields(): string[] {
@@ -50,10 +95,12 @@ export function useProductionCore(): ProductionFormStep<
     const changed: string[] = [];
 
     for (const locale of ["nl", "en"] as const) {
-      for (const key of Object.keys(draft[locale])) {
+      for (const key of Object.keys(draft.value[locale])) {
         const typedKey = key as keyof ProductionCoreForm[typeof locale];
 
-        if (draft[locale][typedKey] !== original.value[locale][typedKey]) {
+        if (
+          draft.value[locale][typedKey] !== original.value[locale][typedKey]
+        ) {
           changed.push(`${locale}.${typedKey}`);
         }
       }
@@ -63,13 +110,14 @@ export function useProductionCore(): ProductionFormStep<
   }
 
   function extractPayload(): ProductionCoreForm {
-    return structuredClone(draft);
+    return structuredClone(draft.value);
   }
 
   return {
     id: "core",
     draft,
-    original: original.value,
+    original,
+    initialize,
     reset,
     getChangedFields,
     extractPayload,

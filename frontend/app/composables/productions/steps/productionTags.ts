@@ -26,9 +26,37 @@ export function useProductionTags(): ProductionFormStep<
   ProductionTagsForm,
   ProductionTagsPayload
 > {
+  const api = useProductionApi();
+
   const draft = ref<ProductionTagsForm>([]);
 
   const original = ref<ProductionTagsForm | null>(null);
+
+  async function initialize(context: {
+    mode: "create" | "edit";
+    id?: string;
+  }): Promise<void> {
+    if (context.mode === "create") {
+      original.value = null;
+      draft.value = [];
+      return;
+    }
+
+    if (!context.id) return;
+
+    const id = Number(context.id);
+
+    const res = await api.getTags(id, "nl");
+    const tags = res.data ?? [];
+    const mapped = tags.map((t) => ({
+      type: "existing" as const,
+      id: t.id,
+      label: t.tag,
+    }));
+
+    original.value = mapped;
+    draft.value = structuredClone(mapped);
+  }
 
   function reset(): void {
     draft.value.splice(
@@ -104,8 +132,9 @@ export function useProductionTags(): ProductionFormStep<
 
   return {
     id: "tags",
-    draft: draft.value,
-    original: original.value,
+    draft,
+    original,
+    initialize,
     reset,
     getChangedFields,
     extractPayload,
