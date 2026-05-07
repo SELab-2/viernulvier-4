@@ -3,109 +3,94 @@
 import type { MediaCrop } from "@repo/common";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useHomeView } from "~/composables/home/useHomeView";
-
 definePageMeta({
   layout: "home",
 });
-
 const { fetchRandomImages } = useHomeView();
-
-// Explicitly type the ref to ensure TS doesn't think it's a boolean
 const crops = ref<MediaCrop[]>([]);
 const currentIndex = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
-
 onMounted(async () => {
   const data = await fetchRandomImages();
   if (data) {
     crops.value = data;
-
-    // Start cycling if we have images
     if (crops.value.length > 0) {
       timer = setInterval(() => {
         currentIndex.value = (currentIndex.value + 1) % crops.value.length;
-      }, 5000); // Change image every 5 seconds
+      }, 5000);
     }
   }
 });
-
 onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
-
 const activeCrop = computed(() => crops.value[currentIndex.value]);
 </script>
-
 <template>
-  <main
-    class="w-full relative flex-1 flex flex-col items-center justify-center py-8 overflow-hidden bg-background"
-  >
-    <!-- Background grid/texture -->
-    <div
-      class="absolute inset-0 z-0 bg-[url('~/assets/images/archive-grid.jpg')] bg-cover bg-center opacity-5 grayscale dark:opacity-10"
-    ></div>
-
-    <div
-      class="page-container z-10 w-full max-w-5xl flex flex-col items-center justify-center space-y-10"
+  <main class="w-full relative flex-1 flex flex-col bg-background">
+    <!-- ── Full-bleed Hero ─────────────────────────────────────────── -->
+    <section
+      class="relative w-full min-h-[88vh] flex flex-col items-center justify-center overflow-hidden"
     >
-      <!-- Center Hero Box -->
+      <!-- Cycling background image -->
+      <transition name="hero-fade">
+        <MediaDisplay
+          v-if="activeCrop"
+          :key="activeCrop.id"
+          :src="activeCrop"
+          :show-icon="false"
+          class="absolute inset-0 w-full h-full object-cover"
+        />
+      </transition>
+
+      <!-- Gradient overlays: darken top + bottom, keep centre readable -->
       <div
-        class="relative w-full max-w-4xl rounded-[2.5rem] overflow-hidden shadow-2xl min-h-[400px] md:min-h-[450px] flex flex-col items-center justify-center p-8 md:p-12 border border-border/40 bg-card/40 backdrop-blur-md"
+        class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70 z-10"
+      />
+
+      <!-- Content — sits above overflow:hidden boundary so dropdown escapes via the years section below -->
+      <div
+        class="relative z-20 w-full max-w-2xl mx-auto px-6 text-center flex flex-col items-center gap-8"
       >
-        <!-- Background Media cycling -->
-        <div class="absolute inset-0 z-0">
-          <transition name="hero-fade">
-            <!-- 
-              We use :key="activeCrop.id" to trigger the transition 
-              when the activeCrop changes 
-            -->
-            <MediaDisplay
-              v-if="activeCrop"
-              :key="activeCrop.id"
-              :src="activeCrop"
-              :show-icon="true"
-              class="absolute inset-0 w-full h-full object-cover opacity-30 dark:opacity-20"
-            />
-          </transition>
-        </div>
-
-        <!-- Search Content -->
-        <div class="relative z-20 w-full max-w-2xl text-center space-y-8">
-          <div class="space-y-3">
-            <h1
-              class="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground drop-shadow-md"
-            >
-              Doorzoek het archief
-            </h1>
-            <p class="text-lg md:text-xl font-medium text-foreground/70">
-              Vind producties, artikels en herinneringen
-            </p>
-          </div>
-
-          <div
-            class="w-full max-w-xl mx-auto transform transition-transform hover:scale-[1.01]"
+        <div class="space-y-3">
+          <h1
+            class="text-5xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg"
           >
-            <HomeSearchBar />
-          </div>
+            Doorzoek het archief
+          </h1>
+          <p class="text-lg md:text-xl font-medium text-white/70">
+            Vind producties, artikels en herinneringen
+          </p>
+        </div>
+
+        <!-- Search bar — dropdown can overflow the section since z-20 is above the overflow:hidden layer -->
+        <div class="w-full max-w-xl">
+          <HomeSearchBar />
+        </div>
+
+        <!-- Tags as in-hero browse shortcuts -->
+        <div class="w-full max-w-xl">
+          <p
+            class="text-xs font-semibold uppercase tracking-widest text-white/40 mb-3"
+          >
+            Blader op thema
+          </p>
+          <HomeRandomTags />
         </div>
       </div>
 
-      <!-- Bottom sections -->
-      <div class="w-full relative max-w-4xl">
-        <div
-          class="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50"
-        ></div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 pt-8 px-4 text-left"
-        >
-          <HomeRandomTags />
-          <HomeRandomYears />
-        </div>
-      </div>
+      <!-- Fade hero into page background at the bottom -->
+      <div
+        class="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-background to-transparent z-10"
+      />
+    </section>
+
+    <!-- ── Below the fold: years ───────────────────────────────────── -->
+    <div class="w-full max-w-5xl mx-auto px-6 py-12">
+      <HomeRandomYears />
     </div>
   </main>
 </template>
-
 <style scoped>
 .hero-fade-enter-active,
 .hero-fade-leave-active {

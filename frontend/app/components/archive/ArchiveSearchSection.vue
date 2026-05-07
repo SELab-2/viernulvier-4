@@ -120,6 +120,8 @@ onMounted(() => {
 
   fetchOldestDate();
 });
+
+onUnmounted(clearAllFilters);
 </script>
 
 <template>
