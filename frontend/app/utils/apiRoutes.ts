@@ -10,6 +10,13 @@ export const API_ROUTES = {
     base: "/auth",
     byId: (accountId: number) => `/auth/${accountId}`,
   },
+  series: {
+    base: "/series",
+    byId: (seriesId: number) => `/series/${seriesId}`,
+    productions: (seriesId: number) => `/series/${seriesId}/productions`,
+    productionById: (seriesId: number, productionId: number) =>
+      `/series/${seriesId}/productions/${productionId}`,
+  },
   productions: {
     base: "/productions",
     byId: (productionId: number) => `/productions/${productionId}`,

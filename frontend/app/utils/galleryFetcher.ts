@@ -77,8 +77,12 @@ export async function fetchFullGallery(
   const { getGalleryItems } = useGalleryApi();
   const { getItemCrops } = useItemApi();
 
+  const response = lang
+    ? await getGalleryItems(gallery.id, lang)
+    : await getGalleryItems(gallery.id);
+
   const items: MediaItem[] | PrintItem[] | MediaItemView[] | PrintItemView[] =
-    (await getGalleryItems(gallery.id, lang)).data ?? [];
+    response.data ?? [];
 
   // If it's a print gallery we can just return the prints.
   if (gallery.type == "prints") {

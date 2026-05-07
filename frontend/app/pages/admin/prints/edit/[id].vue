@@ -1,7 +1,7 @@
 <!--
-  pages/admin/prints/create.vue
+  pages/admin/prints/edit/[id].vue
 
-  Admin Print Create Page
+  Admin Print Edit Page
 
   Key features include:
   - Dutch title input, English title input with fallback on Dutch
@@ -10,7 +10,7 @@
   - File upload required (pdf, png, jpg, webp)
 
   On submission:
-  - A new print entry is created via the API
+  - An existing print entry will be modified via the API
   - The user is redirected to the admin prints page
 
   The page coordinates:
@@ -22,7 +22,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <AdminPrintsForm mode="create" />
+  <AdminPrintsForm mode="edit" />
 </template>
 
 <style scoped></style>

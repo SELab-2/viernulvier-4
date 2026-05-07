@@ -31,7 +31,7 @@ const props = defineProps<{
     description: LocalizedPair;
     id?: number;
   };
-  headerCrop?: MediaCrop | null;
+  headerCrop: MediaCrop | null;
 }>();
 
 const { t } = useI18n();

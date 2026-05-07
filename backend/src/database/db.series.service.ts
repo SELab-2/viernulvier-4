@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
+  executeWithReferenceCheck,
   generateCountQuery,
   generateInsertClause,
   generateReturningClause,
@@ -19,7 +20,10 @@ import {
   ReplaceSeriesDto,
   SeriesDto,
 } from "../dto/dto";
-import { ResourceNotFoundException } from "../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../common/exceptions";
 
 @Injectable()
 export class SeriesDatabaseService {
@@ -30,6 +34,7 @@ export class SeriesDatabaseService {
    * Get a single series by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The Series if there is one.
+   * @throws ResourceNotFoundException if there is no series by the provided id. (404)
    */
   async getSeriesById(id: number): Promise<SeriesDto> {
     const returningClause = generateReturningClause(SeriesSchema);
@@ -86,6 +91,7 @@ export class SeriesDatabaseService {
    * Create series function, creates a series in the database with the given information.
    * @param series must be of the type "CreateSeries" which has all fields defined besides the primary key id.
    * @returns the added series if it was successful.
+   * @throws SystemFailureException if something goes wrong while makes the object.
    */
   async createSeries(series: CreateSeriesDto): Promise<SeriesDto> {
     const { columns, placeholders, values } = generateInsertClause(series);
@@ -100,7 +106,7 @@ export class SeriesDatabaseService {
     const result = await this.db.query<SeriesDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create price.");
+      throw new SystemFailureException("Failed to create price.");
     }
 
     return result[0];
@@ -112,6 +118,8 @@ export class SeriesDatabaseService {
    * @param series must be of the type "ModifySeries" or "ReplaceSeries", gives the freedom to define only what needs to be updated.
    * The id field in the series MUST be defined.
    * @returns the updated series if successful.
+   * @throws BadRequestException is no valid fields are provided to be updated. (400)
+   * @throws ResourceNotFoundException if there is no series by the provided id. (404)
    */
   async updateSeries(
     seriesId: number,
@@ -171,7 +179,9 @@ export class SeriesDatabaseService {
       ON CONFLICT (production_id, series_id) DO NOTHING;
     `;
 
-    await this.db.query(query, [productions, seriesId]);
+    await executeWithReferenceCheck(
+      this.db.query(query, [productions, seriesId]),
+    );
   }
 
   /**

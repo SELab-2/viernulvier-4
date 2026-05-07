@@ -214,11 +214,15 @@
     },
     "form": {
       "title": "Titel",
+      "description": "Beschrijving",
       "type": "Printtype",
       "file": "Bestand",
       "fileRequired": "Upload een bestand.",
       "uploadError": "Kan het bestand niet uploaden.",
-      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?"
+      "loadError": "Kan drukwerk niet laden.",
+      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?",
+      "edit": "Pas wijzigingen toe",
+      "reset": "Resetten"
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
@@ -229,6 +233,8 @@
     "remaining": "resterend",
     "delete": "Verwijder",
     "download": "Download",
+    "edit": "Drukwerk bewerken",
+    "create": "Upload",
     "loading": "Laden...",
     "retry": "Opnieuw proberen",
     "noPrints": "Geen drukwerk",
@@ -336,6 +342,23 @@
       "linkedThisSession": "Gekoppeld in deze sessie",
       "noLinkedProductions": "Nog niet gekoppeld aan een productie",
       "viewProduction": "Bekijk productiepagina"
+    },
+    "parser": {
+      "title": "CSV parser",
+      "description": "Upload een CSV-bestand om te parsen.",
+      "uploadCsv": "Upload {target} CSV",
+      "uploading": "Uploaden...",
+      "uploadSuccess": "{target} CSV succesvol geüpload.",
+      "uploadError": "{target} CSV kon niet worden geüpload.",
+      "headerError": "{target} CSV mist verplichte kolommen: {fields}.",
+      "headerFallbackFields": "onbekende kolommen",
+      "targets": {
+        "productions": "producties",
+        "events": "evenementen",
+        "tags": "tags",
+        "blogs": "verhalen",
+        "prices": "prijzen"
+      }
     }
   },
   "login": {

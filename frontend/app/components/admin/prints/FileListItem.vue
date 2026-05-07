@@ -82,6 +82,9 @@ const rowBase =
         :src="file.url"
         :name="file.titel"
       />
+      <NuxtLink :to="ROUTES.admin.prints.edit(file.id)" @click.stop>
+        <AdminEditButton :label="t('prints.edit')" :size="37" />
+      </NuxtLink>
       <AdminDeleteButton
         :label="t('prints.delete')"
         :size="37"

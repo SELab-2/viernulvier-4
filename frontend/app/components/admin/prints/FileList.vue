@@ -47,7 +47,7 @@ const whitespace = computed(() => ({
     <!-- List -->
     <div v-if="files.length">
       <div class="rounded-lg border border-border overflow-hidden">
-        <PrintsFileListItem
+        <AdminPrintsFileListItem
           v-for="file in files"
           :key="file.id"
           :file="file"
