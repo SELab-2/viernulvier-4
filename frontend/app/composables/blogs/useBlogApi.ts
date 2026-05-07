@@ -52,7 +52,6 @@ export function useBlogApi() {
     };
 
     const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(params).filter(([_, value]) => value != null),
     );
 
