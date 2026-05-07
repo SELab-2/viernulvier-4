@@ -25,20 +25,22 @@ function goToYear(year: number) {
 </script>
 
 <template>
-  <div class="space-y-3">
-    <div class="flex items-center gap-2 text-muted-foreground">
-      <Calendar :size="14" stroke-width="3" />
+  <div class="space-y-4">
+    <div
+      class="flex items-center gap-2 text-muted-foreground border-b border-border/30 pb-2"
+    >
+      <Calendar :size="14" stroke-width="3" class="text-accent" />
       <span class="font-brand text-[10px] font-black uppercase tracking-widest">
         Duik in de tijd
       </span>
     </div>
 
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap gap-2.5">
       <button
         v-for="year in randomYears"
         :key="year"
         @click="goToYear(year)"
-        class="inline-flex h-8 items-center rounded border border-border bg-transparent px-3 font-brand text-[12px] font-black italic tracking-widest text-foreground transition-all hover:border-foreground hover:bg-foreground hover:text-background"
+        class="inline-flex h-8 items-center rounded border border-border/50 bg-transparent px-4 font-brand text-[12px] font-black italic tracking-widest text-foreground transition-all hover:scale-105 hover:border-foreground hover:bg-foreground hover:text-background focus:ring-2 focus:ring-foreground/50 outline-none"
       >
         {{ year }}
       </button>
