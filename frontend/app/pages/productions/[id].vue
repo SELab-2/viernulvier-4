@@ -1,9 +1,19 @@
-<script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from "vue";
+<script lang="ts" setup>
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
+
+/** validation that id is only numbers */
+definePageMeta({
+  validate: async (route) => {
+    const raw = Array.isArray(route.params.id)
+      ? route.params.id[0]
+      : route.params.id;
+    return /^\d+$/.test(raw as string);
+  },
+});
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -28,15 +38,25 @@ const productionId = computed(() => {
 });
 
 /** Get the main production data */
-const { data: production } = await useAsyncData<ProductionView>(
-  `prod-v3-${route.params.id}-${locale.value}`,
-  async () => {
-    if (!productionId.value) return null;
-    const res = await getById(productionId.value, locale.value as any);
-    return (res as any)?.data ?? res;
-  },
-  { watch: [productionId, locale] },
-);
+const { data: production, error: prodError } =
+  await useAsyncData<ProductionView>(
+    `prod-v3-${route.params.id}-${locale.value}`,
+    async () => {
+      if (!productionId.value) return null;
+      const res = await getById(productionId.value, locale.value as any);
+      return (res as any)?.data ?? res;
+    },
+    { watch: [productionId, locale] },
+  );
+
+/** throws error if we must. */
+if (prodError.value || !production.value || !productionId.value) {
+  throw createError({
+    statusCode: prodError.value?.status || 404,
+    statusMessage: "Not Found",
+    fatal: true, // Forces Nuxt to show the error page immediately
+  });
+}
 
 /** Get tags and remove empty ones */
 const { data: tags } = await useAsyncData<TagView[]>(
@@ -173,21 +193,21 @@ onBeforeUnmount(() => {
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
     <section
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
       :class="{ 'image-overlay text-white': headerCrop }"
+      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
     >
       <MediaDisplay
-        class="absolute inset-0 w-full h-full object-cover z-0"
         :id="production.id"
         :src="headerCrop"
+        class="absolute inset-0 w-full h-full object-cover z-0"
       />
 
       <div class="relative z-10 page-container pb-12">
         <div class="flex items-center gap-4 mb-8">
           <button
-            @click="goBack()"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
             :class="headerCrop ? 'text-white' : 'text-foreground'"
+            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
+            @click="goBack()"
           >
             <ChevronLeft :size="14" stroke-width="3" />
             {{ t("general.back") }}
@@ -195,12 +215,12 @@ onBeforeUnmount(() => {
 
           <span
             v-if="isValid(production.performer_type)"
-            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
             :class="
               headerCrop
                 ? 'border-white text-white'
                 : 'border-foreground text-foreground'
             "
+            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
           >
             {{ production.performer_type }}
           </span>
@@ -208,7 +228,6 @@ onBeforeUnmount(() => {
 
         <div>
           <h1
-            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
             :class="[
               production.titel.length > 35
                 ? 'text-4xl lg:text-6xl'
@@ -216,6 +235,7 @@ onBeforeUnmount(() => {
                   ? 'text-5xl lg:text-7xl'
                   : 'text-6xl lg:text-8xl',
             ]"
+            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
           >
             {{ production.titel }}
           </h1>
@@ -259,20 +279,20 @@ onBeforeUnmount(() => {
 
           <div
             ref="descriptionRef"
-            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
             :class="[
               isExpanded
                 ? 'line-clamp-none'
                 : 'line-clamp-[6] md:line-clamp-[8]',
               showReadMoreButton && !isExpanded ? 'should-fade' : '',
             ]"
+            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
             v-html="fullDescription"
           ></div>
 
           <button
             v-if="showReadMoreButton || isExpanded"
-            @click="isExpanded = !isExpanded"
             class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+            @click="isExpanded = !isExpanded"
           >
             {{ isExpanded ? t("general.readLess") : t("general.readMore") }}
           </button>
@@ -294,18 +314,18 @@ onBeforeUnmount(() => {
         <div v-if="isValid(production.description2)" class="mb-16">
           <div
             ref="description2Ref"
-            class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
             :class="[
               isExpanded2 ? 'line-clamp-none' : 'line-clamp-[6]',
               showReadMoreButton2 && !isExpanded2 ? 'should-fade' : '',
             ]"
+            class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
             v-html="cleanText(production.description2)"
           ></div>
 
           <button
             v-if="showReadMoreButton2 || isExpanded2"
-            @click="isExpanded2 = !isExpanded2"
             class="mt-4 ml-8 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+            @click="isExpanded2 = !isExpanded2"
           >
             {{ isExpanded2 ? t("general.readLess") : t("general.readMore") }}
           </button>
