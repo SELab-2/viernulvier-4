@@ -21,6 +21,7 @@
 import { ref, computed } from "vue";
 import { Search, X } from "lucide-vue-next";
 import { useDebounceFn } from "@vueuse/core";
+import type { SearchSuggestion } from "~/types/Search";
 const { t } = useI18n();
 
 /**
@@ -120,12 +121,6 @@ const submit = () => {
 /**
  * Suggestions
  */
-
-export interface SearchSuggestion {
-  display: string; // The main text shown.
-  context?: string; // Secondary text.
-  searchValue: string; // The clean text put into the input.
-}
 
 /**
  * The internal list of suggestions fetched.

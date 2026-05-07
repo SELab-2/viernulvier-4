@@ -1,22 +1,21 @@
-<!--
-  pages/index.vue
-
-  The home page of the VIERNULVIER archive.
-
-  Composed entirely of standalone section components that are auto-imported
-  by Nuxt from app/components/home/. The layout (AppHeader + AppFooter) is
-  provided by layouts/default.vue and does not need to be included here.
-
-  Section order:
-  1. HomeHero       — full-screen hero with title, subtitle and archive CTA
-  2. HomeHighlights — grid of recent productions
-  3. HomeAbout      — about the archive: text + photo
-  4. HomeDiscover   — two large cards linking to Stories and Prints sections
--->
-
+<!-- pages/index.vue -->
 <template>
-  <HomeHero />
-  <HomeHighlights />
-  <HomeAbout />
-  <HomeDiscover />
+  <main
+    class="page-container flex min-h-[75vh] flex-col items-center justify-center space-y-12 py-16"
+  >
+    <!-- Main Search -->
+    <div class="w-full max-w-3xl text-center space-y-6">
+      <h1 class="page-header-title">Doorzoek het archief</h1>
+      <p class="page-header-subtitle mx-auto">
+        Vind producties, artikels en herinneringen
+      </p>
+      <HomeSearchBar />
+    </div>
+
+    <!-- Quick Filters (Tags & Years) -->
+    <div class="w-full max-w-3xl space-y-8 pt-8 border-t border-border">
+      <HomeRandomTags />
+      <HomeRandomYears />
+    </div>
+  </main>
 </template>
