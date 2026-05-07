@@ -80,7 +80,14 @@ const templates: Record<ParserTarget, TemplateData> = {
 };
 
 const template = computed(() => templates[props.target]);
-const src = computed(() => `/csv_templates/${props.target}_template.csv`);
+const baseURL = computed(() => {
+  const value = useRuntimeConfig().app.baseURL || "/";
+
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+});
+const src = computed(
+  () => `${baseURL.value || ""}/csv_templates/${props.target}_template.csv`,
+);
 const fileName = computed(() => `${props.target}_template.csv`);
 
 const { t } = useI18n();

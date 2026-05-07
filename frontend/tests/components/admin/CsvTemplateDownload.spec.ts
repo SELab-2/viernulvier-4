@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import CsvTemplateDownload from "../../../app/components/admin/CsvTemplateDownload.vue";
+
+vi.mock("#app", () => ({
+  useRuntimeConfig: () => ({ app: { baseURL: "/" } }),
+}));
 
 const i18n = createI18n({
   legacy: false,
