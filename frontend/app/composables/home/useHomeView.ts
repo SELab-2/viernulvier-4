@@ -4,6 +4,7 @@ import { useBlogView } from "../blogs/useBlogView";
 import { useArchiveView } from "../useArchiveView";
 import { useCropApi } from "../media/useCropApi";
 import type { MediaCrop } from "@repo/common";
+import { rand } from "@vueuse/core";
 
 export function useHomeView() {
   const {
@@ -92,13 +93,30 @@ export function useHomeView() {
 
   // Media
 
+  const IMAGE_AMOUNT: number = 10;
+
+  /**
+   * Fetches IMAGE_AMOUNT random images from the API to show.
+   * @returns The list of MediaCrop[].
+   */
   async function fetchRandomImages(): Promise<MediaCrop[]> {
+    const totalTest = await getCrops({
+      paginationFilters: { limit: 1, page: 0, descending: true },
+    });
+
+    const totalCrops: number = totalTest.data?.totalItems ?? 0;
+    const totalPages: number = totalCrops / IMAGE_AMOUNT;
+
     const res = await getCrops({
-      paginationFilters: { limit: 10, page: 0, descending: true },
+      paginationFilters: {
+        limit: IMAGE_AMOUNT,
+        page: rand(0, totalPages),
+        descending: true,
+      },
     });
 
     const crops: MediaCrop[] = res.data?.objects ?? [];
-    return crops;
+    return crops.filter((c) => c.url !== ""); // We can try to filter out empty urls.
   }
 
   return {
