@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-  <AdminProductionsFormPageNew mode="edit" />
+  <AdminProductionsFormPage mode="edit" />
 </template>
 
 <style scoped></style>
