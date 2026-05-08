@@ -7,6 +7,7 @@ import goatsImg from "../../assets/vnv_goats.jpg"; // :-)
 /**
  * This is the main error handling page and should be called when fatal errors are thrown.
  * In this file you can define custom display messages for certain error codes etc...
+ * note: write the messages in the i18n locales files.
  */
 
 const props = defineProps({
