@@ -85,8 +85,16 @@ export function useProductionCore(): ProductionFormStep<
   }
 
   function reset(): void {
-    if (!original.value) return;
-    draft.value = structuredClone(original.value);
+    if (!original.value) {
+      if (!original.value)
+        draft.value = {
+          nl: createEmptyTranslation(),
+          en: createEmptyTranslation(),
+        };
+      return;
+    }
+
+    draft.value = structuredClone(toRaw(original.value));
   }
 
   function getChangedFields(): string[] {
@@ -110,7 +118,7 @@ export function useProductionCore(): ProductionFormStep<
   }
 
   function extractPayload(): ProductionCoreForm {
-    return structuredClone(draft.value);
+    return structuredClone(toRaw(draft.value));
   }
 
   return {

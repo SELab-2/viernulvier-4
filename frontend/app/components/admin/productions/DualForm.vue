@@ -2,55 +2,33 @@
 /**
  * AdminProductionsDualForm.vue
  *
- * Dual-language (NL / EN) form shell for a production.
- * Slides between the two language panels with an animated transition.
+ * Dual-language (NL / EN) production form.
  *
- * When liveUpdate is true (passed through to FormBaseForm) the @nl-update and
- * @en-update events fire on every keystroke — plug these into useProductionForm's
- * handleNlUpdate / handleEnUpdate so the preview stays in sync while typing.
+ * This component is fully controlled by the parent.
+ * It does not own any form state internally.
  *
- * The final @submit still emits both language objects together for the save action.
+ * The parent passes the entire draft object through v-model.
  */
+
+import type { ProductionCoreForm } from "~/composables/productions/steps/productionCore";
 
 const active = ref<"nl" | "en">("nl");
 
-const nlData = ref<Record<string, any>>({});
-const enData = ref<Record<string, any>>({});
-
 interface Props {
-  /** Forward to inner forms so the preview updates live while typing */
-  liveUpdate?: boolean;
-  /** Pre-fill values for the NL form (edit mode) */
-  initialNl?: Record<string, any>;
-  /** Pre-fill values for the EN form (edit mode) */
-  initialEn?: Record<string, any>;
+  modelValue: ProductionCoreForm;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  liveUpdate: false,
-});
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  /** Final combined submit */
-  submit: [{ nl: Record<string, any>; en: Record<string, any> }];
-  /** Live NL field change — fired on every keystroke when liveUpdate is true */
-  "nl-update": [Record<string, any>];
-  /** Live EN field change — fired on every keystroke when liveUpdate is true */
-  "en-update": [Record<string, any>];
+  "update:modelValue": [ProductionCoreForm];
 }>();
 
-function handleNlUpdate(data: Record<string, any>) {
-  nlData.value = data;
-  emit("nl-update", data);
-}
-
-function handleEnUpdate(data: Record<string, any>) {
-  enData.value = data;
-  emit("en-update", data);
-}
-
-function handleSubmit() {
-  emit("submit", { nl: nlData.value, en: enData.value });
+function updateLocale(locale: "nl" | "en", value: ProductionCoreForm["nl"]) {
+  emit("update:modelValue", {
+    ...props.modelValue,
+    [locale]: value,
+  });
 }
 </script>
 
@@ -107,11 +85,8 @@ function handleSubmit() {
         >
           <AdminProductionsForm
             language="nl"
-            :showActions="false"
-            :liveUpdate="props.liveUpdate"
-            :initialValues="props.initialNl"
-            @submit="nlData = $event"
-            @update="handleNlUpdate"
+            :modelValue="props.modelValue.nl"
+            @update:modelValue="updateLocale('nl', $event)"
           />
         </div>
 
@@ -126,11 +101,8 @@ function handleSubmit() {
         >
           <AdminProductionsForm
             language="en"
-            :showActions="false"
-            :liveUpdate="props.liveUpdate"
-            :initialValues="props.initialEn"
-            @submit="enData = $event"
-            @update="handleEnUpdate"
+            :modelValue="props.modelValue.en"
+            @update:modelValue="updateLocale('en', $event)"
           />
         </div>
       </div>

@@ -1,30 +1,30 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { FormField } from "~/types/FormField";
+import type { ProductionTranslationForm } from "~/composables/productions/steps/productionCore";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 
 interface Props {
   language?: "nl" | "en";
-  showActions?: boolean;
-  /** Forwarded to FormBaseForm — triggers @update on every keystroke */
-  liveUpdate?: boolean;
+
+  /**
+   * FormBaseForm controlled state.
+   * Parent fully owns the data.
+   */
+  modelValue: ProductionTranslationForm;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   language: "nl",
-  showActions: false,
-  liveUpdate: false,
 });
 
-const isRequired = computed(() => props.language === "nl");
-
 const emit = defineEmits<{
-  submit: [Record<string, any>];
-  /** Bubbled up from FormBaseForm when liveUpdate is true */
-  update: [Record<string, any>];
+  "update:modelValue": [ProductionTranslationForm];
 }>();
+
+const isRequired = computed(() => props.language === "nl");
 
 const fields = computed<FormField[]>(() => [
   {
@@ -77,9 +77,8 @@ const fields = computed<FormField[]>(() => [
 <template>
   <FormBaseForm
     :fields="fields"
-    :showActions="props.showActions"
-    :liveUpdate="props.liveUpdate"
-    @submit="emit('submit', $event)"
-    @update="emit('update', $event)"
+    :showActions="false"
+    :modelValue="props.modelValue"
+    @update:modelValue="emit('update:modelValue', $event)"
   />
 </template>
