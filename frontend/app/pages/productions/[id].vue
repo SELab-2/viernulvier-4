@@ -41,23 +41,18 @@ const productionId = computed(() => {
 const { data: production } = await useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
-    if (!productionId.value) return null;
+    if (!productionId.value) {
+      throw createError({
+        status: 404,
+        statusText: "Not Found",
+        fatal: true,
+      });
+    }
     const res = await getById(productionId.value, locale.value as any);
     return (res as any)?.data ?? res;
   },
   { watch: [productionId, locale] },
 );
-
-/** throws error if we must. */
-const prodRes = production.value as any; // Bypass TS strict typing for a moment
-
-if (!productionId.value || !prodRes || prodRes.error) {
-  throw createError({
-    status: prodRes?.status || 404,
-    statusText: prodRes?.error || "Not Found",
-    fatal: true,
-  });
-}
 
 /** Get tags and remove empty ones */
 const { data: tags } = await useAsyncData<TagView[]>(

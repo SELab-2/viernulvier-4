@@ -95,7 +95,7 @@ export function useApi() {
     // Map status 0 (unreachable/fetch failed) to 503 so the network error triggers
     const finalStatus = status === 0 ? 503 : status;
 
-    showError({
+    throw createError({
       status: finalStatus,
       statusText: status === 0 ? "Service Unavailable" : undefined,
       message: message,
