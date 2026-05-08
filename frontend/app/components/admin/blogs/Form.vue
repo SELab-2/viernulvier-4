@@ -1,24 +1,31 @@
 <!--
   components/admin/blogs/Form.vue
   =================================
-  Bilingual blog form — title (NL + EN) and description (NL + EN).
+  Bilingual blog form — title (NL + EN) and rich-text description (NL + EN).
 
   Composition:
-  - FormSectionsTitleSection        two BaseTextArea fields for the titles
-  - FormSectionsDescriptionSection  two rich-text or plain-text fields (configurable)
-  - FormFormActions                 submit button with spinner and validation hint
+  - FormSectionsTitleSection       two BaseTextArea fields for the titles
+  - FormSectionsDescriptionSection two rich-text or plain-text description fields
+  - Slot #extra                    injected between description and actions (e.g. LinkToProduction)
+  - FormActions                back / reset / restore / submit buttons
 
   The component is intentionally thin: it owns only the reactive field values,
-  the validation computed, and the submit handler. All markup lives in the
-  three sub-components above so this file stays easy to scan.
+  the validation computed, and the submit/reset/restore handlers. All layout
+  lives in the sub-components so this file stays easy to scan.
+
+  Props:
+  - initialData   pre-populate fields when editing an existing blog
+  - loading       true while an API call is in flight (disables the submit button)
+  - mode          'create' shows Create + Reset; 'edit' shows Save Changes
+  - richText      use TipTap rich-text editor instead of plain textarea (default: true)
+  - backUrl       navigation target for the back button
+  - showRestore   show the Restore button (edit mode only; parent decides when it's relevant)
 
   Emits:
-  - submit(data)         when the user clicks Save / Create
-  - preview-update(data) on every keystroke so the live preview panel stays current
-
-  Slots:
-  - #extra               rendered between DescriptionSection and FormActions,
-                         used by the parent to inject LinkToProduction
+  - submit(data)         user clicked Save / Create — payload is CreateBlog or ModifyBlog
+  - preview-update(data) fires on every keystroke so the live preview panel stays current
+  - reset()              user clicked Reset (create mode only)
+  - restore()            user clicked Restore (edit mode only, forwarded from FormActions)
 -->
 
 <script setup lang="ts">
@@ -41,8 +48,9 @@ const props = withDefaults(
     mode?: "create" | "edit";
     richText?: boolean;
     backUrl?: string;
+    showRestore?: boolean;
   }>(),
-  { mode: "create", loading: false, richText: true },
+  { mode: "create", loading: false, richText: true, showRestore: false },
 );
 
 const emit = defineEmits<{
@@ -52,15 +60,18 @@ const emit = defineEmits<{
     data: { titel: LocalizedPair; description: LocalizedPair },
   ): void;
   (e: "reset"): void;
+  (e: "restore"): void;
 }>();
 
-// Reactive field values, one ref per localised field.
+// One reactive ref per localised field. These are kept flat (not nested) so
+// watchers and template bindings remain simple.
 const titelNl = ref("");
 const titelEn = ref("");
 const descriptionNl = ref("");
 const descriptionEn = ref("");
 
-// Populate fields when editing an existing blog.
+// Populate fields immediately when editing an existing blog (or when the parent
+// finishes fetching and passes initialData down for the first time).
 watch(
   () => props.initialData,
   (data) => {
@@ -73,7 +84,8 @@ watch(
   { immediate: true },
 );
 
-// Keep the live preview panel up to date on every keystroke.
+// Keep the live preview panel up to date on every keystroke so the preview
+// always reflects what the editor is currently writing.
 watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   emit("preview-update", {
     titel: { nl: titelNl.value, en: titelEn.value },
@@ -81,7 +93,8 @@ watch([titelNl, titelEn, descriptionNl, descriptionEn], () => {
   });
 });
 
-// The form is valid as soon as both required Dutch fields have content.
+// The form is valid as soon as both required Dutch fields contain non-empty text.
+// English fields are optional and fall back to Dutch on submit.
 const isValid = computed(
   () =>
     titelNl.value.trim().length > 0 && descriptionNl.value.trim().length > 0,
@@ -93,6 +106,7 @@ function handleSubmit() {
   emit("submit", {
     titel: {
       nl: titelNl.value.trim(),
+      // English falls back to Dutch when the field is left empty.
       en: titelEn.value.trim() || titelNl.value.trim(),
     },
     description: {
@@ -113,13 +127,13 @@ function handleReset() {
 
 <template>
   <form class="space-y-4" @submit.prevent="handleSubmit">
-    <!-- Title fields (NL + EN) -->
+    <!-- Title section: NL (required) + EN (optional, falls back to NL) -->
     <FormSectionsTitleSection
       v-model:titelNl="titelNl"
       v-model:titelEn="titelEn"
     />
 
-    <!-- Description fields (NL + EN) — supports both rich-text and plain mode -->
+    <!-- Description section: rich-text or plain textarea, same bilingual pattern -->
     <FormSectionsDescriptionSection
       v-model:descriptionNl="descriptionNl"
       v-model:descriptionEn="descriptionEn"
@@ -127,19 +141,22 @@ function handleReset() {
     />
 
     <!--
-      Extra slot: LinkToProduction is injected here by the parent
-      so it sits between the description card and the submit button.
+      Extra slot: the parent injects additional cards here (e.g. LinkToProduction).
+      This slot sits between the description card and the action row so the
+      submit button is always at the very bottom of the form.
     -->
     <slot name="extra" />
 
-    <!-- Submit / validation row -->
-    <FormFormActions
+    <!-- Action row: back / restore / reset / submit -->
+    <FormActions
       :is-valid="isValid"
       :loading="loading"
       :mode="mode"
       :back-url="backUrl"
+      :show-restore="showRestore"
       @submit="handleSubmit"
       @reset="handleReset"
+      @restore="emit('restore')"
     />
   </form>
 </template>

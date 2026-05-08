@@ -1,13 +1,20 @@
 <!--
   pages/admin/stories/create.vue
+  ================================
+  Admin blog create page — two-step layout.
 
-  Admin Blog Create Page.
-  - Preview scrolls naturally with the page.
-  - Step 2 (photos) is locked until the blog is saved.
-  - After saving, redirects to edit page at step=content so the user
-    can immediately link productions without an extra click.
-  - Two-column layout: left = form, right = preview (inline, not sticky).
-  - On mobile: collapsible preview at the bottom.
+  Step 1: Title & Content (active on this page)
+    - Bilingual title + rich-text description
+    - "Link to production" card is shown but locked (blog must be saved first)
+    - Create + Reset buttons at the bottom via AdminBlogsForm
+  Step 2: Header images (locked — only unlocked after saving)
+
+  After saving, redirects to the edit page at ?step=content so the user can
+  immediately link productions without an extra click.
+
+  Layout:
+  - Desktop XL: two-column grid (left = form, right = sticky preview)
+  - Mobile: collapsible preview panel at the bottom
 -->
 <script setup lang="ts">
 import type { CreateBlog } from "@repo/common";
@@ -21,6 +28,7 @@ const { t } = useI18n();
 const saving = ref(false);
 const error = ref<string | null>(null);
 
+// Live data fed into the preview panel — updated by AdminBlogsForm on each keystroke.
 const previewData = ref<{
   titel: { nl: string; en: string };
   description: { nl: string; en: string };
@@ -32,8 +40,8 @@ async function handleSubmit(data: CreateBlog) {
   try {
     const resp = await create(data);
     if (resp.data) {
-      // Redirect to edit > content step so LinkToProduction is immediately
-      // available and the user can link productions right away.
+      // After creating, redirect to the edit page's "content" step so the
+      // user can immediately link productions without navigating again.
       await navigateTo({
         path: ROUTES.admin.stories.edit(resp.data.id),
         query: { step: "content" },
@@ -52,7 +60,7 @@ async function handleSubmit(data: CreateBlog) {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- Top bar -->
+      <!-- ── Top bar ─────────────────────────────────────────────────────── -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -68,11 +76,15 @@ async function handleSubmit(data: CreateBlog) {
         </h1>
       </div>
 
-      <!-- Step indicator -->
+      <!-- ── Step indicator ────────────────────────────────────────────── -->
+      <!--
+        Step 2 is locked until the blog is saved.
+        The lock icon and reduced opacity make it clear the step is unavailable.
+      -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
-        <!-- Step 1 — active -->
+        <!-- Step 1 — active (current step) -->
         <div
           class="flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-brand font-black uppercase tracking-widest bg-foreground text-background"
         >
@@ -86,15 +98,21 @@ async function handleSubmit(data: CreateBlog) {
 
         <span class="w-px bg-border self-stretch" />
 
-        <!-- Step 2 — locked -->
+        <!-- Step 2 — locked until blog is saved -->
         <div
           class="flex items-center gap-2.5 px-5 py-2.5 text-[11px] font-brand font-black uppercase tracking-widest bg-background text-muted-foreground/40 cursor-not-allowed select-none"
+          :title="
+            t('admin.blogs.image.multiTitle') +
+            ' — ' +
+            t('admin.blogs.linkToProductionCreateHint')
+          "
         >
           <span
             class="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black border-2 border-muted-foreground/30 shrink-0"
             >2</span
           >
           {{ t("admin.blogs.image.multiTitle") }}
+          <!-- Lock icon indicates this step requires saving first -->
           <svg
             class="w-3 h-3 ml-0.5 shrink-0"
             fill="none"
@@ -108,7 +126,7 @@ async function handleSubmit(data: CreateBlog) {
         </div>
       </div>
 
-      <!-- Error -->
+      <!-- ── Error banner ──────────────────────────────────────────────── -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
@@ -116,13 +134,13 @@ async function handleSubmit(data: CreateBlog) {
         {{ error }}
       </div>
 
+      <!-- ── Two-column layout ─────────────────────────────────────────── -->
       <!--
-        Two-column grid.
-        Preview column is NOT sticky — it scrolls with the page naturally.
-        items-start: prevents the right column from stretching.
+        items-start: prevents the preview column from stretching to match
+        the form column height. The preview scrolls naturally with the page.
       -->
       <div class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start">
-        <!-- Left: form + link-to-production (locked until saved) -->
+        <!-- Left column: form + locked link-to-production card -->
         <AdminBlogsForm
           mode="create"
           :loading="saving"
@@ -132,20 +150,21 @@ async function handleSubmit(data: CreateBlog) {
         >
           <template #extra>
             <!--
-              No blogId yet — component shows the friendly "save first" hint.
-              After save we redirect to edit where it becomes fully functional.
+              No blogId is passed here because the blog does not exist yet.
+              AdminBlogsLinkToProduction will detect the missing ID and show
+              a clear "save the story first" locked hint instead.
             -->
             <AdminBlogsLinkToProduction />
           </template>
         </AdminBlogsForm>
 
-        <!-- Right: inline preview (desktop only, scrolls with page) -->
+        <!-- Right column: live preview (desktop XL+ only, sticky) -->
         <div class="hidden xl:block self-start sticky top-28">
           <AdminBlogsPreview :data="previewData" :header-crop="null" />
         </div>
       </div>
 
-      <!-- Mobile: collapsible preview -->
+      <!-- ── Mobile collapsible preview ───────────────────────────────── -->
       <details
         class="xl:hidden group border border-border rounded-xl overflow-hidden"
       >

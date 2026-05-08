@@ -1,31 +1,38 @@
 <!--
   pages/admin/stories/edit/[id].vue
   ====================================
-  Admin blog edit page — two-step layout.
+  Admin blog edit page — two-step tab layout.
 
   Steps:
   1. "Title & Content"  — bilingual title + rich-text description + link-to-production.
                           Live preview panel (sticky on desktop, collapsible on mobile).
   2. "Header images"    — crop upload grid + item metadata card.
+                          Back + Save buttons are rendered at the bottom of this step
+                          so the user always has a consistent way to save and navigate.
 
-  Navigation between steps is handled by tab buttons at the top of the page.
-  The step can be pre-selected via `?step=photos` in the URL (used by the
-  create page after saving, so the user lands on step 2 immediately).
+  Key behaviour differences from the create page:
+  - Reset and Create buttons are NOT shown (edit mode in AdminBlogsForm).
+  - A Restore button IS shown, allowing the user to discard unsaved changes by
+    re-fetching the last saved version from the server.
+  - Both step tabs are unlocked (the blog already exists).
+  - The step can be pre-selected via ?step=photos in the URL, which is used by
+    the create page after saving so the user lands directly on step 2.
 
   Component breakdown:
-  ┌─ edit/[id].vue (this file) ─────────────────────────────────────────────┐
-  │  Data: loads blog, gallery, headerCrop. Handles save + restore.         │
-  │                                                                         │
-  │  Step 1 tab                                                             │
-  │  ├── AdminBlogsForm         — title + description fields + submit       │
-  │  ├── AdminBlogsLinkToProduction — link/unlink production cards          │
-  │  └── AdminBlogsPreview      — live preview panel                        │
-  │                                                                         │
-  │  Step 2 tab                                                             │
-  │  └── AdminBlogsImageSection — crop grid + item metadata                 │
-  │      ├── AdminBlogsCropGrid                                             │
-  │      └── AdminBlogsItemMetadata                                         │
-  └─────────────────────────────────────────────────────────────────────────┘
+  ┌─ edit/[id].vue (this file) ──────────────────────────────────────────────┐
+  │  Data: loads blog, gallery, headerCrop. Handles save + restore.          │
+  │                                                                          │
+  │  Step 1 (content tab)                                                    │
+  │  ├── AdminBlogsForm              title + description fields + actions    │
+  │  │     └── #extra slot           AdminBlogsLinkToProduction card         │
+  │  └── AdminBlogsPreview           live preview panel (desktop sticky)     │
+  │                                                                          │
+  │  Step 2 (photos tab)                                                     │
+  │  ├── AdminBlogsImageSection      crop grid + item metadata               │
+  │  │     ├── AdminBlogsCropGrid                                            │
+  │  │     └── AdminBlogsItemMetadata                                        │
+  │  └── Bottom action row           back link + purple save button          │
+  └──────────────────────────────────────────────────────────────────────────┘
 -->
 
 <script setup lang="ts">
@@ -46,9 +53,9 @@ const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
 
-// Route param
+// ── Route param ───────────────────────────────────────────────────────────
 
-/** Parse the blog ID from the dynamic route segment. */
+/** Parse the blog ID from the dynamic route segment. Returns null for invalid values. */
 const blogId = computed<number | null>(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -57,16 +64,17 @@ const blogId = computed<number | null>(() => {
   return isFinite(n) ? n : null;
 });
 
-// Page state
+// ── Page state ────────────────────────────────────────────────────────────
 
 const blog = ref<Blog | null>(null);
 const fetching = ref(false);
 const saving = ref(false);
 const error = ref<string | null>(null);
-/** True for 3 s after a successful save — drives the "Saved ✓" badge. */
+
+/** True for 3 seconds after a successful save — drives the "Saved ✓" badge. */
 const saved = ref(false);
 
-/** Active step tab ('content' | 'photos'). */
+/** Active step tab: 'content' = step 1, 'photos' = step 2. */
 const step = ref<"content" | "photos">("content");
 
 /**
@@ -78,23 +86,25 @@ const previewData = ref<{
   description: { nl: string; en: string };
 }>({ titel: { nl: "", en: "" }, description: { nl: "", en: "" } });
 
-// Gallery state
+// ── Gallery state ─────────────────────────────────────────────────────────
 
 /** Full gallery with items — used to extract the header crop for the preview. */
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
-/** Gallery ID passed to LinkToProduction so it can link via the correct gallery. */
+
+/** Gallery ID passed to LinkToProduction so it can use the correct gallery. */
 const galleryId = ref<number | null>(null);
 
-/** The FE3_header crop shown in the preview hero. */
+/** The FE3_header crop shown in the preview hero. Null when no image has been uploaded. */
 const headerCrop = computed(() =>
   gallery.value ? getMainImageCrop(gallery.value, "FE3_header") : null,
 );
 
-// Derived initial data for AdminBlogsForm
+// ── Derived initial data for AdminBlogsForm ───────────────────────────────
 
 /**
  * Unwrap the localised titel + description from the fetched Blog object.
  * AdminBlogsForm uses this as its `initial-data` prop to pre-populate fields.
+ * Returns undefined while the blog is still loading so the form stays empty.
  */
 const initialBlogData = computed(() => {
   if (!blog.value) return undefined;
@@ -104,7 +114,7 @@ const initialBlogData = computed(() => {
   };
 });
 
-// Data fetching
+// ── Data fetching ─────────────────────────────────────────────────────────
 
 /** Load the gallery and extract the header crop + gallery ID. */
 async function loadGallery() {
@@ -118,7 +128,10 @@ async function loadGallery() {
   }
 }
 
-/** Fetch the raw Blog object (not localised, so we get both NL and EN). */
+/**
+ * Fetch the raw (non-localised) Blog object so we get both NL and EN field values.
+ * After fetching, the preview panel is also seeded with the freshly loaded data.
+ */
 async function loadBlog() {
   if (!blogId.value) return;
   fetching.value = true;
@@ -127,7 +140,7 @@ async function loadBlog() {
     const resp = await getById(blogId.value);
     blog.value = resp.data as Blog;
 
-    // Seed the preview panel with the freshly fetched data.
+    // Seed the preview panel so it shows the correct content immediately on load.
     if (blog.value) {
       const tl = blog.value.titel as { nl: string; en: string };
       const dc = blog.value.description as { nl: string; en: string };
@@ -143,19 +156,22 @@ async function loadBlog() {
   }
 }
 
-// Lifecycle
+// ── Lifecycle ─────────────────────────────────────────────────────────────
 
 onMounted(async () => {
-  // Allow the create page to redirect to step 2 via ?step=photos.
+  // Allow the create page to redirect straight to step 2 via ?step=photos.
   if (route.query.step === "photos") step.value = "photos";
 
-  // Load data in parallel for speed.
+  // Load blog data and gallery in parallel for speed.
   await Promise.all([loadBlog(), loadGallery()]);
 });
 
-// Save / restore
+// ── Save ──────────────────────────────────────────────────────────────────
 
-/** Submit the form — PATCH the blog and show a transient "Saved" badge. */
+/**
+ * PATCH the blog with the form data, then show a transient "Saved ✓" badge
+ * for 3 seconds to confirm success without interrupting the editing flow.
+ */
 async function handleSubmit(data: ModifyBlog) {
   if (!blogId.value) return;
   saving.value = true;
@@ -172,9 +188,11 @@ async function handleSubmit(data: ModifyBlog) {
   }
 }
 
+// ── Restore ───────────────────────────────────────────────────────────────
+
 /**
- * Restore the form to the last saved state by re-fetching the blog.
- * Requires confirmation because unsaved changes will be lost.
+ * Re-fetch the blog from the server, discarding any unsaved changes in the form.
+ * Requires a confirmation because the action is destructive to in-progress edits.
  */
 async function restoreToSaved() {
   if (
@@ -190,7 +208,7 @@ async function restoreToSaved() {
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <!-- Top bar: back link + title + "Saved" badge -->
+      <!-- ── Top bar: back link + title + "Saved ✓" badge ─────────────── -->
       <div class="flex items-center gap-4 flex-wrap">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
@@ -198,13 +216,14 @@ async function restoreToSaved() {
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
+
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
         >
           {{ t("admin.blogs.edit") }}
         </h1>
 
-        <!-- Transient "Saved ✓" badge — fades in for 3 s after a successful save -->
+        <!-- Transient "Saved ✓" badge — appears for 3 s after a successful save -->
         <Transition name="fade">
           <span
             v-if="saved"
@@ -224,7 +243,12 @@ async function restoreToSaved() {
         </Transition>
       </div>
 
-      <!-- Step indicator tabs -->
+      <!-- ── Step tabs ─────────────────────────────────────────────────── -->
+      <!--
+        Both tabs are clickable in edit mode — unlike create mode where step 2
+        is locked. Styling matches the rest of the admin UI (black active tab,
+        muted inactive tab).
+      -->
       <div
         class="flex items-center gap-0 border border-border rounded-xl overflow-hidden w-fit"
       >
@@ -254,7 +278,7 @@ async function restoreToSaved() {
 
         <span class="w-px bg-border self-stretch" />
 
-        <!-- Step 2: Header Images -->
+        <!-- Step 2: Header images -->
         <button
           type="button"
           :class="[
@@ -278,7 +302,7 @@ async function restoreToSaved() {
         </button>
       </div>
 
-      <!-- Error banner -->
+      <!-- ── Error banner ──────────────────────────────────────────────── -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
@@ -286,7 +310,7 @@ async function restoreToSaved() {
         {{ error }}
       </div>
 
-      <!-- Loading skeleton -->
+      <!-- ── Loading skeleton ──────────────────────────────────────────── -->
       <template v-if="fetching">
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
@@ -299,7 +323,7 @@ async function restoreToSaved() {
         </div>
       </template>
 
-      <!-- Not found -->
+      <!-- ── Not found ─────────────────────────────────────────────────── -->
       <div
         v-else-if="!blog && !fetching"
         class="py-16 text-center text-muted-foreground"
@@ -307,31 +331,40 @@ async function restoreToSaved() {
         {{ t("admin.blogs.notFound") }}
       </div>
 
-      <!-- Main content -->
+      <!-- ── Main content ──────────────────────────────────────────────── -->
       <template v-else-if="blog && blogId">
         <!--
           Two-column grid on XL screens.
-          Left  = active step (form or image section).
-          Right = sticky live preview (desktop only).
-          items-start prevents the preview column from stretching to match
-          the left column's height.
+          Left  = active step content (form or image section).
+          Right = sticky live preview (desktop only, step 1 only).
+          items-start prevents the preview column from stretching.
         -->
         <div
           class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
         >
-          <!-- Left column: active step -->
+          <!-- ── Left column: active step ────────────────────────────── -->
           <div class="space-y-5 min-w-0">
             <!-- Step 1: Title + Description + Link to production -->
             <template v-if="step === 'content'">
+              <!--
+                Edit mode: no Reset or Create buttons are rendered by AdminBlogsForm.
+                The Restore button IS shown so the editor can discard unsaved changes.
+                showRestore=true tells FormActions to include the restore button.
+              -->
               <AdminBlogsForm
                 mode="edit"
                 :initial-data="initialBlogData"
                 :loading="saving"
                 :back-url="ROUTES.admin.stories.base"
+                :show-restore="true"
                 @submit="handleSubmit"
                 @preview-update="(d) => (previewData = d)"
+                @restore="restoreToSaved"
               >
-                <!-- Link-to-production card is rendered above the Save button via the #extra slot -->
+                <!--
+                  LinkToProduction card injected into the #extra slot.
+                  The blogId is available here so the card is fully functional.
+                -->
                 <template #extra>
                   <AdminBlogsLinkToProduction
                     :blog-id="blogId"
@@ -340,16 +373,22 @@ async function restoreToSaved() {
                 </template>
               </AdminBlogsForm>
 
-              <!-- Step navigation: → Photos -->
-              <div class="pt-2 border-t border-border">
+              <!-- Step navigation: ──────────────────────────────────────
+                   A clear, styled button at the bottom of step 1 that takes
+                   the user to step 2 without them having to scroll back up to
+                   the tab bar. Uses the accent colour so it stands out.
+              -->
+              <div
+                class="pt-2 border-t border-border flex items-center justify-end"
+              >
                 <button
                   type="button"
-                  class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border-2 border-accent text-accent font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:bg-accent hover:text-white"
                   @click="step = 'photos'"
                 >
                   {{ t("admin.blogs.image.multiTitle") }}
                   <svg
-                    class="w-3 h-3 shrink-0"
+                    class="w-3.5 h-3.5 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2.5"
@@ -368,23 +407,52 @@ async function restoreToSaved() {
             <!-- Step 2: Crop grid + item metadata -->
             <template v-if="step === 'photos'">
               <!--
-                ImageSection now delegates crop rendering to CropGrid and
-                metadata to ItemMetadata — it only owns the API orchestration.
+                ImageSection delegates crop rendering to CropGrid and metadata
+                to ItemMetadata. It only owns the API orchestration.
+                When a crop is uploaded the gallery is reloaded so the preview
+                hero updates without a full page refresh.
               -->
               <AdminBlogsImageSection
                 :blog-id="blogId"
                 @crop-uploaded="loadGallery"
               />
 
-              <!-- Step navigation: ← Content -->
-              <div class="pt-2 border-t border-border">
+              <!-- ── Bottom action row for step 2 ──────────────────────
+                   Step 2 has no form that owns its own FormActions, so we
+                   render a standalone action row here with:
+                   - Back to step 1 button (left)
+                   - Back to story list link (left, secondary)
+                   - Step 1 navigation button (right, accent-outlined)
+                   This mirrors the pattern from step 1 so the UX is consistent.
+              -->
+              <div
+                class="pt-4 border-t border-border flex items-center justify-between gap-3"
+              >
+                <!-- Left: back to list -->
+                <NuxtLink
+                  :to="ROUTES.admin.stories.base"
+                  class="inline-flex items-center gap-1.5 px-4 py-2.5 h-12 rounded-lg border border-border text-foreground font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:bg-muted/40"
+                >
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  {{ t("general.back") }}
+                </NuxtLink>
+
+                <!-- Right: navigate to step 1 (accent-outlined) -->
                 <button
                   type="button"
-                  class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 h-12 rounded-lg border-2 border-accent text-accent font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:bg-accent hover:text-white"
                   @click="step = 'content'"
                 >
                   <svg
-                    class="w-3 h-3 shrink-0"
+                    class="w-3.5 h-3.5 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2.5"
@@ -403,8 +471,15 @@ async function restoreToSaved() {
             </template>
           </div>
 
-          <!-- Right column: sticky live preview (desktop only) -->
-          <div class="hidden xl:block self-start sticky top-28">
+          <!-- ── Right column: sticky live preview (desktop XL+ only) ── -->
+          <!--
+            Only rendered on step 1 (content). The preview is meaningless for
+            the image upload step, and hiding it avoids a confusing empty column.
+          -->
+          <div
+            v-if="step === 'content'"
+            class="hidden xl:block self-start sticky top-28"
+          >
             <AdminBlogsPreview
               :data="{ ...previewData, id: blogId ?? undefined }"
               :header-crop="headerCrop"
@@ -412,8 +487,9 @@ async function restoreToSaved() {
           </div>
         </div>
 
-        <!-- Mobile: collapsible preview -->
+        <!-- ── Mobile: collapsible preview (step 1 only) ─────────────── -->
         <details
+          v-if="step === 'content'"
           class="xl:hidden group border border-border rounded-xl overflow-hidden mt-6"
         >
           <summary
