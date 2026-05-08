@@ -401,5 +401,35 @@
     "editTags": "Tags bewerken",
     "warning-title": "Toekomstige productie",
     "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld."
+  },
+  "csv": {
+    "templates": {
+      "productions": {
+        "description": "Gebruik dit bestand om producties aan te maken. Bevat velden voor ID, NL/EN titels en beschrijvingen, optionele artiest- en tagline-velden, credits en metadata."
+      },
+      "events": {
+        "description": "Gebruik dit bestand om evenementen toe te voegen. Bevat start-/eindtijden, optionele deur- en pauzetijden, locatievelden en verwijzing naar producties via legacy ID."
+      },
+      "tags": {
+        "description": "Gebruik dit bestand om tags aan te maken en aan producties te koppelen. Bevat Nederlandse en Engelse tag-namen en een komma-gescheiden lijst met productie-IDs."
+      },
+      "blogs": {
+        "description": "Gebruik dit bestand voor blogs (verhalen). Bevat NL/EN titels en omschrijvingen en koppeling naar een productie via legacy ID."
+      },
+      "prices": {
+        "description": "Gebruik dit bestand voor prijsinformatie. Bevat NL/EN prijsnaam, numerieke prijs en koppeling naar een evenement via legacy ID."
+      },
+      "labels": {
+        "mandatory": "Verplicht",
+        "nullable": "Optioneel",
+        "example": "Voorbeeld"
+      },
+      "general": {
+        "header": "Enkele disclaimers:",
+        "autoFill": "Als één van de taalvelden is ingevuld, wordt het andere automatisch ingevuld.",
+        "disclaimer": "Gebruik altijd de ID's uit vorige CSV-bestanden om nieuwe objecten te koppelen.",
+        "uniqueIds": "Zorg dat IDs uniek zijn voor evenementen en producties."
+      }
+    }
   }
 }

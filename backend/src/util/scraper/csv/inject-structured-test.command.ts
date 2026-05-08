@@ -55,7 +55,7 @@ export class InjectStructuredCsvTest extends CommandRunner {
           "structured_test_csv",
         );
 
-    const csvPaths = buildStructuredCsvPaths(resolvedBaseDir);
+    const csvPaths = this.buildStructuredCsvPaths(resolvedBaseDir);
 
     this.logger.log(
       `Structured CSV smoke test started. Base dir: ${resolvedBaseDir}`,
@@ -69,14 +69,4 @@ export class InjectStructuredCsvTest extends CommandRunner {
 
     this.logger.log("Structured CSV smoke test completed.");
   }
-}
-
-function buildStructuredCsvPaths(baseDir: string): StructuredCsvPaths {
-  return {
-    productions: path.join(baseDir, "productions_test.csv"),
-    events: path.join(baseDir, "events_test.csv"),
-    tags: path.join(baseDir, "tags_test.csv"),
-    blogs: path.join(baseDir, "blogs_test.csv"),
-    prices: path.join(baseDir, "prices_test.csv"),
-  };
 }
