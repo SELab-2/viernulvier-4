@@ -1,35 +1,30 @@
 <!--
   components/admin/productions/TagSelector.vue
 
-  Fully local tag selector — no API calls happen here.
-  Selected tags are emitted upward and persisted only when finish() is called.
-
-  Features:
-  - Shows all available tags (no show-more pagination needed in admin context)
-  - Toggle select/deselect
-  - Inline "create new tag" input
-  - Emits @change with the full array of selected TagItem objects
+  Pure display component for tag selection.
+  All state lives in the useProductionTags composable — this component
+  only reads the draft and emits mutations upward via @change.
 
   Props:
-    selected     — current selected tags (controlled from parent via composable)
-    mode         — 'create' | 'edit' (for showing reset button)
+    selected  — current ProductionTagItem[] draft from the composable
   Emits:
-    change       — TagItem[] whenever selection changes
-    reset        — user clicked the reset button
+    change    — ProductionTagItem[] whenever selection changes
 -->
 <script setup lang="ts">
 import type { TagView, PaginatedResponse } from "@repo/common";
-import type { TagItem } from "~/composables/productions/useProductionForm";
-import { Plus, X, RotateCcw } from "lucide-vue-next";
+import type {
+  ProductionTagItem,
+  ExistingTag,
+  NewTag,
+} from "~/composables/productions/steps/productionTags";
+import { Plus, X } from "lucide-vue-next";
 
 const props = defineProps<{
-  selected: TagItem[];
-  mode: "create" | "edit";
+  selected: ProductionTagItem[];
 }>();
 
 const emit = defineEmits<{
-  change: [TagItem[]];
-  reset: [];
+  change: [ProductionTagItem[]];
 }>();
 
 const { t, locale } = useI18n();
@@ -41,7 +36,7 @@ const newTagInput = ref("");
 const showNewTagInput = ref(false);
 const newTagInputRef = ref<HTMLInputElement | null>(null);
 
-// ─── Fetch all available tags ────────────────────────────────────────────────
+// ─── Fetch all available tags ─────────────────────────────────────────────────
 async function fetchTags() {
   isLoading.value = true;
   try {
@@ -73,21 +68,30 @@ async function fetchTags() {
 onMounted(fetchTags);
 watch(locale, fetchTags);
 
-// ─── Toggle an existing tag ──────────────────────────────────────────────────
+// ─── Toggle an existing tag ───────────────────────────────────────────────────
 function toggle(tag: TagView) {
   const current = [...props.selected];
-  const idx = current.findIndex((t) => t.id === tag.id);
+  const idx = current.findIndex(
+    (t): t is ExistingTag => t.type === "existing" && t.id === tag.id,
+  );
+
   if (idx === -1) {
-    emit("change", [...current, { id: tag.id, tag: tag.tag }]);
+    emit("change", [
+      ...current,
+      { type: "existing", id: tag.id, label: tag.tag } satisfies ExistingTag,
+    ]);
   } else {
     current.splice(idx, 1);
     emit("change", current);
   }
 }
 
-const isSelected = (id: number) => props.selected.some((t) => t.id === id);
+const isSelected = (id: number) =>
+  props.selected.some(
+    (t): t is ExistingTag => t.type === "existing" && t.id === id,
+  );
 
-// ─── Create a new tag (local only until finish) ──────────────────────────────
+// ─── Create a new tag (local-only until finish) ───────────────────────────────
 function openNewTagInput() {
   showNewTagInput.value = true;
   nextTick(() => newTagInputRef.value?.focus());
@@ -100,18 +104,17 @@ function confirmNewTag() {
     return;
   }
 
-  // Check for duplicates (case-insensitive)
-  const exists = [
+  const allLabels = [
     ...availableTags.value.map((t) => t.tag.toLowerCase()),
-    ...props.selected.filter((t) => t.isNew).map((t) => t.tag.toLowerCase()),
-  ].includes(label.toLowerCase());
+    ...props.selected
+      .filter((t): t is NewTag => t.type === "new")
+      .map((t) => t.label.toLowerCase()),
+  ];
 
-  if (!exists) {
-    // Use a temporary negative ID to distinguish from real IDs
-    const tempId = -Date.now();
+  if (!allLabels.includes(label.toLowerCase())) {
     emit("change", [
       ...props.selected,
-      { id: tempId, tag: label, isNew: true },
+      { type: "new", label } satisfies NewTag,
     ]);
   }
 
@@ -124,35 +127,28 @@ function cancelNewTag() {
   showNewTagInput.value = false;
 }
 
-function removeNewTag(id: number) {
+function removeNewTag(label: string) {
   emit(
     "change",
-    props.selected.filter((t) => t.id !== id),
+    props.selected.filter(
+      (t): boolean => !(t.type === "new" && t.label === label),
+    ),
   );
 }
+
+const newTags = computed(() =>
+  props.selected.filter((t): t is NewTag => t.type === "new"),
+);
 </script>
 
 <template>
   <div class="space-y-4">
-    <!-- Header row -->
-    <div class="flex items-center justify-between">
-      <p
-        class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
-      >
-        {{ t("admin.productions.tags.available", "Available tags") }}
-      </p>
-      <div class="flex items-center gap-2">
-        <!-- Reset button (edit mode only) -->
-        <button
-          v-if="mode === 'edit'"
-          class="flex items-center gap-1.5 h-7 px-3 rounded-lg border border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-foreground transition-all"
-          @click="emit('reset')"
-        >
-          <RotateCcw :size="10" stroke-width="3" />
-          {{ t("admin.productions.reset", "Reset") }}
-        </button>
-      </div>
-    </div>
+    <!-- Header -->
+    <p
+      class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
+    >
+      {{ t("admin.productions.tags.available", "Available tags") }}
+    </p>
 
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="flex flex-wrap gap-2">
@@ -165,7 +161,7 @@ function removeNewTag(id: number) {
     </div>
 
     <template v-else>
-      <!-- All available tags -->
+      <!-- Available tags + new tag button/input -->
       <div class="flex flex-wrap gap-2">
         <button
           v-for="tag in availableTags"
@@ -181,7 +177,7 @@ function removeNewTag(id: number) {
           {{ tag.tag }}
         </button>
 
-        <!-- New tag button -->
+        <!-- New tag trigger -->
         <button
           v-if="!showNewTagInput"
           class="h-8 px-3 rounded-full border border-dashed border-border text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:border-foreground hover:text-foreground transition-all flex items-center gap-1.5"
@@ -221,11 +217,8 @@ function removeNewTag(id: number) {
         </div>
       </div>
 
-      <!-- Selected new tags (isNew = not yet in DB) -->
-      <div
-        v-if="selected.some((t) => t.isNew)"
-        class="pt-2 border-t border-border"
-      >
+      <!-- Pending new tags (not yet in DB) -->
+      <div v-if="newTags.length > 0" class="pt-2 border-t border-border">
         <p
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2"
         >
@@ -238,14 +231,14 @@ function removeNewTag(id: number) {
         </p>
         <div class="flex flex-wrap gap-2">
           <div
-            v-for="tag in selected.filter((t) => t.isNew)"
-            :key="tag.id"
+            v-for="tag in newTags"
+            :key="tag.label"
             class="h-8 pl-3 pr-2 rounded-full border border-dashed border-accent bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest flex items-center gap-2"
           >
-            {{ tag.tag }}
+            {{ tag.label }}
             <button
               class="w-4 h-4 rounded-full hover:bg-accent/20 flex items-center justify-center transition-colors"
-              @click="removeNewTag(tag.id)"
+              @click="removeNewTag(tag.label)"
             >
               <X :size="8" stroke-width="3" />
             </button>

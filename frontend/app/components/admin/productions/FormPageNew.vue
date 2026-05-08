@@ -18,6 +18,7 @@ import { ChevronLeft, Check } from "lucide-vue-next";
 import { ROUTES } from "~/utils/routes";
 import { useProductionFormPage } from "~/composables/productions/useProductionFormPage";
 import type { ProductionCoreForm } from "~/composables/productions/steps/productionCore";
+import type { ProductionTagsForm } from "~/composables/productions/steps/productionTags";
 
 interface Props {
   mode: "create" | "edit";
@@ -174,14 +175,16 @@ onMounted(async () => {
           <!-- STEP 2 -->
           <template v-else-if="form.currentStep.value.id === 'tags'">
             <div class="border border-border rounded-2xl p-10">
-              <p class="text-sm text-muted-foreground">
-                {{
-                  t(
-                    "admin.productions.tags.placeholder",
-                    "Tags step placeholder",
-                  )
-                }}
-              </p>
+              <AdminProductionsTagSelector
+                :selected="
+                  form.currentStep.value.draft.value as ProductionTagsForm
+                "
+                @change="
+                  (tags) =>
+                    ((form.currentStep.value.draft
+                      .value as ProductionTagsForm) = tags)
+                "
+              />
             </div>
           </template>
 
