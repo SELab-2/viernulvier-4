@@ -1,16 +1,45 @@
-<!-- pages/index.vue -->
 <script setup lang="ts">
-import type { MediaCrop } from "@repo/common";
+import type { MediaCrop, TagView } from "@repo/common";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useHomeView } from "~/composables/home/useHomeView";
+
 definePageMeta({
   layout: "home",
 });
+
 const { fetchRandomImages } = useHomeView();
+const { getAll } = useTagApi();
+const { locale } = useI18n();
+
 const crops = ref<MediaCrop[]>([]);
+const tags = ref<TagView[]>([]);
 const currentIndex = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
+
+async function loadTags() {
+  try {
+    const resp = await getAll({
+      paginationFilters: { page: 0, limit: 100, descending: true },
+      languageFilters: { lang: locale.value as "nl" | "en" },
+    });
+
+    if (resp.data) {
+      const validTags = resp.data.objects.filter((tag) => tag.tag !== "N/A");
+      const shuffled = validTags.sort(() => 0.5 - Math.random());
+
+      // * NOTE: Currently we only take 15 tags but we could realistically do more.
+      tags.value = shuffled.slice(0, 15);
+    }
+  } catch {
+    // Silently fail if tags don't load.
+  }
+}
+
+watch(locale, loadTags);
+
 onMounted(async () => {
+  loadTags();
+
   const data = await fetchRandomImages();
   if (data) {
     crops.value = data;
@@ -21,6 +50,7 @@ onMounted(async () => {
     }
   }
 });
+
 onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
@@ -80,16 +110,11 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         <!-- Overflow clip for the scrolling track -->
         <div class="overflow-hidden">
           <div class="ticker-track">
-            <!--
-              Two identical copies of HomeRandomTags placed side-by-side.
-              When the first copy scrolls fully off-left the second copy
-              seamlessly takes its place — creating an infinite loop.
-            -->
             <div class="ticker-strip hero-tags" aria-hidden="false">
-              <HomeRandomTags />
+              <HomeTags :tags="tags" />
             </div>
             <div class="ticker-strip hero-tags" aria-hidden="true">
-              <HomeRandomTags />
+              <HomeTags :tags="tags" />
             </div>
           </div>
         </div>
@@ -100,97 +125,3 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
     </section>
   </main>
 </template>
-
-<style scoped>
-/* ── Hero image crossfade ── */
-.hero-fade-enter-active,
-.hero-fade-leave-active {
-  transition: opacity 1.5s ease-in-out;
-}
-.hero-fade-enter-from,
-.hero-fade-leave-to {
-  opacity: 0;
-}
-
-/* ── Ticker layout ── */
-.ticker-root {
-  position: absolute;
-}
-
-.ticker-track {
-  display: flex;
-  width: max-content;
-  /* Scroll the entire track leftward over 30 s, then snap back to start */
-  animation: ticker-scroll 30s linear infinite;
-}
-
-/* Pause scrolling when the user hovers anywhere on the ticker */
-.ticker-root:hover .ticker-track {
-  animation-play-state: paused;
-}
-
-.ticker-strip {
-  /* Each strip must NOT wrap so we get a single horizontal row of pills */
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0 1.5rem; /* breathing room between the two copies */
-  white-space: nowrap;
-}
-
-/* Force inner tags to stay on one line */
-.ticker-strip :deep(*) {
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-@keyframes ticker-scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-/* ── Side-edge fade masks ── */
-.ticker-mask-left,
-.ticker-mask-right {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 8rem;
-  z-index: 1;
-  pointer-events: none;
-}
-.ticker-mask-left {
-  left: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.6), transparent);
-}
-.ticker-mask-right {
-  right: 0;
-  background: linear-gradient(to left, rgba(0, 0, 0, 0.6), transparent);
-}
-
-/* ── Tag pill overrides — always dark regardless of theme ── */
-.hero-tags :deep(a),
-.hero-tags :deep(button),
-.hero-tags :deep([class*="badge"]),
-.hero-tags :deep([class*="tag"]),
-.hero-tags :deep([class*="pill"]),
-.hero-tags :deep(span) {
-  background-color: rgba(0, 0, 0, 0.45) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  backdrop-filter: blur(4px);
-  flex-shrink: 0;
-}
-
-.hero-tags :deep(a:hover),
-.hero-tags :deep(button:hover) {
-  background-color: rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-}
-</style>

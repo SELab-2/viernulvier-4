@@ -914,3 +914,85 @@
     display: none;
   }
 }
+
+/* ── Hero image crossfade ────────────────────────────────────────────────── */
+.hero-fade-enter-active,
+.hero-fade-leave-active {
+  transition: opacity 1.5s ease-in-out;
+}
+.hero-fade-enter-from,
+.hero-fade-leave-to {
+  opacity: 0;
+}
+
+/* ── Continuous Ticker Marquee ───────────────────────────────────────────── */
+.ticker-root {
+  position: absolute;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  gap: 0.5rem;
+  animation: ticker-scroll 30s linear infinite;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Pause scrolling on hover */
+.ticker-root:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ── Side-edge fade masks ── */
+.ticker-mask-left,
+.ticker-mask-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 8rem;
+  z-index: 1;
+  pointer-events: none;
+}
+.ticker-mask-left {
+  left: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.6), transparent);
+}
+.ticker-mask-right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.6), transparent);
+}
+
+/* ── Tag pill overrides (always dark over the hero image) ── */
+.hero-tags .tag-pill {
+  background-color: rgba(0, 0, 0, 0.45) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  backdrop-filter: blur(4px);
+}
+
+.hero-tags .tag-pill:hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+}
