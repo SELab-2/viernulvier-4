@@ -5,13 +5,15 @@ import { ROUTES } from "./utils/routes";
 import goatsImg from "../../assets/vnv_goats.jpg"; // :-)
 
 /**
- * This is the main error handling page and should be called whe fatal errors are thrown.
+ * This is the main error handling page and should be called when fatal errors are thrown.
  * In this file you can define custom display messages for certain error codes etc...
  */
 
 const props = defineProps({
   error: Object as () => NuxtError,
 });
+
+const { t } = useI18n();
 
 const handleGoHome = () => clearError({ redirect: ROUTES.home.base });
 
@@ -21,30 +23,30 @@ const is500 = computed(() => props.error?.status === 500);
 // add more here if desired.
 
 const errorTitle = computed(() => {
-  // Fallback to status if available, otherwise "Oops!"
-  return props.error?.status || "Oops!";
+  // Fallback to status if available, otherwise translate "Oops!"
+  return props.error?.status || t("error.titleFallback");
 });
 
 // main display messages:
 const errorSubtitle = computed(() => {
-  if (is404.value) return "You seem to have wandered off the path.";
-  if (is500.value) return "Something went completely wrong on our end.";
+  if (is404.value) return t("error.subtitle.404");
+  if (is500.value) return t("error.subtitle.500");
   // add more custom messages here if desired.
 
-  return "Well, this is unexpected.";
+  return t("error.subtitle.default");
 });
 
 // sub display messages:
 const errorMessage = computed(() => {
   if (is404.value) {
-    return "The page you are looking for doesn't exist or has been moved.";
+    return t("error.message.404");
   }
   if (is500.value) {
-    return "Our servers are having a little hiccup and we couldn't load this page.";
+    return t("error.message.500");
   }
   // add more custom messages here if desired.
 
-  return "something went wrong. Please try again.";
+  return t("error.message.default");
 });
 </script>
 
@@ -65,8 +67,7 @@ const errorMessage = computed(() => {
         {{ errorSubtitle }}
       </h2>
       <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto">
-        {{ errorMessage }} Please blame one or more of our developers in the
-        meantime :-)
+        {{ errorMessage }} {{ t("error.blame") }}
       </p>
 
       <!-- display the img -->
@@ -74,8 +75,8 @@ const errorMessage = computed(() => {
         class="w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl mb-10 border border-gray-200 dark:border-gray-800"
       >
         <img
+          :alt="t('error.imgAlt')"
           :src="goatsImg"
-          alt="Kinda goats"
           class="w-full h-auto object-cover aspect-video hover:scale-105 transition-transform duration-700 ease-in-out"
         />
       </div>
@@ -85,7 +86,7 @@ const errorMessage = computed(() => {
         class="px-8 py-4 bg-black text-white dark:bg-white dark:text-black rounded-full font-semibold text-lg hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
         @click="handleGoHome"
       >
-        Take Me Back Home
+        {{ t("error.goHome") }}
       </button>
     </div>
   </NuxtLayout>
