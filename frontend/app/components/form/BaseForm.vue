@@ -40,7 +40,7 @@
  * ]
  */
 
-import { computed, reactive, watch } from "vue";
+import { computed, reactive, watch, toRaw } from "vue";
 import type { FieldComponent, FormField } from "../../types/FormField";
 
 // Nuxt auto-import only works for direct template usage, therefore manual imports are needed here (since we use the components in script section)
@@ -145,7 +145,7 @@ watch(
   formState,
   (newVal) => {
     if (props.liveUpdate) {
-      emit("update", structuredClone(newVal));
+      emit("update", structuredClone(toRaw(newVal)));
     }
   },
   { deep: true },
@@ -154,7 +154,7 @@ watch(
 const multiSelectRefs = ref<InstanceType<typeof BaseMultiSelect>[]>([]); // references all instances of BaseMultiSelect
 
 function submit() {
-  emit("submit", structuredClone(formState.value));
+  emit("submit", structuredClone(toRaw(formState.value)));
 }
 
 function reset() {
@@ -166,7 +166,7 @@ function reset() {
    * currentStep.reset()
    */
   if (model.value) {
-    emit("update", structuredClone(model.value));
+    emit("update", structuredClone(toRaw(model.value)));
     return;
   }
 
