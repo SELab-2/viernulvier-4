@@ -983,16 +983,21 @@
   background: linear-gradient(to left, rgba(0, 0, 0, 0.6), transparent);
 }
 
-/* ── Tag pill overrides (always dark over the hero image) ── */
+/* ── Tag pill overrides (Purple-tinted glass for the hero) ── */
 .hero-tags .tag-pill {
-  background-color: rgba(0, 0, 0, 0.45) !important;
+  /* A deep, dark purple tint with transparency */
+  background-color: rgba(45, 15, 80, 0.55) !important;
   color: rgba(255, 255, 255, 0.9) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
+  /* A subtle border using a transparent version of your brand accent */
+  border-color: rgba(130, 36, 227, 0.4) !important;
   backdrop-filter: blur(4px);
 }
 
 .hero-tags .tag-pill:hover {
-  background-color: rgba(255, 255, 255, 0.18) !important;
+  /* Brighter, richer brand purple on hover */
+  background-color: rgba(130, 36, 227, 0.5) !important;
   color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
+  border-color: rgba(130, 36, 227, 0.9) !important;
+  /* Adds a subtle purple neon glow to make the hover pop */
+  box-shadow: 0 0 12px rgba(130, 36, 227, 0.4);
 }

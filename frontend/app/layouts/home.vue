@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col h-dvh overflow-hidden bg-background">
-    <AppHeader />
+    <AppHeader :is-home="true" />
 
     <main>
       <slot />

@@ -60,11 +60,9 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
 
 <template>
   <main class="w-full relative flex-1 flex flex-col bg-background">
-    <!-- ── Full-bleed Hero ─────────────────────────────────────────── -->
     <section
-      class="hero relative w-full min-h-[88vh] flex flex-col items-center justify-center overflow-hidden"
+      class="hero relative w-full h-dvh flex flex-col items-center justify-center overflow-hidden"
     >
-      <!-- Cycling background image -->
       <transition name="hero-fade">
         <MediaDisplay
           v-if="activeCrop"
@@ -75,24 +73,26 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         />
       </transition>
 
-      <!-- Always-dark base layer -->
-      <div class="absolute inset-0 bg-black/50 z-10" />
-      <!-- Directional gradient -->
       <div
-        class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70 z-10"
+        class="absolute inset-0 bg-background/60 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
       />
 
-      <!-- ── Hero text + search ── -->
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90 dark:from-black/40 dark:via-transparent dark:to-black/90 z-10 transition-colors duration-500"
+      />
+
       <div
         class="relative z-20 w-full max-w-2xl mx-auto px-6 text-center flex flex-col items-center gap-8"
       >
         <div class="space-y-3">
           <h1
-            class="text-5xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow-lg"
+            class="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground drop-shadow-lg transition-colors"
           >
             Doorzoek het archief
           </h1>
-          <p class="text-lg md:text-xl font-medium text-white/65">
+          <p
+            class="text-lg md:text-xl font-medium text-muted-foreground drop-shadow transition-colors"
+          >
             Vind producties, artikels en herinneringen
           </p>
         </div>
@@ -101,13 +101,28 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         </div>
       </div>
 
-      <!-- ── Tag ticker — pinned to the bottom of the hero ── -->
       <div class="ticker-root absolute bottom-0 inset-x-0 z-20 pb-10">
-        <!-- Soft edge masks so tags fade in/out at the sides -->
-        <div class="ticker-mask-left" />
-        <div class="ticker-mask-right" />
+        <div
+          class="ticker-mask-left dark:!bg-gradient-to-r dark:from-black/60 dark:to-transparent"
+          style="
+            background: linear-gradient(
+              to right,
+              var(--background),
+              transparent
+            );
+          "
+        />
+        <div
+          class="ticker-mask-right dark:!bg-gradient-to-l dark:from-black/60 dark:to-transparent"
+          style="
+            background: linear-gradient(
+              to left,
+              var(--background),
+              transparent
+            );
+          "
+        />
 
-        <!-- Overflow clip for the scrolling track -->
         <div class="overflow-hidden">
           <div class="ticker-track">
             <div class="ticker-strip hero-tags" aria-hidden="false">
@@ -119,9 +134,6 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
           </div>
         </div>
       </div>
-
-      <!-- Bottom page-background fade -->
-      <!-- <div class="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-t from-background to-transparent z-10" /> -->
     </section>
   </main>
 </template>

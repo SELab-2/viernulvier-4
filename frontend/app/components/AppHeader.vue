@@ -22,6 +22,17 @@ const headerRef = ref(null);
 const { t } = useI18n();
 const route = useRoute();
 
+const props = defineProps({
+  isHome: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const isTransparent = computed(() => {
+  return props.isHome && !isMenuOpen.value;
+});
+
 // ── Admin ────────────────────────────────────────────────────────────────
 
 const { isLoggedIn, isSuperAdmin, logout } = useAuth();
@@ -169,13 +180,17 @@ const adminNavItems = [
 <template>
   <header
     ref="headerRef"
-    :class="{ '-translate-y-full': !isVisible && !isMenuOpen }"
-    class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]"
+    :class="[
+      !isVisible && !isMenuOpen ? '-translate-y-full' : '',
+      isTransparent
+        ? 'absolute w-full bg-transparent border-transparent header-transparent'
+        : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)]',
+      'top-0 z-[100] transition-all duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]',
+    ]"
   >
     <div
       class="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
-      <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
       <div class="flex items-center justify-start">
         <nav
           v-if="!showAdminInterface"
@@ -192,7 +207,7 @@ const adminNavItems = [
         </nav>
 
         <button
-          class="lg:hidden text-[var(--foreground)] outline-none"
+          class="lg:hidden outline-none transition-colors text-[var(--foreground)]"
           @click.stop="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
@@ -200,7 +215,6 @@ const adminNavItems = [
         </button>
       </div>
 
-      <!-- ── Centre: logo ────────────────────────────────────────────────── -->
       <div class="flex justify-center">
         <div class="flex items-center gap-[10px]">
           <NuxtLink
@@ -224,14 +238,12 @@ const adminNavItems = [
         </div>
       </div>
 
-      <!-- ── Right: locale + dark-mode + logout ─────────────────────────── -->
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
         <div
           :class="[showAdminInterface ? 'hidden md:flex' : 'hidden sm:flex']"
           class="items-center gap-2 lg:gap-[15px]"
         >
           <LocaleSelector />
-
           <ThemeToggle :is-compact="showAdminInterface" />
         </div>
 
@@ -272,7 +284,6 @@ const adminNavItems = [
       </div>
     </nav>
 
-    <!-- ── Mobile hamburger menu ───────────────────────────────────────────── -->
     <div
       v-if="isMenuOpen"
       class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
@@ -315,7 +326,6 @@ const adminNavItems = [
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
         >
           <LocaleSelector />
-
           <ThemeToggle />
 
           <button
