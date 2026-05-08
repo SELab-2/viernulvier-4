@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
@@ -41,13 +41,7 @@ const productionId = computed(() => {
 const { data: production } = await useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
-    if (!productionId.value) {
-      throw createError({
-        status: 404,
-        statusText: "Not Found",
-        fatal: true,
-      });
-    }
+    if (!productionId.value) return null;
     const res = await getById(productionId.value, locale.value as any);
     return (res as any)?.data ?? res;
   },
