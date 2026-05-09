@@ -1,11 +1,30 @@
 <!--
-  components/admin/Editor.vue
-  Rich Text Editor (TipTap-based)
+  Admin Rich Text Editor
 
-  Key change vs original:
-  - EditorContent now has max-h-[360px] + overflow-y-auto so long articles
-    scroll within the editor while the toolbar stays pinned at the top.
-  - overflow-hidden removed from outer div so the inner scroll isn't clipped.
+  Custom TipTap-based rich text editor used throughout the admin panel for
+  creating and editing blog/story content.
+
+  Features:
+  - Two-way HTML content binding via v-model
+  - Formatting toolbar with common rich text controls
+  - Headings, lists, blockquotes, links, colors, and horizontal rules
+  - Custom font size extension built on top of TipTap TextStyle
+  - Localized placeholder and toolbar labels via i18n
+  - Scrollable editor area with persistent toolbar visibility
+
+  Technical details:
+  - Uses TipTap + StarterKit as the editor foundation
+  - Adds custom FontSize extension for inline font-size styling
+  - Syncs external model updates back into the editor instance
+  - Cleans up the editor instance on component unmount
+
+  UX considerations:
+  - Toolbar remains fixed while long content scrolls
+  - Supports active-state highlighting for formatting buttons
+  - Styled to match the admin design system
+
+  Used in:
+  - Admin story/blog create and edit forms
 -->
 <script setup lang="ts">
 import { useEditor, EditorContent } from "@tiptap/vue-3";
