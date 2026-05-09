@@ -58,22 +58,22 @@ const errorMessage = computed(() => {
     >
       <!-- display the error code -->
       <h1
-        class="text-7xl md:text-9xl font-black tracking-tighter mb-4 text-gray-900 dark:text-gray-100"
+        class="text-7xl md:text-9xl font-black tracking-tighter mb-4 text-foreground"
       >
         {{ errorTitle }}
       </h1>
 
       <!-- display the error message -->
-      <h2 class="text-2xl md:text-4xl font-bold mb-4">
+      <h2 class="text-2xl md:text-4xl font-bold mb-4 text-foreground">
         {{ errorSubtitle }}
       </h2>
-      <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto">
+      <p class="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
         {{ errorMessage }} {{ t("error.blame") }}
       </p>
 
       <!-- display the img -->
       <div
-        class="w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl mb-10 border border-gray-200 dark:border-gray-800"
+        class="w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl mb-10 border border-border"
       >
         <img
           :alt="t('error.imgAlt')"
@@ -84,7 +84,7 @@ const errorMessage = computed(() => {
 
       <!-- go home button -->
       <button
-        class="px-8 py-4 bg-black text-white dark:bg-white dark:text-black rounded-full font-semibold text-lg hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+        class="px-8 py-4 bg-primary text-primary-foreground rounded-full font-semibold text-lg hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
         @click="handleGoHome"
       >
         {{ t("error.goHome") }}
