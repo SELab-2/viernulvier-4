@@ -54,7 +54,7 @@ const errorMessage = computed(() => {
 <template>
   <NuxtLayout>
     <div
-      class="flex flex-col items-center justify-center min-h-[80vh] px-4 py-12 text-center"
+      class="bg-background flex flex-col items-center justify-center min-h-[80vh] px-4 py-12 text-center"
     >
       <!-- display the error code -->
       <h1
