@@ -1,4 +1,15 @@
 <script setup lang="ts">
+/**
+ * Combined CSV import section for admin create pages.
+ *
+ * Renders both:
+ * - CSV template download card
+ * - CSV upload action
+ *
+ * Props:
+ * - `target` (productions|events|tags|blogs|prices) — selects parser target and localized labels.
+ * - `disclaimer` (optional) — custom warning text shown in red above the tools.
+ */
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { ParserTarget } from "~/composables/useParserApi";
