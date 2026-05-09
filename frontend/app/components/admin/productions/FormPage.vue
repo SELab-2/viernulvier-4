@@ -246,9 +246,15 @@ onMounted(async () => {
               <!-- FINISH -->
               <button
                 v-else
-                class="h-11 px-8 bg-accent text-white rounded-lg text-[11px] font-black uppercase tracking-widest hover:opacity-80 active:scale-[0.98] transition-all"
+                class="h-11 px-8 bg-accent text-white rounded-lg text-[11px] font-black uppercase tracking-widest hover:opacity-80 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="form.isSubmitting.value"
+                @click="form.finish"
               >
-                {{ t("general.finish", "Finish") }}
+                {{
+                  form.isSubmitting.value
+                    ? t("general.saving", "Saving…")
+                    : t("general.finish", "Finish")
+                }}
               </button>
             </div>
           </div>
