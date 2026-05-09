@@ -37,7 +37,6 @@ const emit = defineEmits<{
 }>();
 
 // Two-way bindings for the four localised fields.
-// Using defineModel (Vue 3.4+) keeps the template clean.
 const titleNl = defineModel<string>("titleNl", { default: "" });
 const titleEn = defineModel<string>("titleEn", { default: "" });
 const creditsNl = defineModel<string>("creditsNl", { default: "" });
@@ -45,19 +44,7 @@ const creditsEn = defineModel<string>("creditsEn", { default: "" });
 </script>
 
 <template>
-  <div class="rounded-xl border border-card-border bg-card overflow-hidden">
-    <!-- Card header -->
-    <div
-      class="flex items-center gap-3 px-5 py-4 border-b border-card-border bg-card-hover"
-    >
-      <div class="w-1 h-5 rounded-full bg-accent shrink-0" />
-      <h2
-        class="font-brand font-black text-[11px] uppercase tracking-widest text-foreground"
-      >
-        {{ t("admin.blogs.image.metadataTitle") }}
-      </h2>
-    </div>
-
+  <FormSectionsSectionCard :title="t('admin.blogs.image.metadataTitle')">
     <!-- Fields -->
     <div class="p-5 space-y-0">
       <!--
@@ -93,5 +80,5 @@ const creditsEn = defineModel<string>("creditsEn", { default: "" });
         </button>
       </div>
     </div>
-  </div>
+  </FormSectionsSectionCard>
 </template>

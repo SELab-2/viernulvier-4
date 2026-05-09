@@ -179,7 +179,7 @@ onMounted(restoreFromStorage);
 </script>
 
 <template>
-  <AdminBlogsSectionCard
+  <FormSectionsSectionCard
     :title="t('admin.blogs.linkedProductions')"
     :subtitle="t('admin.blogs.linkedProductionsHint')"
   >
@@ -208,5 +208,5 @@ onMounted(restoreFromStorage);
         />
       </template>
     </div>
-  </AdminBlogsSectionCard>
+  </FormSectionsSectionCard>
 </template>

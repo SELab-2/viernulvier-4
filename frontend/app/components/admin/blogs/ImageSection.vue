@@ -8,7 +8,7 @@
   │  Delegates all API logic to useImageSection (composable).              │
   │  Owns only the template wiring and slot composition.                   │
   │                                                                        │
-  │  ┌── AdminBlogsSectionCard ─────────────────────────────────────────┐  │
+  │  ┌── FormSectionsSectionCard ───────────────────────────────────────┐  │
   │  │  Card shell with accent bar + title + subtitle                   │  │
   │  │                                                                  │  │
   │  │  ┌── AdminBlogsImageFeedback ──────────────────────────────┐     │  │
@@ -76,7 +76,7 @@ onMounted(loadGalleryAndItem);
 <template>
   <div class="space-y-4">
     <!-- Crop grid card -->
-    <AdminBlogsSectionCard
+    <FormSectionsSectionCard
       :title="t('admin.blogs.image.multiTitle')"
       :subtitle="t('admin.blogs.image.multiSubtitle')"
     >
@@ -95,7 +95,7 @@ onMounted(loadGalleryAndItem);
           @delete="handleDeleteCrop"
         />
       </div>
-    </AdminBlogsSectionCard>
+    </FormSectionsSectionCard>
 
     <!--
       Metadata card — disabled until at least one crop has been uploaded

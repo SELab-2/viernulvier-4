@@ -7,32 +7,14 @@
   1. "Title & Content"  — bilingual title + rich-text description + link-to-production.
                           Live preview panel (sticky on desktop, collapsible on mobile).
   2. "Header images"    — crop upload grid + item metadata card.
-                          Back + Save buttons are rendered at the bottom of this step
-                          so the user always has a consistent way to save and navigate.
+                          Live preview panel
 
-  Key behaviour differences from the create page:
-  - Reset and Create buttons are NOT shown (edit mode in AdminBlogsForm).
-  - A Restore button IS shown, allowing the user to discard unsaved changes by
-    re-fetching the last saved version from the server.
-  - Both step tabs are unlocked (the blog already exists).
-  - The step can be pre-selected via ?step=photos in the URL, which is used by
-    the create page after saving so the user lands directly on step 2.
+  The live preview is shown on BOTH steps in the right column (desktop XL+)
+  and in the collapsible panel (mobile). On step 2 the preview reflects the
+  uploaded header crop so the editor can see the result without switching tabs.
 
-  Component breakdown:
-  ┌─ edit/[id].vue (this file) ──────────────────────────────────────────────┐
-  │  Data: loads blog, gallery, headerCrop. Handles save + restore.          │
-  │                                                                          │
-  │  Step 1 (content tab)                                                    │
-  │  ├── AdminBlogsForm              title + description fields + actions    │
-  │  │     └── #extra slot           AdminBlogsLinkToProduction card         │
-  │  └── AdminBlogsPreview           live preview panel (desktop sticky)     │
-  │                                                                          │
-  │  Step 2 (photos tab)                                                     │
-  │  ├── AdminBlogsImageSection      crop grid + item metadata               │
-  │  │     ├── AdminBlogsCropGrid                                            │
-  │  │     └── AdminBlogsItemMetadata                                        │
-  │  └── Bottom action row           back link + purple save button          │
-  └──────────────────────────────────────────────────────────────────────────┘
+  The sticky preview column tracks the real rendered header height via a
+  ResizeObserver so it never slides underneath the sticky AppHeader.
 -->
 
 <script setup lang="ts">
@@ -46,12 +28,24 @@ import { useGallery } from "~/composables/media/useGallery";
 
 definePageMeta({ ssr: false });
 
-// Composables
+// ── Composables ───────────────────────────────────────────────────────────
 
 const route = useRoute();
 const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
+
+// ── Header height tracking ────────────────────────────────────────────────
+
+const headerHeight = ref(80);
+let headerObserver: ResizeObserver | null = null;
+
+function measureHeader() {
+  const header = document.querySelector("header");
+  if (header) headerHeight.value = header.getBoundingClientRect().height;
+}
+
+const previewTop = computed(() => `${headerHeight.value + 16}px`);
 
 // ── Route param ───────────────────────────────────────────────────────────
 
@@ -99,7 +93,7 @@ const headerCrop = computed(() =>
   gallery.value ? getMainImageCrop(gallery.value, "FE3_header") : null,
 );
 
-// ── Derived initial data for AdminBlogsForm ───────────────────────────────
+// ── Derived initial data ──────────────────────────────────────────────────
 
 /**
  * Unwrap the localised titel + description from the fetched Blog object.
@@ -162,8 +156,18 @@ onMounted(async () => {
   // Allow the create page to redirect straight to step 2 via ?step=photos.
   if (route.query.step === "photos") step.value = "photos";
 
-  // Load blog data and gallery in parallel for speed.
+  measureHeader();
+  const header = document.querySelector("header");
+  if (header) {
+    headerObserver = new ResizeObserver(measureHeader);
+    headerObserver.observe(header);
+  }
+
   await Promise.all([loadBlog(), loadGallery()]);
+});
+
+onUnmounted(() => {
+  headerObserver?.disconnect();
 });
 
 // ── Save ──────────────────────────────────────────────────────────────────
@@ -373,11 +377,6 @@ async function restoreToSaved() {
                 </template>
               </AdminBlogsForm>
 
-              <!-- Step navigation: ──────────────────────────────────────
-                   A clear, styled button at the bottom of step 1 that takes
-                   the user to step 2 without them having to scroll back up to
-                   the tab bar. Uses the accent colour so it stands out.
-              -->
               <div
                 class="pt-2 border-t border-border flex items-center justify-end"
               >
@@ -477,8 +476,8 @@ async function restoreToSaved() {
             the image upload step, and hiding it avoids a confusing empty column.
           -->
           <div
-            v-if="step === 'content'"
-            class="hidden xl:block self-start sticky top-28"
+            class="hidden xl:block self-start sticky"
+            :style="{ top: previewTop }"
           >
             <AdminBlogsPreview
               :data="{ ...previewData, id: blogId ?? undefined }"
