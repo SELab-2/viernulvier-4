@@ -108,6 +108,11 @@ async function handleSubmit(data: CreateBlog) {
           </div>
         </div>
       </div>
+
+      <AdminCsvImportCard
+        target="blogs"
+        :disclaimer="t('admin.csvImport.blogDisclaimer')"
+      />
     </div>
   </div>
 </template>
