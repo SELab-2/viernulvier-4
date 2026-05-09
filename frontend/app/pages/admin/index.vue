@@ -1,40 +1,91 @@
+<!--
+  pages/admin/index.vue
+  =====================
+  Admin dashboard home page.
+
+  Composed of:
+    - A welcome header showing the logged-in username
+    - A stat row (productions, blogs, events, prints)
+    - Quick-link cards to each admin section
+    - A password-reset card
+
+  Data is fetched via useAdminStats() which hits each API once
+  with limit:1 to read totalItems cheaply.
+-->
 <script setup lang="ts">
-const { isLoggedIn } = useAuth();
+import { ROUTES } from "~/utils/routes";
+import { useAdminStats } from "~/composables/useAdminStats";
+
+const { account, isLoggedIn, isSuperAdmin } = useAuth();
+const { stats, loading, fetchStats } = useAdminStats();
 
 // Guard: redirect to login if not authenticated
-onMounted(() => {
+onMounted(async () => {
   if (!isLoggedIn.value) {
-    navigateTo(ROUTES.admin.login.base);
+    await navigateTo(ROUTES.admin.login.base);
+    return;
   }
+  fetchStats();
 });
+
+// Stat card definitions — icon, label, route and which stats key to read
+const statCards = [
+  {
+    key: "productions",
+    label: "Productions",
+    icon: "🎭",
+    to: ROUTES.admin.productions.base,
+  },
+  { key: "blogs", label: "Stories", icon: "📖", to: ROUTES.admin.stories.base },
+  { key: "events", label: "Events", icon: "🎟", to: ROUTES.admin.events.base },
+  { key: "prints", label: "Prints", icon: "🖼", to: ROUTES.admin.prints.base },
+] as const;
 </script>
 
 <template>
-  <section class="min-h-screen bg-gray-50 py-16 px-6">
-    <div class="page-container">
-      <h1 class="text-4xl font-bold mb-6 text-gray-800">Admin Dashboard</h1>
-
-      <p class="text-lg text-gray-600 leading-relaxed mb-8">
-        Welcome to the admin dashboard! Here you can manage everything.
-      </p>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <NuxtLink
-          :to="ROUTES.admin.stories.base"
-          class="block p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
+  <div class="min-h-screen bg-background">
+    <div class="max-w-6xl mx-auto px-6 py-10 space-y-10">
+      <!-- Welcome header -->
+      <header>
+        <p
+          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground mb-1"
         >
-          <h2
-            class="text-xl font-semibold mb-2 text-gray-800 group-hover:text-primary transition-colors"
-          >
-            Stories & Blogs
-          </h2>
-          <p class="text-gray-600">
-            Create, edit and manage archive stories and blog posts.
-          </p>
-        </NuxtLink>
+          Admin dashboard
+        </p>
+        <h1
+          class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
+        >
+          Welcome back{{ account?.username ? `, ${account.username}` : "" }}
+        </h1>
+      </header>
+
+      <!-- Stat widgets row -->
+      <section>
+        <h2
+          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground mb-4"
+        >
+          Overview
+        </h2>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <AdminDashboardStatsWidget
+            v-for="card in statCards"
+            :key="card.key"
+            :label="card.label"
+            :icon="card.icon"
+            :to="card.to"
+            :count="stats[card.key]"
+            :loading="loading"
+          />
+        </div>
+      </section>
+
+      <!-- Quick-link cards -->
+      <AdminDashboardQuickLinks :is-super-admin="isSuperAdmin" />
+
+      <!-- Password reset -->
+      <div class="max-w-md">
+        <AdminDashboardPasswordReset />
       </div>
     </div>
-  </section>
+  </div>
 </template>
-
-<style scoped></style>
