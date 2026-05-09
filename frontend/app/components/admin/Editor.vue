@@ -22,9 +22,6 @@
   - Toolbar remains fixed while long content scrolls
   - Supports active-state highlighting for formatting buttons
   - Styled to match the admin design system
-
-  Used in:
-  - Admin story/blog create and edit forms
 -->
 <script setup lang="ts">
 import { useEditor, EditorContent } from "@tiptap/vue-3";
