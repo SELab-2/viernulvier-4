@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
 import { flushPromises } from "@vue/test-utils";
-import PrintsPage from "./index.vue";
+import PrintsPage from "../../app/pages/prints/index.vue";
 
 interface PrintApiPayload {
   paginationFilters: {
@@ -15,7 +15,7 @@ interface PrintApiPayload {
 }
 
 const mockGetAll = vi.fn();
-vi.mock("../../composables/media/usePrintApi", () => ({
+vi.mock("../../app/composables/media/usePrintApi", () => ({
   usePrintApi: () => ({ getAll: mockGetAll }),
 }));
 
@@ -55,6 +55,7 @@ describe("Prints Overview Page (Integration)", () => {
   test("handles initial page load, shows skeleton, then displays data", async () => {
     // Delay the mock promise to catch the loading state
     let resolveApi: (val: any) => void;
+
     mockGetAll.mockImplementation(
       () =>
         new Promise((resolve) => {
