@@ -74,11 +74,7 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
       </transition>
 
       <div
-        class="absolute inset-0 bg-background/60 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
-      />
-
-      <div
-        class="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90 dark:from-black/40 dark:via-transparent dark:to-black/90 z-10 transition-colors duration-500"
+        class="absolute inset-0 bg-background/25 dark:bg-black/60 backdrop-blur-md z-10 transition-all duration-500"
       />
 
       <div

@@ -138,7 +138,11 @@ onMounted(async () => {
   await loadPage(true);
 });
 
-onUnmounted(() => io?.disconnect());
+onUnmounted(() => {
+  io?.disconnect();
+  searchQuery.value = "";
+  dateFilter.value = {};
+});
 </script>
 
 <template>
