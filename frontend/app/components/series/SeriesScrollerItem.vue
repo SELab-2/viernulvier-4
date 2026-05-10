@@ -1,3 +1,14 @@
+<!--
+  A single scroller item for SeriesScroller:
+  - Displays a production's thumbnail and title, clickable to the production detail page.
+  - ThumbnailPlaceholder if production has no image.
+
+  Usage:
+  <SeriesScrollerItem
+    :production="production"
+  />
+-->
+
 <script setup lang="ts">
 import type { ProductionView } from "@repo/common";
 import { useProductionApi } from "~/composables/useProductionApi";

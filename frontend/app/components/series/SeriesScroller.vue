@@ -1,3 +1,17 @@
+<!--
+  A series display component:
+  - series title,
+  - series description
+  - horizontally scrollable list of linked productions
+  - empty state when no productions are linked
+
+  Usage:
+  <SeriesScroller
+    :series="series"
+    :productions="productions"
+  />
+-->
+
 <script setup lang="ts">
 import type { ProductionView, SeriesView } from "@repo/common";
 
