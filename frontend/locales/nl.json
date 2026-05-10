@@ -204,6 +204,9 @@
     "createSuccess": "Account \"{username}\" aangemaakt.",
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
+  "series": {
+    "noProductions": "Deze reeks bevat geen producties."
+  },
   "prints": {
     "types": {
       "all": "Alles",

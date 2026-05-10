@@ -203,6 +203,9 @@
     "createSuccess": "Created account \"{username}\".",
     "deleteSuccess": "Deleted account \"{username}\"."
   },
+  "series": {
+    "noProductions": "This serie doesn't contain any productions."
+  },
   "prints": {
     "types": {
       "all": "All",
