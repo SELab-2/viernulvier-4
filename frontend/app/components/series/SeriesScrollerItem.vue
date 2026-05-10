@@ -30,14 +30,14 @@ onMounted(async () => {
   >
     <!-- Thumbnail -->
     <div
-      class="mb-2 rounded-lg overflow-hidden border border-card-border group-hover:border-ring transition-colors"
+      class="w-32 sm:w-48 shrink-0 relative overflow-hidden rounded-lg mb-3"
+      style="min-height: 84px"
     >
       <MediaDisplay
         :id="production.id"
         :src="mainCrop"
         :show-icon="true"
-        size="md"
-        class="w-full h-full"
+        :rounded="true"
       />
     </div>
 

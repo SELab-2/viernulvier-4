@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import type { ProductionView, SeriesView } from "@repo/common";
+import type {
+  PaginatedResponse,
+  ProductionView,
+  SeriesView,
+} from "@repo/common";
 
 const seriesApi = useSeriesApi();
 const { locale } = useI18n();
@@ -17,7 +21,7 @@ const productions2 = ref<ProductionView[]>([]);
 const series3 = ref<SeriesView | null>(null);
 const productions3 = ref<ProductionView[]>([]);
 
-onMounted(async () => {
+async function loadAll() {
   const [s1Res, p1Res, s2Res, p2Res, s3Res, p3Res] = await Promise.all([
     seriesApi.getById(SERIES_ID_1, locale.value),
     seriesApi.getSeriesProductions(SERIES_ID_1, locale.value),
@@ -28,18 +32,27 @@ onMounted(async () => {
   ]);
 
   if (s1Res.data) series1.value = s1Res.data as SeriesView;
-  if (p1Res.data) productions1.value = (p1Res.data as any).objects ?? [];
+  if (p1Res.data)
+    productions1.value =
+      (p1Res.data as PaginatedResponse<ProductionView>).objects ?? [];
 
   if (s2Res.data) series2.value = s2Res.data as SeriesView;
-  if (p2Res.data) productions2.value = (p2Res.data as any).objects ?? [];
+  if (p2Res.data)
+    productions2.value =
+      (p2Res.data as PaginatedResponse<ProductionView>).objects ?? [];
 
   if (s3Res.data) series3.value = s3Res.data as SeriesView;
-  if (p3Res.data) productions3.value = (p3Res.data as any).objects ?? [];
-});
+  if (p3Res.data)
+    productions3.value =
+      (p3Res.data as PaginatedResponse<ProductionView>).objects ?? [];
+}
+
+watch(locale, loadAll);
+onMounted(loadAll);
 </script>
 
 <template>
-  <div class="p-8 max-w-4xl mx-auto flex flex-col gap-8">
+  <div class="page-container py-8 flex flex-col gap-8">
     <SeriesScroller
       v-if="series1"
       :series="series1"
