@@ -3,23 +3,25 @@
   =====================
   Admin dashboard home page.
 
-  Composed of:
-    - A welcome header showing the logged-in username
-    - A stat row (productions, blogs, events, prints)
-    - Quick-link cards to each admin section
-    - A password-reset card
+  Layout (desktop):
+    - Full-width welcome header with username + greeting
+    - 4-column stat widget row (non-clickable)
+    - Two-column section:
+        left  — password-reset card
+        right — quick-links sidebar (mirrors admin header nav)
 
-  Data is fetched via useAdminStats() which hits each API once
-  with limit:1 to read totalItems cheaply.
+  All user-facing text uses i18n keys from admin.dashboard.*.
+  Stats are fetched cheaply (limit:1) via useAdminStats().
 -->
 <script setup lang="ts">
 import { ROUTES } from "~/utils/routes";
 import { useAdminStats } from "~/composables/useAdminStats";
 
 const { account, isLoggedIn, isSuperAdmin } = useAuth();
+const { t } = useI18n();
 const { stats, loading, fetchStats } = useAdminStats();
 
-// Guard: redirect to login if not authenticated
+// Guard: redirect to login when not authenticated
 onMounted(async () => {
   if (!isLoggedIn.value) {
     await navigateTo(ROUTES.admin.login.base);
@@ -28,64 +30,79 @@ onMounted(async () => {
   fetchStats();
 });
 
-// Stat card definitions — icon, label, route and which stats key to read
+// Stat card definitions — i18n label, emoji icon, stats key to read
 const statCards = [
   {
-    key: "productions",
-    label: "Productions",
+    key: "productions" as const,
+    label: computed(() => t("admin.dashboard.productions")),
     icon: "🎭",
-    to: ROUTES.admin.productions.base,
   },
-  { key: "blogs", label: "Stories", icon: "📖", to: ROUTES.admin.stories.base },
-  { key: "events", label: "Events", icon: "🎟", to: ROUTES.admin.events.base },
-  { key: "prints", label: "Prints", icon: "🖼", to: ROUTES.admin.prints.base },
-] as const;
+  {
+    key: "blogs" as const,
+    label: computed(() => t("admin.dashboard.stories")),
+    icon: "📖",
+  },
+  {
+    key: "events" as const,
+    label: computed(() => t("admin.dashboard.events")),
+    icon: "🎟",
+  },
+  {
+    key: "prints" as const,
+    label: computed(() => t("admin.dashboard.prints")),
+    icon: "🖼",
+  },
+];
 </script>
 
 <template>
   <div class="min-h-screen bg-background">
     <div class="max-w-6xl mx-auto px-6 py-10 space-y-10">
       <!-- Welcome header -->
-      <header>
+      <header class="flex flex-col gap-1">
         <p
-          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground mb-1"
+          class="font-brand font-black text-[9px] uppercase tracking-[0.16em] text-muted-foreground"
         >
-          Admin dashboard
+          Admin
         </p>
         <h1
-          class="font-brand font-black text-3xl uppercase tracking-tight text-foreground"
+          class="font-brand font-black text-3xl sm:text-4xl uppercase tracking-tight text-foreground leading-none"
         >
-          Welcome back{{ account?.username ? `, ${account.username}` : "" }}
+          {{ t("admin.dashboard.welcome") }}
+          ,
+          <span v-if="account?.username" class="text-accent">
+            {{ account.username }}</span
+          >
         </h1>
       </header>
 
-      <!-- Stat widgets row -->
+      <!-- Stat widgets (non-clickable) -->
       <section>
-        <h2
-          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground mb-4"
+        <p
+          class="font-brand font-black text-[9px] uppercase tracking-[0.14em] text-muted-foreground mb-4"
         >
-          Overview
-        </h2>
+          {{ t("admin.dashboard.overview") }}
+        </p>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <AdminDashboardStatsWidget
             v-for="card in statCards"
             :key="card.key"
-            :label="card.label"
+            :label="card.label.value"
             :icon="card.icon"
-            :to="card.to"
             :count="stats[card.key]"
             :loading="loading"
           />
         </div>
       </section>
 
-      <!-- Quick-link cards -->
-      <AdminDashboardQuickLinks :is-super-admin="isSuperAdmin" />
-
-      <!-- Password reset -->
-      <div class="max-w-md">
+      <!-- Bottom section: password reset + quick links side by side -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <!-- Password reset card -->
         <AdminDashboardPasswordReset />
-      </div>
+
+        <!-- Quick links sidebar -->
+        <AdminDashboardQuikLinks :is-super-admin="isSuperAdmin" />
+      </section>
     </div>
   </div>
 </template>

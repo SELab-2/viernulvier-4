@@ -359,6 +359,32 @@
         "blogs": "verhalen",
         "prices": "prijzen"
       }
+    },
+    "dashboard": {
+      "welcome": "Welkom terug",
+      "overview": "Overzicht",
+      "quickLinks": "Snelkoppelingen",
+      "productions": "Producties",
+      "stories": "Verhalen",
+      "events": "Evenementen",
+      "prints": "Drukwerk",
+      "accounts": "Accounts",
+      "changePassword": "Wachtwoord wijzigen",
+      "changePasswordHint": "Werk het wachtwoord van je admin-account bij",
+      "newPassword": "Nieuw wachtwoord",
+      "newPasswordPlaceholder": "Minimaal 8 tekens",
+      "confirmPassword": "Bevestig nieuw wachtwoord",
+      "confirmPasswordPlaceholder": "Herhaal nieuw wachtwoord",
+      "updatePassword": "Wachtwoord bijwerken",
+      "updating": "Bijwerken…",
+      "passwordSuccess": "Wachtwoord succesvol bijgewerkt.",
+      "passwordTooShort": "Nieuw wachtwoord moet minimaal 8 tekens bevatten.",
+      "notAuthenticated": "Niet ingelogd.",
+      "productionsDesc": "Producties bekijken en bewerken",
+      "storiesDesc": "Blogberichten aanmaken en beheren",
+      "eventsDesc": "Evenementen bekijken en configureren",
+      "printsDesc": "Drukwerk uploaden en beheren",
+      "accountsDesc": "Admin-accounts beheren"
     }
   },
   "login": {

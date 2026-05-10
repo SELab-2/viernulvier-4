@@ -358,6 +358,32 @@
         "blogs": "stories",
         "prices": "prices"
       }
+    },
+    "dashboard": {
+      "welcome": "Welcome back",
+      "overview": "Overview",
+      "quickLinks": "Quick links",
+      "productions": "Productions",
+      "stories": "Stories",
+      "events": "Events",
+      "prints": "Prints",
+      "accounts": "Accounts",
+      "changePassword": "Change password",
+      "changePasswordHint": "Update your admin account password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Minimum 8 characters",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Repeat new password",
+      "updatePassword": "Update password",
+      "updating": "Updating…",
+      "passwordSuccess": "Password updated successfully.",
+      "passwordTooShort": "New password must be at least 8 characters.",
+      "notAuthenticated": "Not authenticated.",
+      "productionsDesc": "Browse and edit productions",
+      "storiesDesc": "Create and manage blog posts",
+      "eventsDesc": "View and configure events",
+      "printsDesc": "Upload and manage printed materials",
+      "accountsDesc": "Manage admin accounts"
     }
   },
   "login": {

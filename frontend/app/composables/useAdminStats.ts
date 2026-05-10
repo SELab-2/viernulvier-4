@@ -1,8 +1,8 @@
 // composables/useAdminStats.ts
 // ============================
-// Fetches total counts for productions, blogs, events and prints.
-// Each count comes from a single paginated API call (limit: 1) and reads
-// the totalItems field from the response, so only one item is transferred.
+// Fetches total item counts for productions, blogs, events and prints in
+// parallel. Each call uses limit:1 so only the totalItems metadata field
+// is needed — minimal network transfer.
 
 import { ref } from "vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
