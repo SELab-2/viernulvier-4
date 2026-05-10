@@ -4,6 +4,7 @@ import {
   AccountDto,
   ApiKeyDto,
   CreateAccountDto,
+  LoginDto,
   PublicAccountDto,
   UpdateAccountDto,
 } from "../dto/dto";
@@ -102,7 +103,7 @@ export class AccountDatabaseService {
    * @throws InvalidCredentialsException if an incorrect password is provided (401)
    */
   async loginAccount(
-    account: CreateAccountDto,
+    account: LoginDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     // 1. Fetch account by username
     const query = `

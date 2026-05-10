@@ -15,6 +15,7 @@ import { AuthService } from "./auth.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
@@ -30,6 +31,7 @@ import { SuperApiKeyGuard } from "./authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateAccountSchema,
+  LoginSchema,
   PaginatedResponse,
   PaginationFilterSchema,
   UpdateAccountSchema,
@@ -47,10 +49,10 @@ export class AuthController {
    * @returns The Account and their ApiKey.
    */
   @ApiOperation({ summary: "Logs into an existing account." })
-  @UsePipes(new ZodValidationPipe(CreateAccountSchema))
+  @UsePipes(new ZodValidationPipe(LoginSchema))
   @Post("login")
   async loginAccount(
-    @Body() account: CreateAccountDto,
+    @Body() account: LoginDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     return await this.authService.loginAccount(account);
   }
