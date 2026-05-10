@@ -204,7 +204,7 @@
     "deleteSuccess": "Deleted account \"{username}\"."
   },
   "series": {
-    "noProductions": "This serie doesn't contain any productions."
+    "noProductions": "This series doesn't contain any productions."
   },
   "prints": {
     "types": {
