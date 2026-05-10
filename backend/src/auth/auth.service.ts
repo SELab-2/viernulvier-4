@@ -4,6 +4,7 @@ import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
@@ -37,7 +38,7 @@ export class AuthService {
    * @returns An object containing the Account and ApiKey.
    */
   async loginAccount(
-    account: CreateAccountDto,
+    account: LoginDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     return await this.accountDbService.loginAccount(account);
   }

@@ -25,6 +25,7 @@ import {
   LanguageQuerySchema,
   LocationSchema,
   LocationViewSchema,
+  LoginSchema,
   MediaCropSchema,
   MediaGallerySchema,
   MediaItemSchema,
@@ -116,6 +117,7 @@ export class ReplacePriceDto extends createZodDto(ReplacePriceSchema) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
+export class LoginDto extends createZodDto(LoginSchema) {}
 export class UpdateAccountDto extends createZodDto(UpdateAccountSchema) {}
 export class PublicAccountDto extends createZodDto(PublicAccountSchema) {}
 export class AccountDto extends createZodDto(AccountSchema) {}

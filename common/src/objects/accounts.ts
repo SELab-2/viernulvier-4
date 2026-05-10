@@ -12,6 +12,10 @@ export const AccountSchema = z.object({
 export const CreateAccountSchema = AccountSchema.omit({
   id: true,
 });
+export const LoginSchema = AccountSchema.pick({
+  username: true,
+  password: true,
+});
 export const UpdateAccountSchema = AccountSchema.partial();
 
 // Public Account object.
@@ -21,6 +25,7 @@ export const PublicAccountSchema = AccountSchema.omit({
 
 // Type exports.
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
+export type LoginAccount = z.infer<typeof LoginSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
 export type PublicAccount = z.infer<typeof PublicAccountSchema>;
 export type Account = z.infer<typeof AccountSchema>;
