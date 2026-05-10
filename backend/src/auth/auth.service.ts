@@ -54,7 +54,9 @@ export class AuthService {
     const account: PublicAccountDto =
       await this.accountDbService.createAccount(createAccount);
 
-    const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey();
+    const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey(
+      createAccount.superAdmin,
+    );
     await this.accountDbService.linkAccountToKey(account.id, apiKey.id);
 
     return account;
