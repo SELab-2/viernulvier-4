@@ -14,10 +14,11 @@ import type {
 
 type ActiveMediaItemDraft = Extract<MediaItemDraft, { crops: unknown }>;
 
-defineProps<{
+const props = defineProps<{
   item: ActiveMediaItemDraft;
   index: number;
   cropNames: readonly CropName[];
+  getPreview: (crop: DraftCrop) => string | null;
 }>();
 
 const emit = defineEmits<{
@@ -28,17 +29,9 @@ const emit = defineEmits<{
     field: "title" | "description" | "credits",
     value: string,
   ];
-  getPreview: [crop: DraftCrop];
 }>();
 
 const { t } = useI18n();
-
-function previewUrl(crop: DraftCrop): string | null {
-  if (crop.type === "existing") return crop.url;
-  if (crop.type === "replaced") return URL.createObjectURL(crop.file);
-  if (crop.type === "new") return URL.createObjectURL(crop.file);
-  return null;
-}
 
 // Nicer label for each crop slot
 const cropLabels: Record<CropName, string> = {
@@ -53,7 +46,7 @@ const cropLabels: Record<CropName, string> = {
 
 <template>
   <div class="space-y-6">
-    <!-- ── Crop grid ──────────────────────────────────────────────────────── -->
+    <!-- Crop grid -->
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <div v-for="cropName in cropNames" :key="cropName" class="group relative">
         <p
@@ -68,8 +61,8 @@ const cropLabels: Record<CropName, string> = {
           class="relative aspect-video overflow-hidden rounded-lg border border-border bg-muted"
         >
           <img
-            v-if="previewUrl(item.crops[cropName])"
-            :src="previewUrl(item.crops[cropName])!"
+            v-if="props.getPreview(item.crops[cropName])"
+            :src="props.getPreview(item.crops[cropName])!"
             class="h-full w-full object-cover"
             alt=""
           />
@@ -118,7 +111,7 @@ const cropLabels: Record<CropName, string> = {
         <!-- Empty slot -->
         <label
           v-else
-          class="group/upload flex aspect-video cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted hover:border-accent hover:bg-card-hover transition-colors"
+          class="group/upload flex aspect-video cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted transition-colors hover:border-accent hover:bg-card-hover"
         >
           <ImagePlus
             :size="16"
@@ -139,7 +132,7 @@ const cropLabels: Record<CropName, string> = {
       </div>
     </div>
 
-    <!-- ── Metadata ───────────────────────────────────────────────────────── -->
+    <!-- Metadata -->
     <div
       class="grid grid-cols-1 gap-4 border-t border-border pt-2 sm:grid-cols-2"
     >

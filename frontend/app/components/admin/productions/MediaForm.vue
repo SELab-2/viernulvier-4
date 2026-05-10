@@ -23,7 +23,6 @@ import {
   ChevronDown,
   ChevronUp,
   ImagePlus,
-  X,
 } from "lucide-vue-next";
 import { CROP_NAMES } from "@repo/common";
 import type { CropName } from "@repo/common";
@@ -33,6 +32,7 @@ import type {
   DraftCrop,
 } from "~/composables/productions/steps/productionMedia";
 import { newItemDraft } from "~/composables/productions/steps/productionMedia";
+import { formatUrl } from "~/utils/formatters";
 
 type ActiveMediaItemDraft = Extract<MediaItemDraft, { crops: unknown }>;
 
@@ -160,7 +160,7 @@ function removeCrop(itemIndex: number, cropName: CropName) {
 }
 
 function getCropPreviewUrl(crop: DraftCrop): string | null {
-  if (crop.type === "existing") return crop.url;
+  if (crop.type === "existing") return formatUrl(crop.url);
   if (crop.type === "replaced") return URL.createObjectURL(crop.file);
   if (crop.type === "new") return URL.createObjectURL(crop.file);
   return null;
@@ -245,6 +245,7 @@ function toggleCollapse(index: number) {
           :item="mainItem"
           :index="mainItemIndex"
           :crop-names="CROP_NAMES"
+          :get-preview="getCropPreviewUrl"
           @delete="deleteItem(mainItemIndex)"
           @file-input="
             (cropName, e) => handleFileInput(mainItemIndex, cropName, e)
@@ -254,7 +255,6 @@ function toggleCollapse(index: number) {
             (locale, field, value) =>
               updateTranslation(mainItemIndex, locale, field, value)
           "
-          @get-preview="getCropPreviewUrl"
         />
       </div>
 
@@ -343,6 +343,7 @@ function toggleCollapse(index: number) {
               :item="item"
               :index="index"
               :crop-names="CROP_NAMES"
+              :get-preview="getCropPreviewUrl"
               @delete="deleteItem(index)"
               @file-input="(cropName, e) => handleFileInput(index, cropName, e)"
               @remove-crop="(cropName) => removeCrop(index, cropName)"
@@ -350,7 +351,6 @@ function toggleCollapse(index: number) {
                 (locale, field, value) =>
                   updateTranslation(index, locale, field, value)
               "
-              @get-preview="getCropPreviewUrl"
             />
           </div>
         </div>
