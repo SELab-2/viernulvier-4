@@ -11,7 +11,6 @@ export const AccountSchema = z.object({
 // Updating & Creating
 export const CreateAccountSchema = AccountSchema.omit({
   id: true,
-  superAdmin: true,
 });
 export const UpdateAccountSchema = AccountSchema.partial();
 
