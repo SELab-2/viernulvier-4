@@ -93,7 +93,10 @@ const fields = computed<FormField[]>(() => [
     name: "role",
     props: {
       label: t("accounts.role"),
-      options: [t("accounts.admin"), t("accounts.superAdmin")],
+      options: [
+        { label: t("accounts.admin"), value: "Admin" },
+        { label: t("accounts.superAdmin"), value: "Super Admin" },
+      ],
       required: true,
     },
   },
