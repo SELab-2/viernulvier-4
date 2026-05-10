@@ -72,8 +72,8 @@ export class AccountDatabaseService {
     const hashedPassword = await bcrypt.hash(account.password, 10);
 
     const query = `
-      INSERT INTO accounts (username, password)
-      VALUES ($1, $2)
+      INSERT INTO accounts (username, password, super_admin)
+      VALUES ($1, $2, $3)
       RETURNING id, username, super_admin AS "superAdmin"
     `;
 
@@ -81,6 +81,7 @@ export class AccountDatabaseService {
       const result = await this.db.query<PublicAccountDto>(query, [
         account.username,
         hashedPassword,
+        account.superAdmin,
       ]);
 
       return result[0];
