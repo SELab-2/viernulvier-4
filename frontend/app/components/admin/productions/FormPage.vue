@@ -32,6 +32,7 @@ import { ROUTES } from "~/utils/routes";
 import { useProductionFormPage } from "~/composables/productions/useProductionFormPage";
 import type { ProductionCoreForm } from "~/composables/productions/steps/productionCore";
 import type { ProductionTagsForm } from "~/composables/productions/steps/productionTags";
+import type { ProductionMediaForm } from "~/composables/productions/steps/productionMedia";
 
 interface Props {
   mode: "create" | "edit";
@@ -47,6 +48,7 @@ const form = useProductionFormPage(props.mode);
 const stepLabels = computed(() => [
   t("admin.productions.steps.core", "Core info"),
   t("admin.productions.steps.tags", "Tags"),
+  t("admin.productions.steps.media", "Media"),
 ]);
 
 const isFirstStep = computed(() => {
@@ -199,6 +201,20 @@ onMounted(async () => {
                 "
               />
             </div>
+          </template>
+
+          <!-- STEP 3 -->
+          <template v-else-if="form.currentStep.value.id === 'media'">
+            <AdminProductionsMediaForm
+              :model-value="
+                form.currentStep.value.draft.value as ProductionMediaForm
+              "
+              @update:model-value="
+                (val) =>
+                  ((form.currentStep.value.draft.value as ProductionMediaForm) =
+                    val)
+              "
+            />
           </template>
 
           <!-- ACTIONS -->
