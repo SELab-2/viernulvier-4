@@ -27,7 +27,7 @@ export default defineNuxtPlugin(() => {
       return ROUTES.admin.login.base;
     }
 
-    // now we know they have a
+    // now we know they have an api key
 
     // only accounts is a limited super route.
     const isSuperRoute = to.path.startsWith("/admin/accounts");
