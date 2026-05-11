@@ -1,6 +1,8 @@
 import { useProductionCore } from "~/composables/productions/steps/productionCore";
 import { useProductionTags } from "~/composables/productions/steps/productionTags";
 import { useProductionMedia } from "~/composables/productions/steps/productionMedia";
+import { useProductionEvents } from "~/composables/productions/steps/productionEvents";
+import type { EventCreatePayload } from "~/composables/productions/steps/productionEvents";
 import type {
   ItemCreate,
   ItemUpdate,
@@ -19,6 +21,8 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   const router = useRouter();
   const productionApi = useProductionApi();
   const tagApi = useTagApi();
+  const locationApi = useLocationApi();
+  const eventApi = useEventApi();
   const galleryApi = useGalleryApi();
   const itemApi = useItemApi();
   const cropApi = useCropApi();
@@ -27,8 +31,9 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   const core = useProductionCore();
   const tags = useProductionTags();
   const media = useProductionMedia();
+  const events = useProductionEvents();
 
-  const steps = [core, tags, media];
+  const steps = [core, tags, media, events];
 
   const currentStepIndex = ref(0);
   const isSubmitting = ref(false);
@@ -152,6 +157,28 @@ export function useProductionFormPage(mode: ProductionFormMode) {
     await itemApi.remove(item.id);
   }
 
+  // ─── Events helpers ──────────────────────────────────────────────────────────
+
+  /**
+   * Resolves a location for an event: creates a new one if needed, then
+   * returns the id to link. Returns null if no location should be linked.
+   */
+  async function resolveLocationId(
+    createLocation: string | null,
+    linkLocationId: number | null,
+  ): Promise<number | null> {
+    if (createLocation !== null) {
+      const res = await locationApi.create({
+        location: { nl: createLocation, en: createLocation },
+      });
+      if (!res.data)
+        throw new Error(`Failed to create location: ${createLocation}`);
+      return res.data.id;
+    }
+
+    return linkLocationId;
+  }
+
   // ─── Finish ──────────────────────────────────────────────────────────────────
 
   async function finish(): Promise<void> {
@@ -162,6 +189,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       const corePayload = core.extractPayload();
       const tagsPayload = tags.extractPayload();
       const mediaPayload = media.extractPayload();
+      const eventsPayload = events.extractPayload();
 
       // Remap from per-locale translation objects to LocalizedString fields
       const productionBody = {
@@ -237,6 +265,11 @@ export function useProductionFormPage(mode: ProductionFormMode) {
             await persistItemCreate(item, galleryId, productionId);
           }
         }
+
+        // 4. Events — create each one, then link its location
+        for (const event of eventsPayload.eventsToCreate) {
+          await persistEventCreate(event, productionId);
+        }
       } else {
         // Edit mode — id is guaranteed to be set
         const idParam = route.params.id;
@@ -293,11 +326,82 @@ export function useProductionFormPage(mode: ProductionFormMode) {
             await persistItemUpdate(item, productionId);
           }
         }
+
+        // 4. Events
+
+        // Delete: unlink location first, then delete the event
+        for (const event of eventsPayload.eventsToDelete) {
+          if (event.unlinkLocationId !== null) {
+            await eventApi.unlinkLocation(event.id);
+          }
+          await eventApi.remove(event.id);
+        }
+
+        // Update: patch datetime fields, then swap location if needed
+        for (const event of eventsPayload.eventsToUpdate) {
+          await eventApi.modify(event.id, {
+            starttime: event.starttime,
+            endtime: event.endtime,
+            doors_at: event.doors_at,
+            intermission_at: event.intermission_at,
+          });
+
+          const locationChanged =
+            event.unlinkLocationId !== null ||
+            event.linkLocationId !== null ||
+            event.createLocation !== null;
+
+          if (locationChanged) {
+            if (event.unlinkLocationId !== null) {
+              await eventApi.unlinkLocation(event.id);
+            }
+
+            const locationId = await resolveLocationId(
+              event.createLocation,
+              event.linkLocationId,
+            );
+            if (locationId !== null) {
+              await eventApi.linkLocation(event.id, locationId);
+            }
+          }
+        }
+
+        // Create new events
+        for (const event of eventsPayload.eventsToCreate) {
+          await persistEventCreate(event, productionId);
+        }
       }
 
       await router.push(ROUTES.admin.productions.base);
     } finally {
       isSubmitting.value = false;
+    }
+  }
+
+  // helper function to reduce code duplication for event creation in both create and edit modes
+  async function persistEventCreate(
+    event: EventCreatePayload,
+    productionId: number,
+  ): Promise<void> {
+    const created = await eventApi.create({
+      starttime: event.starttime,
+      endtime: event.endtime,
+      doors_at: event.doors_at,
+      intermission_at: event.intermission_at,
+      production_id: productionId,
+    });
+
+    if (!created.data) {
+      throw new Error("Failed to create event");
+    }
+
+    const locationId = await resolveLocationId(
+      event.createLocation,
+      event.linkLocationId,
+    );
+
+    if (locationId !== null) {
+      await eventApi.linkLocation(created.data.id, locationId);
     }
   }
 
