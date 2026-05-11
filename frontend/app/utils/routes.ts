@@ -44,7 +44,7 @@ export const ROUTES = {
       base: "/admin/series",
     },
     tags: {
-      base: "/tags/series",
+      base: "/admin/tags",
     },
     stories: {
       base: "/admin/stories",
