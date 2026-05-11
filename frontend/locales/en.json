@@ -400,5 +400,51 @@
     "editTags": "Edit tags",
     "warning-title": "Future production",
     "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
+  },
+  "error": {
+    "titleFallback": "Oops!",
+    "subtitle": {
+      "404": "You seem to have wandered off the path.",
+      "500": "Something went completely wrong on our end.",
+      "default": "Well, this is unexpected."
+    },
+    "message": {
+      "404": "The page you are looking for doesn't exist or has been moved.",
+      "500": "Our servers are having a little hiccup and we couldn't load this page.",
+      "default": "Something went wrong. Please try again."
+    },
+    "blame": "Please blame one or more of our developers in the meantime :-)",
+    "goHome": "Take Me Back Home",
+    "imgAlt": "Kinda goats"
+  },
+  "csv": {
+    "templates": {
+      "productions": {
+        "description": "Use this file to create productions. Contains fields for ID, NL/EN titles and descriptions, optional artist and tagline fields, credits and metadata."
+      },
+      "events": {
+        "description": "Use this file to add events. Contains start/end times, optional doors/intermission times, location fields and a reference to productions via legacy ID."
+      },
+      "tags": {
+        "description": "Use this file to create tags and attach them to productions. Contains Dutch and English tag names and a comma-separated list of production IDs."
+      },
+      "blogs": {
+        "description": "Use this file for blogs (stories). Contains NL/EN titles and descriptions and a link to a production via legacy ID."
+      },
+      "prices": {
+        "description": "Use this file for price information. Contains NL/EN price name, numeric price and a link to an event via legacy ID."
+      },
+      "labels": {
+        "mandatory": "Mandatory",
+        "nullable": "Optional",
+        "example": "Example"
+      },
+      "general": {
+        "header": "A few disclaimers:",
+        "autoFill": "If either language field is filled in, the other will be filled automatically.",
+        "disclaimer": "Always use the IDs from previous CSV files to link to new objects.",
+        "uniqueIds": "Ensure IDs are unique for events and productions."
+      }
+    }
   }
 }
