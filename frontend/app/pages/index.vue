@@ -74,55 +74,25 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
       </transition>
 
       <div
-        class="absolute inset-0 bg-background/60 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
+        class="absolute inset-0 bg-background/30 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
       />
 
       <div
-        class="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background/90 dark:from-black/40 dark:via-transparent dark:to-black/90 z-10 transition-colors duration-500"
-      />
-
-      <div
-        class="relative z-20 w-full max-w-2xl mx-auto px-6 text-center flex flex-col items-center gap-8"
+        class="relative z-20 w-full max-w-8xl mx-auto px-6 text-center flex flex-col items-center gap-10"
       >
         <div class="space-y-3">
           <h1
-            class="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground drop-shadow-lg transition-colors"
+            class="text-8xl md:text-7xl font-extrabold tracking-tight text-foreground drop-shadow-lg transition-colors"
           >
             Doorzoek het archief
           </h1>
-          <p
-            class="text-lg md:text-xl font-medium text-muted-foreground drop-shadow transition-colors"
-          >
-            Vind producties, artikels en herinneringen
-          </p>
         </div>
-        <div class="w-full max-w-xl">
+        <div class="w-full max-w-3xl">
           <HomeSearchBar />
         </div>
       </div>
 
       <div class="ticker-root absolute bottom-0 inset-x-0 z-20 pb-10">
-        <div
-          class="ticker-mask-left dark:!bg-gradient-to-r dark:from-black/60 dark:to-transparent"
-          style="
-            background: linear-gradient(
-              to right,
-              var(--background),
-              transparent
-            );
-          "
-        />
-        <div
-          class="ticker-mask-right dark:!bg-gradient-to-l dark:from-black/60 dark:to-transparent"
-          style="
-            background: linear-gradient(
-              to left,
-              var(--background),
-              transparent
-            );
-          "
-        />
-
         <div class="overflow-hidden">
           <div class="ticker-track">
             <div class="ticker-strip hero-tags" aria-hidden="false">
