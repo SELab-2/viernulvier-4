@@ -13,7 +13,8 @@
  * Architecture:
  * - Step 1 (core): localized production content form (fully integrated)
  * - Step 2 (tags): production tag selector (fully integrated, composable-driven)
- * - Preview panel: UI-only placeholder for future preview system
+ * - Step 3 (media): media gallery management
+ * - Step 4 (events): event management with location linking
  *
  * State management:
  * - Central orchestration is handled by useProductionFormPage
@@ -33,6 +34,7 @@ import { useProductionFormPage } from "~/composables/productions/useProductionFo
 import type { ProductionCoreForm } from "~/composables/productions/steps/productionCore";
 import type { ProductionTagsForm } from "~/composables/productions/steps/productionTags";
 import type { ProductionMediaForm } from "~/composables/productions/steps/productionMedia";
+import type { ProductionEventsForm } from "~/composables/productions/steps/productionEvents";
 
 interface Props {
   mode: "create" | "edit";
@@ -49,6 +51,7 @@ const stepLabels = computed(() => [
   t("admin.productions.steps.core", "Core info"),
   t("admin.productions.steps.tags", "Tags"),
   t("admin.productions.steps.media", "Media"),
+  t("admin.productions.steps.events", "Events"),
 ]);
 
 const isFirstStep = computed(() => {
@@ -213,6 +216,20 @@ onMounted(async () => {
                 (val) =>
                   ((form.currentStep.value.draft.value as ProductionMediaForm) =
                     val)
+              "
+            />
+          </template>
+
+          <!-- STEP 4 -->
+          <template v-else-if="form.currentStep.value.id === 'events'">
+            <AdminProductionsEventsForm
+              :model-value="
+                form.currentStep.value.draft.value as ProductionEventsForm
+              "
+              @update:model-value="
+                (val) =>
+                  ((form.currentStep.value.draft
+                    .value as ProductionEventsForm) = val)
               "
             />
           </template>
