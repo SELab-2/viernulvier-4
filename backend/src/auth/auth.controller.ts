@@ -26,7 +26,7 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
-import { SuperApiKeyGuard } from "./authGuard";
+import { ApiKeyGuard, SuperApiKeyGuard } from "./authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateAccountSchema,
@@ -128,5 +128,34 @@ export class AuthController {
     @Param("accountId", ParseIntPipe) accountId: number,
   ): Promise<boolean> {
     return await this.authService.deleteAccount(accountId);
+  }
+
+  /**
+   * Responds to a GET to "/auth/verify"
+   * @returns true if a valid standard key was provided
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Verifies that a standard key is valid" })
+  @ApiOkResponse({ description: "Key valid" })
+  @Get("verify")
+  verifyKey(): { valid: boolean } {
+    // If the request makes it past the ApiKeyGuard, the key is strictly valid.
+    return { valid: true };
+  }
+
+  /**
+   * Responds to a GET to "/auth/verify-super"
+   * @returns true if a super api key was provided
+   */
+  @UseGuards(SuperApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Verifies that a super admin key is valid" })
+  @ApiOkResponse({ description: "Super key valid" })
+  @Get("verify-super")
+  verifySuperKey(): { valid: boolean } {
+    // If the request makes it past the SuperApiKeyGuard, the key is strictly valid
+    // and has super privileges.
+    return { valid: true };
   }
 }
