@@ -1,4 +1,7 @@
 {
+  "home": {
+    "title": "Search the archive"
+  },
   "nav": {
     "home": "home",
     "archive": "archive",

@@ -68,7 +68,6 @@ function executeSearch(queryText: string, association?: SearchAssociation) {
       :fetchSuggestions="fetchSuggestions"
       :limit="5"
       :scrollLimit="5"
-      placeholder="Zoek naar een productie, artiest of thema..."
     />
   </div>
 </template>

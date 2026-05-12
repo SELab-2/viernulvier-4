@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  LocalizedStringNullableSchema,
-  type MediaCrop,
-  type TagView,
-} from "@repo/common";
+import { type MediaCrop, type TagView } from "@repo/common";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { useBlogView } from "~/composables/blogs/useBlogView";
 import { useHomeView } from "~/composables/home/useHomeView";
@@ -22,15 +18,20 @@ const {
 const { searchQuery: blogQuery, dateFilter: blogDate } = useBlogView();
 const { searchQuery: printQuery, activeFilter } = usePrintView();
 
+// Other composables.
 const { fetchRandomImages } = useHomeView();
 const { getAll } = useTagApi();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
+// References and the timer.
 const crops = ref<MediaCrop[]>([]);
 const tags = ref<TagView[]>([]);
 const currentIndex = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
 
+/**
+ * Loads all tags so they can be shown.
+ */
 async function loadTags() {
   try {
     const resp = await getAll({
@@ -50,8 +51,11 @@ async function loadTags() {
   }
 }
 
+// Watch the locale so we reload tags if locale changes.
 watch(locale, loadTags);
 
+// On mount we need to fetch some random images.
+// And reset all of the active filters.
 onMounted(async () => {
   loadTags();
 
@@ -75,10 +79,12 @@ onMounted(async () => {
   }
 });
 
+// We clear the timer when unmounted.
 onUnmounted(() => {
   if (timer) clearInterval(timer);
 });
 
+// The active crop to currently use and show!
 const activeCrop = computed(() => crops.value[currentIndex.value]);
 </script>
 
@@ -87,6 +93,9 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
     <section
       class="hero relative w-full h-dvh flex flex-col items-center justify-center overflow-hidden"
     >
+      <!--
+        The image shown in the background.
+      -->
       <transition name="hero-fade">
         <MediaDisplay
           v-if="activeCrop"
@@ -97,10 +106,16 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         />
       </transition>
 
+      <!--
+        Background Dim/Lightening.
+      -->
       <div
         class="absolute inset-0 bg-background/30 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
       />
 
+      <!--
+        The Search bar and Year picker.
+      -->
       <div
         class="relative z-20 w-full max-w-8xl mx-auto px-6 text-center flex flex-col items-center gap-10"
       >
@@ -108,7 +123,7 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
           <h1
             class="text-8xl md:text-7xl font-extrabold tracking-tight text-foreground drop-shadow-lg transition-colors"
           >
-            Doorzoek het archief
+            {{ t("home.title") }}
           </h1>
         </div>
         <div class="w-full max-w-3xl">
@@ -119,6 +134,9 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         </div>
       </div>
 
+      <!--
+        Bottom strip with moving tags.
+      -->
       <div class="ticker-root absolute bottom-0 inset-x-0 z-20 pb-10">
         <div class="overflow-hidden">
           <div class="ticker-track">

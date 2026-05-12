@@ -1,4 +1,7 @@
 {
+  "home": {
+    "title": "Doorzoek het archief"
+  },
   "nav": {
     "home": "home",
     "archive": "archief",
