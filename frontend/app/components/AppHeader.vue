@@ -115,7 +115,8 @@ watch(
 
 // ── Resize — close mobile menu on desktop ────────────────────────────────────
 const handleResize = () => {
-  if (window.innerWidth >= 1024) {
+  const breakpoint = showAdminInterface.value ? 1024 : 1280;
+  if (window.innerWidth >= breakpoint) {
     isMenuOpen.value = false;
     isVisible.value = true;
   }
@@ -175,13 +176,13 @@ const adminNavItems = [
     class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]"
   >
     <div
-      class="grid page-container grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
+      class="grid page-container grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6"
     >
       <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
       <div class="flex items-center justify-start">
         <nav
           v-if="!showAdminInterface"
-          class="hidden lg:flex gap-[20px] xl:gap-[30px]"
+          class="hidden xl:flex gap-[20px] xl:gap-[30px]"
         >
           <NuxtLink
             v-for="item in navItems"
@@ -194,7 +195,8 @@ const adminNavItems = [
         </nav>
 
         <button
-          class="lg:hidden text-[var(--foreground)] outline-none"
+          :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
+          class="text-[var(--foreground)] outline-none"
           @click.stop="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
@@ -252,9 +254,7 @@ const adminNavItems = [
       v-if="showAdminInterface"
       class="hidden lg:flex border-t-1 border-[var(--muted-foreground)] w-full bg-[var(--background)]"
     >
-      <div
-        class="mx-auto flex w-full max-w-[1400px] justify-between items-center px-12 lg:px-20 2xl:px-32"
-      >
+      <div class="page-container flex justify-between items-center">
         <NuxtLink
           v-for="item in adminNavItems"
           :key="item.route"
@@ -277,7 +277,8 @@ const adminNavItems = [
     <!-- ── Mobile hamburger menu ───────────────────────────────────────────── -->
     <div
       v-if="isMenuOpen"
-      class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
+      :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
+      class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] page-container py-8 shadow-xl"
     >
       <nav class="flex flex-col gap-6">
         <template v-if="showAdminInterface">
