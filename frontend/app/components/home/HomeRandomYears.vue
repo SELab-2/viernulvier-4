@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { Calendar } from "lucide-vue-next";
 import { ROUTES } from "~/utils/routes";
 
+// A range for years with it's label.
 interface YearRange {
   start: number;
   end: number;
   label: string;
 }
 
+// Composables.
 const router = useRouter();
 const { getAll } = useEventApi();
 const { dateFilter } = useArchiveView();
 
+// Props
+// Gap is how much years gap to leave between start-end
 const props = defineProps<{
   gap: number;
 }>();

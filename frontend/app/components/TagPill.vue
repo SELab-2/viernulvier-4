@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// Takes a label to show, whether to do it compactly and whether to make it clickable.
 defineProps<{
   label: string;
   compact?: boolean;

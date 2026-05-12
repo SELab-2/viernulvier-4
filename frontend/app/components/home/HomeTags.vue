@@ -3,13 +3,13 @@
 import { useRouter } from "vue-router";
 import type { TagView } from "@repo/common";
 
-// 1. Accept tags from the parent to ensure both strips are identical
+// Accept tags from the parent to ensure both strips are identical
 defineProps<{
   tags: TagView[];
 }>();
 
+// Composables
 const router = useRouter();
-// Assuming useArchiveView is an auto-imported composable in your Nuxt/Vue project
 const { tagIds } = useArchiveView();
 
 // Route to the archive page with the tag ID in the query string

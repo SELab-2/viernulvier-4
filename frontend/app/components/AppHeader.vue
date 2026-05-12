@@ -22,6 +22,7 @@ const headerRef = ref(null);
 const { t } = useI18n();
 const route = useRoute();
 
+// Accepts an isHome prop for when to go transparent.
 const props = defineProps({
   isHome: {
     type: Boolean,
@@ -191,6 +192,7 @@ const adminNavItems = [
     <div
       class="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
     >
+      <!-- ── Left: nav links (desktop) / hamburger (mobile) ────────────────-->
       <div class="flex items-center justify-start">
         <nav
           v-if="!showAdminInterface"
@@ -215,6 +217,7 @@ const adminNavItems = [
         </button>
       </div>
 
+      <!-- ── Centre: logo ────────────────────────────────────────────────── -->
       <div class="flex justify-center">
         <div class="flex items-center gap-[10px]">
           <NuxtLink
@@ -238,6 +241,7 @@ const adminNavItems = [
         </div>
       </div>
 
+      <!-- ── Right: locale + dark-mode + logout ─────────────────────────── -->
       <div class="flex items-center justify-end gap-2 lg:gap-[15px]">
         <div
           :class="[showAdminInterface ? 'hidden md:flex' : 'hidden sm:flex']"
@@ -284,6 +288,7 @@ const adminNavItems = [
       </div>
     </nav>
 
+    <!-- ── Mobile hamburger menu ───────────────────────────────────────────── -->
     <div
       v-if="isMenuOpen"
       class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"

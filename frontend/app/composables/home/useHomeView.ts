@@ -79,20 +79,30 @@ export function useHomeView() {
     });
   }
 
+  /**
+   * Applies a query to the productions page.
+   */
   function applyProductionSearch(query: string) {
     productionQuery.value = query;
   }
 
+  /**
+   * Applies a query to the prints page.
+   */
   function applyPrintQuery(query: string) {
     printQuery.value = query;
   }
 
+  /**
+   * Applies a query to the blogs page.
+   */
   function applyBlogQuery(query: string) {
     blogQuery.value = query;
   }
 
   // Media
 
+  // The amount of images to show on the home page.
   const IMAGE_AMOUNT: number = 10;
 
   /**
@@ -104,6 +114,7 @@ export function useHomeView() {
       paginationFilters: { limit: 1, page: 0, descending: true },
     });
 
+    // TODO: Improve randomness by fetching one by one and random number instead of page.
     const totalCrops: number = totalTest.data?.totalItems ?? 0;
     const totalPages: number = totalCrops / IMAGE_AMOUNT;
 

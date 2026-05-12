@@ -5,13 +5,13 @@ import { useRouter } from "vue-router";
 import { useHomeView } from "~/composables/home/useHomeView";
 import { SearchAssociation, type SearchSuggestion } from "~/types/Search";
 
+// Composables
 const {
   fetchSuggestions,
   applyProductionSearch,
   applyPrintQuery,
   applyBlogQuery,
 } = useHomeView();
-
 const router = useRouter();
 const searchQuery = ref("");
 
@@ -29,6 +29,7 @@ function handleSearch(query: string) {
   }
 }
 
+// Executes a search based on whether there was a suggestion or just a raw string.
 function executeSearch(queryText: string, association?: SearchAssociation) {
   const cleanQuery = queryText.trim();
   if (cleanQuery === "") return;
@@ -56,10 +57,6 @@ function executeSearch(queryText: string, association?: SearchAssociation) {
 </script>
 
 <template>
-  <!-- 
-    We set the height here (h-16) because your SearchBar uses `h-full`.
-    This gives it a prominent, large appearance for the hero section.
-  -->
   <div class="relative mx-auto w-full h-14 sm:h-16 shadow-sm">
     <SearchBar
       v-model="searchQuery"

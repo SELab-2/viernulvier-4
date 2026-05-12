@@ -8,7 +8,6 @@
     Shows only clicked category when clicked, default on first category.
 -->
 <script setup lang="ts">
-import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { PrintTypeValues, type PrintType } from "@repo/common";
 import { useI18n } from "vue-i18n";
 import { usePrintView } from "~/composables/media/usePrintView";
