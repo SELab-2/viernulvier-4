@@ -20,6 +20,10 @@ export const ROUTES = {
   events: {
     base: "/events",
   },
+  series: {
+    base: "/series",
+    byId: (id: number) => `/series/${id}`,
+  },
   prints: {
     base: "/prints",
   },
