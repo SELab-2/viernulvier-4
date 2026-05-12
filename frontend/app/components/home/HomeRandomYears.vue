@@ -1,8 +1,8 @@
-<!-- components/home/HomeRandomYears.vue -->
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { Calendar } from "lucide-vue-next";
+import { ROUTES } from "~/utils/routes";
 
 interface YearRange {
   start: number;
@@ -52,7 +52,6 @@ async function loadYears() {
   });
   const firstEvent = resp.data?.objects[0];
 
-  // If we have a first event we can load the lowest year.
   if (firstEvent !== undefined && firstEvent.endtime) {
     lowestYear.value = new Date(firstEvent.endtime).getFullYear();
   }
@@ -69,6 +68,7 @@ function goToRange(start: number, end: number) {
     after: startDate.toISOString().split("T")[0],
     before: endDate.toISOString().split("T")[0],
   };
+
   router.push({
     path: ROUTES.productions.base,
   });
@@ -78,22 +78,13 @@ onMounted(loadYears);
 </script>
 
 <template>
-  <div class="space-y-4">
-    <div
-      class="flex items-center gap-2 text-muted-foreground border-b border-border/30 pb-2"
-    >
-      <Calendar :size="14" stroke-width="3" class="text-accent" />
-      <span class="font-brand text-[10px] font-black uppercase tracking-widest">
-        Duik in de tijd
-      </span>
-    </div>
-
+  <div class="space-y-3">
     <div class="flex flex-wrap gap-2.5">
       <button
         v-for="range in ranges"
         :key="range.start"
         @click="goToRange(range.start, range.end)"
-        class="inline-flex h-8 items-center rounded border border-border/50 bg-transparent px-4 font-brand text-[12px] font-black italic tracking-widest text-foreground transition-all hover:scale-105 hover:border-foreground hover:bg-foreground hover:text-background focus:ring-2 focus:ring-foreground/50 outline-none"
+        class="inline-flex h-9 items-center justify-center rounded-full border border-border/30 bg-background/40 backdrop-blur-sm px-4 font-brand text-xs font-black uppercase tracking-widest text-foreground/80 transition-all duration-200 hover:border-accent/60 hover:bg-accent/15 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent/50 outline-none cursor-pointer"
       >
         {{ range.label }}
       </button>
