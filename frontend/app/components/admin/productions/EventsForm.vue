@@ -125,7 +125,7 @@ function toggleCollapse(index: number) {
 function eventLabel(event: ActiveEventDraft, position: number): string {
   const start = event.starttime;
   if (!start) {
-    return t("admin.productions.events.newEvent", "New event") + ` ${position}`;
+    return t("admin-productions.events.newEvent") + ` ${position}`;
   }
   try {
     return new Date(start).toLocaleString("nl-BE", {
@@ -155,15 +155,10 @@ function locationLabel(event: ActiveEventDraft): string | null {
         <p
           class="text-[11px] font-black uppercase tracking-widest text-foreground"
         >
-          {{ t("admin.productions.events.title", "Events") }}
+          {{ t("admin-productions.events.title") }}
         </p>
         <p class="mt-0.5 text-[10px] text-muted-foreground">
-          {{
-            t(
-              "admin.productions.events.hint",
-              "Each event is a single occurrence of this production",
-            )
-          }}
+          {{ t("admin-productions.events.hint") }}
         </p>
       </div>
 
@@ -172,7 +167,7 @@ function locationLabel(event: ActiveEventDraft): string | null {
         @click="addEvent"
       >
         <Plus :size="11" stroke-width="3" />
-        {{ t("admin.productions.events.add", "Add event") }}
+        {{ t("admin-productions.events.add") }}
       </button>
     </div>
 
@@ -198,14 +193,14 @@ function locationLabel(event: ActiveEventDraft): string | null {
                 v-if="event.location?.type === 'new'"
                 class="rounded bg-accent/15 px-1 py-0.5 text-[8px] font-black uppercase tracking-widest text-accent"
               >
-                {{ t("admin.productions.events.new", "New") }}
+                {{ t("admin-productions.events.new") }}
               </span>
             </p>
             <p
               v-else-if="!event.starttime"
               class="text-[9px] text-muted-foreground/60 italic"
             >
-              {{ t("admin.productions.events.noDateYet", "No date set yet") }}
+              {{ t("admin-productions.events.noDateYet") }}
             </p>
           </div>
 
@@ -214,7 +209,7 @@ function locationLabel(event: ActiveEventDraft): string | null {
               v-if="event.kind === 'new'"
               class="rounded-full bg-accent/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-accent"
             >
-              {{ t("admin.productions.events.new", "New") }}
+              {{ t("admin-productions.events.new") }}
             </span>
 
             <button
@@ -256,15 +251,10 @@ function locationLabel(event: ActiveEventDraft): string | null {
         <p
           class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.productions.events.empty", "No events yet") }}
+          {{ t("admin-productions.events.empty") }}
         </p>
         <p class="mt-1 text-[10px] text-muted-foreground/60">
-          {{
-            t(
-              "admin.productions.events.emptyHint",
-              "A production must have at least one event",
-            )
-          }}
+          {{ t("admin-productions.events.emptyHint") }}
         </p>
       </div>
     </div>

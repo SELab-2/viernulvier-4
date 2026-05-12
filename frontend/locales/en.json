@@ -243,6 +243,10 @@
     "add": "add"
   },
   "admin": {
+    "finish": "Finish",
+    "reset": "Reset",
+    "previous": "Previous",
+    "next": "Next",
     "back": "Back",
     "cancel": "Cancel",
     "save": "Save",
@@ -405,7 +409,63 @@
     "form-description2": "Description 2",
     "form-tagline": "Tagline",
     "form-credits": "Credits",
-    "form-artists": "Artists"
+    "form-artists": "Artists",
+    "steps": {
+      "core": "Core info",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Events"
+    },
+    "create-title": "New production",
+    "edit-title": "Edit production",
+    "events": {
+      "title": "Events",
+      "hint": "Each event is a single occurrence of this production",
+      "emptyHint": "A production must have at least one event",
+      "starttime": "Start time",
+      "endtime": "End time",
+      "optional": "Optional",
+      "doors_at": "Doors open",
+      "intermission_at": "Intermission",
+      "location": "Location",
+      "add": "Add event",
+      "new": "New",
+      "newEvent": "New event",
+      "searching": "Searching...",
+      "create": "Create",
+      "typeToSearch": "Type to search locations...",
+      "locationPlaceholder": "Search or create a location...",
+      "noDateYet": "No date set yet",
+      "empty": "No events yet"
+    },
+    "media": {
+      "title": "Title",
+      "description": "Description",
+      "credits": "Credits",
+      "main": "Main image",
+      "mainHint": "Used as the hero image on the production page",
+      "new": "New",
+      "add": "Add",
+      "replaced": "Replaced",
+      "replace": "Replace",
+      "upload": "Upload",
+      "optional": "Optional",
+      "required": "Required",
+      "noMain": "No main image added yet",
+      "carousel": "Carousel images",
+      "carouselHint": "Used as a collection of additional photos",
+      "carouselItem": "Carousel image",
+      "noCarousel": "No carousel images added yet",
+      "fallbackHint": "Falls back to NL"
+    },
+    "tags": {
+      "available": "Available tags",
+      "createNew": "New tag",
+      "newPlaceholder": "Tag name...",
+      "newTags": "New tags",
+      "selected": "Selected",
+      "clearTags": "Clear all"
+    }
   },
   "csv": {
     "templates": {

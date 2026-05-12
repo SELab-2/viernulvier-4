@@ -48,10 +48,10 @@ const router = useRouter();
 const form = useProductionFormPage(props.mode);
 
 const stepLabels = computed(() => [
-  t("admin.productions.steps.core", "Core info"),
-  t("admin.productions.steps.tags", "Tags"),
-  t("admin.productions.steps.media", "Media"),
-  t("admin.productions.steps.events", "Events"),
+  t("admin-productions.steps.core"),
+  t("admin-productions.steps.tags"),
+  t("admin-productions.steps.media"),
+  t("admin-productions.steps.events"),
 ]);
 
 const isFirstStep = computed(() => {
@@ -107,7 +107,7 @@ onMounted(async () => {
         >
           <ChevronLeft :size="14" stroke-width="3" />
 
-          {{ t("general.back", "Back") }}
+          {{ t("admin.back") }}
         </button>
 
         <!-- TITLE -->
@@ -116,8 +116,8 @@ onMounted(async () => {
         >
           {{
             props.mode === "create"
-              ? t("admin.productions.create.title", "New production")
-              : t("admin.productions.edit.title", "Edit production")
+              ? t("admin-productions.create-title")
+              : t("admin-productions.edit-title")
           }}
         </h1>
 
@@ -244,7 +244,7 @@ onMounted(async () => {
                 class="h-11 px-6 border border-border rounded-lg text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-foreground transition-all"
                 @click="prevStep"
               >
-                {{ t("general.previous", "Previous") }}
+                {{ t("admin.previous") }}
               </button>
 
               <!-- CANCEL -->
@@ -253,7 +253,7 @@ onMounted(async () => {
                 class="h-11 px-6 border border-border rounded-lg text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-foreground transition-all"
                 @click="goBack"
               >
-                {{ t("general.cancel", "Cancel") }}
+                {{ t("admin.cancel") }}
               </button>
             </div>
 
@@ -264,7 +264,7 @@ onMounted(async () => {
                 class="h-11 px-6 border border-border rounded-lg text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-foreground transition-all"
                 @click="form.resetCurrentStep"
               >
-                {{ t("general.reset", "Reset") }}
+                {{ t("admin.reset") }}
               </button>
 
               <!-- NEXT -->
@@ -273,7 +273,7 @@ onMounted(async () => {
                 class="h-11 px-8 bg-foreground text-background rounded-lg text-[11px] font-black uppercase tracking-widest hover:opacity-80 active:scale-[0.98] transition-all"
                 @click="nextStep"
               >
-                {{ t("general.next", "Next") }}
+                {{ t("admin.next") }}
               </button>
 
               <!-- FINISH -->
@@ -285,8 +285,8 @@ onMounted(async () => {
               >
                 {{
                   form.isSubmitting.value
-                    ? t("general.saving", "Saving…")
-                    : t("general.finish", "Finish")
+                    ? t("admin.saving")
+                    : t("admin.finish")
                 }}
               </button>
             </div>

@@ -77,8 +77,8 @@ const cropLabels: Record<CropName, string> = {
           >
             {{
               item.crops[cropName].type === "new"
-                ? t("admin.productions.media.new", "New")
-                : t("admin.productions.media.replaced", "Replaced")
+                ? t("admin-productions.media.new")
+                : t("admin-productions.media.replaced")
             }}
           </div>
 
@@ -97,7 +97,7 @@ const cropLabels: Record<CropName, string> = {
             <span
               class="rounded-md bg-foreground px-2 py-1 text-[8px] font-black uppercase tracking-widest text-background"
             >
-              {{ t("admin.productions.media.replace", "Replace") }}
+              {{ t("admin-productions.media.replace") }}
             </span>
             <input
               type="file"
@@ -120,7 +120,7 @@ const cropLabels: Record<CropName, string> = {
           <span
             class="mt-1.5 text-[8px] font-black uppercase tracking-widest text-muted-foreground transition-colors group-hover/upload:text-accent"
           >
-            {{ t("admin.productions.media.upload", "Upload") }}
+            {{ t("admin-productions.media.upload") }}
           </span>
           <input
             type="file"
@@ -146,7 +146,7 @@ const cropLabels: Record<CropName, string> = {
               v-if="locale === 'en'"
               class="font-medium normal-case tracking-normal text-muted-foreground"
             >
-              — {{ t("admin.productions.media.optional", "optional") }}
+              — {{ t("admin-productions.media.optional") }}
             </span>
           </p>
 
@@ -155,18 +155,15 @@ const cropLabels: Record<CropName, string> = {
             <label
               class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
             >
-              {{ t("admin.productions.media.title", "Title") }}
+              {{ t("admin-productions.media.title") }}
             </label>
             <input
               :value="item[locale].title"
               class="mt-1 h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
               :placeholder="
                 locale === 'nl'
-                  ? t('admin.productions.media.required', 'Required')
-                  : t(
-                      'admin.productions.media.fallbackHint',
-                      'Falls back to NL',
-                    )
+                  ? t('admin-productions.media.required')
+                  : t('admin-productions.media.fallbackHint')
               "
               @input="
                 emit(
@@ -184,7 +181,7 @@ const cropLabels: Record<CropName, string> = {
             <label
               class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
             >
-              {{ t("admin.productions.media.description", "Description") }}
+              {{ t("admin-productions.media.description") }}
             </label>
             <textarea
               :value="item[locale].description"
@@ -192,11 +189,8 @@ const cropLabels: Record<CropName, string> = {
               class="mt-1 w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
               :placeholder="
                 locale === 'nl'
-                  ? t('admin.productions.media.required', 'Required')
-                  : t(
-                      'admin.productions.media.fallbackHint',
-                      'Falls back to NL',
-                    )
+                  ? t('admin-productions.media.required')
+                  : t('admin-productions.media.fallbackHint')
               "
               @input="
                 emit(
@@ -214,18 +208,15 @@ const cropLabels: Record<CropName, string> = {
             <label
               class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
             >
-              {{ t("admin.productions.media.credits", "Credits") }}
+              {{ t("admin-productions.media.credits") }}
             </label>
             <input
               :value="item[locale].credits"
               class="mt-1 h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
               :placeholder="
                 locale === 'nl'
-                  ? t('admin.productions.media.required', 'Required')
-                  : t(
-                      'admin.productions.media.fallbackHint',
-                      'Falls back to NL',
-                    )
+                  ? t('admin-productions.media.required')
+                  : t('admin-productions.media.fallbackHint')
               "
               @input="
                 emit(

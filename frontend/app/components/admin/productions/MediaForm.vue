@@ -207,15 +207,10 @@ function toggleCollapse(index: number) {
           <p
             class="text-[11px] font-black uppercase tracking-widest text-foreground"
           >
-            {{ t("admin.productions.media.main", "Main image") }}
+            {{ t("admin-productions.media.main") }}
           </p>
           <p class="mt-0.5 text-[10px] text-muted-foreground">
-            {{
-              t(
-                "admin.productions.media.mainHint",
-                "Used as the hero image on the production page",
-              )
-            }}
+            {{ t("admin-productions.media.mainHint") }}
           </p>
         </div>
 
@@ -234,7 +229,7 @@ function toggleCollapse(index: number) {
             @click="addMainItem"
           >
             <Plus :size="11" stroke-width="3" />
-            {{ t("admin.productions.media.add", "Add") }}
+            {{ t("admin-productions.media.add") }}
           </button>
         </div>
       </div>
@@ -271,7 +266,7 @@ function toggleCollapse(index: number) {
         <p
           class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.productions.media.noMain", "No main image added yet") }}
+          {{ t("admin-productions.media.noMain") }}
         </p>
       </div>
     </div>
@@ -286,15 +281,10 @@ function toggleCollapse(index: number) {
           <p
             class="text-[11px] font-black uppercase tracking-widest text-foreground"
           >
-            {{ t("admin.productions.media.carousel", "Carousel images") }}
+            {{ t("admin-productions.media.carousel") }}
           </p>
           <p class="mt-0.5 text-[10px] text-muted-foreground">
-            {{
-              t(
-                "admin.productions.media.carouselHint",
-                "Shown in the image carousel below the hero",
-              )
-            }}
+            {{ t("admin-productions.media.carouselHint") }}
           </p>
         </div>
 
@@ -303,7 +293,7 @@ function toggleCollapse(index: number) {
           @click="addCarouselItem"
         >
           <Plus :size="11" stroke-width="3" />
-          {{ t("admin.productions.media.addCarousel", "Add") }}
+          {{ t("admin-productions.media.add") }}
         </button>
       </div>
 
@@ -318,7 +308,7 @@ function toggleCollapse(index: number) {
             <p
               class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
             >
-              {{ t("admin.productions.media.carouselItem", "Carousel image") }}
+              {{ t("admin-productions.media.carouselItem") }}
               {{ carouselItems.findIndex((ci) => ci.index === index) + 1 }}
             </p>
             <div class="flex items-center gap-2">
@@ -369,12 +359,7 @@ function toggleCollapse(index: number) {
         <p
           class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{
-            t(
-              "admin.productions.media.noCarousel",
-              "No carousel images added yet",
-            )
-          }}
+          {{ t("admin-productions.media.noCarousel") }}
         </p>
       </div>
     </div>

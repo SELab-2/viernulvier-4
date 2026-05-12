@@ -6,7 +6,6 @@
 -->
 <script setup lang="ts">
 import { MapPin, X, Plus } from "lucide-vue-next";
-import type { LocationView } from "@repo/common";
 import type {
   NewEventDraft,
   ExistingEventDraft,
@@ -182,7 +181,7 @@ function fromDatetimeLocalRequired(val: string): string {
         <label
           class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.productions.events.starttime", "Start time") }}
+          {{ t("admin-productions.events.starttime") }}
           <span class="ml-1 text-accent">*</span>
         </label>
         <input
@@ -205,11 +204,11 @@ function fromDatetimeLocalRequired(val: string): string {
         <label
           class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.productions.events.endtime", "End time") }}
+          {{ t("admin-productions.events.endtime") }}
           <span
             class="ml-1 text-[9px] font-medium normal-case tracking-normal text-muted-foreground"
           >
-            — {{ t("admin.productions.events.optional", "optional") }}
+            — {{ t("admin-productions.events.optional") }}
           </span>
         </label>
         <input
@@ -230,11 +229,11 @@ function fromDatetimeLocalRequired(val: string): string {
         <label
           class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.productions.events.doors_at", "Doors open") }}
+          {{ t("admin-productions.events.doors_at") }}
           <span
             class="ml-1 text-[9px] font-medium normal-case tracking-normal text-muted-foreground"
           >
-            — {{ t("admin.productions.events.optional", "optional") }}
+            — {{ t("admin-productions.events.optional") }}
           </span>
         </label>
         <input
@@ -255,11 +254,11 @@ function fromDatetimeLocalRequired(val: string): string {
         <label
           class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.productions.events.intermission_at", "Intermission") }}
+          {{ t("admin-productions.events.intermission_at") }}
           <span
             class="ml-1 text-[9px] font-medium normal-case tracking-normal text-muted-foreground"
           >
-            — {{ t("admin.productions.events.optional", "optional") }}
+            — {{ t("admin-productions.events.optional") }}
           </span>
         </label>
         <input
@@ -280,11 +279,11 @@ function fromDatetimeLocalRequired(val: string): string {
       <label
         class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
       >
-        {{ t("admin.productions.events.location", "Location") }}
+        {{ t("admin-productions.events.location") }}
         <span
           class="ml-1 text-[9px] font-medium normal-case tracking-normal text-muted-foreground"
         >
-          — {{ t("admin.productions.events.optional", "optional") }}
+          — {{ t("admin-productions.events.optional") }}
         </span>
       </label>
 
@@ -303,7 +302,7 @@ function fromDatetimeLocalRequired(val: string): string {
             v-if="isNewLocation"
             class="ml-0.5 rounded bg-accent/20 px-1 py-0.5 text-[8px]"
           >
-            {{ t("admin.productions.events.new", "New") }}
+            {{ t("admin-productions.events.new") }}
           </span>
         </div>
 
@@ -325,12 +324,7 @@ function fromDatetimeLocalRequired(val: string): string {
             v-model="locationQuery"
             type="text"
             class="h-9 w-full rounded-md border border-border bg-background py-0 pr-3 pl-8 text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
-            :placeholder="
-              t(
-                'admin.productions.events.locationPlaceholder',
-                'Search or create a location…',
-              )
-            "
+            :placeholder="t('admin-productions.events.locationPlaceholder')"
             @focus="
               locationQuery.length > 0 ? (showDropdown = true) : undefined
             "
@@ -356,7 +350,7 @@ function fromDatetimeLocalRequired(val: string): string {
                 v-if="isSearching"
                 class="px-4 py-3 text-[10px] font-medium text-muted-foreground"
               >
-                {{ t("admin.productions.events.searching", "Searching…") }}
+                {{ t("admin-productions.events.searching") }}
               </div>
 
               <template v-else>
@@ -388,9 +382,7 @@ function fromDatetimeLocalRequired(val: string): string {
                       stroke-width="2.5"
                     />
                     <span>
-                      {{
-                        t("admin.productions.events.createLocation", "Create")
-                      }}
+                      {{ t("admin-productions.events.create") }}
                       <span class="font-semibold">
                         "{{ locationQuery.trim() }}"
                       </span>
@@ -405,12 +397,7 @@ function fromDatetimeLocalRequired(val: string): string {
                   "
                   class="px-4 py-3 text-[10px] font-medium text-muted-foreground"
                 >
-                  {{
-                    t(
-                      "admin.productions.events.typeToSearch",
-                      "Type to search locations",
-                    )
-                  }}
+                  {{ t("admin-productions.events.typeToSearch") }}
                 </div>
               </template>
             </div>

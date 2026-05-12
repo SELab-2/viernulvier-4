@@ -147,7 +147,7 @@ const newTags = computed(() =>
     <p
       class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
     >
-      {{ t("admin.productions.tags.available", "Available tags") }}
+      {{ t("admin-productions.tags.available") }}
     </p>
 
     <!-- Loading skeleton -->
@@ -184,7 +184,7 @@ const newTags = computed(() =>
           @click="openNewTagInput"
         >
           <Plus :size="10" stroke-width="3" />
-          {{ t("admin.productions.tags.createNew", "New tag") }}
+          {{ t("admin-productions.tags.createNew") }}
         </button>
 
         <!-- Inline new tag input -->
@@ -196,9 +196,7 @@ const newTags = computed(() =>
             ref="newTagInputRef"
             v-model="newTagInput"
             class="bg-transparent outline-none text-[9px] font-black uppercase tracking-widest text-accent w-24 placeholder:text-accent/40"
-            :placeholder="
-              t('admin.productions.tags.newPlaceholder', 'Tag name…')
-            "
+            :placeholder="t('admin-productions.tags.newPlaceholder')"
             @keydown.enter="confirmNewTag"
             @keydown.escape="cancelNewTag"
           />
@@ -222,12 +220,7 @@ const newTags = computed(() =>
         <p
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2"
         >
-          {{
-            t(
-              "admin.productions.tags.newTags",
-              "New tags (will be created on finish)",
-            )
-          }}
+          {{ t("admin-productions.tags.newTags") }}
         </p>
         <div class="flex flex-wrap gap-2">
           <div
@@ -255,13 +248,13 @@ const newTags = computed(() =>
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
           {{ selected.length }}
-          {{ t("admin.productions.tags.selected", "selected") }}
+          {{ t("admin-productions.tags.selected") }}
         </p>
         <button
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
           @click="emit('change', [])"
         >
-          {{ t("archive.clear_tags", "Clear all") }}
+          {{ t("admin-productions.tags.clearTags") }}
         </button>
       </div>
     </template>

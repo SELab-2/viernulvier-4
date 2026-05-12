@@ -244,6 +244,10 @@
     "add": "voeg toe"
   },
   "admin": {
+    "finish": "Voltooien",
+    "reset": "Herstellen",
+    "previous": "Vorige",
+    "next": "Volgende",
     "back": "Terug",
     "cancel": "Annuleren",
     "save": "Opslaan",
@@ -406,7 +410,63 @@
     "form-description2": "Beschrijving 2",
     "form-tagline": "Tagline",
     "form-credits": "Credits",
-    "form-artists": "Artiesten"
+    "form-artists": "Artiesten",
+    "steps": {
+      "core": "Kerngegevens",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Evenementen"
+    },
+    "create-title": "Nieuwe productie",
+    "edit-title": "Productie bewerken",
+    "events": {
+      "title": "Evenementen",
+      "hint": "Elk evenement is een afzonderlijke uitvoering van deze productie",
+      "emptyHint": "Een productie moet ten minste één evenement hebben",
+      "starttime": "Begin tijd",
+      "endtime": "Eind tijd",
+      "optional": "Optioneel",
+      "doors_at": "Deuren open",
+      "intermission_at": "Pauze",
+      "location": "Locatie",
+      "add": "Evenement toevoegen",
+      "new": "Nieuw",
+      "newEvent": "Nieuw evenement",
+      "searching": "Zoeken...",
+      "create": "Aanmaken",
+      "typeToSearch": "Typ om locaties te zoeken...",
+      "locationPlaceholder": "Zoek of creëer een locatie...",
+      "noDateYet": "Nog geen datum ingesteld",
+      "empty": "Nog geen evenementen"
+    },
+    "media": {
+      "title": "Titel",
+      "description": "Beschrijving",
+      "credits": "Credits",
+      "main": "Hoofdafbeelding",
+      "mainHint": "Wordt gebruikt als hoofdafbeelding op de productiepagina",
+      "new": "Nieuw",
+      "add": "Toevoegen",
+      "replaced": "Vervangen",
+      "replace": "Vervang",
+      "upload": "Upload",
+      "optional": "Optioneel",
+      "required": "Verplicht",
+      "noMain": "Nog geen hoofdafbeelding toegevoegd",
+      "carousel": "Carrouselafbeeldingen",
+      "carouselHint": "Wordt gebruikt als verzameling van extra foto’s.",
+      "carouselItem": "Carrouselafbeeldingen",
+      "noCarousel": "Nog geen Carrouselafbeeldingen toegevoegd",
+      "fallbackHint": "Valt terug op NL"
+    },
+    "tags": {
+      "available": "Beschikbare tags",
+      "createNew": "Nieuwe tag",
+      "newPlaceholder": "Tag naam...",
+      "newTags": "Nieuwe tags",
+      "selected": "Geselecteerd",
+      "clearTags": "Alles wissen"
+    }
   },
   "csv": {
     "templates": {
