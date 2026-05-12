@@ -19,7 +19,7 @@ const { searchQuery: blogQuery, dateFilter: blogDate } = useBlogView();
 const { searchQuery: printQuery, activeFilter } = usePrintView();
 
 // Other composables.
-const { fetchRandomImages } = useHomeView();
+const { fetchSingleRandomImage } = useHomeView();
 const { getAll } = useTagApi();
 const { locale, t } = useI18n();
 
@@ -28,6 +28,9 @@ const crops = ref<MediaCrop[]>([]);
 const tags = ref<TagView[]>([]);
 const currentIndex = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
+
+// Track if we are currently fetching to prevent race conditions
+const isFetching = ref(false);
 
 /**
  * Loads all tags so they can be shown.
@@ -54,6 +57,21 @@ async function loadTags() {
 // Watch the locale so we reload tags if locale changes.
 watch(locale, loadTags);
 
+/**
+ * Helper to fetch and push a single image to our array safely.
+ */
+async function preloadNextImage() {
+  if (isFetching.value) return;
+  isFetching.value = true;
+
+  const newImage = await fetchSingleRandomImage();
+  if (newImage) {
+    crops.value.push(newImage);
+  }
+
+  isFetching.value = false;
+}
+
 // On mount we need to fetch some random images.
 // And reset all of the active filters.
 onMounted(async () => {
@@ -68,14 +86,21 @@ onMounted(async () => {
   printQuery.value = "";
   activeFilter.value = null;
 
-  const data = await fetchRandomImages();
-  if (data) {
-    crops.value = data;
-    if (crops.value.length > 0) {
-      timer = setInterval(() => {
-        currentIndex.value = (currentIndex.value + 1) % crops.value.length;
-      }, 5000);
-    }
+  const initialImage = await fetchSingleRandomImage();
+  if (initialImage) {
+    crops.value.push(initialImage);
+
+    // Immediately start loading the 2nd image in the background
+    preloadNextImage();
+
+    // Start the rolling timer
+    timer = setInterval(() => {
+      // Advance to the next image safely
+      currentIndex.value = (currentIndex.value + 1) % crops.value.length;
+
+      // As soon as we switch slides, trigger the fetch for the next upcoming slide
+      preloadNextImage();
+    }, 5000);
   }
 });
 

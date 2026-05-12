@@ -4,7 +4,6 @@ import { useBlogView } from "../blogs/useBlogView";
 import { useArchiveView } from "../useArchiveView";
 import { useCropApi } from "../media/useCropApi";
 import type { MediaCrop } from "@repo/common";
-import { rand } from "@vueuse/core";
 
 export function useHomeView() {
   const {
@@ -102,32 +101,34 @@ export function useHomeView() {
 
   // Media
 
-  // The amount of images to show on the home page.
-  const IMAGE_AMOUNT: number = 10;
-
   /**
-   * Fetches IMAGE_AMOUNT random images from the API to show.
-   * @returns The list of MediaCrop[].
+   * Fetches a single random image from the API.
    */
-  async function fetchRandomImages(): Promise<MediaCrop[]> {
-    const totalTest = await getCrops({
-      paginationFilters: { limit: 1, page: 0, descending: true },
-    });
+  async function fetchSingleRandomImage(): Promise<MediaCrop | null> {
+    try {
+      // Get total items quickly (limit: 1 is highly optimized)
+      const totalTest = await getCrops({
+        paginationFilters: { limit: 1, page: 0, descending: true },
+      });
 
-    // TODO: Improve randomness by fetching one by one and random number instead of page.
-    const totalCrops: number = totalTest.data?.totalItems ?? 0;
-    const totalPages: number = totalCrops / IMAGE_AMOUNT;
+      const totalCrops: number = totalTest.data?.totalItems ?? 0;
+      if (totalCrops === 0) return null;
 
-    const res = await getCrops({
-      paginationFilters: {
-        limit: IMAGE_AMOUNT,
-        page: rand(0, totalPages),
-        descending: true,
-      },
-    });
+      // Fetch exactly one random item
+      const res = await getCrops({
+        paginationFilters: {
+          limit: 1,
+          page: Math.floor(Math.random() * totalCrops),
+          descending: true,
+        },
+      });
 
-    const crops: MediaCrop[] = res.data?.objects ?? [];
-    return crops.filter((c) => c.url !== ""); // We can try to filter out empty urls.
+      const crop = res.data?.objects[0] ?? null;
+      return crop && crop.url !== "" ? crop : null;
+    } catch (error) {
+      console.error("Failed to fetch random image:", error);
+      return null;
+    }
   }
 
   return {
@@ -135,6 +136,6 @@ export function useHomeView() {
     applyProductionSearch,
     applyPrintQuery,
     applyBlogQuery,
-    fetchRandomImages,
+    fetchSingleRandomImage,
   };
 }
