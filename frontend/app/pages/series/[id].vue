@@ -115,19 +115,11 @@ onBeforeUnmount(() => {
 
         <!-- Header -->
         <div class="flex flex-col gap-6">
-          <div class="flex items-end justify-between gap-6 flex-wrap">
-            <h1
-              class="font-brand font-black uppercase italic leading-[0.85] tracking-[-3px] text-5xl lg:text-7xl"
-            >
-              {{ series?.titel }}
-            </h1>
-
-            <div
-              class="text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground font-black shrink-0"
-            >
-              {{ totalItems }} {{ t("nav.productions") }}
-            </div>
-          </div>
+          <h1
+            class="font-brand font-black uppercase italic leading-[0.85] tracking-[-3px] text-5xl lg:text-7xl"
+          >
+            {{ series?.titel }}
+          </h1>
 
           <div v-if="series?.description">
             <p
@@ -156,6 +148,13 @@ onBeforeUnmount(() => {
     <!-- Content section -->
     <section class="py-20">
       <div class="page-container">
+        <!-- Production count -->
+        <div
+          class="text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground font-black mb-6"
+        >
+          {{ totalItems }} {{ t("nav.productions") }}
+        </div>
+
         <!-- Production ListView -->
         <template v-if="series">
           <div v-if="productions.length" class="flex flex-col gap-3">
