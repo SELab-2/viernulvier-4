@@ -169,7 +169,7 @@ const cleanBody = computed(() => cleanText(body.value));
         <div class="page-container">
           <article class="relative w-full">
             <div
-              class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
+              class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
                 background: linear-gradient(
                   to bottom,
