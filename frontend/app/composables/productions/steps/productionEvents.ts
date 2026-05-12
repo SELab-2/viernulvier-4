@@ -1,7 +1,9 @@
+// productionEvents.ts
+// - Composable that manages event drafts for the production form step.
+// - Exposes the draft state, original snapshot, initialization/reset logic,
+//   a change-detection helper, and payload extraction for persistence.
 import type { ProductionFormStep } from "~/types/ProductionFormStep";
 import type { Event } from "@repo/common";
-
-// ─── Location draft types ─────────────────────────────────────────────────────
 
 export type ExistingLocation = {
   type: "existing";
@@ -16,12 +18,7 @@ export type NewLocation = {
 
 export type EventLocationDraft = ExistingLocation | NewLocation | null;
 
-// ─── Event draft types ────────────────────────────────────────────────────────
-
-/**
- * An event that already exists in the backend.
- * `deleted` drives whether it will be removed on finish.
- */
+// Event draft shapes used in the form model
 export type ExistingEventDraft =
   | {
       kind: "existing";
@@ -39,7 +36,6 @@ export type ExistingEventDraft =
       deleted: true;
     };
 
-/** An event that does not yet exist in the backend. */
 export type NewEventDraft = {
   kind: "new";
   starttime: string;
@@ -50,11 +46,9 @@ export type NewEventDraft = {
 };
 
 export type EventDraft = ExistingEventDraft | NewEventDraft;
-
 export type ProductionEventsForm = EventDraft[];
 
-// ─── Payload types ────────────────────────────────────────────────────────────
-
+// Payload types used when persisting changes
 export type EventCreatePayload = {
   kind: "create";
   starttime: string;
@@ -95,8 +89,6 @@ export type ProductionEventsPayload = {
   eventsToDelete: EventDeletePayload[];
 };
 
-// ─── Original snapshot type ───────────────────────────────────────────────────
-
 type OriginalEventSnapshot = {
   id: number;
   starttime: string;
@@ -106,8 +98,7 @@ type OriginalEventSnapshot = {
   location: ExistingLocation | null;
 };
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
+// Returns a new empty event draft (used when user adds an event)
 export function newEventDraft(): NewEventDraft {
   return {
     kind: "new",
@@ -119,12 +110,11 @@ export function newEventDraft(): NewEventDraft {
   };
 }
 
+// cloneLocation: small helper to copy a location draft safely
 function cloneLocation(loc: EventLocationDraft): EventLocationDraft {
   if (loc === null) return null;
   return { ...loc };
 }
-
-// ─── Composable ───────────────────────────────────────────────────────────────
 
 export function useProductionEvents(): ProductionFormStep<
   ProductionEventsForm,
@@ -133,18 +123,18 @@ export function useProductionEvents(): ProductionFormStep<
 > {
   const eventApi = useEventApi();
 
+  // Draft state and original snapshot are stored here
   const draft = ref<ProductionEventsForm>([]);
   const original = ref<OriginalEventSnapshot[] | null>(null);
-
-  // ─── Initialize ─────────────────────────────────────────────────────────────
 
   async function initialize(context: {
     mode: "create" | "edit";
     id?: string;
   }): Promise<void> {
+    // initialize behaves differently for create vs edit
     if (context.mode === "create") {
       original.value = null;
-      draft.value = [newEventDraft()]; // start with one empty event
+      draft.value = [];
       return;
     }
 
@@ -160,7 +150,6 @@ export function useProductionEvents(): ProductionFormStep<
 
     const events = Array.isArray(paginated.objects) ? paginated.objects : [];
 
-    // Fetch each event's linked location in parallel.
     const snapshots: OriginalEventSnapshot[] = await Promise.all(
       events.map(async (event) => {
         const locRes = await eventApi.getLocation(event.id, "nl");
@@ -199,11 +188,10 @@ export function useProductionEvents(): ProductionFormStep<
     );
   }
 
-  // ─── Reset ──────────────────────────────────────────────────────────────────
-
   function reset(): void {
+    // restore draft from original snapshot or clear for create
     if (!original.value) {
-      draft.value = [newEventDraft()];
+      draft.value = [];
       return;
     }
 
@@ -221,13 +209,20 @@ export function useProductionEvents(): ProductionFormStep<
     );
   }
 
-  // ─── Changed fields ──────────────────────────────────────────────────────────
-
   function getChangedFields(): string[] {
+    // Returns a list of identifiers for fields that changed — used by UI to show dirty state
     const changes: string[] = [];
 
     for (const event of draft.value) {
       if (event.kind === "new") {
+        const hasAnyField =
+          Boolean(event.starttime && event.starttime.trim() !== "") ||
+          Boolean(event.endtime) ||
+          Boolean(event.doors_at) ||
+          Boolean(event.intermission_at) ||
+          Boolean(event.location);
+        if (!hasAnyField) continue;
+
         changes.push(`new:${event.starttime || "unsaved"}`);
         continue;
       }
@@ -266,15 +261,13 @@ export function useProductionEvents(): ProductionFormStep<
     return changes;
   }
 
-  // ─── Extract payload ─────────────────────────────────────────────────────────
-
   function extractPayload(): ProductionEventsPayload {
+    // Build lists of create/update/delete payloads based on draft vs original
     const eventsToCreate: EventCreatePayload[] = [];
     const eventsToUpdate: EventUpdatePayload[] = [];
     const eventsToDelete: EventDeletePayload[] = [];
 
     for (const event of draft.value) {
-      // ── Deleted existing event ──────────────────────────────────────────────
       if (event.kind === "existing" && event.deleted) {
         const orig = original.value?.find((o) => o.id === event.id);
         eventsToDelete.push({
@@ -285,8 +278,11 @@ export function useProductionEvents(): ProductionFormStep<
         continue;
       }
 
-      // ── New event ───────────────────────────────────────────────────────────
       if (event.kind === "new") {
+        if (!event.starttime || event.starttime.trim() === "") {
+          continue;
+        }
+
         eventsToCreate.push({
           kind: "create",
           starttime: event.starttime,
@@ -301,7 +297,6 @@ export function useProductionEvents(): ProductionFormStep<
         continue;
       }
 
-      // ── Existing, not deleted ───────────────────────────────────────────────
       const orig = original.value?.find((o) => o.id === event.id);
       const origLocId = orig?.location?.id ?? null;
       const draftLocId =
@@ -316,7 +311,6 @@ export function useProductionEvents(): ProductionFormStep<
         endtime: event.endtime,
         doors_at: event.doors_at,
         intermission_at: event.intermission_at,
-        // Only unlink if the location actually changed
         unlinkLocationId: locationChanged ? origLocId : null,
         linkLocationId:
           locationChanged && event.location?.type === "existing"

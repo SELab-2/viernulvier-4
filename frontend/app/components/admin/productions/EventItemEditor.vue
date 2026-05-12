@@ -1,14 +1,8 @@
 <!--
-  components/admin/productions/EventItemEditor.vue
-
-  Renders all editable fields for a single EventDraft that is not deleted.
-  Purely display — all mutations bubble up via emits to EventsForm.
-
-  Props:
-    event     — the active (non-deleted) event draft
-    index     — its index in the parent items array
-  Emits:
-    update    — full updated draft (parent replaces it in the array)
+  EventItemEditor.vue
+  - Small editor for a single event entry (start/end times, optional times, location).
+  - Hosts the location search UI which teleports the dropdown to document.body to avoid ancestor clipping.
+  - Emits update events with draft changes.
 -->
 <script setup lang="ts">
 import { MapPin, X, Plus } from "lucide-vue-next";
@@ -36,15 +30,15 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const locationApi = useLocationApi();
 
-// ─── Location search ──────────────────────────────────────────────────────────
-
 const locationQuery = ref("");
 const locationResults = ref<ExistingLocation[]>([]);
 const isSearching = ref(false);
 const showDropdown = ref(false);
-const dropdownEl = ref<HTMLElement | null>(null);
 
-// Debounced search
+const inputWrapper = ref<HTMLElement | null>(null);
+const dropdownEl = ref<HTMLElement | null>(null);
+const dropdownStyles = ref<Record<string, string>>({});
+
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(locationQuery, (val) => {
@@ -64,35 +58,66 @@ async function fetchLocations(query: string) {
       locationFilters: { location: query },
       languageFilters: { lang: "nl" },
     });
-    const paginated = res.data as { data?: LocationView[] } | null;
-    const items: LocationView[] = paginated?.data ?? [];
-    locationResults.value = items.map((loc: LocationView) => ({
+
+    const raw = (res && (res.data as any)) || null;
+    const maybeData = raw?.data ?? raw?.objects ?? raw;
+    const itemsArr = Array.isArray(maybeData) ? maybeData : [];
+
+    locationResults.value = itemsArr.map((loc: any) => ({
       type: "existing" as const,
-      id: loc.id,
-      label: loc.location,
+      id: Number(loc.id),
+      label: loc.location ?? loc.name ?? String(loc.id ?? ""),
     }));
+
     showDropdown.value = true;
+    updateDropdownPosition();
   } catch {
     locationResults.value = [];
+    showDropdown.value = false;
   } finally {
     isSearching.value = false;
   }
 }
 
-// Close dropdown on outside click
 onMounted(() => {
   document.addEventListener("mousedown", onClickOutside);
+  window.addEventListener("resize", updateDropdownPosition);
+  window.addEventListener("scroll", updateDropdownPosition, true);
 });
 onUnmounted(() => {
   document.removeEventListener("mousedown", onClickOutside);
+  window.removeEventListener("resize", updateDropdownPosition);
+  window.removeEventListener("scroll", updateDropdownPosition, true);
 });
 function onClickOutside(e: MouseEvent) {
-  if (dropdownEl.value && !dropdownEl.value.contains(e.target as Node)) {
-    showDropdown.value = false;
+  const target = e.target as Node;
+  if (
+    (inputWrapper.value && inputWrapper.value.contains(target)) ||
+    (dropdownEl.value && dropdownEl.value.contains(target))
+  ) {
+    return;
   }
+  showDropdown.value = false;
 }
 
-// ─── Location mutations ───────────────────────────────────────────────────────
+function updateDropdownPosition() {
+  if (!inputWrapper.value || !showDropdown.value) {
+    dropdownStyles.value = {};
+    return;
+  }
+  const rect = inputWrapper.value.getBoundingClientRect();
+  dropdownStyles.value = {
+    position: "fixed",
+    top: `${rect.bottom}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
+    zIndex: "9999",
+  };
+}
+
+watch([showDropdown, locationResults, isSearching, locationQuery], () =>
+  updateDropdownPosition(),
+);
 
 function selectExistingLocation(loc: ExistingLocation) {
   emit("update", { ...props.event, location: loc });
@@ -113,8 +138,6 @@ function clearLocation() {
   emit("update", { ...props.event, location: null });
 }
 
-// ─── Field mutations ──────────────────────────────────────────────────────────
-
 function updateRequiredField(field: "starttime", value: string) {
   emit("update", { ...props.event, [field]: value });
 }
@@ -126,8 +149,6 @@ function updateOptionalField(
   emit("update", { ...props.event, [field]: value });
 }
 
-// ─── Derived ─────────────────────────────────────────────────────────────────
-
 const locationDisplay = computed(() => {
   const loc = props.event.location;
   if (!loc) return null;
@@ -136,32 +157,25 @@ const locationDisplay = computed(() => {
 
 const isNewLocation = computed(() => props.event.location?.type === "new");
 
-// ─── Datetime helpers ─────────────────────────────────────────────────────────
-
-/**
- * Converts a stored ISO datetime string to the "YYYY-MM-DDTHH:mm" format
- * that <input type="datetime-local"> expects. Returns "" for null/empty.
- */
 function toDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
   return iso.slice(0, 16);
 }
 
-/**
- * Converts a datetime-local input value back to a full ISO string.
- * The browser gives us "YYYY-MM-DDTHH:mm" — we store it with seconds
- * and a Z suffix so the backend receives a valid ISO 8601 datetime.
- * Returns null when the input is cleared.
- */
 function fromDatetimeLocal(val: string): string | null {
   if (!val) return null;
+  return `${val}:00.000Z`;
+}
+
+function fromDatetimeLocalRequired(val: string): string {
+  if (!val) return "";
+  if (val.endsWith("Z")) return val;
   return `${val}:00.000Z`;
 }
 </script>
 
 <template>
   <div class="space-y-5">
-    <!-- ── DATETIME GRID ────────────────────────────────────────────────────── -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <!-- Start time (required) -->
       <div>
@@ -178,7 +192,9 @@ function fromDatetimeLocal(val: string): string | null {
           @change="
             updateRequiredField(
               'starttime',
-              ($event.target as HTMLInputElement).value,
+              fromDatetimeLocalRequired(
+                ($event.target as HTMLInputElement).value,
+              ),
             )
           "
         />
@@ -260,7 +276,6 @@ function fromDatetimeLocal(val: string): string | null {
       </div>
     </div>
 
-    <!-- ── LOCATION ────────────────────────────────────────────────────────── -->
     <div class="border-t border-border pt-5">
       <label
         class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
@@ -273,7 +288,6 @@ function fromDatetimeLocal(val: string): string | null {
         </span>
       </label>
 
-      <!-- Selected location pill -->
       <div v-if="locationDisplay !== null" class="mt-2 flex items-center gap-2">
         <div
           class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-widest"
@@ -301,9 +315,8 @@ function fromDatetimeLocal(val: string): string | null {
         </button>
       </div>
 
-      <!-- Search input + dropdown -->
-      <div v-else ref="dropdownEl" class="relative mt-2">
-        <div class="relative">
+      <div v-else class="mt-2">
+        <div class="relative" ref="inputWrapper">
           <MapPin
             :size="13"
             class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
@@ -324,82 +337,85 @@ function fromDatetimeLocal(val: string): string | null {
           />
         </div>
 
-        <!-- Dropdown -->
-        <Transition
-          enter-active-class="transition-all duration-100"
-          enter-from-class="opacity-0 -translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition-all duration-75"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 -translate-y-1"
-        >
-          <div
-            v-if="showDropdown || isSearching"
-            class="absolute top-full right-0 left-0 z-20 mt-1 overflow-hidden rounded-lg border border-border bg-card shadow-lg"
+        <Teleport to="body">
+          <Transition
+            enter-active-class="transition-all duration-100"
+            enter-from-class="opacity-0 -translate-y-1"
+            enter-to-class="opacity-100 translate-y-0"
+            leave-active-class="transition-all duration-75"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 -translate-y-1"
           >
-            <!-- Searching indicator -->
             <div
-              v-if="isSearching"
-              class="px-4 py-3 text-[10px] font-medium text-muted-foreground"
+              v-if="showDropdown || isSearching"
+              ref="dropdownEl"
+              :style="dropdownStyles"
+              class="overflow-hidden rounded-lg border border-border bg-card shadow-lg"
             >
-              {{ t("admin.productions.events.searching", "Searching…") }}
-            </div>
-
-            <template v-else>
-              <!-- Existing results -->
-              <button
-                v-for="loc in locationResults"
-                :key="loc.id"
-                class="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
-                @mousedown.prevent="selectExistingLocation(loc)"
-              >
-                <MapPin :size="11" class="shrink-0 text-muted-foreground" />
-                {{ loc.label }}
-              </button>
-
-              <!-- Divider + create option (shown when there's a query) -->
               <div
-                v-if="locationQuery.trim().length > 0"
-                :class="{
-                  'border-t border-border': locationResults.length > 0,
-                }"
-              >
-                <button
-                  class="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
-                  @mousedown.prevent="confirmNewLocation"
-                >
-                  <Plus
-                    :size="11"
-                    class="shrink-0 text-muted-foreground"
-                    stroke-width="2.5"
-                  />
-                  <span>
-                    {{ t("admin.productions.events.createLocation", "Create") }}
-                    <span class="font-semibold">
-                      "{{ locationQuery.trim() }}"
-                    </span>
-                  </span>
-                </button>
-              </div>
-
-              <!-- No results, no query -->
-              <div
-                v-if="
-                  locationResults.length === 0 &&
-                  locationQuery.trim().length === 0
-                "
+                v-if="isSearching"
                 class="px-4 py-3 text-[10px] font-medium text-muted-foreground"
               >
-                {{
-                  t(
-                    "admin.productions.events.typeToSearch",
-                    "Type to search locations",
-                  )
-                }}
+                {{ t("admin.productions.events.searching", "Searching…") }}
               </div>
-            </template>
-          </div>
-        </Transition>
+
+              <template v-else>
+                <div class="max-h-64 overflow-auto">
+                  <button
+                    v-for="loc in locationResults"
+                    :key="loc.id"
+                    class="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
+                    @mousedown.prevent="selectExistingLocation(loc)"
+                  >
+                    <MapPin :size="11" class="shrink-0 text-muted-foreground" />
+                    {{ loc.label }}
+                  </button>
+                </div>
+
+                <div
+                  v-if="locationQuery.trim().length > 0"
+                  :class="{
+                    'border-t border-border': locationResults.length > 0,
+                  }"
+                >
+                  <button
+                    class="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
+                    @mousedown.prevent="confirmNewLocation"
+                  >
+                    <Plus
+                      :size="11"
+                      class="shrink-0 text-muted-foreground"
+                      stroke-width="2.5"
+                    />
+                    <span>
+                      {{
+                        t("admin.productions.events.createLocation", "Create")
+                      }}
+                      <span class="font-semibold">
+                        "{{ locationQuery.trim() }}"
+                      </span>
+                    </span>
+                  </button>
+                </div>
+
+                <div
+                  v-if="
+                    locationResults.length === 0 &&
+                    locationQuery.trim().length === 0
+                  "
+                  class="px-4 py-3 text-[10px] font-medium text-muted-foreground"
+                >
+                  {{
+                    t(
+                      "admin.productions.events.typeToSearch",
+                      "Type to search locations",
+                    )
+                  }}
+                </div>
+              </template>
+            </div>
+          </Transition>
+        </Teleport>
       </div>
     </div>
   </div>

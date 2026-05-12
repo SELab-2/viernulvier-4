@@ -1,3 +1,7 @@
+// useProductionFormPage.ts
+// - Orchestrates the multi-step production form (core, tags, media, events).
+// - Handles create/edit flows: creates production, tags, media, events and links locations.
+// - Exposes finish() to persist all steps in the correct order.
 import { useProductionCore } from "~/composables/productions/steps/productionCore";
 import { useProductionTags } from "~/composables/productions/steps/productionTags";
 import { useProductionMedia } from "~/composables/productions/steps/productionMedia";
@@ -157,11 +161,10 @@ export function useProductionFormPage(mode: ProductionFormMode) {
     await itemApi.remove(item.id);
   }
 
-  // ─── Events helpers ──────────────────────────────────────────────────────────
-
   /**
-   * Resolves a location for an event: creates a new one if needed, then
-   * returns the id to link. Returns null if no location should be linked.
+   * Resolves a location for an event:
+   * - If createLocation is provided, create a new location and return its id.
+   * - Otherwise return linkLocationId (may be null).
    */
   async function resolveLocationId(
     createLocation: string | null,
@@ -179,7 +182,68 @@ export function useProductionFormPage(mode: ProductionFormMode) {
     return linkLocationId;
   }
 
-  // ─── Finish ──────────────────────────────────────────────────────────────────
+  /**
+   * Creates an event on the server for a production.
+   * - Validates required starttime.
+   * - Builds a payload including optional fields (may be null).
+   * - Creates the event and links a location if needed.
+   * Errors are rethrown with context to the caller.
+   */
+  async function persistEventCreate(
+    event: EventCreatePayload,
+    productionId: number,
+  ): Promise<void> {
+    if (!event.starttime || event.starttime.trim() === "") {
+      throw new Error("Event starttime is required");
+    }
+
+    // Typed request body for clarity
+    type EventApiCreateBody = {
+      starttime: string;
+      endtime: string | null;
+      doors_at: string | null;
+      intermission_at: string | null;
+      production_id: number;
+    };
+
+    const body: EventApiCreateBody = {
+      starttime: event.starttime,
+      endtime: event.endtime ?? null,
+      doors_at: event.doors_at ?? null,
+      intermission_at: event.intermission_at ?? null,
+      production_id: productionId,
+    };
+
+    try {
+      // Pass the typed body directly (no unnecessary assertion)
+      const created = await eventApi.create(body);
+
+      if (!created || !created.data) {
+        throw new Error("Failed to create event: unexpected server response");
+      }
+
+      const locationId = await resolveLocationId(
+        event.createLocation,
+        event.linkLocationId,
+      );
+
+      if (locationId !== null) {
+        await eventApi.linkLocation(created.data.id, locationId);
+      }
+    } catch (err: unknown) {
+      let cause = "unknown";
+      if (err instanceof Error) cause = err.message;
+      else if (typeof err === "string") cause = err;
+      else {
+        try {
+          cause = JSON.stringify(err);
+        } catch {
+          cause = String(err);
+        }
+      }
+      throw new Error(`Failed to create event: ${cause}`);
+    }
+  }
 
   async function finish(): Promise<void> {
     if (isSubmitting.value) return;
@@ -375,33 +439,6 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       await router.push(ROUTES.admin.productions.base);
     } finally {
       isSubmitting.value = false;
-    }
-  }
-
-  // helper function to reduce code duplication for event creation in both create and edit modes
-  async function persistEventCreate(
-    event: EventCreatePayload,
-    productionId: number,
-  ): Promise<void> {
-    const created = await eventApi.create({
-      starttime: event.starttime,
-      endtime: event.endtime,
-      doors_at: event.doors_at,
-      intermission_at: event.intermission_at,
-      production_id: productionId,
-    });
-
-    if (!created.data) {
-      throw new Error("Failed to create event");
-    }
-
-    const locationId = await resolveLocationId(
-      event.createLocation,
-      event.linkLocationId,
-    );
-
-    if (locationId !== null) {
-      await eventApi.linkLocation(created.data.id, locationId);
     }
   }
 

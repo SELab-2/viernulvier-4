@@ -1,20 +1,8 @@
 <!--
-  components/admin/productions/EventsForm.vue
-
-  Step 4 of the production form — event management.
-
-  Displays a list of events (existing + new) belonging to a production.
-  Each event has:
-    - starttime (required), endtime, doors_at, intermission_at
-    - an optional linked location (pick existing or create new)
-
-  All state lives in the useProductionEvents composable draft.
-  This component only mutates draft.value directly — no API calls.
-
-  Props:
-    modelValue — ProductionEventsForm draft ref
-  Emits:
-    update:modelValue — mutated form
+  EventsForm.vue
+  - Manages the list of event drafts for a production.
+  - Hides the initial empty placeholder for "create" flows (composable starts empty).
+  - Allows user to add new event drafts and toggle collapse/expand of each event editor.
 -->
 <script setup lang="ts">
 import {
@@ -46,8 +34,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Flag indicating the user explicitly added blank placeholders via "Add event".
+// This allows showing new empty drafts only after the user requested them.
+const showNewPlaceholders = ref(false);
 
+// Update helpers (emit back to parent)
 function update(val: ProductionEventsForm) {
   emit("update:modelValue", val);
 }
@@ -58,25 +49,43 @@ function updateEvent(index: number, updated: EventDraft) {
   update(items);
 }
 
-// ─── Visible events (non-deleted) ────────────────────────────────────────────
-
+// visibleEvents: filter out deleted existing events and completely empty new drafts,
+// unless user explicitly added placeholders or there are existing events.
 const visibleEvents = computed<{ event: ActiveEventDraft; index: number }[]>(
   () =>
     props.modelValue
       .map((event, index) => ({ event, index }))
-      .filter(
-        ({ event }) =>
-          event.kind === "new" || (event.kind === "existing" && !event.deleted),
-      ) as { event: ActiveEventDraft; index: number }[],
+      .filter(({ event }) => {
+        if (event.kind === "existing") return !event.deleted;
+
+        if (event.kind === "new") {
+          const hasAnyField =
+            Boolean(event.starttime) ||
+            Boolean(event.endtime) ||
+            Boolean(event.doors_at) ||
+            Boolean(event.intermission_at) ||
+            Boolean(event.location);
+
+          const hasExisting = props.modelValue.some(
+            (e) => e.kind === "existing" && !(e as ExistingEventDraft).deleted,
+          );
+
+          // Show if it has content, user explicitly added placeholders, or there are existing events
+          return hasAnyField || showNewPlaceholders.value || hasExisting;
+        }
+        return false;
+      }) as { event: ActiveEventDraft; index: number }[],
 );
 
-// ─── Add / delete ─────────────────────────────────────────────────────────────
-
+// Add/delete events — keep showNewPlaceholders in sync so UI shows newly added placeholders
 function addEvent() {
-  update([...props.modelValue, newEventDraft()]);
-  // Auto-expand the new event
-  const newIndex = props.modelValue.length; // index before push = length before
-  collapsedItems.value.delete(newIndex);
+  const items = [...props.modelValue, newEventDraft()];
+  update(items);
+  showNewPlaceholders.value = true;
+  const newIndex = items.length - 1;
+  const next = new Set(collapsedItems.value);
+  next.delete(newIndex); // auto-expand the new item
+  collapsedItems.value = next;
 }
 
 function deleteEvent(index: number) {
@@ -86,22 +95,23 @@ function deleteEvent(index: number) {
   const items = [...props.modelValue];
 
   if (event.kind === "existing") {
-    // Mark as deleted; finish will clean up
     items[index] = {
       kind: "existing",
       id: event.id,
       deleted: true,
     };
   } else {
-    // New event — just remove
     items.splice(index, 1);
   }
 
   update(items);
+
+  if (!items.some((e) => e.kind === "new")) {
+    showNewPlaceholders.value = false;
+  }
 }
 
-// ─── Collapsed state (local UI only) ─────────────────────────────────────────
-
+// collapsedItems tracks collapsed/expanded state by index
 const collapsedItems = ref<Set<number>>(new Set());
 
 function toggleCollapse(index: number) {
@@ -111,14 +121,12 @@ function toggleCollapse(index: number) {
   collapsedItems.value = next;
 }
 
-// ─── Display label for an event's header row ─────────────────────────────────
-
+// Helpers for rendering labels
 function eventLabel(event: ActiveEventDraft, position: number): string {
   const start = event.starttime;
   if (!start) {
     return t("admin.productions.events.newEvent", "New event") + ` ${position}`;
   }
-  // Format: "Mon 12 Jan 2026, 20:00"
   try {
     return new Date(start).toLocaleString("nl-BE", {
       weekday: "short",
@@ -140,7 +148,6 @@ function locationLabel(event: ActiveEventDraft): string | null {
 
 <template>
   <div class="overflow-hidden rounded-xl border border-border bg-card">
-    <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
     <div
       class="flex items-center justify-between border-b border-border px-6 py-4"
     >
@@ -169,10 +176,8 @@ function locationLabel(event: ActiveEventDraft): string | null {
       </button>
     </div>
 
-    <!-- ── EVENT LIST ─────────────────────────────────────────────────────── -->
     <div v-if="visibleEvents.length > 0" class="divide-y divide-border">
       <div v-for="({ event, index }, position) in visibleEvents" :key="index">
-        <!-- Row header (always visible, click to collapse) -->
         <div
           class="flex cursor-pointer items-center justify-between px-6 py-3 transition-colors hover:bg-muted"
           @click="toggleCollapse(index)"
@@ -205,7 +210,6 @@ function locationLabel(event: ActiveEventDraft): string | null {
           </div>
 
           <div class="ml-4 flex shrink-0 items-center gap-2">
-            <!-- Kind badge -->
             <span
               v-if="event.kind === 'new'"
               class="rounded-full bg-accent/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-accent"
@@ -213,7 +217,6 @@ function locationLabel(event: ActiveEventDraft): string | null {
               {{ t("admin.productions.events.new", "New") }}
             </span>
 
-            <!-- Delete -->
             <button
               class="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-action-red-border hover:bg-action-red-hover hover:text-action-red-icon"
               @click.stop="deleteEvent(index)"
@@ -221,7 +224,6 @@ function locationLabel(event: ActiveEventDraft): string | null {
               <Trash2 :size="11" stroke-width="2.5" />
             </button>
 
-            <!-- Collapse toggle -->
             <ChevronDown
               v-if="collapsedItems.has(index)"
               :size="13"
@@ -231,7 +233,6 @@ function locationLabel(event: ActiveEventDraft): string | null {
           </div>
         </div>
 
-        <!-- Editor (collapsible) -->
         <div v-if="!collapsedItems.has(index)" class="px-6 pb-6 pt-2">
           <AdminProductionsEventItemEditor
             :event="event"
@@ -242,7 +243,6 @@ function locationLabel(event: ActiveEventDraft): string | null {
       </div>
     </div>
 
-    <!-- ── EMPTY STATE ────────────────────────────────────────────────────── -->
     <div
       v-else
       class="flex flex-col items-center justify-center gap-3 px-6 py-12 text-center"
