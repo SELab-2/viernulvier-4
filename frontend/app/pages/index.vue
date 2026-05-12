@@ -90,6 +90,9 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         <div class="w-full max-w-3xl">
           <HomeSearchBar />
         </div>
+        <div>
+          <HomeRandomYears :gap="5" />
+        </div>
       </div>
 
       <div class="ticker-root absolute bottom-0 inset-x-0 z-20 pb-10">
