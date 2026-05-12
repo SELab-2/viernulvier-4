@@ -123,9 +123,15 @@ export function useSeriesApi() {
   function getSeriesProductions(
     seriesId: number,
     lang: Language,
+    paginationFilters?: PaginationFilter,
   ): Promise<ApiResponse<PaginatedResponse<ProductionView>>>;
-  function getSeriesProductions(seriesId: number, lang?: Language) {
-    const query = lang ? `?lang=${lang}` : "";
+  function getSeriesProductions(
+    seriesId: number,
+    lang?: Language,
+    paginationFilters?: PaginationFilter,
+  ) {
+    const params = { ...(lang ? { lang } : {}), ...paginationFilters };
+    const query = buildQueryString(params);
     return get<PaginatedResponse<Production | ProductionView>>(
       `${API_ROUTES.series.productions(seriesId)}${query}`,
     );
