@@ -117,12 +117,6 @@ watch(currentCols, () => {
 watch(currentPage, loadPage, { immediate: false });
 
 onMounted(loadPage);
-
-// Clear the filters if leaving the page.
-onUnmounted(() => {
-  searchQuery.value = "";
-  activeFilter.value = null;
-});
 </script>
 
 <template>

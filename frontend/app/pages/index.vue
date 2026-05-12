@@ -1,11 +1,26 @@
 <script setup lang="ts">
-import type { MediaCrop, TagView } from "@repo/common";
+import {
+  LocalizedStringNullableSchema,
+  type MediaCrop,
+  type TagView,
+} from "@repo/common";
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import { useBlogView } from "~/composables/blogs/useBlogView";
 import { useHomeView } from "~/composables/home/useHomeView";
+import { usePrintView } from "~/composables/media/usePrintView";
 
 definePageMeta({
   layout: "home",
 });
+
+// Get all filters.
+const {
+  searchQuery: productionQuery,
+  dateFilter: productionDate,
+  tagIds,
+} = useArchiveView();
+const { searchQuery: blogQuery, dateFilter: blogDate } = useBlogView();
+const { searchQuery: printQuery, activeFilter } = usePrintView();
 
 const { fetchRandomImages } = useHomeView();
 const { getAll } = useTagApi();
@@ -39,6 +54,15 @@ watch(locale, loadTags);
 
 onMounted(async () => {
   loadTags();
+
+  // Clear all filters from the other pages.
+  productionQuery.value = "";
+  productionDate.value = {};
+  tagIds.value = [];
+  blogQuery.value = "";
+  blogDate.value = {};
+  printQuery.value = "";
+  activeFilter.value = null;
 
   const data = await fetchRandomImages();
   if (data) {

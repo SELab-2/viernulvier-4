@@ -140,8 +140,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
   io?.disconnect();
-  searchQuery.value = "";
-  dateFilter.value = {};
 });
 </script>
 
