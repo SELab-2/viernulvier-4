@@ -105,6 +105,7 @@ onBeforeUnmount(() => {
     <!-- Header section -->
     <section class="w-full border-b border-border bg-muted py-16 lg:py-24">
       <div class="page-container w-full">
+        <!-- Back arrow -->
         <button
           @click="goBack()"
           class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors mb-8"
@@ -113,7 +114,7 @@ onBeforeUnmount(() => {
           {{ t("general.back") }}
         </button>
 
-        <!-- Header -->
+        <!-- Title + description section -->
         <div class="flex flex-col gap-6">
           <h1
             class="font-brand font-black uppercase italic leading-[0.85] tracking-[-3px] text-5xl lg:text-7xl"
