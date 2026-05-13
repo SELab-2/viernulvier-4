@@ -415,7 +415,8 @@
       "core": "Kerngegevens",
       "tags": "Tags",
       "media": "Media",
-      "events": "Evenementen"
+      "events": "Evenementen",
+      "series": "Series"
     },
     "create-title": "Nieuwe productie",
     "edit-title": "Productie bewerken",

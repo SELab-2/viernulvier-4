@@ -414,7 +414,8 @@
       "core": "Core info",
       "tags": "Tags",
       "media": "Media",
-      "events": "Events"
+      "events": "Events",
+      "series": "Series"
     },
     "create-title": "New production",
     "edit-title": "Edit production",

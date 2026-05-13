@@ -35,6 +35,7 @@ import type { ProductionCoreForm } from "~/composables/productions/steps/product
 import type { ProductionTagsForm } from "~/composables/productions/steps/productionTags";
 import type { ProductionMediaForm } from "~/composables/productions/steps/productionMedia";
 import type { ProductionEventsForm } from "~/composables/productions/steps/productionEvents";
+import type { ProductionSeriesForm } from "~/composables/productions/steps/productionSeries";
 
 interface Props {
   mode: "create" | "edit";
@@ -52,6 +53,7 @@ const stepLabels = computed(() => [
   t("admin-productions.steps.tags"),
   t("admin-productions.steps.media"),
   t("admin-productions.steps.events"),
+  t("admin-productions.steps.series"),
 ]);
 
 const isFirstStep = computed(() => {
@@ -230,6 +232,20 @@ onMounted(async () => {
                 (val) =>
                   ((form.currentStep.value.draft
                     .value as ProductionEventsForm) = val)
+              "
+            />
+          </template>
+
+          <!-- STEP 5: Series -->
+          <template v-else-if="form.currentStep.value.id === 'series'">
+            <AdminProductionsSeriesForm
+              :model-value="
+                form.currentStep.value.draft.value as ProductionSeriesForm
+              "
+              @update:model-value="
+                (val) =>
+                  ((form.currentStep.value.draft
+                    .value as ProductionSeriesForm) = val)
               "
             />
           </template>
