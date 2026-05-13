@@ -17,6 +17,8 @@ import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 import { useCropApi } from "~/composables/media/useCropApi";
 import { useStorageApi } from "~/composables/media/useStorageApi";
+import { useProductionSeries } from "~/composables/productions/steps/productionSeries";
+import { useSeriesApi } from "~/composables/useSeriesApi";
 
 export type ProductionFormMode = "create" | "edit";
 
@@ -31,13 +33,15 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   const itemApi = useItemApi();
   const cropApi = useCropApi();
   const storageApi = useStorageApi();
+  const seriesApi = useSeriesApi();
 
   const core = useProductionCore();
   const tags = useProductionTags();
   const media = useProductionMedia();
   const events = useProductionEvents();
+  const series = useProductionSeries();
 
-  const steps = [core, tags, media, events];
+  const steps = [core, tags, media, events, series];
 
   const currentStepIndex = ref(0);
   const isSubmitting = ref(false);
@@ -254,6 +258,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       const tagsPayload = tags.extractPayload();
       const mediaPayload = media.extractPayload();
       const eventsPayload = events.extractPayload();
+      const seriesPayload = series.extractPayload();
 
       // Remap from per-locale translation objects to LocalizedString fields
       const productionBody = {
@@ -334,6 +339,22 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         for (const event of eventsPayload.eventsToCreate) {
           await persistEventCreate(event, productionId);
         }
+
+        // 5. Series: create new series then connect (existing + newly created)
+        const newSeriesIds = await Promise.all(
+          seriesPayload.create.map(async (s) => {
+            const created = await seriesApi.create(s);
+            if (!created.data)
+              throw new Error(`Failed to create series: ${s.titel.nl}`);
+            return created.data.id;
+          }),
+        );
+
+        await Promise.all(
+          [...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
+            seriesApi.linkProductionToSeries(seriesId, productionId),
+          ),
+        );
       } else {
         // Edit mode — id is guaranteed to be set
         const idParam = route.params.id;
@@ -434,6 +455,25 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         for (const event of eventsPayload.eventsToCreate) {
           await persistEventCreate(event, productionId);
         }
+
+        // 5. Series: create new series, connect new+existing, disconnect removed
+        const newSeriesIds = await Promise.all(
+          seriesPayload.create.map(async (s) => {
+            const created = await seriesApi.create(s);
+            if (!created.data)
+              throw new Error(`Failed to create series: ${s.titel.nl}`);
+            return created.data.id;
+          }),
+        );
+
+        await Promise.all([
+          ...[...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
+            seriesApi.linkProductionToSeries(seriesId, productionId),
+          ),
+          ...seriesPayload.disconnect.map((seriesId) =>
+            seriesApi.unlinkProductionFromSeries(seriesId, productionId),
+          ),
+        ]);
       }
 
       await router.push(ROUTES.admin.productions.base);
