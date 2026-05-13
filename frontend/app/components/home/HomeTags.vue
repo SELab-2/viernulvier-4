@@ -1,4 +1,11 @@
-<!-- components/home/HomeTags.vue -->
+<!-- 
+ HomeTags.vue
+ * SUMMARY: 
+ This component shows a strip of tags.
+ * KEY FUNCTIONS:
+  1. Just shows the tags.
+-->
+
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import type { TagView } from "@repo/common";

@@ -1,4 +1,12 @@
-<!-- components/home/HomeSearchBar.vue -->
+<!-- 
+ HomeSearchBar.vue
+ * SUMMARY:
+ This component wraps a SearchBar component and adds some functionality to it.
+ * KEY FUNCTIONS:
+  1. Combines suggestions for productions, blogs and prints
+  2. Shows them through the normal Searchbar
+-->
+
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";

@@ -1,3 +1,17 @@
+<!-- 
+ HomeRandomYears.vue
+ * SUMMARY:
+ This component generates a dynamic list of year-range navigation buttons (e.g., "2015 - 2019").
+ * KEY FUNCTIONS:
+  1. Fetches the oldest event from the database to determine the dynamic "lowestYear" starting point.
+  2. Calculates year buckets based on a configurable `gap` prop.
+  3. Handles navigation to the Archive/Productions page by pre-filling the global `dateFilter` 
+ composable state before routing.
+ * FEATURES:
+  - Glassmorphism UI styling for hero-section integration.
+  - Reactive range calculation based on the current year.
+-->
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
