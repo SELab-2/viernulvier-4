@@ -47,7 +47,7 @@ async function loadTags() {
       const shuffled = validTags.sort(() => 0.5 - Math.random());
 
       // * NOTE: Currently we only take 15 tags but we could realistically do more.
-      tags.value = shuffled.slice(0, 15);
+      tags.value = shuffled.slice(0, 25);
     }
   } catch {
     // Silently fail if tags don't load.
