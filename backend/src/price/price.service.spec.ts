@@ -75,6 +75,7 @@ describe("PriceService", () => {
       const filter: PaginationFilterDto = {
         limit: 10,
         page: 1,
+        descending: false,
       };
       const expectedPrices = [mockPrice];
       mockPriceDatabaseService.getPrices.mockResolvedValue(expectedPrices);
