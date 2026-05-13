@@ -111,8 +111,8 @@ describe("useSeriesApi", () => {
 
     it("linkProductionToSeries calls PUT /series/:id/productions/:productionId", () => {
       const { linkProductionToSeries } = useSeriesApi();
-      void linkProductionToSeries(1, 2);
-      expect(mockPut).toHaveBeenCalledWith("/series/1/productions/2", {});
+      void linkProductionToSeries(1, [2]);
+      expect(mockPut).toHaveBeenCalledWith("/series/1/productions", "[2]");
     });
 
     it("unlinkProductionFromSeries calls DELETE /series/:id/productions/:productionId", () => {
