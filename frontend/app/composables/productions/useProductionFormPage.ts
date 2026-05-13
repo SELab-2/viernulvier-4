@@ -352,7 +352,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
         await Promise.all(
           [...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
-            seriesApi.linkProductionToSeries(seriesId, productionId),
+            seriesApi.linkProductionToSeries(seriesId, [productionId]),
           ),
         );
       } else {
@@ -468,7 +468,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
         await Promise.all([
           ...[...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
-            seriesApi.linkProductionToSeries(seriesId, productionId),
+            seriesApi.linkProductionToSeries(seriesId, [productionId]),
           ),
           ...seriesPayload.disconnect.map((seriesId) =>
             seriesApi.unlinkProductionFromSeries(seriesId, productionId),
