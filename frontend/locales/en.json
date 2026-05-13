@@ -413,6 +413,7 @@
     "form-tagline": "Tagline",
     "form-credits": "Credits",
     "form-artists": "Artists",
+    "form-description": "Description",
     "steps": {
       "core": "Core info",
       "tags": "Tags",
@@ -469,6 +470,12 @@
       "newTags": "New tags",
       "selected": "Selected",
       "clearTags": "Clear all"
+    },
+    "series": {
+      "hint": "Manage series for this production",
+      "add": "Add",
+      "new": "New",
+      "none": "No series yet"
     }
   },
   "error": {

@@ -95,7 +95,7 @@ function updateField<K extends keyof SeriesItem & string>(
         <label
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.series.titel", "Series title") }} (NL)
+          {{ t("admin-productions.form-title") }} (NL)
         </label>
         <input
           :value="props.item.titel.nl"
@@ -111,7 +111,7 @@ function updateField<K extends keyof SeriesItem & string>(
         <label
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.series.titel", "Series title") }} (EN)
+          {{ t("admin-productions.form-title") }} (EN)
         </label>
         <input
           :value="props.item.titel.en ?? ''"
@@ -127,7 +127,7 @@ function updateField<K extends keyof SeriesItem & string>(
         <label
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.series.description", "Series description") }}
+          {{ t("admin-productions.form-description") }}
           (NL)
         </label>
         <textarea
@@ -149,7 +149,7 @@ function updateField<K extends keyof SeriesItem & string>(
         <label
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.series.description", "Series description") }}
+          {{ t("admin-productions.form-description") }}
           (EN)
         </label>
         <textarea

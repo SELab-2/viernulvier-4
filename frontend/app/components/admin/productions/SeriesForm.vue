@@ -83,15 +83,10 @@ const hasItems = computed(() => props.modelValue.length > 0);
         <p
           class="text-[11px] font-black uppercase tracking-widest text-foreground"
         >
-          {{ t("admin-productions.series.title", "Series") }}
+          {{ t("admin-productions.steps.series") }}
         </p>
         <p class="mt-0.5 text-[10px] text-muted-foreground">
-          {{
-            t(
-              "admin-productions.series.hint",
-              "Manage series for this production",
-            )
-          }}
+          {{ t("admin-productions.series.hint") }}
         </p>
       </div>
 
@@ -100,7 +95,7 @@ const hasItems = computed(() => props.modelValue.length > 0);
         @click="addSeries"
       >
         <Plus :size="11" stroke-width="3" />
-        {{ t("admin-productions.series.add", "Add series") }}
+        {{ t("admin-productions.series.add") }}
       </button>
     </div>
 
@@ -118,7 +113,7 @@ const hasItems = computed(() => props.modelValue.length > 0);
               {{
                 item.type === "existing"
                   ? item.titel.nl
-                  : t("admin-productions.series.new", "New")
+                  : t("admin-productions.series.new")
               }}
             </p>
             <p
@@ -134,7 +129,7 @@ const hasItems = computed(() => props.modelValue.length > 0);
               v-if="item.type === 'new'"
               class="rounded-full bg-accent/10 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-accent"
             >
-              {{ t("admin-productions.series.new", "New") }}
+              {{ t("admin-productions.series.new") }}
             </span>
 
             <!-- Row-level delete (single delete control for clarity) -->
@@ -179,15 +174,10 @@ const hasItems = computed(() => props.modelValue.length > 0);
         <p
           class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.series.none", "No series yet") }}
+          {{ t("admin-productions.series.none") }}
         </p>
         <p class="mt-1 text-[10px] text-muted-foreground/60">
-          {{
-            t(
-              "admin-productions.series.hint",
-              "Manage series for this production",
-            )
-          }}
+          {{ t("admin-productions.series.hint") }}
         </p>
       </div>
     </div>

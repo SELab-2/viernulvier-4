@@ -414,6 +414,7 @@
     "form-tagline": "Tagline",
     "form-credits": "Credits",
     "form-artists": "Artiesten",
+    "form-description": "Beschrijving",
     "steps": {
       "core": "Kerngegevens",
       "tags": "Tags",
@@ -470,6 +471,12 @@
       "newTags": "Nieuwe tags",
       "selected": "Geselecteerd",
       "clearTags": "Alles wissen"
+    },
+    "series": {
+      "hint": "Beheer series voor deze productie",
+      "add": "Toevoegen",
+      "new": "Nieuw",
+      "none": "Nog geen series"
     }
   },
   "error": {
