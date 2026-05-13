@@ -68,6 +68,43 @@ const titleSizeClass = computed(() => {
 
 // Whether title is long enough to need the fade
 const titleIsLong = computed(() => title.value.length > 55);
+
+// Title overflow detection: only enable scrolling when the title actually
+// wraps onto more than one rendered line.
+const titleText = ref<HTMLElement | null>(null);
+const titleScrollable = ref(false);
+let __ro: ResizeObserver | null = null;
+
+function updateTitleScrollable() {
+  nextTick(() => {
+    const el = titleText.value;
+    if (!el) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
+    if (!lineHeight) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lines = Math.round(el.scrollHeight / lineHeight);
+    titleScrollable.value = lines > 1;
+  });
+}
+
+onMounted(() => {
+  updateTitleScrollable();
+  __ro = new ResizeObserver(updateTitleScrollable);
+  if (titleText.value) __ro.observe(titleText.value);
+});
+
+onBeforeUnmount(() => {
+  __ro?.disconnect();
+});
+
+watch([title, previewMode], updateTitleScrollable);
 </script>
 
 <template>
@@ -175,9 +212,11 @@ const titleIsLong = computed(() => title.value.length > 55);
                   ? 'title-scroll-wrap-phone'
                   : 'title-scroll-wrap-desktop',
                 titleIsLong ? 'title-scroll-fade' : '',
+                titleScrollable ? 'title-scroll-scrollable' : '',
               ]"
             >
               <h1
+                ref="titleText"
                 class="font-brand font-black uppercase tracking-tighter leading-[0.9] text-white italic title-scroll-text"
                 :class="titleSizeClass"
               >
@@ -243,7 +282,8 @@ const titleIsLong = computed(() => title.value.length > 55);
 /* Long-title scroller with a soft fade. */
 .title-scroll-wrap {
   max-width: 100%;
-  overflow-y: auto;
+  /* default: no scrolling unless JS enables it */
+  overflow-y: hidden;
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -259,6 +299,25 @@ const titleIsLong = computed(() => title.value.length > 55);
 
 .title-scroll-wrap-desktop {
   max-height: 8.6rem;
+}
+
+/* When the title actually overflows the wrapper we enable scrolling */
+.title-scroll-scrollable {
+  overflow-y: auto;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 9999px;
 }
 
 .title-scroll-fade {

@@ -141,6 +141,43 @@ const titleSizeClass = computed(() => {
       ? "text-5xl lg:text-7xl"
       : "text-6xl lg:text-8xl";
 });
+
+// Only allow scrolling of the title when it actually wraps onto more than one
+// rendered line. This avoids showing a scrollbar for single-line titles.
+const titleText = ref<HTMLElement | null>(null);
+const titleScrollable = ref(false);
+let __ro_title: ResizeObserver | null = null;
+
+function updateTitleScrollable() {
+  nextTick(() => {
+    const el = titleText.value;
+    if (!el) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
+    if (!lineHeight) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lines = Math.round(el.scrollHeight / lineHeight);
+    titleScrollable.value = lines > 1;
+  });
+}
+
+onMounted(() => {
+  updateTitleScrollable();
+  __ro_title = new ResizeObserver(updateTitleScrollable);
+  if (titleText.value) __ro_title.observe(titleText.value);
+});
+
+onBeforeUnmount(() => {
+  __ro_title?.disconnect();
+});
+
+watch(title, updateTitleScrollable);
 </script>
 
 <template>
@@ -223,9 +260,13 @@ const titleSizeClass = computed(() => {
           -->
           <div
             class="title-scroll-wrap mb-4"
-            :class="titleIsLong ? 'title-scroll-fade' : ''"
+            :class="[
+              titleIsLong ? 'title-scroll-fade' : '',
+              titleScrollable ? 'title-scroll-scrollable' : '',
+            ]"
           >
             <h1
+              ref="titleText"
               class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
               :class="titleSizeClass"
             >
@@ -331,7 +372,8 @@ const titleSizeClass = computed(() => {
 .title-scroll-wrap {
   max-width: 100%;
   max-height: 13rem; /* ≈ 3 lines at the largest font size */
-  overflow-y: auto;
+  /* hide overflow by default; enable scrolling only when JS detects overflow */
+  overflow-y: hidden;
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -344,6 +386,25 @@ const titleSizeClass = computed(() => {
 }
 .title-scroll-wrap::-webkit-scrollbar {
   display: none;
+}
+
+/* When the title actually overflows the wrapper we enable scrolling */
+.title-scroll-scrollable {
+  overflow-y: auto;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 9999px;
 }
 
 /* Soft bottom fade for very long titles */
