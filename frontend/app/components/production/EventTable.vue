@@ -201,6 +201,12 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
 
               <td :class="cellNarrow">
                 <div v-if="event.prices && event.prices.length">
+                  <p
+                    class="text-[9px] uppercase font-black text-muted-foreground/60 leading-tight mb-0.5 tracking-widest truncate"
+                  >
+                    {{ event.prices[0]?.name || "" }}
+                  </p>
+
                   <p class="text-sm font-brand font-black tracking-tight">
                     {{ formatPrice(event.prices[0]?.price || 0, locale) }}
                   </p>
