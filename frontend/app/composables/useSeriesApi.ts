@@ -143,9 +143,10 @@ export function useSeriesApi() {
    * Links a production to a series.
    */
   function linkProductionToSeries(seriesId: number, productionIds: number[]) {
-    return put(API_ROUTES.series.productions(seriesId), {
-      items: productionIds,
-    });
+    return put(
+      API_ROUTES.series.productions(seriesId),
+      JSON.stringify(productionIds),
+    );
   }
 
   /**
