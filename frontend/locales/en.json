@@ -151,11 +151,11 @@
     "dateAndTime": "Date & Time",
     "location": "Location",
     "price": "Price",
+    "showAll": "show all ({count})",
+    "hidePrices": "hide prices",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details",
     "doors": "doors",
     "break": "intermission",
     "gallery": "gallery"

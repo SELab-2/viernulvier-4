@@ -218,9 +218,9 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                   >
                     {{
                       expandedPriceIds.has(event.id)
-                        ? t("production.hidePriceDetails")
-                        : t("production.showExtraPrices", {
-                            count: event.prices.length - 1,
+                        ? t("production.hidePrices")
+                        : t("production.showAll", {
+                            count: event.prices.length,
                           })
                     }}
                   </button>
