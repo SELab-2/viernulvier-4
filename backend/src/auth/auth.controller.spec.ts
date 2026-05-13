@@ -6,7 +6,7 @@ import {
   PaginationFilterDto,
   UpdateAccountDto,
 } from "../dto/dto";
-import { SuperApiKeyGuard } from "./authGuard"; // <-- Make sure to import your guard!
+import { ApiKeyGuard, SuperApiKeyGuard } from "./authGuard";
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -38,6 +38,8 @@ describe("AuthController", () => {
       // Overriding the guard here so it doesn't look for ApiKeyDatabaseService
       .overrideGuard(SuperApiKeyGuard)
       .useValue({ canActivate: jest.fn(() => true) })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -47,8 +49,6 @@ describe("AuthController", () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
-  // ... (All your tests below remain exactly the same as before) ...
 
   describe("loginAccount", () => {
     it("should log in an account and return public account and api key", async () => {
@@ -125,6 +125,20 @@ describe("AuthController", () => {
 
       expect(authService.deleteAccount).toHaveBeenCalledWith(accountId);
       expect(result).toBe(true);
+    });
+  });
+
+  describe("verifyKey", () => {
+    it("should return valid true for a standard key", () => {
+      const result = controller.verifyKey();
+      expect(result).toEqual({ valid: true });
+    });
+  });
+
+  describe("verifySuperKey", () => {
+    it("should return valid true for a super key", () => {
+      const result = controller.verifySuperKey();
+      expect(result).toEqual({ valid: true });
     });
   });
 });

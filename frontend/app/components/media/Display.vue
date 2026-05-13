@@ -20,7 +20,7 @@
     :src="formattedUrl"
     loading="lazy"
     @error="handleImageError"
-    :class="containerClass"
+    :class="[containerClass, 'object-contain']"
   />
   <ThumbnailPlaceholder
     v-else

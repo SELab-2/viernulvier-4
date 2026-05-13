@@ -32,7 +32,15 @@ const { getMainImageCrop } = useGallery();
 const { getById, getMediaGallery } = useBlogApi();
 const { useBlogStory } = useBlogView();
 
-// Route param
+/** validation that id is only numbers */
+definePageMeta({
+  validate: async (route) => {
+    const raw = Array.isArray(route.params.id)
+      ? route.params.id[0]
+      : route.params.id;
+    return /^\d+$/.test(raw as string);
+  },
+});
 
 /** Parse the blog ID from the URL, returning null for non-numeric values. */
 const blogId = computed(() => {
@@ -177,32 +185,32 @@ const titleSizeClass = computed(() => {
     <template v-else>
       <!-- Hero banner -->
       <section
-        class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
         :class="{ 'image-overlay text-white': headerCrop }"
+        class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
       >
         <!-- Background image (lazy, 0-opacity placeholder when absent) -->
         <MediaDisplay
           v-if="blog.id"
-          class="absolute inset-0 w-full h-full object-cover z-0"
           :id="blog.id"
           :src="headerCrop"
+          class="absolute inset-0 w-full h-full object-cover z-0"
         />
 
         <div class="relative z-10 page-container pb-12">
           <!-- Back link + reading time row -->
           <div class="flex items-center gap-6 mb-8">
             <NuxtLink
+              :class="headerCrop ? 'text-white' : 'text-foreground'"
               :to="ROUTES.stories.base"
               class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
-              :class="headerCrop ? 'text-white' : 'text-foreground'"
             >
               <ChevronLeft :size="14" stroke-width="3" />
               {{ t("general.back") }}
             </NuxtLink>
 
             <span
-              class="text-[9px] font-black uppercase tracking-widest opacity-60"
               :class="headerCrop ? 'text-white' : 'text-foreground'"
+              class="text-[9px] font-black uppercase tracking-widest opacity-60"
             >
               {{ readingTime }} {{ t("stories.minRead") }}
             </span>
@@ -244,6 +252,7 @@ const titleSizeClass = computed(() => {
               Uses a gradient so it fades in/out at the top and bottom.
             -->
             <div
+              aria-hidden="true"
               class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
               style="
                 background: linear-gradient(
@@ -253,7 +262,6 @@ const titleSizeClass = computed(() => {
                   transparent
                 );
               "
-              aria-hidden="true"
             />
 
             <div class="md:pl-10 w-full">

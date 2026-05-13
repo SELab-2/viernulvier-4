@@ -1,9 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import {
+  MissingEnvVariableError,
+  SystemFailureException,
+} from "../../common/exceptions";
 
 @Injectable()
 export class MediaStorageService {
@@ -14,7 +14,7 @@ export class MediaStorageService {
       // Automatically throws if undefined, and guarantees a string return type
       this.mediaBase = this.configService.getOrThrow<string>("MEDIA_BASE_URL");
     } catch {
-      throw new Error("Forgot to set MEDIA_BASE_URL .env variable?");
+      throw new MissingEnvVariableError("MEDIA_BASE_URL");
     }
   }
 
@@ -24,6 +24,7 @@ export class MediaStorageService {
    * @param buffer is the photo data
    * @returns the url if successful
    * note: this is the production impl and thus will save to the given url.
+   * @throws SystemFailureException when the media fails to save (500)
    */
   async saveMedia(url: string, buffer: Buffer): Promise<string> {
     const newUrl = this.getFormattedUrl(url);
@@ -32,7 +33,7 @@ export class MediaStorageService {
       body: buffer.buffer as ArrayBuffer,
     });
     if (!response.ok)
-      throw new BadRequestException(
+      throw new SystemFailureException(
         `Failed to save media: ${response.statusText}`,
       );
     return url; // note: returns the relative path in case of relative saving!
@@ -44,6 +45,8 @@ export class MediaStorageService {
    * @param url is the url you want to fetch the media from
    * @returns the media if it exists.
    * note: this is the production impl and thus will call the url itself.
+   * @throws NotFoundException if the media could not be found through the given url (404)
+   * @throws SystemFailureException if something else went wrong. (500)
    */
   async getMedia(url: string): Promise<Buffer> {
     const newUrl = this.getFormattedUrl(url);
@@ -51,7 +54,7 @@ export class MediaStorageService {
     if (response.status === 404)
       throw new NotFoundException(`Media not found: ${url}`);
     if (!response.ok)
-      throw new BadRequestException(
+      throw new SystemFailureException(
         `Failed to get media: ${response.statusText}`,
       );
     return Buffer.from(await response.arrayBuffer());
@@ -61,12 +64,17 @@ export class MediaStorageService {
    * This function deletes a piece of media from storage
    * @param url is the url you want to delete the media from
    * note: this is the production impl and thus will call from the url.
+   * @throws SystemFailureException if something went wrong trying to delete the media. (500)
+   * note: normally and elsewhere in this project we don't throw errors when deleting,
+   * however this is a special case, and we need to make sure the media filesystem's integrity stays intact.
    */
   async deleteMedia(url: string): Promise<void> {
     const newUrl = this.getFormattedUrl(url);
     const response = await fetch(newUrl, { method: "DELETE" });
     if (!response.ok)
-      throw new Error(`Failed to delete media: ${response.statusText}`);
+      throw new SystemFailureException(
+        `Failed to delete media: ${response.statusText}`,
+      );
   }
 
   /**

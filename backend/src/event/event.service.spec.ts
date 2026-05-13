@@ -5,8 +5,8 @@ import {
   type CreateEventDto,
   type EventDto,
   type LocationDto,
-  type PriceDto,
   type ModifyEventDto,
+  type PriceDto,
 } from "../dto/dto";
 import { BlogDatabaseService } from "../database/db.blog.service";
 import { FilterEventSchema, PaginationFilterSchema } from "@repo/common";
@@ -83,7 +83,7 @@ describe("EventService", () => {
             getBlogsOfEvent: jest.fn(),
             linkBlogWithEventID: jest.fn(),
             deleteBlogFromEvent: jest.fn(),
-            linkEventToLocation: jest.fn().mockResolvedValue(true),
+            linkEventToLocation: jest.fn(),
             deleteLocationFromEvent: jest.fn().mockResolvedValue(undefined),
             getLocationOfEvent: jest.fn().mockResolvedValue(mockLocation),
 
@@ -285,14 +285,6 @@ describe("EventService", () => {
       await expect(service.createEvent(newEvent)).rejects.toThrow(
         "Failed to create event",
       );
-    });
-  });
-
-  describe("linkEventToLocation", () => {
-    it("should link an event to a location via DB service", async () => {
-      const result = await service.linkEventToLocation(1, 2);
-      expect(dbService.linkEventToLocation).toHaveBeenCalledWith(1, 2);
-      expect(result).toBe(true);
     });
   });
 

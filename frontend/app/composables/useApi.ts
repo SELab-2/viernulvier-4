@@ -18,6 +18,7 @@ export interface ApiResponse<TData> {
   data: TData | null;
   error: string | null;
   errorCode?: string | null;
+  errorData?: unknown;
   status: number | null;
 }
 
@@ -50,11 +51,15 @@ export function useApi() {
       // $fetch throws a FetchError on non-ok responses with status and data attached
       const fetchError = err as {
         status?: number;
-        data?: { message?: string; internalCode?: string };
+        data?: { message?: string; internalCode?: string } & Record<
+          string,
+          unknown
+        >;
         message?: string;
       };
       const status = fetchError.status ?? null;
       const errorCode = fetchError.data?.internalCode ?? null;
+      const errorData = fetchError.data ?? null;
       const message =
         fetchError.data?.message ??
         fetchError.message ??
@@ -66,7 +71,7 @@ export function useApi() {
         handleDefaultError(status ?? 0, message);
       }
 
-      return { data: null, error: message, errorCode, status };
+      return { data: null, error: message, errorCode, errorData, status };
     }
   }
 
@@ -74,6 +79,7 @@ export function useApi() {
    * Fallback error handler used when no onError is passed to a request.
    * 401/403 are logged as auth errors — redirect to login should be handled
    * by the caller via onError if needed.
+   * Forces the application to route to error.vue. if the error would break pages (fatal error).
    */
   function handleDefaultError(status: number, message: string): void {
     if (status === 401 || status === 403) {
@@ -85,6 +91,17 @@ export function useApi() {
     } else {
       console.error(`[useApi] Error (${status}): ${message}`);
     }
+
+    // Map status 0 (unreachable/fetch failed) to 503 so the network error triggers
+    const finalStatus = status === 0 ? 503 : status;
+
+    showError({
+      // use showError so we still return.
+      status: finalStatus,
+      statusText: status === 0 ? "Service Unavailable" : undefined,
+      message: message,
+      fatal: true, // Required to break out of client-side navigation
+    });
   }
 
   /** request — asks for object. */

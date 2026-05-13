@@ -179,6 +179,7 @@ export class MediaGalleryController {
   /**
    * Responds to a GET to "/media/galleries/:galleryId/items"
    * @param galleryId The ID of the gallery in the URL.
+   * @param lang is the desired language
    * @returns A list of items for that gallery.
    */
   @ApiOperation({ summary: "Gets the items from one gallery." })

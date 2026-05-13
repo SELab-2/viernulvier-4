@@ -41,6 +41,7 @@ export class ProductionBlogController {
   /**
    * Responds to a GET to "/productions/:productionId/blogs".
    * @param productionId The id of the Production.
+   * @param lang is the desired language.
    * @returns A list of all Blog objects linked to this Production.
    */
   @ApiOperation({ summary: "Get all Blogs linked to a Production." })

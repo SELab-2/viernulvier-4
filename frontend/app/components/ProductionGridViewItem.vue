@@ -5,7 +5,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProductionView, Tag, Event } from "@repo/common";
+import type { ProductionView, Event, TagView } from "@repo/common";
 import { useProductionApi } from "~/composables/useProductionApi";
 import { useEventApi } from "~/composables/useEventApi";
 import { ROUTES } from "~/utils/routes";
@@ -16,7 +16,7 @@ const { productionView } = defineProps<{
   productionView: ProductionView;
 }>();
 
-const tags = ref<Tag[]>([]);
+const tags = ref<TagView[]>([]);
 const events = ref<Event[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
 const mainCrop = computed(() => {
@@ -36,7 +36,7 @@ async function loadTags() {
   try {
     const response = await getTags(productionView.id, locale.value);
     if (response.data) {
-      tags.value = (response.data as Tag[]).filter((tag) => {
+      tags.value = (response.data as TagView[]).filter((tag) => {
         const currentTag =
           typeof tag.tag === "string"
             ? tag.tag

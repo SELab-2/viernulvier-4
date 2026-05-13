@@ -4,7 +4,7 @@ import { ref } from "vue";
  * Acts as a lightweight global store for filters, pagination, and view settings.
  */
 
-import type { PaginatedResponse, PrintItemView, PrintType } from "@repo/common";
+import type { PrintItemView, PrintType } from "@repo/common";
 import { usePrintApi } from "./usePrintApi";
 import type { SearchSuggestion } from "~/components/SearchBar.vue";
 
@@ -33,7 +33,7 @@ export function usePrintView() {
     query: string,
     limit: number,
   ): Promise<SearchSuggestion[]> {
-    const resp = (await getAll({
+    const resp = await getAll({
       paginationFilters: { page: 0, limit: limit, descending: true },
       printItemFilters: {
         title: query,
@@ -41,7 +41,7 @@ export function usePrintView() {
         is_suggestion: true,
       },
       languageFilters: { lang: locale.value },
-    })) as ApiResponse<PaginatedResponse<PrintItemView>>;
+    });
 
     if (!resp.data?.objects) return [];
 

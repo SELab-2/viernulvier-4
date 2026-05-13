@@ -33,6 +33,7 @@ export class EventLocationController {
   /**
    * Responds to GET /events/:eventId/locations
    * @param eventId ID in the URL of the request.
+   * @param lang is the desired language.
    * @returns The Location corresponding to this event.
    */
   @ApiOperation({
@@ -65,8 +66,8 @@ export class EventLocationController {
   async linkEventToLocation(
     @Param("eventId", ParseIntPipe) eventId: number,
     @Param("locationId", ParseIntPipe) locationId: number,
-  ): Promise<boolean> {
-    return await this.eventService.linkEventToLocation(eventId, locationId);
+  ): Promise<void> {
+    await this.eventService.linkEventToLocation(eventId, locationId);
   }
 
   /**

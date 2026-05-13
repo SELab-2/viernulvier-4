@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { VueWrapper, mount } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
-import FileList from "../../../app/components/prints/FileList.vue";
+import FileList from "../../../app/components/admin/prints/FileList.vue";
 
 const i18n = createI18n({
   locale: "nl",
