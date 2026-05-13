@@ -203,6 +203,9 @@
     "createSuccess": "Created account \"{username}\".",
     "deleteSuccess": "Deleted account \"{username}\"."
   },
+  "series": {
+    "noProductions": "This series doesn't contain any productions."
+  },
   "prints": {
     "types": {
       "all": "All",
@@ -467,6 +470,22 @@
       "selected": "Selected",
       "clearTags": "Clear all"
     }
+  },
+  "error": {
+    "titleFallback": "Oops!",
+    "subtitle": {
+      "404": "You seem to have wandered off the path.",
+      "500": "Something went completely wrong on our end.",
+      "default": "Well, this is unexpected."
+    },
+    "message": {
+      "404": "The page you are looking for doesn't exist or has been moved.",
+      "500": "Our servers are having a little hiccup and we couldn't load this page.",
+      "default": "Something went wrong. Please try again."
+    },
+    "blame": "Please blame one or more of our developers in the meantime :-)",
+    "goHome": "Take Me Back Home",
+    "imgAlt": "Kinda goats"
   },
   "csv": {
     "templates": {

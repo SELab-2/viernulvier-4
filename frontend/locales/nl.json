@@ -204,6 +204,9 @@
     "createSuccess": "Account \"{username}\" aangemaakt.",
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
+  "series": {
+    "noProductions": "Deze reeks bevat geen producties."
+  },
   "prints": {
     "types": {
       "all": "Alles",
@@ -468,6 +471,22 @@
       "selected": "Geselecteerd",
       "clearTags": "Alles wissen"
     }
+  },
+  "error": {
+    "titleFallback": "Oeps!",
+    "subtitle": {
+      "404": "Je lijkt van het pad te zijn afgedwaald.",
+      "500": "Er is aan onze kant iets helemaal misgegaan.",
+      "default": "Nou, dit is onverwacht."
+    },
+    "message": {
+      "404": "De pagina die je zoekt bestaat niet of is verplaatst.",
+      "500": "Onze servers hebben een kleine hapering en we konden deze pagina niet laden.",
+      "default": "Er is iets misgegaan. Probeer het opnieuw."
+    },
+    "blame": "Geef in de tussentijd gerust de schuld aan een van onze developers :-)",
+    "goHome": "Breng me terug naar home",
+    "imgAlt": "Soort van geiten"
   },
   "csv": {
     "templates": {
