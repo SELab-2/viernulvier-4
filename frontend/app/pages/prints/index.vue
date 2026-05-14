@@ -126,7 +126,6 @@ onMounted(loadPage);
       :title="t('prints.title')"
       :description="t('prints.headerDescription')"
     />
-
     <PrintsToolbar
       @update:search="searchQuery = $event"
       @update:types="activeFilter = $event"

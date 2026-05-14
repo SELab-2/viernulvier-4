@@ -154,15 +154,17 @@ onUnmounted(() => io?.disconnect());
       When the calendar opens it expands the toolbar element downward,
       pushing <main> down naturally — no overlap.
     -->
-    <StoryToolbar
-      v-model:sort-order="sortOrder"
-      :story-titles="[]"
-      :oldest-date="oldestDate"
-      :newest-date="newestDate"
-      :date-filter="dateFilter"
-      @update:search="searchQuery = $event"
-      @update:date-filter="dateFilter = $event"
-    />
+    <div class="page-container">
+      <StoryToolbar
+        v-model:sort-order="sortOrder"
+        :story-titles="[]"
+        :oldest-date="oldestDate"
+        :newest-date="newestDate"
+        :date-filter="dateFilter"
+        @update:search="searchQuery = $event"
+        @update:date-filter="dateFilter = $event"
+      />
+    </div>
 
     <main class="page-container py-8 sm:py-12">
       <StorySkeleton v-if="pending" />
