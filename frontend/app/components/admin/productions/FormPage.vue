@@ -56,6 +56,26 @@ const stepLabels = computed(() => [
   t("admin-productions.steps.series"),
 ]);
 
+const previewData = computed(() => {
+  const core = form.steps[0];
+  const tags = form.steps[1];
+  const media = form.steps[2];
+  const events = form.steps[3];
+  const series = form.steps[4];
+
+  if (!core || !tags || !media || !events || !series) {
+    return null;
+  }
+
+  return {
+    core: core.draft.value as ProductionCoreForm,
+    tags: tags.draft.value as ProductionTagsForm,
+    media: media.draft.value as ProductionMediaForm,
+    events: events.draft.value as ProductionEventsForm,
+    series: series.draft.value as ProductionSeriesForm,
+  };
+});
+
 const isFirstStep = computed(() => {
   return form.currentStepIndex.value === 0;
 });
@@ -311,18 +331,14 @@ onMounted(async () => {
 
         <!-- RIGHT / PREVIEW -->
         <div class="w-[400px] xl:w-[440px] shrink-0 sticky top-20 self-start">
-          <div
-            class="border border-border rounded-2xl p-10 min-h-[400px] flex items-center justify-center"
-          >
-            <p class="text-sm text-muted-foreground text-center">
-              {{
-                t(
-                  "admin.productions.preview.placeholder",
-                  "Preview will appear here",
-                )
-              }}
-            </p>
-          </div>
+          <AdminProductionsPreview
+            v-if="previewData"
+            :core="previewData.core"
+            :tags="previewData.tags"
+            :media="previewData.media"
+            :events="previewData.events"
+            :series="previewData.series"
+          />
         </div>
       </div>
     </div>
