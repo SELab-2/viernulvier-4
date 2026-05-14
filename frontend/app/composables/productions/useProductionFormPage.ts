@@ -165,6 +165,8 @@ export function useProductionFormPage(mode: ProductionFormMode) {
     await itemApi.remove(item.id);
   }
 
+  // ─── Location / Event helpers ───────────────────────────────────────────────
+
   /**
    * Resolves a location for an event:
    * - If createLocation is provided, create a new location and return its id.
@@ -235,7 +237,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         await eventApi.linkLocation(created.data.id, locationId);
       }
     } catch (err: unknown) {
-      let cause = "unknown";
+      let cause: string;
       if (err instanceof Error) cause = err.message;
       else if (typeof err === "string") cause = err;
       else {
@@ -247,6 +249,166 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       }
       throw new Error(`Failed to create event: ${cause}`);
     }
+  }
+
+  // ─── Refactor helpers to reduce duplication ─────────────────────────────────
+  async function createTagIds(labels: string[]): Promise<number[]> {
+    return Promise.all(
+      labels.map(async (label) => {
+        const created = await tagApi.create({ tag: { nl: label, en: label } });
+        if (!created.data) throw new Error(`Failed to create tag: ${label}`);
+        return created.data.id;
+      }),
+    );
+  }
+
+  async function connectTags(productionId: number, tagIds: number[]) {
+    await Promise.all(
+      tagIds.map((tagId) => productionApi.addTag(productionId, tagId)),
+    );
+  }
+
+  async function disconnectTags(productionId: number, tagIds: number[]) {
+    await Promise.all(
+      tagIds.map((tagId) => productionApi.removeTag(productionId, tagId)),
+    );
+  }
+
+  async function handleMediaCreate(
+    productionId: number,
+    mediaPayload: ReturnType<typeof media.extractPayload>,
+  ) {
+    if (mediaPayload.itemsToCreate.length > 0) {
+      const galleryId = await ensureGallery(productionId, null);
+      for (const item of mediaPayload.itemsToCreate) {
+        await persistItemCreate(item, galleryId, productionId);
+      }
+    }
+  }
+
+  async function handleMediaEdit(
+    productionId: number,
+    mediaPayload: ReturnType<typeof media.extractPayload>,
+  ) {
+    const hasMediaChanges =
+      mediaPayload.itemsToCreate.length > 0 ||
+      mediaPayload.itemsToUpdate.length > 0 ||
+      mediaPayload.itemsToDelete.length > 0;
+
+    if (!hasMediaChanges) return;
+
+    // Deletions first
+    for (const item of mediaPayload.itemsToDelete) {
+      await persistItemDelete(item);
+    }
+
+    const galleryId = await ensureGallery(productionId, mediaPayload.galleryId);
+
+    for (const item of mediaPayload.itemsToCreate) {
+      await persistItemCreate(item, galleryId, productionId);
+    }
+    for (const item of mediaPayload.itemsToUpdate) {
+      await persistItemUpdate(item, productionId);
+    }
+  }
+
+  async function handleEventsCreate(
+    productionId: number,
+    eventsPayload: ReturnType<typeof events.extractPayload>,
+  ) {
+    for (const event of eventsPayload.eventsToCreate) {
+      await persistEventCreate(event, productionId);
+    }
+  }
+
+  async function handleEventsEdit(
+    productionId: number,
+    eventsPayload: ReturnType<typeof events.extractPayload>,
+  ) {
+    // Delete: unlink location first, then delete the event
+    for (const event of eventsPayload.eventsToDelete) {
+      if (event.unlinkLocationId !== null) {
+        await eventApi.unlinkLocation(event.id);
+      }
+      await eventApi.remove(event.id);
+    }
+
+    // Update: patch datetime fields, then swap location if needed
+    for (const event of eventsPayload.eventsToUpdate) {
+      await eventApi.modify(event.id, {
+        starttime: event.starttime,
+        endtime: event.endtime,
+        doors_at: event.doors_at,
+        intermission_at: event.intermission_at,
+      });
+
+      const locationChanged =
+        event.unlinkLocationId !== null ||
+        event.linkLocationId !== null ||
+        event.createLocation !== null;
+
+      if (locationChanged) {
+        if (event.unlinkLocationId !== null) {
+          await eventApi.unlinkLocation(event.id);
+        }
+
+        const locationId = await resolveLocationId(
+          event.createLocation,
+          event.linkLocationId,
+        );
+        if (locationId !== null) {
+          await eventApi.linkLocation(event.id, locationId);
+        }
+      }
+    }
+
+    // Create new events
+    for (const event of eventsPayload.eventsToCreate) {
+      await persistEventCreate(event, productionId);
+    }
+  }
+
+  async function handleSeriesCreateAndConnect(
+    productionId: number,
+    seriesPayload: ReturnType<typeof series.extractPayload>,
+  ) {
+    const newSeriesIds = await Promise.all(
+      seriesPayload.create.map(async (s) => {
+        const created = await seriesApi.create(s);
+        if (!created.data)
+          throw new Error(`Failed to create series: ${s.titel.nl}`);
+        return created.data.id;
+      }),
+    );
+
+    await Promise.all(
+      [...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
+        seriesApi.linkProductionToSeries(seriesId, [productionId]),
+      ),
+    );
+  }
+
+  async function handleSeriesEdit(
+    productionId: number,
+    seriesPayload: ReturnType<typeof series.extractPayload>,
+  ) {
+    const newSeriesIds = await Promise.all(
+      seriesPayload.create.map(async (s) => {
+        const created = await seriesApi.create(s);
+        if (!created.data)
+          throw new Error(`Failed to create series: ${s.titel.nl}`);
+        return created.data.id;
+      }),
+    );
+
+    await Promise.all([
+      ...[...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
+        seriesApi.linkProductionToSeries(seriesId, [productionId]),
+      ),
+      ...seriesPayload.disconnect.map((seriesId) =>
+        seriesApi.unlinkProductionFromSeries(seriesId, productionId),
+      ),
+    ]);
   }
 
   async function finish(): Promise<void> {
@@ -308,53 +470,18 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
         const productionId = res.data.id;
 
-        // 2. Create new tags and collect all IDs to connect
-        const newTagIds = await Promise.all(
-          tagsPayload.create.map(async (label) => {
-            const created = await tagApi.create({
-              tag: { nl: label, en: label },
-            });
-            if (!created.data)
-              throw new Error(`Failed to create tag: ${label}`);
-            return created.data.id;
-          }),
-        );
+        // Tags: create labels then connect all tag ids
+        const newTagIds = await createTagIds(tagsPayload.create);
+        await connectTags(productionId, [...tagsPayload.connect, ...newTagIds]);
 
-        // Connect all tags (existing selections + freshly created)
-        await Promise.all(
-          [...tagsPayload.connect, ...newTagIds].map((tagId) =>
-            productionApi.addTag(productionId, tagId),
-          ),
-        );
+        // Media
+        await handleMediaCreate(productionId, mediaPayload);
 
-        // 3. Media — only if there are items to create
-        if (mediaPayload.itemsToCreate.length > 0) {
-          const galleryId = await ensureGallery(productionId, null);
-          for (const item of mediaPayload.itemsToCreate) {
-            await persistItemCreate(item, galleryId, productionId);
-          }
-        }
+        // Events
+        await handleEventsCreate(productionId, eventsPayload);
 
-        // 4. Events — create each one, then link its location
-        for (const event of eventsPayload.eventsToCreate) {
-          await persistEventCreate(event, productionId);
-        }
-
-        // 5. Series: create new series then connect (existing + newly created)
-        const newSeriesIds = await Promise.all(
-          seriesPayload.create.map(async (s) => {
-            const created = await seriesApi.create(s);
-            if (!created.data)
-              throw new Error(`Failed to create series: ${s.titel.nl}`);
-            return created.data.id;
-          }),
-        );
-
-        await Promise.all(
-          [...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
-            seriesApi.linkProductionToSeries(seriesId, [productionId]),
-          ),
-        );
+        // Series
+        await handleSeriesCreateAndConnect(productionId, seriesPayload);
       } else {
         // Edit mode — id is guaranteed to be set
         const idParam = route.params.id;
@@ -365,115 +492,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         // 1. Replace core content
         await productionApi.replace(productionId, productionBody);
 
-        // 2. Create new tags and collect their IDs
-        const newTagIds = await Promise.all(
-          tagsPayload.create.map(async (label) => {
-            const created = await tagApi.create({
-              tag: { nl: label, en: label },
-            });
-            if (!created.data)
-              throw new Error(`Failed to create tag: ${label}`);
-            return created.data.id;
-          }),
-        );
-
-        // Connect new tags (existing + freshly created) and disconnect removed ones
+        // Tags: create new + connect and disconnect removed
+        const newTagIds = await createTagIds(tagsPayload.create);
         await Promise.all([
-          ...[...tagsPayload.connect, ...newTagIds].map((tagId) =>
-            productionApi.addTag(productionId, tagId),
-          ),
-          ...tagsPayload.disconnect.map((tagId) =>
-            productionApi.removeTag(productionId, tagId),
-          ),
+          connectTags(productionId, [...tagsPayload.connect, ...newTagIds]),
+          disconnectTags(productionId, tagsPayload.disconnect),
         ]);
 
-        // 3. Media
-        const hasMediaChanges =
-          mediaPayload.itemsToCreate.length > 0 ||
-          mediaPayload.itemsToUpdate.length > 0 ||
-          mediaPayload.itemsToDelete.length > 0;
+        // Media
+        await handleMediaEdit(productionId, mediaPayload);
 
-        if (hasMediaChanges) {
-          // Deletions first so we don't leave orphans
-          for (const item of mediaPayload.itemsToDelete) {
-            await persistItemDelete(item);
-          }
+        // Events
+        await handleEventsEdit(productionId, eventsPayload);
 
-          const galleryId = await ensureGallery(
-            productionId,
-            mediaPayload.galleryId,
-          );
-
-          for (const item of mediaPayload.itemsToCreate) {
-            await persistItemCreate(item, galleryId, productionId);
-          }
-          for (const item of mediaPayload.itemsToUpdate) {
-            await persistItemUpdate(item, productionId);
-          }
-        }
-
-        // 4. Events
-
-        // Delete: unlink location first, then delete the event
-        for (const event of eventsPayload.eventsToDelete) {
-          if (event.unlinkLocationId !== null) {
-            await eventApi.unlinkLocation(event.id);
-          }
-          await eventApi.remove(event.id);
-        }
-
-        // Update: patch datetime fields, then swap location if needed
-        for (const event of eventsPayload.eventsToUpdate) {
-          await eventApi.modify(event.id, {
-            starttime: event.starttime,
-            endtime: event.endtime,
-            doors_at: event.doors_at,
-            intermission_at: event.intermission_at,
-          });
-
-          const locationChanged =
-            event.unlinkLocationId !== null ||
-            event.linkLocationId !== null ||
-            event.createLocation !== null;
-
-          if (locationChanged) {
-            if (event.unlinkLocationId !== null) {
-              await eventApi.unlinkLocation(event.id);
-            }
-
-            const locationId = await resolveLocationId(
-              event.createLocation,
-              event.linkLocationId,
-            );
-            if (locationId !== null) {
-              await eventApi.linkLocation(event.id, locationId);
-            }
-          }
-        }
-
-        // Create new events
-        for (const event of eventsPayload.eventsToCreate) {
-          await persistEventCreate(event, productionId);
-        }
-
-        // 5. Series: create new series, connect new+existing, disconnect removed
-        const newSeriesIds = await Promise.all(
-          seriesPayload.create.map(async (s) => {
-            const created = await seriesApi.create(s);
-            if (!created.data)
-              throw new Error(`Failed to create series: ${s.titel.nl}`);
-            return created.data.id;
-          }),
-        );
-
-        await Promise.all([
-          ...[...seriesPayload.connect, ...newSeriesIds].map((seriesId) =>
-            seriesApi.linkProductionToSeries(seriesId, [productionId]),
-          ),
-          ...seriesPayload.disconnect.map((seriesId) =>
-            seriesApi.unlinkProductionFromSeries(seriesId, productionId),
-          ),
-        ]);
+        // Series
+        await handleSeriesEdit(productionId, seriesPayload);
       }
 
       await router.push(ROUTES.admin.productions.base);
