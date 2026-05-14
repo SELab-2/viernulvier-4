@@ -61,6 +61,7 @@ export class SeriesDatabaseService {
    * Get series with pagination
    * @param paginationFilters are the filters you want to use in the pagination.
    * @param seriesFilters The filters used for series.
+   * @param language Optional language param that'll be used to choose what field to filter by.
    * @return prices
    */
   async getSeries(

@@ -27,7 +27,8 @@ export class SeriesService {
   /**
    * Fetches a paginated list of series.
    * @param paginationFilters The filters to paginate by.
-   * @param seriesFilters The filters for series.
+   * @param seriesFilters The filters for series
+   * @param language Optional language param that'll be used to choose what field to filter by.
    * @returns Paginated list of series.
    */
   async getSeries(
