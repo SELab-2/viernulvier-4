@@ -204,6 +204,8 @@
     "deleteSuccess": "Deleted account \"{username}\"."
   },
   "series": {
+    "header_title": "Series",
+    "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
     "noProductions": "This series doesn't contain any productions."
   },
   "prints": {
@@ -403,6 +405,9 @@
     "editTags": "Edit tags",
     "warning-title": "Future production",
     "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
+  },
+  "admin-series": {
+    "header_title": "Series"
   },
   "error": {
     "titleFallback": "Oops!",
