@@ -183,15 +183,11 @@ watch([title, previewMode], updateTitleScrollable);
         "
       >
         <!-- Hero -->
-        <div
-          class="relative flex items-end overflow-hidden"
-          :class="previewMode === 'phone' ? 'min-h-[200px]' : 'min-h-[240px]'"
-        >
+        <div class="relative flex items-end overflow-hidden aspect-video">
           <MediaDisplay
             :id="props.data.id"
             :src="headerCrop"
             size="fill"
-            object-fit="cover"
             :show-icon="false"
             :show-border="false"
             :rounded="false"

@@ -20,7 +20,10 @@
     :src="formattedUrl"
     loading="lazy"
     @error="handleImageError"
-    :class="[containerClass, `object-${props.objectFit ?? 'contain'}`]"
+    :class="[
+      containerClass,
+      props.objectFit ? `object-${props.objectFit}` : '',
+    ]"
   />
   <ThumbnailPlaceholder
     v-else
