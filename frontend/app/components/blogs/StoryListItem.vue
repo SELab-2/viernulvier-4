@@ -82,6 +82,7 @@ watch(() => props.story.id, loadGallery);
         :rounded="false"
         :show-icon="true"
         size="fill"
+        class="object-cover"
       />
     </div>
 

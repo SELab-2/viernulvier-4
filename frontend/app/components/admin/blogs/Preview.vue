@@ -191,7 +191,7 @@ watch([title, previewMode], updateTitleScrollable);
             :show-icon="false"
             :show-border="false"
             :rounded="false"
-            class="absolute inset-0 w-full h-full z-0"
+            class="absolute inset-0 w-full h-full z-0 object-cover"
           />
           <div
             class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-[1]"
