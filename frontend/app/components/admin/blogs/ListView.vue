@@ -151,7 +151,7 @@ async function handleDelete(blog: BlogView) {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-center justify-between gap-4">
+    <div class="page-container py-10 flex items-center justify-between gap-4">
       <div>
         <h1
           class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
@@ -227,7 +227,7 @@ async function handleDelete(blog: BlogView) {
       We intentionally do NOT reuse StoryTimeline here because admin items
       need the edit/delete buttons that StoryTimeline's StoryListItem doesn't have.
     -->
-    <div v-else class="space-y-3">
+    <div v-else class="page-container space-y-3">
       <AdminBlogsListItem
         v-for="blog in blogs"
         :key="blog.id"

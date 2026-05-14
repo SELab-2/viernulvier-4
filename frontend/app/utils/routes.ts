@@ -13,9 +13,6 @@ export const ROUTES = {
     base: "/productions",
     byId: (id: number) => `/productions/${id}`,
   },
-  series: {
-    base: "/series",
-  },
   stories: {
     base: "/stories",
     byId: (id: number) => `/stories/${id}`,
@@ -46,9 +43,6 @@ export const ROUTES = {
     },
     series: {
       base: "/admin/series",
-    },
-    tags: {
-      base: "/admin/tags",
     },
     stories: {
       base: "/admin/stories",

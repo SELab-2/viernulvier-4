@@ -21,8 +21,6 @@
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="page-container py-10">
-      <AdminBlogsListView />
-    </div>
+    <AdminBlogsListView />
   </div>
 </template>

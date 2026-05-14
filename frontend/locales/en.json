@@ -9,8 +9,7 @@
     "events": "events",
     "accounts": "accounts",
     "dashboard": "dashboard",
-    "logout": "logout",
-    "tags": "tags"
+    "logout": "logout"
   },
   "auth": {
     "confirmLogout": "Logged out successfully"

@@ -112,7 +112,7 @@ const filterIsActive = computed(() => panelOpen.value || hasDateFilter.value);
 <template>
   <div class="w-full border-b border-border bg-background">
     <!-- Toolbar row -->
-    <div class="py-5 flex items-stretch gap-3">
+    <div class="page-container py-5 flex items-stretch gap-3">
       <!-- Search -->
       <div class="flex-1 min-w-0 h-12">
         <SearchBar

@@ -163,7 +163,6 @@ const adminNavItems = [
   { label: "dashboard", route: ROUTES.admin.dashboard.base },
   { label: "productions", route: ROUTES.admin.productions.base },
   { label: "series", route: ROUTES.admin.series.base },
-  { label: "tags", route: ROUTES.admin.tags.base },
   { label: "stories", route: ROUTES.admin.stories.base },
   { label: "prints", route: ROUTES.admin.prints.base },
 ];
