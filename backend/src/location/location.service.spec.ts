@@ -26,6 +26,7 @@ describe("LocationService", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: false,
   };
 
   const mockLocationArray: LocationDto[] = [mockLocation];
@@ -60,7 +61,7 @@ describe("LocationService", () => {
 
   describe("getLocations", () => {
     it("should fetch all locations from the database", async () => {
-      const result = await service.getLocations(filter);
+      const result = await service.getLocations(filter, {});
       expect(result).toEqual(mockLocationArray);
       expect(dbService.getLocations).toHaveBeenCalledTimes(1);
     });
