@@ -205,6 +205,6 @@ onUnmounted(() => io?.disconnect());
         </div>
       </template>
     </main>
-    <ScrollToTop />
+    <BlogsScrollToTop />
   </div>
 </template>
