@@ -34,6 +34,7 @@ const route = useRoute();
 const { getById, modify, getMediaGallery } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 const { t, locale } = useI18n();
+const snackbar = useSnackbar();
 
 // ── Header height tracking ────────────────────────────────────────────────
 
@@ -184,9 +185,17 @@ async function handleSubmit(data: ModifyBlog) {
   try {
     await modify(blogId.value, data);
     saved.value = true;
+    snackbar.add({
+      type: "success",
+      text: t("admin.blogs.saveSuccess"),
+    });
     setTimeout(() => (saved.value = false), 3000);
   } catch {
     error.value = t("admin.blogs.saveError");
+    snackbar.add({
+      type: "error",
+      text: error.value,
+    });
   } finally {
     saving.value = false;
   }
@@ -213,38 +222,40 @@ async function restoreToSaved() {
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <!-- ── Top bar: back link + title + "Saved ✓" badge ─────────────── -->
-      <div class="flex items-center gap-4 flex-wrap">
+      <div class="space-y-4">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
-          class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          class="inline-flex items-center gap-1.5 font-brand font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
 
-        <h1
-          class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
-        >
-          {{ t("admin.blogs.edit") }}
-        </h1>
-
-        <!-- Transient "Saved ✓" badge — appears for 3 s after a successful save -->
-        <Transition name="fade">
-          <span
-            v-if="saved"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-feedback-success-bg text-feedback-success-text border border-feedback-success-border text-[10px] font-black uppercase tracking-widest shrink-0"
+        <div class="flex items-start justify-between gap-4">
+          <h1
+            class="font-brand font-black text-2xl uppercase tracking-tight text-foreground truncate flex-1"
           >
-            <svg
-              class="w-3 h-3"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="3"
-              viewBox="0 0 24 24"
+            {{ t("admin.blogs.edit") }}
+          </h1>
+
+          <!-- Transient "Saved ✓" badge — appears for 3 s after a successful save -->
+          <Transition name="fade">
+            <span
+              v-if="saved"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-feedback-success-bg text-feedback-success-text border border-feedback-success-border text-[10px] font-black uppercase tracking-widest shrink-0"
             >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            {{ t("admin.saved") }}
-          </span>
-        </Transition>
+              <svg
+                class="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                viewBox="0 0 24 24"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              {{ t("admin.saved") }}
+            </span>
+          </Transition>
+        </div>
       </div>
 
       <!-- ── Step tabs ─────────────────────────────────────────────────── -->

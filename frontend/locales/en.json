@@ -263,6 +263,8 @@
       "saveBtn": "Save Changes",
       "createError": "Could not create the story. Please try again.",
       "saveError": "Could not save the changes. Please try again.",
+      "createSuccess": "Story created.",
+      "saveSuccess": "Story saved.",
       "sectionTitle": "Title",
       "sectionContent": "Content",
       "titleNl": "Title (NL)",
@@ -282,6 +284,8 @@
       "descriptionEnRequired": "English description is required",
       "restoreConfirm": "Are you sure you want to restore the last version ?",
       "restoreBtn": "Restore",
+      "deleteSuccess": "Deleted story \"{title}\".",
+      "deleteError": "Could not delete the story. Please try again.",
       "validation": {
         "titleNlRequired": "A Dutch title is required.",
         "descriptionNlRequired": "A Dutch description is required."

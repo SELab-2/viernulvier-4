@@ -23,6 +23,7 @@ import { useBlogView } from "~/composables/blogs/useBlogView";
 
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
+const snackbar = useSnackbar();
 
 /**
  * Pull shared filter refs from useBlogView.
@@ -187,15 +188,31 @@ async function handleDelete(blog: BlogView) {
 
   deletingIds.value.add(blog.id);
   try {
-    await remove(blog.id);
+    const response = await remove(blog.id);
+
+    if (response.error) {
+      snackbar.add({
+        type: "error",
+        text: response.error ?? t("admin.blogs.deleteError"),
+      });
+      return;
+    }
 
     if (blogs.value.length === 1 && currentPage.value > 1) {
       currentPage.value--; // triggers loadBlogs via watcher
     } else {
       await loadBlogs();
     }
+
+    snackbar.add({
+      type: "success",
+      text: t("admin.blogs.deleteSuccess", { title: blog.titel ?? blog.id }),
+    });
   } catch {
-    alert(t("admin.blogs.saveError"));
+    snackbar.add({
+      type: "error",
+      text: t("admin.blogs.deleteError"),
+    });
   } finally {
     deletingIds.value.delete(blog.id);
   }
@@ -264,26 +281,21 @@ async function handleDelete(blog: BlogView) {
       </p>
     </div>
 
-    <!-- Story list: each item links to the edit page -->
+    <!-- Story list: each item exposes edit/delete actions in the card -->
     <div v-else class="space-y-2">
-      <NuxtLink
+      <!--
+        BlogsStoryListItem is the same card used on the public stories page.
+        `is-admin` switches it to show edit/delete buttons instead of a link.
+        `deleting` disables the delete button while the API call is in flight.
+      -->
+      <BlogsStoryListItem
         v-for="blog in blogs"
         :key="blog.id"
-        :to="ROUTES.admin.stories.edit(blog.id)"
-        class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
-      >
-        <!--
-          BlogsStoryListItem is the same card used on the public stories page.
-          `is-admin` switches it to show edit/delete buttons instead of a link.
-          `deleting` disables the delete button while the API call is in flight.
-        -->
-        <BlogsStoryListItem
-          :story="blog"
-          :is-admin="true"
-          :deleting="deletingIds.has(blog.id)"
-          @delete.stop="handleDelete(blog)"
-        />
-      </NuxtLink>
+        :story="blog"
+        :is-admin="true"
+        :deleting="deletingIds.has(blog.id)"
+        @delete="handleDelete(blog)"
+      />
     </div>
 
     <!-- Pagination bar (hidden when there is only one page and no items yet) -->

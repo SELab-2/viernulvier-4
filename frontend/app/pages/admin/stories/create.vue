@@ -23,6 +23,7 @@ import { useBlogApi } from "~/composables/blogs/useBlogApi";
 definePageMeta({ ssr: false });
 
 const { create } = useBlogApi();
+const snackbar = useSnackbar();
 const { t } = useI18n();
 
 const saving = ref(false);
@@ -40,6 +41,10 @@ async function handleSubmit(data: CreateBlog) {
   try {
     const resp = await create(data);
     if (resp.data) {
+      snackbar.add({
+        type: "success",
+        text: t("admin.blogs.createSuccess"),
+      });
       // After creating, redirect to the edit page's "content" step so the
       // user can immediately link productions without navigating again.
       await navigateTo({
@@ -48,9 +53,17 @@ async function handleSubmit(data: CreateBlog) {
       });
     } else {
       error.value = resp.error ?? t("admin.blogs.createError");
+      snackbar.add({
+        type: "error",
+        text: error.value,
+      });
     }
   } catch {
     error.value = t("admin.blogs.createError");
+    snackbar.add({
+      type: "error",
+      text: error.value,
+    });
   } finally {
     saving.value = false;
   }
@@ -61,16 +74,16 @@ async function handleSubmit(data: CreateBlog) {
   <div class="min-h-screen bg-background">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <!-- ── Top bar ─────────────────────────────────────────────────────── -->
-      <div class="flex items-center gap-4 flex-wrap">
+      <div class="space-y-4">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
-          class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          class="inline-flex items-center gap-1.5 font-brand font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
 
         <h1
-          class="font-brand font-black text-2xl uppercase tracking-tight text-foreground flex-1 truncate"
+          class="font-brand font-black text-2xl uppercase tracking-tight text-foreground truncate"
         >
           {{ t("admin.blogs.new") }}
         </h1>

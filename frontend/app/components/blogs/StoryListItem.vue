@@ -89,25 +89,41 @@ watch(() => props.story.id, loadGallery);
     <div
       class="flex-1 min-w-0 flex flex-col justify-between px-4 py-3 sm:px-5 sm:py-4"
     >
-      <div class="overflow-hidden">
-        <!-- We use line-clamp-2 here to native CSS truncate the text cleanly -->
-        <h3
-          class="font-brand font-black text-sm sm:text-base uppercase tracking-tight leading-snug mb-1 transition-colors duration-150 break-words line-clamp-2"
-          :class="
-            isAdmin
-              ? 'text-card-foreground group-hover:text-accent'
-              : 'text-gray-900 dark:text-gray-100 group-hover:text-purple-500 dark:group-hover:text-purple-400'
-          "
-        >
-          {{ title }}
-        </h3>
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0 flex-1 overflow-hidden">
+          <!-- We use line-clamp-2 here to native CSS truncate the text cleanly -->
+          <h3
+            class="font-brand font-black text-sm sm:text-base uppercase tracking-tight leading-snug mb-1 transition-colors duration-150 break-words line-clamp-2"
+            :class="
+              isAdmin
+                ? 'text-card-foreground group-hover:text-accent'
+                : 'text-gray-900 dark:text-gray-100 group-hover:text-purple-500 dark:group-hover:text-purple-400'
+            "
+          >
+            {{ title }}
+          </h3>
 
-        <!-- Description is now also visible in Admin to keep height consistent -->
-        <p
-          v-if="cleanDescription"
-          class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400"
-          v-html="cleanDescription"
-        />
+          <!-- Description is now also visible in Admin to keep height consistent -->
+          <p
+            v-if="cleanDescription"
+            class="text-xs leading-relaxed line-clamp-2 text-gray-500 dark:text-gray-400"
+            v-html="cleanDescription"
+          />
+        </div>
+
+        <!-- Admin action buttons -->
+        <div v-if="isAdmin" class="flex items-center gap-2 shrink-0">
+          <AdminEditButton
+            :label="t('admin.edit')"
+            :size="44"
+            @click="navigateTo(ROUTES.admin.stories.edit(story.id))"
+          />
+          <AdminDeleteButton
+            :label="deleting ? '…' : t('admin.delete')"
+            :size="44"
+            @click="emit('delete')"
+          />
+        </div>
       </div>
 
       <div class="flex items-center justify-between mt-2">
@@ -117,20 +133,6 @@ watch(() => props.story.id, loadGallery);
         >
           {{ formattedDate }}
         </span>
-
-        <!-- Admin action buttons -->
-        <div v-if="isAdmin" class="flex items-center gap-2 shrink-0 ml-auto">
-          <AdminEditButton
-            :label="t('admin.edit')"
-            :size="34"
-            @click="navigateTo(ROUTES.admin.stories.edit(story.id))"
-          />
-          <AdminDeleteButton
-            :label="deleting ? '…' : t('admin.delete')"
-            :size="34"
-            @click="emit('delete')"
-          />
-        </div>
       </div>
     </div>
   </article>

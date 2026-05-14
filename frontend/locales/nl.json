@@ -263,6 +263,8 @@
       "saveBtn": "Wijzigingen Opslaan",
       "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
       "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
+      "createSuccess": "Verhaal aangemaakt.",
+      "saveSuccess": "Verhaal opgeslagen.",
       "sectionTitle": "Titel",
       "sectionContent": "Inhoud",
       "titleNl": "Titel (NL)",
@@ -282,6 +284,8 @@
       "descriptionEnRequired": "Engelse beschrijving is nodig",
       "restoreConfirm": "Ben je zeker dat je wil herstellen naar de laatste versie ?",
       "restoreBtn": "Herstellen",
+      "deleteSuccess": "Verhaal \"{title}\" verwijderd.",
+      "deleteError": "Het verhaal kon niet worden verwijderd. Probeer het opnieuw.",
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
         "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
