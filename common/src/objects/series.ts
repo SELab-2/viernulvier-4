@@ -45,3 +45,4 @@ export type SeriesView = z.infer<typeof SeriesViewSchema>;
 export type CreateSeries = z.infer<typeof CreateSeriesSchema>;
 export type ModifySeries = z.infer<typeof ModifySeriesSchema>;
 export type ReplaceSeries = z.infer<typeof ReplaceSeriesSchema>;
+export type FilterSeries = z.infer<typeof FilterSeriesSchema>;
