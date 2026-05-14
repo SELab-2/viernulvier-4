@@ -135,7 +135,11 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
         Background Dim/Lightening.
       -->
       <div
-        class="absolute inset-0 bg-background/30 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
+        class="absolute inset-0 bg-background/40 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
+      />
+
+      <div
+        class="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-background/80 via-background/30 to-transparent z-15 pointer-events-none"
       />
 
       <!--
