@@ -1,5 +1,5 @@
 <!--
-SeriesPageJumper.vue
+SeriesProductionsPageJumper.vue
 
 Input control for navigating directly to a specific page in the productions of a series.
 Responsible for:

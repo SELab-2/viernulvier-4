@@ -1,5 +1,5 @@
 <!--
-SeriesPagination.vue
+SeriesProductionsPagination.vue
 
 Pagination control for navigating through series production pages.
 Responsible for:
