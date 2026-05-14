@@ -33,7 +33,7 @@ export const ReplaceSeriesSchema = MutableSeriesSchema;
 // Filtering.
 export const FilterSeriesSchema = z.object({
   title: z.string().optional(),
-  production_id: z.number().optional(),
+  production_id: z.coerce.number().optional(),
 
   // Toggle for the backend to treat this request as a suggestion.
   is_suggestion: QueryBoolean.default(false),

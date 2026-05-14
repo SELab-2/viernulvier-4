@@ -77,6 +77,17 @@ export class SeriesDatabaseService {
       return `$${values.length}`;
     };
 
+    // Filter by production to get all series that contain a certain production.
+    if (seriesFilters.production_id) {
+      conditions.push(
+        `EXISTS (
+          SELECT 1 FROM production_series ps
+          WHERE ps.series_id = series.id 
+          AND ps.production_id = ${param(seriesFilters.production_id)}
+        )`,
+      );
+    }
+
     // Title filter
     // Looks into the language provided and filters differently based on
     // Whether the query is a suggestion or not.
