@@ -1,5 +1,6 @@
 import z from "zod";
 import { LocalizedStringSchema } from "./language";
+import { QueryBoolean } from "./pagination";
 
 // Base Series object.
 export const SeriesSchema = z.object({
@@ -32,6 +33,10 @@ export const ReplaceSeriesSchema = MutableSeriesSchema;
 // Filtering.
 export const FilterSeriesSchema = z.object({
   title: z.string().optional(),
+  production_id: z.number().optional(),
+
+  // Toggle for the backend to treat this request as a suggestion.
+  is_suggestion: QueryBoolean.default(false),
 });
 
 // Type exports.

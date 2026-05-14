@@ -2,13 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { SeriesDatabaseService } from "../database/db.series.service";
 import {
   CreateSeriesDto,
+  FilterSeriesDto,
   ModifySeriesDto,
   PaginationFilterDto,
   ProductionDto,
   ReplaceSeriesDto,
   SeriesDto,
 } from "../dto/dto";
-import { PaginatedResponse } from "@repo/common";
+import { Language, PaginatedResponse } from "@repo/common";
 
 @Injectable()
 export class SeriesService {
@@ -26,12 +27,19 @@ export class SeriesService {
   /**
    * Fetches a paginated list of series.
    * @param paginationFilters The filters to paginate by.
+   * @param seriesFilters The filters for series.
    * @returns Paginated list of series.
    */
   async getSeries(
     paginationFilters: PaginationFilterDto,
+    seriesFilters: FilterSeriesDto,
+    language?: Language,
   ): Promise<PaginatedResponse<SeriesDto>> {
-    return await this.seriesDbService.getSeries(paginationFilters);
+    return await this.seriesDbService.getSeries(
+      paginationFilters,
+      seriesFilters,
+      language,
+    );
   }
 
   /**

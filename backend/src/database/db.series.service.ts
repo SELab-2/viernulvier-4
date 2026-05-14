@@ -2,18 +2,21 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   executeWithReferenceCheck,
-  generateCountQuery,
   generateInsertClause,
+  generateRelevanceClause,
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
 import {
+  Language,
   PaginatedResponse,
   ProductionSchema,
   SeriesSchema,
+  SUPPORTED_LANGUAGES,
 } from "@repo/common";
 import {
   CreateSeriesDto,
+  FilterSeriesDto,
   ModifySeriesDto,
   PaginationFilterDto,
   ProductionDto,
@@ -57,33 +60,97 @@ export class SeriesDatabaseService {
   /**
    * Get series with pagination
    * @param paginationFilters are the filters you want to use in the pagination.
+   * @param seriesFilters The filters used for series.
    * @return prices
    */
   async getSeries(
     paginationFilters: PaginationFilterDto,
+    seriesFilters: FilterSeriesDto,
+    language?: Language,
   ): Promise<PaginatedResponse<SeriesDto>> {
     const returningClause = generateReturningClause(SeriesSchema);
+
+    const conditions: string[] = [];
+    const values: (string | number)[] = [];
+    const param = (val: string | number) => {
+      values.push(val);
+      return `$${values.length}`;
+    };
+
+    // Title filter
+    // Looks into the language provided and filters differently based on
+    // Whether the query is a suggestion or not.
+    if (seriesFilters.title) {
+      const searchTerm = seriesFilters.title;
+
+      const allClauses = SUPPORTED_LANGUAGES.flatMap((lang) => {
+        if (language && language !== lang) return [];
+
+        const titleField = `titel->>'${lang}'`;
+
+        if (seriesFilters.is_suggestion) {
+          const pSearch = param(searchTerm);
+          return [`word_similarity(${pSearch}, ${titleField}) > 0.3`];
+        } else {
+          const pSearch = param(`%${searchTerm}%`);
+          return [`${titleField} ILIKE ${pSearch}`];
+        }
+      });
+
+      // Push them as a single string wrapped in parentheses, joined by OR
+      if (allClauses.length > 0) {
+        conditions.push(`(${allClauses.join(" OR ")})`);
+      }
+    }
+
+    const whereClause = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const filterValues = [...values];
+    const countQuery = `
+      SELECT COUNT(*) as count FROM series
+      ${whereClause};
+    `;
+
+    // pagination
+    const offset = paginationFilters.page * paginationFilters.limit;
+    const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
+
+    // Ordering (relevance vs date)
+    let orderClause: string;
+    if (seriesFilters.is_suggestion && seriesFilters.title) {
+      const relevanceMath = generateRelevanceClause(
+        seriesFilters.title,
+        [{ name: `titel` }],
+        param,
+        language,
+      );
+
+      orderClause = `ORDER BY ${relevanceMath} DESC`;
+    } else {
+      orderClause = `ORDER BY created_at ${paginationFilters.descending ? "DESC" : "ASC"}`;
+    }
 
     const query = `
       SELECT ${returningClause}
       FROM series
-      ORDER BY id
-      LIMIT $1 OFFSET $2;
+      ${whereClause}
+      ${orderClause}
+      ${paginationClause};
     `;
-    const countQuery = generateCountQuery("series");
 
-    const offset = paginationFilters.page * paginationFilters.limit;
-
-    const [prices, countResult] = await Promise.all([
-      this.db.query<SeriesDto>(query, [paginationFilters.limit, offset]),
-      this.db.query<{ count: string }>(countQuery),
+    // Fetch count and objects.
+    const [objects, countResult] = await Promise.all([
+      this.db.query<SeriesDto>(query, values),
+      this.db.query<{ count: string }>(countQuery, filterValues),
     ]);
 
     return {
       page: paginationFilters.page,
       limit: paginationFilters.limit,
       totalItems: parseInt(countResult[0].count),
-      objects: prices,
+      objects: objects,
     };
   }
 
