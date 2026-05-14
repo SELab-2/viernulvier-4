@@ -21,6 +21,7 @@ import {
   FilterLocationSchema,
   FilterPrintItemSchema,
   FilterProductionSchema,
+  FilterSeriesSchema,
   FilterTagSchema,
   LanguageQuerySchema,
   LocationSchema,
@@ -167,6 +168,7 @@ export class SeriesViewDto extends createZodDto(SeriesViewSchema) {}
 export class CreateSeriesDto extends createZodDto(CreateSeriesSchema) {}
 export class ModifySeriesDto extends createZodDto(ModifySeriesSchema) {}
 export class ReplaceSeriesDto extends createZodDto(ReplaceSeriesSchema) {}
+export class FilterSeriesDto extends createZodDto(FilterSeriesSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {
