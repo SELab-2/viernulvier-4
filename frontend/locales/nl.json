@@ -415,6 +415,13 @@
     "form-credits": "Credits",
     "form-artists": "Artiesten",
     "form-description": "Beschrijving",
+    "preview": {
+      "title": "Voorbeeld titel",
+      "preview": "Live voorbeeld",
+      "hint": "Media & tags worden in latere stappen toegevoegd",
+      "bodyPlaceholder": "Begin met typen om live voorbeeld te zien",
+      "deleted": "Verwijderd"
+    },
     "steps": {
       "core": "Kerngegevens",
       "tags": "Tags",

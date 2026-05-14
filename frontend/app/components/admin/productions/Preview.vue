@@ -80,9 +80,7 @@ function isValid(val: string | null | undefined): boolean {
 }
 
 const title = computed(
-  () =>
-    get("titel") ||
-    t("admin.productions.preview.placeholderTitle", "Untitled production"),
+  () => get("titel") || t("admin-productions.preview.title"),
 );
 const artist = computed(() => get("artist"));
 const tagline = computed(() => get("tagline"));
@@ -251,7 +249,7 @@ function eventLocation(e: EventDraft): string {
         <span
           class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin.preview.lang", "Preview") }}
+          {{ t("admin-productions.preview.preview") }}
         </span>
         <div
           class="inline-flex bg-background border border-border rounded-lg p-0.5 overflow-hidden"
@@ -328,7 +326,7 @@ function eventLocation(e: EventDraft): string {
                 class="flex items-center gap-1 text-[9px] font-black uppercase tracking-[2px] opacity-60"
               >
                 <ChevronLeft :size="11" stroke-width="3" />
-                {{ t("general.back", "Back") }}
+                {{ t("general.back") }}
               </span>
 
               <span
@@ -404,12 +402,7 @@ function eventLocation(e: EventDraft): string {
               <span
                 class="text-[9px] font-black uppercase tracking-widest text-white/60"
               >
-                {{
-                  t(
-                    "admin.productions.preview.imageHint",
-                    "Images & tags added in later steps",
-                  )
-                }}
+                {{ t("admin-productions.preview.hint") }}
               </span>
             </div>
           </div>
@@ -433,12 +426,7 @@ function eventLocation(e: EventDraft): string {
             <p
               class="text-muted-foreground/50 text-[10px] font-black uppercase tracking-widest leading-relaxed"
             >
-              {{
-                t(
-                  "admin.productions.preview.bodyPlaceholder",
-                  "Start typing to see a live preview",
-                )
-              }}
+              {{ t("admin-productions.preview.bodyPlaceholder") }}
             </p>
           </div>
 
@@ -472,17 +460,13 @@ function eventLocation(e: EventDraft): string {
               class="mb-6 text-[9px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
               @click="isExpanded = !isExpanded"
             >
-              {{
-                isExpanded
-                  ? t("general.readLess", "Read less")
-                  : t("general.readMore", "Read more")
-              }}
+              {{ isExpanded ? t("general.readLess") : t("general.readMore") }}
             </button>
 
             <!-- ── Events — mirrors [id].vue ProductionEventTable section ── -->
             <div class="mt-4 mb-8">
               <h2 class="text-[11px] uppercase font-black mb-4 tracking-widest">
-                {{ t("production.events", "Events") }}
+                {{ t("production.events") }}
               </h2>
 
               <!-- Events table (simplified mirror of ProductionEventTable) -->
@@ -518,14 +502,14 @@ function eventLocation(e: EventDraft): string {
                       v-if="event.kind === 'existing' && event.deleted"
                       class="text-[8px] text-red-400 font-black uppercase tracking-widest"
                     >
-                      {{ t("admin.deleted", "Deleted") }}
+                      {{ t("admin-productions.preview.deleted") }}
                     </span>
                   </div>
                 </div>
               </template>
 
               <div v-else class="py-4 opacity-60 italic text-[11px]">
-                {{ t("production.noEvents", "No events planned yet") }}
+                {{ t("production.noEvents") }}
               </div>
             </div>
 
@@ -546,9 +530,7 @@ function eventLocation(e: EventDraft): string {
                 @click="isExpanded2 = !isExpanded2"
               >
                 {{
-                  isExpanded2
-                    ? t("general.readLess", "Read less")
-                    : t("general.readMore", "Read more")
+                  isExpanded2 ? t("general.readLess") : t("general.readMore")
                 }}
               </button>
             </div>
@@ -576,7 +558,7 @@ function eventLocation(e: EventDraft): string {
               <h4
                 class="text-[9px] uppercase font-black opacity-40 mb-4 tracking-widest"
               >
-                {{ t("production.credits", "Credits") }}
+                {{ t("production.credits") }}
               </h4>
               <div
                 class="description-content max-w-xs text-[11px] leading-relaxed opacity-70 text-gray-600 dark:text-gray-400"

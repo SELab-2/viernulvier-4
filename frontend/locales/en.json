@@ -414,6 +414,13 @@
     "form-credits": "Credits",
     "form-artists": "Artists",
     "form-description": "Description",
+    "preview": {
+      "title": "Title placeholder",
+      "preview": "Live preview",
+      "hint": "Images & tags added in later steps",
+      "bodyPlaceholder": "Start typing to see a live preview",
+      "deleted": "Deleted"
+    },
     "steps": {
       "core": "Core info",
       "tags": "Tags",
