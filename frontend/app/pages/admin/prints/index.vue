@@ -17,7 +17,6 @@ import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
 import { usePrintView } from "../../../composables/media/usePrintView";
 import PrintsToolbar from "../../../components/prints/PrintsToolbar.vue";
-import FileList from "../../../components/prints/FileList.vue";
 
 const { t, locale } = useI18n();
 const { getAll, remove } = usePrintApi();
@@ -120,7 +119,7 @@ onMounted(() => {
 
   <!-- File list -->
   <div class="page-container py-6">
-    <FileList
+    <AdminPrintsFileList
       :category="activeFilter"
       :files="prints"
       :total-pages="totalPages"

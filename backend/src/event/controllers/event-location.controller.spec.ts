@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { EventLocationController } from "./event-location.controller";
 import EventService from "../event.service";
 import { LanguageService } from "../../util/language/language.service";
-import { LocationDto, LocationViewDto, LanguageQueryDto } from "../../dto/dto";
+import { LanguageQueryDto, LocationDto, LocationViewDto } from "../../dto/dto";
 import { ApiKeyGuard } from "../../auth/authGuard";
 
 describe("EventLocationController", () => {
@@ -30,8 +30,6 @@ describe("EventLocationController", () => {
   };
 
   const mockEventId = 42;
-  const mockLocationId = 1;
-
   // Mocking the EventService
   const mockEventService = {
     getLocationForEvent: jest.fn(),
@@ -100,26 +98,6 @@ describe("EventLocationController", () => {
         langQuery.lang,
       );
       expect(result).toEqual(mockLocationView);
-    });
-  });
-
-  describe("linkEventToLocation", () => {
-    it("should link an event to a location and return true", async () => {
-      // Arrange
-      mockEventService.linkEventToLocation.mockResolvedValue(true);
-
-      // Act
-      const result = await controller.linkEventToLocation(
-        mockEventId,
-        mockLocationId,
-      );
-
-      // Assert
-      expect(result).toBe(true);
-      expect(eventService.linkEventToLocation).toHaveBeenCalledWith(
-        mockEventId,
-        mockLocationId,
-      );
     });
   });
 

@@ -46,7 +46,7 @@ const normalizedOptions = computed<SearchSuggestion[]>(() => {
     if (typeof opt === "string") {
       return { display: opt, searchValue: opt, context: "" };
     }
-    return opt;
+    return opt as SearchSuggestion;
   });
 });
 
@@ -120,7 +120,7 @@ defineExpose({ clear });
       <div
         v-for="item in model"
         :key="item"
-        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors duration-150 hover:bg-muted border-b border-border last:border-b-0"
+        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted border-b border-border last:border-b-0"
       >
         <span class="truncate mr-4">{{ item }}</span>
         <X

@@ -11,7 +11,7 @@ onMounted(() => {
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />
-      <NuxtSnackbar />
     </NuxtLayout>
+    <NuxtSnackbar />
   </div>
 </template>

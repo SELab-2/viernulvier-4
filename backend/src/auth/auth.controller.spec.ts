@@ -3,10 +3,11 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import {
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   UpdateAccountDto,
 } from "../dto/dto";
-import { SuperApiKeyGuard } from "./authGuard"; // <-- Make sure to import your guard!
+import { ApiKeyGuard, SuperApiKeyGuard } from "./authGuard";
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -23,6 +24,7 @@ describe("AuthController", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: true,
   };
 
   beforeEach(async () => {
@@ -38,6 +40,8 @@ describe("AuthController", () => {
       // Overriding the guard here so it doesn't look for ApiKeyDatabaseService
       .overrideGuard(SuperApiKeyGuard)
       .useValue({ canActivate: jest.fn(() => true) })
+      .overrideGuard(ApiKeyGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
     controller = module.get<AuthController>(AuthController);
@@ -48,11 +52,9 @@ describe("AuthController", () => {
     jest.clearAllMocks();
   });
 
-  // ... (All your tests below remain exactly the same as before) ...
-
   describe("loginAccount", () => {
     it("should log in an account and return public account and api key", async () => {
-      const dto: CreateAccountDto = {
+      const dto: LoginDto = {
         username: "testuser",
         password: "password123",
       };
@@ -88,6 +90,7 @@ describe("AuthController", () => {
       const dto: CreateAccountDto = {
         username: "testuser",
         password: "password123",
+        superAdmin: false,
       };
       const expectedResult = { id: 1, username: "testuser", superAdmin: false };
       mockAuthService.createAccount.mockResolvedValue(expectedResult);
@@ -125,6 +128,20 @@ describe("AuthController", () => {
 
       expect(authService.deleteAccount).toHaveBeenCalledWith(accountId);
       expect(result).toBe(true);
+    });
+  });
+
+  describe("verifyKey", () => {
+    it("should return valid true for a standard key", () => {
+      const result = controller.verifyKey();
+      expect(result).toEqual({ valid: true });
+    });
+  });
+
+  describe("verifySuperKey", () => {
+    it("should return valid true for a super key", () => {
+      const result = controller.verifySuperKey();
+      expect(result).toEqual({ valid: true });
     });
   });
 });

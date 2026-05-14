@@ -10,6 +10,7 @@
  * />
  */
 import type { PrintItemView } from "@repo/common";
+import { Info, X } from "lucide-vue-next";
 
 interface Props {
   file: PrintItemView;
@@ -19,6 +20,24 @@ const { t, locale } = useI18n();
 
 const fileLabel = "text-[11px] font-bold uppercase truncate";
 const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
+const showInfo = ref(false); // if the info (description) section is opened or if not
+
+watch(showInfo, (val) => {
+  // Prevents scrolling when description is opened
+  // (paddingRight compensates for the scrollbar width to prevent the layout from shifting)
+  if (val) {
+    document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.paddingRight = "";
+    document.body.style.overflow = "";
+  }
+});
+
+onUnmounted(() => {
+  document.body.style.overflow = "";
+  document.body.style.paddingRight = "";
+});
 </script>
 
 <template>
@@ -28,7 +47,53 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
       class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150"
       @click="openFile(file.url)"
     >
-      <MediaDisplay :src="file" size="fill" :show-icon="true" />
+      <div @click="openFile(file.url)" class="w-full h-full">
+        <MediaDisplay :src="file" size="fill" :show-icon="true" />
+      </div>
+      <!-- Info button -->
+      <button
+        v-if="file.description && file.description != ''"
+        @click.stop="showInfo = true"
+        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+      >
+        <Info class="w-3.5 h-3.5 text-white" />
+      </button>
+      <!-- Info/description section -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <!-- z-index is set to very high so the header doesn't cover it -->
+          <div
+            v-if="showInfo"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+            @click="showInfo = false"
+          >
+            <div
+              class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full shadow-xl max-h-[85vh] flex flex-col"
+              @click.stop
+            >
+              <!-- Close button -->
+              <button
+                @click.stop="showInfo = false"
+                class="absolute top-3 right-3 w-7 h-7 rounded-full bg-foreground/10 hover:bg-foreground/20 border border-border flex items-center justify-center transition-colors shrink-0"
+              >
+                <X class="w-3.5 h-3.5" />
+              </button>
+              <!-- Title -->
+              <p
+                class="text-[11px] font-bold uppercase tracking-widest mb-3 pr-8 shrink-0"
+              >
+                {{ file.titel }}
+              </p>
+              <!-- Description -->
+              <p
+                class="text-sm leading-relaxed text-muted-foreground overflow-y-auto break-words"
+              >
+                {{ file.description }}
+              </p>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </div>
 
     <!-- File info -->

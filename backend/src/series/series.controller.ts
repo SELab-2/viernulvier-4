@@ -4,25 +4,25 @@ import {
   Delete,
   Get,
   Param,
+  ParseArrayPipe,
   ParseIntPipe,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
-  ParseArrayPipe,
-  Put,
 } from "@nestjs/common";
 import { SeriesService } from "./series.service";
 import {
   CreateSeriesDto,
   LanguageQueryDto,
-  PaginationFilterDto,
-  SeriesDto,
   ModifySeriesDto,
+  PaginationFilterDto,
   ProductionDto,
-  SeriesViewDto,
-  ReplaceSeriesDto,
   ProductionViewDto,
+  ReplaceSeriesDto,
+  SeriesDto,
+  SeriesViewDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -35,9 +35,9 @@ import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateSeriesSchema,
   LanguageQuerySchema,
+  ModifySeriesSchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  ModifySeriesSchema,
   ReplaceSeriesSchema,
 } from "@repo/common";
 import { LanguageService } from "../util/language/language.service";
@@ -170,6 +170,8 @@ export class SeriesController {
   /**
    * Responds to GET /series/:seriesId/productions
    * @param seriesId ID in the URL of the request.
+   * @param lang is the desired language.
+   * @param paginationFilters is the pagination filters.
    * @returns An array of ProductionDto objects linked to the series.
    */
   @ApiOperation({ summary: "Returns all Productions linked to a Series." })

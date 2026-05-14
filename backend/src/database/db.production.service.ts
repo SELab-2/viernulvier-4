@@ -23,6 +23,7 @@ import {
 } from "@repo/common";
 import {
   applyExactFilters,
+  executeWithReferenceCheck,
   generateInsertClause,
   generateRelevanceClause,
   generateReturningClause,
@@ -31,6 +32,7 @@ import {
 import {
   MediaNotFoundException,
   ResourceNotFoundException,
+  SystemFailureException,
 } from "../common/exceptions";
 
 @Injectable()
@@ -41,6 +43,7 @@ export class ProductionDatabaseService {
    * Get a single Production by their ID.
    * @param id The ID we are looking for.
    * @returns The production if there is one.
+   * @throws ResourceNotFoundException if there is no production linked to the given id. (404)
    */
   async getProductionById(id: number): Promise<ProductionDto> {
     const returningClause = generateReturningClause(ProductionSchema);
@@ -228,7 +231,7 @@ export class ProductionDatabaseService {
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     // Ordering (relevance vs date)
-    let orderClause = "";
+    let orderClause: string;
     if (productionFilters.is_suggestion && productionFilters.titelOrArtist) {
       const relevanceMath = generateRelevanceClause(
         productionFilters.titelOrArtist,
@@ -276,6 +279,7 @@ export class ProductionDatabaseService {
    * @param production must be of the type "CreateProduction" which has all necessary fields defined,
    * besides primary key id. (database auto-generates that)
    * @returns the added production if it was successful.
+   * @throws SystemFailureException if something went wrong while creating the object. (500)
    */
   async createProduction(
     production: CreateProductionDto,
@@ -292,7 +296,7 @@ export class ProductionDatabaseService {
     const result = await this.db.query<ProductionDto>(query, values);
 
     if (!result.length) {
-      throw new Error("Failed to create production");
+      throw new SystemFailureException("Failed to create production");
     }
 
     return result[0];
@@ -305,6 +309,8 @@ export class ProductionDatabaseService {
    * @param production must be of the type "ModifyProduction" or "ReplaceProduction", gives the freedom to define only what needs to be updated.
    * The id field in the production MUST be defined.
    * @returns the updated production if successful.
+   * @throws BadRequestException if no valid fields were given to be updated. (400)
+   * @throws ResourceNotFoundException if the given id is not linked to any production. (404)
    */
   async updateProduction(
     productionId: number,
@@ -374,9 +380,8 @@ export class ProductionDatabaseService {
 
   /**
    * Link an existing blog to a production.
-   * @param blog_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * @param production_id must be a valid id in the database. If an invalid id is given, then nothing happens and no errors are thrown.
-   * (silent handling)
+   * @param blog_id must be a valid id in the database.
+   * @param production_id must be a valid id in the database.
    * @returns nothing.
    */
   async linkBlogWithProductionID(
@@ -386,13 +391,13 @@ export class ProductionDatabaseService {
     const query = `
       INSERT INTO production_blogs (production_id, blog_id)
       VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
+      ON CONFLICT DO NOTHING;
     `;
 
-    await this.db.query(query, [production_id, blog_id]);
+    await executeWithReferenceCheck(
+      this.db.query(query, [production_id, blog_id]),
+    );
   }
-
-  // -- Tags -- //
 
   /**
    * Adds an existing Tag to an existing Production in the Database.
@@ -406,10 +411,12 @@ export class ProductionDatabaseService {
     const query = `
       INSERT INTO production_tag (production_id, tag_id)
       VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
+      ON CONFLICT DO NOTHING;
     `;
 
-    await this.db.query(query, [production_id, tag_id]);
+    await executeWithReferenceCheck(
+      this.db.query(query, [production_id, tag_id]),
+    );
   }
 
   /**
@@ -437,6 +444,7 @@ export class ProductionDatabaseService {
    * @param prod_id The ID of the production you want.
    * @param type is the type of media you want.
    * @returns The MediaGallery if it exists.
+   * @throws MediaNotFoundException if there is no media linked to the production. (404)
    */
   async getMediaFromProduction(
     prod_id: number,
@@ -476,12 +484,14 @@ export class ProductionDatabaseService {
     gallery_id: number,
   ): Promise<void> {
     const query = `
-    INSERT INTO production_media_gallery (production_id, gallery_id)
-    VALUES ($1, $2)
-    ON CONFLICT DO NOTHING
-  `;
+      INSERT INTO production_media_gallery (production_id, gallery_id)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING;
+    `;
 
-    await this.db.query(query, [prod_id, gallery_id]);
+    await executeWithReferenceCheck(
+      this.db.query(query, [prod_id, gallery_id]),
+    );
   }
 
   /**

@@ -14,22 +14,22 @@ import {
 import { BlogService } from "../blog.service";
 import {
   CreateBlogSchema,
+  FilterBlogSchema,
   LanguageQuerySchema,
+  ModifyBlogSchema,
   PaginatedResponse,
   PaginationFilterSchema,
   ReplaceBlogSchema,
-  ModifyBlogSchema,
-  FilterBlogSchema,
 } from "@repo/common";
 import {
   BlogDto,
   BlogViewDto,
   CreateBlogDto,
+  FilterBlogDto,
   LanguageQueryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
-  ModifyBlogDto,
-  FilterBlogDto,
 } from "../../dto/dto";
 import {
   ApiBody,
@@ -82,6 +82,7 @@ export class BlogController {
   /**
    * Responds to a GET to "/blogs/:blogId"
    * @param blogId The ID of the Blog that will be fetched.
+   * @param lang is the desired language.
    * @returns The Blog corresponding to ID if there was one.
    */
   @ApiOperation({ summary: "Returns a single blog." })

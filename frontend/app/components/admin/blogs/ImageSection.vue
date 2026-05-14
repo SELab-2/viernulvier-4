@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import type { MediaGallery, MediaItem, MediaCrop } from "@repo/common";
+import type {
+  MediaGallery,
+  MediaItem,
+  MediaCrop,
+  MediaItemView,
+} from "@repo/common";
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 import { useCropApi } from "~/composables/media/useCropApi";
@@ -10,6 +15,7 @@ import { API_ROUTES } from "~/utils/apiRoutes";
 import type {
   GalleryWithItems,
   ItemViewWithCrops,
+  ItemWithCrops,
 } from "~/utils/galleryFetcher";
 
 const CROP_SLOTS = [
@@ -63,7 +69,7 @@ const { getMediaGallery, linkMedia: linkMediaToBlog } = useBlogApi();
 const { getMainImageCrop } = useGallery();
 
 // Gallery state — loaded via useBlogApi (reuses the standard composable path)
-const fullGallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+const fullGallery = ref<GalleryWithItems<ItemWithCrops> | null>(null);
 const gallery = ref<MediaGallery | null>(null);
 const mediaItem = ref<MediaItem | null>(null);
 const existingCrops = ref<Partial<Record<CropName, MediaCrop>>>({});
@@ -88,7 +94,8 @@ function setFeedback(type: "ok" | "err", msg: string) {
 async function loadGalleryAndItem() {
   loadingGallery.value = true;
   try {
-    fullGallery.value = await getMediaGallery(props.blogId, locale.value);
+    // Don't fetch with locale because we are editing here.
+    fullGallery.value = await getMediaGallery(props.blogId);
 
     if (!fullGallery.value) {
       gallery.value = null;
@@ -181,9 +188,18 @@ async function ensureGalleryAndItem(): Promise<{
         position: freshItem.position,
         width: freshItem.width,
         height: freshItem.height,
-        title: freshItem.title,
-        description: freshItem.description,
-        credits: freshItem.credits,
+        title: {
+          nl: freshItem.title,
+          en: freshItem.title,
+        },
+        description: {
+          nl: freshItem.description,
+          en: freshItem.description,
+        },
+        credits: {
+          nl: freshItem.credits,
+          en: freshItem.credits,
+        },
         created_at: freshItem.created_at,
         updated_at: freshItem.updated_at,
       } as MediaItem;

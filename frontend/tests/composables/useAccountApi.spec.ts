@@ -28,7 +28,9 @@ describe("useAccountApi", () => {
 
   it("getAll appends pagination query params", () => {
     const { getAll } = useAccountApi();
-    void getAll({ page: 1, limit: 10 });
+    void getAll({
+      paginationFilters: { page: 1, limit: 10, descending: true },
+    });
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("page=1"));
     expect(mockGet).toHaveBeenCalledWith(expect.stringContaining("limit=10"));
   });

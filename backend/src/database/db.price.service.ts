@@ -14,7 +14,10 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
-import { ResourceNotFoundException } from "../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../common/exceptions";
 
 @Injectable()
 export class PriceDatabaseService {
@@ -25,6 +28,7 @@ export class PriceDatabaseService {
    * Get a single price by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The Price if there is one.
+   * @throws ResourceNotFoundException if there is no price with the provided id. (404)
    */
   async getPriceById(id: number): Promise<PriceDto> {
     const returningClause = generateReturningClause(PriceSchema);
@@ -81,6 +85,7 @@ export class PriceDatabaseService {
    * Create price function, creates a price in the database with the given information.
    * @param price must be of the type "CreatePrice" which has all fields defined besides the primary key id.
    * @returns the added price if it was successful.
+   * @throws SystemFailureException if something went wrong while creating the object. (500)
    */
   async createPrice(price: CreatePriceDto): Promise<PriceDto> {
     const { columns, placeholders, values } = generateInsertClause(price);
@@ -95,7 +100,7 @@ export class PriceDatabaseService {
     const result = await this.db.query<PriceDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create price.");
+      throw new SystemFailureException("Failed to create price.");
     }
 
     return result[0];
@@ -103,9 +108,12 @@ export class PriceDatabaseService {
 
   /**
    * Update function for price. Updates the price in the database.
+   * @param priceId is the id of the price you want to update
    * @param price must be of the type "ModifyPrice" or "ReplacePrice", gives the freedom to define only what needs to be updated.
    * The id field in the price MUST be defined.
    * @returns the updated price if successful.
+   * @throws BadRequestException if no valid fields are provided to be updated. (400)
+   * @throws ResourceNotFoundException if there is no price linked with the provided id. (404)
    */
   async updatePrice(
     priceId: number,

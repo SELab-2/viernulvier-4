@@ -1,5 +1,36 @@
 // Formatting helpers used across the frontend (dates and ranges).
 
+// Parameters for Queries
+
+/**
+ * Builds a query string based on the passed parameters
+ *
+ * @param params The parameters to include in the string.
+ * @returns A query string.
+ */
+export function buildQueryString(params: Record<string, any>): string {
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, val]) => {
+    // Skip null or undefined values
+    if (val === null || val === undefined) return;
+
+    if (Array.isArray(val)) {
+      // Append each item individually to repeat the key
+      val.forEach((item) => {
+        if (item !== null && item !== undefined) {
+          searchParams.append(key, String(item));
+        }
+      });
+    } else {
+      searchParams.append(key, String(val));
+    }
+  });
+
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : "";
+}
+
 // ISO / date helpers
 
 /** Serialize a Date to a local-timezone YYYY-MM-DD string (no UTC drift). */
