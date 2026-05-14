@@ -29,6 +29,11 @@ export const CreateSeriesSchema = MutableSeriesSchema;
 export const ModifySeriesSchema = MutableSeriesSchema.partial();
 export const ReplaceSeriesSchema = MutableSeriesSchema;
 
+// Filtering.
+export const FilterSeriesSchema = z.object({
+  title: z.string().optional(),
+});
+
 // Type exports.
 export type Series = z.infer<typeof SeriesSchema>;
 export type SeriesView = z.infer<typeof SeriesViewSchema>;
