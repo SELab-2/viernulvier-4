@@ -191,10 +191,11 @@ watch([title, previewMode], updateTitleScrollable);
             :id="props.data.id"
             :src="headerCrop"
             size="fill"
+            object-fit="cover"
             :show-icon="false"
             :show-border="false"
             :rounded="false"
-            class="absolute inset-0 w-full h-full object-cover z-0"
+            class="absolute inset-0 w-full h-full z-0"
           />
           <div
             class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-[1]"

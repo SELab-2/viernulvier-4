@@ -20,7 +20,7 @@
     :src="formattedUrl"
     loading="lazy"
     @error="handleImageError"
-    :class="[containerClass, 'object-contain']"
+    :class="[containerClass, `object-${props.objectFit ?? 'contain'}`]"
   />
   <ThumbnailPlaceholder
     v-else
@@ -39,6 +39,7 @@ const props = defineProps<{
   id?: number;
   src: MediaCrop | PrintItem | PrintItemView | null;
   size?: "sm" | "md" | "lg" | "fill" | number;
+  objectFit?: "contain" | "cover" | "fill" | "scale-down";
   showIcon?: boolean;
   showBorder?: boolean;
   rounded?: boolean;
