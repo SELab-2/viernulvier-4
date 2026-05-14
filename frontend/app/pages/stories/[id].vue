@@ -39,7 +39,7 @@ const blogId = computed(() => {
 });
 
 /** Get the main blog data and handle API nesting */
-const { data, pending, error } = await useAsyncData<BlogView | null>(
+const { data, status, error } = useAsyncData<BlogView | null>(
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
@@ -52,10 +52,28 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
   { watch: [blogId, locale] },
 );
 
+// Watch the blog fetch to see if everything is fetched correctly.
+watch(
+  [status, error, data],
+  ([newStatus, newError, newBlog]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
+    if (newStatus === "success" && !newBlog) {
+      showError({
+        statusCode: 404,
+        statusMessage: "Blog not found",
+        fatal: true,
+      });
+    } else if (newError) {
+      showError({ statusCode: 500, statusMessage: "API Error", fatal: true });
+    }
+  },
+  { immediate: true },
+);
+
 const blog = computed(() => data.value);
 
 /** Get the media gallery. */
-const { data: gallery } = await useAsyncData(
+const { data: gallery } = useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
     if (!blogId.value) return null;
@@ -87,7 +105,10 @@ const cleanBody = computed(() => cleanText(body.value));
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
     <!-- Loading -->
-    <div v-if="pending" class="min-h-screen flex items-center justify-center">
+    <div
+      v-if="status === 'pending'"
+      class="min-h-screen flex items-center justify-center"
+    >
       <svg
         class="w-6 h-6 animate-spin text-gray-400"
         fill="none"
