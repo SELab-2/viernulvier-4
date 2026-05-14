@@ -11,7 +11,6 @@
 -->
 <script lang="ts" setup>
 import type { BlogView, FilterBlog, PaginatedResponse } from "@repo/common";
-import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
 import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
 import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
 import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
@@ -145,7 +144,10 @@ onUnmounted(() => io?.disconnect());
   <div
     class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
-    <StoriesHeader />
+    <PageHeader
+      :title="t('stories.title')"
+      :description="t('stories.headerDescription')"
+    />
 
     <!--
       StoryToolbar contains the Calendar panel inline (in-flow).
