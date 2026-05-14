@@ -180,6 +180,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Manage the accounts.",
+    "headerDescription": "Create, edit and control archive admin accounts.",
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",

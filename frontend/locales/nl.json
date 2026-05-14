@@ -182,6 +182,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Beheer de accounts.",
+    "headerDescription": "Beheer, bewerk en controleer de accounts van de archiefbeheerders.",
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruikersnaam",

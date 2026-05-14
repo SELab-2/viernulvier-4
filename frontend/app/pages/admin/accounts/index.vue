@@ -128,6 +128,10 @@ onMounted(async () => {
 });
 </script>
 <template>
+  <PageHeader
+    :title="t('accounts.title')"
+    :description="t('accounts.headerDescription')"
+  />
   <section class="page-container min-h-screen space-y-4 py-12">
     <div class="space-y-4">
       <AdminAccountListView
