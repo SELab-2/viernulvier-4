@@ -53,8 +53,9 @@ const {
   totalPages,
   loading,
 } = useArchiveView();
-const { getAll } = useProductionApi();
+const { getAll, remove } = useProductionApi();
 const { t, locale } = useI18n();
+const snackbar = useSnackbar();
 
 const PAGE_SIZE = 15; // number of items per page
 
@@ -178,10 +179,37 @@ watch(searchQuery, () => {
   }, 350);
 });
 
-// DELETION
+/**
+ * Deletion
+ */
 
+/**
+ * Reacts to the press of a delete button.
+ * @param production The production we want to delete.
+ */
 async function handleDeleteProduction(production: ProductionView) {
-  console.log(production);
+  // Check whether the user ACTUALLY wants to perform the delete.
+  const confirmed = confirm(
+    "Do you want to delete this production?", // TODO: i18n this?
+  );
+  if (!confirmed) return;
+
+  // Perform the various deletes.
+  await Promise.all([deleteProduction(production.id)]);
+}
+
+/**
+ * Deletes a production (and it's events) from the database.
+ * @param production_id The ID of the production.
+ */
+async function deleteProduction(production_id: number) {
+  const response = await remove(production_id);
+  if (response.error) {
+    snackbar.add({
+      type: "error",
+      text: response.error,
+    });
+  }
 }
 </script>
 
