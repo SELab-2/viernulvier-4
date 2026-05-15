@@ -55,7 +55,7 @@ export function useProductionSeries(): ProductionFormStep<
   ProductionSeriesForm,
   ProductionSeriesPayload
 > {
-  const productionApi = useProductionApi();
+  const seriesApi = useSeriesApi();
 
   const draft = ref<ProductionSeriesForm>([]);
   const original = ref<ProductionSeriesForm | null>(null);
@@ -74,41 +74,47 @@ export function useProductionSeries(): ProductionFormStep<
 
     const id = Number(context.id);
 
-    // Load production views in Dutch and English to capture localized series fields.
+    // Fetch all series linked to this production in both languages.
     const [nlRes, enRes] = await Promise.all([
-      productionApi.getById(id, "nl"),
-      productionApi.getById(id, "en"),
+      seriesApi.getAll({
+        languageFilters: { lang: "nl" },
+        seriesFilters: {
+          is_suggestion: false,
+          production_id: id,
+        },
+      }),
+      seriesApi.getAll({
+        languageFilters: { lang: "en" },
+        seriesFilters: {
+          is_suggestion: false,
+          production_id: id,
+        },
+      }),
     ]);
 
-    const nlSeries =
-      (nlRes.data as { series?: unknown } | undefined)?.series ?? [];
-    const enSeries =
-      (enRes.data as { series?: unknown } | undefined)?.series ?? [];
+    type SeriesObject = { id: number; titel: string; description: string };
 
-    // Build a map of english series by id for quick lookups (may be empty).
-    type SeriesViewLike = {
-      id: number;
-      titel?: string;
-      title?: string;
-      description?: string;
-    };
-    const enById = new Map<number, SeriesViewLike>();
-    for (const s of enSeries as SeriesViewLike[]) {
-      if (s && typeof s.id === "number") enById.set(s.id, s);
+    const nlObjects =
+      (nlRes.data as unknown as { objects?: SeriesObject[] })?.objects ?? [];
+    const enObjects =
+      (enRes.data as unknown as { objects?: SeriesObject[] })?.objects ?? [];
+
+    // Build a map of english series by id for quick lookups.
+    const enById = new Map<number, SeriesObject>();
+    for (const s of enObjects) {
+      enById.set(s.id, s);
     }
 
-    const mapped = (nlSeries as SeriesViewLike[]).map<ExistingSeries>((s) => {
-      const nlTitel = s.titel ?? s.title ?? String(s.id);
-      const nlDesc = s.description ?? "";
+    const mapped = nlObjects.map<ExistingSeries>((s) => {
       const enMatch = enById.get(s.id);
-      const enTitel = enMatch?.titel ?? enMatch?.title ?? undefined;
-      const enDesc = enMatch?.description ?? undefined;
-
       return {
         type: "existing",
         id: s.id,
-        titel: { nl: nlTitel, en: enTitel ?? undefined },
-        description: { nl: nlDesc, en: enDesc ?? undefined },
+        titel: { nl: s.titel, en: enMatch?.titel ?? undefined },
+        description: {
+          nl: s.description,
+          en: enMatch?.description ?? undefined,
+        },
       };
     });
 
