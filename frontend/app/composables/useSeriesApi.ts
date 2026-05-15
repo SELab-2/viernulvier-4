@@ -10,12 +10,14 @@ import type {
   ReplaceSeries,
   Series,
   SeriesView,
+  FilterSeries,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
 import { buildQueryString } from "~/utils/formatters";
 
 interface SeriesListOptions {
   paginationFilters?: PaginationFilter;
+  seriesFilters?: FilterSeries;
   languageFilters?: LanguageQuery;
 }
 
@@ -34,16 +36,23 @@ export function useSeriesApi() {
    */
   function getAll(options?: {
     paginationFilters?: PaginationFilter;
+    seriesFilters?: FilterSeries;
   }): Promise<ApiResponse<PaginatedResponse<Series>>>;
   function getAll(options: {
     paginationFilters?: PaginationFilter;
+    seriesFilters?: FilterSeries;
     languageFilters: LanguageQuery;
   }): Promise<ApiResponse<PaginatedResponse<SeriesView>>>;
   function getAll({
     paginationFilters,
+    seriesFilters,
     languageFilters,
   }: SeriesListOptions = {}) {
-    const params = { ...paginationFilters, ...languageFilters };
+    const params = {
+      ...paginationFilters,
+      ...languageFilters,
+      ...seriesFilters,
+    };
     const query = buildQueryString(params);
 
     return get<PaginatedResponse<Series | SeriesView>>(

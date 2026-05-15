@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
  * A dynamic form component that renders fields based on a given array, includes:
- *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate, BaseTagInput, BaseFileUpload, BaseSelect, BaseMultiSelect)
+ *  - Supports all base field components (BaseInput, BaseTextArea, BaseDate,
+ *    BaseTagInput, BaseFileUpload, BaseSelect, BaseMultiSelect, AdminEditor)
  *  - Multiple instances of the same component type are supported
- *  - Pre-filled values supported (the key needs to match the name of the field you want to fill in)
+ *  - Pre-filled values supported (the key must match the field name)
  *  - Emits all field values on submit via @submit
  *  - When liveUpdate is true, also emits @update on every field change (for live previews)
  *  - Resets all field values to initial values via a reset-button
@@ -35,15 +36,17 @@
  *
  * Example fields config:
  * const fields: FormField[] = [
- *   { component: 'BaseInput', name: 'title', props: { label: 'Title', required: true } },
- *   { component: 'BaseDate',  name: 'dueDate', props: { label: 'Due Date' } }
+ *   { component: 'BaseInput',    name: 'title',   props: { label: 'Title', required: true } },
+ *   { component: 'BaseDate',     name: 'dueDate', props: { label: 'Due Date' } },
+ *   { component: 'AdminEditor',  name: 'body',    props: { placeholder: 'Write here…' } },
  * ]
  */
 
 import { computed, reactive, watch, toRaw } from "vue";
 import type { FieldComponent, FormField } from "../../types/FormField";
 
-// Nuxt auto-import only works for direct template usage, therefore manual imports are needed here (since we use the components in script section)
+// Nuxt auto-import only works for direct template usage, so manual imports are
+// needed here (these are referenced dynamically via the components map).
 import BaseInput from "./fields/BaseInput.vue";
 import BaseTextArea from "./fields/BaseTextArea.vue";
 import BaseDate from "./fields/BaseDate.vue";
@@ -51,6 +54,7 @@ import BaseFileUpload from "./fields/BaseFileUpload.vue";
 import BaseTagInput from "./fields/BaseTagInput.vue";
 import BaseSelect from "./fields/BaseSelect.vue";
 import BaseMultiSelect from "./fields/BaseMultiSelect.vue";
+import AdminEditor from "../admin/Editor.vue";
 
 const { t } = useI18n();
 
@@ -75,7 +79,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const model = defineModel<Record<string, any>>();
 
-const { fields, initialValues } = props;
+const { fields, initialValues, submitLabel, resetLabel } = props;
 
 /**
  * Internal state used only in uncontrolled mode.
@@ -128,6 +132,7 @@ const components: Record<FieldComponent, any> = {
   BaseTagInput,
   BaseSelect,
   BaseMultiSelect,
+  AdminEditor,
 };
 
 const emit = defineEmits<{
@@ -183,13 +188,12 @@ function reset() {
   multiSelectRefs.value = [];
 }
 
-defineExpose({
-  reset,
-});
+defineExpose({ reset });
 
 onBeforeUpdate(() => {
   multiSelectRefs.value = [];
 });
+
 function collectMultiSelectRef(el: any) {
   // adds to the array if MultiSelect and if mounted
   if (el) multiSelectRefs.value.push(el);
@@ -236,5 +240,3 @@ function collectMultiSelectRef(el: any) {
     </div>
   </form>
 </template>
-
-<style scoped></style>
