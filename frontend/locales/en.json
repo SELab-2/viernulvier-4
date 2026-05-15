@@ -2,6 +2,7 @@
   "nav": {
     "home": "home",
     "archive": "archive",
+    "series": "series",
     "stories": "stories",
     "prints": "prints",
     "productions": "productions",
@@ -150,13 +151,14 @@
     "dateAndTime": "Date & Time",
     "location": "Location",
     "price": "Price",
+    "showAll": "show all ({count})",
+    "hidePrices": "hide prices",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details",
     "doors": "doors",
-    "break": "intermission"
+    "break": "intermission",
+    "gallery": "gallery"
   },
   "general": {
     "back": "Back",
@@ -166,7 +168,8 @@
     "showLess": "Show less",
     "noStories": "This production doesn't contain any stories.",
     "filters": "filters",
-    "close": "close"
+    "close": "close",
+    "results": "results"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -178,6 +181,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Manage the accounts.",
+    "headerDescription": "Create, edit and control archive admin accounts.",
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",
@@ -244,7 +248,7 @@
     "pagination": "Pagination",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "add": "add"
+    "new": "New print"
   },
   "admin": {
     "back": "Back",
@@ -439,7 +443,7 @@
   },
   "admin-productions": {
     "header_title": "Productions",
-    "create": "Create production",
+    "new": "New production",
     "editTags": "Edit tags",
     "warning-title": "Future production",
     "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
