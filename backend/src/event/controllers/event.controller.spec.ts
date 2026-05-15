@@ -60,13 +60,20 @@ describe("EventController", () => {
 
   describe("getAllEvents", () => {
     it("should return an array of events", async () => {
-      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
+      const result = await controller.getAllEvents(
+        FilterEventSchema.parse({}),
+        { limit: 10, page: 1, descending: false },
+      );
       expect(result).toEqual(mockEvents);
       expect(service.getAllEvents).toHaveBeenCalled();
     });
 
     it("should call service.getAllEvents", async () => {
-      await controller.getAllEvents(FilterEventSchema.parse({}));
+      await controller.getAllEvents(FilterEventSchema.parse({}), {
+        limit: 10,
+        page: 1,
+        descending: false,
+      });
       expect(service.getAllEvents).toHaveBeenCalledTimes(1);
     });
 
@@ -77,7 +84,10 @@ describe("EventController", () => {
         totalItems: 0,
         objects: [],
       });
-      const result = await controller.getAllEvents(FilterEventSchema.parse({}));
+      const result = await controller.getAllEvents(
+        FilterEventSchema.parse({}),
+        { limit: 10, page: 1, descending: false },
+      );
       expect(result).toEqual({
         page: 0,
         limit: 20,

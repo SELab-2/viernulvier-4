@@ -108,7 +108,7 @@ describe("BlogController", () => {
       const rawBlogs = [mockBlog];
       const flattenedBlogs = [mockBlogView];
       const langQuery: LanguageQueryDto = { lang: "en" };
-      const blogFilters: FilterBlog = {};
+      const blogFilters: FilterBlog = { is_suggestion: false };
 
       mockBlogService.getAllBlogs.mockResolvedValue(rawBlogs);
       mockLanguageService.flattenByLanguage.mockReturnValue(flattenedBlogs);
