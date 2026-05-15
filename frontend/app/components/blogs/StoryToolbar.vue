@@ -282,7 +282,7 @@ const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
     <!-- Collapsible filter panel -->
     <Transition name="cal-slide">
       <div v-if="panelOpen" class="border-t border-border">
-        <div class="container mx-auto px-4 max-w-5xl py-6 flex flex-col gap-6">
+        <div class="page-container py-6 flex flex-col gap-6">
           <!-- Sort order -->
           <div class="flex flex-col gap-2 w-max">
             <span class="section-label">{{ t("stories.sortLabel") }}</span>

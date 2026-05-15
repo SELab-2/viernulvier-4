@@ -140,7 +140,10 @@ onUnmounted(() => io?.disconnect());
   <div
     class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
-    <BlogsStoriesHeader />
+    <PageHeader
+      :title="t('stories.title')"
+      :description="t('stories.headerDescription')"
+    />
 
     <!--
       StoryToolbar contains the Calendar panel inline (in-flow).

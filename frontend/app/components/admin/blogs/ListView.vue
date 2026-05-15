@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
+import { Plus } from "lucide-vue-next";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogView } from "~/composables/blogs/useBlogView";
 
@@ -221,34 +222,39 @@ async function handleDelete(blog: BlogView) {
 
 <template>
   <div class="space-y-6">
-    <!-- Header: title + result count -->
-    <div>
-      <h1
-        class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
-      >
-        {{ t("nav.stories") }}
-      </h1>
-      <p
-        v-if="!loading && totalItems > 0"
-        class="text-sm text-muted-foreground mt-0.5"
-      >
-        {{ totalItems }} {{ t("admin.blogs.results") }}
-      </p>
-    </div>
-
     <!--
-      Toolbar: search input + filter toggle + "New story" button.
-      AdminBlogsToolbar wraps StoryToolbar, which now accepts fetchSuggestions
-      as a prop so this admin context doesn't pollute the shared composable.
+      Reuse the public StoryToolbar for search + sort + date filters.
+      This eliminates the large block of duplicated filter UI that was
+      previously inlined here.
     -->
-    <AdminBlogsToolbar
+    <BlogsStoryToolbar
+      v-model:sort-order="sortOrder"
+      :story-titles="[]"
       :oldest-date="oldestDate"
       :newest-date="newestDate"
       :date-filter="dateFilter"
-      :fetch-suggestions="fetchSuggestions"
       @update:search="searchQuery = $event"
       @update:date-filter="dateFilter = $event"
     />
+
+    <div class="page-container flex items-center justify-between mb-6">
+      <div>
+        <p
+          v-if="!loading && totalItems > 0"
+          class="font-brand text-2xl font-black text-foreground"
+        >
+          {{ totalItems }} {{ t("general.results") }}
+        </p>
+      </div>
+
+      <NuxtLink
+        :to="ROUTES.admin.stories.create"
+        class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+      >
+        <Plus :size="15" />
+        {{ t("admin.blogs.new") }}
+      </NuxtLink>
+    </div>
 
     <!-- Error banner -->
     <div
@@ -282,7 +288,7 @@ async function handleDelete(blog: BlogView) {
     </div>
 
     <!-- Story list: each item exposes edit/delete actions in the card -->
-    <div v-else class="space-y-2">
+    <div v-else class="page-container space-y-3 mb-6">
       <!--
         BlogsStoryListItem is the same card used on the public stories page.
         `is-admin` switches it to show edit/delete buttons instead of a link.
@@ -296,19 +302,18 @@ async function handleDelete(blog: BlogView) {
         :deleting="deletingIds.has(blog.id)"
         @delete="handleDelete(blog)"
       />
+      <!-- Pagination bar (hidden when there is only one page and no items yet) -->
+      <AdminBlogsPagination
+        v-if="totalPages > 1 || totalItems > 0"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :total-items="totalItems"
+        :loading="loading"
+        :jump-input="jumpInput"
+        @update:current-page="currentPage = $event"
+        @jump="handleJump"
+        @update:jump-input="jumpInput = $event"
+      />
     </div>
-
-    <!-- Pagination bar (hidden when there is only one page and no items yet) -->
-    <AdminBlogsPagination
-      v-if="totalPages > 1 || totalItems > 0"
-      :current-page="currentPage"
-      :total-pages="totalPages"
-      :total-items="totalItems"
-      :loading="loading"
-      :jump-input="jumpInput"
-      @update:current-page="currentPage = $event"
-      @jump="handleJump"
-      @update:jump-input="jumpInput = $event"
-    />
   </div>
 </template>

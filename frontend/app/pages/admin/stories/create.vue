@@ -72,7 +72,7 @@ async function handleSubmit(data: CreateBlog) {
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <div class="page-container py-10 space-y-6">
       <!-- ── Top bar ─────────────────────────────────────────────────────── -->
       <div class="space-y-4">
         <NuxtLink

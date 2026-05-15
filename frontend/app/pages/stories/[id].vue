@@ -293,8 +293,7 @@ watch(title, updateTitleScrollable);
               Uses a gradient so it fades in/out at the top and bottom.
             -->
             <div
-              aria-hidden="true"
-              class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
+              class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
                 background: linear-gradient(
                   to bottom,
@@ -303,6 +302,7 @@ watch(title, updateTitleScrollable);
                   transparent
                 );
               "
+              aria-hidden="true"
             />
 
             <div class="md:pl-10 w-full">
