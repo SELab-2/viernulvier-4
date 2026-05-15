@@ -26,6 +26,10 @@ import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
 import { Plus, Edit2 } from "lucide-vue-next";
+import { useStorageApi } from "~/composables/media/useStorageApi";
+import { useCropApi } from "~/composables/media/useCropApi";
+import { useItemApi } from "~/composables/media/useItemApi";
+import { useGalleryApi } from "~/composables/media/useGalleryApi";
 
 const props = withDefaults(
   defineProps<{
@@ -53,7 +57,11 @@ const {
   totalPages,
   loading,
 } = useArchiveView();
-const { getAll, remove } = useProductionApi();
+const { getAll, remove: removeProduction } = useProductionApi();
+const { deleteMedia } = useStorageApi();
+const { remove: removeCrop } = useCropApi();
+const { remove: removeItem } = useItemApi();
+const { remove: removeGallery } = useGalleryApi();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
 
@@ -183,11 +191,25 @@ watch(searchQuery, () => {
  * Deletion
  */
 
+function showSnackbarError(message: string) {
+  snackbar.add({
+    type: "error",
+    text: message,
+  });
+}
+
 /**
  * Reacts to the press of a delete button.
+ *
+ * NOTE: Currently when a production is deleted it's corresponding MEDIA is also removed.
+ * Because we don't have any frontend functionality to link media from other productions to each other this is safe.
+ * A Print gallery is left as is because they also show up on the prints page.
  * @param production The production we want to delete.
  */
-async function handleDeleteProduction(production: ProductionView) {
+async function handleDeleteProduction(
+  production: ProductionView,
+  gallery: GalleryWithItems<ItemViewWithCrops> | null,
+) {
   // Check whether the user ACTUALLY wants to perform the delete.
   const confirmed = confirm(
     "Do you want to delete this production?", // TODO: i18n this?
@@ -195,20 +217,64 @@ async function handleDeleteProduction(production: ProductionView) {
   if (!confirmed) return;
 
   // Perform the various deletes.
-  await Promise.all([deleteProduction(production.id)]);
+  await Promise.all([
+    deleteProduction(production),
+    deleteGallery(gallery),
+    // NOTE: Events are automatically deleted by the DB if their production is removed.
+  ]);
+
+  // Reload the page
+  resetAndLoad();
 }
 
 /**
  * Deletes a production (and it's events) from the database.
  * @param production_id The ID of the production.
  */
-async function deleteProduction(production_id: number) {
-  const response = await remove(production_id);
+async function deleteProduction(production: ProductionView) {
+  const response = await removeProduction(production.id);
   if (response.error) {
-    snackbar.add({
-      type: "error",
-      text: response.error,
-    });
+    showSnackbarError(response.error);
+  }
+}
+
+/**
+ * Deletes a full gallery and it's assets from the database/server.
+ * @param gallery_id The ID of the gallery.
+ */
+async function deleteGallery(
+  gallery: GalleryWithItems<ItemViewWithCrops> | null,
+) {
+  if (!gallery) return; // If no gallery we can just skip this step.
+
+  // Start by deleting the images from the server.
+  // In the same (sub)-loop we can delete crops and items.
+  for (const item of gallery.items) {
+    for (const crop of Object.values(item.crops)) {
+      // Remove the image itself.
+      const responseMedia = await deleteMedia(crop.url);
+      if (responseMedia.error) {
+        showSnackbarError(responseMedia.error);
+      }
+
+      // Remove the crop.
+      const responseCrop = await removeCrop(crop.id);
+      if (responseCrop.error) {
+        showSnackbarError(responseCrop.error);
+      }
+    }
+
+    // Remove the item itself when all it's crops are removed.
+    const responseItem = await removeItem(item.id);
+    if (responseItem.error) {
+      showSnackbarError(responseItem.error);
+    }
+  }
+
+  // Lastly remove the gallery.
+  const responseGallery = await removeGallery(gallery.id);
+  if (responseGallery.error) {
+    showSnackbarError(responseGallery.error);
   }
 }
 </script>

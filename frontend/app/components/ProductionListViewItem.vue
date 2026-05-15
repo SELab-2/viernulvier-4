@@ -29,7 +29,11 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "delete", production: ProductionView): void;
+  (
+    e: "delete",
+    production: ProductionView,
+    gallery: GalleryWithItems<ItemViewWithCrops> | null,
+  ): void;
 }>();
 
 const { t, locale } = useI18n();
@@ -224,7 +228,7 @@ watch(locale, () => loadTags());
               <div @click.stop>
                 <AdminDeleteButton
                   label="Delete production"
-                  @click="$emit('delete', props.productionView)"
+                  @click="$emit('delete', props.productionView, gallery)"
                 />
               </div>
             </template>
