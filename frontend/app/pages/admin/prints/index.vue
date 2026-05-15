@@ -125,7 +125,7 @@ onMounted(() => {
     </div>
 
     <!-- File list -->
-    <div class="page-container">
+    <div class="page-container py-6">
       <AdminPrintsFileList
         :category="activeFilter"
         :files="prints"
