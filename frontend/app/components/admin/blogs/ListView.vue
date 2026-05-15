@@ -1,34 +1,52 @@
 <!--
   components/admin/blogs/ListView.vue
+  ======================================
+  Admin blog list — orchestrates fetching, filtering, pagination and deletion.
 
-  Admin overview of all blog stories.
+  Responsibility split:
+  - This file owns all *state* and *business logic*:
+      fetching blogs, handling deletes, managing pagination, filter state.
+  - Presentation is delegated to sub-components:
+      AdminBlogsToolbar    — search + filter toggle + "New story" button
+      BlogsStoryListItem   — individual row card (shared with public page)
+      AdminBlogsPagination — page-nav bar
 
-  Reuses the public-facing StoryToolbar (search + filters) and StoryTimeline
-  (year/month grouped list) components to avoid code duplication.
-  Adds admin-only actions (edit, delete) via a slot/wrapper around each item.
-
-  Pagination: Page X of Y (identical to archive page).
-  Create button: NuxtLink styled directly.
+  Sub-components are all auto-imported by Nuxt (no explicit imports needed).
 -->
+
 <script setup lang="ts">
 import type { BlogView, PaginatedResponse } from "@repo/common";
 import { Plus } from "lucide-vue-next";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
-import type { DateFilter } from "~/types/DateFilter";
+import { useBlogView } from "~/composables/blogs/useBlogView";
+
+// Composables
 
 const { getAll, remove } = useBlogApi();
 const { locale, t } = useI18n();
+const snackbar = useSnackbar();
 
-// Filters
+/**
+ * Pull shared filter refs from useBlogView.
+ * sortOrder and searchQuery are module-level refs shared with the public
+ * stories page; dateFilter is also module-level so filters persist across
+ * navigation within the admin section.
+ */
+const { sortOrder, searchQuery, dateFilter, fetchSuggestions } = useBlogView();
 
-const sortOrder = ref<"newest" | "oldest">("newest");
-const searchQuery = ref("");
-const dateFilter = ref<DateFilter>({});
+// Date bounds (for year picker + calendar)
 
-// Date bounds for calendar + year picker
+/** ISO date string of the oldest existing blog (fetched once on mount). */
 const oldestDate = ref("");
+/** ISO date string of the newest existing blog. */
 const newestDate = ref("");
 
+/**
+ * Fetch the oldest and newest blog dates in parallel.
+ * These are used to populate the YearPicker and DefaultCalendar lower/upper
+ * bounds so the user can't select dates outside the available range.
+ * Non-critical: the calendar still works if this fails.
+ */
 async function fetchDateBounds() {
   try {
     const [o, n] = await Promise.all([
@@ -46,7 +64,7 @@ async function fetchDateBounds() {
     if (first?.created_at) oldestDate.value = first.created_at.slice(0, 10);
     if (last?.created_at) newestDate.value = last.created_at.slice(0, 10);
   } catch {
-    /* non-critical */
+    /* Non-critical — calendar still works without bounds */
   }
 }
 
@@ -56,34 +74,49 @@ const PAGE_SIZE = 10;
 const currentPage = ref(1);
 const totalPages = ref(1);
 const totalItems = ref(0);
+
+/** Value bound to the page-jump input. Reset to '' after each jump attempt. */
 const jumpInput = ref("");
 
+/** Jump to a specific page if the value is valid and different from current. */
 function handleJump() {
   const v = parseInt(jumpInput.value, 10);
-  if (!isNaN(v) && v >= 1 && v <= totalPages.value && v !== currentPage.value)
+  if (!isNaN(v) && v >= 1 && v <= totalPages.value && v !== currentPage.value) {
     currentPage.value = v;
+  }
   jumpInput.value = "";
 }
 
-// Data
+// Blog data
 
 const blogs = ref<BlogView[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+
+/**
+ * IDs of blogs currently being deleted.
+ * Passed to StoryListItem so it can show a spinner or disabled state while
+ * the delete request is in flight.
+ */
 const deletingIds = ref(new Set<number>());
 
+/**
+ * Fetch the current page of blogs, applying all active filters.
+ * Called on mount, on page changes, and whenever filters change.
+ */
 async function loadBlogs() {
   loading.value = true;
   error.value = null;
   try {
     const resp = await getAll({
       paginationFilters: {
-        page: currentPage.value - 1,
+        page: currentPage.value - 1, // backend uses 0-based pages
         limit: PAGE_SIZE,
         descending: sortOrder.value === "newest",
       },
       languageFilters: { lang: locale.value as "nl" | "en" },
       blogFilters: {
+        // Only pass filters that are actually set to avoid unnecessary query params.
         ...(searchQuery.value ? { title: searchQuery.value } : {}),
         ...(dateFilter.value.after ? { after: dateFilter.value.after } : {}),
         ...(dateFilter.value.before ? { before: dateFilter.value.before } : {}),
@@ -104,6 +137,12 @@ async function loadBlogs() {
   }
 }
 
+// Watchers
+
+/**
+ * Debounce search input changes so we don't fire a request on every keystroke.
+ * 350 ms matches the public stories page behaviour.
+ */
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, () => {
   if (searchTimer) clearTimeout(searchTimer);
@@ -113,6 +152,7 @@ watch(searchQuery, () => {
   }, 350);
 });
 
+/** Reset to page 1 and reload whenever sort order, locale, or date filter changes. */
 watch(
   [sortOrder, locale, dateFilter],
   () => {
@@ -121,27 +161,59 @@ watch(
   },
   { deep: true },
 );
+
+/** Reload when the user navigates to a different page. */
 watch(currentPage, loadBlogs);
 
+// Lifecycle
+
 onMounted(async () => {
+  // Fetch date bounds first so the calendar/year-picker is ready before the
+  // first blog page renders.
   await fetchDateBounds();
   loadBlogs();
 });
 
 // Delete
 
+/**
+ * Delete a blog after asking for confirmation.
+ * If the deleted item was the only one on the current page, navigates to the
+ * previous page rather than showing an empty list.
+ */
 async function handleDelete(blog: BlogView) {
   if (
     !confirm(t("admin.blogs.deleteConfirm", { title: blog.titel ?? blog.id }))
   )
     return;
+
   deletingIds.value.add(blog.id);
   try {
-    await remove(blog.id);
-    if (blogs.value.length === 1 && currentPage.value > 1) currentPage.value--;
-    else await loadBlogs();
+    const response = await remove(blog.id);
+
+    if (response.error) {
+      snackbar.add({
+        type: "error",
+        text: response.error ?? t("admin.blogs.deleteError"),
+      });
+      return;
+    }
+
+    if (blogs.value.length === 1 && currentPage.value > 1) {
+      currentPage.value--; // triggers loadBlogs via watcher
+    } else {
+      await loadBlogs();
+    }
+
+    snackbar.add({
+      type: "success",
+      text: t("admin.blogs.deleteSuccess", { title: blog.titel ?? blog.id }),
+    });
   } catch {
-    alert(t("admin.blogs.saveError"));
+    snackbar.add({
+      type: "error",
+      text: t("admin.blogs.deleteError"),
+    });
   } finally {
     deletingIds.value.delete(blog.id);
   }
@@ -184,24 +256,24 @@ async function handleDelete(blog: BlogView) {
       </NuxtLink>
     </div>
 
-    <!-- Error -->
+    <!-- Error banner -->
     <div
       v-if="error"
-      class="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 px-4 py-3 text-sm text-red-600 dark:text-red-400"
+      class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
     >
       {{ error }}
     </div>
 
-    <!-- Loading -->
+    <!-- Loading skeleton: one placeholder per PAGE_SIZE slot -->
     <div v-if="loading" class="space-y-3">
       <div
         v-for="i in PAGE_SIZE"
         :key="i"
-        class="h-20 bg-muted rounded-xl animate-pulse"
+        class="h-[136px] bg-muted rounded-xl animate-pulse"
       />
     </div>
 
-    <!-- Empty -->
+    <!-- Empty state -->
     <div v-else-if="!blogs.length" class="py-20 text-center">
       <p
         class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
@@ -215,151 +287,33 @@ async function handleDelete(blog: BlogView) {
       </p>
     </div>
 
-    <!--
-      Admin blog list: each story rendered as an AdminBlogsListItem
-      (which adds edit/delete actions on top of the standard story card).
-      We intentionally do NOT reuse StoryTimeline here because admin items
-      need the edit/delete buttons that StoryTimeline's StoryListItem doesn't have.
-    -->
-    <div v-else class="page-container space-y-3">
-      <AdminBlogsListItem
+    <!-- Story list: each item exposes edit/delete actions in the card -->
+    <div v-else class="page-container space-y-3 pb-8">
+      <!--
+        BlogsStoryListItem is the same card used on the public stories page.
+        `is-admin` switches it to show edit/delete buttons instead of a link.
+        `deleting` disables the delete button while the API call is in flight.
+      -->
+      <BlogsStoryListItem
         v-for="blog in blogs"
         :key="blog.id"
-        :blog="blog"
+        :story="blog"
+        :is-admin="true"
         :deleting="deletingIds.has(blog.id)"
         @delete="handleDelete(blog)"
       />
-    </div>
-
-    <!-- Pagination -->
-    <div
-      v-if="totalPages > 1 || totalItems > 0"
-      class="flex items-center justify-between pt-4 border-t border-border gap-4 flex-wrap"
-    >
-      <p
-        v-if="totalItems > 0 && !loading"
-        class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
-      >
-        {{ totalItems }} {{ t("admin.blogs.results") }}
-      </p>
-      <div v-else class="h-4 w-24 bg-muted rounded animate-pulse" />
-
-      <div v-if="totalPages > 1" class="flex items-center gap-3">
-        <!-- Page jumper -->
-        <div class="flex items-center gap-2">
-          <span
-            class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
-            >{{ t("archive.page_label") }}</span
-          >
-          <input
-            v-model="jumpInput"
-            type="number"
-            :min="1"
-            :max="totalPages"
-            :placeholder="currentPage.toString()"
-            :disabled="loading"
-            @keydown.enter="handleJump"
-            @blur="handleJump"
-            class="w-14 h-9 rounded-md border-2 border-foreground/20 bg-background px-1 text-sm text-center font-black text-foreground focus:outline-none focus:border-foreground disabled:opacity-25 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          />
-          <span
-            class="text-[10px] font-black uppercase tracking-wide text-muted-foreground"
-            >{{ t("archive.of_pages", { total: totalPages }) }}</span
-          >
-        </div>
-
-        <!-- Nav buttons — same as archive pagination -->
-        <nav
-          class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
-          :aria-label="t('archive.pagination')"
-        >
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === 1 || loading"
-            @click="currentPage = 1"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
-              />
-            </svg>
-          </button>
-          <span class="w-[2px] bg-foreground" />
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === 1 || loading"
-            @click="currentPage--"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
-              />
-            </svg>
-          </button>
-          <span class="w-[2px] bg-foreground" />
-          <span
-            class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
-          >
-            {{ currentPage }}
-          </span>
-          <span class="w-[2px] bg-foreground" />
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === totalPages || loading"
-            @click="currentPage++"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m8.25 4.5 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-          <span class="w-[2px] bg-foreground" />
-          <button
-            class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-            :disabled="currentPage === totalPages || loading"
-            @click="currentPage = totalPages"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.65"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-        </nav>
-      </div>
+      <!-- Pagination bar (hidden when there is only one page and no items yet) -->
+      <AdminBlogsPagination
+        v-if="totalPages > 1 || totalItems > 0"
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :total-items="totalItems"
+        :loading="loading"
+        :jump-input="jumpInput"
+        @update:current-page="currentPage = $event"
+        @jump="handleJump"
+        @update:jump-input="jumpInput = $event"
+      />
     </div>
   </div>
 </template>
