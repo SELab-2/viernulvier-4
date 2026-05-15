@@ -492,7 +492,13 @@
       "hint": "Manage series for this production",
       "add": "Add",
       "new": "New",
-      "none": "No series yet"
+      "none": "No series yet",
+      "search-placeholder": "Search existing series to link...",
+      "no-results": "No series found",
+      "link": "Link",
+      "linked": "Linked",
+      "unlink": "Unlink",
+      "delete": "Delete"
     }
   },
   "error": {

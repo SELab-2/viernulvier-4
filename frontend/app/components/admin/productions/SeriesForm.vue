@@ -198,12 +198,7 @@ function itemLabel(item: ExistingSeries | NewSeries): string {
         <input
           v-model="searchQuery"
           type="text"
-          :placeholder="
-            t(
-              'admin-productions.series.search-placeholder',
-              'Search existing series to link…',
-            )
-          "
+          :placeholder="t('admin-productions.series.search-placeholder')"
           class="h-9 w-full rounded-md border border-border bg-background pl-9 pr-8 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-foreground/20"
           @focus="showDropdown = searchResults.length > 0"
         />
@@ -237,7 +232,7 @@ function itemLabel(item: ExistingSeries | NewSeries): string {
           "
           class="px-4 py-3 text-[11px] text-muted-foreground"
         >
-          {{ t("admin-productions.series.no-results", "No series found") }}
+          {{ t("admin-productions.series.no-results") }}
         </div>
 
         <!-- Results list -->
@@ -263,7 +258,7 @@ function itemLabel(item: ExistingSeries | NewSeries): string {
               class="ml-3 flex shrink-0 items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-accent"
             >
               <Link :size="10" />
-              {{ t("admin-productions.series.link", "Link") }}
+              {{ t("admin-productions.series.link") }}
             </div>
           </li>
         </ul>
@@ -307,7 +302,7 @@ function itemLabel(item: ExistingSeries | NewSeries): string {
               v-else
               class="rounded-full bg-foreground/5 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-muted-foreground"
             >
-              {{ t("admin-productions.series.linked", "Linked") }}
+              {{ t("admin-productions.series.linked") }}
             </span>
 
             <!-- Delete / unlink -->
@@ -315,8 +310,8 @@ function itemLabel(item: ExistingSeries | NewSeries): string {
               class="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-action-red-border hover:bg-action-red-hover hover:text-action-red-icon"
               :title="
                 item.type === 'existing'
-                  ? t('admin-productions.series.unlink', 'Unlink')
-                  : t('admin-productions.series.delete', 'Delete')
+                  ? t('admin-productions.series.unlink')
+                  : t('admin-productions.series.delete')
               "
               @click.stop="deleteItem(index)"
             >

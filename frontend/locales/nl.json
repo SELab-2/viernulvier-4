@@ -492,7 +492,13 @@
       "hint": "Beheer series voor deze productie",
       "add": "Toevoegen",
       "new": "Nieuw",
-      "none": "Nog geen series"
+      "none": "Nog geen series",
+      "search-placeholder": "Zoek bestaande series om te koppelen...",
+      "no-results": "Geen series gevonden",
+      "link": "Koppelen",
+      "linked": "Gekoppeld",
+      "unlink": "Onktoppelen",
+      "delete": "Verwijder"
     }
   },
   "error": {
