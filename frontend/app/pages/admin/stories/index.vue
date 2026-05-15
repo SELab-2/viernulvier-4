@@ -17,10 +17,13 @@
   Designed to keep page-level concerns minimal while delegating all
   business logic and interactions to the AdminBlogsListView component.
 -->
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const { t } = useI18n();
+</script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div>
+    <PageHeader :title="t('nav.stories')" />
     <AdminBlogsListView />
   </div>
 </template>

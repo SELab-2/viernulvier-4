@@ -170,7 +170,8 @@
     "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen.",
     "filters": "filters",
-    "close": "sluiten"
+    "close": "sluiten",
+    "results": "resultaten"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",

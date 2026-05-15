@@ -150,31 +150,6 @@ async function handleDelete(blog: BlogView) {
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="page-container py-10 flex items-center justify-between gap-4">
-      <div>
-        <h1
-          class="font-brand font-black text-2xl uppercase tracking-tight text-foreground"
-        >
-          {{ t("nav.stories") }}
-        </h1>
-        <p
-          v-if="!loading && totalItems > 0"
-          class="text-sm text-muted-foreground mt-0.5"
-        >
-          {{ totalItems }} {{ t("admin.blogs.results") }}
-        </p>
-      </div>
-
-      <NuxtLink
-        :to="ROUTES.admin.stories.create"
-        class="inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 shadow-md shadow-accent/30 cursor-pointer"
-      >
-        <Plus :size="14" />
-        {{ t("admin.blogs.new") }}
-      </NuxtLink>
-    </div>
-
     <!--
       Reuse the public StoryToolbar for search + sort + date filters.
       This eliminates the large block of duplicated filter UI that was
@@ -189,6 +164,25 @@ async function handleDelete(blog: BlogView) {
       @update:search="searchQuery = $event"
       @update:date-filter="dateFilter = $event"
     />
+
+    <div class="page-container flex items-center justify-between mb-6">
+      <div>
+        <p
+          v-if="!loading && totalItems > 0"
+          class="font-brand text-2xl font-black text-foreground"
+        >
+          {{ totalItems }} {{ t("general.results") }}
+        </p>
+      </div>
+
+      <NuxtLink
+        :to="ROUTES.admin.stories.create"
+        class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+      >
+        <Plus :size="15" />
+        {{ t("admin.blogs.new") }}
+      </NuxtLink>
+    </div>
 
     <!-- Error -->
     <div

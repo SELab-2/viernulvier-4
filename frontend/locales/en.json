@@ -167,7 +167,8 @@
     "showLess": "Show less",
     "noStories": "This production doesn't contain any stories.",
     "filters": "filters",
-    "close": "close"
+    "close": "close",
+    "results": "results"
   },
   "eventlist": {
     "noEventsFound": "No events found",
