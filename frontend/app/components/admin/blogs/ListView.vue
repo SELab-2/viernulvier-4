@@ -288,7 +288,7 @@ async function handleDelete(blog: BlogView) {
     </div>
 
     <!-- Story list: each item exposes edit/delete actions in the card -->
-    <div v-else class="page-container space-y-3 py-6">
+    <div v-else class="page-container space-y-3 mb-6">
       <!--
         BlogsStoryListItem is the same card used on the public stories page.
         `is-admin` switches it to show edit/delete buttons instead of a link.

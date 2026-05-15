@@ -106,7 +106,7 @@ onMounted(() => {
     />
 
     <!-- TotalItems + Add button -->
-    <div class="page-container flex items-center justify-between mb-6">
+    <div class="page-container flex items-center justify-between mb-0">
       <div>
         <p
           v-if="!loading && totalItems > 0"
