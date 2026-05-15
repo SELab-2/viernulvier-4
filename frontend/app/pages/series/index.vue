@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import type { SeriesView, PaginatedResponse } from "@repo/common";
 
-const { locale } = useI18n();
-const { getAll } = useSeriesApi();
-const { currentPage, totalItems, totalPages, loading, fetchError } =
-  useSeriesView();
+const { t, locale } = useI18n();
+const { getAll, getSeriesProductions } = useSeriesApi();
+const {
+  searchQuery,
+  currentPage,
+  totalItems,
+  totalPages,
+  loading,
+  fetchError,
+  fetchSuggestions,
+} = useSeriesView();
 
 // Responsive columns
-const series = ref<SeriesView[]>([]);
+const series = ref<[SeriesView, number][]>([]);
 const ROWS_PER_PAGE = 4;
 const windowWidth = ref(1024);
 const handleResize = () => {
   windowWidth.value = window.innerWidth;
 };
+
 onMounted(() => {
   handleResize();
   window.addEventListener("resize", handleResize);
@@ -51,13 +59,26 @@ async function loadPage() {
         limit: LIMIT.value,
         descending: true,
       },
+      seriesFilters: {
+        ...(searchQuery.value ? { title: searchQuery.value } : {}),
+        is_suggestion: false,
+      },
       languageFilters: { lang: locale.value as "nl" | "en" },
     });
 
     const paged = unwrap(raw);
-    series.value = (paged?.objects ?? []) as SeriesView[];
+    const seriesList = (paged?.objects ?? []) as SeriesView[];
     totalItems.value = paged?.totalItems ?? 0;
     totalPages.value = Math.max(1, Math.ceil(totalItems.value / LIMIT.value));
+
+    const counts = await Promise.all(
+      seriesList.map((s) =>
+        getSeriesProductions(s.id).then((p) => p.data?.totalItems ?? 0),
+      ),
+    );
+    series.value = seriesList.map(
+      (s, i) => [s, counts[i]] as [SeriesView, number],
+    );
   } catch (e) {
     fetchError.value = e as Error;
   } finally {
@@ -66,9 +87,11 @@ async function loadPage() {
   }
 }
 
-watch(locale, () => {
+watch([searchQuery, locale], () => {
+  currentPage.value = 0;
   loadPage();
 });
+
 watch(currentCols, () => {
   currentPage.value = 0;
   loadPage();
@@ -82,11 +105,27 @@ onMounted(loadPage);
   <div
     class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
+    <!-- Header -->
     <SeriesHeader />
+
+    <!-- Search -->
+    <div class="w-full border-b border-border bg-background">
+      <div class="page-container py-5">
+        <div class="h-12">
+          <SearchBar
+            v-model="searchQuery"
+            :fetch-suggestions="fetchSuggestions"
+            :limit="15"
+            :scroll-limit="5"
+            :placeholder="t('searchbar.placeholder')"
+          />
+        </div>
+      </div>
+    </div>
 
     <!-- Grid -->
     <div class="page-container py-8">
-      <SeriesGrid :items="series.map((s) => [s, 0])" />
+      <SeriesGrid :items="series" />
     </div>
   </div>
 </template>

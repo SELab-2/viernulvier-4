@@ -208,7 +208,8 @@
   "series": {
     "header_title": "Series",
     "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
-    "noProductions": "This series doesn't contain any productions."
+    "noProductions": "This series doesn't contain any productions.",
+    "noSeries": "No series"
   },
   "prints": {
     "types": {
