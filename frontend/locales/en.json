@@ -247,7 +247,7 @@
     "pagination": "Pagination",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "add": "add"
+    "new": "New print"
   },
   "admin": {
     "back": "Back",
@@ -403,7 +403,7 @@
   },
   "admin-productions": {
     "header_title": "Productions",
-    "create": "Create production",
+    "new": "New production",
     "editTags": "Edit tags",
     "warning-title": "Future production",
     "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
