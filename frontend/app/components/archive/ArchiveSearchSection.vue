@@ -189,7 +189,7 @@ onMounted(() => {
     <!-- Filter panel -->
     <Transition name="filter-slide">
       <div v-if="filterOpen" class="border-t border-border">
-        <div class="max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
+        <div class="page-container py-6 flex flex-col gap-6">
           <!-- Sort order -->
           <div class="flex flex-col gap-2 shrink-0 pt-1 w-max">
             <span

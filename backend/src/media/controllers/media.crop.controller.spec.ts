@@ -108,7 +108,7 @@ describe("MediaCropController", () => {
   describe("replaceCrop", () => {
     it("should replace and return the crop", async () => {
       const replaceCropDto: ReplaceMediaCropDto = {
-        name: "og_image",
+        name: "hd_ready",
         url: "https://example.com/og.jpg",
       };
       mediaCropService.replaceCrop.mockResolvedValue(mockCrop);
