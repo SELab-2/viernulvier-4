@@ -141,7 +141,7 @@ export function useProductionSeries(): ProductionFormStep<
 
     const changes: string[] = [];
 
-    // Track existing items by id for additions/removals.
+    // Track existing items by id for additions/removals/edits.
     const origExistingById = new Map<number, ExistingSeries>();
     for (const s of original.value) {
       if (s.type === "existing") origExistingById.set(s.id, s);
@@ -163,6 +163,18 @@ export function useProductionSeries(): ProductionFormStep<
     for (const [id, s] of origExistingById) {
       if (!currExistingById.has(id)) {
         changes.push(`unselected:${s.titel.nl}`);
+      }
+    }
+
+    // Edited existing series (present in both original and draft but fields changed)
+    for (const [id, curr] of currExistingById) {
+      const orig = origExistingById.get(id);
+      if (!orig) continue;
+      if (
+        !isEqualSeries(curr.titel, orig.titel) ||
+        !isEqualSeries(curr.description, orig.description)
+      ) {
+        changes.push(`edited:${curr.titel.nl}`);
       }
     }
 
@@ -210,24 +222,37 @@ export function useProductionSeries(): ProductionFormStep<
 
     const update: UpdateSeriesItem[] = draft.value
       .filter((s): s is ExistingSeries => s.type === "existing")
-      .map((s) => {
+      .flatMap((s) => {
         const originalItem = originalExistingMap.get(s.id);
 
-        if (!originalItem) return null;
+        // Newly linked this session — if fields were edited, include in update.
+        // If not edited we skip (backend already has the canonical values).
+        if (!originalItem) {
+          // We don't have a baseline to diff against, so always send the update
+          // so any edits the user made before saving are persisted.
+          return [
+            {
+              id: s.id,
+              titel: s.titel,
+              description: s.description,
+            },
+          ];
+        }
 
         const changed =
           !isEqualSeries(s.titel, originalItem.titel) ||
           !isEqualSeries(s.description, originalItem.description);
 
-        if (!changed) return null;
+        if (!changed) return [];
 
-        return {
-          id: s.id,
-          titel: s.titel,
-          description: s.description,
-        };
-      })
-      .filter((x): x is UpdateSeriesItem => x !== null);
+        return [
+          {
+            id: s.id,
+            titel: s.titel,
+            description: s.description,
+          },
+        ];
+      });
 
     // Build CreateSeries objects for new series. Dutch is required; English
     // falls back to Dutch when not provided to keep payload shape consistent.
