@@ -62,7 +62,7 @@ describe("AccountForm", () => {
       props?: Record<string, unknown>;
     }>;
 
-    expect(fields).toHaveLength(3);
+    expect(fields).toHaveLength(4);
     expect(fields[0]?.name).toBe("username");
     expect(fields[0]?.props?.label).toBe("Username");
     expect(fields[0]?.props?.placeholder).toBe("Enter a username");
@@ -72,6 +72,7 @@ describe("AccountForm", () => {
     expect(fields[2]?.name).toBe("confirmPassword");
     expect(fields[2]?.props?.label).toBe("Confirm password");
     expect(fields[2]?.props?.placeholder).toBe("Repeat your password");
+    expect(fields[3]?.name).toBe("role");
   });
 
   it("updates translated labels when locale changes", async () => {
@@ -115,6 +116,7 @@ describe("AccountForm", () => {
     expect(wrapper.emitted("submit")?.[0]?.[0]).toEqual({
       username: "admin-user",
       password: "secret123",
+      superAdmin: false,
     });
   });
 

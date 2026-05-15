@@ -10,12 +10,14 @@ import type {
   ReplaceSeries,
   Series,
   SeriesView,
+  FilterSeries,
 } from "@repo/common";
 import { API_ROUTES } from "~/utils/apiRoutes";
 import { buildQueryString } from "~/utils/formatters";
 
 interface SeriesListOptions {
   paginationFilters?: PaginationFilter;
+  seriesFilters?: FilterSeries;
   languageFilters?: LanguageQuery;
 }
 
@@ -34,16 +36,23 @@ export function useSeriesApi() {
    */
   function getAll(options?: {
     paginationFilters?: PaginationFilter;
+    seriesFilters?: FilterSeries;
   }): Promise<ApiResponse<PaginatedResponse<Series>>>;
   function getAll(options: {
     paginationFilters?: PaginationFilter;
+    seriesFilters?: FilterSeries;
     languageFilters: LanguageQuery;
   }): Promise<ApiResponse<PaginatedResponse<SeriesView>>>;
   function getAll({
     paginationFilters,
+    seriesFilters,
     languageFilters,
   }: SeriesListOptions = {}) {
-    const params = { ...paginationFilters, ...languageFilters };
+    const params = {
+      ...paginationFilters,
+      ...languageFilters,
+      ...seriesFilters,
+    };
     const query = buildQueryString(params);
 
     return get<PaginatedResponse<Series | SeriesView>>(
@@ -123,9 +132,15 @@ export function useSeriesApi() {
   function getSeriesProductions(
     seriesId: number,
     lang: Language,
+    paginationFilters?: PaginationFilter,
   ): Promise<ApiResponse<PaginatedResponse<ProductionView>>>;
-  function getSeriesProductions(seriesId: number, lang?: Language) {
-    const query = lang ? `?lang=${lang}` : "";
+  function getSeriesProductions(
+    seriesId: number,
+    lang?: Language,
+    paginationFilters?: PaginationFilter,
+  ) {
+    const params = { ...(lang ? { lang } : {}), ...paginationFilters };
+    const query = buildQueryString(params);
     return get<PaginatedResponse<Production | ProductionView>>(
       `${API_ROUTES.series.productions(seriesId)}${query}`,
     );
@@ -136,8 +151,11 @@ export function useSeriesApi() {
    *
    * Links a production to a series.
    */
-  function linkProductionToSeries(seriesId: number, productionId: number) {
-    return put(API_ROUTES.series.productionById(seriesId, productionId), {});
+  function linkProductionToSeries(seriesId: number, productionIds: number[]) {
+    return put(
+      API_ROUTES.series.productions(seriesId),
+      JSON.stringify(productionIds),
+    );
   }
 
   /**

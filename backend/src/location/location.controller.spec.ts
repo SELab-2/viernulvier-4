@@ -56,6 +56,7 @@ describe("LocationController", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: false,
   };
 
   beforeEach(async () => {
@@ -98,7 +99,7 @@ describe("LocationController", () => {
         mockLocationViewArray,
       );
 
-      const result = await controller.getLocations(filter, langQuery);
+      const result = await controller.getLocations(filter, langQuery, {});
 
       expect(result).toEqual(mockLocationViewArray);
       expect(service.getLocations).toHaveBeenCalledTimes(1);

@@ -204,6 +204,9 @@
     "createSuccess": "Account \"{username}\" aangemaakt.",
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
+  "series": {
+    "noProductions": "Deze reeks bevat geen producties."
+  },
   "prints": {
     "types": {
       "all": "Alles",
@@ -263,6 +266,8 @@
       "saveBtn": "Wijzigingen Opslaan",
       "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
       "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
+      "createSuccess": "Verhaal aangemaakt.",
+      "saveSuccess": "Verhaal opgeslagen.",
       "sectionTitle": "Titel",
       "sectionContent": "Inhoud",
       "titleNl": "Titel (NL)",
@@ -280,6 +285,10 @@
       "deleteConfirmBtn": "Verwijderen",
       "titleEnRequired": "Engelse titel is nodig",
       "descriptionEnRequired": "Engelse beschrijving is nodig",
+      "restoreConfirm": "Ben je zeker dat je wil herstellen naar de laatste versie ?",
+      "restoreBtn": "Herstellen",
+      "deleteSuccess": "Verhaal \"{title}\" verwijderd.",
+      "deleteError": "Het verhaal kon niet worden verwijderd. Probeer het opnieuw.",
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
         "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
@@ -324,23 +333,26 @@
         "cropMobile": "Mobiele crop",
         "cropMobileHint": "Portretcrop geoptimaliseerd voor smalle schermen",
         "cropNb": "NB Ready",
-        "cropNbHint": "Variant met neutrale achtergrond"
+        "cropNbHint": "Variant met neutrale achtergrond",
+        "metadataTitle": "Afbeeldingsmetadata",
+        "itemTitleNl": "Afbeeldingstitel (NL)",
+        "itemTitleEn": "Afbeeldingstitel (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata opgeslagen."
       },
       "linkToProduction": "Koppel aan productie",
       "linkBtn": "Koppelen",
-      "linkToProductionTitle": "Koppel aan productie",
       "linkToProductionSearch": "Zoek producties op titel...",
       "linkToProductionNoResults": "Geen producties gevonden",
-      "linkToProductionSuccess": "Succesvol gekoppeld aan productie",
-      "linkToProductionError": "Koppelen mislukt. Probeer opnieuw.",
-      "shareGallery": "Deel afbeeldingen met deze productie",
-      "shareGalleryHint": "De productie toont dan dezelfde foto's als dit verhaal.",
+      "linkToProductionCreateHint": "Sla het verhaal eerst op om het aan een productie te koppelen.",
       "linking": "Koppelen...",
       "linked": "Gekoppeld",
       "linkedProductions": "Koppel aan productie",
       "linkedProductionsHint": "Koppel dit verhaal aan een productie zodat het verschijnt op de productiepagina.",
       "linkedThisSession": "Gekoppeld in deze sessie",
       "noLinkedProductions": "Nog niet gekoppeld aan een productie",
+      "unlinkBtn": "Ontkoppelen",
       "viewProduction": "Bekijk productiepagina"
     },
     "parser": {
@@ -427,6 +439,22 @@
     "editTags": "Tags bewerken",
     "warning-title": "Toekomstige productie",
     "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld."
+  },
+  "error": {
+    "titleFallback": "Oeps!",
+    "subtitle": {
+      "404": "Je lijkt van het pad te zijn afgedwaald.",
+      "500": "Er is aan onze kant iets helemaal misgegaan.",
+      "default": "Nou, dit is onverwacht."
+    },
+    "message": {
+      "404": "De pagina die je zoekt bestaat niet of is verplaatst.",
+      "500": "Onze servers hebben een kleine hapering en we konden deze pagina niet laden.",
+      "default": "Er is iets misgegaan. Probeer het opnieuw."
+    },
+    "blame": "Geef in de tussentijd gerust de schuld aan een van onze developers :-)",
+    "goHome": "Breng me terug naar home",
+    "imgAlt": "Soort van geiten"
   },
   "csv": {
     "templates": {

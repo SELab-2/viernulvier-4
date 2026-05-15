@@ -1,392 +1,212 @@
 <!--
   components/admin/blogs/LinkToProduction.vue
+  =============================================
+  Card that lets the editor link this blog post to one or more productions.
 
-  Card section for linking this blog to productions.
-  Shows all linked productions, persisted in localStorage so they survive
-  navigation away and back within the same browser session.
+  Architecture:
+  ┌─ LinkToProduction (this file) ──────────────────────────────────────────┐
+  │  Owns: search state, linked-productions list, API calls, localStorage   │
+  │        persistence.                                                     │
+  │                                                                         │
+  │  ┌── AdminBlogsLinkLockedHint ─────────────────────────────────────┐    │
+  │  │  Shown when no blogId is available (blog not saved yet)         │    │
+  │  └─────────────────────────────────────────────────────────────────┘    │
+  │                                                                         │
+  │  ┌── AdminBlogsLinkLinkedList ─────────────────────────────────────┐    │
+  │  │  Scrollable list of already-linked productions + Unlink button  │    │
+  │  └─────────────────────────────────────────────────────────────────┘    │
+  │                                                                         │
+  │  ┌── AdminBlogsLinkSearchDropdown ────────────────────────────────┐     │
+  │  │  Search input + autocomplete dropdown + Link button per row    │     │
+  │  └────────────────────────────────────────────────────────────────┘     │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  Props:
+  - blogId     number | null  — undefined or null when the blog is not saved yet
+  - galleryId  number | null  — not used here, exposed for parent symmetry
+
+  The linked-productions list is persisted in localStorage so a page refresh
+  does not lose the session state.
 -->
+
 <script setup lang="ts">
 import type { PaginatedResponse, ProductionView } from "@repo/common";
-import {
-  Link2,
-  Search,
-  Check,
-  Loader2,
-  X,
-  ExternalLink,
-} from "lucide-vue-next";
 
 const props = defineProps<{
-  blogId: number;
+  blogId?: number | null;
   galleryId?: number | null;
 }>();
 
 const { t, locale } = useI18n();
-const { getAll, linkBlog, linkMedia } = useProductionApi();
-const { fetchSuggestions } = useArchiveView();
+const { getAll, linkBlog, unlinkBlog } = useProductionApi();
 
-// Persistence key (per blog)
-const storageKey = computed(() => `vnv-blog-linked-prods-${props.blogId}`);
+// Whether a valid blogId is present (determines locked vs unlocked UI).
+const hasBlogId = computed(() => typeof props.blogId === "number");
 
-// Linked productions
-// Loaded from localStorage on mount so they survive page navigations.
+// Search state.
+const search = ref("");
+const searchResults = ref<ProductionView[]>([]);
+const hasMore = ref(false);
+const currentPage = ref(0);
+const searching = ref(false);
+
+// Link / unlink operation state.
+const linking = ref<number | null>(null);
+const unlinking = ref<number | null>(null);
+
+// The set of linked productions maintained for the current session.
 const linkedProductions = ref<ProductionView[]>([]);
 
-onMounted(() => {
-  if (!import.meta.client) return;
-  try {
-    const stored = localStorage.getItem(storageKey.value);
-    if (stored)
-      linkedProductions.value = JSON.parse(stored) as ProductionView[];
-  } catch {
-    // Ignore parse errors (corrupted storage etc.)
-  }
-});
+const linkedProductionIds = computed(
+  () => new Set(linkedProductions.value.map((p) => p.id)),
+);
 
-function persistLinked() {
-  if (!import.meta.client) return;
+// localStorage persistence key — unique per blog so different blogs do not
+// share the same session data.
+const storageKey = computed(() =>
+  hasBlogId.value ? `vnv-blog-linked-prods-${props.blogId}` : null,
+);
+
+function persist() {
+  if (!import.meta.client || !storageKey.value) return;
   try {
     localStorage.setItem(
       storageKey.value,
       JSON.stringify(linkedProductions.value),
     );
-  } catch {}
-}
-
-// Search state
-const search = ref("");
-const productions = ref<ProductionView[]>([]);
-const loadingSearch = ref(false);
-const searchOpen = ref(false);
-
-// Options
-const shareGallery = ref(true);
-
-// Feedback
-const linking = ref<number | null>(null);
-const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
-
-// Search
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
-
-watch(search, () => {
-  if (searchTimer) clearTimeout(searchTimer);
-  searchTimer = setTimeout(fetchProductions, 300);
-});
-
-async function fetchProductions() {
-  loadingSearch.value = true;
-  try {
-    const resp = await getAll({
-      productionFilters: {
-        titelOrArtist: search.value,
-        is_suggestion: false,
-      },
-      paginationFilters: { page: 0, limit: 10, descending: true },
-      languageFilters: { lang: locale.value as "nl" | "en" },
-    });
-    const data = resp.data as PaginatedResponse<ProductionView> | null;
-    productions.value = (data?.objects ?? []) as ProductionView[];
-  } finally {
-    loadingSearch.value = false;
+  } catch {
+    // Storage may be unavailable in certain browser configurations.
   }
 }
 
-function openSearch() {
-  searchOpen.value = true;
-  search.value = "";
-  feedback.value = null;
-  fetchProductions();
+async function restoreFromStorage() {
+  if (!import.meta.client || !storageKey.value) return;
+  try {
+    const raw = localStorage.getItem(storageKey.value);
+    if (raw) linkedProductions.value = JSON.parse(raw) as ProductionView[];
+  } catch {
+    // Ignore parse errors — the list simply starts empty.
+  }
 }
 
-// Link
-const linkedIds = computed(
-  () => new Set(linkedProductions.value.map((p) => p.id)),
-);
+// Debounced search triggered by the watcher below.
+let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
-async function link(production: ProductionView) {
-  if (linkedIds.value.has(production.id)) return;
+async function runSearch(reset = true) {
+  if (!hasBlogId.value || !search.value.trim()) {
+    searchResults.value = [];
+    hasMore.value = false;
+    return;
+  }
+
+  if (reset) {
+    currentPage.value = 0;
+    searchResults.value = [];
+    hasMore.value = false;
+  }
+
+  searching.value = true;
+  try {
+    const resp = await getAll({
+      productionFilters: { titelOrArtist: search.value.trim() },
+      paginationFilters: {
+        page: currentPage.value,
+        limit: 8,
+        descending: true,
+      },
+      languageFilters: { lang: locale.value as "nl" | "en" },
+    });
+
+    const data = resp.data as PaginatedResponse<ProductionView> | null;
+    const items = data?.objects ?? [];
+
+    if (reset) searchResults.value = items;
+    else searchResults.value.push(...items);
+
+    hasMore.value = items.length >= 8;
+    if (items.length) currentPage.value += 1;
+  } catch {
+    hasMore.value = false;
+  } finally {
+    searching.value = false;
+  }
+}
+
+// Debounce the search so we don't fire a request on every keystroke.
+watch(search, (val) => {
+  if (searchTimer) clearTimeout(searchTimer);
+  if (!val.trim()) {
+    searchResults.value = [];
+    hasMore.value = false;
+    return;
+  }
+  searchTimer = setTimeout(() => runSearch(true), 250);
+});
+
+// Link a production to this blog post.
+async function handleLink(production: ProductionView) {
+  if (!hasBlogId.value || linkedProductionIds.value.has(production.id)) return;
   linking.value = production.id;
-  feedback.value = null;
   try {
     await linkBlog(production.id, props.blogId);
-    if (shareGallery.value && props.galleryId) {
-      await linkMedia(production.id, props.galleryId);
-    }
-    linkedProductions.value.push(production);
-    persistLinked();
-
-    search.value = "";
-    searchOpen.value = false;
-    feedback.value = {
-      type: "ok",
-      msg: t("admin.blogs.linkToProductionSuccess"),
-    };
-    setTimeout(() => (feedback.value = null), 3000);
-  } catch {
-    feedback.value = {
-      type: "err",
-      msg: t("admin.blogs.linkToProductionError"),
-    };
+    linkedProductions.value = [production, ...linkedProductions.value];
+    persist();
+  } catch (err) {
+    console.error("Failed to link production:", err);
   } finally {
     linking.value = null;
   }
 }
 
-// Close search dropdown when clicking outside
-const wrapperRef = ref<HTMLElement | null>(null);
-function handleOutsideClick(e: MouseEvent) {
-  const target = e.target as Element;
-
-  if (!document.body.contains(target)) return;
-
-  if (wrapperRef.value && wrapperRef.value.contains(target)) return;
-
-  // If none of the rules above hit we can close the menu.
-  searchOpen.value = false;
+// Unlink a production from this blog post.
+async function handleUnlink(productionId: number) {
+  if (!hasBlogId.value) return;
+  unlinking.value = productionId;
+  try {
+    await unlinkBlog(productionId, props.blogId);
+    linkedProductions.value = linkedProductions.value.filter(
+      (p) => p.id !== productionId,
+    );
+    persist();
+  } catch (err) {
+    console.error("Failed to unlink production:", err);
+  } finally {
+    unlinking.value = null;
+  }
 }
-onMounted(() => document.addEventListener("mousedown", handleOutsideClick));
-onUnmounted(() =>
-  document.removeEventListener("mousedown", handleOutsideClick),
-);
+
+onMounted(restoreFromStorage);
 </script>
 
 <template>
-  <div class="rounded-xl border border-card-border bg-card overflow-hidden">
-    <!-- Header -->
-    <div class="px-5 py-4 border-b border-card-border bg-card-hover">
-      <h2
-        class="font-brand font-black text-[13px] uppercase tracking-widest text-card-foreground flex items-center gap-2"
-      >
-        <Link2 :size="13" class="text-accent opacity-80" />
-        {{ t("admin.blogs.linkedProductions") }}
-      </h2>
-      <p class="text-xs text-muted-foreground mt-0.5">
-        {{ t("admin.blogs.linkedProductionsHint") }}
-      </p>
-    </div>
-
+  <FormSectionsSectionCard
+    :title="t('admin.blogs.linkedProductions')"
+    :subtitle="t('admin.blogs.linkedProductionsHint')"
+  >
     <div class="p-5 space-y-4">
-      <!-- Feedback banner -->
-      <Transition name="slide-down">
-        <div
-          v-if="feedback"
-          :class="[
-            'rounded-lg border px-4 py-2.5 text-sm',
-            feedback.type === 'ok'
-              ? 'border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900 text-green-700 dark:text-green-400'
-              : 'border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900 text-red-600 dark:text-red-400',
-          ]"
-        >
-          {{ feedback.msg }}
-        </div>
-      </Transition>
+      <!-- Locked state — shown before the blog is first saved -->
+      <AdminBlogsLinkLockedHint v-if="!hasBlogId" />
 
-      <!-- Linked productions list -->
-      <div v-if="linkedProductions.length" class="space-y-2">
-        <p
-          class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
-        >
-          {{ t("admin.blogs.linkedThisSession") }}
-        </p>
-        <div class="space-y-2">
-          <div
-            v-for="prod in linkedProductions"
-            :key="prod.id"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-green-200 dark:border-green-900/40 bg-green-50 dark:bg-green-950/10"
-          >
-            <Check
-              :size="13"
-              class="text-green-600 dark:text-green-400 shrink-0"
-            />
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-foreground truncate">
-                {{ prod.titel }}
-              </p>
-              <p
-                v-if="prod.artist && prod.artist !== 'N/A'"
-                class="text-[10px] text-muted-foreground truncate"
-              >
-                {{ prod.artist }}
-              </p>
-            </div>
-            <NuxtLink
-              :to="ROUTES.productions.byId(prod.id)"
-              target="_blank"
-              class="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              :title="t('admin.blogs.viewProduction')"
-            >
-              <ExternalLink :size="12" />
-            </NuxtLink>
-          </div>
-        </div>
-      </div>
+      <template v-else>
+        <!-- Search input + autocomplete dropdown (at the top) -->
+        <AdminBlogsLinkSearchDropdown
+          v-model:search="search"
+          :search-results="searchResults"
+          :linked-ids="linkedProductionIds"
+          :searching="searching"
+          :has-more="hasMore"
+          :linking-id="linking"
+          @link="handleLink"
+          @load-more="runSearch(false)"
+        />
 
-      <!-- Empty state -->
-      <div
-        v-else
-        class="rounded-lg border border-dashed border-border px-4 py-5 text-center"
-      >
-        <p
-          class="text-[11px] font-brand font-black uppercase tracking-widest text-muted-foreground/60"
-        >
-          {{ t("admin.blogs.noLinkedProductions") }}
-        </p>
-      </div>
-
-      <!-- Search + link section -->
-      <div ref="wrapperRef" class="relative">
-        <!-- Search input (shows when open) -->
-        <div v-if="searchOpen" class="space-y-3">
-          <SearchBar
-            v-model:model-value="search"
-            :fetch-suggestions="fetchSuggestions"
-            :limit="5"
-            class="w-full !h-12"
-          />
-
-          <!-- Share gallery option -->
-          <label
-            v-if="galleryId"
-            class="flex items-start gap-2.5 cursor-pointer group"
-          >
-            <button
-              type="button"
-              class="w-4 h-4 mt-0.5 rounded border-2 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
-              :class="
-                shareGallery
-                  ? 'bg-accent border-accent'
-                  : 'border-border bg-background group-hover:border-accent/50'
-              "
-              @click="shareGallery = !shareGallery"
-            >
-              <Check v-if="shareGallery" :size="9" class="text-white" />
-            </button>
-            <div>
-              <p
-                class="text-[11px] font-brand font-black uppercase tracking-widest text-foreground"
-              >
-                {{ t("admin.blogs.shareGallery") }}
-              </p>
-              <p class="text-[10px] text-muted-foreground mt-0.5">
-                {{ t("admin.blogs.shareGalleryHint") }}
-              </p>
-            </div>
-          </label>
-
-          <!-- Results dropdown -->
-          <div
-            class="rounded-lg border border-border bg-background overflow-hidden"
-          >
-            <!-- Loading -->
-            <div
-              v-if="loadingSearch"
-              class="flex items-center justify-center gap-2 py-6 text-muted-foreground"
-            >
-              <Loader2 :size="14" class="animate-spin" />
-              <span
-                class="text-[11px] font-brand font-black uppercase tracking-widest"
-                >{{ t("stories.loading") }}</span
-              >
-            </div>
-
-            <!-- No results -->
-            <div v-else-if="!productions.length" class="py-6 text-center">
-              <p class="text-sm text-muted-foreground">
-                {{ t("admin.blogs.linkToProductionNoResults") }}
-              </p>
-            </div>
-
-            <!-- Production list -->
-            <div v-else class="divide-y divide-border max-h-56 overflow-y-auto">
-              <div
-                v-for="prod in productions"
-                :key="prod.id"
-                class="flex items-center gap-3 px-3 py-2.5 hover:bg-muted transition-colors"
-              >
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-foreground truncate">
-                    {{ prod.titel }}
-                  </p>
-                  <p
-                    v-if="prod.artist && prod.artist !== 'N/A'"
-                    class="text-[10px] text-muted-foreground truncate"
-                  >
-                    {{ prod.artist }}
-                  </p>
-                </div>
-
-                <!-- Already linked -->
-                <span
-                  v-if="linkedIds.has(prod.id)"
-                  class="shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[9px] font-black uppercase tracking-widest"
-                >
-                  <Check :size="8" /> {{ t("admin.blogs.linked") }}
-                </span>
-
-                <!-- Link button -->
-                <button
-                  v-else
-                  type="button"
-                  :disabled="linking === prod.id"
-                  class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-accent text-white text-[10px] font-black uppercase tracking-widest transition-all hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  @click="link(prod)"
-                >
-                  <Loader2
-                    v-if="linking === prod.id"
-                    :size="10"
-                    class="animate-spin"
-                  />
-                  <Link2 v-else :size="10" />
-                  {{
-                    linking === prod.id
-                      ? t("admin.blogs.linking")
-                      : t("admin.blogs.linkBtn")
-                  }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Open search button (shows when closed) -->
-        <button
-          v-else
-          type="button"
-          class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed text-[11px] font-brand font-black uppercase tracking-widest transition-all cursor-pointer"
-          style="
-            border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-            color: var(--accent);
-            background: color-mix(in srgb, var(--accent) 5%, transparent);
-          "
-          @mouseenter="
-            (e) =>
-              ((e.currentTarget as HTMLElement).style.background =
-                'color-mix(in srgb, var(--accent) 12%, transparent)')
-          "
-          @mouseleave="
-            (e) =>
-              ((e.currentTarget as HTMLElement).style.background =
-                'color-mix(in srgb, var(--accent) 5%, transparent)')
-          "
-          @click="openSearch"
-        >
-          <Link2 :size="13" />
-          {{ t("admin.blogs.linkToProduction") }}
-        </button>
-      </div>
+        <!-- List of productions linked during this session -->
+        <AdminBlogsLinkLinkedList
+          :productions="linkedProductions"
+          :unlinking-id="unlinking"
+          @unlink="handleUnlink"
+        />
+      </template>
     </div>
-  </div>
+  </FormSectionsSectionCard>
 </template>
-
-<style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.2s ease;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-</style>

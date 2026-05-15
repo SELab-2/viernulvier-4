@@ -20,6 +20,9 @@ describe("BlogService", () => {
     createBlog: jest.fn(),
     updateBlog: jest.fn(),
     deleteBlog: jest.fn(),
+    getMediaFromBlog: jest.fn(),
+    linkMediaToBlog: jest.fn(),
+    unlinkMediaFromBlog: jest.fn(),
   };
 
   // Sample data for testing
@@ -40,6 +43,7 @@ describe("BlogService", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: false,
   };
 
   beforeEach(async () => {
@@ -72,7 +76,9 @@ describe("BlogService", () => {
   describe("getAllBlogs", () => {
     it("should return an array of blogs", async () => {
       const expectedBlogs = [mockBlog];
-      const blogFilters: FilterBlog = {};
+      const blogFilters: FilterBlog = {
+        is_suggestion: false,
+      };
       mockBlogDbService.getBlogs.mockResolvedValue(expectedBlogs);
 
       const result = await service.getAllBlogs(filter, blogFilters);
@@ -160,6 +166,78 @@ describe("BlogService", () => {
 
       expect(blogDbService.deleteBlog).toHaveBeenCalledWith(1);
       expect(blogDbService.deleteBlog).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("-- Media --", () => {
+    const mockMediaGallery = {
+      id: 1,
+      name: "Blog Main Gallery",
+      type: "default",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
+    };
+
+    describe("getBlogMedia", () => {
+      it("should return the media gallery linked to a blog", async () => {
+        mockBlogDbService.getMediaFromBlog.mockResolvedValueOnce(
+          mockMediaGallery,
+        );
+        const result = await service.getMedia(1, "default");
+        expect(result).toEqual(mockMediaGallery);
+        expect(blogDbService.getMediaFromBlog).toHaveBeenCalledWith(
+          1,
+          "default",
+        );
+      });
+
+      it("should handle errors if fetching media fails", async () => {
+        mockBlogDbService.getMediaFromBlog.mockRejectedValueOnce(
+          new Error("Database error"),
+        );
+        await expect(service.getMedia(999, "default")).rejects.toThrow(
+          "Database error",
+        );
+      });
+    });
+
+    describe("linkMediaToBlog", () => {
+      it("should link a media gallery to a blog successfully and return undefined", async () => {
+        mockBlogDbService.linkMediaToBlog.mockResolvedValueOnce(undefined);
+        const result = await service.linkMediaToBlog(1, 2);
+        expect(blogDbService.linkMediaToBlog).toHaveBeenCalledWith(1, 2);
+        expect(result).toBeUndefined();
+      });
+
+      it("should throw an error if the linking process fails", async () => {
+        mockBlogDbService.linkMediaToBlog.mockRejectedValueOnce(
+          new Error("Failed to link"),
+        );
+        await expect(service.linkMediaToBlog(1, 2)).rejects.toThrow(
+          "Failed to link",
+        );
+      });
+    });
+
+    describe("unlinkMediaFromBlog", () => {
+      it("should unlink a media gallery from a blog successfully and return undefined", async () => {
+        mockBlogDbService.unlinkMediaFromBlog.mockResolvedValueOnce(undefined);
+        const result = await service.unlinkMediaFromBlog(1, 2);
+        expect(mockBlogDbService.unlinkMediaFromBlog).toHaveBeenCalledWith(
+          1,
+          2,
+        );
+        expect(result).toBeUndefined();
+      });
+
+      it("should throw an error if the unlinking process fails", async () => {
+        mockBlogDbService.unlinkMediaFromBlog.mockRejectedValueOnce(
+          new Error("Failed to unlink"),
+        );
+        await expect(service.unlinkMediaFromBlog(1, 2)).rejects.toThrow(
+          "Failed to unlink",
+        );
+      });
     });
   });
 });
