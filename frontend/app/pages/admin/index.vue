@@ -52,6 +52,16 @@ const statCards = [
     label: computed(() => t("admin.dashboard.prints")),
     icon: "🖼",
   },
+  {
+    key: "series" as const,
+    label: computed(() => t("admin.dashboard.series")),
+    icon: "📚",
+  },
+  {
+    key: "tags" as const,
+    label: computed(() => t("admin.dashboard.tags")),
+    icon: "🏷",
+  },
 ];
 </script>
 
@@ -83,7 +93,7 @@ const statCards = [
         >
           {{ t("admin.dashboard.overview") }}
         </p>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
           <AdminDashboardStatsWidget
             v-for="card in statCards"
             :key="card.key"
