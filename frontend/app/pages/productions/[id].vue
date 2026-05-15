@@ -38,18 +38,40 @@ const productionId = computed(() => {
 });
 
 /** Get the main production data */
-const { data: production } = await useAsyncData<ProductionView>(
+const {
+  data: production,
+  status,
+  error,
+} = useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null;
     const res = await getById(productionId.value, locale.value as any);
-    return (res as any)?.data ?? res;
+    return (res as any)?.data;
   },
   { watch: [productionId, locale] },
 );
 
+// Watch the production fetch to see if everything is fetched correctly.
+watch(
+  [status, error, production],
+  ([newStatus, newError, newProd]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
+    if (newStatus === "success" && !newProd) {
+      showError({
+        statusCode: 404,
+        statusMessage: "Production not found",
+        fatal: true,
+      });
+    } else if (newError) {
+      showError({ statusCode: 500, statusMessage: "API Error", fatal: true });
+    }
+  },
+  { immediate: true },
+);
+
 /** Get tags and remove empty ones */
-const { data: tags } = await useAsyncData<TagView[]>(
+const { data: tags } = useAsyncData<TagView[]>(
   `prod-tags-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return [];
@@ -64,7 +86,7 @@ const { data: tags } = await useAsyncData<TagView[]>(
 const { getAll: getAllEvents, getLocation, getPrices } = useEventApi();
 
 /** Get all events with their location and prices */
-const { data: events } = await useAsyncData(
+const { data: events } = useAsyncData(
   `events-detailed-${route.params.id}`,
   async () => {
     if (!productionId.value) return [];
@@ -101,7 +123,7 @@ const { data: events } = await useAsyncData(
 );
 
 /** Get blogs/stories */
-const { data: stories } = await useAsyncData(
+const { data: stories } = useAsyncData(
   `prod-stories-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return [];
@@ -114,9 +136,7 @@ const { data: stories } = await useAsyncData(
 );
 
 /** Gets the production gallery. Handles API nesting and page-specific data fetching.*/
-const { data: gallery } = await useAsyncData<
-  GalleryWithItems<ItemViewWithCrops>
->(
+const { data: gallery } = useAsyncData<GalleryWithItems<ItemViewWithCrops>>(
   `gallery-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null;
