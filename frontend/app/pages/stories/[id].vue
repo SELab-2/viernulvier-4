@@ -31,6 +31,7 @@ const { t, locale } = useI18n();
 const { getMainImageCrop } = useGallery();
 const { getById, getMediaGallery } = useBlogApi();
 const { useBlogStory } = useBlogView();
+const router = useRouter();
 
 /** validation that id is only numbers */
 definePageMeta({
@@ -41,6 +42,15 @@ definePageMeta({
     return /^\d+$/.test(raw as string);
   },
 });
+
+// Let's you go back to the previous page!
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push(ROUTES.stories.base); // Fallback
+  }
+};
 
 /** Parse the blog ID from the URL, returning null for non-numeric values. */
 const blogId = computed(() => {
@@ -251,14 +261,14 @@ watch(title, updateTitleScrollable);
         <div class="relative z-10 page-container pb-12">
           <!-- Back link + reading time row -->
           <div class="flex items-center gap-6 mb-8">
-            <NuxtLink
+            <button
               :class="headerCrop ? 'text-white' : 'text-foreground'"
-              :to="ROUTES.stories.base"
               class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
+              @click="goBack()"
             >
               <ChevronLeft :size="14" stroke-width="3" />
               {{ t("general.back") }}
-            </NuxtLink>
+            </button>
 
             <span
               :class="headerCrop ? 'text-white' : 'text-foreground'"
