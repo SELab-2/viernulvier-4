@@ -177,6 +177,12 @@ watch(searchQuery, () => {
     resetAndLoad();
   }, 350);
 });
+
+// DELETION
+
+async function handleDeleteProduction(production: ProductionView) {
+  console.log(production);
+}
 </script>
 
 <template>
@@ -268,6 +274,7 @@ watch(searchQuery, () => {
           :key="production.id"
           :productionView="production"
           :is-admin="props.isAdmin"
+          @delete="handleDeleteProduction"
         />
       </div>
 

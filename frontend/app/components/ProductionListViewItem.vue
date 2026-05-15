@@ -221,10 +221,12 @@ watch(locale, () => loadTags());
                 <AdminEditButton label="Edit production" />
               </NuxtLink>
 
-              <AdminDeleteButton
-                label="Delete production"
-                @click.stop="emit('delete', props.productionView)"
-              />
+              <div @click.stop>
+                <AdminDeleteButton
+                  label="Delete production"
+                  @click="$emit('delete', props.productionView)"
+                />
+              </div>
             </template>
           </div>
         </div>
