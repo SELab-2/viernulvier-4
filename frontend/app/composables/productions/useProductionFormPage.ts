@@ -19,6 +19,7 @@ import { useCropApi } from "~/composables/media/useCropApi";
 import { useStorageApi } from "~/composables/media/useStorageApi";
 import { useProductionSeries } from "~/composables/productions/steps/productionSeries";
 import { useSeriesApi } from "~/composables/useSeriesApi";
+import type { LocalizedInput } from "~/composables/productions/steps/productionSeries";
 
 export type ProductionFormMode = "create" | "edit";
 
@@ -388,6 +389,32 @@ export function useProductionFormPage(mode: ProductionFormMode) {
     );
   }
 
+  function toModifySeriesPayload(input: {
+    titel: LocalizedInput;
+    description: LocalizedInput;
+  }) {
+    return {
+      titel: {
+        nl: input.titel.nl,
+        en: input.titel.en ?? input.titel.nl,
+      },
+      description: {
+        nl: input.description.nl,
+        en: input.description.en ?? input.description.nl,
+      },
+    };
+  }
+
+  async function handleSeriesUpdate(
+    seriesPayload: ReturnType<typeof series.extractPayload>,
+  ) {
+    await Promise.all(
+      seriesPayload.update.map((s) =>
+        seriesApi.modify(s.id, toModifySeriesPayload(s)),
+      ),
+    );
+  }
+
   async function handleSeriesEdit(
     productionId: number,
     seriesPayload: ReturnType<typeof series.extractPayload>,
@@ -482,6 +509,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
         // Series
         await handleSeriesCreateAndConnect(productionId, seriesPayload);
+        await handleSeriesUpdate(seriesPayload);
       } else {
         // Edit mode — id is guaranteed to be set
         const idParam = route.params.id;
@@ -507,6 +535,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
         // Series
         await handleSeriesEdit(productionId, seriesPayload);
+        await handleSeriesUpdate(seriesPayload);
       }
 
       await router.push(ROUTES.admin.productions.base);

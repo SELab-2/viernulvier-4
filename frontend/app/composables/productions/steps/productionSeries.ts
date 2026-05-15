@@ -37,10 +37,17 @@ export type NewSeries = {
 
 export type ProductionSeriesForm = (ExistingSeries | NewSeries)[];
 
+export interface UpdateSeriesItem {
+  id: number;
+  titel: LocalizedInput;
+  description: LocalizedInput;
+}
+
 export interface ProductionSeriesPayload {
   connect: number[]; // existing series ids to link
   disconnect: number[]; // existing series ids to unlink
   create: CreateSeries[]; // series to create (localized)
+  update: UpdateSeriesItem[]; // existing series ids to update
 }
 
 export function useProductionSeries(): ProductionFormStep<
@@ -163,12 +170,23 @@ export function useProductionSeries(): ProductionFormStep<
     return changes;
   }
 
+  function isEqualSeries(a: LocalizedInput, b: LocalizedInput): boolean {
+    return a.nl === b.nl && (a.en ?? null) === (b.en ?? null);
+  }
+
   function extractPayload(): ProductionSeriesPayload {
     const originalExistingIds = new Set(
       (original.value ?? [])
         .filter((s): s is ExistingSeries => s.type === "existing")
         .map((s) => s.id),
     );
+
+    const originalExistingMap = new Map<number, ExistingSeries>();
+    for (const s of original.value ?? []) {
+      if (s.type === "existing") {
+        originalExistingMap.set(s.id, s);
+      }
+    }
 
     const currentExistingIds = new Set(
       draft.value
@@ -183,6 +201,27 @@ export function useProductionSeries(): ProductionFormStep<
     const disconnect = [...originalExistingIds].filter(
       (id) => !currentExistingIds.has(id),
     );
+
+    const update: UpdateSeriesItem[] = draft.value
+      .filter((s): s is ExistingSeries => s.type === "existing")
+      .map((s) => {
+        const originalItem = originalExistingMap.get(s.id);
+
+        if (!originalItem) return null;
+
+        const changed =
+          !isEqualSeries(s.titel, originalItem.titel) ||
+          !isEqualSeries(s.description, originalItem.description);
+
+        if (!changed) return null;
+
+        return {
+          id: s.id,
+          titel: s.titel,
+          description: s.description,
+        };
+      })
+      .filter((x): x is UpdateSeriesItem => x !== null);
 
     // Build CreateSeries objects for new series. Dutch is required; English
     // falls back to Dutch when not provided to keep payload shape consistent.
@@ -204,6 +243,7 @@ export function useProductionSeries(): ProductionFormStep<
       connect,
       disconnect,
       create,
+      update,
     };
   }
 
