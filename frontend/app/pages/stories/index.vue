@@ -11,11 +11,6 @@
 -->
 <script lang="ts" setup>
 import type { BlogView, FilterBlog, PaginatedResponse } from "@repo/common";
-import StoriesHeader from "~/components/blogs/StoriesHeader.vue";
-import StoryToolbar from "~/components/blogs/StoryToolbar.vue";
-import StorySkeleton from "~/components/blogs/StorySkeleton.vue";
-import StoryTimeline from "~/components/blogs/StoryTimeline.vue";
-import ScrollToTop from "~/components/blogs/ScrollToTop.vue";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useBlogView } from "~/composables/blogs/useBlogView";
 
@@ -145,14 +140,17 @@ onUnmounted(() => io?.disconnect());
   <div
     class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
-    <StoriesHeader />
+    <PageHeader
+      :title="t('stories.title')"
+      :description="t('stories.headerDescription')"
+    />
 
     <!--
       StoryToolbar contains the Calendar panel inline (in-flow).
       When the calendar opens it expands the toolbar element downward,
       pushing <main> down naturally — no overlap.
     -->
-    <StoryToolbar
+    <BlogsStoryToolbar
       v-model:sort-order="sortOrder"
       :story-titles="[]"
       :oldest-date="oldestDate"
@@ -163,7 +161,7 @@ onUnmounted(() => io?.disconnect());
     />
 
     <main class="page-container py-8 sm:py-12">
-      <StorySkeleton v-if="pending" />
+      <BlogsStorySkeleton v-if="pending" />
 
       <div v-else-if="fetchError" class="py-24 text-center space-y-4">
         <p
@@ -185,7 +183,7 @@ onUnmounted(() => io?.disconnect());
       </div>
 
       <template v-else>
-        <StoryTimeline :stories="stories" :sort-order="sortOrder" />
+        <BlogsStoryTimeline :stories="stories" :sort-order="sortOrder" />
 
         <div ref="sentinel" class="h-1" aria-hidden="true" />
 
@@ -210,6 +208,6 @@ onUnmounted(() => io?.disconnect());
         </div>
       </template>
     </main>
-    <ScrollToTop />
+    <BlogsScrollToTop />
   </div>
 </template>

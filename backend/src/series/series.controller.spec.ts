@@ -69,10 +69,20 @@ describe("SeriesController", () => {
     it("should return paginated series and flatten by language", async () => {
       mockSeriesService.getSeries.mockResolvedValue(mockPaginatedSeries);
 
-      const result = await controller.getSeries(mockLang, mockPaginationFilter);
+      const result = await controller.getSeries(
+        mockLang,
+        mockPaginationFilter,
+        { is_suggestion: false },
+      );
 
       expect(result).toEqual(mockPaginatedSeries);
-      expect(service.getSeries).toHaveBeenCalledWith(mockPaginationFilter);
+      expect(service.getSeries).toHaveBeenCalledWith(
+        mockPaginationFilter,
+        {
+          is_suggestion: false,
+        },
+        mockLang.lang,
+      );
       expect(languageService.flattenByLanguage).toHaveBeenCalledWith(
         mockPaginatedSeries,
         mockLang.lang,

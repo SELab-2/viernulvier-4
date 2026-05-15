@@ -18,7 +18,7 @@ definePageMeta({
 const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
-const { getMainImageCrop } = useGallery();
+const { getMainImageCrop, getCarouselImageCrops } = useGallery();
 const route = useRoute();
 
 const goBack = () => {
@@ -149,6 +149,13 @@ const { data: gallery } = useAsyncData<GalleryWithItems<ItemViewWithCrops>>(
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
+});
+
+// carousel
+
+const carouselImages = computed(() => {
+  if (!gallery.value || !gallery.value.items) return [];
+  return getCarouselImageCrops(gallery.value, "hd_ready"); // of FE3_2by1
 });
 
 /**
@@ -347,6 +354,12 @@ onBeforeUnmount(() => {
           </h1>
           <ProductionStoryListView :stories="stories" />
         </div>
+
+        <ProductionGallery
+          v-if="carouselImages.length > 0"
+          :images="carouselImages"
+          :production-id="production.id"
+        />
 
         <div
           v-if="isValid(production.credits)"

@@ -1,13 +1,25 @@
 <!--
   pages/stories/[id].vue
   ========================
-  Fetches a single blog post by ID with the current locale so the backend
-  returns a flat BlogView. Renders the HTML description from the rich-text
-  editor, including blue links, colors, headings, lists etc.
+  Public single-blog-post page.
+
+  Layout:
+  1. Hero banner  — full-width image with scrollable/fading title overlay.
+  2. Body article — rich-text content with a thin purple left accent line.
+  3. Credits bar  — image credits fetched from the linked media item, shown
+                    in a subtle strip at the bottom of the article when present.
+
+  The title uses the same scrollable + fade pattern as the admin preview
+  (AdminBlogsPreview.vue) so very long titles never overflow the hero section.
+
+  Data fetching:
+  - Blog data    : useBlogApi().getById  (lang-aware, returns BlogView)
+  - Gallery data : useBlogApi().getMediaGallery  (header crop + credits)
+  Both use useAsyncData so they are SSR-compatible and react to locale changes.
 -->
 <script lang="ts" setup>
 import { ChevronLeft } from "lucide-vue-next";
-import type { BlogView } from "@repo/common";
+import type { BlogView, MediaItemView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
 import { useGallery } from "~/composables/media/useGallery";
@@ -30,6 +42,7 @@ definePageMeta({
   },
 });
 
+/** Parse the blog ID from the URL, returning null for non-numeric values. */
 const blogId = computed(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -40,6 +53,7 @@ const blogId = computed(() => {
 
 /** Get the main blog data and handle API nesting */
 const { data, status, error } = useAsyncData<BlogView | null>(
+  // Data fetching
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
@@ -83,20 +97,99 @@ const { data: gallery } = useAsyncData(
   { watch: [blogId, locale] },
 );
 
+// Derived values
+
 const { title, description: body, formattedDate } = useBlogStory(blog);
 
+/** Header crop used in the hero section. */
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
 });
 
+/**
+ * Credits string extracted from the first media item in the gallery.
+ * The backend returns credits as a localised object { nl: string, en: string }
+ * for raw MediaItem, or as a flat string for MediaItemView (when lang is passed).
+ * We handle both shapes here.
+ */
+const imageCredits = computed<string>(() => {
+  const firstItem = gallery.value?.items?.[0] as MediaItemView | undefined;
+  if (!firstItem?.credits) return "";
+
+  // Flat string (MediaItemView with lang param)
+  if (typeof firstItem.credits === "string") return firstItem.credits;
+
+  // Localised object (MediaItem without lang param, or mixed response)
+  const obj = firstItem.credits as { nl?: string; en?: string };
+  return obj[locale.value as "nl" | "en"] ?? obj.nl ?? "";
+});
+
+/** Estimated reading time in minutes (200 wpm). */
 const readingTime = computed(() => {
   if (!body.value) return 0;
   const words = body.value.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 });
 
+/** Sanitised rich-text body ready for v-html. */
 const cleanBody = computed(() => cleanText(body.value));
+
+/**
+ * Show the fade mask once the title is long enough to risk overflowing
+ * the fixed-height scroll wrapper in the hero section.
+ */
+const titleIsLong = computed(() => title.value.length > 50);
+
+/**
+ * Dynamic font-size class — same breakpoints as the production detail page
+ * and the admin preview component so all contexts look consistent.
+ */
+const titleSizeClass = computed(() => {
+  const len = title.value.length;
+  return len > 35
+    ? "text-4xl lg:text-6xl"
+    : len > 25
+      ? "text-5xl lg:text-7xl"
+      : "text-6xl lg:text-8xl";
+});
+
+// Only allow scrolling of the title when it actually wraps onto more than one
+// rendered line. This avoids showing a scrollbar for single-line titles.
+const titleText = ref<HTMLElement | null>(null);
+const titleScrollable = ref(false);
+let __ro_title: ResizeObserver | null = null;
+
+function updateTitleScrollable() {
+  nextTick(() => {
+    const el = titleText.value;
+    if (!el) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
+    if (!lineHeight) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lines = Math.round(el.scrollHeight / lineHeight);
+    titleScrollable.value = lines > 1;
+  });
+}
+
+onMounted(() => {
+  updateTitleScrollable();
+  __ro_title = new ResizeObserver(updateTitleScrollable);
+  if (titleText.value) __ro_title.observe(titleText.value);
+});
+
+onBeforeUnmount(() => {
+  __ro_title?.disconnect();
+});
+
+watch(title, updateTitleScrollable);
 </script>
 
 <template>
@@ -122,7 +215,7 @@ const cleanBody = computed(() => cleanText(body.value));
       </svg>
     </div>
 
-    <!-- Not found -->
+    <!-- Not found / error state -->
     <div
       v-else-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
@@ -140,12 +233,14 @@ const cleanBody = computed(() => cleanText(body.value));
       </NuxtLink>
     </div>
 
+    <!-- Main content -->
     <template v-else>
-      <!-- ── Hero banner ─────────────────────────────────────────── -->
+      <!-- Hero banner -->
       <section
         :class="{ 'image-overlay text-white': headerCrop }"
         class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
       >
+        <!-- Background image (lazy, 0-opacity placeholder when absent) -->
         <MediaDisplay
           v-if="blog.id"
           :id="blog.id"
@@ -154,6 +249,7 @@ const cleanBody = computed(() => cleanText(body.value));
         />
 
         <div class="relative z-10 page-container pb-12">
+          <!-- Back link + reading time row -->
           <div class="flex items-center gap-6 mb-8">
             <NuxtLink
               :class="headerCrop ? 'text-white' : 'text-foreground'"
@@ -172,36 +268,47 @@ const cleanBody = computed(() => cleanText(body.value));
             </span>
           </div>
 
-          <div>
+          <!--
+            Scrollable title container.
+            max-height + overflow-y: long titles scroll instead of overflowing.
+            The fade mask is applied when the title is long enough to be cut off.
+          -->
+          <div
+            class="title-scroll-wrap mb-4"
+            :class="[
+              titleIsLong ? 'title-scroll-fade' : '',
+              titleScrollable ? 'title-scroll-scrollable' : '',
+            ]"
+          >
             <h1
-              :class="[
-                title.length > 35
-                  ? 'text-4xl lg:text-6xl'
-                  : title.length > 25
-                    ? 'text-5xl lg:text-7xl'
-                    : 'text-6xl lg:text-8xl',
-              ]"
-              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
+              ref="titleText"
+              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
+              :class="titleSizeClass"
             >
               {{ title }}
             </h1>
-
-            <p
-              v-if="formattedDate"
-              class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
-            >
-              {{ formattedDate }}
-            </p>
           </div>
+
+          <!-- Publication date -->
+          <p
+            v-if="formattedDate"
+            class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
+          >
+            {{ formattedDate }}
+          </p>
         </div>
       </section>
 
+      <!-- Article body -->
       <section class="py-20">
         <div class="page-container">
           <article class="relative w-full">
+            <!--
+              Decorative vertical line on the left (md+).
+              Uses a gradient so it fades in/out at the top and bottom.
+            -->
             <div
-              aria-hidden="true"
-              class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
+              class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
                 background: linear-gradient(
                   to bottom,
@@ -210,16 +317,50 @@ const cleanBody = computed(() => cleanText(body.value));
                   transparent
                 );
               "
+              aria-hidden="true"
             />
 
             <div class="md:pl-10 w-full">
+              <!-- Rich-text content (sanitised HTML from the editor) -->
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"
-              ></div>
+              />
 
+              <!--
+                Image credits bar — only shown when the linked media item has credits.
+                Positioned at the bottom of the article, above the navigation footer.
+              -->
               <div
-                class="mt-20 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
+                v-if="imageCredits"
+                class="mt-12 flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3"
+              >
+                <!-- Camera icon -->
+                <svg
+                  class="w-3.5 h-3.5 text-muted-foreground/60 mt-0.5 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <circle cx="12" cy="13" r="4" stroke-linecap="round" />
+                </svg>
+                <p
+                  class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground/70 leading-relaxed"
+                >
+                  {{ imageCredits }}
+                </p>
+              </div>
+
+              <!-- Article footer: date + back link -->
+              <div
+                class="mt-16 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
               >
                 <span
                   class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500"
@@ -242,12 +383,52 @@ const cleanBody = computed(() => cleanText(body.value));
 </template>
 
 <style scoped>
-/*
-  Rich-text body styles — applied to .description-content which wraps
-  HTML produced by the TipTap editor. The class name matches the template above.
-*/
+/* Scrollable hero title */
+.title-scroll-wrap {
+  max-width: 100%;
+  max-height: 13rem; /* ≈ 3 lines at the largest font size */
+  /* hide overflow by default; enable scrolling only when JS detects overflow */
+  overflow-y: hidden;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
-/* Links — blue + underline */
+.title-scroll-wrap h1 {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+.title-scroll-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+/* When the title actually overflows the wrapper we enable scrolling */
+.title-scroll-scrollable {
+  overflow-y: auto;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 9999px;
+}
+
+/* Soft bottom fade for very long titles */
+.title-scroll-fade {
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+/* Rich-text body styles */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -259,8 +440,6 @@ const cleanBody = computed(() => cleanText(body.value));
 .description-content :deep(a:hover) {
   opacity: 0.7;
 }
-
-/* Headings */
 .description-content :deep(h1) {
   font-size: 1.75rem;
   font-weight: 900;
@@ -278,13 +457,9 @@ const cleanBody = computed(() => cleanText(body.value));
   font-weight: 700;
   margin: 1rem 0 0.3rem;
 }
-
-/* Paragraphs */
 .description-content :deep(p) {
   margin: 0.75rem 0;
 }
-
-/* Lists */
 .description-content :deep(ul) {
   list-style: disc;
   padding-left: 1.5rem;
@@ -298,8 +473,6 @@ const cleanBody = computed(() => cleanText(body.value));
 .description-content :deep(li) {
   margin: 0.25rem 0;
 }
-
-/* Blockquote */
 .description-content :deep(blockquote) {
   border-left: 3px solid #9333ea;
   padding: 0.25rem 0 0.25rem 1rem;
@@ -310,8 +483,6 @@ const cleanBody = computed(() => cleanText(body.value));
 :global(.dark) .description-content :deep(blockquote) {
   color: #9ca3af;
 }
-
-/* Horizontal rule */
 .description-content :deep(hr) {
   border: none;
   border-top: 1px solid #e5e7eb;
@@ -320,8 +491,6 @@ const cleanBody = computed(() => cleanText(body.value));
 :global(.dark) .description-content :deep(hr) {
   border-top-color: #374151;
 }
-
-/* Inline formatting */
 .description-content :deep(strong) {
   font-weight: 700;
 }
@@ -336,6 +505,7 @@ const cleanBody = computed(() => cleanText(body.value));
   text-underline-offset: 2px;
 }
 
+/* Gradient overlay on the hero image */
 .image-overlay::after {
   content: "";
   position: absolute;

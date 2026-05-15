@@ -14,7 +14,6 @@
 import type { PrintItemView, PaginatedResponse } from "@repo/common";
 import { usePrintApi } from "../../composables/media/usePrintApi";
 import { usePrintView } from "../../composables/media/usePrintView";
-import PrintsHeader from "../../components/prints/PrintsHeader.vue";
 import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
 import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
 import FileGrid from "../../components/prints/FileGrid.vue";
@@ -123,8 +122,10 @@ onMounted(loadPage);
   <div
     class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
-    <PrintsHeader />
-
+    <PageHeader
+      :title="t('prints.title')"
+      :description="t('prints.headerDescription')"
+    />
     <PrintsToolbar
       @update:search="searchQuery = $event"
       @update:types="activeFilter = $event"
