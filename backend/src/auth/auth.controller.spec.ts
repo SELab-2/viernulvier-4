@@ -3,6 +3,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import {
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   UpdateAccountDto,
 } from "../dto/dto";
@@ -23,6 +24,7 @@ describe("AuthController", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: true,
   };
 
   beforeEach(async () => {
@@ -52,7 +54,7 @@ describe("AuthController", () => {
 
   describe("loginAccount", () => {
     it("should log in an account and return public account and api key", async () => {
-      const dto: CreateAccountDto = {
+      const dto: LoginDto = {
         username: "testuser",
         password: "password123",
       };
@@ -88,6 +90,7 @@ describe("AuthController", () => {
       const dto: CreateAccountDto = {
         username: "testuser",
         password: "password123",
+        superAdmin: false,
       };
       const expectedResult = { id: 1, username: "testuser", superAdmin: false };
       mockAuthService.createAccount.mockResolvedValue(expectedResult);

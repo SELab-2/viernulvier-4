@@ -105,7 +105,7 @@ function selectType(type: PrintType | null) {
     <!-- Filter panel -->
     <Transition name="filter-slide">
       <div v-if="filterOpen" class="border-t border-border">
-        <div class="container mx-auto px-4 max-w-5xl py-4 flex flex-wrap gap-2">
+        <div class="page-container py-4 flex flex-wrap gap-2">
           <!-- All -->
           <button
             @click="selectType(null)"

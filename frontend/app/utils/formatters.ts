@@ -8,18 +8,27 @@
  * @param params The parameters to include in the string.
  * @returns A query string.
  */
-export function buildQueryString(params: object): string {
-  const cleanParams = Object.entries(params).reduce(
-    (acc, [key, val]) => {
-      if (val !== null && val !== undefined) acc[key] = String(val);
-      return acc;
-    },
-    {} as Record<string, string>,
-  );
+export function buildQueryString(params: Record<string, any>): string {
+  const searchParams = new URLSearchParams();
 
-  const queryString = new URLSearchParams(cleanParams).toString();
-  const query = queryString ? `?${queryString}` : "";
-  return query;
+  Object.entries(params).forEach(([key, val]) => {
+    // Skip null or undefined values
+    if (val === null || val === undefined) return;
+
+    if (Array.isArray(val)) {
+      // Append each item individually to repeat the key
+      val.forEach((item) => {
+        if (item !== null && item !== undefined) {
+          searchParams.append(key, String(item));
+        }
+      });
+    } else {
+      searchParams.append(key, String(val));
+    }
+  });
+
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : "";
 }
 
 // ISO / date helpers

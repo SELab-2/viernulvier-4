@@ -7,9 +7,16 @@ Responsible for:
 - Combining header, search/filter section, and results body
 - Acting as a structural wrapper (no logic)
 -->
+<script setup lang="ts">
+const { t } = useI18n();
+</script>
+
 <template>
   <div>
-    <ArchiveHeader />
+    <PageHeader
+      :title="t('archive.header_title')"
+      :description="t('archive.header_subtitle')"
+    />
     <ArchiveSearchSection />
     <ArchiveBody />
   </div>

@@ -4,6 +4,7 @@ import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   ApiKeyDto,
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
@@ -37,7 +38,7 @@ export class AuthService {
    * @returns An object containing the Account and ApiKey.
    */
   async loginAccount(
-    account: CreateAccountDto,
+    account: LoginDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     return await this.accountDbService.loginAccount(account);
   }
@@ -53,7 +54,9 @@ export class AuthService {
     const account: PublicAccountDto =
       await this.accountDbService.createAccount(createAccount);
 
-    const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey();
+    const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey(
+      createAccount.superAdmin,
+    );
     await this.accountDbService.linkAccountToKey(account.id, apiKey.id);
 
     return account;

@@ -5,6 +5,7 @@
   "nav": {
     "home": "home",
     "archive": "archive",
+    "series": "series",
     "stories": "stories",
     "prints": "prints",
     "productions": "productions",
@@ -81,6 +82,7 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
+    "sortLabel": "Sort",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
@@ -152,13 +154,14 @@
     "dateAndTime": "Date & Time",
     "location": "Location",
     "price": "Price",
+    "showAll": "show all ({count})",
+    "hidePrices": "hide prices",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details",
     "doors": "doors",
-    "break": "intermission"
+    "break": "intermission",
+    "gallery": "gallery"
   },
   "general": {
     "back": "Back",
@@ -168,7 +171,8 @@
     "showLess": "Show less",
     "noStories": "This production doesn't contain any stories.",
     "filters": "filters",
-    "close": "close"
+    "close": "close",
+    "results": "results"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -180,6 +184,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Manage the accounts.",
+    "headerDescription": "Create, edit and control archive admin accounts.",
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",
@@ -205,6 +210,9 @@
     "confirmDelete": "Delete account \"{username}\"? This cannot be undone.",
     "createSuccess": "Created account \"{username}\".",
     "deleteSuccess": "Deleted account \"{username}\"."
+  },
+  "series": {
+    "noProductions": "This series doesn't contain any productions."
   },
   "prints": {
     "types": {
@@ -243,9 +251,13 @@
     "pagination": "Pagination",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "add": "add"
+    "new": "New print"
   },
   "admin": {
+    "finish": "Finish",
+    "reset": "Reset",
+    "previous": "Previous",
+    "next": "Next",
     "back": "Back",
     "cancel": "Cancel",
     "save": "Save",
@@ -265,6 +277,8 @@
       "saveBtn": "Save Changes",
       "createError": "Could not create the story. Please try again.",
       "saveError": "Could not save the changes. Please try again.",
+      "createSuccess": "Story created.",
+      "saveSuccess": "Story saved.",
       "sectionTitle": "Title",
       "sectionContent": "Content",
       "titleNl": "Title (NL)",
@@ -282,6 +296,10 @@
       "deleteConfirmBtn": "Delete",
       "titleEnRequired": "English title is required",
       "descriptionEnRequired": "English description is required",
+      "restoreConfirm": "Are you sure you want to restore the last version ?",
+      "restoreBtn": "Restore",
+      "deleteSuccess": "Deleted story \"{title}\".",
+      "deleteError": "Could not delete the story. Please try again.",
       "validation": {
         "titleNlRequired": "A Dutch title is required.",
         "descriptionNlRequired": "A Dutch description is required."
@@ -326,23 +344,26 @@
         "cropMobile": "Mobile crop",
         "cropMobileHint": "Portrait crop optimised for narrow screens",
         "cropNb": "NB Ready",
-        "cropNbHint": "Neutral-background variant"
+        "cropNbHint": "Neutral-background variant",
+        "metadataTitle": "Image metadata",
+        "itemTitleNl": "Image title (NL)",
+        "itemTitleEn": "Image title (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata saved."
       },
       "linkToProduction": "Link to Production",
       "linkBtn": "Link",
-      "linkToProductionTitle": "Link to Production",
       "linkToProductionSearch": "Search productions by title...",
       "linkToProductionNoResults": "No productions found",
-      "linkToProductionSuccess": "Successfully linked to production",
-      "linkToProductionError": "Failed to link. Please try again.",
-      "shareGallery": "Share images with this production",
-      "shareGalleryHint": "The production will show the same photos as this story.",
+      "linkToProductionCreateHint": "Save the story first to link it to a production.",
       "linking": "Linking...",
       "linked": "Linked",
       "linkedProductions": "Link to Production",
       "linkedProductionsHint": "Link this story to a production so it appears on the production page.",
       "linkedThisSession": "Linked this session",
       "noLinkedProductions": "Not linked to any production yet",
+      "unlinkBtn": "Unlink",
       "viewProduction": "View production page"
     },
     "parser": {
@@ -361,6 +382,11 @@
         "blogs": "stories",
         "prices": "prices"
       }
+    },
+    "csvImport": {
+      "title": "CSV import tools for {target}",
+      "description": "Use these tools to bulk import {target} from CSV files.",
+      "blogDisclaimer": "It is highly recommended to use the creation tool above because formatting is easier to achieve in the form and the CSV cannot add media to the story. (This can however be added later from the edit page.) "
     }
   },
   "login": {
@@ -399,10 +425,93 @@
   },
   "admin-productions": {
     "header_title": "Productions",
-    "create": "Create production",
+    "new": "New production",
     "editTags": "Edit tags",
     "warning-title": "Future production",
-    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
+    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled.",
+    "form-title": "Title",
+    "form-description1": "Description 1",
+    "form-description2": "Description 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artists",
+    "form-description": "Description",
+    "preview": {
+      "title": "Title placeholder",
+      "preview": "Live preview",
+      "hint": "Images & tags added in later steps",
+      "bodyPlaceholder": "Start typing to see a live preview",
+      "deleted": "Deleted"
+    },
+    "steps": {
+      "core": "Core info",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Events",
+      "series": "Series"
+    },
+    "create-title": "New production",
+    "edit-title": "Edit production",
+    "events": {
+      "title": "Events",
+      "hint": "Each event is a single occurrence of this production",
+      "emptyHint": "A production must have at least one event",
+      "starttime": "Start time",
+      "endtime": "End time",
+      "optional": "Optional",
+      "doors_at": "Doors open",
+      "intermission_at": "Intermission",
+      "location": "Location",
+      "add": "Add event",
+      "new": "New",
+      "newEvent": "New event",
+      "searching": "Searching...",
+      "create": "Create",
+      "typeToSearch": "Type to search locations...",
+      "locationPlaceholder": "Search or create a location...",
+      "noDateYet": "No date set yet",
+      "empty": "No events yet"
+    },
+    "media": {
+      "title": "Title",
+      "description": "Description",
+      "credits": "Credits",
+      "main": "Main image",
+      "mainHint": "Used as the hero image on the production page",
+      "new": "New",
+      "add": "Add",
+      "replaced": "Replaced",
+      "replace": "Replace",
+      "upload": "Upload",
+      "optional": "Optional",
+      "required": "Required",
+      "noMain": "No main image added yet",
+      "carousel": "Carousel images",
+      "carouselHint": "Used as a collection of additional photos",
+      "carouselItem": "Carousel image",
+      "noCarousel": "No carousel images added yet",
+      "fallbackHint": "Falls back to NL"
+    },
+    "tags": {
+      "available": "Available tags",
+      "createNew": "New tag",
+      "newPlaceholder": "Tag name...",
+      "newTags": "New tags",
+      "selected": "Selected",
+      "clearTags": "Clear all"
+    },
+    "series": {
+      "hint": "Manage series for this production",
+      "add": "Add",
+      "new": "New",
+      "none": "No series yet",
+      "search-placeholder": "Search existing series to link...",
+      "no-results": "No series found",
+      "link": "Link",
+      "linked": "Linked",
+      "unlink": "Unlink",
+      "delete": "Delete"
+    }
   },
   "error": {
     "titleFallback": "Oops!",

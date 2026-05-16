@@ -127,7 +127,8 @@ watch(
 
 // ── Resize — close mobile menu on desktop ────────────────────────────────────
 const handleResize = () => {
-  if (window.innerWidth >= 1024) {
+  const breakpoint = showAdminInterface.value ? 1024 : 1280;
+  if (window.innerWidth >= breakpoint) {
     isMenuOpen.value = false;
     isVisible.value = true;
   }
@@ -165,6 +166,7 @@ onUnmounted(() => {
 const navItems = [
   { label: "home", route: ROUTES.home.base },
   { label: "archive", route: ROUTES.productions.base },
+  { label: "series", route: ROUTES.series.base },
   { label: "stories", route: ROUTES.stories.base },
   { label: "prints", route: ROUTES.prints.base },
 ];
@@ -172,7 +174,7 @@ const navItems = [
 const adminNavItems = [
   { label: "dashboard", route: ROUTES.admin.dashboard.base },
   { label: "productions", route: ROUTES.admin.productions.base },
-  { label: "events", route: ROUTES.admin.events.base },
+  { label: "series", route: ROUTES.admin.series.base },
   { label: "stories", route: ROUTES.admin.stories.base },
   { label: "prints", route: ROUTES.admin.prints.base },
 ];
@@ -190,13 +192,13 @@ const adminNavItems = [
     ]"
   >
     <div
-      class="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
+      class="grid page-container grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6"
     >
       <!-- ── Left: nav links (desktop) / hamburger (mobile) ────────────────-->
       <div class="flex items-center justify-start">
         <nav
           v-if="!showAdminInterface"
-          class="hidden lg:flex gap-[20px] xl:gap-[30px]"
+          class="hidden xl:flex gap-[20px] xl:gap-[30px]"
         >
           <NuxtLink
             v-for="item in navItems"
@@ -210,6 +212,7 @@ const adminNavItems = [
 
         <button
           class="lg:hidden outline-none transition-colors text-[var(--foreground)]"
+          :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
           @click.stop="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
@@ -264,11 +267,9 @@ const adminNavItems = [
 
     <nav
       v-if="showAdminInterface"
-      class="hidden lg:flex border-t-3 border-[var(--foreground)] w-full bg-[var(--background)]"
+      class="hidden lg:flex border-t-1 border-[var(--muted-foreground)] w-full bg-[var(--background)]"
     >
-      <div
-        class="mx-auto flex w-full max-w-[1400px] justify-between items-center px-12 lg:px-20 2xl:px-32"
-      >
+      <div class="page-container flex justify-between items-center">
         <NuxtLink
           v-for="item in adminNavItems"
           :key="item.route"
@@ -291,7 +292,8 @@ const adminNavItems = [
     <!-- ── Mobile hamburger menu ───────────────────────────────────────────── -->
     <div
       v-if="isMenuOpen"
-      class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
+      :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
+      class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] page-container py-8 shadow-xl"
     >
       <nav class="flex flex-col gap-6">
         <template v-if="showAdminInterface">

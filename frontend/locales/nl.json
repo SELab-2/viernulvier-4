@@ -5,13 +5,15 @@
   "nav": {
     "home": "home",
     "archive": "archief",
+    "series": "reeksen",
     "stories": "verhalen",
     "prints": "drukwerk",
     "productions": "producties",
     "events": "evenementen",
     "accounts": "accounts",
     "dashboard": "dashboard",
-    "logout": "uitloggen"
+    "logout": "uitloggen",
+    "tags": "tags"
   },
   "auth": {
     "confirmLogout": "Succesvol uitgelogd"
@@ -153,23 +155,26 @@
     "dateAndTime": "Datum & Tijd",
     "location": "Locatie",
     "price": "Prijs",
+    "showAll": "toon alle ({count})",
+    "hidePrices": "verberg prijzen",
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prijzen",
-    "hidePriceDetails": "verberg details",
     "doors": "deuren open",
-    "break": "pauze"
+    "break": "pauze",
+    "gallery": "galerij"
   },
   "general": {
     "back": "Terug",
     "readMore": "Lees meer",
     "readLess": "Lees minder",
     "showMore": "Toon meer",
+    "showMoreWithCount": "Toon meer ({count})",
     "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen.",
     "filters": "filters",
-    "close": "sluiten"
+    "close": "sluiten",
+    "results": "resultaten"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",
@@ -181,6 +186,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Beheer de accounts.",
+    "headerDescription": "Beheer, bewerk en controleer de accounts van de archiefbeheerders.",
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruikersnaam",
@@ -206,6 +212,9 @@
     "confirmDelete": "Account \"{username}\" verwijderen? Dit kan niet ongedaan gemaakt worden.",
     "createSuccess": "Account \"{username}\" aangemaakt.",
     "deleteSuccess": "Account \"{username}\" verwijderd."
+  },
+  "series": {
+    "noProductions": "Deze reeks bevat geen producties."
   },
   "prints": {
     "types": {
@@ -244,9 +253,13 @@
     "pagination": "Paginering",
     "page_label": "Pagina",
     "of_pages": "van {total}",
-    "add": "voeg toe"
+    "new": "Nieuw drukwerk"
   },
   "admin": {
+    "finish": "Voltooien",
+    "reset": "Herstellen",
+    "previous": "Vorige",
+    "next": "Volgende",
     "back": "Terug",
     "cancel": "Annuleren",
     "save": "Opslaan",
@@ -266,6 +279,8 @@
       "saveBtn": "Wijzigingen Opslaan",
       "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
       "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
+      "createSuccess": "Verhaal aangemaakt.",
+      "saveSuccess": "Verhaal opgeslagen.",
       "sectionTitle": "Titel",
       "sectionContent": "Inhoud",
       "titleNl": "Titel (NL)",
@@ -283,6 +298,10 @@
       "deleteConfirmBtn": "Verwijderen",
       "titleEnRequired": "Engelse titel is nodig",
       "descriptionEnRequired": "Engelse beschrijving is nodig",
+      "restoreConfirm": "Ben je zeker dat je wil herstellen naar de laatste versie ?",
+      "restoreBtn": "Herstellen",
+      "deleteSuccess": "Verhaal \"{title}\" verwijderd.",
+      "deleteError": "Het verhaal kon niet worden verwijderd. Probeer het opnieuw.",
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
         "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
@@ -327,23 +346,26 @@
         "cropMobile": "Mobiele crop",
         "cropMobileHint": "Portretcrop geoptimaliseerd voor smalle schermen",
         "cropNb": "NB Ready",
-        "cropNbHint": "Variant met neutrale achtergrond"
+        "cropNbHint": "Variant met neutrale achtergrond",
+        "metadataTitle": "Afbeeldingsmetadata",
+        "itemTitleNl": "Afbeeldingstitel (NL)",
+        "itemTitleEn": "Afbeeldingstitel (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata opgeslagen."
       },
       "linkToProduction": "Koppel aan productie",
       "linkBtn": "Koppelen",
-      "linkToProductionTitle": "Koppel aan productie",
       "linkToProductionSearch": "Zoek producties op titel...",
       "linkToProductionNoResults": "Geen producties gevonden",
-      "linkToProductionSuccess": "Succesvol gekoppeld aan productie",
-      "linkToProductionError": "Koppelen mislukt. Probeer opnieuw.",
-      "shareGallery": "Deel afbeeldingen met deze productie",
-      "shareGalleryHint": "De productie toont dan dezelfde foto's als dit verhaal.",
+      "linkToProductionCreateHint": "Sla het verhaal eerst op om het aan een productie te koppelen.",
       "linking": "Koppelen...",
       "linked": "Gekoppeld",
       "linkedProductions": "Koppel aan productie",
       "linkedProductionsHint": "Koppel dit verhaal aan een productie zodat het verschijnt op de productiepagina.",
       "linkedThisSession": "Gekoppeld in deze sessie",
       "noLinkedProductions": "Nog niet gekoppeld aan een productie",
+      "unlinkBtn": "Ontkoppelen",
       "viewProduction": "Bekijk productiepagina"
     },
     "parser": {
@@ -362,6 +384,11 @@
         "blogs": "verhalen",
         "prices": "prijzen"
       }
+    },
+    "csvImport": {
+      "title": "CSV-importtools voor {target}",
+      "description": "Gebuik deze tools om {target} in bulk te importeren vanuit CSV-bestanden.",
+      "blogDisclaimer": "Het wordt sterk aanbevolen om de aanmaaktool hierboven te gebruiken omdat opmaak gemakkelijker te bereiken is in het formulier en de CSV geen media kan toevoegen aan het verhaal. (Dit kan echter later worden toegevoegd vanaf de bewerkpagina.) "
     }
   },
   "login": {
@@ -400,10 +427,93 @@
   },
   "admin-productions": {
     "header_title": "Producties",
-    "create": "Nieuwe productie",
+    "new": "Nieuwe productie",
     "editTags": "Tags bewerken",
     "warning-title": "Toekomstige productie",
-    "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld."
+    "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld.",
+    "form-title": "Titel",
+    "form-description1": "Beschrijving 1",
+    "form-description2": "Beschrijving 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artiesten",
+    "form-description": "Beschrijving",
+    "preview": {
+      "title": "Voorbeeld titel",
+      "preview": "Live voorbeeld",
+      "hint": "Media & tags worden in latere stappen toegevoegd",
+      "bodyPlaceholder": "Begin met typen om live voorbeeld te zien",
+      "deleted": "Verwijderd"
+    },
+    "steps": {
+      "core": "Kerngegevens",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Evenementen",
+      "series": "Series"
+    },
+    "create-title": "Nieuwe productie",
+    "edit-title": "Productie bewerken",
+    "events": {
+      "title": "Evenementen",
+      "hint": "Elk evenement is een afzonderlijke uitvoering van deze productie",
+      "emptyHint": "Een productie moet ten minste één evenement hebben",
+      "starttime": "Begin tijd",
+      "endtime": "Eind tijd",
+      "optional": "Optioneel",
+      "doors_at": "Deuren open",
+      "intermission_at": "Pauze",
+      "location": "Locatie",
+      "add": "Evenement toevoegen",
+      "new": "Nieuw",
+      "newEvent": "Nieuw evenement",
+      "searching": "Zoeken...",
+      "create": "Aanmaken",
+      "typeToSearch": "Typ om locaties te zoeken...",
+      "locationPlaceholder": "Zoek of creëer een locatie...",
+      "noDateYet": "Nog geen datum ingesteld",
+      "empty": "Nog geen evenementen"
+    },
+    "media": {
+      "title": "Titel",
+      "description": "Beschrijving",
+      "credits": "Credits",
+      "main": "Hoofdafbeelding",
+      "mainHint": "Wordt gebruikt als hoofdafbeelding op de productiepagina",
+      "new": "Nieuw",
+      "add": "Toevoegen",
+      "replaced": "Vervangen",
+      "replace": "Vervang",
+      "upload": "Upload",
+      "optional": "Optioneel",
+      "required": "Verplicht",
+      "noMain": "Nog geen hoofdafbeelding toegevoegd",
+      "carousel": "Carrouselafbeeldingen",
+      "carouselHint": "Wordt gebruikt als verzameling van extra foto’s.",
+      "carouselItem": "Carrouselafbeeldingen",
+      "noCarousel": "Nog geen Carrouselafbeeldingen toegevoegd",
+      "fallbackHint": "Valt terug op NL"
+    },
+    "tags": {
+      "available": "Beschikbare tags",
+      "createNew": "Nieuwe tag",
+      "newPlaceholder": "Tag naam...",
+      "newTags": "Nieuwe tags",
+      "selected": "Geselecteerd",
+      "clearTags": "Alles wissen"
+    },
+    "series": {
+      "hint": "Beheer series voor deze productie",
+      "add": "Toevoegen",
+      "new": "Nieuw",
+      "none": "Nog geen series",
+      "search-placeholder": "Zoek bestaande series om te koppelen...",
+      "no-results": "Geen series gevonden",
+      "link": "Koppelen",
+      "linked": "Gekoppeld",
+      "unlink": "Onktoppelen",
+      "delete": "Verwijder"
+    }
   },
   "error": {
     "titleFallback": "Oeps!",
