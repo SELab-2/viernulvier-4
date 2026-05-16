@@ -124,7 +124,8 @@ onMounted(loadPage);
     </div>
 
     <!-- Grid -->
-    <div class="page-container py-8">
+    <SeriesSkeleton v-if="loading && isFirstLoad" />
+    <div v-else class="page-container py-8">
       <!-- Grid Header -->
       <div class="flex items-center gap-3 mb-4">
         <span class="text-[20px] font-bold uppercase shrink-0">{{
