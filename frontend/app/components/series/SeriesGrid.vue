@@ -43,7 +43,7 @@ const grid = computed(() =>
 
   <!-- Grid -->
   <div v-if="items.length">
-    <div :class="grid">
+    <div :class="grid" class="w-full">
       <SeriesFolder
         v-for="[series, count] in items"
         :key="series.id"

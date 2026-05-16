@@ -15,7 +15,7 @@ const {
 
 // Responsive columns
 const series = ref<[SeriesView, number][]>([]);
-const ROWS_PER_PAGE = 4;
+const ROWS_PER_PAGE = 5;
 const windowWidth = ref(1024);
 const handleResize = () => {
   windowWidth.value = window.innerWidth;

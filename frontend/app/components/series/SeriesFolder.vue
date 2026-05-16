@@ -27,7 +27,7 @@ const { t } = useI18n();
 <template>
   <NuxtLink
     :to="ROUTES.series.byId(series.id)"
-    class="group flex flex-col items-center gap-1.5 cursor-pointer select-none w-36 sm:w-40"
+    class="group flex flex-col items-center gap-1.5 cursor-pointer select-none w-full"
   >
     <!-- Folder icon -->
     <div class="flex items-center justify-center">
