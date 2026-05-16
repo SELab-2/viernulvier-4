@@ -11,6 +11,7 @@
  * - `disclaimer` (optional) — custom warning text shown in red above the tools.
  */
 import { computed } from "vue";
+import { TriangleAlert } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 import type { ParserTarget } from "~/composables/useParserApi";
 
@@ -41,8 +42,11 @@ const description = computed(() =>
       <p class="text-sm text-muted-foreground">
         {{ description }}
       </p>
-      <p v-if="props.disclaimer" class="text-sm font-semibold text-red-600">
-        {{ props.disclaimer }}
+      <p v-if="props.disclaimer" class="flex items-start gap-2">
+        <TriangleAlert class="mt-0.5 shrink-0 text-red-600" :size="16" />
+        <span class="text-sm font-semibold text-red-600">
+          {{ props.disclaimer }}
+        </span>
       </p>
     </div>
 
