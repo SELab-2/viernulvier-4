@@ -126,6 +126,22 @@ onMounted(loadPage);
     <!-- Grid -->
     <div class="page-container py-8">
       <SeriesGrid :items="series" />
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between mt-6">
+        <SeriesPageJumper
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          :loading="loading"
+          @go-to-page="currentPage = $event"
+        />
+        <SeriesPagination
+          :currentPage="currentPage"
+          :totalPages="totalPages"
+          :loading="loading"
+          @go-to-page="currentPage = $event"
+        />
+      </div>
     </div>
   </div>
 </template>
