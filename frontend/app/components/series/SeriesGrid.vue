@@ -2,7 +2,6 @@
  A reusable folder grid component, displays series folders, includes:
   - Folder icon cards, clickable series
   - Responsive grid (default: 4 items per row, can change to 3 -> 2)
-  - Shows total series count
   - Empty state fallback when no series are available
 
  Usage:
