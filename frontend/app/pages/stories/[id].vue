@@ -456,7 +456,7 @@ watch(title, updateTitleScrollable);
         v-else-if="linkedProductions && linkedProductions.length > 0"
         class="page-container pb-14 border-t border-gray-200 dark:border-[#2e3347] pt-10"
       >
-        <div class="md:pl-10 w-full">
+        <div class="w-full">
           <div class="mb-6">
             <h2 class="subtitle">
               {{ t("stories.relatedProductions") }}
@@ -500,7 +500,7 @@ watch(title, updateTitleScrollable);
 
       <section class="pb-20">
         <div class="page-container">
-          <div class="md:pl-10 w-full">
+          <div class="w-full">
             <!-- Article footer: date + back link -->
             <div
               class="pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
