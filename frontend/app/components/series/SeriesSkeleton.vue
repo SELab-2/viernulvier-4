@@ -1,3 +1,8 @@
+<!--
+  components/series/SeriesSkeleton.vue
+  ====================================
+  Animated loading skeleton for the first page fetch.
+-->
 <script setup lang="ts"></script>
 
 <template>
