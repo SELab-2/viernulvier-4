@@ -115,9 +115,24 @@ const LINKED_PRODUCTIONS_LIMIT = 3;
 const currentLimit = ref(LINKED_PRODUCTIONS_LIMIT);
 const totalLinkedProductions = ref(0);
 
-const hasMore = computed(() => {
-  return linkedProductions.value.length < totalLinkedProductions.value;
+const productionListIsExpanded = computed(() => {
+  return (
+    currentLimit.value >= totalLinkedProductions.value &&
+    totalLinkedProductions.value > LINKED_PRODUCTIONS_LIMIT
+  );
 });
+
+const hasHiddenProductions = computed(() => {
+  return totalLinkedProductions.value > LINKED_PRODUCTIONS_LIMIT;
+});
+
+const toggleProductionsLimit = () => {
+  if (productionListIsExpanded.value) {
+    currentLimit.value = LINKED_PRODUCTIONS_LIMIT;
+  } else {
+    currentLimit.value = totalLinkedProductions.value;
+  }
+};
 
 const loadMoreProductions = () => {
   currentLimit.value = totalLinkedProductions.value;
@@ -439,13 +454,11 @@ watch(title, updateTitleScrollable);
 
       <section
         v-else-if="linkedProductions && linkedProductions.length > 0"
-        class="page-container pb-14 pt-10"
+        class="page-container pb-14 border-t border-gray-200 dark:border-[#2e3347] pt-10"
       >
         <div class="md:pl-10 w-full">
           <div class="mb-6">
-            <h2
-              class="font-brand font-black text-2xl lg:text-3xl uppercase tracking-tighter italic text-foreground"
-            >
+            <h2 class="subtitle">
               {{ t("stories.relatedProductions") }}
             </h2>
           </div>
@@ -461,18 +474,25 @@ watch(title, updateTitleScrollable);
             />
           </div>
 
-          <div v-if="hasMore" class="flex justify-center mt-8">
+          <div v-if="hasHiddenProductions" class="flex justify-center mt-10">
             <button
-              class="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded font-brand font-black text-[10px] uppercase tracking-widest transition-all duration-300 hover:bg-gray-50 dark:hover:bg-white/5 outline-none"
+              @click="toggleProductionsLimit"
               :disabled="productionsStatus === 'pending'"
-              @click="loadMoreProductions"
+              class="text-[11px] font-black uppercase tracking-[2px] text-accent hover:underline outline-none flex items-center gap-2 disabled:opacity-50"
             >
-              <span v-if="productionsStatus === 'pending'">{{
-                t("stories.loading")
-              }}</span>
-              <span v-else>
-                {{ t("general.showMore") }}
-              </span>
+              <template v-if="productionsStatus === 'pending'">
+                {{ t("stories.loading") }}
+              </template>
+              <template v-else-if="!productionListIsExpanded">
+                {{ t("general.showMore") }} ({{
+                  totalLinkedProductions - LINKED_PRODUCTIONS_LIMIT
+                }})
+                <ChevronDown :size="14" stroke-width="3" />
+              </template>
+              <template v-else>
+                {{ t("general.showLess") }}
+                <ChevronUp :size="14" stroke-width="3" />
+              </template>
             </button>
           </div>
         </div>

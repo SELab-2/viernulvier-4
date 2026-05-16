@@ -29,11 +29,7 @@ const setSlide = (index: number) => {
 </script>
 
 <template>
-  <div v-if="images && images.length > 0" class="my-16">
-    <h2 class="text-[16px] uppercase font-black mb-6 tracking-widest">
-      {{ t("production.gallery") }}
-    </h2>
-
+  <div class="w-full">
     <div
       class="relative group overflow-hidden rounded-2xl bg-gray-100 dark:bg-white/5"
     >

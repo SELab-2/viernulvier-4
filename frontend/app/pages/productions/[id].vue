@@ -316,9 +316,9 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="mt-12 mb-16">
-          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+          <h2 class="subtitle mb-4">
             {{ t("production.events") }}
-          </h1>
+          </h2>
           <ProductionEventTable
             v-if="events && events.length > 0"
             :events="events"
@@ -349,17 +349,21 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="stories && stories.length > 0" class="my-16">
-          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+          <h2 class="subtitle mb-4">
             {{ t("production.stories") }}
-          </h1>
+          </h2>
           <ProductionStoryListView :stories="stories" />
         </div>
 
-        <ProductionGallery
-          v-if="carouselImages.length > 0"
-          :images="carouselImages"
-          :production-id="production.id"
-        />
+        <div v-if="carouselImages && carouselImages.length > 0" class="my-16">
+          <h2 class="subtitle mb-4">
+            {{ t("production.gallery") }}
+          </h2>
+          <ProductionGallery
+            :images="carouselImages"
+            :production-id="production.id"
+          />
+        </div>
 
         <div
           v-if="isValid(production.credits)"
