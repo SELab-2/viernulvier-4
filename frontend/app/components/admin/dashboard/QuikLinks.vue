@@ -6,7 +6,7 @@
   All labels come from i18n so both NL and EN work automatically.
 -->
 <script setup lang="ts">
-import { BookOpen, Film, Printer, Users, Layers3 } from "lucide-vue-next";
+import { BookOpen, Film, Printer, Users } from "lucide-vue-next";
 import { ROUTES } from "~/utils/routes";
 
 defineProps<{ isSuperAdmin: boolean }>();
@@ -38,14 +38,6 @@ const links = computed(() => [
     to: ROUTES.admin.prints.base,
     accent: "text-amber-500",
     bg: "bg-amber-500/10 dark:bg-amber-500/15",
-  },
-  {
-    label: t("admin.dashboard.series"),
-    desc: t("admin.dashboard.seriesDesc"),
-    icon: Layers3,
-    to: ROUTES.admin.series.base,
-    accent: "text-emerald-500",
-    bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
   },
 ]);
 </script>

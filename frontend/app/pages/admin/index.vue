@@ -5,13 +5,10 @@
 
   Layout (desktop):
     - Full-width welcome header with username + greeting
-    - 4-column stat widget row (non-clickable)
+    - 6-column stat widget row (productions, blogs, events, prints, series, tags)
     - Two-column section:
         left  — password-reset card
-        right — quick-links sidebar (mirrors admin header nav)
-
-  All user-facing text uses i18n keys from admin.dashboard.*.
-  Stats are fetched cheaply (limit:1) via useAdminStats().
+        right — quick-links sidebar (stories, productions, prints + accounts for super-admin)
 -->
 <script setup lang="ts">
 import { ROUTES } from "~/utils/routes";
@@ -86,7 +83,7 @@ const statCards = [
         </h1>
       </header>
 
-      <!-- Stat widgets (non-clickable) -->
+      <!-- Stat widgets — all 6 counts -->
       <section>
         <p
           class="font-brand font-black text-[9px] uppercase tracking-[0.14em] text-muted-foreground mb-4"
@@ -105,7 +102,7 @@ const statCards = [
         </div>
       </section>
 
-      <!-- Bottom section: password reset + quick links side by side -->
+      <!-- Bottom section: password reset + quick links -->
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <!-- Password reset card -->
         <AdminDashboardPasswordReset />
