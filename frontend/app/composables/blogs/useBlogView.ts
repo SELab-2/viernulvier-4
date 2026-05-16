@@ -12,7 +12,7 @@
  * are already flat strings (backend returns them localised via the lang param).
  */
 import type { BlogView } from "@repo/common";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { SearchSuggestion } from "~/types/Search";
 import { formatDateShort } from "~/utils/formatters";
 import { useBlogApi } from "./useBlogApi";
 import type { DateFilter } from "~/types/DateFilter";

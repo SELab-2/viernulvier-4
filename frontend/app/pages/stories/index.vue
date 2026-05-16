@@ -133,7 +133,9 @@ onMounted(async () => {
   await loadPage(true);
 });
 
-onUnmounted(() => io?.disconnect());
+onUnmounted(() => {
+  io?.disconnect();
+});
 </script>
 
 <template>

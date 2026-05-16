@@ -1,25 +1,23 @@
-<!--
-  A simple component to display a tag as a pill-shaped label.
-  It accepts a `label` prop for the text to display and an optional `compact` prop to adjust the padding for a more compact appearance.
--->
 <script setup lang="ts">
-// TagPill: small presentational tag label component.
-const props = defineProps<{
+// Takes a label to show, whether to do it compactly and whether to make it clickable.
+defineProps<{
   label: string;
   compact?: boolean;
+  clickable?: boolean;
 }>();
 </script>
 
 <template>
-  <span
+  <component
+    :is="clickable ? 'button' : 'span'"
+    class="tag-pill inline-flex items-center justify-center rounded-full border transition-all outline-none flex-shrink-0 whitespace-nowrap font-brand font-black uppercase tracking-widest"
     :class="[
-      'inline-flex items-center rounded-full text-sm font-medium',
-      compact ? 'px-2 py-0.5' : 'px-3 py-0.5',
+      compact ? 'h-6 px-3 text-[8px]' : 'h-8 px-4 text-[9px]',
+      clickable
+        ? 'border-border/50 bg-muted/20 text-foreground cursor-pointer hover:border-accent hover:bg-accent/10 hover:text-accent focus-visible:ring-2 focus-visible:ring-accent/50'
+        : 'border-transparent bg-accent/10 text-accent',
     ]"
-    class="text-accent bg-accent/10"
   >
     {{ label }}
-  </span>
+  </component>
 </template>
-
-<style scoped></style>

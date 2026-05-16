@@ -19,7 +19,7 @@
  */
 import { ref, computed } from "vue";
 import { X } from "lucide-vue-next";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { SearchSuggestion } from "~/types/Search";
 
 interface Props {
   label?: string; // label displayed above the field
