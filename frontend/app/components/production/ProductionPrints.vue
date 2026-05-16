@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * Component to show prints on production detail page (for specific productionId)
+ * Component to show related prints on production detail page
  */
 
 import { computed } from "vue";
