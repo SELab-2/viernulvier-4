@@ -100,7 +100,7 @@
             <div class="h-7 bg-muted animate-pulse rounded w-2/3" />
             <!-- Artist -->
             <div class="h-4 bg-muted animate-pulse rounded w-1/3" />
-            <!-- Calender icon + data -->
+            <!-- Calender icon + date -->
             <div class="flex items-center gap-2 mt-2">
               <div class="w-4 h-4 bg-muted animate-pulse rounded" />
               <div class="h-4 bg-muted animate-pulse rounded w-40" />
