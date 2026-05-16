@@ -121,21 +121,26 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
       <!--
         The image shown in the background.
       -->
-      <transition name="hero-fade">
+      <transition-group
+        name="hero-fade"
+        tag="div"
+        class="absolute inset-0 w-full h-full"
+      >
         <MediaDisplay
-          v-if="activeCrop"
-          :key="activeCrop.id"
-          :src="activeCrop"
+          v-for="(crop, index) in crops"
+          v-show="index === currentIndex"
+          :key="crop.id"
+          :src="crop"
           :show-icon="false"
           class="absolute inset-0 w-full h-full object-cover"
         />
-      </transition>
+      </transition-group>
 
       <!--
         Background Dim/Lightening.
       -->
       <div
-        class="absolute inset-0 bg-background/40 dark:bg-black/60 backdrop-blur-[2px] z-10 transition-colors duration-500"
+        class="absolute inset-0 bg-background/30 dark:bg-black/30 z-10 transition-colors duration-500"
       />
 
       <div
