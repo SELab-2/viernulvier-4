@@ -32,7 +32,7 @@ const { t } = useI18n();
     <!-- Folder icon -->
     <div class="flex items-center justify-center">
       <FolderOpen
-        class="hidden group-hover:block w-20 h-20 sm:w-28 sm:h-28 text-accent transition-colors duration-150"
+        class="hidden group-hover:block w-20 h-20 sm:w-28 sm:h-28 text-accent fill-accent/30 transition-colors duration-150"
         :stroke-width="1"
       />
       <Folder
