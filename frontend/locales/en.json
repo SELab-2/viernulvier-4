@@ -379,6 +379,11 @@
         "blogs": "stories",
         "prices": "prices"
       }
+    },
+    "csvImport": {
+      "title": "CSV import tools for {target}",
+      "description": "Use these tools to bulk import {target} from CSV files.",
+      "blogDisclaimer": "It is highly recommended to use the creation tool above because formatting is easier to achieve in the form and the CSV cannot add media to the story. (This can however be added later from the edit page.) "
     }
   },
   "login": {

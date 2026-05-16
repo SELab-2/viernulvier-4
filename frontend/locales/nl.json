@@ -381,6 +381,11 @@
         "blogs": "verhalen",
         "prices": "prijzen"
       }
+    },
+    "csvImport": {
+      "title": "CSV-importtools voor {target}",
+      "description": "Gebuik deze tools om {target} in bulk te importeren vanuit CSV-bestanden.",
+      "blogDisclaimer": "Het wordt sterk aanbevolen om de aanmaaktool hierboven te gebruiken omdat opmaak gemakkelijker te bereiken is in het formulier en de CSV geen media kan toevoegen aan het verhaal. (Dit kan echter later worden toegevoegd vanaf de bewerkpagina.) "
     }
   },
   "login": {
