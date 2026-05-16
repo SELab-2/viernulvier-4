@@ -42,9 +42,9 @@ const description = computed(() =>
       <p class="text-sm text-muted-foreground">
         {{ description }}
       </p>
-      <p v-if="props.disclaimer" class="flex items-start gap-2">
-        <TriangleAlert class="mt-0.5 shrink-0 text-red-600" :size="16" />
-        <span class="text-sm font-semibold text-red-600">
+      <p v-if="props.disclaimer" class="flex items-start gap-2 text-red-600">
+        <TriangleAlert class="mt-0.5 shrink-0" :size="16" />
+        <span class="text-sm font-semibold">
           {{ props.disclaimer }}
         </span>
       </p>

@@ -92,12 +92,8 @@ const fileName = computed(() => `${props.target}_template.csv`);
 
 const { t } = useI18n();
 const templateTitle = computed(() => t(`admin.parser.targets.${props.target}`));
-const displayTemplateTitle = computed(
-  () =>
-    templateTitle.value.charAt(0).toUpperCase() + templateTitle.value.slice(1),
-);
 const downloadTitle = computed(
-  () => `Download ${displayTemplateTitle.value} template`,
+  () => `Download ${templateTitle.value} template`,
 );
 const templateDescription = computed(() =>
   t(`csv.templates.${props.target}.description`),
@@ -110,7 +106,7 @@ const templateExample = computed(() => templates[props.target].example);
     <div class="mb-6">
       <div class="flex items-start justify-between gap-4">
         <div class="space-y-1">
-          <h3 class="text-lg font-bold text-card-foreground capitalize">
+          <h3 class="text-lg font-bold text-card-foreground">
             {{ downloadTitle }}
           </h3>
           <p class="text-sm text-muted-foreground">
