@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
 import { getToday } from "~/utils/constants";
 import type { ProductionView } from "@repo/common";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { SearchSuggestion } from "~/types/Search";
 import type { DateFilter } from "~/types/DateFilter";
 
 /**

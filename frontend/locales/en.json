@@ -1,4 +1,7 @@
 {
+  "home": {
+    "title": "Search the archive"
+  },
   "nav": {
     "home": "home",
     "archive": "archive",
@@ -80,6 +83,7 @@
     "darkMode": "Dark mode",
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
     "sortLabel": "Sort",
+    "relatedProductions": "Related productions",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
@@ -158,7 +162,12 @@
     "credits": "Credits",
     "doors": "doors",
     "break": "intermission",
-    "gallery": "gallery"
+    "gallery": "gallery",
+    "gallery_nav": {
+      "prev": "Previous image",
+      "next": "Next image",
+      "go_to_slide": "Go to slide {slide}"
+    }
   },
   "general": {
     "back": "Back",
@@ -209,7 +218,10 @@
     "deleteSuccess": "Deleted account \"{username}\"."
   },
   "series": {
-    "noProductions": "This series doesn't contain any productions."
+    "header_title": "Series",
+    "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
+    "noProductions": "This series doesn't contain any productions.",
+    "noSeries": "No series"
   },
   "prints": {
     "types": {
@@ -251,6 +263,10 @@
     "new": "New print"
   },
   "admin": {
+    "finish": "Finish",
+    "reset": "Reset",
+    "previous": "Previous",
+    "next": "Next",
     "back": "Back",
     "cancel": "Cancel",
     "save": "Save",
@@ -405,6 +421,11 @@
       "seriesDesc": "Explore the public series archive",
       "tagsDesc": "Review and manage tag metadata",
       "accountsDesc": "Manage admin accounts"
+    },
+    "csvImport": {
+      "title": "CSV import tools for {target}",
+      "description": "Use these tools to bulk import {target} from CSV files.",
+      "blogDisclaimer": "It is highly recommended to use the creation tool above because formatting is easier to achieve in the form and the CSV cannot add media to the story. (This can however be added later from the edit page.) "
     }
   },
   "login": {
@@ -446,7 +467,90 @@
     "new": "New production",
     "editTags": "Edit tags",
     "warning-title": "Future production",
-    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
+    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled.",
+    "form-title": "Title",
+    "form-description1": "Description 1",
+    "form-description2": "Description 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artists",
+    "form-description": "Description",
+    "preview": {
+      "title": "Title placeholder",
+      "preview": "Live preview",
+      "hint": "Images & tags added in later steps",
+      "bodyPlaceholder": "Start typing to see a live preview",
+      "deleted": "Deleted"
+    },
+    "steps": {
+      "core": "Core info",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Events",
+      "series": "Series"
+    },
+    "create-title": "New production",
+    "edit-title": "Edit production",
+    "events": {
+      "title": "Events",
+      "hint": "Each event is a single occurrence of this production",
+      "emptyHint": "A production must have at least one event",
+      "starttime": "Start time",
+      "endtime": "End time",
+      "optional": "Optional",
+      "doors_at": "Doors open",
+      "intermission_at": "Intermission",
+      "location": "Location",
+      "add": "Add event",
+      "new": "New",
+      "newEvent": "New event",
+      "searching": "Searching...",
+      "create": "Create",
+      "typeToSearch": "Type to search locations...",
+      "locationPlaceholder": "Search or create a location...",
+      "noDateYet": "No date set yet",
+      "empty": "No events yet"
+    },
+    "media": {
+      "title": "Title",
+      "description": "Description",
+      "credits": "Credits",
+      "main": "Main image",
+      "mainHint": "Used as the hero image on the production page",
+      "new": "New",
+      "add": "Add",
+      "replaced": "Replaced",
+      "replace": "Replace",
+      "upload": "Upload",
+      "optional": "Optional",
+      "required": "Required",
+      "noMain": "No main image added yet",
+      "carousel": "Carousel images",
+      "carouselHint": "Used as a collection of additional photos",
+      "carouselItem": "Carousel image",
+      "noCarousel": "No carousel images added yet",
+      "fallbackHint": "Falls back to NL"
+    },
+    "tags": {
+      "available": "Available tags",
+      "createNew": "New tag",
+      "newPlaceholder": "Tag name...",
+      "newTags": "New tags",
+      "selected": "Selected",
+      "clearTags": "Clear all"
+    },
+    "series": {
+      "hint": "Manage series for this production",
+      "add": "Add",
+      "new": "New",
+      "none": "No series yet",
+      "search-placeholder": "Search existing series to link...",
+      "no-results": "No series found",
+      "link": "Link",
+      "linked": "Linked",
+      "unlink": "Unlink",
+      "delete": "Delete"
+    }
   },
   "error": {
     "titleFallback": "Oops!",

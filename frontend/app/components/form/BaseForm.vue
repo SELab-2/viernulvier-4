@@ -6,13 +6,32 @@
  *  - Multiple instances of the same component type are supported
  *  - Pre-filled values supported (the key must match the field name)
  *  - Emits all field values on submit via @submit
+ *  - When liveUpdate is true, also emits @update on every field change (for live previews)
  *  - Resets all field values to initial values via a reset-button
  *
- * Usage:
+ * Supports two modes:
+ *
+ * 1. Uncontrolled mode (legacy)
+ *    - FormBaseForm owns its internal state
+ *    - Uses initialValues
+ *    - Existing pages continue working without changes
+ *
+ * 2. Controlled mode
+ *    - Parent owns the state via v-model
+ *    - FormBaseForm becomes a pure renderer
+ *    - Used for complex multi-step flows and live preview systems
+ *
+ * Usage (uncontrolled):
  * <FormBaseForm
  *   :fields="fields"
  *   :initialValues="{ title: 'Default title' }"
  *   @submit="handleSubmit"
+ * />
+ *
+ * Usage (controlled):
+ * <FormBaseForm
+ *   v-model="draft"
+ *   :fields="fields"
  * />
  *
  * Example fields config:
@@ -23,7 +42,7 @@
  * ]
  */
 
-import { reactive } from "vue";
+import { computed, reactive, watch, toRaw } from "vue";
 import type { FieldComponent, FormField } from "../../types/FormField";
 
 // Nuxt auto-import only works for direct template usage, so manual imports are
@@ -41,15 +60,71 @@ const { t } = useI18n();
 
 interface Props {
   fields: FormField[]; // Can store multiple fields, allows us to have multiple of the same type
-  initialValues?: Record<string, any>; // Optional pre-filled values
+  initialValues?: Record<string, any>; // Optional pre-filled values for uncontrolled mode
   submitLabel?: string; // Text on the submit button
-  resetLabel?: string; // Text on the empty button
+  resetLabel?: string; // Text on the reset button
+  showActions?: boolean; // Whether to show submit/reset buttons, default is true
+
+  /**
+   * When true, emits @update with the full form state on every field change.
+   * Useful for live preview systems. Use only when using the uncontrolled mode, otherwise it does not work.
+   */
+  liveUpdate?: boolean;
 }
 
-const { fields, initialValues, submitLabel, resetLabel } = defineProps<Props>();
-const form = reactive<Record<string, any>>({ ...initialValues });
+const props = withDefaults(defineProps<Props>(), {
+  showActions: true,
+  liveUpdate: false,
+});
+
+const model = defineModel<Record<string, any>>();
+
+const { fields, initialValues, submitLabel, resetLabel } = props;
+
+/**
+ * Internal state used only in uncontrolled mode.
+ * Existing pages still rely on this behavior.
+ */
+const internalForm = reactive<Record<string, any>>({
+  ...(initialValues ?? {}),
+});
+
+/**
+ * Unified form state.
+ *
+ * Controlled mode:
+ *  - uses v-model from parent
+ *
+ * Uncontrolled mode:
+ *  - falls back to internal reactive state
+ */
+const formState = computed<Record<string, any>>({
+  get() {
+    return model.value ?? internalForm;
+  },
+
+  set(value) {
+    /**
+     * Controlled mode:
+     * parent owns state
+     */
+    if (model.value) {
+      model.value = value;
+      return;
+    }
+
+    /**
+     * Uncontrolled mode:
+     * mutate internal state
+     */
+    Object.keys(internalForm).forEach((key) => delete internalForm[key]);
+
+    Object.assign(internalForm, value);
+  },
+});
 
 const components: Record<FieldComponent, any> = {
+  // mapping
   BaseInput,
   BaseTextArea,
   BaseDate,
@@ -62,18 +137,54 @@ const components: Record<FieldComponent, any> = {
 
 const emit = defineEmits<{
   submit: [Record<string, any>];
+
+  /**
+   * Fired on every field change when liveUpdate prop is true
+   */
+  update: [Record<string, any>];
 }>();
 
-const multiSelectRefs = ref<InstanceType<typeof BaseMultiSelect>[]>([]);
+// ─── Live update watcher ─────────────────────────────────────────────────────
+// Only active when liveUpdate is true, so pages without a preview pay no cost.
+watch(
+  formState,
+  (newVal) => {
+    if (props.liveUpdate) {
+      emit("update", structuredClone(toRaw(newVal)));
+    }
+  },
+  { deep: true },
+);
+
+const multiSelectRefs = ref<InstanceType<typeof BaseMultiSelect>[]>([]); // references all instances of BaseMultiSelect
 
 function submit() {
-  emit("submit", form);
+  emit("submit", structuredClone(toRaw(formState.value)));
 }
 
 function reset() {
-  Object.keys(form).forEach((key) => delete form[key]);
-  Object.assign(form, initialValues ?? {});
-  multiSelectRefs.value.forEach((c) => c?.clear());
+  /**
+   * Controlled mode:
+   * parent owns reset logic
+   *
+   * Example:
+   * currentStep.reset()
+   */
+  if (model.value) {
+    emit("update", structuredClone(toRaw(model.value)));
+    return;
+  }
+
+  /**
+   * Uncontrolled mode:
+   * reset internal state to initial values
+   */
+  Object.keys(internalForm).forEach((key) => delete internalForm[key]);
+
+  Object.assign(internalForm, initialValues ?? {});
+
+  multiSelectRefs.value.forEach((c) => c?.clear()); // needed so half typed input also gets cleared
+
   multiSelectRefs.value = [];
 }
 
@@ -84,6 +195,7 @@ onBeforeUpdate(() => {
 });
 
 function collectMultiSelectRef(el: any) {
+  // adds to the array if MultiSelect and if mounted
   if (el) multiSelectRefs.value.push(el);
 }
 </script>
@@ -93,11 +205,12 @@ function collectMultiSelectRef(el: any) {
     @submit.prevent="submit"
     class="m-0 border border-border rounded-lg bg-background overflow-hidden"
   >
+    <!-- All components of the form under each other -->
     <component
       v-for="field in fields"
       :key="field.name"
       :is="components[field.component]"
-      v-model="form[field.name]"
+      v-model="formState[field.name]"
       :id="field.name"
       v-bind="field.props"
       :ref="
@@ -107,13 +220,16 @@ function collectMultiSelectRef(el: any) {
       "
     />
 
-    <div class="p-4 flex gap-3">
+    <!-- Buttons -->
+    <div v-if="props.showActions" class="p-4 flex gap-3">
+      <!-- Submit button -->
       <button
         type="submit"
         class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
       >
         {{ submitLabel ?? t("baseform.submitbutton") }}
       </button>
+      <!-- Reset button -->
       <button
         type="button"
         @click="reset"

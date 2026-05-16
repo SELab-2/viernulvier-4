@@ -1,4 +1,7 @@
 {
+  "home": {
+    "title": "Doorzoek het archief"
+  },
   "nav": {
     "home": "home",
     "archive": "archief",
@@ -81,6 +84,7 @@
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
     "sortLabel": "Sorteer",
+    "relatedProductions": "Gerelateerde producties",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -159,7 +163,12 @@
     "credits": "Credits",
     "doors": "deuren open",
     "break": "pauze",
-    "gallery": "galerij"
+    "gallery": "galerij",
+    "gallery_nav": {
+      "prev": "Vorige afbeelding",
+      "next": "Volgende afbeelding",
+      "go_to_slide": "Ga naar dia {slide}"
+    }
   },
   "general": {
     "back": "Terug",
@@ -211,7 +220,10 @@
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
   "series": {
-    "noProductions": "Deze reeks bevat geen producties."
+    "header_title": "Reeksen",
+    "header_subtitle": "Ontdek samengebundelde reeksen van producties uit het viernulvier archief.",
+    "noProductions": "Deze reeks bevat geen producties.",
+    "noSeries": "Geen reeksen"
   },
   "prints": {
     "types": {
@@ -253,6 +265,10 @@
     "new": "Nieuw drukwerk"
   },
   "admin": {
+    "finish": "Voltooien",
+    "reset": "Herstellen",
+    "previous": "Vorige",
+    "next": "Volgende",
     "back": "Terug",
     "cancel": "Annuleren",
     "save": "Opslaan",
@@ -407,6 +423,11 @@
       "seriesDesc": "De publieke series-archief bekijken",
       "tagsDesc": "Tag-metadata bekijken en beheren",
       "accountsDesc": "Admin-accounts beheren"
+    },
+    "csvImport": {
+      "title": "CSV-importtools voor {target}",
+      "description": "Gebuik deze tools om {target} in bulk te importeren vanuit CSV-bestanden.",
+      "blogDisclaimer": "Het wordt sterk aanbevolen om de aanmaaktool hierboven te gebruiken omdat opmaak gemakkelijker te bereiken is in het formulier en de CSV geen media kan toevoegen aan het verhaal. (Dit kan echter later worden toegevoegd vanaf de bewerkpagina.) "
     }
   },
   "login": {
@@ -448,7 +469,90 @@
     "new": "Nieuwe productie",
     "editTags": "Tags bewerken",
     "warning-title": "Toekomstige productie",
-    "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld."
+    "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld.",
+    "form-title": "Titel",
+    "form-description1": "Beschrijving 1",
+    "form-description2": "Beschrijving 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artiesten",
+    "form-description": "Beschrijving",
+    "preview": {
+      "title": "Voorbeeld titel",
+      "preview": "Live voorbeeld",
+      "hint": "Media & tags worden in latere stappen toegevoegd",
+      "bodyPlaceholder": "Begin met typen om live voorbeeld te zien",
+      "deleted": "Verwijderd"
+    },
+    "steps": {
+      "core": "Kerngegevens",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Evenementen",
+      "series": "Series"
+    },
+    "create-title": "Nieuwe productie",
+    "edit-title": "Productie bewerken",
+    "events": {
+      "title": "Evenementen",
+      "hint": "Elk evenement is een afzonderlijke uitvoering van deze productie",
+      "emptyHint": "Een productie moet ten minste één evenement hebben",
+      "starttime": "Begin tijd",
+      "endtime": "Eind tijd",
+      "optional": "Optioneel",
+      "doors_at": "Deuren open",
+      "intermission_at": "Pauze",
+      "location": "Locatie",
+      "add": "Evenement toevoegen",
+      "new": "Nieuw",
+      "newEvent": "Nieuw evenement",
+      "searching": "Zoeken...",
+      "create": "Aanmaken",
+      "typeToSearch": "Typ om locaties te zoeken...",
+      "locationPlaceholder": "Zoek of creëer een locatie...",
+      "noDateYet": "Nog geen datum ingesteld",
+      "empty": "Nog geen evenementen"
+    },
+    "media": {
+      "title": "Titel",
+      "description": "Beschrijving",
+      "credits": "Credits",
+      "main": "Hoofdafbeelding",
+      "mainHint": "Wordt gebruikt als hoofdafbeelding op de productiepagina",
+      "new": "Nieuw",
+      "add": "Toevoegen",
+      "replaced": "Vervangen",
+      "replace": "Vervang",
+      "upload": "Upload",
+      "optional": "Optioneel",
+      "required": "Verplicht",
+      "noMain": "Nog geen hoofdafbeelding toegevoegd",
+      "carousel": "Carrouselafbeeldingen",
+      "carouselHint": "Wordt gebruikt als verzameling van extra foto’s.",
+      "carouselItem": "Carrouselafbeeldingen",
+      "noCarousel": "Nog geen Carrouselafbeeldingen toegevoegd",
+      "fallbackHint": "Valt terug op NL"
+    },
+    "tags": {
+      "available": "Beschikbare tags",
+      "createNew": "Nieuwe tag",
+      "newPlaceholder": "Tag naam...",
+      "newTags": "Nieuwe tags",
+      "selected": "Geselecteerd",
+      "clearTags": "Alles wissen"
+    },
+    "series": {
+      "hint": "Beheer series voor deze productie",
+      "add": "Toevoegen",
+      "new": "Nieuw",
+      "none": "Nog geen series",
+      "search-placeholder": "Zoek bestaande series om te koppelen...",
+      "no-results": "Geen series gevonden",
+      "link": "Koppelen",
+      "linked": "Gekoppeld",
+      "unlink": "Onktoppelen",
+      "delete": "Verwijder"
+    }
   },
   "error": {
     "titleFallback": "Oeps!",
