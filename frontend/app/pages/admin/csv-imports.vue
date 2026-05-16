@@ -1,3 +1,16 @@
+<!--
+  pages/admin/csv-imports.vue
+
+  Admin CSV imports page.
+
+  Provides CSV import tools for multiple targets:
+    - productions
+    - events
+    - tags
+    - prices
+
+-->
+
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 import { ROUTES } from "~/utils/routes";
