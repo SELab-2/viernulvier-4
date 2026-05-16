@@ -7,6 +7,7 @@
     "archive": "archief",
     "series": "reeksen",
     "stories": "verhalen",
+    "series": "reeksen",
     "prints": "drukwerk",
     "productions": "producties",
     "events": "evenementen",
@@ -220,7 +221,10 @@
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
   "series": {
-    "noProductions": "Deze reeks bevat geen producties."
+    "header_title": "Reeksen",
+    "header_subtitle": "Ontdek samengebundelde reeksen van producties uit het viernulvier archief.",
+    "noProductions": "Deze reeks bevat geen producties.",
+    "noSeries": "Geen reeksen"
   },
   "prints": {
     "types": {

@@ -7,6 +7,7 @@
     "archive": "archive",
     "series": "series",
     "stories": "stories",
+    "series": "series",
     "prints": "prints",
     "productions": "productions",
     "events": "events",
@@ -218,7 +219,10 @@
     "deleteSuccess": "Deleted account \"{username}\"."
   },
   "series": {
-    "noProductions": "This series doesn't contain any productions."
+    "header_title": "Series",
+    "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
+    "noProductions": "This series doesn't contain any productions.",
+    "noSeries": "No series"
   },
   "prints": {
     "types": {
