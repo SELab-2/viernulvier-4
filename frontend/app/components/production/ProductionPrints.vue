@@ -4,7 +4,7 @@
  */
 
 import { computed } from "vue";
-import type { PrintItemView } from "@repo/common";
+import type { PrintItemView, Language } from "@repo/common";
 
 interface Props {
   productionId: number;
@@ -22,7 +22,10 @@ const { data: galleryData, status } = useAsyncData(
   `prod-prints-${props.productionId}-${locale.value}`,
   async () => {
     if (!props.productionId) return null;
-    const res = await getPrintsGallery(props.productionId, locale.value as any);
+    const res = await getPrintsGallery(
+      props.productionId,
+      locale.value as Language,
+    );
     return (res as any)?.data ?? res;
   },
   { watch: [() => props.productionId, locale] },
