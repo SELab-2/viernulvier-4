@@ -22,6 +22,7 @@ import { ChevronLeft } from "lucide-vue-next";
 import type { BlogView, MediaItemView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useProductionApi } from "~/composables/useProductionApi";
 import { useGallery } from "~/composables/media/useGallery";
 import { ROUTES } from "~/utils/routes";
 import { useBlogView } from "~/composables/blogs/useBlogView";
@@ -30,6 +31,7 @@ const route = useRoute();
 const { t, locale } = useI18n();
 const { getMainImageCrop } = useGallery();
 const { getById, getMediaGallery } = useBlogApi();
+const { getAll: getProductions } = useProductionApi();
 const { useBlogStory } = useBlogView();
 const router = useRouter();
 
@@ -105,6 +107,52 @@ const { data: gallery } = useAsyncData(
     return (res as any)?.data ?? res;
   },
   { watch: [blogId, locale] },
+);
+
+/** Pagination state and logic for the "Show All" button.*/
+
+const LINKED_PRODUCTIONS_LIMIT = 3;
+const currentLimit = ref(LINKED_PRODUCTIONS_LIMIT);
+const totalLinkedProductions = ref(0);
+
+const hasMore = computed(() => {
+  return linkedProductions.value.length < totalLinkedProductions.value;
+});
+
+const loadMoreProductions = () => {
+  currentLimit.value = totalLinkedProductions.value;
+};
+
+/** Fetch linked productions using the blog_id filter */
+const { data: linkedProductions, status: productionsStatus } = useAsyncData(
+  `blog-productions-${blogId.value}-${locale.value}`,
+  async () => {
+    if (!blogId.value) return [];
+
+    try {
+      const resp = await getProductions({
+        productionFilters: {
+          blog_id: blogId.value,
+        },
+        paginationFilters: {
+          page: 0,
+          limit: currentLimit.value,
+          descending: false,
+        },
+        languageFilters: {
+          lang: locale.value as any,
+        },
+      });
+
+      const unwrapped = (resp as any)?.data ?? resp;
+      totalLinkedProductions.value = unwrapped?.totalItems ?? 0;
+      return unwrapped?.objects ?? [];
+    } catch (err) {
+      console.error("Failed to load related productions:", err);
+      return [];
+    }
+  },
+  { watch: [blogId, locale, currentLimit], default: () => [] },
 );
 
 // Derived values
@@ -367,25 +415,86 @@ watch(title, updateTitleScrollable);
                   {{ imageCredits }}
                 </p>
               </div>
-
-              <!-- Article footer: date + back link -->
-              <div
-                class="mt-16 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
-              >
-                <span
-                  class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500"
-                >
-                  {{ formattedDate }}
-                </span>
-                <NuxtLink
-                  :to="ROUTES.stories.base"
-                  class="flex items-center gap-1.5 px-4 py-2 rounded border font-brand font-black text-[9px] uppercase tracking-widest transition-all duration-150 border-gray-300 text-gray-600 hover:text-accent dark:border-[#2e3347] dark:text-gray-400"
-                >
-                  <ChevronLeft :size="12" /> {{ t("general.back") }}
-                </NuxtLink>
-              </div>
             </div>
           </article>
+        </div>
+      </section>
+      <section
+        v-if="productionsStatus === 'pending' && linkedProductions.length === 0"
+        class="page-container py-10 flex justify-center"
+      >
+        <svg
+          class="w-6 h-6 animate-spin text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M21 12a9 9 0 1 1-6.219-8.56"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+        </svg>
+      </section>
+
+      <section
+        v-else-if="linkedProductions && linkedProductions.length > 0"
+        class="page-container pb-10 border-t border-gray-100 dark:border-[#2e3347]/30 pt-10"
+      >
+        <div class="mb-6">
+          <h2
+            class="font-brand font-black text-2xl lg:text-3xl uppercase tracking-tighter italic text-foreground"
+          >
+            {{ t("stories.relatedProductions", "Gerelateerde voorstellingen") }}
+          </h2>
+        </div>
+
+        <div
+          class="flex flex-col gap-4 mb-6 transition-all duration-500 ease-in-out"
+        >
+          <ProductionListViewItem
+            v-for="production in linkedProductions"
+            :key="production.id"
+            :productionView="production"
+            :is-admin="false"
+          />
+        </div>
+
+        <div v-if="hasMore" class="flex justify-center mt-8">
+          <button
+            class="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded font-brand font-black text-[10px] uppercase tracking-widest transition-all duration-300 hover:bg-gray-50 dark:hover:bg-white/5 outline-none"
+            :disabled="productionsStatus === 'pending'"
+            @click="loadMoreProductions"
+          >
+            <span v-if="productionsStatus === 'pending'">{{
+              t("general.loading", "Laden...")
+            }}</span>
+            <span v-else>{{
+              t("general.showAll", "Toon alle voorstellingen")
+            }}</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="pb-20">
+        <div class="page-container">
+          <div class="md:pl-10 w-full">
+            <!-- Article footer: date + back link -->
+            <div
+              class="pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
+            >
+              <span
+                class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500"
+              >
+                {{ formattedDate }}
+              </span>
+              <NuxtLink
+                :to="ROUTES.stories.base"
+                class="flex items-center gap-1.5 px-4 py-2 rounded border font-brand font-black text-[9px] uppercase tracking-widest transition-all duration-150 border-gray-300 text-gray-600 hover:text-accent dark:border-[#2e3347] dark:text-gray-400"
+              >
+                <ChevronLeft :size="12" /> {{ t("general.back") }}
+              </NuxtLink>
+            </div>
+          </div>
         </div>
       </section>
     </template>
