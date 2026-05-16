@@ -92,8 +92,12 @@ const fileName = computed(() => `${props.target}_template.csv`);
 
 const { t } = useI18n();
 const templateTitle = computed(() => t(`admin.parser.targets.${props.target}`));
+const displayTemplateTitle = computed(
+  () =>
+    templateTitle.value.charAt(0).toUpperCase() + templateTitle.value.slice(1),
+);
 const downloadTitle = computed(
-  () => `Download ${templateTitle.value} template`,
+  () => `Download ${displayTemplateTitle.value} template`,
 );
 const templateDescription = computed(() =>
   t(`csv.templates.${props.target}.description`),

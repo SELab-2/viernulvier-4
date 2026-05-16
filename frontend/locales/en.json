@@ -365,7 +365,7 @@
     },
     "parser": {
       "title": "CSV parser",
-      "description": "Upload a CSV file for parsing.",
+      "description": "Upload a CSV file for {target} parsing.",
       "uploadCsv": "Upload {target} CSV",
       "uploading": "Uploading...",
       "uploadSuccess": "Successfully uploaded {target} CSV.",
