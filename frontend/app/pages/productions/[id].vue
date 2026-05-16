@@ -355,6 +355,8 @@ onBeforeUnmount(() => {
           <ProductionStoryListView :stories="stories" />
         </div>
 
+        <ProductionPrints v-if="productionId" :production-id="productionId" />
+
         <div v-if="carouselImages && carouselImages.length > 0" class="my-16">
           <h2 class="subtitle mb-4">
             {{ t("production.gallery") }}
@@ -367,7 +369,7 @@ onBeforeUnmount(() => {
 
         <div
           v-if="isValid(production.credits)"
-          class="pt-12 flex flex-col items-center"
+          class="flex flex-col items-center"
         >
           <div class="max-w-2xl text-center">
             <h4

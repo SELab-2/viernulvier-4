@@ -162,6 +162,7 @@
     "credits": "Credits",
     "doors": "doors",
     "break": "intermission",
+    "prints": "prints",
     "gallery": "gallery",
     "gallery_nav": {
       "prev": "Previous image",
