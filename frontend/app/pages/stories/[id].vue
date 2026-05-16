@@ -267,11 +267,10 @@ watch(title, updateTitleScrollable);
 
 <template>
   <!-- Loading skeleton-->
-  <BlogsStorySkeleton v-if="true" />
-  <!--v-if="status === 'pending'"-->
+  <BlogsStorySkeleton v-if="status === 'pending'" />
 
   <main
-    v-if="blog"
+    v-else-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
     <!-- Not found / error state -->
