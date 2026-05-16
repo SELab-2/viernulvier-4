@@ -209,7 +209,7 @@ watch(searchQuery, () => {
             class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-secondary border-2 border-secondary text-secondary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-secondary transition"
           >
             <FileText :size="15" />
-            {{ t("admin.csvImport.button") }}
+            {{ t("admin.csvImport.label") }}
           </NuxtLink>
 
           <NuxtLink
