@@ -25,7 +25,7 @@ import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
-import { Plus, Edit2 } from "lucide-vue-next";
+import { Plus, Edit2, FileText } from "lucide-vue-next";
 
 const props = withDefaults(
   defineProps<{
@@ -203,6 +203,13 @@ watch(searchQuery, () => {
           >
             <Edit2 :size="15" />
             {{ t("admin-productions.editTags") }}
+          </NuxtLink>
+          <NuxtLink
+            :to="ROUTES.admin.productions.csvImports"
+            class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-secondary border-2 border-secondary text-secondary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-secondary transition"
+          >
+            <FileText :size="15" />
+            {{ t("admin.csvImport.button") }}
           </NuxtLink>
 
           <NuxtLink
