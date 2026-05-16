@@ -37,7 +37,7 @@ const setSlide = (index: number) => {
         v-if="images.length > 1"
         @click="prevSlide"
         class="shrink-0 text-foreground/40 hover:text-accent p-2 rounded-full transition-colors outline-none"
-        aria-label="Vorige afbeelding"
+        :aria-label="t('production.gallery_nav.prev')"
       >
         <ChevronLeft :size="28" stroke-width="2.5" />
       </button>
@@ -69,7 +69,9 @@ const setSlide = (index: number) => {
             :class="
               currentSlide === index ? 'bg-white w-6' : 'bg-white/40 w-1.5'
             "
-            :aria-label="`Ga naar dia ${index + 1}`"
+            :aria-label="
+              t('production.gallery_nav.go_to_slide', { slide: index + 1 })
+            "
           ></button>
         </div>
       </div>
@@ -78,7 +80,7 @@ const setSlide = (index: number) => {
         v-if="images.length > 1"
         @click="nextSlide"
         class="shrink-0 text-foreground/40 hover:text-accent p-2 rounded-full transition-colors outline-none"
-        aria-label="Volgende afbeelding"
+        aria-label="t('production.gallery_nav.next')"
       >
         <ChevronRight :size="28" stroke-width="2.5" />
       </button>

@@ -159,7 +159,12 @@
     "credits": "Credits",
     "doors": "doors",
     "break": "intermission",
-    "gallery": "gallery"
+    "gallery": "gallery",
+    "gallery_nav": {
+      "prev": "Previous image",
+      "next": "Next image",
+      "go_to_slide": "Go to slide {slide}"
+    }
   },
   "general": {
     "back": "Back",

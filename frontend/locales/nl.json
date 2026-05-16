@@ -160,7 +160,12 @@
     "credits": "Credits",
     "doors": "deuren open",
     "break": "pauze",
-    "gallery": "galerij"
+    "gallery": "galerij",
+    "gallery_nav": {
+      "prev": "Vorige afbeelding",
+      "next": "Volgende afbeelding",
+      "go_to_slide": "Ga naar dia {slide}"
+    }
   },
   "general": {
     "back": "Terug",
