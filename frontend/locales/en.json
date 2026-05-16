@@ -467,7 +467,12 @@
       "typeToSearch": "Type to search locations...",
       "locationPlaceholder": "Search or create a location...",
       "noDateYet": "No date set yet",
-      "empty": "No events yet"
+      "empty": "No events yet",
+      "prices": {
+        "title": "Prijzen",
+        "empty": "Nog geen prijzen",
+        "add": "Nieuwe prijs"
+      }
     },
     "media": {
       "title": "Title",

@@ -465,14 +465,14 @@ function fromDatetimeLocalRequired(val: string): string {
         <label
           class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.events.prices") }}
+          {{ t("admin-productions.events.prices.title") }}
         </label>
         <button
           type="button"
           class="text-[10px] font-bold uppercase text-accent hover:underline"
           @click="addPrice"
         >
-          + {{ t("admin-productions.events.addPrice") }}
+          + {{ t("admin-productions.events.prices.add") }}
         </button>
       </div>
 
@@ -563,7 +563,7 @@ function fromDatetimeLocalRequired(val: string): string {
           v-if="activePrices.length === 0"
           class="text-[10px] text-muted-foreground italic"
         >
-          {{ t("admin-productions.events.noPrices") }}
+          {{ t("admin-productions.events.prices.empty") }}
         </p>
       </div>
     </div>
