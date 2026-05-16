@@ -439,16 +439,14 @@ watch(title, updateTitleScrollable);
 
       <section
         v-else-if="linkedProductions && linkedProductions.length > 0"
-        class="page-container pb-14 border-t border-gray-100 dark:border-[#2e3347]/30 pt-10"
+        class="page-container pb-14 pt-10"
       >
         <div class="md:pl-10 w-full">
           <div class="mb-6">
             <h2
               class="font-brand font-black text-2xl lg:text-3xl uppercase tracking-tighter italic text-foreground"
             >
-              {{
-                t("stories.relatedProductions", "Gerelateerde voorstellingen")
-              }}
+              {{ t("stories.relatedProductions") }}
             </h2>
           </div>
 
@@ -470,11 +468,11 @@ watch(title, updateTitleScrollable);
               @click="loadMoreProductions"
             >
               <span v-if="productionsStatus === 'pending'">{{
-                t("general.loading", "Laden...")
+                t("stories.loading")
               }}</span>
-              <span v-else>{{
-                t("general.showAll", "Toon alle voorstellingen")
-              }}</span>
+              <span v-else>
+                {{ t("general.showMore") }}
+              </span>
             </button>
           </div>
         </div>

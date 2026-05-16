@@ -80,6 +80,7 @@
     "darkMode": "Dark mode",
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
     "sortLabel": "Sort",
+    "relatedProductions": "Related productions",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
