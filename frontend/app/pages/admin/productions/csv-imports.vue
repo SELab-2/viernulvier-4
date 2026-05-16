@@ -1,7 +1,7 @@
 <!--
-  pages/admin/csv-imports.vue
-
-  Admin CSV imports page.
+  pages/admin/productions/csv-imports.vue
+  =====================================
+  Admin CSV imports page under productions.
 
   Provides CSV import tools for multiple targets:
     - productions
@@ -9,6 +9,8 @@
     - tags
     - prices
 
+  Note: SSR is disabled for this page because the CSV upload
+  components rely on browser-only APIs (File API, DOM access).
 -->
 
 <script setup lang="ts">
@@ -28,6 +30,12 @@ const { t } = useI18n();
       >
         ← {{ t("admin.back") }}
       </NuxtLink>
+
+      <h1
+        class="font-brand font-black text-2xl uppercase tracking-tight text-foreground truncate"
+      >
+        {{ t("admin.csvImport.label") }}
+      </h1>
 
       <div class="space-y-8">
         <AdminCsvImportCard target="productions" />
