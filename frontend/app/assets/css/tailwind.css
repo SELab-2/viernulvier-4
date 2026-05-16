@@ -522,6 +522,10 @@
     @apply mt-4 max-w-xl;
     @apply font-brand font-black text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground;
   }
+
+  .subtitle {
+    @apply font-brand font-black text-xl lg:text-2xl uppercase tracking-tighter italic text-foreground;
+  }
 }
 /* ── Calendar component ──────────────────────────────────────────────────────
    Used by components/calendar.vue + components/calendar/*.vue

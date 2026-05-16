@@ -137,6 +137,17 @@ export class ProductionDatabaseService {
       productionPrefix,
     );
 
+    // Filter by blog to get all productions that contain a certain blog.
+    if (productionFilters.blog_id) {
+      conditions.push(
+        `EXISTS (
+          SELECT 1 FROM production_blogs pb
+          WHERE pb.production_id = p.id 
+          AND pb.blog_id = ${param(productionFilters.blog_id)}
+        )`,
+      );
+    }
+
     // Filter by either artist or title. The trgm extension in psql
     if (productionFilters.titelOrArtist) {
       const searchTerm = productionFilters.titelOrArtist;

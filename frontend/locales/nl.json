@@ -81,6 +81,7 @@
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
     "sortLabel": "Sorteer",
+    "relatedProductions": "Gerelateerde producties",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -159,7 +160,12 @@
     "credits": "Credits",
     "doors": "deuren open",
     "break": "pauze",
-    "gallery": "galerij"
+    "gallery": "galerij",
+    "gallery_nav": {
+      "prev": "Vorige afbeelding",
+      "next": "Volgende afbeelding",
+      "go_to_slide": "Ga naar dia {slide}"
+    }
   },
   "general": {
     "back": "Terug",

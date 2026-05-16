@@ -29,40 +29,36 @@ const setSlide = (index: number) => {
 </script>
 
 <template>
-  <div v-if="images && images.length > 0" class="my-16">
-    <h2 class="text-[16px] uppercase font-black mb-6 tracking-widest">
-      {{ t("production.gallery") }}
-    </h2>
-
+  <div class="w-full">
     <div
-      class="relative group overflow-hidden rounded-2xl bg-gray-100 dark:bg-white/5"
+      class="flex items-center gap-2 sm:gap-4 md:gap-6 px-4 sm:px-12 md:px-16"
     >
-      <div class="aspect-[2/1] w-full overflow-hidden">
-        <MediaDisplay
-          :id="productionId"
-          :src="images[currentSlide] ?? null"
-          size="fill"
-          :rounded="false"
-          class="w-full h-full object-cover"
-        />
-      </div>
+      <button
+        v-if="images.length > 1"
+        @click="prevSlide"
+        class="shrink-0 text-foreground/40 hover:text-accent p-2 rounded-full transition-colors outline-none"
+        :aria-label="t('production.gallery_nav.prev')"
+      >
+        <ChevronLeft :size="28" stroke-width="2.5" />
+      </button>
 
-      <template v-if="images.length > 1">
-        <button
-          @click="prevSlide"
-          class="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
+      <div
+        class="flex-1 relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-white/5"
+      >
+        <div
+          class="aspect-[16/9] w-full overflow-hidden flex items-center justify-center"
         >
-          <ChevronLeft :size="24" />
-        </button>
-
-        <button
-          @click="nextSlide"
-          class="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100"
-        >
-          <ChevronRight :size="24" />
-        </button>
+          <MediaDisplay
+            :id="productionId"
+            :src="images[currentSlide] ?? null"
+            size="fill"
+            :rounded="false"
+            class="w-full h-full object-contain"
+          />
+        </div>
 
         <div
+          v-if="images.length > 1"
           class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2"
         >
           <button
@@ -73,9 +69,21 @@ const setSlide = (index: number) => {
             :class="
               currentSlide === index ? 'bg-white w-6' : 'bg-white/40 w-1.5'
             "
+            :aria-label="
+              t('production.gallery_nav.go_to_slide', { slide: index + 1 })
+            "
           ></button>
         </div>
-      </template>
+      </div>
+
+      <button
+        v-if="images.length > 1"
+        @click="nextSlide"
+        class="shrink-0 text-foreground/40 hover:text-accent p-2 rounded-full transition-colors outline-none"
+        aria-label="t('production.gallery_nav.next')"
+      >
+        <ChevronRight :size="28" stroke-width="2.5" />
+      </button>
     </div>
 
     <div class="mt-4 flex justify-center">
