@@ -447,6 +447,12 @@
       "events": "Events",
       "series": "Series"
     },
+    "batch": {
+      "toggle": "Batch Edit",
+      "mode-label": "Batch Edit Mode",
+      "selected": "{count} selected",
+      "proceed": "Go to Batch Edit"
+    },
     "create-title": "New production",
     "edit-title": "Edit production",
     "events": {

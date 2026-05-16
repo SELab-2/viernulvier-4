@@ -449,6 +449,12 @@
       "events": "Evenementen",
       "series": "Series"
     },
+    "batch": {
+      "toggle": "Batchbewerking",
+      "mode-label": "Batchbewerkingsmodus",
+      "selected": "{count} geselecteerd",
+      "proceed": "Ga naar batchbewerking"
+    },
     "create-title": "Nieuwe productie",
     "edit-title": "Productie bewerken",
     "events": {

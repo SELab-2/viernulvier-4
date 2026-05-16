@@ -1,12 +1,19 @@
 <!--
+  ProductionListViewItem.vue
+
   This component represents a single item in the production list view.
   It displays the production's title, date range, and associated tags.
 
   Modes:
-- Public: media display + title + artist + date range + tags
-- Admin:
-  * same as public but the tile itself is not clickable.
-  * edit / delete buttons OR warning button if production has events from the future.
+  - Public: media display + title + artist + date range + tags
+  - Admin:
+    * same as public but the tile itself is not clickable.
+    * edit / delete buttons OR warning button if production has events from the future.
+  - Admin + Batch Edit Mode:
+    * Edit/delete actions are hidden; warning button stays visible.
+    * Selectable productions show a checkbox in place of the action buttons.
+    * Future productions remain non-selectable (consistent with non-editable/non-deletable).
+    * The card shows a highlighted selected state when chosen.
 -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
@@ -17,14 +24,18 @@ import { useEventApi } from "~/composables/useEventApi";
 import { ROUTES } from "~/utils/routes";
 import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
+import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
+import { Check } from "lucide-vue-next";
 
 const props = withDefaults(
   defineProps<{
     productionView: ProductionView;
     isAdmin?: boolean;
+    isBatchMode?: boolean;
   }>(),
   {
     isAdmin: false,
+    isBatchMode: false,
   },
 );
 
@@ -44,6 +55,10 @@ const mainCrop = computed(() => {
 const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
 const { getMainImageCrop } = useGallery();
+
+const { isSelected, toggleSelection } = useProductionBatchEdit();
+
+const selected = computed(() => isSelected(props.productionView));
 
 async function loadTags() {
   if (!props.productionView?.id) return;
@@ -119,6 +134,9 @@ const isFutureProduction = computed(() => {
   return latest > now;
 });
 
+// Future productions are not selectable in batch mode — consistent with them being non-editable/non-deletable
+const isSelectableInBatchMode = computed(() => !isFutureProduction.value);
+
 onMounted(() => {
   loadEvents();
   loadTags();
@@ -136,20 +154,39 @@ watch(
 
 // reload tags if language changes
 watch(locale, () => loadTags());
+
+// ── Batch mode interaction ───────────────────────────────────────────────
+
+function handleClick() {
+  if (props.isBatchMode && isSelectableInBatchMode.value) {
+    toggleSelection(props.productionView);
+  }
+}
 </script>
 
 <template>
   <component
-    :is="props.isAdmin ? 'div' : 'NuxtLink'"
+    :is="props.isAdmin || props.isBatchMode ? 'div' : 'NuxtLink'"
     :to="
-      !props.isAdmin
+      !props.isAdmin && !props.isBatchMode
         ? ROUTES.productions.byId(props.productionView.id)
         : undefined
     "
     class="group block"
+    :class="{ 'cursor-pointer': props.isBatchMode && isSelectableInBatchMode }"
+    @click="handleClick"
   >
     <div
-      class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
+      class="flex items-center gap-4 p-4 rounded-xl border bg-card transition-colors transition-shadow duration-150"
+      :class="[
+        props.isBatchMode
+          ? selected
+            ? 'border-primary bg-primary/5 shadow-[0_0_0_2px_hsl(var(--primary)/0.25)]'
+            : isSelectableInBatchMode
+              ? 'border-card-border hover:border-primary/40 hover:bg-card-hover'
+              : 'border-card-border cursor-not-allowed'
+          : 'border-card-border hover:border-ring hover:shadow-sm hover:bg-card-hover',
+      ]"
     >
       <MediaDisplay
         :id="props.productionView.id"
@@ -164,7 +201,8 @@ watch(locale, () => loadTags());
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 max-w-[60%]">
             <h3
-              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate"
+              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate transition-colors"
+              :class="{ 'text-primary': props.isBatchMode && selected }"
             >
               {{ props.productionView.titel }}
             </h3>
@@ -201,30 +239,60 @@ watch(locale, () => loadTags());
             </p>
           </div>
 
-          <!-- Admin buttons -->
+          <!-- Right-side actions -->
           <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
-            <!-- WARNING -->
-            <AdminWarningButton
-              v-if="isFutureProduction"
-              :title="t('admin-productions.warning-title')"
-              :description="t('admin-productions.warning-description')"
-            />
-
-            <!-- NORMAL ACTIONS -->
-            <template v-else>
-              <NuxtLink
-                :to="
-                  ROUTES.admin.productions.edit(Number(props.productionView.id))
+            <!-- BATCH MODE: selectable production → show checkbox -->
+            <template v-if="props.isBatchMode && isSelectableInBatchMode">
+              <div
+                class="flex items-center justify-center w-6 h-6 rounded-md border-2 transition-all duration-150"
+                :class="
+                  selected
+                    ? 'bg-primary border-primary text-primary-foreground'
+                    : 'border-muted-foreground/30 bg-transparent'
                 "
-                @click.stop
+                aria-hidden="true"
               >
-                <AdminEditButton label="Edit production" />
-              </NuxtLink>
+                <Transition name="check">
+                  <Check v-if="selected" :size="13" stroke-width="3" />
+                </Transition>
+              </div>
+            </template>
 
-              <AdminDeleteButton
-                label="Delete production"
-                @click.stop="emit('delete', props.productionView)"
+            <!-- BATCH MODE: future/warning production → show warning button, no checkbox -->
+            <template v-else-if="props.isBatchMode && !isSelectableInBatchMode">
+              <AdminWarningButton
+                :title="t('admin-productions.warning-title')"
+                :description="t('admin-productions.warning-description')"
               />
+            </template>
+
+            <!-- NORMAL ADMIN MODE -->
+            <template v-else>
+              <!-- WARNING -->
+              <AdminWarningButton
+                v-if="isFutureProduction"
+                :title="t('admin-productions.warning-title')"
+                :description="t('admin-productions.warning-description')"
+              />
+
+              <!-- NORMAL ACTIONS -->
+              <template v-else>
+                <NuxtLink
+                  :to="
+                    ROUTES.admin.productions.edit(
+                      Number(props.productionView.id),
+                    )
+                  "
+                  @click.stop
+                >
+                  <AdminEditButton label="Edit production" />
+                </NuxtLink>
+
+                <AdminDeleteButton
+                  label="Delete production"
+                  @click.stop="emit('delete', props.productionView)"
+                />
+              </template>
             </template>
           </div>
         </div>
@@ -256,5 +324,25 @@ watch(locale, () => loadTags());
 }
 .group:hover {
   text-decoration: none;
+}
+
+/* Checkmark pop-in */
+.check-enter-active {
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.1s;
+}
+.check-enter-from {
+  transform: scale(0);
+  opacity: 0;
+}
+.check-leave-active {
+  transition:
+    transform 0.1s ease,
+    opacity 0.1s;
+}
+.check-leave-to {
+  transform: scale(0);
+  opacity: 0;
 }
 </style>

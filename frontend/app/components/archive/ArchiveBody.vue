@@ -1,22 +1,24 @@
 <!--
-ArchiveBody.vue
+  ArchiveBody.vue
 
-Main container component for the archive page.
-Responsible for:
-- Fetching paginated productions from the API
-- Reacting to filters (search, tags, date, sorting, language)
-- Handling loading, error, and empty states
-- Rendering results in grid or list view
+  Main container component for the archive page.
+  Responsible for:
+  - Fetching paginated productions from the API
+  - Reacting to filters (search, tags, date, sorting, language)
+  - Handling loading, error, and empty states
+  - Rendering results in grid or list view
+  - (Admin) Batch edit mode: selection, visual edit-mode indicator, floating panel
 
-Uses:
-- useArchiveView: shared archive state (filters, pagination, view mode)
-- useProductionApi: API communication
-TODO: The pagination logic is not what I want to be defined here and should be changed in the future.
-      It should be defined elsewhere to be more clear and to prevent bugs that are hard to find.
-      By pagination logic I mean the logic that handles the parameters that are used to know on witch page the user is.
+  Uses:
+  - useArchiveView: shared archive state (filters, pagination, view mode)
+  - useProductionApi: API communication
+  - useProductionBatchEdit: batch selection state
+  TODO: The pagination logic is not what I want to be defined here and should be changed in the future.
+        It should be defined elsewhere to be more clear and to prevent bugs that are hard to find.
+        By pagination logic I mean the logic that handles the parameters that are used to know on witch page the user is.
 -->
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, watch, onMounted, onUnmounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useProductionApi } from "../../composables/useProductionApi";
 import type { ProductionView, PaginatedResponse } from "@repo/common";
@@ -25,7 +27,8 @@ import ProductionGridViewItem from "../ProductionGridViewItem.vue";
 import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
-import { Plus, Edit2 } from "lucide-vue-next";
+import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
+import { Plus, Layers } from "lucide-vue-next";
 
 const props = withDefaults(
   defineProps<{
@@ -55,6 +58,9 @@ const {
 } = useArchiveView();
 const { getAll } = useProductionApi();
 const { t, locale } = useI18n();
+
+const { isBatchEditMode, toggleBatchEditMode, disableBatchEditMode } =
+  useProductionBatchEdit();
 
 const PAGE_SIZE = 15; // number of items per page
 
@@ -126,6 +132,8 @@ function resetAndLoad() {
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 onUnmounted(() => {
   if (searchTimer) clearTimeout(searchTimer);
+  // Always clean up batch edit mode when leaving the page
+  disableBatchEditMode();
 });
 
 onMounted(() => {
@@ -180,7 +188,7 @@ watch(searchQuery, () => {
 </script>
 
 <template>
-  <section class="w-full bg-background">
+  <section class="w-full bg-background relative">
     <div class="page-container py-6">
       <!-- Results count + pagination -->
       <div class="flex items-center justify-between mb-6">
@@ -196,15 +204,35 @@ watch(searchQuery, () => {
         />
 
         <ArchivePagination v-if="!isAdmin" />
-        <div v-else class="flex gap-3">
-          <NuxtLink
-            :to="ROUTES.admin.productions.editTags"
-            class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-primary border-2 border-primary text-primary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-primary transition"
-          >
-            <Edit2 :size="15" />
-            {{ t("admin-productions.editTags") }}
-          </NuxtLink>
 
+        <!-- Admin toolbar -->
+        <div v-else class="flex gap-3">
+          <!-- Batch edit pill toggle -->
+          <button
+            class="inline-flex items-center gap-2.5 px-3 py-2 rounded-lg border-2 font-brand font-black text-[11px] uppercase tracking-widest leading-none transition-colors duration-200"
+            :class="
+              isBatchEditMode
+                ? 'border-primary/30 bg-primary/5 text-foreground'
+                : 'border-border bg-transparent text-foreground hover:border-primary/30'
+            "
+            @click="toggleBatchEditMode"
+          >
+            <Layers :size="13" class="text-muted-foreground shrink-0" />
+            {{ t("admin-productions.batch.toggle") }}
+            <!-- Pill track -->
+            <span
+              class="relative inline-flex items-center w-9 h-5 rounded-full transition-colors duration-300 shrink-0"
+              :class="isBatchEditMode ? 'bg-emerald-500' : 'bg-rose-400'"
+            >
+              <!-- Sliding knob -->
+              <span
+                class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all duration-300"
+                :class="isBatchEditMode ? 'left-[18px]' : 'left-0.5'"
+              />
+            </span>
+          </button>
+
+          <!-- New production -->
           <NuxtLink
             :to="ROUTES.admin.productions.create"
             class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
@@ -268,6 +296,7 @@ watch(searchQuery, () => {
           :key="production.id"
           :productionView="production"
           :is-admin="props.isAdmin"
+          :is-batch-mode="props.isAdmin && isBatchEditMode"
         />
       </div>
 
@@ -277,6 +306,9 @@ watch(searchQuery, () => {
         <ArchivePagination />
       </div>
     </div>
+
+    <!-- Floating batch panel (only visible in admin batch mode) -->
+    <ArchiveBatchSelectedPanel v-if="isAdmin" />
   </section>
 </template>
 
