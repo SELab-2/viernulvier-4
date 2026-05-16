@@ -132,8 +132,12 @@ function resetAndLoad() {
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 onUnmounted(() => {
   if (searchTimer) clearTimeout(searchTimer);
-  // Always clean up batch edit mode when leaving the page
-  disableBatchEditMode();
+  // Only reset batch edit mode when leaving to somewhere other than the
+  // batch edit page. If the user clicked "Proceed", we must keep the
+  // selection alive so the batch edit page can read it from the singleton.
+  if (router.currentRoute.value.path !== ROUTES.admin.productions.batchEdit) {
+    disableBatchEditMode();
+  }
 });
 
 onMounted(() => {
