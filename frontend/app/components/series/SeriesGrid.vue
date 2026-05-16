@@ -31,17 +31,6 @@ const grid = computed(() =>
 </script>
 
 <template>
-  <!-- Header -->
-  <div class="flex items-center gap-3 mb-4">
-    <span class="text-[20px] font-bold uppercase shrink-0">{{
-      t("nav.series")
-    }}</span>
-    <span class="flex-1 h-px bg-border" />
-    <span class="text-[11px] text-muted-foreground shrink-0">
-      {{ items.length }} {{ t("nav.series") }}
-    </span>
-  </div>
-
   <!-- Grid -->
   <div v-if="items.length">
     <div :class="grid" class="w-full">
