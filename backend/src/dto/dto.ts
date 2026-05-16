@@ -21,10 +21,12 @@ import {
   FilterLocationSchema,
   FilterPrintItemSchema,
   FilterProductionSchema,
+  FilterSeriesSchema,
   FilterTagSchema,
   LanguageQuerySchema,
   LocationSchema,
   LocationViewSchema,
+  LoginSchema,
   MediaCropSchema,
   MediaGallerySchema,
   MediaItemSchema,
@@ -116,6 +118,7 @@ export class ReplacePriceDto extends createZodDto(ReplacePriceSchema) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
+export class LoginDto extends createZodDto(LoginSchema) {}
 export class UpdateAccountDto extends createZodDto(UpdateAccountSchema) {}
 export class PublicAccountDto extends createZodDto(PublicAccountSchema) {}
 export class AccountDto extends createZodDto(AccountSchema) {}
@@ -165,6 +168,7 @@ export class SeriesViewDto extends createZodDto(SeriesViewSchema) {}
 export class CreateSeriesDto extends createZodDto(CreateSeriesSchema) {}
 export class ModifySeriesDto extends createZodDto(ModifySeriesSchema) {}
 export class ReplaceSeriesDto extends createZodDto(ReplaceSeriesSchema) {}
+export class FilterSeriesDto extends createZodDto(FilterSeriesSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {

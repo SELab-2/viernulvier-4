@@ -44,19 +44,20 @@ export class ApiKeyDatabaseService {
   /**
    * Generates, inserts the api key into the database and returns an api key.
    * This function should only be allowed to be used by a "superuser"
+   * @param superKey whether the generated key should be a super key or not. default: false
    * @returns the newly generated apiKey.
    */
-  async generateApiKey(): Promise<ApiKeyDto> {
+  async generateApiKey(superKey: boolean = false): Promise<ApiKeyDto> {
     // Generate secure random key
     const key = crypto.randomBytes(32).toString("hex");
 
     const query = `
-      INSERT INTO api_keys (key, active)
-      VALUES ($1, TRUE)
-      RETURNING id, key, active
+      INSERT INTO api_keys (key, active, super_key)
+      VALUES ($1, TRUE, $2)
+      RETURNING id, key, active, super_key
     `;
 
-    const result = await this.db.query<ApiKeyDto>(query, [key]);
+    const result = await this.db.query<ApiKeyDto>(query, [key, superKey]);
 
     return result[0];
   }

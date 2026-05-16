@@ -21,14 +21,14 @@ import { computed } from "vue";
 import type { CreateAccount } from "@repo/common";
 import type { FormField } from "../../types/FormField";
 
-// type AccountRole = "Admin" | "Super Admin";
+type AccountRole = "Admin" | "Super Admin";
 
 const { t } = useI18n();
 interface AccountFormModel {
   username: string;
   password: string;
   confirmPassword: string;
-  // role: AccountRole;
+  role: AccountRole;
 }
 
 const props = withDefaults(
@@ -40,7 +40,7 @@ const props = withDefaults(
       username: "",
       password: "",
       confirmPassword: "",
-      // role: "Admin" as AccountRole,
+      role: "Admin" as AccountRole,
     }),
   },
 );
@@ -88,17 +88,18 @@ const fields = computed<FormField[]>(() => [
       minLength: 8, // enforce minimum length for better security, can be adjusted as needed
     },
   },
-  /*
   {
     component: "BaseSelect",
     name: "role",
     props: {
       label: t("accounts.role"),
-      options: [t("accounts.admin"), t("accounts.superAdmin")],
+      options: [
+        { label: t("accounts.admin"), value: "Admin" },
+        { label: t("accounts.superAdmin"), value: "Super Admin" },
+      ],
       required: true,
     },
   },
-  */
 ]);
 
 function handleFormSubmit(formData: Record<string, any>) {
@@ -114,7 +115,7 @@ function handleFormSubmit(formData: Record<string, any>) {
   const payload: CreateAccount = {
     username: String(formData.username ?? ""),
     password: String(formData.password ?? ""),
-    // superAdmin: formData.role === "Super Admin",
+    superAdmin: formData.role === "Super Admin",
   };
 
   emit("submit", payload);

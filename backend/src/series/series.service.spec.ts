@@ -77,9 +77,21 @@ describe("SeriesService", () => {
   describe("getSeries", () => {
     it("should fetch a paginated list of series", async () => {
       mockSeriesDbService.getSeries.mockResolvedValue(mockPaginatedSeries);
-      const result = await service.getSeries(mockPaginationFilter);
+      const result = await service.getSeries(
+        mockPaginationFilter,
+        {
+          is_suggestion: false,
+        },
+        undefined,
+      );
       expect(result).toEqual(mockPaginatedSeries);
-      expect(dbService.getSeries).toHaveBeenCalledWith(mockPaginationFilter);
+      expect(dbService.getSeries).toHaveBeenCalledWith(
+        mockPaginationFilter,
+        {
+          is_suggestion: false,
+        },
+        undefined,
+      );
     });
   });
 

@@ -1,14 +1,24 @@
-<script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from "vue";
+<script lang="ts" setup>
+import { computed, nextTick, onMounted, ref } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
 
+/** validation that id is only numbers */
+definePageMeta({
+  validate: async (route) => {
+    const raw = Array.isArray(route.params.id)
+      ? route.params.id[0]
+      : route.params.id;
+    return /^\d+$/.test(raw as string);
+  },
+});
+
 const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
-const { getMainImageCrop } = useGallery();
+const { getMainImageCrop, getCarouselImageCrops } = useGallery();
 const route = useRoute();
 
 const goBack = () => {
@@ -28,18 +38,40 @@ const productionId = computed(() => {
 });
 
 /** Get the main production data */
-const { data: production } = await useAsyncData<ProductionView>(
+const {
+  data: production,
+  status,
+  error,
+} = useAsyncData<ProductionView>(
   `prod-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null;
     const res = await getById(productionId.value, locale.value as any);
-    return (res as any)?.data ?? res;
+    return (res as any)?.data;
   },
   { watch: [productionId, locale] },
 );
 
+// Watch the production fetch to see if everything is fetched correctly.
+watch(
+  [status, error, production],
+  ([newStatus, newError, newProd]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
+    if (newStatus === "success" && !newProd) {
+      showError({
+        statusCode: 404,
+        statusMessage: "Production not found",
+        fatal: true,
+      });
+    } else if (newError) {
+      showError({ statusCode: 500, statusMessage: "API Error", fatal: true });
+    }
+  },
+  { immediate: true },
+);
+
 /** Get tags and remove empty ones */
-const { data: tags } = await useAsyncData<TagView[]>(
+const { data: tags } = useAsyncData<TagView[]>(
   `prod-tags-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return [];
@@ -54,7 +86,7 @@ const { data: tags } = await useAsyncData<TagView[]>(
 const { getAll: getAllEvents, getLocation, getPrices } = useEventApi();
 
 /** Get all events with their location and prices */
-const { data: events } = await useAsyncData(
+const { data: events } = useAsyncData(
   `events-detailed-${route.params.id}`,
   async () => {
     if (!productionId.value) return [];
@@ -91,7 +123,7 @@ const { data: events } = await useAsyncData(
 );
 
 /** Get blogs/stories */
-const { data: stories } = await useAsyncData(
+const { data: stories } = useAsyncData(
   `prod-stories-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return [];
@@ -104,9 +136,7 @@ const { data: stories } = await useAsyncData(
 );
 
 /** Gets the production gallery. Handles API nesting and page-specific data fetching.*/
-const { data: gallery } = await useAsyncData<
-  GalleryWithItems<ItemViewWithCrops>
->(
+const { data: gallery } = useAsyncData<GalleryWithItems<ItemViewWithCrops>>(
   `gallery-v3-${route.params.id}-${locale.value}`,
   async () => {
     if (!productionId.value) return null;
@@ -119,6 +149,13 @@ const { data: gallery } = await useAsyncData<
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
+});
+
+// carousel
+
+const carouselImages = computed(() => {
+  if (!gallery.value || !gallery.value.items) return [];
+  return getCarouselImageCrops(gallery.value, "hd_ready"); // of FE3_2by1
 });
 
 /**
@@ -173,21 +210,21 @@ onBeforeUnmount(() => {
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
     <section
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
       :class="{ 'image-overlay text-white': headerCrop }"
+      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
     >
       <MediaDisplay
-        class="absolute inset-0 w-full h-full object-cover z-0"
         :id="production.id"
         :src="headerCrop"
+        class="absolute inset-0 w-full h-full object-cover z-0"
       />
 
       <div class="relative z-10 page-container pb-12">
         <div class="flex items-center gap-4 mb-8">
           <button
-            @click="goBack()"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
             :class="headerCrop ? 'text-white' : 'text-foreground'"
+            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
+            @click="goBack()"
           >
             <ChevronLeft :size="14" stroke-width="3" />
             {{ t("general.back") }}
@@ -195,12 +232,12 @@ onBeforeUnmount(() => {
 
           <span
             v-if="isValid(production.performer_type)"
-            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
             :class="
               headerCrop
                 ? 'border-white text-white'
                 : 'border-foreground text-foreground'
             "
+            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
           >
             {{ production.performer_type }}
           </span>
@@ -208,7 +245,6 @@ onBeforeUnmount(() => {
 
         <div>
           <h1
-            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
             :class="[
               production.titel.length > 35
                 ? 'text-4xl lg:text-6xl'
@@ -216,6 +252,7 @@ onBeforeUnmount(() => {
                   ? 'text-5xl lg:text-7xl'
                   : 'text-6xl lg:text-8xl',
             ]"
+            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
           >
             {{ production.titel }}
           </h1>
@@ -259,20 +296,20 @@ onBeforeUnmount(() => {
 
           <div
             ref="descriptionRef"
-            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
             :class="[
               isExpanded
                 ? 'line-clamp-none'
                 : 'line-clamp-[6] md:line-clamp-[8]',
               showReadMoreButton && !isExpanded ? 'should-fade' : '',
             ]"
+            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
             v-html="fullDescription"
           ></div>
 
           <button
             v-if="showReadMoreButton || isExpanded"
-            @click="isExpanded = !isExpanded"
             class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+            @click="isExpanded = !isExpanded"
           >
             {{ isExpanded ? t("general.readLess") : t("general.readMore") }}
           </button>
@@ -294,18 +331,18 @@ onBeforeUnmount(() => {
         <div v-if="isValid(production.description2)" class="mb-16">
           <div
             ref="description2Ref"
-            class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
             :class="[
               isExpanded2 ? 'line-clamp-none' : 'line-clamp-[6]',
               showReadMoreButton2 && !isExpanded2 ? 'should-fade' : '',
             ]"
+            class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
             v-html="cleanText(production.description2)"
           ></div>
 
           <button
             v-if="showReadMoreButton2 || isExpanded2"
-            @click="isExpanded2 = !isExpanded2"
             class="mt-4 ml-8 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
+            @click="isExpanded2 = !isExpanded2"
           >
             {{ isExpanded2 ? t("general.readLess") : t("general.readMore") }}
           </button>
@@ -317,6 +354,12 @@ onBeforeUnmount(() => {
           </h1>
           <ProductionStoryListView :stories="stories" />
         </div>
+
+        <ProductionGallery
+          v-if="carouselImages.length > 0"
+          :images="carouselImages"
+          :production-id="production.id"
+        />
 
         <div
           v-if="isValid(production.credits)"

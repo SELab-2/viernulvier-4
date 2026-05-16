@@ -20,6 +20,10 @@ export const ROUTES = {
   events: {
     base: "/events",
   },
+  series: {
+    base: "/series",
+    byId: (id: number) => `/series/${id}`,
+  },
   prints: {
     base: "/prints",
   },
@@ -36,6 +40,9 @@ export const ROUTES = {
       create: "/admin/productions/create",
       edit: (id: number) => `/admin/productions/edit/${id}`,
       editTags: "/admin/productions/editTags",
+    },
+    series: {
+      base: "/admin/series",
     },
     stories: {
       base: "/admin/stories",

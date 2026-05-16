@@ -15,6 +15,7 @@ import {
 import { SeriesService } from "./series.service";
 import {
   CreateSeriesDto,
+  FilterSeriesDto,
   LanguageQueryDto,
   ModifySeriesDto,
   PaginationFilterDto,
@@ -34,6 +35,7 @@ import { ApiKeyGuard } from "../auth/authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateSeriesSchema,
+  FilterSeriesSchema,
   LanguageQuerySchema,
   ModifySeriesSchema,
   PaginatedResponse,
@@ -57,6 +59,7 @@ export class SeriesController {
    * Responds to GET /series
    * @param lang is the language filter
    * @param paginationFilter is the pagination parameters.
+   * @param seriesFilters filtering for series.
    * @returns Paginated SeriesDto objects
    */
   @ApiOperation({ summary: "Returns a paginated list of Series." })
@@ -66,10 +69,19 @@ export class SeriesController {
     @Query(new ZodValidationPipe(LanguageQuerySchema)) lang: LanguageQueryDto,
     @Query(new ZodValidationPipe(PaginationFilterSchema))
     paginationFilter: PaginationFilterDto,
+    @Query(new ZodValidationPipe(FilterSeriesSchema))
+    seriesFilters: FilterSeriesDto,
   ): Promise<PaginatedResponse<SeriesDto | SeriesViewDto>> {
     return this.ls.flattenByLanguage<
       PaginatedResponse<SeriesDto | SeriesViewDto>
-    >(await this.seriesService.getSeries(paginationFilter), lang.lang);
+    >(
+      await this.seriesService.getSeries(
+        paginationFilter,
+        seriesFilters,
+        lang.lang,
+      ),
+      lang.lang,
+    );
   }
 
   /**
