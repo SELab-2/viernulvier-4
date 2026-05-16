@@ -31,12 +31,6 @@ const { t } = useI18n();
         ← {{ t("admin.back") }}
       </NuxtLink>
 
-      <h1
-        class="font-brand font-black text-2xl uppercase tracking-tight text-foreground truncate"
-      >
-        {{ t("admin.csvImport.label") }}
-      </h1>
-
       <div class="space-y-8">
         <AdminCsvImportCard target="productions" />
         <AdminCsvImportCard target="tags" />
