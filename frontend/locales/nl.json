@@ -453,7 +453,8 @@
       "toggle": "Batchbewerking",
       "mode-label": "Batchbewerkingsmodus",
       "selected": "{count} geselecteerd",
-      "proceed": "Ga naar batchbewerking"
+      "proceed": "Ga naar batchbewerking",
+      "hint": "Selecteer producties die je wilt bewerken"
     },
     "create-title": "Nieuwe productie",
     "edit-title": "Productie bewerken",

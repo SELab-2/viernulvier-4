@@ -308,7 +308,7 @@ watch(searchQuery, () => {
     </div>
 
     <!-- Floating batch panel (only visible in admin batch mode) -->
-    <ArchiveBatchSelectedPanel v-if="isAdmin" />
+    <ArchiveBatchSelectedPanel v-if="isAdmin && isBatchEditMode" />
   </section>
 </template>
 

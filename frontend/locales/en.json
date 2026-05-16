@@ -451,7 +451,8 @@
       "toggle": "Batch Edit",
       "mode-label": "Batch Edit Mode",
       "selected": "{count} selected",
-      "proceed": "Go to Batch Edit"
+      "proceed": "Go to Batch Edit",
+      "hint": "Select productions you want to edit"
     },
     "create-title": "New production",
     "edit-title": "Edit production",

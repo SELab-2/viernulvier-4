@@ -27,7 +27,6 @@ const {
 <template>
   <Transition name="panel-slide">
     <div
-      v-if="hasSelections"
       class="fixed bottom-6 right-6 z-50 w-80 rounded-2xl border border-border bg-card shadow-2xl shadow-black/20 overflow-hidden"
     >
       <!-- Header -->
@@ -55,6 +54,21 @@ const {
       <!-- Body -->
       <Transition name="collapse">
         <div v-if="!isPanelCollapsed">
+          <!-- EMPTY STATE -->
+          <div v-if="!hasSelections" class="px-4 py-10 text-center">
+            <div class="flex flex-col items-center gap-3">
+              <div
+                class="flex items-center justify-center w-10 h-10 rounded-full bg-muted border border-border"
+              >
+                <Layers :size="18" class="text-muted-foreground" />
+              </div>
+              <p
+                class="text-sm font-brand font-black uppercase tracking-widest text-muted-foreground"
+              >
+                {{ t("admin-productions.batch.hint") }}
+              </p>
+            </div>
+          </div>
           <!-- Selected list -->
           <ul class="max-h-52 overflow-y-auto divide-y divide-border">
             <li
@@ -78,7 +92,10 @@ const {
           </ul>
 
           <!-- Footer CTA -->
-          <div class="px-4 py-3 border-t border-border">
+          <div
+            class="px-4 py-3 border-t border-border"
+            :class="{ 'opacity-40 pointer-events-none': !hasSelections }"
+          >
             <NuxtLink
               :to="ROUTES.admin.productions.batchEdit"
               class="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
