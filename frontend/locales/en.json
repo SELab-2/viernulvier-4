@@ -422,9 +422,6 @@
     "warning-title": "Future production",
     "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled."
   },
-  "admin-series": {
-    "header_title": "Series"
-  },
   "error": {
     "titleFallback": "Oops!",
     "subtitle": {

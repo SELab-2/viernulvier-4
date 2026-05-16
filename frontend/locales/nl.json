@@ -424,9 +424,6 @@
     "warning-title": "Toekomstige productie",
     "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld."
   },
-  "admin-series": {
-    "header_title": "Reeksen"
-  },
   "error": {
     "titleFallback": "Oeps!",
     "subtitle": {

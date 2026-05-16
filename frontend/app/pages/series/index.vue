@@ -106,7 +106,10 @@ onMounted(loadPage);
     class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
     <!-- Header -->
-    <SeriesHeader />
+    <PageHeader
+      :title="t('series.header_title')"
+      :description="t('series.header_subtitle')"
+    />
 
     <!-- Search -->
     <div class="w-full border-b border-border bg-background">
