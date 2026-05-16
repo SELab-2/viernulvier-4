@@ -200,7 +200,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-6xl mx-auto px-6 py-10 space-y-8">
+    <div class="page-container py-10 space-y-8">
       <!-- Back link -->
       <NuxtLink
         :to="ROUTES.admin.prints.base"

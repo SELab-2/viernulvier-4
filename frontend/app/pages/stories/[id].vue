@@ -51,10 +51,9 @@ const blogId = computed(() => {
   return isFinite(n) ? n : null;
 });
 
-// Data fetching
-
-/** Fetch the localised blog post. Reacts to blogId and locale changes. */
-const { data, pending, error } = await useAsyncData<BlogView | null>(
+/** Get the main blog data and handle API nesting */
+const { data, status, error } = useAsyncData<BlogView | null>(
+  // Data fetching
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
@@ -67,15 +66,28 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
   { watch: [blogId, locale] },
 );
 
+// Watch the blog fetch to see if everything is fetched correctly.
+watch(
+  [status, error, data],
+  ([newStatus, newError, newBlog]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
+    if (newStatus === "success" && !newBlog) {
+      showError({
+        statusCode: 404,
+        statusMessage: "Blog not found",
+        fatal: true,
+      });
+    } else if (newError) {
+      showError({ statusCode: 500, statusMessage: "API Error", fatal: true });
+    }
+  },
+  { immediate: true },
+);
+
 const blog = computed(() => data.value);
 
-/**
- * Fetch the media gallery for this blog.
- * We need:
- *  - the FE3_header crop for the hero image
- *  - the credits field on the first media item (shown below the article)
- */
-const { data: gallery } = await useAsyncData(
+/** Get the media gallery. */
+const { data: gallery } = useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
     if (!blogId.value) return null;
@@ -185,8 +197,11 @@ watch(title, updateTitleScrollable);
     v-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
-    <!-- Loading state -->
-    <div v-if="pending" class="min-h-screen flex items-center justify-center">
+    <!-- Loading -->
+    <div
+      v-if="status === 'pending'"
+      class="min-h-screen flex items-center justify-center"
+    >
       <svg
         class="w-6 h-6 animate-spin text-gray-400"
         fill="none"
@@ -293,8 +308,7 @@ watch(title, updateTitleScrollable);
               Uses a gradient so it fades in/out at the top and bottom.
             -->
             <div
-              aria-hidden="true"
-              class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
+              class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
                 background: linear-gradient(
                   to bottom,
@@ -303,6 +317,7 @@ watch(title, updateTitleScrollable);
                   transparent
                 );
               "
+              aria-hidden="true"
             />
 
             <div class="md:pl-10 w-full">

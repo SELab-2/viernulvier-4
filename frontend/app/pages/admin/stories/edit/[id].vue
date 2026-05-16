@@ -219,20 +219,21 @@ async function restoreToSaved() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="min-h-screen bg-background page-container py-10 space-y-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
       <!-- ── Top bar: back link + title + "Saved ✓" badge ─────────────── -->
       <div class="space-y-4">
         <NuxtLink
           :to="ROUTES.admin.stories.base"
-          class="inline-flex items-center gap-1.5 font-brand font-black text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          class="inline-flex items-center gap-1.5 font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
         >
           ← {{ t("admin.back") }}
         </NuxtLink>
 
-        <div class="flex items-start justify-between gap-4">
+        <!-- Title row -->
+        <div class="flex items-center gap-3 flex-wrap">
           <h1
-            class="font-brand font-black text-2xl uppercase tracking-tight text-foreground truncate flex-1"
+            class="font-brand font-black text-3xl uppercase tracking-tight text-foreground flex-1"
           >
             {{ t("admin.blogs.edit") }}
           </h1>
@@ -521,7 +522,8 @@ async function restoreToSaved() {
               {{ t("admin.blogs.preview.label") }}
             </span>
             <svg
-              class="w-4 h-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+              class="w-4 h-4 text-muted-foreground transition-transform duration-200"
+              :class="previewOpen ? 'rotate-180' : ''"
               fill="none"
               stroke="currentColor"
               stroke-width="2.5"

@@ -2,6 +2,7 @@
   "nav": {
     "home": "home",
     "archive": "archief",
+    "series": "reeksen",
     "stories": "verhalen",
     "series": "reeksen",
     "prints": "drukwerk",
@@ -9,7 +10,8 @@
     "events": "evenementen",
     "accounts": "accounts",
     "dashboard": "dashboard",
-    "logout": "uitloggen"
+    "logout": "uitloggen",
+    "tags": "tags"
   },
   "auth": {
     "confirmLogout": "Succesvol uitgelogd"
@@ -151,23 +153,26 @@
     "dateAndTime": "Datum & Tijd",
     "location": "Locatie",
     "price": "Prijs",
+    "showAll": "toon alle ({count})",
+    "hidePrices": "verberg prijzen",
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prijzen",
-    "hidePriceDetails": "verberg details",
     "doors": "deuren open",
-    "break": "pauze"
+    "break": "pauze",
+    "gallery": "galerij"
   },
   "general": {
     "back": "Terug",
     "readMore": "Lees meer",
     "readLess": "Lees minder",
     "showMore": "Toon meer",
+    "showMoreWithCount": "Toon meer ({count})",
     "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen.",
     "filters": "filters",
-    "close": "sluiten"
+    "close": "sluiten",
+    "results": "resultaten"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",
@@ -179,6 +184,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Beheer de accounts.",
+    "headerDescription": "Beheer, bewerk en controleer de accounts van de archiefbeheerders.",
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruikersnaam",
@@ -248,7 +254,7 @@
     "pagination": "Paginering",
     "page_label": "Pagina",
     "of_pages": "van {total}",
-    "add": "voeg toe"
+    "new": "Nieuw drukwerk"
   },
   "admin": {
     "back": "Terug",
@@ -413,7 +419,7 @@
   },
   "admin-productions": {
     "header_title": "Producties",
-    "create": "Nieuwe productie",
+    "new": "Nieuwe productie",
     "editTags": "Tags bewerken",
     "warning-title": "Toekomstige productie",
     "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld."
