@@ -17,14 +17,15 @@ import type { SeriesView } from "@repo/common";
 
 interface Props {
   items: [SeriesView, number][];
+  totalPages: number;
 }
 
 const props = defineProps<Props>();
 const { t } = useI18n();
 
 const grid = computed(() =>
-  props.items.length > 8
-    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 grid-rows-4 items-start"
+  props.totalPages > 1
+    ? "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 grid-rows-5 items-start"
     : "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4",
 );
 </script>

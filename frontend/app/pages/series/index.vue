@@ -125,7 +125,7 @@ onMounted(loadPage);
 
     <!-- Grid -->
     <div class="page-container py-8">
-      <SeriesGrid :items="series" />
+      <SeriesGrid :items="series" :total-pages="totalPages" />
 
       <!-- Pagination -->
       <div class="flex items-center justify-between mt-6">
