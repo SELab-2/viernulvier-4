@@ -358,7 +358,7 @@ watch(title, updateTitleScrollable);
       </section>
 
       <!-- Article body -->
-      <section class="py-20">
+      <section class="pt-20 pb-10">
         <div class="page-container">
           <article class="relative w-full">
             <!--
@@ -419,6 +419,7 @@ watch(title, updateTitleScrollable);
           </article>
         </div>
       </section>
+
       <section
         v-if="productionsStatus === 'pending' && linkedProductions.length === 0"
         class="page-container py-10 flex justify-center"
@@ -438,40 +439,44 @@ watch(title, updateTitleScrollable);
 
       <section
         v-else-if="linkedProductions && linkedProductions.length > 0"
-        class="page-container pb-10 border-t border-gray-100 dark:border-[#2e3347]/30 pt-10"
+        class="page-container pb-14 border-t border-gray-100 dark:border-[#2e3347]/30 pt-10"
       >
-        <div class="mb-6">
-          <h2
-            class="font-brand font-black text-2xl lg:text-3xl uppercase tracking-tighter italic text-foreground"
-          >
-            {{ t("stories.relatedProductions", "Gerelateerde voorstellingen") }}
-          </h2>
-        </div>
+        <div class="md:pl-10 w-full">
+          <div class="mb-6">
+            <h2
+              class="font-brand font-black text-2xl lg:text-3xl uppercase tracking-tighter italic text-foreground"
+            >
+              {{
+                t("stories.relatedProductions", "Gerelateerde voorstellingen")
+              }}
+            </h2>
+          </div>
 
-        <div
-          class="flex flex-col gap-4 mb-6 transition-all duration-500 ease-in-out"
-        >
-          <ProductionListViewItem
-            v-for="production in linkedProductions"
-            :key="production.id"
-            :productionView="production"
-            :is-admin="false"
-          />
-        </div>
-
-        <div v-if="hasMore" class="flex justify-center mt-8">
-          <button
-            class="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded font-brand font-black text-[10px] uppercase tracking-widest transition-all duration-300 hover:bg-gray-50 dark:hover:bg-white/5 outline-none"
-            :disabled="productionsStatus === 'pending'"
-            @click="loadMoreProductions"
+          <div
+            class="flex flex-col gap-4 mb-6 transition-all duration-500 ease-in-out"
           >
-            <span v-if="productionsStatus === 'pending'">{{
-              t("general.loading", "Laden...")
-            }}</span>
-            <span v-else>{{
-              t("general.showAll", "Toon alle voorstellingen")
-            }}</span>
-          </button>
+            <ProductionListViewItem
+              v-for="production in linkedProductions"
+              :key="production.id"
+              :productionView="production"
+              :is-admin="false"
+            />
+          </div>
+
+          <div v-if="hasMore" class="flex justify-center mt-8">
+            <button
+              class="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded font-brand font-black text-[10px] uppercase tracking-widest transition-all duration-300 hover:bg-gray-50 dark:hover:bg-white/5 outline-none"
+              :disabled="productionsStatus === 'pending'"
+              @click="loadMoreProductions"
+            >
+              <span v-if="productionsStatus === 'pending'">{{
+                t("general.loading", "Laden...")
+              }}</span>
+              <span v-else>{{
+                t("general.showAll", "Toon alle voorstellingen")
+              }}</span>
+            </button>
+          </div>
         </div>
       </section>
 
