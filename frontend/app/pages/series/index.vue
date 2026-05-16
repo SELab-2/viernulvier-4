@@ -131,12 +131,9 @@ onMounted(loadPage);
     <div v-else class="page-container py-8">
       <!-- Grid Header -->
       <div class="flex items-center gap-3 mb-4">
-        <span class="text-[20px] font-bold uppercase shrink-0">{{
-          t("nav.series")
-        }}</span>
         <span class="flex-1 h-px bg-border" />
-        <span class="text-[11px] text-muted-foreground shrink-0">
-          {{ totalItems }} {{ t("nav.series") }}
+        <span class="text-[13px] text-muted-foreground shrink-0">
+          {{ totalItems }} {{ t("general.results") }}
         </span>
       </div>
 

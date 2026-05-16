@@ -9,9 +9,8 @@
   <div class="page-container py-8" aria-busy="true" aria-label="Loading series">
     <!-- Grid Header skeleton -->
     <div class="flex items-center gap-3 mb-4">
-      <div class="h-7 w-24 bg-muted animate-pulse rounded" />
       <div class="flex-1 h-px bg-muted" />
-      <div class="h-4 w-16 bg-muted animate-pulse rounded" />
+      <div class="h-7 w-24 bg-muted animate-pulse rounded" />
     </div>
 
     <!-- Grid skeleton -->
