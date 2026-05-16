@@ -1,7 +1,7 @@
 <!--
-SeriesPagination.vue
+SeriesProductionsPagination.vue
 
-Pagination control for navigating through series pages.
+Pagination control for navigating through series production pages.
 Responsible for:
 - Displaying current page and navigation controls
 - Handling previous/next/first/last navigation
@@ -9,52 +9,41 @@ Responsible for:
 - Updating shared pagination state
 
 Uses:
-- useSeriesView: pagination state (currentPage, totalPages, loading) (passed from parent)
+- useSeriesProductionsView: pagination state (currentPage, totalPages, loading)
 -->
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
+import { useSeriesProductionsView } from "../../composables/useSeriesProductionsView";
+
+const { currentPage, totalPages, loading } = useSeriesProductionsView();
 const { t } = useI18n();
-
-const props = defineProps<{
-  currentPage: number;
-  totalPages: number;
-  loading: boolean;
-}>();
-
-const emit = defineEmits<{
-  (e: "go-to-page", page: number): void;
-}>();
 
 function goToPage(page: number) {
   // Prevent invalid or unnecessary navigation
   if (
-    page < 0 ||
-    page > props.totalPages ||
-    page === props.currentPage ||
-    props.loading
+    page < 1 ||
+    page > totalPages.value ||
+    page === currentPage.value ||
+    loading.value
   )
     return;
-  emit("go-to-page", page);
+  currentPage.value = page;
   // Scroll to top after page change
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-
-// constants
-const chevronButton =
-  "w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed";
 </script>
 
 <template>
   <nav
-    v-if="props.totalPages > 1"
+    v-if="totalPages > 1"
     class="inline-flex items-stretch rounded-md border-2 border-foreground overflow-hidden"
-    :aria-label="t('prints.pagination')"
+    :aria-label="t('archive.pagination')"
   >
     <!-- First page -->
     <button
-      :class="chevronButton"
-      :disabled="currentPage === 0"
-      @click="goToPage(0)"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      :disabled="currentPage === 1 || loading"
+      @click="goToPage(1)"
     >
       <svg
         class="w-4 h-4"
@@ -72,12 +61,12 @@ const chevronButton =
     </button>
 
     <!-- separator -->
-    <span class="w-[2px] bg-foreground" />
+    <span class="w-[2px] bg-foreground"></span>
 
     <!-- Previous -->
     <button
-      :class="chevronButton"
-      :disabled="currentPage === 0"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      :disabled="currentPage === 1 || loading"
       @click="goToPage(currentPage - 1)"
     >
       <svg
@@ -96,21 +85,22 @@ const chevronButton =
     </button>
 
     <!-- separator -->
-    <span class="w-[2px] bg-foreground" />
+    <span class="w-[2px] bg-foreground"></span>
 
     <!-- Current page -->
     <span
       class="w-14 h-8 flex items-center justify-center bg-foreground text-background font-black text-sm"
     >
-      {{ currentPage + 1 }}
+      {{ currentPage }}
     </span>
 
-    <span class="w-[2px] bg-foreground" />
+    <!-- separator -->
+    <span class="w-[2px] bg-foreground"></span>
 
     <!-- Next -->
     <button
-      :class="chevronButton"
-      :disabled="currentPage === totalPages - 1"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      :disabled="currentPage === totalPages || loading"
       @click="goToPage(currentPage + 1)"
     >
       <svg
@@ -129,13 +119,13 @@ const chevronButton =
     </button>
 
     <!-- separator -->
-    <span class="w-[2px] bg-foreground" />
+    <span class="w-[2px] bg-foreground"></span>
 
     <!-- Last -->
     <button
-      :class="chevronButton"
-      :disabled="currentPage === totalPages - 1"
-      @click="goToPage(totalPages - 1)"
+      class="w-11 flex items-center justify-center bg-background text-foreground hover:bg-foreground/70 hover:text-background transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
+      :disabled="currentPage === totalPages || loading"
+      @click="goToPage(totalPages)"
     >
       <svg
         class="w-4 h-4"
@@ -153,5 +143,3 @@ const chevronButton =
     </button>
   </nav>
 </template>
-
-<style scoped></style>
