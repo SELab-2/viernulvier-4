@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from "vue";
 
 interface Props {
   htmlContent: string;
@@ -34,6 +34,15 @@ onMounted(async () => {
   }
 });
 
+watch(
+  () => props.htmlContent,
+  async () => {
+    await nextTick();
+    checkOverflow();
+  },
+  { immediate: true },
+);
+
 onBeforeUnmount(() => {
   observer?.disconnect();
 });
@@ -65,7 +74,7 @@ onBeforeUnmount(() => {
       <div
         ref="descriptionRef"
         :class="[
-          isExpanded ? 'line-clamp-none' : 'line-clamp-[6]',
+          isExpanded ? 'line-clamp-none' : 'line-clamp-[6] md:line-clamp-[8]',
           showReadMoreButton && !isExpanded ? 'should-fade' : '',
         ]"
         class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
@@ -84,6 +93,15 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.description-content :deep(p) {
+  margin-bottom: 1.25rem;
+}
+
+.description-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+/* Links in description */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;

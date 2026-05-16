@@ -221,9 +221,16 @@ export function stripHtml(html: string): string {
  */
 export const cleanText = (text: string | null | undefined) => {
   if (!text) return "";
-  return text
-    .replace(/\\/g, "")
-    .trim()
-    .replace(/(\r?\n){2,}/g, "\n\n")
-    .replace(/\n/g, "<br />");
+
+  return (
+    text
+      .replace(/\\/g, "")
+      // 1. Convert multiple newlines into clean double newlines
+      .replace(/(\r?\n){2,}/g, "\n\n")
+      // 2. Convert remaining single newlines to HTML breaks
+      .replace(/\n/g, "<br />")
+      // 3. Strip all trailing empty paragraphs, breaks, and spaces
+      .replace(/(<p>(&nbsp;|\s)*<\/p>|<br\s*\/?>|\s)+$/, "")
+      .trim()
+  );
 };

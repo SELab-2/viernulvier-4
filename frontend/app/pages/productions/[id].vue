@@ -166,10 +166,6 @@ const isValid = (val: any) => {
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
-
-const fullDescription = computed(
-  () => cleanText(production.value?.description1) || "",
-);
 </script>
 
 <template>
@@ -263,7 +259,9 @@ const fullDescription = computed(
             </p>
           </div>
 
-          <ProductionDescription :html-content="fullDescription" />
+          <ProductionDescription
+            :html-content="cleanText(production.description1)"
+          />
         </div>
 
         <div class="mt-12 mb-16">
