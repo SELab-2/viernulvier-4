@@ -42,22 +42,36 @@ const checkOverflow = () => {
   }
 };
 
-const handleThemeChange = async () => {
-  themeKey.value++;
-  await nextTick();
-  checkOverflow();
+let resizeObserver: ResizeObserver | null = null;
+
+// safely (re)attach the observer
+const startObserving = () => {
+  if (descriptionRef.value && resizeObserver) {
+    resizeObserver.observe(descriptionRef.value);
+  }
 };
 
-let resizeObserver: ResizeObserver | null = null;
+const handleThemeChange = async () => {
+  // Disconnect from old DOM node before it gets destroyed
+  resizeObserver?.disconnect();
+
+  themeKey.value++;
+
+  // Wait until Vue rendered new DOM node with updated key
+  await nextTick();
+
+  checkOverflow();
+  startObserving(); // Attach observer to new DOM node
+};
 
 onMounted(async () => {
   await nextTick();
 
-  // Observe screen size
+  // Initialize observer
   resizeObserver = new ResizeObserver(() => checkOverflow());
-  if (descriptionRef.value) resizeObserver.observe(descriptionRef.value);
+  startObserving();
 
-  // Listen to signal theme toggle
+  // Listen to theme toggle signal
   window.addEventListener("theme-changed", handleThemeChange);
 });
 
