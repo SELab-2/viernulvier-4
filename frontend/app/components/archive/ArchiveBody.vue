@@ -198,6 +198,13 @@ function showSnackbarError(message: string) {
   });
 }
 
+function showSnackbarSuccess(message: string) {
+  snackbar.add({
+    type: "success",
+    text: message,
+  });
+}
+
 /**
  * Reacts to the press of a delete button.
  *
@@ -225,6 +232,7 @@ async function handleDeleteProduction(
 
   // Reload the page
   resetAndLoad();
+  showSnackbarSuccess("Successfully deleted production!");
 }
 
 /**
