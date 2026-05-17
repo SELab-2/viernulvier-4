@@ -1,4 +1,6 @@
 {
+  "english": "EN",
+  "dutch": "NL",
   "home": {
     "title": "Search the archive"
   },
@@ -478,9 +480,9 @@
       "noDateYet": "No date set yet",
       "empty": "No events yet",
       "prices": {
-        "title": "Prijzen",
-        "empty": "Nog geen prijzen",
-        "add": "Nieuwe prijs"
+        "title": "Prices",
+        "empty": "No prices yet",
+        "add": "New price"
       }
     },
     "media": {

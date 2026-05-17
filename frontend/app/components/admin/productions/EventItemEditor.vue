@@ -485,7 +485,7 @@ function fromDatetimeLocalRequired(val: string): string {
           <div class="relative flex-1">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-muted-foreground pointer-events-none"
-              >NL</span
+              >{{ t("dutch") }}</span
             >
             <input
               type="text"
@@ -509,7 +509,7 @@ function fromDatetimeLocalRequired(val: string): string {
           <div class="relative flex-1">
             <span
               class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-muted-foreground pointer-events-none"
-              >EN</span
+              >{{ t("english") }}</span
             >
             <input
               type="text"
