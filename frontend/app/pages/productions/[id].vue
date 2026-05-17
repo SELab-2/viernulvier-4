@@ -205,8 +205,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- Loading skeleton-->
+  <ProductionSkeleton v-if="status === 'pending'" />
+
   <main
-    v-if="production"
+    v-else-if="production"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
     <section

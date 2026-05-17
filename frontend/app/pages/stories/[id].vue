@@ -266,31 +266,16 @@ watch(title, updateTitleScrollable);
 </script>
 
 <template>
+  <!-- Loading skeleton-->
+  <BlogsStorySkeleton v-if="status === 'pending'" />
+
   <main
-    v-if="blog"
+    v-else-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
-    <!-- Loading -->
-    <div
-      v-if="status === 'pending'"
-      class="min-h-screen flex items-center justify-center"
-    >
-      <svg
-        class="w-6 h-6 animate-spin text-gray-400"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M21 12a9 9 0 1 1-6.219-8.56"
-          stroke="currentColor"
-          stroke-width="2"
-        />
-      </svg>
-    </div>
-
     <!-- Not found / error state -->
     <div
-      v-else-if="error || !blog"
+      v-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
     >
       <p
