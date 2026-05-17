@@ -261,4 +261,24 @@ export class AccountDatabaseService {
     return result[0] ?? null; // should never happen that an account does not have an api-key!
     // however don't throw an error for security reasons.
   }
+
+  /**
+   * Get an accountId from an apiKey
+   * @param apiKey is the apiKey you want the accountId of.
+   * @returns the accountId.
+   */
+  async getAccountIdFromApiKey(apiKey: string): Promise<number | null> {
+    const query = `
+      SELECT aak.account_id
+      FROM account_api_keys aak
+      JOIN api_keys ON api_keys.id = aak.api_key_id
+      WHERE api_keys.key = $1
+        AND api_keys.active = TRUE
+      LIMIT 1
+    `;
+
+    const result = await this.db.query<{ account_id: number }>(query, [apiKey]);
+
+    return result[0]?.account_id ?? null;
+  }
 }

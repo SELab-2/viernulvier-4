@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   ParseIntPipe,
   Patch,
@@ -14,6 +15,7 @@ import {
 import { AuthService } from "./auth.service";
 import {
   ApiKeyDto,
+  ChangePasswordDto,
   CreateAccountDto,
   LoginDto,
   PaginationFilterDto,
@@ -30,6 +32,7 @@ import {
 import { ApiKeyGuard, SuperApiKeyGuard } from "./authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
+  ChangePasswordSchema,
   CreateAccountSchema,
   LoginSchema,
   PaginatedResponse,
@@ -114,6 +117,29 @@ export class AuthController {
     @Body() updateAccount: UpdateAccountDto,
   ): Promise<PublicAccountDto> {
     return await this.authService.updateAccount(updateAccount);
+  }
+
+  /**
+   * Responds to a POST to "/auth/change-password".
+   * @param apiKey The API key of the account.
+   * @param changePassword The new password.
+   * @returns The updated account.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Changes the password of the current account." })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiOkResponse({
+    type: PublicAccountDto,
+    description: "Password updated successfully.",
+  })
+  @UsePipes(new ZodValidationPipe(ChangePasswordSchema))
+  @Post("change-password")
+  async changePassword(
+    @Headers("x-api-key") apiKey: string,
+    @Body() changePassword: ChangePasswordDto,
+  ): Promise<PublicAccountDto> {
+    return await this.authService.changePassword(apiKey, changePassword);
   }
 
   /**

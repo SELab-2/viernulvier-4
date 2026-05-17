@@ -7,6 +7,7 @@
 export const API_ROUTES = {
   auth: {
     login: "/auth/login",
+    changePassword: "/auth/change-password",
     base: "/auth",
     byId: (accountId: number) => `/auth/${accountId}`,
   },
