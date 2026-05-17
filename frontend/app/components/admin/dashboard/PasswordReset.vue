@@ -2,13 +2,14 @@
   components/admin/dashboard/PasswordReset.vue
   =============================================
   Card that lets the logged-in admin change their own password.
-  Calls useAccountApi().modify() with the current account id.
+  Calls useAccountApi().changePassword() which uses the API key to identify the account.
+  All user-facing strings come from i18n (admin.dashboard.*).
 -->
 <script setup lang="ts">
 import { Eye, EyeOff, KeyRound } from "lucide-vue-next";
 
 const { account } = useAuth();
-const { modify } = useAccountApi();
+const { changePassword } = useAccountApi();
 const { t } = useI18n();
 
 const newPassword = ref("");
@@ -49,8 +50,7 @@ async function handleSubmit() {
 
   submitting.value = true;
   try {
-    const resp = await modify({
-      id: Number(accountId),
+    const resp = await changePassword({
       password: newPassword.value,
     });
 

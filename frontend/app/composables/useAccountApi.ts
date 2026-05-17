@@ -2,6 +2,7 @@ import type {
   PublicAccount,
   CreateAccount,
   UpdateAccount,
+  ChangePassword,
   PaginationFilter,
   PaginatedResponse,
 } from "@repo/common";
@@ -14,7 +15,7 @@ interface AccountListOptions {
 
 /**
  * Composable for account management endpoints.
- * All endpoints require a super admin API key.
+ * Most endpoints require a super admin API key, except changePassword which only requires a valid API key.
  */
 export function useAccountApi() {
   const { get, post, patch, del } = useApi();
@@ -52,6 +53,18 @@ export function useAccountApi() {
   }
 
   /**
+   * POST "/auth/change-password"
+   *
+   * Changes the password of the current account.
+   */
+  function changePassword(body: ChangePassword) {
+    return post<PublicAccount, ChangePassword>(
+      API_ROUTES.auth.changePassword,
+      body,
+    );
+  }
+
+  /**
    * DELETE "/auth/:accountId"
    *
    * Deletes an account.
@@ -64,6 +77,7 @@ export function useAccountApi() {
     getAll,
     create,
     modify,
+    changePassword,
     remove,
   };
 }
