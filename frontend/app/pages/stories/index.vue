@@ -140,7 +140,7 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="min-h-screen bg-white dark:bg-[#151821] text-gray-900 dark:text-gray-100 transition-colors duration-200"
+    class="min-h-screen bg-background text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
     <PageHeader
       :title="t('stories.title')"
