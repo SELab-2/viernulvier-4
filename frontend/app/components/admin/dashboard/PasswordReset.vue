@@ -3,7 +3,6 @@
   =============================================
   Card that lets the logged-in admin change their own password.
   Calls useAccountApi().modify() with the current account id.
-  All user-facing strings come from i18n (admin.dashboard.*).
 -->
 <script setup lang="ts">
 import { Eye, EyeOff, KeyRound } from "lucide-vue-next";
@@ -38,7 +37,9 @@ async function handleSubmit() {
     feedback.value = { type: "err", msg: t("accounts.password_mismatch") };
     return;
   }
-  if (!account.value?.id) {
+
+  const accountId = account.value?.id;
+  if (!accountId) {
     feedback.value = {
       type: "err",
       msg: t("admin.dashboard.notAuthenticated"),
@@ -49,7 +50,7 @@ async function handleSubmit() {
   submitting.value = true;
   try {
     const resp = await modify({
-      id: account.value.id,
+      id: Number(accountId),
       password: newPassword.value,
     });
 
@@ -62,6 +63,12 @@ async function handleSubmit() {
       };
       clearForm();
     }
+  } catch (e) {
+    feedback.value = {
+      type: "err",
+      msg:
+        e instanceof Error ? e.message : t("admin.dashboard.notAuthenticated"),
+    };
   } finally {
     submitting.value = false;
   }
