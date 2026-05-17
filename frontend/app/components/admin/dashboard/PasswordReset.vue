@@ -38,7 +38,9 @@ async function handleSubmit() {
     feedback.value = { type: "err", msg: t("accounts.password_mismatch") };
     return;
   }
-  if (!account.value?.id) {
+
+  const accountId = account.value?.id;
+  if (!accountId) {
     feedback.value = {
       type: "err",
       msg: t("admin.dashboard.notAuthenticated"),
@@ -61,6 +63,12 @@ async function handleSubmit() {
       };
       clearForm();
     }
+  } catch (e) {
+    feedback.value = {
+      type: "err",
+      msg:
+        e instanceof Error ? e.message : t("admin.dashboard.notAuthenticated"),
+    };
   } finally {
     submitting.value = false;
   }

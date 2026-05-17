@@ -64,7 +64,7 @@ const statCards = [
 
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-6xl mx-auto px-6 py-10 space-y-10">
+    <div class="page-container py-10 space-y-10">
       <!-- Welcome header -->
       <header class="flex flex-col gap-1">
         <p
@@ -90,7 +90,7 @@ const statCards = [
         >
           {{ t("admin.dashboard.overview") }}
         </p>
-        <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <AdminDashboardStatsWidget
             v-for="card in statCards"
             :key="card.key"
