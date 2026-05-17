@@ -1,4 +1,6 @@
 {
+  "english": "EN",
+  "dutch": "NL",
   "home": {
     "title": "Search the archive"
   },
@@ -481,7 +483,12 @@
       "typeToSearch": "Type to search locations...",
       "locationPlaceholder": "Search or create a location...",
       "noDateYet": "No date set yet",
-      "empty": "No events yet"
+      "empty": "No events yet",
+      "prices": {
+        "title": "Prices",
+        "empty": "No prices yet",
+        "add": "New price"
+      }
     },
     "media": {
       "title": "Title",

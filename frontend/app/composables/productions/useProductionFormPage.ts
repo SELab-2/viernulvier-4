@@ -12,7 +12,7 @@ import type {
   ItemUpdate,
   ItemDelete,
 } from "~/composables/productions/steps/productionMedia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 import { useCropApi } from "~/composables/media/useCropApi";
@@ -31,6 +31,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   const tagApi = useTagApi();
   const locationApi = useLocationApi();
   const eventApi = useEventApi();
+  const priceApi = usePriceApi();
   const galleryApi = useGalleryApi();
   const itemApi = useItemApi();
   const cropApi = useCropApi();
@@ -253,6 +254,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       if (locationId !== null) {
         await eventApi.linkLocation(created.data.id, locationId);
       }
+
+      // Create the price and link it to the event.
+      for (const price of event.pricesToCreate) {
+        const resp = await priceApi.create({
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+
+        if (resp.data?.id) {
+          await eventApi.linkPrice(created.data.id, resp.data.id);
+        }
+      }
     } catch (err: unknown) {
       let cause: string;
       if (err instanceof Error) cause = err.message;
@@ -403,6 +419,35 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         );
         if (locationId !== null) {
           await eventApi.linkLocation(event.id, locationId);
+        }
+      }
+
+      // Remove the prices that should be deleted.
+      for (const priceId of event.pricesToDelete) {
+        await priceApi.remove(priceId);
+      }
+
+      // Modify the prices that should be modified.
+      for (const price of event.pricesToUpdate) {
+        await priceApi.modify(price.id, {
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+      }
+      for (const price of event.pricesToCreate) {
+        const resp = await priceApi.create({
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+
+        if (resp.data?.id) {
+          await eventApi.linkPrice(event.id, resp.data.id);
         }
       }
     }

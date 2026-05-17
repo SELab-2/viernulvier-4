@@ -1,4 +1,6 @@
 {
+  "english": "EN",
+  "dutch": "NL",
   "home": {
     "title": "Doorzoek het archief"
   },
@@ -483,7 +485,12 @@
       "typeToSearch": "Typ om locaties te zoeken...",
       "locationPlaceholder": "Zoek of creëer een locatie...",
       "noDateYet": "Nog geen datum ingesteld",
-      "empty": "Nog geen evenementen"
+      "empty": "Nog geen evenementen",
+      "prices": {
+        "title": "Prijzen",
+        "empty": "Nog geen prijzen",
+        "add": "Nieuwe prijs"
+      }
     },
     "media": {
       "title": "Titel",

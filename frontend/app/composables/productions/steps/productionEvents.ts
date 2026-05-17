@@ -1,9 +1,9 @@
 // productionEvents.ts
 // - Composable that manages event drafts for the production form step.
 // - Exposes the draft state, original snapshot, initialization/reset logic,
-//   a change-detection helper, and payload extraction for persistence.
+//  a change-detection helper, and payload extraction for persistence.
 import type { ProductionFormStep } from "~/types/ProductionFormStep";
-import type { Event } from "@repo/common";
+import type { Event, Price } from "@repo/common";
 
 export type ExistingLocation = {
   type: "existing";
@@ -18,6 +18,23 @@ export type NewLocation = {
 
 export type EventLocationDraft = ExistingLocation | NewLocation | null;
 
+export type ExistingPriceDraft = {
+  kind: "existing";
+  id: number;
+  name: { nl: string; en: string | null };
+  price: number;
+  deleted: boolean;
+};
+
+export type NewPriceDraft = {
+  kind: "new";
+  tempId: string;
+  name: { nl: string; en: string | null };
+  price: number;
+};
+
+export type PriceDraft = ExistingPriceDraft | NewPriceDraft;
+
 // Event draft shapes used in the form model
 export type ExistingEventDraft =
   | {
@@ -28,6 +45,7 @@ export type ExistingEventDraft =
       doors_at: string | null;
       intermission_at: string | null;
       location: EventLocationDraft;
+      prices: PriceDraft[];
       deleted: false;
     }
   | {
@@ -43,12 +61,24 @@ export type NewEventDraft = {
   doors_at: string | null;
   intermission_at: string | null;
   location: EventLocationDraft;
+  prices: PriceDraft[];
 };
 
 export type EventDraft = ExistingEventDraft | NewEventDraft;
 export type ProductionEventsForm = EventDraft[];
 
 // Payload types used when persisting changes
+export type PriceCreatePayload = {
+  name: { nl: string; en: string | null };
+  price: number;
+};
+
+export type PriceUpdatePayload = {
+  id: number;
+  name: { nl: string; en: string | null };
+  price: number;
+};
+
 export type EventCreatePayload = {
   kind: "create";
   starttime: string;
@@ -59,6 +89,7 @@ export type EventCreatePayload = {
   linkLocationId: number | null;
   /** Label for a brand-new location to create + link after creation. */
   createLocation: string | null;
+  pricesToCreate: PriceCreatePayload[];
 };
 
 export type EventUpdatePayload = {
@@ -74,6 +105,9 @@ export type EventUpdatePayload = {
   linkLocationId: number | null;
   /** Label for a brand-new location to create + link, or null. */
   createLocation: string | null;
+  pricesToCreate: PriceCreatePayload[];
+  pricesToUpdate: PriceUpdatePayload[];
+  pricesToDelete: number[];
 };
 
 export type EventDeletePayload = {
@@ -96,6 +130,11 @@ type OriginalEventSnapshot = {
   doors_at: string | null;
   intermission_at: string | null;
   location: ExistingLocation | null;
+  prices: {
+    id: number;
+    name: { nl: string; en: string | null };
+    price: number;
+  }[];
 };
 
 // Returns a new empty event draft (used when user adds an event)
@@ -107,6 +146,7 @@ export function newEventDraft(): NewEventDraft {
     doors_at: null,
     intermission_at: null,
     location: null,
+    prices: [],
   };
 }
 
@@ -114,6 +154,16 @@ export function newEventDraft(): NewEventDraft {
 function cloneLocation(loc: EventLocationDraft): EventLocationDraft {
   if (loc === null) return null;
   return { ...loc };
+}
+
+function clonePrices(prices: OriginalEventSnapshot["prices"]): PriceDraft[] {
+  return prices.map((p) => ({
+    kind: "existing",
+    id: p.id,
+    name: { ...p.name },
+    price: p.price,
+    deleted: false,
+  }));
 }
 
 export function useProductionEvents(): ProductionFormStep<
@@ -152,7 +202,9 @@ export function useProductionEvents(): ProductionFormStep<
 
     const snapshots: OriginalEventSnapshot[] = await Promise.all(
       events.map(async (event) => {
-        const locRes = await eventApi.getLocation(event.id, "nl");
+        const locRes = await eventApi
+          .getLocation(event.id, "nl")
+          .catch(() => ({ data: null }));
         const loc = locRes.data
           ? {
               type: "existing" as const,
@@ -161,6 +213,17 @@ export function useProductionEvents(): ProductionFormStep<
             }
           : null;
 
+        const pricesRes = await eventApi
+          .getPrices(event.id)
+          .catch(() => ({ data: [] }));
+        const prices = Array.isArray(pricesRes.data)
+          ? pricesRes.data.map((p: Price) => ({
+              id: p.id,
+              name: { nl: p.name.nl, en: p.name.en ?? null },
+              price: p.price,
+            }))
+          : [];
+
         return {
           id: event.id,
           starttime: event.starttime,
@@ -168,6 +231,7 @@ export function useProductionEvents(): ProductionFormStep<
           doors_at: event.doors_at,
           intermission_at: event.intermission_at,
           location: loc,
+          prices,
         };
       }),
     );
@@ -183,6 +247,7 @@ export function useProductionEvents(): ProductionFormStep<
         doors_at: s.doors_at,
         intermission_at: s.intermission_at,
         location: cloneLocation(s.location),
+        prices: clonePrices(s.prices),
         deleted: false,
       }),
     );
@@ -204,6 +269,7 @@ export function useProductionEvents(): ProductionFormStep<
         doors_at: s.doors_at,
         intermission_at: s.intermission_at,
         location: cloneLocation(s.location),
+        prices: clonePrices(s.prices),
         deleted: false,
       }),
     );
@@ -220,7 +286,8 @@ export function useProductionEvents(): ProductionFormStep<
           Boolean(event.endtime) ||
           Boolean(event.doors_at) ||
           Boolean(event.intermission_at) ||
-          Boolean(event.location);
+          Boolean(event.location) ||
+          event.prices.length > 0;
         if (!hasAnyField) continue;
 
         changes.push(`new:${event.starttime || "unsaved"}`);
@@ -255,6 +322,24 @@ export function useProductionEvents(): ProductionFormStep<
         changes.push(`${event.id}:location:new`);
       } else if (origLocId !== draftLocId) {
         changes.push(`${event.id}:location:changed`);
+      }
+
+      for (const p of event.prices) {
+        if (p.kind === "new") {
+          changes.push(`${event.id}:price:new`);
+        } else if (p.deleted) {
+          changes.push(`${event.id}:price:deleted:${p.id}`);
+        } else {
+          const origPrice = orig.prices.find((op) => op.id === p.id);
+          if (
+            origPrice &&
+            (origPrice.price !== p.price ||
+              origPrice.name.nl !== p.name.nl ||
+              origPrice.name.en !== p.name.en)
+          ) {
+            changes.push(`${event.id}:price:changed:${p.id}`);
+          }
+        }
       }
     }
 
@@ -293,6 +378,10 @@ export function useProductionEvents(): ProductionFormStep<
             event.location?.type === "existing" ? event.location.id : null,
           createLocation:
             event.location?.type === "new" ? event.location.label : null,
+          pricesToCreate: event.prices.map((p) => ({
+            name: p.name,
+            price: p.price,
+          })),
         });
         continue;
       }
@@ -303,6 +392,28 @@ export function useProductionEvents(): ProductionFormStep<
         event.location?.type === "existing" ? event.location.id : null;
       const locationChanged =
         origLocId !== draftLocId || event.location?.type === "new";
+
+      const pricesToCreate: PriceCreatePayload[] = [];
+      const pricesToUpdate: PriceUpdatePayload[] = [];
+      const pricesToDelete: number[] = [];
+
+      for (const p of event.prices) {
+        if (p.kind === "new") {
+          pricesToCreate.push({ name: p.name, price: p.price });
+        } else if (p.deleted) {
+          pricesToDelete.push(p.id);
+        } else {
+          const origPrice = orig?.prices.find((op) => op.id === p.id);
+          if (
+            origPrice &&
+            (origPrice.price !== p.price ||
+              origPrice.name.nl !== p.name.nl ||
+              origPrice.name.en !== p.name.en)
+          ) {
+            pricesToUpdate.push({ id: p.id, name: p.name, price: p.price });
+          }
+        }
+      }
 
       eventsToUpdate.push({
         kind: "update",
@@ -320,6 +431,9 @@ export function useProductionEvents(): ProductionFormStep<
           locationChanged && event.location?.type === "new"
             ? event.location.label
             : null,
+        pricesToCreate,
+        pricesToUpdate,
+        pricesToDelete,
       });
     }
 
