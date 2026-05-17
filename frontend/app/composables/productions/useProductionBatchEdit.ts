@@ -2,7 +2,8 @@
  * useProductionBatchEdit.ts
  *
  * Manages batch edit mode for the admin productions page.
- * Handles: mode toggle, selection, deselection, panel state, and batch tag editing.
+ * Handles: mode toggle, selection, deselection, panel state,
+ * batch tag editing, and batch series editing.
  *
  * Designed to be used as a singleton (shared state across all components on the page).
  */
@@ -14,6 +15,10 @@ import type {
   ExistingTag,
   NewTag,
 } from "~/composables/productions/steps/productionTags";
+import type {
+  ProductionSeriesForm,
+  ExistingSeries,
+} from "~/composables/productions/steps/productionSeries";
 
 // ── Singleton state ───────────────────────────────────────────────────────────
 
@@ -42,6 +47,26 @@ const tagsDraft = ref<ProductionTagItem[]>([]);
  * fresh fetch from the server — unsaved edits are intentionally discarded.
  */
 const commonTagsLoaded = ref(false);
+
+// ── Batch series state ────────────────────────────────────────────────────────
+
+/**
+ * Series shared by ALL selected productions (the intersection).
+ * This is the saved baseline — reset and save both use this as the reference.
+ */
+const commonSeries = ref<ProductionSeriesForm>([]);
+
+/**
+ * Working draft the user edits in the UI via SeriesForm.
+ * Starts as a clone of commonSeries on every (re)load.
+ * Reset restores this back to commonSeries.
+ */
+const seriesDraft = ref<ProductionSeriesForm>([]);
+
+/**
+ * Tracks whether commonSeries has been loaded for the current session.
+ */
+const commonSeriesLoaded = ref(false);
 
 // ── Composable ────────────────────────────────────────────────────────────────
 
@@ -154,9 +179,7 @@ export function useProductionBatchEdit() {
     );
 
     commonTags.value = mapped;
-
     tagsDraft.value = structuredClone(mapped);
-
     commonTagsLoaded.value = true;
   }
 
@@ -176,10 +199,6 @@ export function useProductionBatchEdit() {
   /**
    * Diffs the draft against the common-tags baseline to produce the
    * connect / disconnect / create payload for the API.
-   *
-   * connect / disconnect are relative to the COMMON baseline, not each
-   * production's individual tag list. The backend is expected to be
-   * idempotent (connecting a tag a production already has is a no-op).
    */
   function extractTagsPayload(): {
     connect: number[];
@@ -205,6 +224,125 @@ export function useProductionBatchEdit() {
         .filter((t): t is NewTag => t.type === "new")
         .map((t) => t.label),
     };
+  }
+
+  // ── Batch series editing ──────────────────────────────────────────────────
+
+  /**
+   * Fetches series for every selected production in parallel, then keeps only
+   * those present in ALL of them (set intersection by series id).
+   *
+   * The caller supplies the fetch function (same API-agnostic pattern as tags).
+   */
+  async function loadCommonSeries(
+    fetchSeriesForProduction: (id: number) => Promise<ExistingSeries[]>,
+  ): Promise<void> {
+    commonSeriesLoaded.value = false;
+
+    if (selectedProductions.value.length === 0) {
+      commonSeries.value = [];
+      seriesDraft.value = [];
+      commonSeriesLoaded.value = true;
+      return;
+    }
+
+    const results = await Promise.all(
+      selectedProductions.value.map((p) => fetchSeriesForProduction(p.id)),
+    );
+
+    // Seed the intersection from the first production's series.
+    const intersectionMap = new Map(results[0]!.map((s) => [s.id, s]));
+
+    // Narrow to only series present in every other production.
+    for (const seriesList of results.slice(1)) {
+      const ids = new Set(seriesList.map((s) => s.id));
+      for (const id of intersectionMap.keys()) {
+        if (!ids.has(id)) intersectionMap.delete(id);
+      }
+    }
+
+    const mapped = [...intersectionMap.values()];
+
+    commonSeries.value = mapped;
+    seriesDraft.value = structuredClone(mapped);
+    commonSeriesLoaded.value = true;
+  }
+
+  /** Replace the series draft — called when SeriesForm emits update:modelValue. */
+  function setSeriesDraft(items: ProductionSeriesForm) {
+    seriesDraft.value = items;
+  }
+
+  /** Reset the series draft back to the server baseline. */
+  function resetSeriesDraft() {
+    seriesDraft.value = structuredClone(commonSeries.value);
+  }
+
+  /**
+   * Diffs the series draft against the common-series baseline.
+   *
+   * connect    — existing series added relative to the baseline
+   * disconnect — existing series removed relative to the baseline
+   * create     — brand-new series (type: "new")
+   * update     — existing series whose titel or description changed
+   *
+   * connect/disconnect are relative to the COMMON baseline, so applying the
+   * same diff to every production is correct and idempotent on the backend.
+   */
+  function extractSeriesPayload() {
+    const originalIds = new Set(
+      commonSeries.value
+        .filter((s): s is ExistingSeries => s.type === "existing")
+        .map((s) => s.id),
+    );
+
+    const originalMap = new Map(
+      commonSeries.value
+        .filter((s): s is ExistingSeries => s.type === "existing")
+        .map((s) => [s.id, s]),
+    );
+
+    const currentExisting = seriesDraft.value.filter(
+      (s): s is ExistingSeries => s.type === "existing",
+    );
+
+    const currentIds = new Set(currentExisting.map((s) => s.id));
+
+    const connect = currentExisting
+      .filter((s) => !originalIds.has(s.id))
+      .map((s) => s.id);
+
+    const disconnect = [...originalIds].filter((id) => !currentIds.has(id));
+
+    // Detect field edits for existing series that were already in the baseline.
+    const update = currentExisting
+      .filter((s) => originalIds.has(s.id))
+      .flatMap((s) => {
+        const orig = originalMap.get(s.id)!;
+        const changed =
+          s.titel.nl !== orig.titel.nl ||
+          (s.titel.en ?? null) !== (orig.titel.en ?? null) ||
+          s.description.nl !== orig.description.nl ||
+          (s.description.en ?? null) !== (orig.description.en ?? null);
+        return changed
+          ? [{ id: s.id, titel: s.titel, description: s.description }]
+          : [];
+      });
+
+    const create = seriesDraft.value
+      .filter((s) => s.type === "new")
+      .map((s) => {
+        const nl_titel = s.titel.nl;
+        const en_titel = s.titel.en ?? nl_titel;
+        const nl_desc = s.description.nl ?? "";
+        const en_desc = s.description.en ?? nl_desc;
+        return {
+          titel: { nl: nl_titel, en: en_titel },
+          description: { nl: nl_desc, en: en_desc },
+        };
+      });
+
+    return { connect, disconnect, create, update };
   }
 
   // ── Public API ────────────────────────────────────────────────────────────
@@ -241,5 +379,13 @@ export function useProductionBatchEdit() {
     setTagsDraft,
     resetTagsDraft,
     extractTagsPayload,
+
+    // Batch series state & actions
+    seriesDraft,
+    commonSeriesLoaded,
+    loadCommonSeries,
+    setSeriesDraft,
+    resetSeriesDraft,
+    extractSeriesPayload,
   };
 }

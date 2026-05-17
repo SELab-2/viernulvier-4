@@ -1,21 +1,23 @@
 <!--
   pages/admin/productions/batch-edit.vue
 
-  This page owns the initial data load. It calls loadCommonTags directly in its
-  own onMounted, then passes the fetch function down to the tab as a prop so the
-  tab can trigger reloads after save or on locale change — without any flag-based
-  timing dependency between parent and child onMounted hooks.
+  This page owns all initial data loads. It calls loadCommonTags and
+  loadCommonSeries directly in its own onMounted, then passes the fetch
+  functions down to each tab as props — eliminating any timing dependency
+  between parent and child onMounted hooks.
 -->
 <script setup lang="ts">
 import { ArrowLeft } from "lucide-vue-next";
 import BatchTagsTab from "~/components/admin/productions/BatchTagsTab.vue";
+import BatchSeriesTab from "~/components/admin/productions/BatchSeriesTab.vue";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
 
 const { t, locale } = useI18n();
 const router = useRouter();
 const productionApi = useProductionApi();
+const seriesApi = useSeriesApi();
 
-const { selectedProductions, hasSelections, loadCommonTags } =
+const { selectedProductions, hasSelections, loadCommonTags, loadCommonSeries } =
   useProductionBatchEdit();
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
@@ -26,33 +28,69 @@ const tabs = [
     label: "admin-productions.batchEdit.tabs.tags",
     default: "Tags",
   },
-  // { id: "series", label: "admin-productions.batchEdit.tabs.series", default: "Series" },
-  // { id: "blogs",  label: "admin-productions.batchEdit.tabs.blogs",  default: "Blogs"  },
+  {
+    id: "series",
+    label: "admin-productions.batchEdit.tabs.series",
+    default: "Series",
+  },
+  // { id: "blogs", label: "admin-productions.batchEdit.tabs.blogs", default: "Blogs" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
 const activeTab = ref<TabId>("tags");
 
-// ── Fetch function — defined here so the page controls the initial load ────────
+// ── Fetch functions — defined here so the page controls all initial loads ──────
 
 async function fetchTagsForProduction(id: number) {
   const res = await productionApi.getTags(id, locale.value as "nl" | "en");
   return (res.data ?? []).map((tag) => ({ id: tag.id, tag: tag.tag }));
 }
 
-// ── Initial load — the page triggers this, not the tab ────────────────────────
-//
-// Doing the load here (rather than in the tab's onMounted) eliminates the race
-// condition where the tab's onMounted fires before the page's, reading a stale
-// commonTagsLoaded flag and skipping the fetch.
+async function fetchSeriesForProduction(id: number) {
+  type SeriesObject = { id: number; titel: string; description: string };
+
+  const [nlRes, enRes] = await Promise.all([
+    seriesApi.getAll({
+      languageFilters: { lang: "nl" },
+      seriesFilters: { is_suggestion: false, production_id: id },
+    }),
+    seriesApi.getAll({
+      languageFilters: { lang: "en" },
+      seriesFilters: { is_suggestion: false, production_id: id },
+    }),
+  ]);
+
+  const nlObjects =
+    (nlRes.data as unknown as { objects?: SeriesObject[] })?.objects ?? [];
+  const enObjects =
+    (enRes.data as unknown as { objects?: SeriesObject[] })?.objects ?? [];
+
+  const enById = new Map(enObjects.map((s) => [s.id, s]));
+
+  return nlObjects.map((s) => {
+    const en = enById.get(s.id);
+    return {
+      type: "existing" as const,
+      id: s.id,
+      titel: { nl: s.titel, en: en?.titel ?? undefined },
+      description: { nl: s.description, en: en?.description ?? undefined },
+    };
+  });
+}
+
+// ── Initial load — page triggers this, not the tabs ───────────────────────────
 
 onMounted(async () => {
   if (!hasSelections.value) {
-    router.replace("/admin/productions");
+    await router.replace(ROUTES.admin.productions.base);
     return;
   }
 
-  await loadCommonTags(fetchTagsForProduction);
+  // Load both tabs in parallel so switching to series feels instant.
+  await Promise.all([
+    loadCommonTags(fetchTagsForProduction),
+    loadCommonSeries(fetchSeriesForProduction),
+  ]);
 });
 
 // ── Navigation ────────────────────────────────────────────────────────────────
@@ -86,17 +124,22 @@ function getTitle(production: { titel: unknown }): string {
           @click="goBack"
         >
           <ArrowLeft :size="11" stroke-width="2.5" />
-          {{ t("admin-productions.batch.backToSelection") }}
+          {{
+            t(
+              "admin-productions.batchEdit.backToSelection",
+              "Back to selection",
+            )
+          }}
         </button>
 
         <p
           class="mt-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.batch.editingLabel") }}
+          {{ t("admin-productions.batchEdit.editingLabel", "Editing") }}
         </p>
         <p class="text-sm font-semibold text-foreground leading-tight">
           {{ selectedProductions.length }}
-          {{ t("admin-productions.batch.productionsLabel") }}
+          {{ t("admin-productions.batchEdit.productionsLabel", "productions") }}
         </p>
       </div>
 
@@ -143,9 +186,12 @@ function getTitle(production: { titel: unknown }): string {
           v-if="activeTab === 'tags'"
           :fetch-tags-for-production="fetchTagsForProduction"
         />
+        <BatchSeriesTab
+          v-else-if="activeTab === 'series'"
+          :fetch-series-for-production="fetchSeriesForProduction"
+        />
         <!--
-          <BatchSeriesTab v-else-if="activeTab === 'series'" ... />
-          <BatchBlogsTab  v-else-if="activeTab === 'blogs'"  ... />
+          <BatchBlogsTab v-else-if="activeTab === 'blogs'" ... />
         -->
       </div>
     </main>
