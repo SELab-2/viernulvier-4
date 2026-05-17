@@ -540,10 +540,13 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
       // Remap from per-locale translation objects to LocalizedString fields
       const productionBody = {
-        titel: { nl: corePayload.nl.titel, en: corePayload.en.titel },
+        titel: {
+          nl: corePayload.nl.titel,
+          en: corePayload.en.titel || corePayload.nl.titel, // Fallback to dutch if no english.
+        },
         description1: {
           nl: corePayload.nl.description1,
-          en: corePayload.en.description1,
+          en: corePayload.en.description1 || corePayload.nl.description1, // Fallback to dutch if no english
         },
         description2:
           corePayload.nl.description2 !== null ||
