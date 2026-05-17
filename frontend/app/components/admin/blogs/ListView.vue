@@ -221,7 +221,7 @@ async function handleDelete(blog: BlogView) {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div>
     <!--
       Reuse the public StoryToolbar for search + sort + date filters.
       This eliminates the large block of duplicated filter UI that was
@@ -237,83 +237,85 @@ async function handleDelete(blog: BlogView) {
       @update:date-filter="dateFilter = $event"
     />
 
-    <div class="page-container flex items-center justify-between mb-6">
-      <div>
-        <p
-          v-if="!loading && totalItems > 0"
-          class="font-brand text-2xl font-black text-foreground"
+    <section class="bg-background pt-6 pb-6 h-full">
+      <div class="page-container flex items-center justify-between mb-6">
+        <div>
+          <p
+            v-if="!loading && totalItems > 0"
+            class="font-brand text-2xl font-black text-foreground"
+          >
+            {{ totalItems }} {{ t("general.results") }}
+          </p>
+        </div>
+
+        <NuxtLink
+          :to="ROUTES.admin.stories.create"
+          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
         >
-          {{ totalItems }} {{ t("general.results") }}
+          <Plus :size="15" />
+          {{ t("admin.blogs.new") }}
+        </NuxtLink>
+      </div>
+
+      <!-- Error banner -->
+      <div
+        v-if="error"
+        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
+      >
+        {{ error }}
+      </div>
+
+      <!-- Loading skeleton: one placeholder per PAGE_SIZE slot -->
+      <div v-if="loading" class="space-y-3">
+        <div
+          v-for="i in PAGE_SIZE"
+          :key="i"
+          class="h-[136px] bg-muted rounded-xl animate-pulse"
+        />
+      </div>
+
+      <!-- Empty state -->
+      <div v-else-if="!blogs.length" class="py-20 text-center">
+        <p
+          class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
+        >
+          {{ t("stories.noStories") }}
+        </p>
+        <p
+          class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
+        >
+          {{ t("stories.noStoriesDesc") }}
         </p>
       </div>
 
-      <NuxtLink
-        :to="ROUTES.admin.stories.create"
-        class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
-      >
-        <Plus :size="15" />
-        {{ t("admin.blogs.new") }}
-      </NuxtLink>
-    </div>
-
-    <!-- Error banner -->
-    <div
-      v-if="error"
-      class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
-    >
-      {{ error }}
-    </div>
-
-    <!-- Loading skeleton: one placeholder per PAGE_SIZE slot -->
-    <div v-if="loading" class="space-y-3">
-      <div
-        v-for="i in PAGE_SIZE"
-        :key="i"
-        class="h-[136px] bg-muted rounded-xl animate-pulse"
-      />
-    </div>
-
-    <!-- Empty state -->
-    <div v-else-if="!blogs.length" class="py-20 text-center">
-      <p
-        class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
-      >
-        {{ t("stories.noStories") }}
-      </p>
-      <p
-        class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
-      >
-        {{ t("stories.noStoriesDesc") }}
-      </p>
-    </div>
-
-    <!-- Story list: each item exposes edit/delete actions in the card -->
-    <div v-else class="page-container space-y-3 mb-6">
-      <!--
-        BlogsStoryListItem is the same card used on the public stories page.
-        `is-admin` switches it to show edit/delete buttons instead of a link.
-        `deleting` disables the delete button while the API call is in flight.
-      -->
-      <BlogsStoryListItem
-        v-for="blog in blogs"
-        :key="blog.id"
-        :story="blog"
-        :is-admin="true"
-        :deleting="deletingIds.has(blog.id)"
-        @delete="handleDelete(blog)"
-      />
-      <!-- Pagination bar (hidden when there is only one page and no items yet) -->
-      <AdminBlogsPagination
-        v-if="totalPages > 1 || totalItems > 0"
-        :current-page="currentPage"
-        :total-pages="totalPages"
-        :total-items="totalItems"
-        :loading="loading"
-        :jump-input="jumpInput"
-        @update:current-page="currentPage = $event"
-        @jump="handleJump"
-        @update:jump-input="jumpInput = $event"
-      />
-    </div>
+      <!-- Story list: each item exposes edit/delete actions in the card -->
+      <div v-else class="page-container space-y-3">
+        <!--
+          BlogsStoryListItem is the same card used on the public stories page.
+          `is-admin` switches it to show edit/delete buttons instead of a link.
+          `deleting` disables the delete button while the API call is in flight.
+        -->
+        <BlogsStoryListItem
+          v-for="blog in blogs"
+          :key="blog.id"
+          :story="blog"
+          :is-admin="true"
+          :deleting="deletingIds.has(blog.id)"
+          @delete="handleDelete(blog)"
+        />
+        <!-- Pagination bar (hidden when there is only one page and no items yet) -->
+        <AdminBlogsPagination
+          v-if="totalPages > 1 || totalItems > 0"
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total-items="totalItems"
+          :loading="loading"
+          :jump-input="jumpInput"
+          @update:current-page="currentPage = $event"
+          @jump="handleJump"
+          @update:jump-input="jumpInput = $event"
+        />
+      </div>
+    </section>
   </div>
 </template>
