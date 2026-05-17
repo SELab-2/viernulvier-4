@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mount, VueWrapper } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import EventListView from "../../../app/components/event/EventListView.vue";
@@ -10,6 +10,7 @@ vi.mock("#app", async (importOriginal) => {
 
   return {
     ...actual,
+    navigateTo: vi.fn(), // Mocking navigateTo here as well for Nuxt auto-imports
   };
 });
 
@@ -76,6 +77,9 @@ describe("EventListView", () => {
   let wrapper: VueWrapper<InstanceType<typeof EventListView>>;
 
   beforeEach(() => {
+    // Stub global navigateTo to prevent 'history is not defined' Vue Router errors
+    vi.stubGlobal("navigateTo", vi.fn());
+
     wrapper = mount(EventListView, {
       global: {
         plugins: [i18n],
@@ -84,6 +88,11 @@ describe("EventListView", () => {
         events,
       },
     });
+  });
+
+  afterEach(() => {
+    // Clean up global stubs to prevent test leakage
+    vi.unstubAllGlobals();
   });
 
   it("renders the event cards", () => {

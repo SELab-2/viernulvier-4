@@ -211,7 +211,7 @@ const adminNavItems = [
         </nav>
 
         <button
-          class="lg:hidden outline-none transition-colors text-[var(--foreground)]"
+          class="outline-none transition-colors text-[var(--foreground)]"
           :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
           @click.stop="toggleMenu"
         >
