@@ -72,9 +72,9 @@ const skel_muted = "bg-muted animate-pulse rounded";
 
             <div class="pt-2" />
 
-            <div class="`h-5 ${skel_muted} w-full`" />
-            <div class="`h-5 ${skel_muted} w-4/5`" />
-            <div class="`h-5 ${skel_muted} w-full`" />
+            <div :class="`h-5 ${skel_muted} w-full`" />
+            <div :class="`h-5 ${skel_muted} w-4/5`" />
+            <div :class="`h-5 ${skel_muted} w-full`" />
           </div>
         </article>
       </div>
@@ -84,7 +84,7 @@ const skel_muted = "bg-muted animate-pulse rounded";
     <section class="page-container pb-14 border-t border-border pt-10">
       <!-- Title -->
       <div class="mb-6">
-        <div class="`h-6 w-48 ${skel_muted}`" />
+        <div :class="`h-6 w-48 ${skel_muted}`" />
       </div>
 
       <!-- Production list items -->
@@ -95,7 +95,7 @@ const skel_muted = "bg-muted animate-pulse rounded";
           class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card"
         >
           <!-- Thumbnail -->
-          <div :class="`w-48 h-32 ${skel_muted}-lg shrink-0`" />
+          <div :class="`w-48 h-32 ${skel_muted} rounded-lg shrink-0`" />
 
           <!-- Info -->
           <div :class="`flex-1 min-w-0 space-y-3`">
@@ -110,9 +110,9 @@ const skel_muted = "bg-muted animate-pulse rounded";
             </div>
             <!-- Tags -->
             <div class="flex gap-2 mt-2">
-              <div :class="`h-5 w-16 ${skel_muted}-full`" />
-              <div :class="`h-5 w-20 ${skel_muted}-full`" />
-              <div :class="`h-5 w-14 ${skel_muted}-full`" />
+              <div :class="`h-5 w-16 ${skel_muted} rounded-full`" />
+              <div :class="`h-5 w-20 ${skel_muted} rounded-full`" />
+              <div :class="`h-5 w-14 ${skel_muted} rounded-full`" />
             </div>
           </div>
         </div>

@@ -174,7 +174,7 @@ const skel_muted = "bg-muted animate-pulse rounded";
             <div :class="`flex-1 aspect-[16/9] ${skel_muted} rounded-2xl`" />
 
             <!-- Next arrow -->
-            <div :class="`w-10 h-10 ${skel_muted}-full shrink-0`" />
+            <div :class="`w-10 h-10 ${skel_muted} rounded-full shrink-0`" />
           </div>
 
           <!-- Slide counter -->
