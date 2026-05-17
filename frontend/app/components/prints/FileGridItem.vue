@@ -126,7 +126,7 @@ onUnmounted(() => {
               </button>
               <!-- Title -->
               <p
-                class="font-brand text-md font-bold uppercase tracking-widest mb-6 pr-8 shrink-0"
+                class="font-brand text-base font-bold uppercase tracking-widest mb-6 pr-8 shrink-0"
               >
                 {{ file.titel }}
               </p>
