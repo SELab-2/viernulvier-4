@@ -155,15 +155,7 @@ export function useProductionBatchEdit() {
 
     commonTags.value = mapped;
 
-    // Mutate in-place so Vue's reactivity picks up the change even when the
-    // new array is structurally identical to the previous one (e.g. after a
-    // reset). Replacing the reference with = [...] can silently no-op when
-    // the TagSelector has already rendered the old array.
-    tagsDraft.value.splice(
-      0,
-      tagsDraft.value.length,
-      ...structuredClone(mapped),
-    );
+    tagsDraft.value = structuredClone(mapped);
 
     commonTagsLoaded.value = true;
   }
@@ -174,16 +166,11 @@ export function useProductionBatchEdit() {
   }
 
   /**
-   * Reset the draft back to the current server baseline (commonTags).
-   * Mutates in-place so TagSelector always re-renders, even when the
-   * reset value is structurally identical to the current draft.
+   * Reset the draft back to the server baseline, mirroring productionTags.ts.
+   * Direct ref assignment always triggers Vue reactivity — no splice subtleties.
    */
   function resetTagsDraft() {
-    tagsDraft.value.splice(
-      0,
-      tagsDraft.value.length,
-      ...structuredClone(commonTags.value),
-    );
+    tagsDraft.value = commonTags.value.map((tag) => ({ ...tag }));
   }
 
   /**
@@ -248,7 +235,6 @@ export function useProductionBatchEdit() {
     togglePanel,
 
     // Batch tag state & actions
-    commonTags,
     tagsDraft,
     commonTagsLoaded,
     loadCommonTags,

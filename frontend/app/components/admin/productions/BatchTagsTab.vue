@@ -10,6 +10,7 @@
   tags to sometimes not appear after navigating back to the page.
 -->
 <script setup lang="ts">
+import { computed } from "vue";
 import { Loader2, RotateCcw, Save } from "lucide-vue-next";
 import TagSelector from "~/components/admin/productions/TagSelector.vue";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
@@ -34,6 +35,12 @@ const {
   resetTagsDraft,
   extractTagsPayload,
 } = useProductionBatchEdit();
+
+// A computed copy ensures TagSelector receives a new array reference whenever
+// tagsDraft contents change (splice, reset, load). This guarantees Vue sees a
+// prop change and re-renders TagSelector's isSelected calls — even when the
+// array identity stays the same after an in-place splice.
+const selectedForTagSelector = computed(() => [...tagsDraft.value]);
 
 const isSaving = ref(false);
 const saveError = ref<string | null>(null);
@@ -60,7 +67,7 @@ async function save() {
   if (!hasChanges) {
     isSaving.value = false;
     saveSuccess.value = true;
-    setTimeout(() => (saveSuccess.value = false), 2500);
+    setTimeout(() => (saveSuccess.value = false), 800);
     return;
   }
 
@@ -93,7 +100,7 @@ async function save() {
     await loadCommonTags(props.fetchTagsForProduction);
 
     saveSuccess.value = true;
-    setTimeout(() => (saveSuccess.value = false), 2500);
+    setTimeout(() => (saveSuccess.value = false), 800);
   } catch (err) {
     console.error("Batch tag save failed", err);
     saveError.value = t(
@@ -219,7 +226,10 @@ function handleTagChange(items: ProductionTagItem[]) {
         </div>
       </Transition>
 
-      <TagSelector :selected="tagsDraft" @change="handleTagChange" />
+      <TagSelector
+        :selected="selectedForTagSelector"
+        @change="handleTagChange"
+      />
     </div>
 
     <!-- Error -->

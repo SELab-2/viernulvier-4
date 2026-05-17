@@ -48,7 +48,7 @@ async function fetchTagsForProduction(id: number) {
 
 onMounted(async () => {
   if (!hasSelections.value) {
-    await router.replace(ROUTES.admin.productions.base);
+    router.replace("/admin/productions");
     return;
   }
 
@@ -75,7 +75,7 @@ function getTitle(production: { titel: unknown }): string {
 </script>
 
 <template>
-  <div class="flex h-full min-h-0">
+  <div class="flex h-full min-h-screen">
     <!-- ── Left panel — selected productions ─────────────────────────────── -->
     <aside
       class="w-64 shrink-0 flex flex-col border-r border-border bg-muted/20"
