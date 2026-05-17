@@ -168,10 +168,10 @@ const skel_muted = "bg-muted animate-pulse rounded";
 
           <div class="flex items-center gap-4 px-4 sm:px-12 md:px-16">
             <!-- Prev arrow -->
-            <div :class="`w-10 h-10 ${skel_muted}-full shrink-0`" />
+            <div :class="`w-10 h-10 ${skel_muted} rounded-full shrink-0`" />
 
             <!-- Main image -->
-            <div :class="`flex-1 aspect-[16/9] ${skel_muted}-2xl`" />
+            <div :class="`flex-1 aspect-[16/9] ${skel_muted} rounded-2xl`" />
 
             <!-- Next arrow -->
             <div :class="`w-10 h-10 ${skel_muted}-full shrink-0`" />
