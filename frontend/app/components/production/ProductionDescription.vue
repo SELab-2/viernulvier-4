@@ -22,6 +22,7 @@ const { t } = useI18n();
 const isExpanded = ref(false);
 const showReadMoreButton = ref(false);
 const descriptionRef = ref<HTMLElement | null>(null);
+const themeKey = ref(0);
 
 const variantClasses = computed(() => {
   if (props.variant === "boxed") {
@@ -41,12 +42,23 @@ const checkOverflow = () => {
   }
 };
 
-let observer: ResizeObserver | null = null;
+const handleThemeChange = async () => {
+  themeKey.value++;
+  await nextTick();
+  checkOverflow();
+};
+
+let resizeObserver: ResizeObserver | null = null;
 
 onMounted(async () => {
   await nextTick();
-  observer = new ResizeObserver(() => checkOverflow());
-  if (descriptionRef.value) observer.observe(descriptionRef.value);
+
+  // Observe screen size
+  resizeObserver = new ResizeObserver(() => checkOverflow());
+  if (descriptionRef.value) resizeObserver.observe(descriptionRef.value);
+
+  // Listen to signal theme toggle
+  window.addEventListener("theme-changed", handleThemeChange);
 });
 
 watch(
@@ -58,12 +70,16 @@ watch(
   { immediate: true },
 );
 
-onBeforeUnmount(() => observer?.disconnect());
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  window.removeEventListener("theme-changed", handleThemeChange);
+});
 </script>
 
 <template>
   <div class="w-full">
     <div
+      :key="themeKey"
       ref="descriptionRef"
       :class="[
         variantClasses,
