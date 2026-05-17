@@ -24,6 +24,20 @@ import { ROUTES } from "~/utils/routes";
 
 export type ProductionFormMode = "create" | "edit";
 
+// Helps automatically fill localized fields.
+function getLocalizedField(nlValue: string | null, enValue: string | null) {
+  // If both are null or undefined, return null
+  if (nlValue == null && enValue == null) {
+    return null;
+  }
+
+  // Otherwise, return the object, falling back to the other language if one is missing
+  return {
+    nl: nlValue ?? enValue ?? "",
+    en: enValue ?? nlValue ?? "",
+  };
+}
+
 export function useProductionFormPage(mode: ProductionFormMode) {
   const route = useRoute();
   const router = useRouter();
@@ -548,35 +562,19 @@ export function useProductionFormPage(mode: ProductionFormMode) {
           nl: corePayload.nl.description1,
           en: corePayload.en.description1 || corePayload.nl.description1, // Fallback to dutch if no english
         },
-        description2:
-          corePayload.nl.description2 !== null ||
-          corePayload.en.description2 !== null
-            ? {
-                nl: corePayload.nl.description2 ?? "",
-                en: corePayload.en.description2 ?? "",
-              }
-            : null,
-        artist:
-          corePayload.nl.artist !== null || corePayload.en.artist !== null
-            ? {
-                nl: corePayload.nl.artist ?? "",
-                en: corePayload.en.artist ?? "",
-              }
-            : null,
-        tagline:
-          corePayload.nl.tagline !== null || corePayload.en.tagline !== null
-            ? {
-                nl: corePayload.nl.tagline ?? "",
-                en: corePayload.en.tagline ?? "",
-              }
-            : null,
-        credits:
-          corePayload.nl.credits !== null || corePayload.en.credits !== null
-            ? {
-                nl: corePayload.nl.credits ?? "",
-                en: corePayload.en.credits ?? "",
-              }
-            : null,
+        description2: getLocalizedField(
+          corePayload.nl.description2,
+          corePayload.en.description2,
+        ),
+        artist: getLocalizedField(corePayload.nl.artist, corePayload.en.artist),
+        tagline: getLocalizedField(
+          corePayload.nl.tagline,
+          corePayload.en.tagline,
+        ),
+        credits: getLocalizedField(
+          corePayload.nl.credits,
+          corePayload.en.credits,
+        ),
         performer_type: null,
         attendance_mode: null,
       };
