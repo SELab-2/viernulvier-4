@@ -9,7 +9,7 @@
  *    :file="file"
  * />
  */
-import { ref, watch, onUnmounted } from "vue";
+import { ref, watch, onMounted, computed, onUnmounted } from "vue";
 import type { PrintItemView, ProductionView } from "@repo/common";
 import { Info, X } from "lucide-vue-next";
 import { useProductionApi } from "~/composables/useProductionApi"; // Uses your existing production composable
@@ -50,15 +50,30 @@ const loadLinkedProductions = async () => {
   }
 };
 
+const hasInfoAvailable = computed(() => {
+  const hasDescription =
+    props.file.description && props.file.description !== "";
+  const hasProductions = linkedProductions.value.length > 0;
+  return hasDescription || hasProductions || isLoadingProductions.value;
+});
+
+onMounted(() => {
+  loadLinkedProductions();
+});
+
+watch(
+  () => props.file?.id,
+  () => {
+    loadLinkedProductions();
+  },
+);
+
 watch(showInfo, (val) => {
   // Prevents scrolling when description is opened
   // (paddingRight compensates for the scrollbar width to prevent the layout from shifting)
   if (val) {
     document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
     document.body.style.overflow = "hidden";
-
-    // Lazy load the productions
-    loadLinkedProductions();
   } else {
     document.body.style.paddingRight = "";
     document.body.style.overflow = "";
@@ -83,7 +98,7 @@ onUnmounted(() => {
       </div>
       <!-- Info button -->
       <button
-        v-if="file.description && file.description != ''"
+        v-if="hasInfoAvailable"
         @click.stop="showInfo = true"
         class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors z-10"
       >
@@ -111,28 +126,33 @@ onUnmounted(() => {
               </button>
               <!-- Title -->
               <p
-                class="text-[11px] font-bold uppercase tracking-widest mb-3 pr-8 shrink-0"
+                class="font-brand text-md font-bold uppercase tracking-widest mb-6 pr-8 shrink-0"
               >
                 {{ file.titel }}
               </p>
 
-              <div class="overflow-y-auto pr-1 space-y-6 flex-1">
+              <div
+                class="overflow-y-auto pr-2 space-y-6 flex-1 custom-scrollbar"
+              >
                 <div v-if="file.description && file.description !== ''">
                   <h4
-                    class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-1.5"
+                    class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-2 border-b border-border pb-1"
                   >
                     {{ t("general.description", "Description") }}
                   </h4>
                   <p
-                    class="text-sm leading-relaxed text-muted-foreground break-words"
+                    class="text-sm leading-relaxed text-muted-foreground break-words pt-1"
                   >
                     {{ file.description }}
                   </p>
                 </div>
 
-                <div>
+                <div
+                  v-if="isLoadingProductions || linkedProductions.length"
+                  class="flex flex-col"
+                >
                   <h4
-                    class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-2.5"
+                    class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-4 border-b border-border pb-1"
                   >
                     {{ t("prints.linkedProductions", "Linked Productions") }}
                   </h4>
@@ -146,25 +166,15 @@ onUnmounted(() => {
 
                   <div
                     v-else-if="linkedProductions.length"
-                    class="flex flex-wrap gap-2"
+                    class="flex flex-col gap-4"
                   >
-                    <NuxtLink
+                    <ProductionListViewItem
                       v-for="prod in linkedProductions"
                       :key="prod.id"
-                      :to="ROUTES.productions.byId(prod.id)"
-                      class="text-xs font-medium px-3 py-1.5 rounded-full border border-border bg-muted hover:border-accent hover:text-accent transition-colors duration-150"
-                    >
-                      {{ prod.titel }}
-                    </NuxtLink>
-                  </div>
-
-                  <div v-else class="text-xs italic text-muted-foreground py-1">
-                    {{
-                      t(
-                        "prints.noLinkedProductions",
-                        "No productions linked to this file.",
-                      )
-                    }}
+                      :production-view="prod"
+                      :is-admin="false"
+                      @click="showInfo = false"
+                    />
                   </div>
                 </div>
               </div>
@@ -174,7 +184,6 @@ onUnmounted(() => {
       </Teleport>
     </div>
 
-    <!-- File info -->
     <div class="mt-2">
       <p
         :class="[
