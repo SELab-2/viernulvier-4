@@ -454,7 +454,16 @@
       "mode-label": "Batchbewerkingsmodus",
       "selected": "{count} geselecteerd",
       "proceed": "Ga naar batchbewerking",
-      "hint": "Selecteer producties die je wilt bewerken"
+      "hint": "Selecteer producties die je wilt bewerken",
+      "saveError": "Er is iets misgegaan bij het opslaan. Probeer het opnieuw.",
+      "productionsLabel": "producties",
+      "editingLabel": "Bewerken",
+      "backToSelection": "Terug naar selectie",
+      "tags": {
+        "title": "Tags",
+        "description": "Vooraf geselecteerde tags worden gedeeld door alle geselecteerde producties. Wijzigingen worden bij het opslaan toegepast op elke productie.",
+        "commonNotice": "Toont tags die gemeenschappelijk zijn voor alle {count} geselecteerde producties."
+      }
     },
     "create-title": "Nieuwe productie",
     "edit-title": "Productie bewerken",

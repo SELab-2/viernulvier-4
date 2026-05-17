@@ -103,10 +103,7 @@ async function save() {
     setTimeout(() => (saveSuccess.value = false), 800);
   } catch (err) {
     console.error("Batch tag save failed", err);
-    saveError.value = t(
-      "admin-productions.batchEdit.tags.saveError",
-      "Something went wrong while saving. Please try again.",
-    );
+    saveError.value = t("admin-productions.batch.saveError");
   } finally {
     isSaving.value = false;
   }
@@ -125,15 +122,10 @@ function handleTagChange(items: ProductionTagItem[]) {
         <p
           class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.batchEdit.tags.title", "Tags") }}
+          {{ t("admin-productions.batch.tags.title") }}
         </p>
         <p class="text-xs text-muted-foreground mt-0.5">
-          {{
-            t(
-              "admin-productions.batchEdit.tags.description",
-              "Pre-selected tags are shared by all selected productions. Changes apply to every production on save.",
-            )
-          }}
+          {{ t("admin-productions.batch.tags.description") }}
         </p>
       </div>
 
@@ -145,7 +137,7 @@ function handleTagChange(items: ProductionTagItem[]) {
           @click="resetTagsDraft"
         >
           <RotateCcw :size="10" stroke-width="2.5" />
-          {{ t("common.reset", "Reset") }}
+          {{ t("admin.reset") }}
         </button>
 
         <!-- Save -->
@@ -168,10 +160,10 @@ function handleTagChange(items: ProductionTagItem[]) {
           <Save v-else :size="10" stroke-width="2.5" />
           {{
             saveSuccess
-              ? t("common.saved", "Saved!")
+              ? t("admin.saved")
               : isSaving
-                ? t("common.saving", "Saving…")
-                : t("common.save", "Save")
+                ? t("admin.saving")
+                : t("admin.save")
           }}
         </button>
       </div>
@@ -183,11 +175,9 @@ function handleTagChange(items: ProductionTagItem[]) {
       class="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted/50 rounded-lg px-3 py-2"
     >
       {{
-        t(
-          "admin-productions.batchEdit.tags.commonNotice",
-          { count: selectedProductions.length },
-          `Showing tags common to all ${selectedProductions.length} selected productions.`,
-        )
+        t("admin-productions.batch.tags.commonNotice", {
+          count: selectedProductions.length,
+        })
       }}
     </p>
 
@@ -221,7 +211,7 @@ function handleTagChange(items: ProductionTagItem[]) {
           <p
             class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
           >
-            {{ t("common.saving", "Saving…") }}
+            {{ t("admin.saving") }}
           </p>
         </div>
       </Transition>

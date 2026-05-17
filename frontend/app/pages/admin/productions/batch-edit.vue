@@ -86,22 +86,17 @@ function getTitle(production: { titel: unknown }): string {
           @click="goBack"
         >
           <ArrowLeft :size="11" stroke-width="2.5" />
-          {{
-            t(
-              "admin-productions.batchEdit.backToSelection",
-              "Back to selection",
-            )
-          }}
+          {{ t("admin-productions.batch.backToSelection") }}
         </button>
 
         <p
           class="mt-3 text-[9px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.batchEdit.editingLabel", "Editing") }}
+          {{ t("admin-productions.batch.editingLabel") }}
         </p>
         <p class="text-sm font-semibold text-foreground leading-tight">
           {{ selectedProductions.length }}
-          {{ t("admin-productions.batchEdit.productionsLabel", "productions") }}
+          {{ t("admin-productions.batch.productionsLabel") }}
         </p>
       </div>
 

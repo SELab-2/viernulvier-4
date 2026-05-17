@@ -452,7 +452,16 @@
       "mode-label": "Batch Edit Mode",
       "selected": "{count} selected",
       "proceed": "Go to Batch Edit",
-      "hint": "Select productions you want to edit"
+      "hint": "Select productions you want to edit",
+      "saveError": "Something went wrong while saving. Please try again.",
+      "productionsLabel": "productions",
+      "editingLabel": "Editing",
+      "backToSelection": "Back to selection",
+      "tags": {
+        "title": "Tags",
+        "description": "Pre-selected tags are shared by all selected productions. Changes apply to every production on save.",
+        "commonNotice": "Showing tags common to all {count} selected productions."
+      }
     },
     "create-title": "New production",
     "edit-title": "Edit production",
