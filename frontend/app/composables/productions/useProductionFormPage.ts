@@ -20,6 +20,7 @@ import { useStorageApi } from "~/composables/media/useStorageApi";
 import { useProductionSeries } from "~/composables/productions/steps/productionSeries";
 import { useSeriesApi } from "~/composables/useSeriesApi";
 import type { LocalizedInput } from "~/composables/productions/steps/productionSeries";
+import { ROUTES } from "~/utils/routes";
 
 export type ProductionFormMode = "create" | "edit";
 
@@ -81,6 +82,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       type: "default",
     });
     if (!res.data) throw new Error("Failed to create gallery");
+    await productionApi.linkMedia(productionId, res.data.id);
+    return res.data.id;
+  }
+
+  async function ensurePrintGallery(
+    productionId: number,
+    existingGalleryId: number | null,
+  ): Promise<number> {
+    if (existingGalleryId !== null) return existingGalleryId;
+
+    const res = await galleryApi.create({
+      name: `production-${productionId}-prints`,
+      type: "prints",
+    });
+    if (!res.data) throw new Error("Failed to create print gallery");
     await productionApi.linkMedia(productionId, res.data.id);
     return res.data.id;
   }
@@ -285,6 +301,13 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         await persistItemCreate(item, galleryId, productionId);
       }
     }
+
+    if (mediaPayload.printsToLink.length > 0) {
+      const printGalleryId = await ensurePrintGallery(productionId, null);
+      for (const printId of mediaPayload.printsToLink) {
+        await galleryApi.linkPrintToGallery(printGalleryId, printId);
+      }
+    }
   }
 
   async function handleMediaEdit(
@@ -296,20 +319,41 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       mediaPayload.itemsToUpdate.length > 0 ||
       mediaPayload.itemsToDelete.length > 0;
 
-    if (!hasMediaChanges) return;
+    if (hasMediaChanges) {
+      // Deletions first
+      for (const item of mediaPayload.itemsToDelete) {
+        await persistItemDelete(item);
+      }
 
-    // Deletions first
-    for (const item of mediaPayload.itemsToDelete) {
-      await persistItemDelete(item);
+      const galleryId = await ensureGallery(
+        productionId,
+        mediaPayload.galleryId,
+      );
+
+      for (const item of mediaPayload.itemsToCreate) {
+        await persistItemCreate(item, galleryId, productionId);
+      }
+      for (const item of mediaPayload.itemsToUpdate) {
+        await persistItemUpdate(item, productionId);
+      }
     }
 
-    const galleryId = await ensureGallery(productionId, mediaPayload.galleryId);
+    const hasPrintChanges =
+      mediaPayload.printsToLink.length > 0 ||
+      mediaPayload.printsToUnlink.length > 0;
 
-    for (const item of mediaPayload.itemsToCreate) {
-      await persistItemCreate(item, galleryId, productionId);
-    }
-    for (const item of mediaPayload.itemsToUpdate) {
-      await persistItemUpdate(item, productionId);
+    if (hasPrintChanges) {
+      const printGalleryId = await ensurePrintGallery(
+        productionId,
+        mediaPayload.printGalleryId,
+      );
+
+      for (const printId of mediaPayload.printsToLink) {
+        await galleryApi.linkPrintToGallery(printGalleryId, printId);
+      }
+      for (const printId of mediaPayload.printsToUnlink) {
+        await galleryApi.unlinkPrintFromGallery(printGalleryId, printId);
+      }
     }
   }
 

@@ -502,7 +502,12 @@
       "carouselHint": "Wordt gebruikt als verzameling van extra foto’s.",
       "carouselItem": "Carrouselafbeeldingen",
       "noCarousel": "Nog geen Carrouselafbeeldingen toegevoegd",
-      "fallbackHint": "Valt terug op NL"
+      "fallbackHint": "Valt terug op NL",
+      "prints": "Drukwerk",
+      "printsHint": "Koppel bestaand drukwerk aan deze productie",
+      "searchPrints": "Zoek drukwerk op titel...",
+      "noPrintsFound": "Geen drukwerk gevonden",
+      "searching": "Zoeken..."
     },
     "tags": {
       "available": "Beschikbare tags",

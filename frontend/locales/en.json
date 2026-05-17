@@ -500,7 +500,12 @@
       "carouselHint": "Used as a collection of additional photos",
       "carouselItem": "Carousel image",
       "noCarousel": "No carousel images added yet",
-      "fallbackHint": "Falls back to NL"
+      "fallbackHint": "Falls back to NL",
+      "prints": "Prints",
+      "printsHint": "Link existing print items to this production",
+      "searchPrints": "Search prints by title...",
+      "noPrintsFound": "No prints found",
+      "searching": "Searching..."
     },
     "tags": {
       "available": "Available tags",

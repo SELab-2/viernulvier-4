@@ -72,6 +72,8 @@ export const API_ROUTES = {
     items: (galleryId: number) => `/media/galleries/${galleryId}/items`,
     itemLink: (galleryId: number, itemId: number) =>
       `/media/galleries/${galleryId}/items/${itemId}`,
+    printLink: (galleryId: number, itemId: number) =>
+      `/media/galleries/${galleryId}/prints/${itemId}`,
   },
   items: {
     base: "/media/items",
