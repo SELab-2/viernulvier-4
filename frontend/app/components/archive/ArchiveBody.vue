@@ -194,7 +194,7 @@ watch(searchQuery, () => {
 function showSnackbarError(message: string) {
   snackbar.add({
     type: "error",
-    text: message,
+    text: t("admin-productions.deleteError") + message,
   });
 }
 
@@ -219,7 +219,9 @@ async function handleDeleteProduction(
 ) {
   // Check whether the user ACTUALLY wants to perform the delete.
   const confirmed = confirm(
-    "Do you want to delete this production?", // TODO: i18n this?
+    t("admin-productions.deleteConfirm", {
+      production: production.titel,
+    }),
   );
   if (!confirmed) return;
 
@@ -232,7 +234,11 @@ async function handleDeleteProduction(
 
   // Reload the page
   resetAndLoad();
-  showSnackbarSuccess("Successfully deleted production!");
+  showSnackbarSuccess(
+    t("admin-productions.deleteSuccess", {
+      production: production.titel,
+    }),
+  );
 }
 
 /**

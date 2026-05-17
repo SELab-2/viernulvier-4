@@ -430,6 +430,9 @@
     }
   },
   "admin-productions": {
+    "deleteError": "Could not delete production.",
+    "deleteSuccess": "Deleted production \"{production}\".",
+    "deleteConfirm": "Are you sure you want to delete \"{production}\"?",
     "header_title": "Productions",
     "new": "New production",
     "editTags": "Edit tags",

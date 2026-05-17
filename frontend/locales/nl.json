@@ -432,6 +432,9 @@
     }
   },
   "admin-productions": {
+    "deleteError": "De productie kon niet verwijderd worden.",
+    "deleteSuccess": "Productie \"{production}\" verwijderd.",
+    "deleteConfirm": "Weet je zeker dat je \"{production}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "header_title": "Producties",
     "new": "Nieuwe productie",
     "editTags": "Tags bewerken",
