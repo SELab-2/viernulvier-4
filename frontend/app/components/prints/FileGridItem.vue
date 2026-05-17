@@ -138,7 +138,7 @@ onUnmounted(() => {
                   <h4
                     class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-2 border-b border-border pb-1"
                   >
-                    {{ t("general.description", "Description") }}
+                    {{ t("prints.description") }}
                   </h4>
                   <p
                     class="text-sm leading-relaxed text-muted-foreground break-words pt-1"
@@ -154,7 +154,7 @@ onUnmounted(() => {
                   <h4
                     class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-4 border-b border-border pb-1"
                   >
-                    {{ t("prints.linkedProductions", "Linked Productions") }}
+                    {{ t("prints.relatedProductions") }}
                   </h4>
 
                   <div

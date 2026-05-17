@@ -262,7 +262,9 @@
     "pagination": "Pagination",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "new": "New print"
+    "new": "New print",
+    "description": "description",
+    "relatedProductions": "Related productions"
   },
   "admin": {
     "finish": "Finish",
