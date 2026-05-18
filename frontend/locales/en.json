@@ -1,4 +1,6 @@
 {
+  "english": "EN",
+  "dutch": "NL",
   "home": {
     "title": "Search the archive"
   },
@@ -162,6 +164,7 @@
     "credits": "Credits",
     "doors": "doors",
     "break": "intermission",
+    "prints": "prints",
     "gallery": "gallery",
     "gallery_nav": {
       "prev": "Previous image",
@@ -218,7 +221,10 @@
     "deleteSuccess": "Deleted account \"{username}\"."
   },
   "series": {
-    "noProductions": "This series doesn't contain any productions."
+    "header_title": "Series",
+    "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
+    "noProductions": "This series doesn't contain any productions.",
+    "noSeries": "No series"
   },
   "prints": {
     "types": {
@@ -389,6 +395,36 @@
         "prices": "prices"
       }
     },
+    "dashboard": {
+      "welcome": "Welcome back",
+      "overview": "Overview",
+      "quickLinks": "Quick links",
+      "productions": "Productions",
+      "stories": "Stories",
+      "events": "Events",
+      "prints": "Prints",
+      "series": "Series",
+      "tags": "Tags",
+      "accounts": "Accounts",
+      "changePassword": "Change password",
+      "changePasswordHint": "Update your admin account password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Minimum 8 characters",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Repeat new password",
+      "updatePassword": "Update password",
+      "updating": "Updating…",
+      "passwordSuccess": "Password updated successfully.",
+      "passwordTooShort": "New password must be at least 8 characters.",
+      "notAuthenticated": "Not authenticated.",
+      "productionsDesc": "Browse and edit productions",
+      "storiesDesc": "Create and manage blog posts",
+      "eventsDesc": "View and configure events",
+      "printsDesc": "Upload and manage printed materials",
+      "seriesDesc": "Explore the public series archive",
+      "tagsDesc": "Review and manage tag metadata",
+      "accountsDesc": "Manage admin accounts"
+    },
     "csvImport": {
       "title": "CSV import tools for {target}",
       "description": "Use these tools to bulk import {target} from CSV files.",
@@ -479,7 +515,12 @@
       "typeToSearch": "Type to search locations...",
       "locationPlaceholder": "Search or create a location...",
       "noDateYet": "No date set yet",
-      "empty": "No events yet"
+      "empty": "No events yet",
+      "prices": {
+        "title": "Prices",
+        "empty": "No prices yet",
+        "add": "New price"
+      }
     },
     "media": {
       "title": "Title",
@@ -499,7 +540,12 @@
       "carouselHint": "Used as a collection of additional photos",
       "carouselItem": "Carousel image",
       "noCarousel": "No carousel images added yet",
-      "fallbackHint": "Falls back to NL"
+      "fallbackHint": "Falls back to NL",
+      "prints": "Prints",
+      "printsHint": "Link existing print items to this production",
+      "searchPrints": "Search prints by title...",
+      "noPrintsFound": "No prints found",
+      "searching": "Searching..."
     },
     "tags": {
       "available": "Available tags",

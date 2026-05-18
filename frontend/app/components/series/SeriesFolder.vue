@@ -27,17 +27,17 @@ const { t } = useI18n();
 <template>
   <NuxtLink
     :to="ROUTES.series.byId(series.id)"
-    class="group flex flex-col items-center gap-1.5 cursor-pointer select-none w-36 sm:w-40"
+    class="group flex flex-col items-center gap-1.5 cursor-pointer select-none w-full"
   >
     <!-- Folder icon -->
     <div class="flex items-center justify-center">
       <FolderOpen
-        class="hidden group-hover:block w-16 h-16 sm:w-20 sm:h-20 text-accent transition-colors duration-150"
-        :stroke-width="1.25"
+        class="hidden group-hover:block w-20 h-20 sm:w-28 sm:h-28 text-accent fill-accent/30 transition-colors duration-150"
+        :stroke-width="1"
       />
       <Folder
-        class="block group-hover:hidden w-16 h-16 sm:w-20 sm:h-20 text-muted-foreground transition-colors duration-150"
-        :stroke-width="1.25"
+        class="block group-hover:hidden w-20 h-20 sm:w-28 sm:h-28 text-muted-foreground transition-colors duration-150"
+        :stroke-width="1"
       />
     </div>
 

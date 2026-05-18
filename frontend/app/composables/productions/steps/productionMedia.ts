@@ -1,5 +1,5 @@
 import type { ProductionFormStep } from "~/types/ProductionFormStep";
-import type { CropName } from "@repo/common";
+import type { CropName, PrintItemView } from "@repo/common";
 import { CROP_NAMES } from "@repo/common";
 
 // ─── Draft types (what the UI works with) ─────────────────────────────────────
@@ -43,6 +43,8 @@ export type MediaItemDraft =
 export type ProductionMediaForm = {
   galleryId: number | null;
   items: MediaItemDraft[];
+  printGalleryId: number | null;
+  prints: PrintItemView[];
 };
 
 // ─── Payload types (what finish works with) ───────────────────────────────────
@@ -82,6 +84,9 @@ export type ProductionMediaPayload = {
   itemsToCreate: ItemCreate[];
   itemsToUpdate: ItemUpdate[];
   itemsToDelete: ItemDelete[];
+  printGalleryId: number | null;
+  printsToLink: number[];
+  printsToUnlink: number[];
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -128,7 +133,12 @@ export function useProductionMedia(): ProductionFormStep<
 > {
   const productionApi = useProductionApi();
 
-  const draft = ref<ProductionMediaForm>({ galleryId: null, items: [] });
+  const draft = ref<ProductionMediaForm>({
+    galleryId: null,
+    items: [],
+    printGalleryId: null,
+    prints: [],
+  });
   const original = ref<ProductionMediaForm | null>(null);
 
   // ─── Initialize ─────────────────────────────────────────────────────────────
@@ -139,63 +149,73 @@ export function useProductionMedia(): ProductionFormStep<
   }): Promise<void> {
     if (context.mode === "create") {
       original.value = null;
-      draft.value = { galleryId: null, items: [] };
+      draft.value = {
+        galleryId: null,
+        items: [],
+        printGalleryId: null,
+        prints: [],
+      };
       return;
     }
 
     if (!context.id) return;
 
     const productionId = Number(context.id);
-    const gallery = await productionApi.getMediaGallery(productionId);
+    const [gallery, printGallery] = await Promise.all([
+      productionApi.getMediaGallery(productionId),
+      productionApi.getPrintsGallery(productionId, "nl"), // Using NL to get PrintItemView
+    ]);
 
-    if (!gallery) {
-      original.value = { galleryId: null, items: [] };
-      draft.value = { galleryId: null, items: [] };
-      return;
-    }
+    const items: MediaItemDraft[] =
+      gallery?.items.map((item) => {
+        const crops = emptyCrops();
 
-    const items: MediaItemDraft[] = gallery.items.map((item) => {
-      const crops = emptyCrops();
-
-      for (const [cropName, crop] of Object.entries(item.crops)) {
-        if (crop) {
-          crops[cropName as CropName] = {
-            type: "existing",
-            id: crop.id,
-            url: crop.url,
-          };
+        for (const [cropName, crop] of Object.entries(item.crops)) {
+          if (crop) {
+            crops[cropName as CropName] = {
+              type: "existing",
+              id: crop.id,
+              url: crop.url,
+            };
+          }
         }
-      }
 
-      const title = item.title as { nl?: string; en?: string } | null;
-      const description = item.description as {
-        nl?: string;
-        en?: string;
-      } | null;
-      const credits = item.credits as { nl?: string; en?: string } | null;
+        const title = item.title as { nl?: string; en?: string } | null;
+        const description = item.description as {
+          nl?: string;
+          en?: string;
+        } | null;
+        const credits = item.credits as { nl?: string; en?: string } | null;
 
-      return {
-        kind: "existing",
-        id: item.id,
-        position: item.position,
-        deleted: false,
-        nl: {
-          title: title?.nl ?? "",
-          description: description?.nl ?? "",
-          credits: credits?.nl ?? "",
-        },
-        en: {
-          title: title?.en ?? "",
-          description: description?.en ?? "",
-          credits: credits?.en ?? "",
-        },
-        crops,
-      };
-    });
+        return {
+          kind: "existing",
+          id: item.id,
+          position: item.position,
+          deleted: false,
+          nl: {
+            title: title?.nl ?? "",
+            description: description?.nl ?? "",
+            credits: credits?.nl ?? "",
+          },
+          en: {
+            title: title?.en ?? "",
+            description: description?.en ?? "",
+            credits: credits?.en ?? "",
+          },
+          crops,
+        };
+      }) ?? [];
 
-    original.value = { galleryId: gallery.id, items };
+    const prints = (printGallery?.items as PrintItemView[]) ?? [];
+
+    original.value = {
+      galleryId: gallery?.id ?? null,
+      items,
+      printGalleryId: printGallery?.id ?? null,
+      prints,
+    };
     draft.value = {
-      galleryId: gallery.id,
+      galleryId: gallery?.id ?? null,
       items: items.map((item) => {
         if (item.kind === "existing" && !item.deleted) {
           return {
@@ -207,6 +227,8 @@ export function useProductionMedia(): ProductionFormStep<
         }
         return { ...item };
       }),
+      printGalleryId: printGallery?.id ?? null,
+      prints: [...prints],
     };
   }
 
@@ -214,7 +236,12 @@ export function useProductionMedia(): ProductionFormStep<
 
   function reset(): void {
     if (!original.value) {
-      draft.value = { galleryId: null, items: [] };
+      draft.value = {
+        galleryId: null,
+        items: [],
+        printGalleryId: null,
+        prints: [],
+      };
       return;
     }
 
@@ -231,6 +258,8 @@ export function useProductionMedia(): ProductionFormStep<
         }
         return { ...item };
       }),
+      printGalleryId: original.value.printGalleryId,
+      prints: [...original.value.prints],
     };
   }
 
@@ -238,11 +267,15 @@ export function useProductionMedia(): ProductionFormStep<
 
   function getChangedFields(): string[] {
     if (!original.value) {
-      return draft.value.items.map((_, i) => `item[${i}]`);
+      return [
+        ...draft.value.items.map((_, i) => `item[${i}]`),
+        ...draft.value.prints.map((p) => `print:${p.id}`),
+      ];
     }
 
     const changes: string[] = [];
 
+    // Media items changes
     for (const item of draft.value.items) {
       if (item.kind === "new") {
         changes.push(`new:${item.position}`);
@@ -275,6 +308,21 @@ export function useProductionMedia(): ProductionFormStep<
         if (crop.type === "empty" && orig.crops[cropName].type === "existing") {
           changes.push(`${item.id}:removed:${cropName}`);
         }
+      }
+    }
+
+    // Prints changes
+    const origPrintIds = new Set(original.value.prints.map((p) => p.id));
+    const draftPrintIds = new Set(draft.value.prints.map((p) => p.id));
+
+    for (const p of draft.value.prints) {
+      if (!origPrintIds.has(p.id)) {
+        changes.push(`print:link:${p.id}`);
+      }
+    }
+    for (const p of original.value.prints) {
+      if (!draftPrintIds.has(p.id)) {
+        changes.push(`print:unlink:${p.id}`);
       }
     }
 
@@ -370,11 +418,24 @@ export function useProductionMedia(): ProductionFormStep<
       });
     }
 
+    const origPrintIds = new Set(original.value?.prints.map((p) => p.id) ?? []);
+    const draftPrintIds = new Set(draft.value.prints.map((p) => p.id));
+
+    const printsToLink = draft.value.prints
+      .filter((p) => !origPrintIds.has(p.id))
+      .map((p) => p.id);
+    const printsToUnlink = (original.value?.prints ?? [])
+      .filter((p) => !draftPrintIds.has(p.id))
+      .map((p) => p.id);
+
     return {
       galleryId: draft.value.galleryId,
       itemsToCreate,
       itemsToUpdate,
       itemsToDelete,
+      printGalleryId: draft.value.printGalleryId,
+      printsToLink,
+      printsToUnlink,
     };
   }
 

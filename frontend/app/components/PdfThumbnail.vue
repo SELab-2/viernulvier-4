@@ -62,7 +62,7 @@ const openPdf = () => props.src && window.open(props.src, "_blank"); // for open
 </script>
 
 <template>
-  <div class="absolute inset-0 w-full h-full" @click.stop="openPdf">
+  <div class="relative w-full h-full overflow-hidden">
     <div
       v-if="loading"
       class="w-full h-full flex items-center justify-center bg-muted"
@@ -75,7 +75,7 @@ const openPdf = () => props.src && window.open(props.src, "_blank"); // for open
     <canvas
       v-show="!loading && !error"
       ref="canvas"
-      class="w-full h-full object-cover"
+      class="block w-full h-full object-cover"
     />
     <!-- Error fallback -->
     <slot v-if="error" name="fallback" />

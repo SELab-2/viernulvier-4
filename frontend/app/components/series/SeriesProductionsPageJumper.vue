@@ -1,67 +1,60 @@
 <!--
-SeriesPageJumper.vue
+SeriesProductionsPageJumper.vue
 
-Input control for navigating directly to a specific page of series.
+Input control for navigating directly to a specific page in the productions of a series.
 Responsible for:
 - Allowing users to enter a page number
 - Validating the input against available pages
-- Updating the current page in the shared series' state
+- Updating the current page in the shared series' productions state
 - Scrolling to the top after navigation
 
 Uses:
-- useSeriesView: pagination state (currentPage, totalPages, loading) (passed from parent)
+- useSeriesProductionsView: pagination state (currentPage, totalPages, loading)
 -->
 <script setup lang="ts">
 import { ref } from "vue";
+import { useSeriesProductionsView } from "../../composables/useSeriesProductionsView";
+
+const { currentPage, totalPages, loading } = useSeriesProductionsView();
 const { t } = useI18n();
 
 const jumpInput = ref("");
 
-const props = defineProps<{
-  currentPage: number;
-  totalPages: number;
-  loading: boolean;
-}>();
-
-const emit = defineEmits<{
-  (e: "go-to-page", page: number): void;
-}>();
-
 function goToPage(page: number) {
   // Prevent invalid or unnecessary navigation
   if (
-    page < 0 ||
-    page >= props.totalPages ||
-    page === props.currentPage ||
-    props.loading
+    page < 1 ||
+    page > totalPages.value ||
+    page === currentPage.value ||
+    loading.value
   )
     return;
-  emit("go-to-page", page);
+  currentPage.value = page;
   // Scroll to top after page change
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function handleJump() {
   const page = parseInt(jumpInput.value, 10);
-  if (!isNaN(page)) goToPage(page - 1);
+  if (!isNaN(page)) goToPage(page);
   // Reset input after attempting jump
   jumpInput.value = "";
 }
 </script>
 
 <template>
-  <div v-if="totalPages > 1" class="flex items-center gap-2">
+  <div class="flex items-center gap-2">
     <span
       class="text-sm font-black uppercase tracking-wide text-muted-foreground"
     >
-      {{ t("prints.page_label") }}
+      {{ t("archive.page_label") }}
     </span>
     <input
       v-model="jumpInput"
       type="number"
       :min="1"
       :max="totalPages"
-      :placeholder="(currentPage + 1).toString()"
+      :placeholder="currentPage.toString()"
       :disabled="loading"
       @keydown.enter="handleJump"
       @blur="handleJump"
@@ -70,9 +63,7 @@ function handleJump() {
     <span
       class="text-sm font-black uppercase tracking-wide text-muted-foreground"
     >
-      {{ t("prints.of_pages", { total: totalPages }) }}
+      {{ t("archive.of_pages", { total: totalPages }) }}
     </span>
   </div>
 </template>
-
-<style scoped></style>

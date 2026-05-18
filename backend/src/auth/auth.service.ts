@@ -3,6 +3,7 @@ import { AccountDatabaseService } from "../database/db.account.service";
 import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   ApiKeyDto,
+  ChangePasswordDto,
   CreateAccountDto,
   LoginDto,
   PaginationFilterDto,
@@ -10,6 +11,7 @@ import {
   UpdateAccountDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
+import { UnauthorizedException } from "@nestjs/common";
 
 @Injectable()
 export class AuthService {
@@ -80,5 +82,28 @@ export class AuthService {
    */
   async deleteAccount(accountId: number): Promise<boolean> {
     return await this.accountDbService.deleteAccount(accountId);
+  }
+
+  /**
+   * Changes the password of the account associated with the provided API key.
+   * @param apiKey The API key of the account.
+   * @param changePassword The new password.
+   * @returns The updated account.
+   */
+  async changePassword(
+    apiKey: string,
+    changePassword: ChangePasswordDto,
+  ): Promise<PublicAccountDto> {
+    const accountId =
+      await this.accountDbService.getAccountIdFromApiKey(apiKey);
+
+    if (!accountId) {
+      throw new UnauthorizedException("Invalid API key");
+    }
+
+    return await this.accountDbService.updateAccount({
+      id: accountId,
+      password: changePassword.password,
+    });
   }
 }
