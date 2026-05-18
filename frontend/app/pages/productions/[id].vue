@@ -149,11 +149,15 @@ const headerCrop = computed(() => {
   return getMainImageCrop(gallery.value, "FE3_header");
 });
 
+// carousel
 const carouselImages = computed(() => {
   if (!gallery.value || !gallery.value.items) return [];
   return getCarouselImageCrops(gallery.value, "hd_ready");
 });
 
+/**
+ * Check if a string is useful (not "N/A" or empty)
+ */
 const isValid = (val: any) => {
   if (!val) return false;
   const s = String(val).trim().toUpperCase();

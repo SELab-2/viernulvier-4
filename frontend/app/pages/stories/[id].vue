@@ -1,3 +1,22 @@
+<!--
+  pages/stories/[id].vue
+  ========================
+  Public single-blog-post page.
+
+  Layout:
+  1. Hero banner  — full-width image with scrollable/fading title overlay.
+  2. Body article — rich-text content with a thin purple left accent line.
+  3. Credits bar  — image credits fetched from the linked media item, shown
+                    in a subtle strip at the bottom of the article when present.
+
+  The title uses the same scrollable + fade pattern as the admin preview
+  (AdminBlogsPreview.vue) so very long titles never overflow the hero section.
+
+  Data fetching:
+  - Blog data    : useBlogApi().getById  (lang-aware, returns BlogView)
+  - Gallery data : useBlogApi().getMediaGallery  (header crop + credits)
+  Both use useAsyncData so they are SSR-compatible and react to locale changes.
+-->
 <script lang="ts" setup>
 import { computed, ref, watch } from "vue";
 import { ChevronLeft, ChevronDown, ChevronUp } from "lucide-vue-next";
@@ -47,6 +66,7 @@ const blogId = computed(() => {
 
 /** Get the main blog data and handle API nesting */
 const { data, status, error } = useAsyncData<BlogView | null>(
+  // Data fetching
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
@@ -63,6 +83,7 @@ const { data, status, error } = useAsyncData<BlogView | null>(
 watch(
   [status, error, data],
   ([newStatus, newError, newBlog]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
     if (newStatus === "success" && !newBlog) {
       showError({
         statusCode: 404,
@@ -156,13 +177,18 @@ const headerCrop = computed(() => {
 
 /**
  * Credits string extracted from the first media item in the gallery.
+ * The backend returns credits as a localised object { nl: string, en: string }
+ * for raw MediaItem, or as a flat string for MediaItemView (when lang is passed).
+ * We handle both shapes here.
  */
 const imageCredits = computed<string>(() => {
   const firstItem = gallery.value?.items?.[0] as MediaItemView | undefined;
   if (!firstItem?.credits) return "";
 
+  // Flat string (MediaItemView with lang param)
   if (typeof firstItem.credits === "string") return firstItem.credits;
 
+  // Localised object (MediaItem without lang param, or mixed response)
   const obj = firstItem.credits as { nl?: string; en?: string };
   return obj[locale.value as "nl" | "en"] ?? obj.nl ?? "";
 });
@@ -179,12 +205,14 @@ const cleanBody = computed(() => cleanText(body.value));
 </script>
 
 <template>
+  <!-- Loading skeleton-->
   <BlogsStorySkeleton v-if="status === 'pending'" />
 
   <main
     v-else-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
+    <!-- Not found / error state -->
     <div
       v-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
@@ -202,6 +230,7 @@ const cleanBody = computed(() => cleanText(body.value));
       </NuxtLink>
     </div>
 
+    <!-- Main content -->
     <template v-else>
       <DetailHero
         :id="blog.id"
@@ -221,9 +250,14 @@ const cleanBody = computed(() => cleanText(body.value));
         </template>
       </DetailHero>
 
+      <!-- Article body -->
       <section class="pt-20 pb-10">
         <div class="page-container">
           <article class="relative w-full">
+            <!--
+              Decorative vertical line on the left (md+).
+              Uses a gradient so it fades in/out at the top and bottom.
+            -->
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
@@ -238,15 +272,21 @@ const cleanBody = computed(() => cleanText(body.value));
             />
 
             <div class="md:pl-10 w-full">
+              <!-- Rich-text content (sanitised HTML from the editor) -->
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"
               />
 
+              <!--
+                Image credits bar — only shown when the linked media item has credits.
+                Positioned at the bottom of the article, above the navigation footer.
+              -->
               <div
                 v-if="imageCredits"
                 class="mt-12 flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3"
               >
+                <!-- Camera icon -->
                 <svg
                   class="w-3.5 h-3.5 text-muted-foreground/60 mt-0.5 shrink-0"
                   fill="none"
@@ -336,6 +376,7 @@ const cleanBody = computed(() => cleanText(body.value));
         </div>
       </section>
 
+      <!-- Article footer: date + back link -->
       <section class="pb-20">
         <div class="page-container">
           <div class="w-full">
