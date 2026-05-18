@@ -103,7 +103,7 @@ function getSeriesTitle(series: SeriesView) {
                   class="absolute left-0 top-full hidden group-hover/series-dropdown:flex flex-col gap-1 pt-1 z-30"
                 >
                   <div
-                    class="flex flex-col gap-1 bg-background/95 backdrop-blur-md border border-border p-1.5 rounded-lg shadow-lg min-w-[130px] animate-in fade-in slide-in-from-top-1 duration-100"
+                    class="flex flex-col gap-1 bg-background/95 backdrop-blur-md border border-border p-1.5 rounded-lg shadow-lg min-w-[130px] max-h-[200px] overflow-y-auto [scrollbar-width:thin] animate-in fade-in slide-in-from-top-1 duration-100"
                   >
                     <NuxtLink
                       v-for="series in props.linkedSeriesList"
