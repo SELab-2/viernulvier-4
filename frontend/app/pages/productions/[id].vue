@@ -185,7 +185,6 @@ const isValid = (val: any) => {
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
 
-// --- LOGICA VOOR HET UITKLAPPEN VAN DE SERIES ---
 const showAllSeries = ref(false);
 const maxVisibleSeries = 2;
 
@@ -232,63 +231,20 @@ const hiddenSeries = computed(() => {
           </span>
 
           <template v-if="visibleSeries.length">
-            <NuxtLink
+            <SeriesLabel
               v-for="serie in visibleSeries"
               :key="serie.id"
-              :to="ROUTES.series.byId(serie.id)"
-              class="group flex items-center gap-1.5 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm transition-colors hover:bg-background/90"
-            >
-              <svg
-                class="w-3 h-3 text-muted-foreground group-hover:text-accent transition-colors shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-              >
-                <path
-                  d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
-                />
-              </svg>
-              <span
-                class="max-w-[120px] truncate transition-colors group-hover:text-accent"
-              >
-                {{
-                  typeof serie.titel === "string"
-                    ? serie.titel
-                    : serie.titel?.[locale]
-                }}
-              </span>
-            </NuxtLink>
+              :serie="serie"
+            />
           </template>
 
           <template v-if="showAllSeries && hiddenSeries.length">
-            <NuxtLink
+            <SeriesLabel
               v-for="serie in hiddenSeries"
               :key="serie.id"
-              :to="ROUTES.series.byId(serie.id)"
-              class="group flex items-center gap-1.5 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm transition-colors hover:bg-background/90 animate-in fade-in zoom-in-95 duration-150"
-            >
-              <svg
-                class="w-3 h-3 text-muted-foreground group-hover:text-accent transition-colors shrink-0"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-              >
-                <path
-                  d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
-                />
-              </svg>
-              <span
-                class="max-w-[120px] truncate transition-colors group-hover:text-accent"
-              >
-                {{
-                  typeof serie.titel === "string"
-                    ? serie.titel
-                    : serie.titel?.[locale]
-                }}
-              </span>
-            </NuxtLink>
+              :serie="serie"
+              class="animate-in fade-in zoom-in-95 duration-150"
+            />
           </template>
 
           <button

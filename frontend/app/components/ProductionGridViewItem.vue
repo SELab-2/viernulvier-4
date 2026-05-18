@@ -139,7 +139,7 @@ watch(locale, () => {
           class="w-full h-full"
         />
 
-        <ProductionSeriesBadge
+        <SeriesDropdown
           :series-list="linkedSeriesList"
           align="right"
           class="absolute top-2 right-2 z-20"

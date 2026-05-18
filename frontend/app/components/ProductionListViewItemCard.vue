@@ -45,7 +45,7 @@ const emit = defineEmits<{
               {{ props.productionView.titel }}
             </h3>
 
-            <ProductionSeriesBadge :series-list="props.linkedSeriesList" />
+            <SeriesDropdown :series-list="props.linkedSeriesList" />
           </div>
           <!-- Artist -->
           <p
