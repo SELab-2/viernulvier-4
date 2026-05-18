@@ -19,6 +19,7 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
 const { getMainImageCrop, getCarouselImageCrops } = useGallery();
+const { tagIds } = useArchiveView();
 const route = useRoute();
 
 const goBack = () => {
@@ -27,6 +28,14 @@ const goBack = () => {
   } else {
     router.push(ROUTES.productions.base); // Fallback
   }
+};
+
+const goToTaggedSearch = (tagId: number) => {
+  tagIds.value = [tagId];
+  router.push({
+    path: ROUTES.productions.base,
+    query: { tag: String(tagId), page: "1" },
+  });
 };
 
 const productionId = computed(() => {
@@ -240,12 +249,14 @@ const isValid = (val: any) => {
           class="flex flex-wrap gap-3 mt-8"
         >
           <template v-for="tag in tags" :key="tag.id">
-            <span
+            <button
               v-if="isValid(tag.tag)"
+              type="button"
               class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]"
+              @click="goToTaggedSearch(tag.id)"
             >
               {{ tag.tag }}
-            </span>
+            </button>
           </template>
         </div>
       </div>
