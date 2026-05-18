@@ -36,7 +36,9 @@ const { t } = useI18n();
 
 // Flag indicating the user explicitly added blank placeholders via "Add event".
 // This allows showing new empty drafts only after the user requested them.
-const showNewPlaceholders = ref(false);
+// We initialize it to true if there are already new drafts in the model,
+// ensuring they stay visible when the user navigates back to this step.
+const showNewPlaceholders = ref(props.modelValue.some((e) => e.kind === "new"));
 
 // Update helpers (emit back to parent)
 function update(val: ProductionEventsForm) {
