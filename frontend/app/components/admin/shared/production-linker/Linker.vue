@@ -173,10 +173,11 @@ async function handleUnlink(productionId: number) {
 
 onMounted(restoreFromStorage);
 
-const titleKey = computed(() => `admin.${props.type}s.linkedProductions`);
-const subtitleKey = computed(
-  () => `admin.${props.type}s.linkedProductionsHint`,
+const baseKey = computed(() =>
+  props.type === "blog" ? "admin.blogs" : "prints",
 );
+const titleKey = computed(() => `${baseKey.value}.linkedProductions`);
+const subtitleKey = computed(() => `${baseKey.value}.linkedProductionsHint`);
 </script>
 
 <template>

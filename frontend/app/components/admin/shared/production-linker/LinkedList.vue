@@ -19,14 +19,13 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const sectionLabelKey = computed(
-  () => `admin.${props.type}s.linkedThisSession`,
+const baseKey = computed(() =>
+  props.type === "blog" ? "admin.blogs" : "prints",
 );
-const emptyLabelKey = computed(
-  () => `admin.${props.type}s.noLinkedProductions`,
-);
-const unlinkBtnKey = computed(() => `admin.${props.type}s.unlinkBtn`);
-const viewProdKey = computed(() => `admin.${props.type}s.viewProduction`);
+const sectionLabelKey = computed(() => `${baseKey.value}.linkedThisSession`);
+const emptyLabelKey = computed(() => `${baseKey.value}.noLinkedProductions`);
+const unlinkBtnKey = computed(() => `${baseKey.value}.unlinkBtn`);
+const viewProdKey = computed(() => `${baseKey.value}.viewProduction`);
 </script>
 
 <template>

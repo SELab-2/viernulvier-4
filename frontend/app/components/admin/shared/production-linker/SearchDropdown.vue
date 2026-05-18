@@ -42,14 +42,17 @@ const showDropdown = computed(
   () => open.value && props.search.trim().length > 0,
 );
 
+const baseKey = computed(() =>
+  props.type === "blog" ? "admin.blogs" : "prints",
+);
 const placeholderKey = computed(
-  () => `admin.${props.type}s.linkToProductionSearch`,
+  () => `${baseKey.value}.linkToProductionSearch`,
 );
 const noResultsKey = computed(
-  () => `admin.${props.type}s.linkToProductionNoResults`,
+  () => `${baseKey.value}.linkToProductionNoResults`,
 );
-const linkedLabelKey = computed(() => `admin.${props.type}s.linked`);
-const linkBtnKey = computed(() => `admin.${props.type}s.linkBtn`);
+const linkedLabelKey = computed(() => `${baseKey.value}.linked`);
+const linkBtnKey = computed(() => `${baseKey.value}.linkBtn`);
 
 function recalcPosition() {
   if (!inputWrapperRef.value) return;

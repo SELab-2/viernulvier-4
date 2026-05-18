@@ -11,10 +11,11 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const titleKey = computed(
-  () => `admin.${props.type}s.linkToProductionCreateHint`,
+const baseKey = computed(() =>
+  props.type === "blog" ? "admin.blogs" : "prints",
 );
-const hintKey = computed(() => `admin.${props.type}s.linkedProductionsHint`);
+const titleKey = computed(() => `${baseKey.value}.linkToProductionCreateHint`);
+const hintKey = computed(() => `${baseKey.value}.linkedProductionsHint`);
 </script>
 
 <template>

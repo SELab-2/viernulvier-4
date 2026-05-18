@@ -257,10 +257,7 @@ onMounted(async () => {
           />
         </div>
 
-        <div
-          v-else
-          class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
-        >
+        <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
           <div class="space-y-6">
             <!-- Create form -->
             <FormBaseForm
@@ -289,7 +286,11 @@ onMounted(async () => {
 
           <!-- Production Linker (Step 1.5 in blog logic, here part of main form) -->
           <div class="space-y-6 xl:sticky xl:top-24">
-            <AdminSharedProductionLinker :entity-id="printId" type="print" />
+            <AdminSharedProductionLinker
+              v-if="mode === 'edit' && print"
+              :entity-id="printId"
+              type="print"
+            />
           </div>
         </div>
 
