@@ -44,14 +44,14 @@ const model = defineModel<string>();
         v-model="model"
         :required="required"
         :class="[
-          'px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-accent hover:bg-muted/70 focus:border-accent focus:bg-background',
+          'px-4 bg-muted border border-border h-12 font-bold text-[10px] tracking-widest rounded-lg w-full outline-none hover:border-accent hover:bg-muted/70 focus:border-foreground/30 focus:bg-background placeholder:text-muted-foreground placeholder:opacity-100 dark:placeholder:opacity-90',
           model ? 'text-foreground' : 'text-muted-foreground',
         ]"
       />
 
       <!-- Calendar icon -->
       <Calendar
-        class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
       />
     </div>
   </div>
