@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { computed, watch } from "vue";
-import type { ProductionView, TagView } from "@repo/common";
+import type { ProductionView, TagView, SeriesView } from "@repo/common"; // <-- SeriesView toegevoegd
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
+import { useSeriesApi } from "~/composables/useSeriesApi"; // <-- 1. Importeer de Series API
 
 /** validation that id is only numbers */
 definePageMeta({
@@ -17,6 +18,7 @@ definePageMeta({
 const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
+const { getAll: getAllSeries } = useSeriesApi(); // <-- 2. Haal getAllSeries uit de composable
 const { getMainImageCrop, getCarouselImageCrops } = useGallery();
 const route = useRoute();
 
@@ -66,6 +68,25 @@ watch(
     }
   },
   { immediate: true },
+);
+
+/** get series */
+const { data: linkedSeries } = useAsyncData<SeriesView[]>(
+  `prod-series-${route.params.id}-${locale.value}`,
+  async () => {
+    if (!productionId.value) return [];
+    try {
+      const resp = await getAllSeries({
+        seriesFilters: { production_id: productionId.value } as any,
+        languageFilters: { lang: locale.value },
+      });
+      return (resp.data as any)?.objects ?? resp.data ?? [];
+    } catch (err) {
+      console.error("Error loading linked series on detail page:", err);
+      return [];
+    }
+  },
+  { watch: [productionId, locale], default: () => [] },
 );
 
 /** Get tags and remove empty ones */
@@ -163,6 +184,16 @@ const isValid = (val: any) => {
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
+
+const maxVisibleSeries = 3;
+
+const visibleSeries = computed(() => {
+  return linkedSeries.value?.slice(0, maxVisibleSeries) || [];
+});
+
+const hiddenSeries = computed(() => {
+  return linkedSeries.value?.slice(maxVisibleSeries) || [];
+});
 </script>
 
 <template>
@@ -185,17 +216,102 @@ const isValid = (val: any) => {
       @back="goBack"
     >
       <template #meta>
-        <span
-          v-if="isValid(production.performer_type)"
-          :class="
-            headerCrop
-              ? 'border-white text-white'
-              : 'border-foreground text-foreground'
-          "
-          class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
-        >
-          {{ production.performer_type }}
-        </span>
+        <div class="flex flex-wrap items-center gap-2">
+          <span
+            v-if="isValid(production.performer_type)"
+            :class="
+              headerCrop
+                ? 'border-white text-white bg-white/5'
+                : 'border-foreground text-foreground dark:text-gray-100 bg-foreground/5'
+            "
+            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm backdrop-blur-sm"
+          >
+            {{ production.performer_type }}
+          </span>
+
+          <template v-if="visibleSeries.length">
+            <NuxtLink
+              v-for="serie in visibleSeries"
+              :key="serie.id"
+              :to="ROUTES.series.byId(serie.id)"
+              class="group flex items-center gap-1.5 backdrop-blur-md border text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm transition-all"
+              :class="
+                headerCrop
+                  ? 'bg-background/80 text-foreground border-border/40 hover:bg-background'
+                  : 'bg-foreground/5 dark:bg-white/10 text-foreground dark:text-gray-100 border-foreground/10 dark:border-white/10 hover:bg-foreground/10 dark:hover:bg-white/20'
+              "
+            >
+              <svg
+                class="w-3 h-3 text-muted-foreground group-hover:text-accent transition-colors shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
+                />
+              </svg>
+              <span class="max-w-[120px] truncate">
+                {{
+                  typeof serie.titel === "string"
+                    ? serie.titel
+                    : serie.titel?.[locale]
+                }}
+              </span>
+            </NuxtLink>
+          </template>
+
+          <div
+            v-if="hiddenSeries.length"
+            class="relative group/more-series inline-block"
+          >
+            <div
+              class="flex items-center gap-1 backdrop-blur-md border text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm cursor-pointer transition-all"
+              :class="
+                headerCrop
+                  ? 'bg-background/80 text-foreground border-border/40 hover:bg-background'
+                  : 'bg-foreground/5 dark:bg-white/10 text-foreground dark:text-gray-100 border-foreground/10 dark:border-white/10 hover:bg-foreground/10 dark:hover:bg-white/20'
+              "
+            >
+              <span>+{{ hiddenSeries.length }}</span>
+            </div>
+
+            <div
+              class="absolute top-full left-0 hidden group-hover/more-series:flex flex-col gap-1 pt-1 z-30"
+            >
+              <div
+                class="flex flex-col gap-1 bg-background/95 backdrop-blur-md border border-border p-1.5 rounded-lg shadow-lg min-w-[140px] max-h-[200px] overflow-y-auto [scrollbar-width:thin]"
+              >
+                <NuxtLink
+                  v-for="serie in hiddenSeries"
+                  :key="serie.id"
+                  :to="ROUTES.series.byId(serie.id)"
+                  class="group/item flex items-center gap-1.5 text-foreground hover:text-accent text-[10px] font-semibold uppercase tracking-wider px-2 py-1.5 rounded-md hover:bg-muted transition-colors whitespace-nowrap"
+                >
+                  <svg
+                    class="w-2.5 h-2.5 text-muted-foreground shrink-0 group-hover/item:text-accent transition-colors"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
+                    />
+                  </svg>
+                  <span class="max-w-[120px] truncate">
+                    {{
+                      typeof serie.titel === "string"
+                        ? serie.titel
+                        : serie.titel?.[locale]
+                    }}
+                  </span>
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
 
       <template #footer>
@@ -206,7 +322,7 @@ const isValid = (val: any) => {
           <template v-for="tag in tags" :key="tag.id">
             <span
               v-if="isValid(tag.tag)"
-              class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px]"
+              class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px] shadow-sm"
             >
               {{ tag.tag }}
             </span>
