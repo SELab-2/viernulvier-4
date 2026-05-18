@@ -1,3 +1,7 @@
+<!--
+  This component represents a single item in the production grid view.
+  It displays the production's thumbnail, title, date range, and associated tags.
+-->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -128,6 +132,7 @@ watch(locale, () => {
     <div
       class="flex flex-col rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150 overflow-hidden h-full"
     >
+      <!-- Thumbnail area — square bottom corners, separator line, no own border -->
       <div
         class="relative w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
       >
@@ -146,13 +151,16 @@ watch(locale, () => {
         />
       </div>
 
+      <!-- Content area -->
       <div class="flex flex-col flex-1 p-4 gap-2 min-w-0">
+        <!-- Title -->
         <h3
           class="text-lg font-semibold text-card-foreground leading-tight line-clamp-2"
         >
           {{ productionView.titel }}
         </h3>
 
+        <!-- Artist -->
         <p
           v-if="productionView.artist && productionView.artist !== 'N/A'"
           class="text-sm text-muted-foreground leading-normal line-clamp-1"
@@ -160,6 +168,7 @@ watch(locale, () => {
           {{ productionView.artist }}
         </p>
 
+        <!-- Date range -->
         <p class="text-sm text-muted-foreground flex items-center gap-2">
           <svg
             class="w-4 h-4 shrink-0 text-muted-foreground"
@@ -178,6 +187,7 @@ watch(locale, () => {
           <span class="truncate">{{ dateRangeText }}</span>
         </p>
 
+        <!-- Tags -->
         <div class="overflow-hidden">
           <div class="flex flex-wrap items-center gap-1.5">
             <TagPill
@@ -185,6 +195,7 @@ watch(locale, () => {
               :key="tag.id"
               :label="typeof tag.tag === 'string' ? tag.tag : ''"
             />
+            <!-- Invisible spacer to preserve height when no tags -->
             <TagPill
               v-if="tags.length === 0"
               label="/"
