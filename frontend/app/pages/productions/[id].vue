@@ -3,7 +3,6 @@ import { ref, computed, watch } from "vue";
 import type { ProductionView, TagView, SeriesView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
-import { useSeriesApi } from "~/composables/useSeriesApi";
 
 /** validation that id is only numbers */
 definePageMeta({
@@ -20,14 +19,23 @@ const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
 const { getAll: getAllSeries } = useSeriesApi();
 const { getMainImageCrop, getCarouselImageCrops } = useGallery();
+const { tagIds } = useArchiveView();
 const route = useRoute();
 
 const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push(ROUTES.productions.base);
+    router.push(ROUTES.productions.base); // Fallback
   }
+};
+
+const goToTaggedSearch = (tagId: number) => {
+  tagIds.value = [tagId];
+  router.push({
+    path: ROUTES.productions.base,
+    query: { tag: String(tagId), page: "1" },
+  });
 };
 
 const productionId = computed(() => {
@@ -57,6 +65,7 @@ const {
 watch(
   [status, error, production],
   ([newStatus, newError, newProd]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
     if (newStatus === "success" && !newProd) {
       showError({
         statusCode: 404,
@@ -198,6 +207,7 @@ const hiddenSeries = computed(() => {
 </script>
 
 <template>
+  <!-- Loading skeleton-->
   <ProductionSkeleton v-if="status === 'pending'" />
 
   <main
@@ -267,12 +277,14 @@ const hiddenSeries = computed(() => {
           class="flex flex-wrap gap-3 mt-8"
         >
           <template v-for="tag in tags" :key="tag.id">
-            <span
+            <button
               v-if="isValid(tag.tag)"
-              class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px] shadow-sm"
+              type="button"
+              class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px] cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-110 hover:shadow-2xl hover:-translate-y-1"
+              @click="goToTaggedSearch(tag.id)"
             >
               {{ tag.tag }}
-            </span>
+            </button>
           </template>
         </div>
       </template>

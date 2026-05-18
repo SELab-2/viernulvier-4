@@ -99,8 +99,8 @@ watch([seriesId, locale, currentPage], loadPage);
 
 onMounted(async () => {
   observer = new ResizeObserver(() => updateTitleScrollable());
-  await loadPage();
   if (titleText.value) observer.observe(titleText.value);
+  await loadPage();
 });
 
 onBeforeUnmount(() => {
