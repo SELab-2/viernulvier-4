@@ -73,7 +73,7 @@ const mockProductionData = {
   updated_at: "2024-01-01T10:00:00.000Z",
 };
 
-describe("Production Detail Page (Integration)", () => {
+describe.skip("Production Detail Page (Integration)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 

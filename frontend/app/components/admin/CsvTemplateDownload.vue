@@ -106,7 +106,7 @@ const templateExample = computed(() => templates[props.target].example);
     <div class="mb-6">
       <div class="flex items-start justify-between gap-4">
         <div class="space-y-1">
-          <h3 class="text-lg font-bold text-card-foreground capitalize">
+          <h3 class="text-lg font-bold text-card-foreground">
             {{ downloadTitle }}
           </h3>
           <p class="text-sm text-muted-foreground">

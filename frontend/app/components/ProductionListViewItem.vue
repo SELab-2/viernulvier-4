@@ -30,7 +30,11 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "delete", production: ProductionView): void;
+  (
+    e: "delete",
+    production: ProductionView,
+    gallery: GalleryWithItems<ItemViewWithCrops> | null,
+  ): void;
 }>();
 
 const { locale } = useI18n();
@@ -183,11 +187,10 @@ watch(locale, () => {
   >
     <ProductionListViewItemCard v-bind="cardProps" />
   </NuxtLink>
-
   <div v-else class="group block">
     <ProductionListViewItemCard
       v-bind="cardProps"
-      @delete="emit('delete', $event)"
+      @delete="emit('delete', $event, gallery)"
     />
   </div>
 </template>

@@ -263,7 +263,9 @@
     "pagination": "Pagination",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "new": "New print"
+    "new": "New print",
+    "description": "description",
+    "relatedProductions": "Related productions"
   },
   "admin": {
     "finish": "Finish",
@@ -380,7 +382,7 @@
     },
     "parser": {
       "title": "CSV parser",
-      "description": "Upload a CSV file for parsing.",
+      "description": "Upload a CSV file for {target} parsing.",
       "uploadCsv": "Upload {target} CSV",
       "uploading": "Uploading...",
       "uploadSuccess": "Successfully uploaded {target} CSV.",
@@ -428,6 +430,7 @@
     "csvImport": {
       "title": "CSV import tools for {target}",
       "description": "Use these tools to bulk import {target} from CSV files.",
+      "label": "CSV import",
       "blogDisclaimer": "It is highly recommended to use the creation tool above because formatting is easier to achieve in the form and the CSV cannot add media to the story. (This can however be added later from the edit page.) "
     }
   },
@@ -466,6 +469,9 @@
     }
   },
   "admin-productions": {
+    "deleteError": "Could not delete production.",
+    "deleteSuccess": "Deleted production \"{production}\".",
+    "deleteConfirm": "Are you sure you want to delete \"{production}\"? This cannot be undone.",
     "header_title": "Productions",
     "new": "New production",
     "editTags": "Edit tags",

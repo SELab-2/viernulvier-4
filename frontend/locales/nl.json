@@ -265,7 +265,9 @@
     "pagination": "Paginering",
     "page_label": "Pagina",
     "of_pages": "van {total}",
-    "new": "Nieuw drukwerk"
+    "new": "Nieuw drukwerk",
+    "description": "omschrijving",
+    "relatedProductions": "Gerelateerde producties"
   },
   "admin": {
     "finish": "Voltooien",
@@ -382,7 +384,7 @@
     },
     "parser": {
       "title": "CSV parser",
-      "description": "Upload een CSV-bestand om te parsen.",
+      "description": "Upload een CSV-bestand voor {target}-verwerking.",
       "uploadCsv": "Upload {target} CSV",
       "uploading": "Uploaden...",
       "uploadSuccess": "{target} CSV succesvol geüpload.",
@@ -430,6 +432,7 @@
     "csvImport": {
       "title": "CSV-importtools voor {target}",
       "description": "Gebuik deze tools om {target} in bulk te importeren vanuit CSV-bestanden.",
+      "label": "CSV-import",
       "blogDisclaimer": "Het wordt sterk aanbevolen om de aanmaaktool hierboven te gebruiken omdat opmaak gemakkelijker te bereiken is in het formulier en de CSV geen media kan toevoegen aan het verhaal. (Dit kan echter later worden toegevoegd vanaf de bewerkpagina.) "
     }
   },
@@ -468,6 +471,9 @@
     }
   },
   "admin-productions": {
+    "deleteError": "De productie kon niet verwijderd worden.",
+    "deleteSuccess": "Productie \"{production}\" verwijderd.",
+    "deleteConfirm": "Weet je zeker dat je \"{production}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "header_title": "Producties",
     "new": "Nieuwe productie",
     "editTags": "Tags bewerken",

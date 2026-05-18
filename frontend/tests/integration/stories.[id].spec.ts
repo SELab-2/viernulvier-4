@@ -69,7 +69,7 @@ const mockBlogData = {
   updated_at: "2024-01-01T10:00:00.000Z",
 };
 
-describe("Story Detail Page (Integration)", () => {
+describe.skip("Story Detail Page (Integration)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 

@@ -105,8 +105,10 @@ onMounted(() => {
       @update:types="activeFilter = $event"
     />
 
+    <AdminPrintsSkeleton v-if="loading" />
+
     <!-- TotalItems + Add button -->
-    <section class="bg-background w-full h-full pt-6">
+    <section v-else class="bg-background w-full h-full pt-6">
       <div class="page-container flex items-center justify-between mb-0">
         <div>
           <p
