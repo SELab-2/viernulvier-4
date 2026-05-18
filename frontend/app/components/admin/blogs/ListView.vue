@@ -90,7 +90,7 @@ function handleJump() {
 // Blog data
 
 const blogs = ref<BlogView[]>([]);
-const loading = ref(false);
+const loading = ref(true);
 const error = ref<string | null>(null);
 
 /**
@@ -238,25 +238,6 @@ async function handleDelete(blog: BlogView) {
     />
 
     <section class="bg-background pt-6 pb-6 h-full">
-      <div class="page-container flex items-center justify-between mb-6">
-        <div>
-          <p
-            v-if="!loading && totalItems > 0"
-            class="font-brand text-2xl font-black text-foreground"
-          >
-            {{ totalItems }} {{ t("general.results") }}
-          </p>
-        </div>
-
-        <NuxtLink
-          :to="ROUTES.admin.stories.create"
-          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
-        >
-          <Plus :size="15" />
-          {{ t("admin.blogs.new") }}
-        </NuxtLink>
-      </div>
-
       <!-- Error banner -->
       <div
         v-if="error"
@@ -265,14 +246,8 @@ async function handleDelete(blog: BlogView) {
         {{ error }}
       </div>
 
-      <!-- Loading skeleton: one placeholder per PAGE_SIZE slot -->
-      <div v-if="loading" class="space-y-3">
-        <div
-          v-for="i in PAGE_SIZE"
-          :key="i"
-          class="h-[136px] bg-muted rounded-xl animate-pulse"
-        />
-      </div>
+      <!-- Loading skeleton -->
+      <AdminBlogsStoriesSkeleton v-if="loading" />
 
       <!-- Empty state -->
       <div v-else-if="!blogs.length" class="py-20 text-center">
@@ -288,8 +263,28 @@ async function handleDelete(blog: BlogView) {
         </p>
       </div>
 
-      <!-- Story list: each item exposes edit/delete actions in the card -->
-      <div v-else class="page-container space-y-3">
+      <div v-else>
+        <!-- Story list: each item exposes edit/delete actions in the card -->
+        <div class="page-container flex items-center justify-between mb-6">
+          <div>
+            <p
+              v-if="!loading && totalItems > 0"
+              class="font-brand text-2xl font-black text-foreground"
+            >
+              {{ totalItems }} {{ t("general.results") }}
+            </p>
+          </div>
+
+          <NuxtLink
+            :to="ROUTES.admin.stories.create"
+            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+          >
+            <Plus :size="15" />
+            {{ t("admin.blogs.new") }}
+          </NuxtLink>
+        </div>
+      </div>
+      <div class="page-container space-y-3">
         <!--
           BlogsStoryListItem is the same card used on the public stories page.
           `is-admin` switches it to show edit/delete buttons instead of a link.
