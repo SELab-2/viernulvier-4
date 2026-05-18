@@ -1,5 +1,12 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  nextTick,
+} from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
@@ -56,7 +63,6 @@ const {
 watch(
   [status, error, production],
   ([newStatus, newError, newProd]) => {
-    // Once the fetch finishes, check if it failed or returned nothing
     if (newStatus === "success" && !newProd) {
       showError({
         statusCode: 404,
@@ -155,7 +161,7 @@ const headerCrop = computed(() => {
 
 const carouselImages = computed(() => {
   if (!gallery.value || !gallery.value.items) return [];
-  return getCarouselImageCrops(gallery.value, "hd_ready"); // of FE3_2by1
+  return getCarouselImageCrops(gallery.value, "hd_ready");
 });
 
 /**
@@ -166,6 +172,56 @@ const isValid = (val: any) => {
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
+
+// scrollable title
+
+const productionTitle = computed(() => production.value?.titel || "");
+
+const titleIsLong = computed(() => productionTitle.value.length > 50);
+
+const titleSizeClass = computed(() => {
+  const len = productionTitle.value.length;
+  return len > 35
+    ? "text-4xl lg:text-6xl"
+    : len > 25
+      ? "text-5xl lg:text-7xl"
+      : "text-6xl lg:text-8xl";
+});
+
+const titleText = ref<HTMLElement | null>(null);
+const titleScrollable = ref(false);
+let __ro_title: ResizeObserver | null = null;
+
+function updateTitleScrollable() {
+  nextTick(() => {
+    const el = titleText.value;
+    if (!el) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
+    if (!lineHeight) {
+      titleScrollable.value = false;
+      return;
+    }
+
+    const lines = Math.round(el.scrollHeight / lineHeight);
+    titleScrollable.value = lines > 1;
+  });
+}
+
+onMounted(() => {
+  updateTitleScrollable();
+  __ro_title = new ResizeObserver(updateTitleScrollable);
+  if (titleText.value) __ro_title.observe(titleText.value);
+});
+
+onBeforeUnmount(() => {
+  __ro_title?.disconnect();
+});
+
+watch(productionTitle, updateTitleScrollable);
 </script>
 
 <template>
@@ -212,18 +268,22 @@ const isValid = (val: any) => {
         </div>
 
         <div>
-          <h1
+          <div
+            class="title-scroll-wrap mb-4"
             :class="[
-              production.titel.length > 35
-                ? 'text-4xl lg:text-6xl'
-                : production.titel.length > 25
-                  ? 'text-5xl lg:text-7xl'
-                  : 'text-6xl lg:text-8xl',
+              titleIsLong ? 'title-scroll-fade' : '',
+              titleScrollable ? 'title-scroll-scrollable' : '',
             ]"
-            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
           >
-            {{ production.titel }}
-          </h1>
+            <h1
+              ref="titleText"
+              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
+              :class="titleSizeClass"
+            >
+              {{ production.titel }}
+            </h1>
+          </div>
+
           <p
             v-if="
               isValid(production.artist) &&
@@ -328,6 +388,49 @@ const isValid = (val: any) => {
 </template>
 
 <style scoped>
+/* Scrollable hero title */
+.title-scroll-wrap {
+  max-width: 100%;
+  max-height: 13rem;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.title-scroll-wrap h1 {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.title-scroll-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+.title-scroll-scrollable {
+  overflow-y: auto;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.title-scroll-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 9999px;
+}
+
+.title-scroll-fade {
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
 .image-overlay::after {
   content: "";
   position: absolute;
