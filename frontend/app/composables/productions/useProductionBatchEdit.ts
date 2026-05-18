@@ -263,8 +263,17 @@ export function useProductionBatchEdit() {
 
     const mapped = [...intersectionMap.values()];
 
-    commonSeries.value = mapped;
-    seriesDraft.value = structuredClone(mapped);
+    commonSeries.value = mapped.map((s) => ({
+      ...s,
+      titel: { ...s.titel },
+      description: { ...s.description },
+    }));
+
+    seriesDraft.value = mapped.map((s) => ({
+      ...s,
+      titel: { ...s.titel },
+      description: { ...s.description },
+    }));
     commonSeriesLoaded.value = true;
   }
 
@@ -275,7 +284,15 @@ export function useProductionBatchEdit() {
 
   /** Reset the series draft back to the server baseline. */
   function resetSeriesDraft() {
-    seriesDraft.value = structuredClone(commonSeries.value);
+    seriesDraft.value.splice(
+      0,
+      seriesDraft.value.length,
+      ...commonSeries.value.map((s) => ({
+        ...s,
+        titel: { ...s.titel },
+        description: { ...s.description },
+      })),
+    );
   }
 
   /**
