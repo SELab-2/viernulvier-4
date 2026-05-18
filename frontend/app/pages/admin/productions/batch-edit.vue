@@ -33,7 +33,6 @@ const tabs = [
     label: "admin-productions.batchEdit.tabs.series",
     default: "Series",
   },
-  // { id: "blogs", label: "admin-productions.batchEdit.tabs.blogs", default: "Blogs" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -190,9 +189,6 @@ function getTitle(production: { titel: unknown }): string {
           v-else-if="activeTab === 'series'"
           :fetch-series-for-production="fetchSeriesForProduction"
         />
-        <!--
-          <BatchBlogsTab v-else-if="activeTab === 'blogs'" ... />
-        -->
       </div>
     </main>
   </div>
