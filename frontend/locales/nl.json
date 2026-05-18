@@ -412,6 +412,8 @@
       "accounts": "Accounts",
       "changePassword": "Wachtwoord wijzigen",
       "changePasswordHint": "Werk het wachtwoord van je admin-account bij",
+      "oldPassword": "Oud wachtwoord",
+      "oldPasswordPlaceholder": "Uw oud wachtwoord",
       "newPassword": "Nieuw wachtwoord",
       "newPasswordPlaceholder": "Minimaal 8 tekens",
       "confirmPassword": "Bevestig nieuw wachtwoord",

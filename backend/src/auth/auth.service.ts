@@ -105,8 +105,8 @@ export class AuthService {
 
     // Verify password using bcrypt (check whether the old password is correct)
     const isValid = await bcrypt.compare(
-      account.password,
       changePassword.oldPassword,
+      account.password,
     );
     if (!isValid) {
       throw new InvalidCredentialsException();
