@@ -11,9 +11,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProductionView, Event, TagView } from "@repo/common";
+import type { ProductionView, Event, TagView, SeriesView } from "@repo/common";
 import { useProductionApi } from "~/composables/useProductionApi";
 import { useEventApi } from "~/composables/useEventApi";
+import { useSeriesApi } from "~/composables/useSeriesApi";
 import { ROUTES } from "~/utils/routes";
 import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
@@ -35,7 +36,9 @@ const emit = defineEmits<{
 const { locale } = useI18n();
 const tags = ref<TagView[]>([]);
 const events = ref<Event[]>([]);
+const linkedSeriesList = ref<SeriesView[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+
 const mainCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "hd_ready");
@@ -43,6 +46,7 @@ const mainCrop = computed(() => {
 
 const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
+const { getAll: getAllSeries } = useSeriesApi();
 const { getMainImageCrop } = useGallery();
 
 async function loadTags() {
@@ -88,17 +92,36 @@ async function loadGallery() {
   gallery.value = await getMediaGallery(props.productionView.id, locale.value);
 }
 
+// Get series linked to productions
+async function loadLinkedSeries() {
+  if (!props.productionView?.id) return;
+
+  try {
+    const resp = await getAllSeries({
+      seriesFilters: { production_id: props.productionView.id } as any,
+      languageFilters: { lang: locale.value },
+    });
+
+    if (resp.data && Array.isArray(resp.data.objects)) {
+      linkedSeriesList.value = resp.data.objects as SeriesView[];
+    } else {
+      linkedSeriesList.value = [];
+    }
+  } catch (err) {
+    console.error("Error loading linked series:", err);
+  }
+}
+
 // Recompute dateRangeText whenever events or locale changes
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
 
-// Determine if the production has any events in the future to know if we should display a warning button in admin mode.
+// Determine if the production has any events in the future
 const isFutureProduction = computed(() => {
   if (!events.value?.length) return false;
 
   const now = Date.now();
-
   const allTimes: number[] = [];
 
   for (const e of events.value) {
@@ -113,7 +136,6 @@ const isFutureProduction = computed(() => {
   }
 
   if (!allTimes.length) return false;
-
   const latest = Math.max(...allTimes);
 
   return latest > now;
@@ -126,12 +148,14 @@ const cardProps = computed(() => ({
   dateRangeText: dateRangeText.value,
   tags: tags.value,
   isFutureProduction: isFutureProduction.value,
+  linkedSeriesList: linkedSeriesList.value, // Doorgeven aan de kaart
 }));
 
 onMounted(() => {
   loadEvents();
   loadTags();
   loadGallery();
+  loadLinkedSeries();
 });
 
 watch(
@@ -140,11 +164,15 @@ watch(
     loadEvents();
     loadTags();
     loadGallery();
+    loadLinkedSeries();
   },
 );
 
-// reload tags if language changes
-watch(locale, () => loadTags());
+// reload tags and series if language changes
+watch(locale, () => {
+  loadTags();
+  loadLinkedSeries();
+});
 </script>
 
 <template>
