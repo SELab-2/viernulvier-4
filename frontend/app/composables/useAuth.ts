@@ -1,4 +1,8 @@
-import { type ApiKey, type PublicAccount } from "@repo/common";
+import {
+  type ApiKey,
+  type ChangePassword,
+  type PublicAccount,
+} from "@repo/common";
 import { ROUTES } from "~/utils/routes";
 import { FetchError } from "ofetch"; // Nuxt's underlying fetch error type
 
@@ -60,7 +64,7 @@ export function useAuth() {
     try {
       await $fetch(`${baseUrl}/auth/verify`, {
         method: "GET",
-        headers: { Authorization: `Bearer ${currentKey}` },
+        headers: { "x-api-key": currentKey },
       });
 
       isVerified.value = true;
@@ -90,7 +94,7 @@ export function useAuth() {
     try {
       await $fetch(`${baseUrl}/auth/verify-super`, {
         method: "GET",
-        headers: { Authorization: `Bearer ${currentKey}` },
+        headers: { "x-api-key": currentKey },
       });
 
       isSuperVerified.value = true;
@@ -178,6 +182,33 @@ export function useAuth() {
     void navigateTo(ROUTES.admin.login.base);
   }
 
+  /**
+   * POST "/auth/change-password"
+   *
+   * Changes the password of the current account.
+   */
+  async function changePassword(
+    body: ChangePassword,
+  ): Promise<PublicAccount | null> {
+    const currentKey =
+      apiKey.value ||
+      (import.meta.client ? sessionStorage.getItem("apiKey") : null);
+
+    try {
+      // We have to do it like this so Nuxt doesn't automatically show an error page.
+      // This will not work for some reason with anything else.
+      const response = await $fetch(`${baseUrl}/auth/change-password`, {
+        method: "POST",
+        body: body,
+        headers: { "x-api-key": currentKey as string },
+      });
+
+      return response as PublicAccount;
+    } catch {
+      return null;
+    }
+  }
+
   const isLoggedIn = computed(() => !!apiKey.value);
 
   const isSuperAdmin = computed(() => {
@@ -196,5 +227,6 @@ export function useAuth() {
     rehydrate,
     verifySession,
     verifySuperSession,
+    changePassword,
   };
 }

@@ -412,6 +412,7 @@
       "changePasswordHint": "Update your admin account password",
       "oldPassword": "Old password",
       "oldPasswordPlaceholder": "Your old password",
+      "oldPasswordWrong": "Old password is wrong",
       "newPassword": "New password",
       "newPasswordPlaceholder": "Minimum 8 characters",
       "confirmPassword": "Confirm new password",

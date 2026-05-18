@@ -8,8 +8,7 @@
 <script setup lang="ts">
 import { Eye, EyeOff, KeyRound } from "lucide-vue-next";
 
-const { account } = useAuth();
-const { changePassword } = useAccountApi();
+const { account, changePassword } = useAuth();
 const { t } = useI18n();
 
 const oldPassword = ref("");
@@ -52,30 +51,22 @@ async function handleSubmit() {
   }
 
   submitting.value = true;
-  try {
-    const resp = await changePassword({
-      oldPassword: oldPassword.value,
-      password: newPassword.value,
-    });
+  const pubAccount = await changePassword({
+    oldPassword: oldPassword.value,
+    password: newPassword.value,
+  });
 
-    if (resp.error) {
-      feedback.value = { type: "err", msg: resp.error };
-    } else {
-      feedback.value = {
-        type: "ok",
-        msg: t("admin.dashboard.passwordSuccess"),
-      };
-      clearForm();
-    }
-  } catch (e) {
+  if (!pubAccount) {
     feedback.value = {
       type: "err",
-      msg:
-        e instanceof Error ? e.message : t("admin.dashboard.notAuthenticated"),
+      msg: t("admin.dashboard.oldPasswordWrong"),
     };
-  } finally {
-    submitting.value = false;
+  } else {
+    feedback.value = { type: "ok", msg: t("admin.dashboard.passwordSuccess") };
+    clearForm();
   }
+
+  submitting.value = false;
 }
 
 // Shared input class reused for both fields
