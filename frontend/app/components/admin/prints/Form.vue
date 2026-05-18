@@ -249,7 +249,6 @@ onMounted(async () => {
       <div class="min-h-[720px]">
         <!-- Minimum height so the footer doesn't jump -->
         <div v-if="fetching" class="flex flex-col gap-4">
-          <!-- TODO possibly replaced by loading skeleton later on -->
           <div
             v-for="i in 6"
             :key="i"
