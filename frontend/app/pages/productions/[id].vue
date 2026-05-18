@@ -232,10 +232,10 @@ const hiddenSeries = computed(() => {
             v-if="isValid(production.performer_type)"
             :class="
               headerCrop
-                ? 'border-white text-white bg-white/5'
-                : 'border-foreground text-foreground dark:text-gray-100 bg-foreground/5'
+                ? 'border-white text-white'
+                : 'border-foreground text-foreground dark:text-gray-100'
             "
-            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm backdrop-blur-sm"
+            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
           >
             {{ production.performer_type }}
           </span>
@@ -264,9 +264,9 @@ const hiddenSeries = computed(() => {
             class="flex items-center gap-1 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm cursor-pointer transition-colors hover:bg-background/90 hover:text-accent"
           >
             <span v-if="!showAllSeries">+{{ hiddenSeries.length }}</span>
-            <span v-else class="transition-colors hover:text-accent"
-              >&times; minder</span
-            >
+            <span v-else class="transition-colors hover:text-accent">
+              &times; {{ t("general.showLess") }}
+            </span>
           </button>
         </div>
       </template>
