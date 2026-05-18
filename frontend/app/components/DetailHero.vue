@@ -27,9 +27,6 @@ const emit = defineEmits<{
   (e: "back"): void;
 }>();
 
-/** Show the fade mask if the title is long enough */
-const titleIsLong = computed(() => props.title.length > 50);
-
 /** Dynamic font-size class based on string length */
 const titleSizeClass = computed(() => {
   const len = props.title.length;
@@ -58,8 +55,11 @@ function updateTitleScrollable() {
       return;
     }
 
+    // Calculate lines based on the unconstrained inner content height
     const lines = Math.round(el.scrollHeight / lineHeight);
-    titleScrollable.value = lines > 1;
+
+    // If the text naturally takes up more than 3 lines, we unlock the scroll wrapper
+    titleScrollable.value = lines > 3;
   });
 }
 
@@ -105,8 +105,9 @@ watch(() => props.title, updateTitleScrollable);
         <div
           class="title-scroll-wrap mb-4"
           :class="[
-            titleIsLong ? 'title-scroll-fade' : '',
-            titleScrollable ? 'title-scroll-scrollable' : '',
+            titleScrollable
+              ? 'title-scroll-scrollable title-scroll-fade'
+              : 'title-clamp-3',
           ]"
         >
           <h1
@@ -132,12 +133,20 @@ watch(() => props.title, updateTitleScrollable);
 </template>
 
 <style scoped>
-/* Scrollable hero title styles */
 .title-scroll-wrap {
   max-width: 100%;
-  max-height: 13rem;
-  overflow-y: hidden;
-  overflow-x: hidden;
+  overflow: hidden;
+}
+
+.title-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.title-scroll-scrollable {
+  max-height: 8rem;
+  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -146,14 +155,8 @@ watch(() => props.title, updateTitleScrollable);
   overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
-}
-
-.title-scroll-wrap::-webkit-scrollbar {
-  display: none;
-}
-
-.title-scroll-scrollable {
-  overflow-y: auto;
+  margin: 0;
+  padding: 0;
 }
 
 .title-scroll-scrollable::-webkit-scrollbar {
@@ -170,10 +173,9 @@ watch(() => props.title, updateTitleScrollable);
   border-radius: 9999px;
 }
 
-/* Soft bottom fade mask for extra long titles */
 .title-scroll-fade {
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
 }
 
 /* Gradient overlay on hero image */
