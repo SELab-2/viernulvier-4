@@ -40,10 +40,14 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: "delete", production: ProductionView): void;
+  (
+    e: "delete",
+    production: ProductionView,
+    gallery: GalleryWithItems<ItemViewWithCrops> | null,
+  ): void;
 }>();
 
-const { t, locale } = useI18n();
+const { locale } = useI18n();
 const tags = ref<TagView[]>([]);
 const events = ref<Event[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
@@ -136,6 +140,16 @@ const isFutureProduction = computed(() => {
 
 // Future productions are not selectable in batch mode — consistent with them being non-editable/non-deletable
 const isSelectableInBatchMode = computed(() => !isFutureProduction.value);
+const cardProps = computed(() => ({
+  productionView: props.productionView,
+  isAdmin: props.isAdmin,
+  isBatchMode: props.isBatchMode,
+  selected: selected.value,
+  mainCrop: mainCrop.value,
+  dateRangeText: dateRangeText.value,
+  tags: tags.value,
+  isFutureProduction: isFutureProduction.value,
+}));
 
 onMounted(() => {
   loadEvents();
@@ -165,8 +179,8 @@ function handleClick() {
 </script>
 
 <template>
-  <component
-    :is="props.isAdmin || props.isBatchMode ? 'div' : 'NuxtLink'"
+  <NuxtLink
+    v-if="!props.isAdmin || props.isBatchMode"
     :to="
       !props.isAdmin && !props.isBatchMode
         ? ROUTES.productions.byId(props.productionView.id)
@@ -176,145 +190,14 @@ function handleClick() {
     :class="{ 'cursor-pointer': props.isBatchMode && isSelectableInBatchMode }"
     @click="handleClick"
   >
-    <div
-      class="flex items-center gap-4 p-4 rounded-xl border bg-card transition-colors transition-shadow duration-150"
-      :class="[
-        props.isBatchMode
-          ? selected
-            ? 'border-primary bg-primary/5 shadow-[0_0_0_2px_hsl(var(--primary)/0.25)]'
-            : isSelectableInBatchMode
-              ? 'border-card-border hover:border-primary/40 hover:bg-card-hover'
-              : 'border-card-border cursor-not-allowed'
-          : 'border-card-border hover:border-ring hover:shadow-sm hover:bg-card-hover',
-      ]"
-    >
-      <MediaDisplay
-        :id="props.productionView.id"
-        :src="mainCrop"
-        size="md"
-        :rounded="true"
-        :show-icon="true"
-        class="object-cover"
-      />
-
-      <div class="flex-1 min-w-0">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 max-w-[60%]">
-            <h3
-              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate transition-colors"
-              :class="{ 'text-primary': props.isBatchMode && selected }"
-            >
-              {{ props.productionView.titel }}
-            </h3>
-
-            <!-- Artist -->
-            <p
-              v-if="
-                props.productionView.artist &&
-                props.productionView.artist !== 'N/A'
-              "
-              class="text-sm text-muted-foreground leading-normal line-clamp-1"
-            >
-              {{ props.productionView.artist }}
-            </p>
-
-            <p
-              class="mt-2 text-sm text-muted-foreground flex items-center gap-2"
-            >
-              <svg
-                class="w-4 h-4 text-muted-foreground"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path
-                  d="M16 2v4M8 2v4M3 10h18"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <span>{{ dateRangeText }}</span>
-            </p>
-          </div>
-
-          <!-- Right-side actions -->
-          <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
-            <!-- BATCH MODE: selectable production → show checkbox -->
-            <template v-if="props.isBatchMode && isSelectableInBatchMode">
-              <div
-                class="flex items-center justify-center w-6 h-6 rounded-md border-2 transition-all duration-150"
-                :class="
-                  selected
-                    ? 'bg-primary border-primary text-primary-foreground'
-                    : 'border-muted-foreground/30 bg-transparent'
-                "
-                aria-hidden="true"
-              >
-                <Transition name="check">
-                  <Check v-if="selected" :size="13" stroke-width="3" />
-                </Transition>
-              </div>
-            </template>
-
-            <!-- BATCH MODE: future/warning production → show warning button, no checkbox -->
-            <template v-else-if="props.isBatchMode && !isSelectableInBatchMode">
-              <AdminWarningButton
-                :title="t('admin-productions.warning-title')"
-                :description="t('admin-productions.warning-description')"
-              />
-            </template>
-
-            <!-- NORMAL ADMIN MODE -->
-            <template v-else>
-              <!-- WARNING -->
-              <AdminWarningButton
-                v-if="isFutureProduction"
-                :title="t('admin-productions.warning-title')"
-                :description="t('admin-productions.warning-description')"
-              />
-
-              <!-- NORMAL ACTIONS -->
-              <template v-else>
-                <NuxtLink
-                  :to="
-                    ROUTES.admin.productions.edit(
-                      Number(props.productionView.id),
-                    )
-                  "
-                  @click.stop
-                >
-                  <AdminEditButton label="Edit production" />
-                </NuxtLink>
-
-                <AdminDeleteButton
-                  label="Delete production"
-                  @click.stop="emit('delete', props.productionView)"
-                />
-              </template>
-            </template>
-          </div>
-        </div>
-
-        <!-- Tags container -->
-        <div class="mt-2 overflow-hidden">
-          <div class="flex items-center gap-2">
-            <TagPill
-              v-for="tag in tags"
-              :key="tag.id"
-              :label="typeof tag.tag === 'string' ? tag.tag : ''"
-            />
-            <TagPill
-              v-if="tags.length === 0"
-              :label="'/'"
-              class="opacity-0 pointer-events-none"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  </component>
+    <ProductionListViewItemCard v-bind="cardProps" />
+  </NuxtLink>
+  <div v-else class="group block">
+    <ProductionListViewItemCard
+      v-bind="cardProps"
+      @delete="emit('delete', $event, gallery)"
+    />
+  </div>
 </template>
 
 <style scoped>

@@ -1,40 +1,115 @@
-<script setup lang="ts">
-const { isLoggedIn } = useAuth();
+<!--
+  pages/admin/index.vue
+  =====================
+  Admin dashboard home page.
 
-// Guard: redirect to login if not authenticated
-onMounted(() => {
+  Layout (desktop):
+    - Full-width welcome header with username + greeting
+    - 6-column stat widget row (productions, blogs, events, prints, series, tags)
+    - Two-column section:
+        left  — password-reset card
+        right — quick-links sidebar (stories, productions, prints + accounts for super-admin)
+-->
+<script setup lang="ts">
+import { ROUTES } from "~/utils/routes";
+import { useAdminStats } from "~/composables/useAdminStats";
+
+const { account, isLoggedIn, isSuperAdmin } = useAuth();
+const { t } = useI18n();
+const { stats, loading, fetchStats } = useAdminStats();
+
+// Guard: redirect to login when not authenticated
+onMounted(async () => {
   if (!isLoggedIn.value) {
-    navigateTo(ROUTES.admin.login.base);
+    await navigateTo(ROUTES.admin.login.base);
+    return;
   }
+  fetchStats();
 });
+
+// Stat card definitions — i18n label, emoji icon, stats key to read
+const statCards = [
+  {
+    key: "productions" as const,
+    label: computed(() => t("admin.dashboard.productions")),
+    icon: "🎭",
+  },
+  {
+    key: "blogs" as const,
+    label: computed(() => t("admin.dashboard.stories")),
+    icon: "📖",
+  },
+  {
+    key: "events" as const,
+    label: computed(() => t("admin.dashboard.events")),
+    icon: "🎟",
+  },
+  {
+    key: "prints" as const,
+    label: computed(() => t("admin.dashboard.prints")),
+    icon: "🖼",
+  },
+  {
+    key: "series" as const,
+    label: computed(() => t("admin.dashboard.series")),
+    icon: "📚",
+  },
+  {
+    key: "tags" as const,
+    label: computed(() => t("admin.dashboard.tags")),
+    icon: "🏷",
+  },
+];
 </script>
 
 <template>
-  <section class="min-h-screen bg-gray-50 py-16 px-6">
-    <div class="page-container">
-      <h1 class="text-4xl font-bold mb-6 text-gray-800">Admin Dashboard</h1>
-
-      <p class="text-lg text-gray-600 leading-relaxed mb-8">
-        Welcome to the admin dashboard! Here you can manage everything.
-      </p>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <NuxtLink
-          :to="ROUTES.admin.stories.base"
-          class="block p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow group"
+  <div class="min-h-screen bg-background">
+    <div class="page-container py-10 space-y-10">
+      <!-- Welcome header -->
+      <header class="flex flex-col gap-1">
+        <p
+          class="font-brand font-black text-[9px] uppercase tracking-[0.16em] text-muted-foreground"
         >
-          <h2
-            class="text-xl font-semibold mb-2 text-gray-800 group-hover:text-primary transition-colors"
+          Admin
+        </p>
+        <h1
+          class="font-brand font-black text-3xl sm:text-4xl uppercase tracking-tight text-foreground leading-none"
+        >
+          {{ t("admin.dashboard.welcome") }}
+          ,
+          <span v-if="account?.username" class="text-accent">
+            {{ account.username }}</span
           >
-            Stories & Blogs
-          </h2>
-          <p class="text-gray-600">
-            Create, edit and manage archive stories and blog posts.
-          </p>
-        </NuxtLink>
-      </div>
-    </div>
-  </section>
-</template>
+        </h1>
+      </header>
 
-<style scoped></style>
+      <!-- Stat widgets — all 6 counts -->
+      <section>
+        <p
+          class="font-brand font-black text-[9px] uppercase tracking-[0.14em] text-muted-foreground mb-4"
+        >
+          {{ t("admin.dashboard.overview") }}
+        </p>
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          <AdminDashboardStatsWidget
+            v-for="card in statCards"
+            :key="card.key"
+            :label="card.label.value"
+            :icon="card.icon"
+            :count="stats[card.key]"
+            :loading="loading"
+          />
+        </div>
+      </section>
+
+      <!-- Bottom section: password reset + quick links -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <!-- Password reset card -->
+        <AdminDashboardPasswordReset />
+
+        <!-- Quick links sidebar -->
+        <AdminDashboardQuikLinks :is-super-admin="isSuperAdmin" />
+      </section>
+    </div>
+  </div>
+</template>

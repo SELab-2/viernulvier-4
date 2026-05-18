@@ -522,6 +522,10 @@
     @apply mt-4 max-w-xl;
     @apply font-brand font-black text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground;
   }
+
+  .subtitle {
+    @apply font-brand font-black text-xl lg:text-2xl uppercase tracking-tighter italic text-foreground;
+  }
 }
 /* ── Calendar component ──────────────────────────────────────────────────────
    Used by components/calendar.vue + components/calendar/*.vue
@@ -913,4 +917,66 @@
   .cal-month--right {
     display: none;
   }
+}
+
+/* ── Hero image crossfade ────────────────────────────────────────────────── */
+.hero-fade-enter-active,
+.hero-fade-leave-active {
+  transition: opacity 1.5s ease-in-out;
+}
+.hero-fade-enter-from,
+.hero-fade-leave-to {
+  opacity: 0;
+}
+
+/* ── Continuous Ticker Marquee ───────────────────────────────────────────── */
+.ticker-root {
+  position: absolute;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  gap: 0.5rem;
+  animation: ticker-scroll 30s linear infinite;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Pause scrolling on hover */
+.ticker-root:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+.ticker-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ── Tag pill overrides (Purple-tinted glass for the hero) ── */
+.hero-tags .tag-pill {
+  background-color: rgba(45, 15, 80, 0.85) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(130, 36, 227, 0.4) !important;
+}
+
+.hero-tags .tag-pill:hover {
+  background-color: rgba(130, 36, 227, 0.9) !important;
+  color: #ffffff !important;
+  border-color: rgba(130, 36, 227, 1) !important;
 }

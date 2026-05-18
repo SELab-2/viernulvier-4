@@ -101,7 +101,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-background text-foreground">
+  <SeriesDetailSkeleton v-if="loading && !series" />
+
+  <main v-else class="min-h-screen bg-background text-foreground">
     <!-- Header section -->
     <section class="w-full border-b border-border bg-muted py-16 lg:py-24">
       <div class="page-container w-full">
@@ -177,8 +179,18 @@ onBeforeUnmount(() => {
           v-if="totalPages > 1"
           class="flex items-center justify-between mt-16"
         >
-          <SeriesPageJumper />
-          <SeriesPagination />
+          <SeriesPageJumper
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :loading="loading"
+            @go-to-page="currentPage = $event"
+          />
+          <SeriesPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :loading="loading"
+            @go-to-page="currentPage = $event"
+          />
         </div>
       </div>
     </section>

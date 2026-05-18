@@ -22,7 +22,7 @@
     @error="handleImageError"
     :class="[
       containerClass,
-      props.objectFit ? `object-${props.objectFit}` : '',
+      props.objectFit ? `object-${props.objectFit}` : 'object-cover',
     ]"
   />
   <ThumbnailPlaceholder

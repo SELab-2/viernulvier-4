@@ -12,7 +12,7 @@ import type {
   ItemUpdate,
   ItemDelete,
 } from "~/composables/productions/steps/productionMedia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 import { useCropApi } from "~/composables/media/useCropApi";
@@ -20,8 +20,23 @@ import { useStorageApi } from "~/composables/media/useStorageApi";
 import { useProductionSeries } from "~/composables/productions/steps/productionSeries";
 import { useSeriesApi } from "~/composables/useSeriesApi";
 import type { LocalizedInput } from "~/composables/productions/steps/productionSeries";
+import { ROUTES } from "~/utils/routes";
 
 export type ProductionFormMode = "create" | "edit";
+
+// Helps automatically fill localized fields.
+function getLocalizedField(nlValue: string | null, enValue: string | null) {
+  // If both are null or undefined, return null
+  if (nlValue == null && enValue == null) {
+    return null;
+  }
+
+  // Otherwise, return the object, falling back to the other language if one is missing
+  return {
+    nl: nlValue ?? enValue ?? "",
+    en: enValue ?? nlValue ?? "",
+  };
+}
 
 export function useProductionFormPage(mode: ProductionFormMode) {
   const route = useRoute();
@@ -30,6 +45,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   const tagApi = useTagApi();
   const locationApi = useLocationApi();
   const eventApi = useEventApi();
+  const priceApi = usePriceApi();
   const galleryApi = useGalleryApi();
   const itemApi = useItemApi();
   const cropApi = useCropApi();
@@ -81,6 +97,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       type: "default",
     });
     if (!res.data) throw new Error("Failed to create gallery");
+    await productionApi.linkMedia(productionId, res.data.id);
+    return res.data.id;
+  }
+
+  async function ensurePrintGallery(
+    productionId: number,
+    existingGalleryId: number | null,
+  ): Promise<number> {
+    if (existingGalleryId !== null) return existingGalleryId;
+
+    const res = await galleryApi.create({
+      name: `production-${productionId}-prints`,
+      type: "prints",
+    });
+    if (!res.data) throw new Error("Failed to create print gallery");
     await productionApi.linkMedia(productionId, res.data.id);
     return res.data.id;
   }
@@ -237,6 +268,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       if (locationId !== null) {
         await eventApi.linkLocation(created.data.id, locationId);
       }
+
+      // Create the price and link it to the event.
+      for (const price of event.pricesToCreate) {
+        const resp = await priceApi.create({
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+
+        if (resp.data?.id) {
+          await eventApi.linkPrice(created.data.id, resp.data.id);
+        }
+      }
     } catch (err: unknown) {
       let cause: string;
       if (err instanceof Error) cause = err.message;
@@ -285,6 +331,13 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         await persistItemCreate(item, galleryId, productionId);
       }
     }
+
+    if (mediaPayload.printsToLink.length > 0) {
+      const printGalleryId = await ensurePrintGallery(productionId, null);
+      for (const printId of mediaPayload.printsToLink) {
+        await galleryApi.linkPrintToGallery(printGalleryId, printId);
+      }
+    }
   }
 
   async function handleMediaEdit(
@@ -296,20 +349,41 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       mediaPayload.itemsToUpdate.length > 0 ||
       mediaPayload.itemsToDelete.length > 0;
 
-    if (!hasMediaChanges) return;
+    if (hasMediaChanges) {
+      // Deletions first
+      for (const item of mediaPayload.itemsToDelete) {
+        await persistItemDelete(item);
+      }
 
-    // Deletions first
-    for (const item of mediaPayload.itemsToDelete) {
-      await persistItemDelete(item);
+      const galleryId = await ensureGallery(
+        productionId,
+        mediaPayload.galleryId,
+      );
+
+      for (const item of mediaPayload.itemsToCreate) {
+        await persistItemCreate(item, galleryId, productionId);
+      }
+      for (const item of mediaPayload.itemsToUpdate) {
+        await persistItemUpdate(item, productionId);
+      }
     }
 
-    const galleryId = await ensureGallery(productionId, mediaPayload.galleryId);
+    const hasPrintChanges =
+      mediaPayload.printsToLink.length > 0 ||
+      mediaPayload.printsToUnlink.length > 0;
 
-    for (const item of mediaPayload.itemsToCreate) {
-      await persistItemCreate(item, galleryId, productionId);
-    }
-    for (const item of mediaPayload.itemsToUpdate) {
-      await persistItemUpdate(item, productionId);
+    if (hasPrintChanges) {
+      const printGalleryId = await ensurePrintGallery(
+        productionId,
+        mediaPayload.printGalleryId,
+      );
+
+      for (const printId of mediaPayload.printsToLink) {
+        await galleryApi.linkPrintToGallery(printGalleryId, printId);
+      }
+      for (const printId of mediaPayload.printsToUnlink) {
+        await galleryApi.unlinkPrintFromGallery(printGalleryId, printId);
+      }
     }
   }
 
@@ -359,6 +433,35 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         );
         if (locationId !== null) {
           await eventApi.linkLocation(event.id, locationId);
+        }
+      }
+
+      // Remove the prices that should be deleted.
+      for (const priceId of event.pricesToDelete) {
+        await priceApi.remove(priceId);
+      }
+
+      // Modify the prices that should be modified.
+      for (const price of event.pricesToUpdate) {
+        await priceApi.modify(price.id, {
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+      }
+      for (const price of event.pricesToCreate) {
+        const resp = await priceApi.create({
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+
+        if (resp.data?.id) {
+          await eventApi.linkPrice(event.id, resp.data.id);
         }
       }
     }
@@ -451,40 +554,27 @@ export function useProductionFormPage(mode: ProductionFormMode) {
 
       // Remap from per-locale translation objects to LocalizedString fields
       const productionBody = {
-        titel: { nl: corePayload.nl.titel, en: corePayload.en.titel },
+        titel: {
+          nl: corePayload.nl.titel,
+          en: corePayload.en.titel || corePayload.nl.titel, // Fallback to dutch if no english.
+        },
         description1: {
           nl: corePayload.nl.description1,
-          en: corePayload.en.description1,
+          en: corePayload.en.description1 || corePayload.nl.description1, // Fallback to dutch if no english
         },
-        description2:
-          corePayload.nl.description2 !== null ||
-          corePayload.en.description2 !== null
-            ? {
-                nl: corePayload.nl.description2 ?? "",
-                en: corePayload.en.description2 ?? "",
-              }
-            : null,
-        artist:
-          corePayload.nl.artist !== null || corePayload.en.artist !== null
-            ? {
-                nl: corePayload.nl.artist ?? "",
-                en: corePayload.en.artist ?? "",
-              }
-            : null,
-        tagline:
-          corePayload.nl.tagline !== null || corePayload.en.tagline !== null
-            ? {
-                nl: corePayload.nl.tagline ?? "",
-                en: corePayload.en.tagline ?? "",
-              }
-            : null,
-        credits:
-          corePayload.nl.credits !== null || corePayload.en.credits !== null
-            ? {
-                nl: corePayload.nl.credits ?? "",
-                en: corePayload.en.credits ?? "",
-              }
-            : null,
+        description2: getLocalizedField(
+          corePayload.nl.description2,
+          corePayload.en.description2,
+        ),
+        artist: getLocalizedField(corePayload.nl.artist, corePayload.en.artist),
+        tagline: getLocalizedField(
+          corePayload.nl.tagline,
+          corePayload.en.tagline,
+        ),
+        credits: getLocalizedField(
+          corePayload.nl.credits,
+          corePayload.en.credits,
+        ),
         performer_type: null,
         attendance_mode: null,
       };

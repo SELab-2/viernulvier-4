@@ -99,55 +99,59 @@ onMounted(() => {
 <template>
   <PageHeader :title="t('prints.title')" />
 
-  <div class="space-y-6">
+  <div>
     <PrintsToolbar
       @update:search="searchQuery = $event"
       @update:types="activeFilter = $event"
     />
 
+    <AdminPrintsSkeleton v-if="loading" />
+
     <!-- TotalItems + Add button -->
-    <div class="page-container flex items-center justify-between mb-0">
-      <div>
-        <p
-          v-if="!loading && totalItems > 0"
-          class="font-brand text-2xl font-black text-foreground"
+    <section v-else class="bg-background w-full h-full pt-6">
+      <div class="page-container flex items-center justify-between mb-0">
+        <div>
+          <p
+            v-if="!loading && totalItems > 0"
+            class="font-brand text-2xl font-black text-foreground"
+          >
+            {{ totalItems }} {{ t("general.results") }}
+          </p>
+        </div>
+        <NuxtLink
+          :to="ROUTES.admin.prints.create"
+          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
         >
-          {{ totalItems }} {{ t("general.results") }}
-        </p>
+          <Plus :size="15" />
+          {{ t("prints.new") }}
+        </NuxtLink>
       </div>
-      <NuxtLink
-        :to="ROUTES.admin.prints.create"
-        class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
-      >
-        <Plus :size="15" />
-        {{ t("prints.new") }}
-      </NuxtLink>
-    </div>
 
-    <!-- File list -->
-    <div class="page-container py-6">
-      <AdminPrintsFileList
-        :category="activeFilter"
-        :files="prints"
-        :total-pages="totalPages"
-        @delete="handleDelete"
-      />
+      <!-- File list -->
+      <div class="page-container py-6">
+        <AdminPrintsFileList
+          :category="activeFilter"
+          :files="prints"
+          :total-pages="totalPages"
+          @delete="handleDelete"
+        />
 
-      <div class="flex items-center justify-between mt-6">
-        <PrintsPageJumper
-          :current-page="currentPage"
-          :total-pages="totalPages"
-          :loading="loading"
-          @go-to-page="currentPage = $event"
-        />
-        <PrintsPagination
-          :current-page="currentPage"
-          :total-pages="totalPages"
-          :loading="loading"
-          @go-to-page="currentPage = $event"
-        />
+        <div class="flex items-center justify-between mt-6">
+          <PrintsPageJumper
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :loading="loading"
+            @go-to-page="currentPage = $event"
+          />
+          <PrintsPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :loading="loading"
+            @go-to-page="currentPage = $event"
+          />
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 

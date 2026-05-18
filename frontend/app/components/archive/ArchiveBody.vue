@@ -28,7 +28,11 @@ import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
-import { Plus, Layers } from "lucide-vue-next";
+import { Plus, Edit2, FileText } from "lucide-vue-next";
+import { useStorageApi } from "~/composables/media/useStorageApi";
+import { useCropApi } from "~/composables/media/useCropApi";
+import { useItemApi } from "~/composables/media/useItemApi";
+import { useGalleryApi } from "~/composables/media/useGalleryApi";
 
 const props = withDefaults(
   defineProps<{
@@ -56,8 +60,13 @@ const {
   totalPages,
   loading,
 } = useArchiveView();
-const { getAll } = useProductionApi();
+const { getAll, remove: removeProduction } = useProductionApi();
+const { deleteMedia } = useStorageApi();
+const { remove: removeCrop } = useCropApi();
+const { remove: removeItem } = useItemApi();
+const { remove: removeGallery } = useGalleryApi();
 const { t, locale } = useI18n();
+const snackbar = useSnackbar();
 
 const { isBatchEditMode, toggleBatchEditMode, disableBatchEditMode } =
   useProductionBatchEdit();
@@ -189,6 +198,111 @@ watch(searchQuery, () => {
     resetAndLoad();
   }, 350);
 });
+
+/**
+ * Deletion
+ */
+
+function showSnackbarError(message: string) {
+  snackbar.add({
+    type: "error",
+    text: t("admin-productions.deleteError") + message,
+  });
+}
+
+function showSnackbarSuccess(message: string) {
+  snackbar.add({
+    type: "success",
+    text: message,
+  });
+}
+
+/**
+ * Reacts to the press of a delete button.
+ *
+ * NOTE: Currently when a production is deleted it's corresponding MEDIA is also removed.
+ * Because we don't have any frontend functionality to link media from other productions to each other this is safe.
+ * A Print gallery is left as is because they also show up on the prints page.
+ * @param production The production we want to delete.
+ */
+async function handleDeleteProduction(
+  production: ProductionView,
+  gallery: GalleryWithItems<ItemViewWithCrops> | null,
+) {
+  // Check whether the user ACTUALLY wants to perform the delete.
+  const confirmed = confirm(
+    t("admin-productions.deleteConfirm", {
+      production: production.titel,
+    }),
+  );
+  if (!confirmed) return;
+
+  // Perform the various deletes.
+  await Promise.all([
+    deleteProduction(production),
+    deleteGallery(gallery),
+    // NOTE: Events are automatically deleted by the DB if their production is removed.
+  ]);
+
+  // Reload the page
+  resetAndLoad();
+  showSnackbarSuccess(
+    t("admin-productions.deleteSuccess", {
+      production: production.titel,
+    }),
+  );
+}
+
+/**
+ * Deletes a production (and it's events) from the database.
+ * @param production_id The ID of the production.
+ */
+async function deleteProduction(production: ProductionView) {
+  const response = await removeProduction(production.id);
+  if (response.error) {
+    showSnackbarError(response.error);
+  }
+}
+
+/**
+ * Deletes a full gallery and it's assets from the database/server.
+ * @param gallery_id The ID of the gallery.
+ */
+async function deleteGallery(
+  gallery: GalleryWithItems<ItemViewWithCrops> | null,
+) {
+  if (!gallery) return; // If no gallery we can just skip this step.
+
+  // Start by deleting the images from the server.
+  // In the same (sub)-loop we can delete crops and items.
+  for (const item of gallery.items) {
+    for (const crop of Object.values(item.crops)) {
+      // Remove the image itself.
+      const responseMedia = await deleteMedia(crop.url);
+      if (responseMedia.error) {
+        showSnackbarError(responseMedia.error);
+      }
+
+      // Remove the crop.
+      const responseCrop = await removeCrop(crop.id);
+      if (responseCrop.error) {
+        showSnackbarError(responseCrop.error);
+      }
+    }
+
+    // Remove the item itself when all it's crops are removed.
+    const responseItem = await removeItem(item.id);
+    if (responseItem.error) {
+      showSnackbarError(responseItem.error);
+    }
+  }
+
+  // Lastly remove the gallery.
+  const responseGallery = await removeGallery(gallery.id);
+  if (responseGallery.error) {
+    showSnackbarError(responseGallery.error);
+  }
+}
 </script>
 
 <template>
@@ -208,7 +322,6 @@ watch(searchQuery, () => {
         />
 
         <ArchivePagination v-if="!isAdmin" />
-
         <!-- Admin toolbar -->
         <div v-else class="flex gap-3">
           <!-- Batch edit pill toggle -->
@@ -301,6 +414,7 @@ watch(searchQuery, () => {
           :productionView="production"
           :is-admin="props.isAdmin"
           :is-batch-mode="props.isAdmin && isBatchEditMode"
+          @delete="handleDeleteProduction"
         />
       </div>
 

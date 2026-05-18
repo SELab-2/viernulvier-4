@@ -17,6 +17,9 @@ export const LoginSchema = AccountSchema.pick({
   password: true,
 });
 export const UpdateAccountSchema = AccountSchema.partial();
+export const ChangePasswordSchema = z.object({
+  password: z.string().min(8),
+});
 
 // Public Account object.
 export const PublicAccountSchema = AccountSchema.omit({
@@ -27,5 +30,6 @@ export const PublicAccountSchema = AccountSchema.omit({
 export type CreateAccount = z.infer<typeof CreateAccountSchema>;
 export type LoginAccount = z.infer<typeof LoginSchema>;
 export type UpdateAccount = z.infer<typeof UpdateAccountSchema>;
+export type ChangePassword = z.infer<typeof ChangePasswordSchema>;
 export type PublicAccount = z.infer<typeof PublicAccountSchema>;
 export type Account = z.infer<typeof AccountSchema>;

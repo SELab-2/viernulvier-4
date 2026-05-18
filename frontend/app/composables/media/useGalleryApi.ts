@@ -135,6 +135,24 @@ export function useGalleryApi() {
     return del(API_ROUTES.galleries.itemLink(galleryId, itemId));
   }
 
+  /**
+   * PUT "/galleries/:galleryId/prints/:itemId"
+   *
+   * Links an print to a gallery.
+   */
+  function linkPrintToGallery(galleryId: number, itemId: number) {
+    return put(API_ROUTES.galleries.printLink(galleryId, itemId), {});
+  }
+
+  /**
+   * DELETE "/galleries/:galleryId/prints/:itemId"
+   *
+   * Unlinks an print from a gallery.
+   */
+  function unlinkPrintFromGallery(galleryId: number, itemId: number) {
+    return del(API_ROUTES.galleries.printLink(galleryId, itemId));
+  }
+
   return {
     getAll,
     getById,
@@ -145,5 +163,7 @@ export function useGalleryApi() {
     getGalleryItems,
     linkItemToGallery,
     unlinkItemFromGallery,
+    linkPrintToGallery,
+    unlinkPrintFromGallery,
   };
 }

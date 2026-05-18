@@ -213,6 +213,11 @@ async function handleSubmit(data: CreateBlog) {
           <AdminBlogsPreview :data="previewData" :header-crop="null" />
         </div>
       </details>
+      <!-- CSV import tools for blogs -->
+      <AdminCsvImportCard
+        target="blogs"
+        :disclaimer="t('admin.csvImport.blogDisclaimer')"
+      />
     </div>
   </div>
 </template>

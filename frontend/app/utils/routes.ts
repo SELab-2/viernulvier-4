@@ -40,6 +40,7 @@ export const ROUTES = {
       create: "/admin/productions/create",
       edit: (id: number) => `/admin/productions/edit/${id}`,
       batchEdit: "/admin/productions/batch-edit",
+      csvImports: "/admin/productions/csv-imports",
     },
     series: {
       base: "/admin/series",
