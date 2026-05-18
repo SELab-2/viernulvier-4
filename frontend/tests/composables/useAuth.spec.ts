@@ -13,13 +13,13 @@ vi.mock("#app", async (importOriginal) => {
 });
 
 const mockFetch = vi.fn();
-vi.stubGlobal("$fetch", mockFetch);
 
 beforeEach(() => {
   mockFetch.mockReset();
   vi.clearAllMocks();
   sessionStorage.clear();
   vi.stubGlobal("navigateTo", vi.fn());
+  vi.stubGlobal("$fetch", mockFetch);
 });
 
 afterEach(() => {
