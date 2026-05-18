@@ -1,24 +1,6 @@
-<!--
-  pages/stories/[id].vue
-  ========================
-  Public single-blog-post page.
-
-  Layout:
-  1. Hero banner  — full-width image with scrollable/fading title overlay.
-  2. Body article — rich-text content with a thin purple left accent line.
-  3. Credits bar  — image credits fetched from the linked media item, shown
-                    in a subtle strip at the bottom of the article when present.
-
-  The title uses the same scrollable + fade pattern as the admin preview
-  (AdminBlogsPreview.vue) so very long titles never overflow the hero section.
-
-  Data fetching:
-  - Blog data    : useBlogApi().getById  (lang-aware, returns BlogView)
-  - Gallery data : useBlogApi().getMediaGallery  (header crop + credits)
-  Both use useAsyncData so they are SSR-compatible and react to locale changes.
--->
 <script lang="ts" setup>
-import { ChevronLeft } from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
+import { ChevronLeft, ChevronDown, ChevronUp } from "lucide-vue-next";
 import type { BlogView, MediaItemView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
@@ -65,7 +47,6 @@ const blogId = computed(() => {
 
 /** Get the main blog data and handle API nesting */
 const { data, status, error } = useAsyncData<BlogView | null>(
-  // Data fetching
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
@@ -82,7 +63,6 @@ const { data, status, error } = useAsyncData<BlogView | null>(
 watch(
   [status, error, data],
   ([newStatus, newError, newBlog]) => {
-    // Once the fetch finishes, check if it failed or returned nothing
     if (newStatus === "success" && !newBlog) {
       showError({
         statusCode: 404,
@@ -110,7 +90,6 @@ const { data: gallery } = useAsyncData(
 );
 
 /** Pagination state and logic for the "Show All" button.*/
-
 const LINKED_PRODUCTIONS_LIMIT = 3;
 const currentLimit = ref(LINKED_PRODUCTIONS_LIMIT);
 const totalLinkedProductions = ref(0);
@@ -132,10 +111,6 @@ const toggleProductionsLimit = () => {
   } else {
     currentLimit.value = totalLinkedProductions.value;
   }
-};
-
-const loadMoreProductions = () => {
-  currentLimit.value = totalLinkedProductions.value;
 };
 
 /** Fetch linked productions using the blog_id filter */
@@ -171,7 +146,6 @@ const { data: linkedProductions, status: productionsStatus } = useAsyncData(
 );
 
 // Derived values
-
 const { title, description: body, formattedDate } = useBlogStory(blog);
 
 /** Header crop used in the hero section. */
@@ -182,18 +156,13 @@ const headerCrop = computed(() => {
 
 /**
  * Credits string extracted from the first media item in the gallery.
- * The backend returns credits as a localised object { nl: string, en: string }
- * for raw MediaItem, or as a flat string for MediaItemView (when lang is passed).
- * We handle both shapes here.
  */
 const imageCredits = computed<string>(() => {
   const firstItem = gallery.value?.items?.[0] as MediaItemView | undefined;
   if (!firstItem?.credits) return "";
 
-  // Flat string (MediaItemView with lang param)
   if (typeof firstItem.credits === "string") return firstItem.credits;
 
-  // Localised object (MediaItem without lang param, or mixed response)
   const obj = firstItem.credits as { nl?: string; en?: string };
   return obj[locale.value as "nl" | "en"] ?? obj.nl ?? "";
 });
@@ -207,73 +176,15 @@ const readingTime = computed(() => {
 
 /** Sanitised rich-text body ready for v-html. */
 const cleanBody = computed(() => cleanText(body.value));
-
-/**
- * Show the fade mask once the title is long enough to risk overflowing
- * the fixed-height scroll wrapper in the hero section.
- */
-const titleIsLong = computed(() => title.value.length > 50);
-
-/**
- * Dynamic font-size class — same breakpoints as the production detail page
- * and the admin preview component so all contexts look consistent.
- */
-const titleSizeClass = computed(() => {
-  const len = title.value.length;
-  return len > 35
-    ? "text-4xl lg:text-6xl"
-    : len > 25
-      ? "text-5xl lg:text-7xl"
-      : "text-6xl lg:text-8xl";
-});
-
-// Only allow scrolling of the title when it actually wraps onto more than one
-// rendered line. This avoids showing a scrollbar for single-line titles.
-const titleText = ref<HTMLElement | null>(null);
-const titleScrollable = ref(false);
-let __ro_title: ResizeObserver | null = null;
-
-function updateTitleScrollable() {
-  nextTick(() => {
-    const el = titleText.value;
-    if (!el) {
-      titleScrollable.value = false;
-      return;
-    }
-
-    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
-    if (!lineHeight) {
-      titleScrollable.value = false;
-      return;
-    }
-
-    const lines = Math.round(el.scrollHeight / lineHeight);
-    titleScrollable.value = lines > 1;
-  });
-}
-
-onMounted(() => {
-  updateTitleScrollable();
-  __ro_title = new ResizeObserver(updateTitleScrollable);
-  if (titleText.value) __ro_title.observe(titleText.value);
-});
-
-onBeforeUnmount(() => {
-  __ro_title?.disconnect();
-});
-
-watch(title, updateTitleScrollable);
 </script>
 
 <template>
-  <!-- Loading skeleton-->
   <BlogsStorySkeleton v-if="status === 'pending'" />
 
   <main
     v-else-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
-    <!-- Not found / error state -->
     <div
       v-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
@@ -291,80 +202,28 @@ watch(title, updateTitleScrollable);
       </NuxtLink>
     </div>
 
-    <!-- Main content -->
     <template v-else>
-      <!-- Hero banner -->
-      <section
-        :class="{ 'image-overlay text-white': headerCrop }"
-        class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
+      <DetailHero
+        :id="blog.id"
+        :title="title"
+        :subtitle="formattedDate"
+        :header-crop="headerCrop"
+        :back-text="t('general.back')"
+        @back="goBack"
       >
-        <!-- Background image (lazy, 0-opacity placeholder when absent) -->
-        <MediaDisplay
-          v-if="blog.id"
-          :id="blog.id"
-          :src="headerCrop"
-          class="absolute inset-0 w-full h-full object-cover z-0"
-        />
-
-        <div class="relative z-10 page-container pb-12">
-          <!-- Back link + reading time row -->
-          <div class="flex items-center gap-6 mb-8">
-            <button
-              :class="headerCrop ? 'text-white' : 'text-foreground'"
-              class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
-              @click="goBack()"
-            >
-              <ChevronLeft :size="14" stroke-width="3" />
-              {{ t("general.back") }}
-            </button>
-
-            <span
-              :class="headerCrop ? 'text-white' : 'text-foreground'"
-              class="text-[9px] font-black uppercase tracking-widest opacity-60"
-            >
-              {{ readingTime }} {{ t("stories.minRead") }}
-            </span>
-          </div>
-
-          <!--
-            Scrollable title container.
-            max-height + overflow-y: long titles scroll instead of overflowing.
-            The fade mask is applied when the title is long enough to be cut off.
-          -->
-          <div
-            class="title-scroll-wrap mb-4"
-            :class="[
-              titleIsLong ? 'title-scroll-fade' : '',
-              titleScrollable ? 'title-scroll-scrollable' : '',
-            ]"
+        <template #meta>
+          <span
+            :class="headerCrop ? 'text-white' : 'text-foreground'"
+            class="text-[9px] font-black uppercase tracking-widest opacity-60"
           >
-            <h1
-              ref="titleText"
-              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
-              :class="titleSizeClass"
-            >
-              {{ title }}
-            </h1>
-          </div>
+            {{ readingTime }} {{ t("stories.minRead") }}
+          </span>
+        </template>
+      </DetailHero>
 
-          <!-- Publication date -->
-          <p
-            v-if="formattedDate"
-            class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
-          >
-            {{ formattedDate }}
-          </p>
-        </div>
-      </section>
-
-      <!-- Article body -->
       <section class="pt-20 pb-10">
         <div class="page-container">
           <article class="relative w-full">
-            <!--
-              Decorative vertical line on the left (md+).
-              Uses a gradient so it fades in/out at the top and bottom.
-            -->
             <div
               class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
@@ -379,21 +238,15 @@ watch(title, updateTitleScrollable);
             />
 
             <div class="md:pl-10 w-full">
-              <!-- Rich-text content (sanitised HTML from the editor) -->
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"
               />
 
-              <!--
-                Image credits bar — only shown when the linked media item has credits.
-                Positioned at the bottom of the article, above the navigation footer.
-              -->
               <div
                 v-if="imageCredits"
                 class="mt-12 flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3"
               >
-                <!-- Camera icon -->
                 <svg
                   class="w-3.5 h-3.5 text-muted-foreground/60 mt-0.5 shrink-0"
                   fill="none"
@@ -486,7 +339,6 @@ watch(title, updateTitleScrollable);
       <section class="pb-20">
         <div class="page-container">
           <div class="w-full">
-            <!-- Article footer: date + back link -->
             <div
               class="pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
             >
@@ -510,51 +362,6 @@ watch(title, updateTitleScrollable);
 </template>
 
 <style scoped>
-/* Scrollable hero title */
-.title-scroll-wrap {
-  max-width: 100%;
-  max-height: 13rem; /* ≈ 3 lines at the largest font size */
-  /* hide overflow by default; enable scrolling only when JS detects overflow */
-  overflow-y: hidden;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.title-scroll-wrap h1 {
-  overflow-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
-}
-.title-scroll-wrap::-webkit-scrollbar {
-  display: none;
-}
-
-/* When the title actually overflows the wrapper we enable scrolling */
-.title-scroll-scrollable {
-  overflow-y: auto;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar {
-  display: block;
-  width: 6px;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
-  border-radius: 9999px;
-}
-
-/* Soft bottom fade for very long titles */
-.title-scroll-fade {
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-}
-
 /* Rich-text body styles */
 .description-content :deep(a) {
   text-decoration: underline;
@@ -630,20 +437,5 @@ watch(title, updateTitleScrollable);
 .description-content :deep(u) {
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-
-/* Gradient overlay on the hero image */
-.image-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
 }
 </style>

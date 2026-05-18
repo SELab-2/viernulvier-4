@@ -1,13 +1,5 @@
 <script lang="ts" setup>
-import {
-  ref,
-  computed,
-  onMounted,
-  onBeforeUnmount,
-  watch,
-  nextTick,
-} from "vue";
-import { ChevronLeft } from "lucide-vue-next";
+import { computed, watch } from "vue";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
@@ -157,144 +149,52 @@ const headerCrop = computed(() => {
   return getMainImageCrop(gallery.value, "FE3_header");
 });
 
-// carousel
-
 const carouselImages = computed(() => {
   if (!gallery.value || !gallery.value.items) return [];
   return getCarouselImageCrops(gallery.value, "hd_ready");
 });
 
-/**
- * Check if a string is useful (not "N/A" or empty)
- */
 const isValid = (val: any) => {
   if (!val) return false;
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
-
-// scrollable title
-
-const productionTitle = computed(() => production.value?.titel || "");
-
-const titleIsLong = computed(() => productionTitle.value.length > 50);
-
-const titleSizeClass = computed(() => {
-  const len = productionTitle.value.length;
-  return len > 35
-    ? "text-4xl lg:text-6xl"
-    : len > 25
-      ? "text-5xl lg:text-7xl"
-      : "text-6xl lg:text-8xl";
-});
-
-const titleText = ref<HTMLElement | null>(null);
-const titleScrollable = ref(false);
-let __ro_title: ResizeObserver | null = null;
-
-function updateTitleScrollable() {
-  nextTick(() => {
-    const el = titleText.value;
-    if (!el) {
-      titleScrollable.value = false;
-      return;
-    }
-
-    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
-    if (!lineHeight) {
-      titleScrollable.value = false;
-      return;
-    }
-
-    const lines = Math.round(el.scrollHeight / lineHeight);
-    titleScrollable.value = lines > 1;
-  });
-}
-
-onMounted(() => {
-  updateTitleScrollable();
-  __ro_title = new ResizeObserver(updateTitleScrollable);
-  if (titleText.value) __ro_title.observe(titleText.value);
-});
-
-onBeforeUnmount(() => {
-  __ro_title?.disconnect();
-});
-
-watch(productionTitle, updateTitleScrollable);
 </script>
 
 <template>
-  <!-- Loading skeleton-->
   <ProductionSkeleton v-if="status === 'pending'" />
 
   <main
     v-else-if="production"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
-    <!-- Hero -->
-    <section
-      :class="{ 'image-overlay text-white': headerCrop }"
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
+    <DetailHero
+      :id="production.id"
+      :title="production.titel"
+      :subtitle="
+        isValid(production.artist) && production.artist !== production.titel
+          ? production.artist
+          : null
+      "
+      :header-crop="headerCrop"
+      :back-text="t('general.back')"
+      @back="goBack"
     >
-      <MediaDisplay
-        :id="production.id"
-        :src="headerCrop"
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
+      <template #meta>
+        <span
+          v-if="isValid(production.performer_type)"
+          :class="
+            headerCrop
+              ? 'border-white text-white'
+              : 'border-foreground text-foreground'
+          "
+          class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
+        >
+          {{ production.performer_type }}
+        </span>
+      </template>
 
-      <div class="relative z-10 page-container pb-12">
-        <div class="flex items-center gap-4 mb-8">
-          <button
-            :class="headerCrop ? 'text-white' : 'text-foreground'"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
-            @click="goBack()"
-          >
-            <ChevronLeft :size="14" stroke-width="3" />
-            {{ t("general.back") }}
-          </button>
-
-          <span
-            v-if="isValid(production.performer_type)"
-            :class="
-              headerCrop
-                ? 'border-white text-white'
-                : 'border-foreground text-foreground'
-            "
-            class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
-          >
-            {{ production.performer_type }}
-          </span>
-        </div>
-
-        <div>
-          <div
-            class="title-scroll-wrap mb-4"
-            :class="[
-              titleIsLong ? 'title-scroll-fade' : '',
-              titleScrollable ? 'title-scroll-scrollable' : '',
-            ]"
-          >
-            <h1
-              ref="titleText"
-              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
-              :class="titleSizeClass"
-            >
-              {{ production.titel }}
-            </h1>
-          </div>
-
-          <p
-            v-if="
-              isValid(production.artist) &&
-              production.artist !== production.titel
-            "
-            class="text-2xl lg:text-3xl font-medium opacity-80"
-          >
-            {{ production.artist }}
-          </p>
-        </div>
-
+      <template #footer>
         <div
           v-if="tags?.some((t) => isValid(t.tag))"
           class="flex flex-wrap gap-3 mt-8"
@@ -308,8 +208,8 @@ watch(productionTitle, updateTitleScrollable);
             </span>
           </template>
         </div>
-      </div>
-    </section>
+      </template>
+    </DetailHero>
 
     <section class="py-20">
       <div class="page-container">
@@ -387,61 +287,4 @@ watch(productionTitle, updateTitleScrollable);
   </main>
 </template>
 
-<style scoped>
-/* Scrollable hero title */
-.title-scroll-wrap {
-  max-width: 100%;
-  max-height: 13rem;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.title-scroll-wrap h1 {
-  overflow-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
-}
-
-.title-scroll-wrap::-webkit-scrollbar {
-  display: none;
-}
-
-.title-scroll-scrollable {
-  overflow-y: auto;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar {
-  display: block;
-  width: 6px;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
-  border-radius: 9999px;
-}
-
-.title-scroll-fade {
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-}
-
-.image-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
-}
-</style>
+<style scoped></style>
