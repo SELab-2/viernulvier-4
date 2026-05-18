@@ -22,6 +22,12 @@ interface Props {
 }
 defineProps<Props>();
 
+const inputRef = ref<HTMLInputElement | null>(null);
+function openPicker() {
+  // Showing native calendar
+  inputRef.value?.showPicker();
+}
+
 const model = defineModel<string>();
 </script>
 
@@ -39,6 +45,7 @@ const model = defineModel<string>();
     <!-- Date Picker Field -->
     <div class="relative">
       <input
+        ref="inputRef"
         :id="id"
         type="date"
         v-model="model"
@@ -51,6 +58,7 @@ const model = defineModel<string>();
 
       <!-- Calendar icon -->
       <Calendar
+        @click="openPicker"
         class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
       />
     </div>
