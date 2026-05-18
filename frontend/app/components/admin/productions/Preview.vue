@@ -91,10 +91,20 @@ const description2Raw = computed(() => get("description2"));
 // Tags: filter out blanks (mirrors [id].vue: `t.tag.trim().length > 1`)
 const visibleTags = computed(() =>
   (props.tags ?? []).filter((tag) => {
-    const label = tag.label;
-    return label && label.trim().length > 1;
+    const label =
+      tag.type === "new"
+        ? tag.label[previewLang.value] || tag.label.nl
+        : tag.label;
+    return label && String(label).trim().length > 1;
   }),
 );
+
+function tagLabel(tag: ProductionTagsForm[number]): string {
+  if (tag.type === "new") {
+    return tag.label[previewLang.value] || tag.label.nl || "";
+  }
+  return tag.label;
+}
 
 // Series: only non-deleted items
 const visibleSeries = computed(() =>
@@ -216,7 +226,11 @@ function eventLocation(e: EventDraft): string {
   if (e.kind === "existing" && e.deleted) return "";
   const loc = (e as Extract<EventDraft, { deleted?: false }>).location;
   if (!loc) return "";
-  return loc.label || "";
+
+  if (loc.type === "new") {
+    return loc.label[previewLang.value] || loc.label.nl || "";
+  }
+  return loc.label;
 }
 </script>
 
@@ -384,7 +398,7 @@ function eventLocation(e: EventDraft): string {
             >
               <span
                 v-for="tag in visibleTags"
-                :key="tag.type === 'existing' ? tag.id : tag.label"
+                :key="tag.type === 'existing' ? tag.id : tag.label.nl"
                 class="bg-accent text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest"
                 :class="
                   tag.type === 'new'
@@ -392,7 +406,7 @@ function eventLocation(e: EventDraft): string {
                     : ''
                 "
               >
-                {{ tag.label }}
+                {{ tagLabel(tag) }}
               </span>
             </div>
 

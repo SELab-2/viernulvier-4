@@ -147,7 +147,14 @@ function eventLabel(event: ActiveEventDraft, position: number): string {
 }
 
 function locationLabel(event: ActiveEventDraft): string | null {
-  return event.location?.label ?? null;
+  const loc = event.location;
+  if (!loc) return null;
+
+  if (loc.type === "new") {
+    return loc.label.nl + (loc.label.en ? ` / ${loc.label.en}` : "");
+  }
+
+  return loc.label;
 }
 </script>
 

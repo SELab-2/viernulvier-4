@@ -227,13 +227,19 @@ export function useProductionEvents(): ProductionFormStep<
         const locRes = await eventApi
           .getLocation(event.id, "nl")
           .catch(() => ({ data: null }));
-        const loc = locRes.data
-          ? {
-              type: "existing" as const,
-              id: locRes.data.id,
-              label: locRes.data.location,
-            }
-          : null;
+
+        let loc: ExistingLocation | null = null;
+        if (locRes.data) {
+          // Normalize label to string if it comes as a localized object
+          const rawLoc = locRes.data.location;
+          const label = rawLoc;
+
+          loc = {
+            type: "existing" as const,
+            id: locRes.data.id,
+            label,
+          };
+        }
 
         const pricesRes = await eventApi
           .getPrices(event.id)

@@ -29,7 +29,7 @@ const emit = defineEmits<{
   update: [draft: ActiveEventDraft];
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const locationApi = useLocationApi();
 
 const locationQuery = ref("");
@@ -63,18 +63,28 @@ async function fetchLocations(query: string) {
   try {
     const res = await locationApi.getAll({
       locationFilters: { location: query },
-      languageFilters: { lang: "nl" },
+      languageFilters: { lang: locale.value as "nl" | "en" },
     });
 
     const raw = (res && (res.data as any)) || null;
     const maybeData = raw?.data ?? raw?.objects ?? raw;
     const itemsArr = Array.isArray(maybeData) ? maybeData : [];
 
-    locationResults.value = itemsArr.map((loc: any) => ({
-      type: "existing" as const,
-      id: Number(loc.id),
-      label: loc.location ?? loc.name ?? String(loc.id ?? ""),
-    }));
+    locationResults.value = itemsArr.map((loc: any) => {
+      // Correctly extract localized label for existing location
+      let label = "";
+      if (typeof loc.location === "object" && loc.location !== null) {
+        label = loc.location[locale.value] || loc.location.nl || String(loc.id);
+      } else {
+        label = loc.location ?? loc.name ?? String(loc.id ?? "");
+      }
+
+      return {
+        type: "existing" as const,
+        id: Number(loc.id),
+        label,
+      };
+    });
 
     showDropdown.value = true;
     updateDropdownPosition();

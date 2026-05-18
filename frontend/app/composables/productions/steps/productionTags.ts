@@ -72,6 +72,7 @@ export function useProductionTags(): ProductionFormStep<
         if (tag.type === "new") {
           return `new:${tag.label.nl}`;
         }
+        // Narrowing for type safety
         return `selected:${tag.id}`;
       });
     }
@@ -92,14 +93,20 @@ export function useProductionTags(): ProductionFormStep<
     for (const tag of draft.value) {
       if (tag.type === "new") {
         changes.push(`new:${tag.label.nl}`);
-      } else if (tag.type === "existing" && !originalIds.has(tag.id)) {
-        changes.push(`selected:${tag.id}`);
+      } else if (tag.type === "existing") {
+        // Tag is now narrowed to ExistingTag
+        if (!originalIds.has(tag.id)) {
+          changes.push(`selected:${tag.id}`);
+        }
       }
     }
 
     for (const tag of original.value) {
-      if (tag.type === "existing" && !currentIds.has(tag.id)) {
-        changes.push(`unselected:${tag.id}`);
+      if (tag.type === "existing") {
+        // Tag is now narrowed to ExistingTag
+        if (!currentIds.has(tag.id)) {
+          changes.push(`unselected:${tag.id}`);
+        }
       }
     }
 
