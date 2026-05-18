@@ -133,51 +133,6 @@ watch(() => props.title, updateTitleScrollable);
 </template>
 
 <style scoped>
-.title-scroll-wrap {
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.title-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
-
-.title-scroll-scrollable {
-  max-height: 8rem;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.title-scroll-wrap h1 {
-  overflow-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
-  margin: 0;
-  padding: 0;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar {
-  display: block;
-  width: 6px;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.title-scroll-scrollable::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
-  border-radius: 9999px;
-}
-
-.title-scroll-fade {
-  mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
-}
-
 /* Gradient overlay on hero image */
 .image-overlay::after {
   content: "";

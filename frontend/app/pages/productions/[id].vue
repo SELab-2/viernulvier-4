@@ -289,9 +289,7 @@ const hiddenSeries = computed(() => {
             </p>
           </div>
 
-          <ProductionDescription
-            :html-content="cleanText(production.description1)"
-          />
+          <Description :html-content="cleanText(production.description1)" />
         </div>
 
         <div class="mt-12 mb-16">
@@ -307,7 +305,7 @@ const hiddenSeries = computed(() => {
           </div>
         </div>
 
-        <ProductionDescription
+        <Description
           v-if="isValid(production.description2)"
           :html-content="cleanText(production.description2)"
           variant="boxed"
