@@ -222,7 +222,8 @@ export class ProductionDatabaseService {
     if (productionFilters.before) {
       havingConditions.push(
         // Note: We add one day here to include the day itself too without having to cast the column.
-        `MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day'`,
+        // The IS NULL check ensures productions without an endtime are not filtered out.
+        `(MAX(e.endtime) IS NULL OR MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day')`,
       );
     }
 
