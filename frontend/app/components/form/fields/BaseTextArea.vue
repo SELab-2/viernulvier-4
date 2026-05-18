@@ -48,7 +48,7 @@ const model = defineModel<string>();
       v-model="model"
       :required="required"
       :rows="rows"
-      class="px-4 py-3 bg-muted border border-border font-bold text-[10px] tracking-widest rounded-lg w-full outline-none hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background resize-none placeholder:text-muted-foreground placeholder:opacity-100 dark:placeholder:opacity-90"
+      class="px-4 py-3 bg-muted border border-border font-bold text-[10px] tracking-widest rounded-lg w-full outline-none hover:border-accent hover:bg-muted/70 focus:border-foreground/30 focus:bg-background resize-none placeholder:text-muted-foreground placeholder:opacity-100 dark:placeholder:opacity-90"
     />
   </div>
 </template>
