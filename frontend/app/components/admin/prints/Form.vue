@@ -10,7 +10,7 @@
 -->
 
 <script setup lang="ts">
-import type { PrintItemView } from "@repo/common";
+import type { PrintItem } from "@repo/common";
 import { PrintTypeValues } from "@repo/common";
 import type { FormField } from "../../../types/FormField";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
@@ -36,7 +36,7 @@ const printId = computed<number | null>(() => {
 });
 
 // State
-const print = ref<PrintItemView | null>(null);
+const print = ref<PrintItem | null>(null);
 const fetching = ref(false); // true while loading existing print data
 const loading = ref(false); // true while the form is being submitted
 const error = ref<string | null>(null); // holds error message (to display in case of error)
@@ -101,7 +101,7 @@ async function loadPrint() {
   error.value = null;
   try {
     const resp = await getById(printId.value);
-    print.value = resp.data as PrintItemView;
+    print.value = resp.data;
   } catch {
     error.value = t("admin.form.loadError");
   } finally {
