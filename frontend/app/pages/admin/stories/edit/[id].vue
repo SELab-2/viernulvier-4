@@ -385,9 +385,9 @@ async function restoreToSaved() {
                     The blogId is available here so the card is fully functional.
                   -->
                   <template #extra>
-                    <AdminBlogsLinkToProduction
-                      :blog-id="blogId"
-                      :gallery-id="galleryId"
+                    <AdminSharedProductionLinker
+                      type="blog"
+                      :entity-id="blogId"
                     />
                   </template>
                 </AdminBlogsForm>
