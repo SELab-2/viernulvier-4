@@ -214,6 +214,18 @@ const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
         />
       </div>
 
+      <!-- Sort order select -->
+      <div class="shrink-0" :class="rowHeight">
+        <label class="sr-only">{{ t("stories.sortLabel") }}</label>
+        <select
+          v-model="sortOrder"
+          class="h-full px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30"
+        >
+          <option value="newest">{{ t("stories.sortNewest") }}</option>
+          <option value="oldest">{{ t("stories.sortOldest") }}</option>
+        </select>
+      </div>
+
       <!-- Filters toggle button with active-filter badge -->
       <div class="relative shrink-0">
         <button
@@ -283,18 +295,6 @@ const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
     <Transition name="cal-slide">
       <div v-if="panelOpen" class="border-t border-border">
         <div class="page-container py-6 flex flex-col gap-6">
-          <!-- Sort order -->
-          <div class="flex flex-col gap-2 w-max">
-            <span class="section-label">{{ t("stories.sortLabel") }}</span>
-            <select
-              v-model="sortOrder"
-              class="h-10 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
-            >
-              <option value="newest">{{ t("stories.sortNewest") }}</option>
-              <option value="oldest">{{ t("stories.sortOldest") }}</option>
-            </select>
-          </div>
-
           <!-- Year picker — only shown when date bounds are available -->
           <div class="flex flex-col gap-2">
             <span class="section-label">{{ t("stories.filters.year") }}</span>

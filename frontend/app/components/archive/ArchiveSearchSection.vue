@@ -137,6 +137,18 @@ onMounted(() => {
         />
       </div>
 
+      <!-- Sort order select -->
+      <div class="shrink-0 h-12">
+        <label class="sr-only">{{ t("archive.sortLabel") }}</label>
+        <select
+          v-model="sortOrder"
+          class="h-12 px-3 rounded bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30"
+        >
+          <option value="newest">{{ t("archive.sortNewest") }}</option>
+          <option value="oldest">{{ t("archive.sortOldest") }}</option>
+        </select>
+      </div>
+
       <!-- Filter toggle + badge -->
       <div class="relative">
         <button
@@ -190,22 +202,6 @@ onMounted(() => {
     <Transition name="filter-slide">
       <div v-if="filterOpen" class="border-t border-border">
         <div class="page-container py-6 flex flex-col gap-6">
-          <!-- Sort order -->
-          <div class="flex flex-col gap-2 shrink-0 pt-1 w-max">
-            <span
-              class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
-            >
-              {{ t("archive.sortLabel") }}
-            </span>
-            <select
-              v-model="sortOrder"
-              class="h-10 px-3 rounded-md bg-muted border border-border text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground focus:outline-none cursor-pointer transition-colors hover:border-foreground/30 w-max"
-            >
-              <option value="newest">{{ t("archive.sortNewest") }}</option>
-              <option value="oldest">{{ t("archive.sortOldest") }}</option>
-            </select>
-          </div>
-
           <!-- Calendar -->
           <span
             class="font-brand font-black text-[10px] uppercase tracking-widest text-muted-foreground"
