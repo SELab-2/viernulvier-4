@@ -14,6 +14,7 @@ This site contains the complete documentation for the VierNulVier project.
 
 * **[Building & Run](./build-run/index.md):** Install the dependencies and run the project.
 * **[Server](./server/index.md):** Understand the architecture and how VierNulVier Archive works under the hood.
+* **[Frontend — Nuxt overview](./frontend-nuxt-overview.md):** Frontend structure, routing and naming conventions for the Nuxt app.
 
 ## Requirements
 
