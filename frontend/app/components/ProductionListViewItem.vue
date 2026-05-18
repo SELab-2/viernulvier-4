@@ -148,7 +148,7 @@ const cardProps = computed(() => ({
   dateRangeText: dateRangeText.value,
   tags: tags.value,
   isFutureProduction: isFutureProduction.value,
-  linkedSeriesList: linkedSeriesList.value, // Doorgeven aan de kaart
+  linkedSeriesList: linkedSeriesList.value,
 }));
 
 onMounted(() => {

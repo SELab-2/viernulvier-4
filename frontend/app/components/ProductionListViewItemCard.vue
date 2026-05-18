@@ -47,7 +47,7 @@ const emit = defineEmits<{
 
             <ProductionSeriesBadge :series-list="props.linkedSeriesList" />
           </div>
-
+          <!-- Artist -->
           <p
             v-if="
               props.productionView.artist &&
@@ -77,13 +77,16 @@ const emit = defineEmits<{
           </p>
         </div>
 
+        <!-- Admin buttons -->
         <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
+          <!-- WARNING -->
           <AdminWarningButton
             v-if="props.isFutureProduction"
             :title="t('admin-productions.warning-title')"
             :description="t('admin-productions.warning-description')"
           />
 
+          <!-- NORMAL ACTIONS -->
           <template v-else>
             <NuxtLink
               :to="
@@ -102,6 +105,7 @@ const emit = defineEmits<{
         </div>
       </div>
 
+      <!-- Tags container -->
       <div class="mt-2 overflow-hidden">
         <div class="flex items-center gap-2">
           <TagPill
