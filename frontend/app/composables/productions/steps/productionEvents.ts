@@ -150,6 +150,28 @@ export function newEventDraft(): NewEventDraft {
   };
 }
 
+/**
+ * Normalizes an ISO string (likely UTC from API) to a literal local-time string (no Z).
+ * This ensures that when we send it back, the backend/DB treats it as wall-clock time.
+ */
+function toLocalString(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const h = pad(d.getHours());
+  const min = pad(d.getMinutes());
+  return `${y}-${m}-${day}T${h}:${min}:00.000`;
+}
+
+function toLocalStringRequired(iso: string): string {
+  return toLocalString(iso) || "";
+}
+
 // cloneLocation: small helper to copy a location draft safely
 function cloneLocation(loc: EventLocationDraft): EventLocationDraft {
   if (loc === null) return null;
@@ -226,10 +248,10 @@ export function useProductionEvents(): ProductionFormStep<
 
         return {
           id: event.id,
-          starttime: event.starttime,
-          endtime: event.endtime,
-          doors_at: event.doors_at,
-          intermission_at: event.intermission_at,
+          starttime: toLocalStringRequired(event.starttime),
+          endtime: toLocalString(event.endtime),
+          doors_at: toLocalString(event.doors_at),
+          intermission_at: toLocalString(event.intermission_at),
           location: loc,
           prices,
         };

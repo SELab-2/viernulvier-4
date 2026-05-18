@@ -3,10 +3,10 @@ import { z } from "zod";
 // Base Event object.
 export const EventSchema = z.object({
   id: z.number(),
-  starttime: z.iso.datetime(),
-  endtime: z.iso.datetime().nullable(),
-  doors_at: z.iso.datetime().nullable(),
-  intermission_at: z.iso.datetime().nullable(),
+  starttime: z.iso.datetime({ local: true }),
+  endtime: z.iso.datetime({ local: true }).nullable(),
+  doors_at: z.iso.datetime({ local: true }).nullable(),
+  intermission_at: z.iso.datetime({ local: true }).nullable(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   production_id: z.number(),

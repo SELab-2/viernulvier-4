@@ -130,7 +130,10 @@ function eventLabel(event: ActiveEventDraft, position: number): string {
     return t("admin-productions.events.newEvent") + ` ${position}`;
   }
   try {
-    return new Date(start).toLocaleString("nl-BE", {
+    const d = new Date(start);
+    if (isNaN(d.getTime())) return start;
+
+    return d.toLocaleString("nl-BE", {
       weekday: "short",
       day: "numeric",
       month: "short",

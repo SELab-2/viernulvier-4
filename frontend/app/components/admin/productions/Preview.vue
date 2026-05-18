@@ -197,13 +197,16 @@ watch(previewLang, () => {
 function formatDatetime(dt: string | null): string {
   if (!dt) return "—";
   try {
+    const d = new Date(dt);
+    if (isNaN(d.getTime())) return dt;
+
     return new Intl.DateTimeFormat(
       previewLang.value === "nl" ? "nl-BE" : "en-GB",
       {
         dateStyle: "medium",
         timeStyle: "short",
       },
-    ).format(new Date(dt));
+    ).format(d);
   } catch {
     return dt;
   }

@@ -212,18 +212,28 @@ const isNewLocation = computed(() => props.event.location?.type === "new");
 
 function toDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
-  return iso.slice(0, 16);
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const h = pad(d.getHours());
+  const min = pad(d.getMinutes());
+  return `${y}-${m}-${day}T${h}:${min}`;
 }
 
 function fromDatetimeLocal(val: string): string | null {
   if (!val) return null;
-  return `${val}:00.000Z`;
+  // Send as the literal local time string without 'Z' or offset.
+  // The backend schema now uses { local: true } to accept this.
+  return `${val}:00.000`;
 }
 
 function fromDatetimeLocalRequired(val: string): string {
   if (!val) return "";
-  if (val.endsWith("Z")) return val;
-  return `${val}:00.000Z`;
+  return `${val}:00.000`;
 }
 </script>
 
