@@ -348,7 +348,14 @@ async function deleteGallery(
               />
             </span>
           </button>
-
+          <!-- CSV imports -->
+          <NuxtLink
+            :to="ROUTES.admin.productions.csvImports"
+            class="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg bg-secondary border-2 border-secondary text-secondary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-secondary transition"
+          >
+            <FileText :size="15" />
+            {{ t("admin.csvImport.label") }}
+          </NuxtLink>
           <!-- New production -->
           <NuxtLink
             :to="ROUTES.admin.productions.create"
