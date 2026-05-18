@@ -8,12 +8,11 @@
     Shows only clicked category when clicked, default on first category.
 -->
 <script setup lang="ts">
-import { ChevronDown, ChevronUp } from "lucide-vue-next";
 import { PrintTypeValues, type PrintType } from "@repo/common";
 import { useI18n } from "vue-i18n";
 import { usePrintView } from "~/composables/media/usePrintView";
 const { t } = useI18n();
-const { fetchSuggestions } = usePrintView();
+const { searchQuery, fetchSuggestions } = usePrintView();
 
 defineProps<{
   titles?: string[];
@@ -24,7 +23,6 @@ const emit = defineEmits<{
   (e: "update:types", value: PrintType | null): void;
 }>();
 
-const searchQuery = ref("");
 const filterOpen = ref(false); // Checks if filter panel is open or not.
 const activeType = ref<PrintType | null>(null); // Current selected print-type.
 

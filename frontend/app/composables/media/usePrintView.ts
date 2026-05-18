@@ -6,7 +6,7 @@ import { ref } from "vue";
 
 import type { PrintItemView, PrintType } from "@repo/common";
 import { usePrintApi } from "./usePrintApi";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { SearchSuggestion } from "~/types/Search";
 
 // Filters
 const searchQuery = ref("");

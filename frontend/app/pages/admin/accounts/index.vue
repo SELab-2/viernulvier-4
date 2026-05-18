@@ -134,8 +134,8 @@ onMounted(async () => {
     :title="t('accounts.title')"
     :description="t('accounts.headerDescription')"
   />
-  <section class="page-container min-h-screen space-y-4 py-12">
-    <div class="space-y-4">
+  <section class="bg-background w-full">
+    <div class="page-container min-h-screen space-y-4 py-12">
       <AdminAccountListView
         :accounts="accounts"
         @delete="handleDeleteAccount"

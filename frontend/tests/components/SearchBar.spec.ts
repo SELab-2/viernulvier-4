@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
-import SearchBar, {
-  SearchSuggestion,
-} from "../../app/components/SearchBar.vue";
+import SearchBar from "../../app/components/SearchBar.vue";
+import type { SearchSuggestion } from "../../app/types/Search";
 import { createI18n } from "vue-i18n";
 
 vi.useFakeTimers();

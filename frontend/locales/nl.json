@@ -1,4 +1,9 @@
 {
+  "english": "EN",
+  "dutch": "NL",
+  "home": {
+    "title": "Doorzoek het archief"
+  },
   "nav": {
     "home": "home",
     "archive": "archief",
@@ -81,6 +86,7 @@
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
     "sortLabel": "Sorteer",
+    "relatedProductions": "Gerelateerde producties",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -159,7 +165,13 @@
     "credits": "Credits",
     "doors": "deuren open",
     "break": "pauze",
-    "gallery": "galerij"
+    "prints": "drukwerk",
+    "gallery": "galerij",
+    "gallery_nav": {
+      "prev": "Vorige afbeelding",
+      "next": "Volgende afbeelding",
+      "go_to_slide": "Ga naar dia {slide}"
+    }
   },
   "general": {
     "back": "Terug",
@@ -211,7 +223,10 @@
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
   "series": {
-    "noProductions": "Deze reeks bevat geen producties."
+    "header_title": "Reeksen",
+    "header_subtitle": "Ontdek samengebundelde reeksen van producties uit het viernulvier archief.",
+    "noProductions": "Deze reeks bevat geen producties.",
+    "noSeries": "Geen reeksen"
   },
   "prints": {
     "types": {
@@ -382,6 +397,36 @@
         "prices": "prijzen"
       }
     },
+    "dashboard": {
+      "welcome": "Welkom terug",
+      "overview": "Overzicht",
+      "quickLinks": "Snelkoppelingen",
+      "productions": "Producties",
+      "stories": "Verhalen",
+      "events": "Evenementen",
+      "prints": "Drukwerk",
+      "series": "Series",
+      "tags": "Tags",
+      "accounts": "Accounts",
+      "changePassword": "Wachtwoord wijzigen",
+      "changePasswordHint": "Werk het wachtwoord van je admin-account bij",
+      "newPassword": "Nieuw wachtwoord",
+      "newPasswordPlaceholder": "Minimaal 8 tekens",
+      "confirmPassword": "Bevestig nieuw wachtwoord",
+      "confirmPasswordPlaceholder": "Herhaal nieuw wachtwoord",
+      "updatePassword": "Wachtwoord bijwerken",
+      "updating": "Bijwerken…",
+      "passwordSuccess": "Wachtwoord succesvol bijgewerkt.",
+      "passwordTooShort": "Nieuw wachtwoord moet minimaal 8 tekens bevatten.",
+      "notAuthenticated": "Niet ingelogd.",
+      "productionsDesc": "Producties bekijken en bewerken",
+      "storiesDesc": "Blogberichten aanmaken en beheren",
+      "eventsDesc": "Evenementen bekijken en configureren",
+      "printsDesc": "Drukwerk uploaden en beheren",
+      "seriesDesc": "De publieke series-archief bekijken",
+      "tagsDesc": "Tag-metadata bekijken en beheren",
+      "accountsDesc": "Admin-accounts beheren"
+    },
     "csvImport": {
       "title": "CSV-importtools voor {target}",
       "description": "Gebuik deze tools om {target} in bulk te importeren vanuit CSV-bestanden.",
@@ -424,6 +469,9 @@
     }
   },
   "admin-productions": {
+    "deleteError": "De productie kon niet verwijderd worden.",
+    "deleteSuccess": "Productie \"{production}\" verwijderd.",
+    "deleteConfirm": "Weet je zeker dat je \"{production}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "header_title": "Producties",
     "new": "Nieuwe productie",
     "editTags": "Tags bewerken",
@@ -470,7 +518,12 @@
       "typeToSearch": "Typ om locaties te zoeken...",
       "locationPlaceholder": "Zoek of creëer een locatie...",
       "noDateYet": "Nog geen datum ingesteld",
-      "empty": "Nog geen evenementen"
+      "empty": "Nog geen evenementen",
+      "prices": {
+        "title": "Prijzen",
+        "empty": "Nog geen prijzen",
+        "add": "Nieuwe prijs"
+      }
     },
     "media": {
       "title": "Titel",
@@ -490,7 +543,12 @@
       "carouselHint": "Wordt gebruikt als verzameling van extra foto’s.",
       "carouselItem": "Carrouselafbeeldingen",
       "noCarousel": "Nog geen Carrouselafbeeldingen toegevoegd",
-      "fallbackHint": "Valt terug op NL"
+      "fallbackHint": "Valt terug op NL",
+      "prints": "Drukwerk",
+      "printsHint": "Koppel bestaand drukwerk aan deze productie",
+      "searchPrints": "Zoek drukwerk op titel...",
+      "noPrintsFound": "Geen drukwerk gevonden",
+      "searching": "Zoeken..."
     },
     "tags": {
       "available": "Beschikbare tags",

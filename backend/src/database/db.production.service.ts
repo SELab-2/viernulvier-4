@@ -137,6 +137,29 @@ export class ProductionDatabaseService {
       productionPrefix,
     );
 
+    // Filter by blog to get all productions that contain a certain blog.
+    if (productionFilters.blog_id) {
+      conditions.push(
+        `EXISTS (
+          SELECT 1 FROM production_blogs pb
+          WHERE pb.production_id = p.id 
+          AND pb.blog_id = ${param(productionFilters.blog_id)}
+        )`,
+      );
+    }
+
+    // Filter to get all productions linked to a gallery that contains a specific print item.
+    if (productionFilters.print_id) {
+      conditions.push(
+        `EXISTS (
+          SELECT 1 FROM production_media_gallery pmg
+          JOIN print_item_media_gallery pimg ON pimg.media_gallery_id = pmg.gallery_id
+          WHERE pmg.production_id = p.id 
+          AND pimg.print_item_id = ${param(productionFilters.print_id)}
+        )`,
+      );
+    }
+
     // Filter by either artist or title. The trgm extension in psql
     if (productionFilters.titelOrArtist) {
       const searchTerm = productionFilters.titelOrArtist;

@@ -11,6 +11,9 @@ import type {
   ExistingEventDraft,
   EventLocationDraft,
   ExistingLocation,
+  NewPriceDraft,
+  ExistingPriceDraft,
+  PriceDraft,
 } from "~/composables/productions/steps/productionEvents";
 
 type ActiveEventDraft =
@@ -146,6 +149,57 @@ function updateOptionalField(
   value: string | null,
 ) {
   emit("update", { ...props.event, [field]: value });
+}
+
+const activePrices = computed(() => {
+  return (props.event.prices || []).filter(
+    (p) => p.kind === "new" || !p.deleted,
+  );
+});
+
+function addPrice() {
+  const newPrice: NewPriceDraft = {
+    kind: "new",
+    tempId: Math.random().toString(36).slice(2),
+    name: { nl: "", en: "" },
+    price: 0,
+  };
+  emit("update", {
+    ...props.event,
+    prices: [...(props.event.prices || []), newPrice],
+  });
+}
+
+function updatePrice(index: number, field: "name" | "price", value: any) {
+  const updatedPrices = [...(props.event.prices || [])];
+  const activePrice = activePrices.value[index];
+  const realIndex = updatedPrices.findIndex((p) => p === activePrice);
+
+  if (realIndex > -1) {
+    updatedPrices[realIndex] = {
+      ...updatedPrices[realIndex],
+      [field]: value,
+    } as PriceDraft;
+    emit("update", { ...props.event, prices: updatedPrices });
+  }
+}
+
+function removePrice(index: number) {
+  const updatedPrices = [...(props.event.prices || [])];
+  const activePrice = activePrices.value[index];
+  const realIndex = updatedPrices.findIndex((p) => p === activePrice);
+
+  if (realIndex > -1) {
+    if (updatedPrices[realIndex]?.kind === "existing") {
+      updatedPrices[realIndex] = {
+        ...updatedPrices[realIndex],
+        deleted: true,
+      } as ExistingPriceDraft;
+    } else {
+      updatedPrices.splice(realIndex, 1);
+    }
+    emit("update", { ...props.event, prices: updatedPrices });
+  }
 }
 
 const locationDisplay = computed(() => {
@@ -403,6 +457,114 @@ function fromDatetimeLocalRequired(val: string): string {
             </div>
           </Transition>
         </Teleport>
+      </div>
+    </div>
+
+    <div class="border-t border-border pt-5 mt-5">
+      <div class="flex items-center justify-between mb-3">
+        <label
+          class="block text-[9px] font-black uppercase tracking-widest text-muted-foreground"
+        >
+          {{ t("admin-productions.events.prices.title") }}
+        </label>
+        <button
+          type="button"
+          class="text-[10px] font-bold uppercase text-accent hover:underline"
+          @click="addPrice"
+        >
+          + {{ t("admin-productions.events.prices.add") }}
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <div
+          v-for="(price, i) in activePrices"
+          :key="price.kind === 'existing' ? price.id : price.tempId"
+          class="flex flex-col gap-2 sm:flex-row sm:items-center"
+        >
+          <div class="relative flex-1">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-muted-foreground pointer-events-none"
+              >{{ t("dutch") }}</span
+            >
+            <input
+              type="text"
+              :value="price.name.nl"
+              :placeholder="
+                t(
+                  'admin-productions.events.priceNamePlaceholderNl',
+                  'Standaard',
+                )
+              "
+              class="h-9 w-full rounded-md border border-border bg-background pl-8 pr-3 text-sm focus:border-foreground focus:outline-none"
+              @input="
+                updatePrice(i, 'name', {
+                  ...price.name,
+                  nl: ($event.target as HTMLInputElement).value,
+                })
+              "
+            />
+          </div>
+
+          <div class="relative flex-1">
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-muted-foreground pointer-events-none"
+              >{{ t("english") }}</span
+            >
+            <input
+              type="text"
+              :value="price.name.en || ''"
+              :placeholder="
+                t(
+                  'admin-productions.events.priceNamePlaceholderEn',
+                  'Standard (Optional)',
+                )
+              "
+              class="h-9 w-full rounded-md border border-border bg-background pl-8 pr-3 text-sm focus:border-foreground focus:outline-none"
+              @input="
+                updatePrice(i, 'name', {
+                  ...price.name,
+                  en: ($event.target as HTMLInputElement).value || null,
+                })
+              "
+            />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="relative w-24">
+              <span
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm pointer-events-none"
+                >€</span
+              >
+              <input
+                type="number"
+                step="0.01"
+                :value="price.price"
+                class="h-9 w-full rounded-md border border-border bg-background pl-7 pr-3 text-sm focus:border-foreground focus:outline-none"
+                @input="
+                  updatePrice(
+                    i,
+                    'price',
+                    parseFloat(($event.target as HTMLInputElement).value),
+                  )
+                "
+              />
+            </div>
+            <button
+              type="button"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-action-red-border hover:bg-action-red-hover hover:text-action-red-icon"
+              @click="removePrice(i)"
+            >
+              <X :size="14" stroke-width="2.5" />
+            </button>
+          </div>
+        </div>
+        <p
+          v-if="activePrices.length === 0"
+          class="text-[10px] text-muted-foreground italic"
+        >
+          {{ t("admin-productions.events.prices.empty") }}
+        </p>
       </div>
     </div>
   </div>

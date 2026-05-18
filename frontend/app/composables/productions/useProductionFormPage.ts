@@ -12,7 +12,7 @@ import type {
   ItemUpdate,
   ItemDelete,
 } from "~/composables/productions/steps/productionMedia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useGalleryApi } from "~/composables/media/useGalleryApi";
 import { useItemApi } from "~/composables/media/useItemApi";
 import { useCropApi } from "~/composables/media/useCropApi";
@@ -20,6 +20,7 @@ import { useStorageApi } from "~/composables/media/useStorageApi";
 import { useProductionSeries } from "~/composables/productions/steps/productionSeries";
 import { useSeriesApi } from "~/composables/useSeriesApi";
 import type { LocalizedInput } from "~/composables/productions/steps/productionSeries";
+import { ROUTES } from "~/utils/routes";
 
 export type ProductionFormMode = "create" | "edit";
 
@@ -30,6 +31,7 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   const tagApi = useTagApi();
   const locationApi = useLocationApi();
   const eventApi = useEventApi();
+  const priceApi = usePriceApi();
   const galleryApi = useGalleryApi();
   const itemApi = useItemApi();
   const cropApi = useCropApi();
@@ -81,6 +83,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       type: "default",
     });
     if (!res.data) throw new Error("Failed to create gallery");
+    await productionApi.linkMedia(productionId, res.data.id);
+    return res.data.id;
+  }
+
+  async function ensurePrintGallery(
+    productionId: number,
+    existingGalleryId: number | null,
+  ): Promise<number> {
+    if (existingGalleryId !== null) return existingGalleryId;
+
+    const res = await galleryApi.create({
+      name: `production-${productionId}-prints`,
+      type: "prints",
+    });
+    if (!res.data) throw new Error("Failed to create print gallery");
     await productionApi.linkMedia(productionId, res.data.id);
     return res.data.id;
   }
@@ -237,6 +254,21 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       if (locationId !== null) {
         await eventApi.linkLocation(created.data.id, locationId);
       }
+
+      // Create the price and link it to the event.
+      for (const price of event.pricesToCreate) {
+        const resp = await priceApi.create({
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+
+        if (resp.data?.id) {
+          await eventApi.linkPrice(created.data.id, resp.data.id);
+        }
+      }
     } catch (err: unknown) {
       let cause: string;
       if (err instanceof Error) cause = err.message;
@@ -285,6 +317,13 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         await persistItemCreate(item, galleryId, productionId);
       }
     }
+
+    if (mediaPayload.printsToLink.length > 0) {
+      const printGalleryId = await ensurePrintGallery(productionId, null);
+      for (const printId of mediaPayload.printsToLink) {
+        await galleryApi.linkPrintToGallery(printGalleryId, printId);
+      }
+    }
   }
 
   async function handleMediaEdit(
@@ -296,20 +335,41 @@ export function useProductionFormPage(mode: ProductionFormMode) {
       mediaPayload.itemsToUpdate.length > 0 ||
       mediaPayload.itemsToDelete.length > 0;
 
-    if (!hasMediaChanges) return;
+    if (hasMediaChanges) {
+      // Deletions first
+      for (const item of mediaPayload.itemsToDelete) {
+        await persistItemDelete(item);
+      }
 
-    // Deletions first
-    for (const item of mediaPayload.itemsToDelete) {
-      await persistItemDelete(item);
+      const galleryId = await ensureGallery(
+        productionId,
+        mediaPayload.galleryId,
+      );
+
+      for (const item of mediaPayload.itemsToCreate) {
+        await persistItemCreate(item, galleryId, productionId);
+      }
+      for (const item of mediaPayload.itemsToUpdate) {
+        await persistItemUpdate(item, productionId);
+      }
     }
 
-    const galleryId = await ensureGallery(productionId, mediaPayload.galleryId);
+    const hasPrintChanges =
+      mediaPayload.printsToLink.length > 0 ||
+      mediaPayload.printsToUnlink.length > 0;
 
-    for (const item of mediaPayload.itemsToCreate) {
-      await persistItemCreate(item, galleryId, productionId);
-    }
-    for (const item of mediaPayload.itemsToUpdate) {
-      await persistItemUpdate(item, productionId);
+    if (hasPrintChanges) {
+      const printGalleryId = await ensurePrintGallery(
+        productionId,
+        mediaPayload.printGalleryId,
+      );
+
+      for (const printId of mediaPayload.printsToLink) {
+        await galleryApi.linkPrintToGallery(printGalleryId, printId);
+      }
+      for (const printId of mediaPayload.printsToUnlink) {
+        await galleryApi.unlinkPrintFromGallery(printGalleryId, printId);
+      }
     }
   }
 
@@ -359,6 +419,35 @@ export function useProductionFormPage(mode: ProductionFormMode) {
         );
         if (locationId !== null) {
           await eventApi.linkLocation(event.id, locationId);
+        }
+      }
+
+      // Remove the prices that should be deleted.
+      for (const priceId of event.pricesToDelete) {
+        await priceApi.remove(priceId);
+      }
+
+      // Modify the prices that should be modified.
+      for (const price of event.pricesToUpdate) {
+        await priceApi.modify(price.id, {
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+      }
+      for (const price of event.pricesToCreate) {
+        const resp = await priceApi.create({
+          price: price.price,
+          name: {
+            en: price.name.en ?? price.name.nl, // Fallback to the dutch version.
+            nl: price.name.nl,
+          },
+        });
+
+        if (resp.data?.id) {
+          await eventApi.linkPrice(event.id, resp.data.id);
         }
       }
     }

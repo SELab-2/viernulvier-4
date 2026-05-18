@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref } from "vue";
+import { computed } from "vue";
 import { ChevronLeft } from "lucide-vue-next";
 import type { ProductionView, TagView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
@@ -166,49 +166,17 @@ const isValid = (val: any) => {
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
-
-const fullDescription = computed(
-  () => cleanText(production.value?.description1) || "",
-);
-const isExpanded = ref(false);
-const showReadMoreButton = ref(false);
-const descriptionRef = ref<HTMLElement | null>(null);
-
-const isExpanded2 = ref(false);
-const showReadMoreButton2 = ref(false);
-const description2Ref = ref<HTMLElement | null>(null);
-
-const checkOverflow = () => {
-  if (descriptionRef.value) {
-    showReadMoreButton.value =
-      descriptionRef.value.scrollHeight > descriptionRef.value.clientHeight;
-  }
-  if (description2Ref.value) {
-    showReadMoreButton2.value =
-      description2Ref.value.scrollHeight > description2Ref.value.clientHeight;
-  }
-};
-
-let observer: ResizeObserver | null = null;
-
-onMounted(async () => {
-  await nextTick();
-  observer = new ResizeObserver(() => checkOverflow());
-
-  if (descriptionRef.value) observer.observe(descriptionRef.value);
-  if (description2Ref.value) observer.observe(description2Ref.value);
-});
-
-onBeforeUnmount(() => {
-  observer?.disconnect();
-});
 </script>
 
 <template>
+  <!-- Loading skeleton-->
+  <ProductionSkeleton v-if="status === 'pending'" />
+
   <main
-    v-if="production"
+    v-else-if="production"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
+    <!-- Hero -->
     <section
       :class="{ 'image-overlay text-white': headerCrop }"
       class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
@@ -294,31 +262,15 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <div
-            ref="descriptionRef"
-            :class="[
-              isExpanded
-                ? 'line-clamp-none'
-                : 'line-clamp-[6] md:line-clamp-[8]',
-              showReadMoreButton && !isExpanded ? 'should-fade' : '',
-            ]"
-            class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200 transition-all duration-500"
-            v-html="fullDescription"
-          ></div>
-
-          <button
-            v-if="showReadMoreButton || isExpanded"
-            class="mt-6 mb-4 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
-            @click="isExpanded = !isExpanded"
-          >
-            {{ isExpanded ? t("general.readLess") : t("general.readMore") }}
-          </button>
+          <ProductionDescription
+            :html-content="cleanText(production.description1)"
+          />
         </div>
 
         <div class="mt-12 mb-16">
-          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+          <h2 class="subtitle mb-4">
             {{ t("production.events") }}
-          </h1>
+          </h2>
           <ProductionEventTable
             v-if="events && events.length > 0"
             :events="events"
@@ -328,42 +280,35 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div v-if="isValid(production.description2)" class="mb-16">
-          <div
-            ref="description2Ref"
-            :class="[
-              isExpanded2 ? 'line-clamp-none' : 'line-clamp-[6]',
-              showReadMoreButton2 && !isExpanded2 ? 'should-fade' : '',
-            ]"
-            class="description-content p-8 bg-gray-100 dark:bg-white/5 border-l-2 border-gray-200 dark:border-gray-700 italic opacity-80 text-lg lg:text-xl rounded-2xl transition-all duration-500"
-            v-html="cleanText(production.description2)"
-          ></div>
-
-          <button
-            v-if="showReadMoreButton2 || isExpanded2"
-            class="mt-4 ml-8 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
-            @click="isExpanded2 = !isExpanded2"
-          >
-            {{ isExpanded2 ? t("general.readLess") : t("general.readMore") }}
-          </button>
-        </div>
+        <ProductionDescription
+          v-if="isValid(production.description2)"
+          :html-content="cleanText(production.description2)"
+          variant="boxed"
+          class="mb-16"
+        />
 
         <div v-if="stories && stories.length > 0" class="my-16">
-          <h1 class="text-[16px] uppercase font-black mb-6 tracking-widest">
+          <h2 class="subtitle mb-4">
             {{ t("production.stories") }}
-          </h1>
+          </h2>
           <ProductionStoryListView :stories="stories" />
         </div>
 
-        <ProductionGallery
-          v-if="carouselImages.length > 0"
-          :images="carouselImages"
-          :production-id="production.id"
-        />
+        <ProductionPrints v-if="productionId" :production-id="productionId" />
+
+        <div v-if="carouselImages && carouselImages.length > 0" class="my-16">
+          <h2 class="subtitle mb-4">
+            {{ t("production.gallery") }}
+          </h2>
+          <ProductionGallery
+            :images="carouselImages"
+            :production-id="production.id"
+          />
+        </div>
 
         <div
           v-if="isValid(production.credits)"
-          class="pt-12 flex flex-col items-center"
+          class="flex flex-col items-center"
         >
           <div class="max-w-2xl text-center">
             <h4
@@ -383,26 +328,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* links in description */
-.description-content :deep(a) {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.description-content :deep(a:hover) {
-  opacity: 0.7;
-}
-
-.should-fade {
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-}
-
-.line-clamp-none {
-  mask-image: none !important;
-  -webkit-mask-image: none !important;
-}
-
 .image-overlay::after {
   content: "";
   position: absolute;

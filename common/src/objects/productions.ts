@@ -62,6 +62,11 @@ export const FilterProductionSchema = z.object({
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
 
+  // This will return all productions that are tied to the blog.
+  blog_id: z.coerce.number().optional(),
+  // This will return all productions that are tied to a print.
+  print_id: z.coerce.number().optional(),
+
   // Toggle for the backend to treat the request as a suggestion.
   is_suggestion: QueryBoolean.default(false),
 });

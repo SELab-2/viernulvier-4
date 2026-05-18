@@ -363,5 +363,30 @@ function toggleCollapse(index: number) {
         </p>
       </div>
     </div>
+
+    <!-- ─── Prints Section ─────────────────────────────────────────────────── -->
+    <div class="mt-8 rounded-xl border border-border bg-card">
+      <div
+        class="flex items-center justify-between border-b border-border px-6 py-4"
+      >
+        <div>
+          <p
+            class="text-[11px] font-black uppercase tracking-widest text-foreground"
+          >
+            {{ t("admin-productions.media.prints") }}
+          </p>
+          <p class="mt-0.5 text-[10px] text-muted-foreground">
+            {{ t("admin-productions.media.printsHint") }}
+          </p>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <AdminProductionsPrintSelector
+          v-model="modelValue.prints"
+          class="w-full"
+        />
+      </div>
+    </div>
   </div>
 </template>

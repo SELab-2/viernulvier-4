@@ -31,7 +31,7 @@ Table events {
   id int [pk, increment]
   titel jsonb
   starttime timestamp [not null]
-  endtime timestamp [not null]
+  endtime timestamp
   doors_at timestamp
   intermission_at timestamp
   created_at timestamp [not null, default: `now()`]
