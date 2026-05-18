@@ -81,6 +81,7 @@ async function fetchOldestDate() {
         ? (evResp.data as any)
         : [];
 
+    // Extract all timestamps and find earliest
     const times = events
       .flatMap((e) => [e.starttime, e.endtime])
       .filter(Boolean)
