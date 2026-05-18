@@ -29,6 +29,9 @@ const inputRef = ref<HTMLInputElement | null>(null);
 const isUploading = ref(false);
 
 const targetLabel = computed(() => t(`admin.parser.targets.${props.target}`));
+const displayTargetLabel = computed(
+  () => targetLabel.value.charAt(0).toUpperCase() + targetLabel.value.slice(1),
+);
 const buttonLabel = computed(() =>
   t("admin.parser.uploadCsv", {
     target: targetLabel.value,
@@ -132,10 +135,10 @@ async function handleFileChange(event: Event) {
           {{ t("admin.parser.title") }}
         </p>
         <h2 class="text-lg font-bold text-card-foreground">
-          {{ targetLabel }}
+          {{ displayTargetLabel }}
         </h2>
         <p class="text-sm text-muted-foreground">
-          {{ t("admin.parser.description") }}
+          {{ t("admin.parser.description", { target: targetLabel }) }}
         </p>
       </div>
 
