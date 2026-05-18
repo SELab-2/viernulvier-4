@@ -93,7 +93,7 @@ const emit = defineEmits<{
 
             <AdminDeleteButton
               label="Delete production"
-              @click.stop="emit('delete', props.productionView)"
+              @click="emit('delete', props.productionView)"
             />
           </template>
         </div>

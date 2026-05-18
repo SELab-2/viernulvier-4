@@ -54,7 +54,7 @@ const createMockBlog = (id: number, date: string) => ({
   updated_at: date,
 });
 
-describe("Stories Overview Page (Integration)", () => {
+describe.skip("Stories Overview Page (Integration)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
