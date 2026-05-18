@@ -98,7 +98,7 @@ defineExpose({ clear });
     </label>
 
     <!-- SearchBar -->
-    <div class="-mx-4 h-12">
+    <div class="flex-1 min-w-0 h-12">
       <SearchBar
         ref="searchBarRef"
         v-model="searchQuery"
