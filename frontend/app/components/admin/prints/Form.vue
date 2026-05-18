@@ -257,32 +257,44 @@ onMounted(async () => {
           />
         </div>
 
-        <!-- Create form -->
-        <FormBaseForm
-          v-else-if="mode === 'create'"
-          :fields="fields"
-          :reset-label="t('prints.form.reset')"
-          @submit="handleSubmit"
-        />
+        <div
+          v-else
+          class="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-8 items-start"
+        >
+          <div class="space-y-6">
+            <!-- Create form -->
+            <FormBaseForm
+              v-if="mode === 'create'"
+              :fields="fields"
+              :reset-label="t('prints.form.reset')"
+              @submit="handleSubmit"
+            />
 
-        <!-- Edit form -->
-        <FormBaseForm
-          v-else-if="mode === 'edit' && print"
-          :fields="fields"
-          :submit-label="t('prints.form.edit')"
-          :reset-label="t('prints.form.reset')"
-          @submit="handleSubmit"
-          :initial-values="{
-            titel_nl: titel?.nl,
-            titel_en: titel?.en,
-            description_nl: description?.nl,
-            description_en: description?.en,
-            print_type: print.print_type,
-          }"
-        />
+            <!-- Edit form -->
+            <FormBaseForm
+              v-else-if="mode === 'edit' && print"
+              :fields="fields"
+              :submit-label="t('prints.form.edit')"
+              :reset-label="t('prints.form.reset')"
+              @submit="handleSubmit"
+              :initial-values="{
+                titel_nl: titel?.nl,
+                titel_en: titel?.en,
+                description_nl: description?.nl,
+                description_en: description?.en,
+                print_type: print.print_type,
+              }"
+            />
+          </div>
+
+          <!-- Production Linker (Step 1.5 in blog logic, here part of main form) -->
+          <div class="space-y-6 xl:sticky xl:top-24">
+            <AdminSharedProductionLinker :entity-id="printId" type="print" />
+          </div>
+        </div>
 
         <div
-          v-else-if="mode === 'edit' && !print && !fetching"
+          v-if="mode === 'edit' && !print && !fetching"
           class="py-16 text-center text-muted-foreground"
         >
           {{ t("admin.prints.notFound") }}
