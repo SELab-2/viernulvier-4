@@ -5,6 +5,18 @@ import EventListView from "../../../app/components/event/EventListView.vue";
 import type { LocationView, PriceView } from "@repo/common";
 import type { EventWithDetails } from "../../../app/types/EventWithDetails";
 
+// Mock history to prevent ReferenceError in vue-router
+if (typeof history === "undefined") {
+  Object.defineProperty(global, "history", {
+    value: {
+      pushState: vi.fn(),
+      replaceState: vi.fn(),
+      state: {},
+    },
+    writable: true,
+  });
+}
+
 vi.mock("#app", async (importOriginal) => {
   const actual = await importOriginal<Record<string, any>>();
 
