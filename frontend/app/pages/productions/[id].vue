@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { computed, watch } from "vue";
-import type { ProductionView, TagView, SeriesView } from "@repo/common"; // <-- SeriesView toegevoegd
+import { ref, computed, watch } from "vue";
+import type { ProductionView, TagView, SeriesView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
-import { useSeriesApi } from "~/composables/useSeriesApi"; // <-- 1. Importeer de Series API
+import { useSeriesApi } from "~/composables/useSeriesApi";
 
 /** validation that id is only numbers */
 definePageMeta({
@@ -18,7 +18,7 @@ definePageMeta({
 const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
-const { getAll: getAllSeries } = useSeriesApi(); // <-- 2. Haal getAllSeries uit de composable
+const { getAll: getAllSeries } = useSeriesApi();
 const { getMainImageCrop, getCarouselImageCrops } = useGallery();
 const route = useRoute();
 
@@ -26,7 +26,7 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push(ROUTES.productions.base); // Fallback
+    router.push(ROUTES.productions.base);
   }
 };
 
@@ -185,7 +185,9 @@ const isValid = (val: any) => {
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
 
-const maxVisibleSeries = 3;
+// --- LOGICA VOOR HET UITKLAPPEN VAN DE SERIES ---
+const showAllSeries = ref(false);
+const maxVisibleSeries = 2;
 
 const visibleSeries = computed(() => {
   return linkedSeries.value?.slice(0, maxVisibleSeries) || [];
@@ -234,12 +236,7 @@ const hiddenSeries = computed(() => {
               v-for="serie in visibleSeries"
               :key="serie.id"
               :to="ROUTES.series.byId(serie.id)"
-              class="group flex items-center gap-1.5 backdrop-blur-md border text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm transition-all"
-              :class="
-                headerCrop
-                  ? 'bg-background/80 text-foreground border-border/40 hover:bg-background'
-                  : 'bg-foreground/5 dark:bg-white/10 text-foreground dark:text-gray-100 border-foreground/10 dark:border-white/10 hover:bg-foreground/10 dark:hover:bg-white/20'
-              "
+              class="group flex items-center gap-1.5 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm transition-colors hover:bg-background/90"
             >
               <svg
                 class="w-3 h-3 text-muted-foreground group-hover:text-accent transition-colors shrink-0"
@@ -252,7 +249,9 @@ const hiddenSeries = computed(() => {
                   d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
                 />
               </svg>
-              <span class="max-w-[120px] truncate">
+              <span
+                class="max-w-[120px] truncate transition-colors group-hover:text-accent"
+              >
                 {{
                   typeof serie.titel === "string"
                     ? serie.titel
@@ -262,55 +261,47 @@ const hiddenSeries = computed(() => {
             </NuxtLink>
           </template>
 
-          <div
-            v-if="hiddenSeries.length"
-            class="relative group/more-series inline-block"
-          >
-            <div
-              class="flex items-center gap-1 backdrop-blur-md border text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm cursor-pointer transition-all"
-              :class="
-                headerCrop
-                  ? 'bg-background/80 text-foreground border-border/40 hover:bg-background'
-                  : 'bg-foreground/5 dark:bg-white/10 text-foreground dark:text-gray-100 border-foreground/10 dark:border-white/10 hover:bg-foreground/10 dark:hover:bg-white/20'
-              "
+          <template v-if="showAllSeries && hiddenSeries.length">
+            <NuxtLink
+              v-for="serie in hiddenSeries"
+              :key="serie.id"
+              :to="ROUTES.series.byId(serie.id)"
+              class="group flex items-center gap-1.5 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm transition-colors hover:bg-background/90 animate-in fade-in zoom-in-95 duration-150"
             >
-              <span>+{{ hiddenSeries.length }}</span>
-            </div>
-
-            <div
-              class="absolute top-full left-0 hidden group-hover/more-series:flex flex-col gap-1 pt-1 z-30"
-            >
-              <div
-                class="flex flex-col gap-1 bg-background/95 backdrop-blur-md border border-border p-1.5 rounded-lg shadow-lg min-w-[140px] max-h-[200px] overflow-y-auto [scrollbar-width:thin]"
+              <svg
+                class="w-3 h-3 text-muted-foreground group-hover:text-accent transition-colors shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
               >
-                <NuxtLink
-                  v-for="serie in hiddenSeries"
-                  :key="serie.id"
-                  :to="ROUTES.series.byId(serie.id)"
-                  class="group/item flex items-center gap-1.5 text-foreground hover:text-accent text-[10px] font-semibold uppercase tracking-wider px-2 py-1.5 rounded-md hover:bg-muted transition-colors whitespace-nowrap"
-                >
-                  <svg
-                    class="w-2.5 h-2.5 text-muted-foreground shrink-0 group-hover/item:text-accent transition-colors"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2.5"
-                  >
-                    <path
-                      d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
-                    />
-                  </svg>
-                  <span class="max-w-[120px] truncate">
-                    {{
-                      typeof serie.titel === "string"
-                        ? serie.titel
-                        : serie.titel?.[locale]
-                    }}
-                  </span>
-                </NuxtLink>
-              </div>
-            </div>
-          </div>
+                <path
+                  d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"
+                />
+              </svg>
+              <span
+                class="max-w-[120px] truncate transition-colors group-hover:text-accent"
+              >
+                {{
+                  typeof serie.titel === "string"
+                    ? serie.titel
+                    : serie.titel?.[locale]
+                }}
+              </span>
+            </NuxtLink>
+          </template>
+
+          <button
+            v-if="hiddenSeries.length"
+            type="button"
+            @click="showAllSeries = !showAllSeries"
+            class="flex items-center gap-1 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm cursor-pointer transition-colors hover:bg-background/90 hover:text-accent"
+          >
+            <span v-if="!showAllSeries">+{{ hiddenSeries.length }}</span>
+            <span v-else class="transition-colors hover:text-accent"
+              >&times; minder</span
+            >
+          </button>
         </div>
       </template>
 
