@@ -2,6 +2,21 @@
   components/admin/shared/production-linker/LinkedList.vue
   ========================================================
   Scrollable list of productions linked to the entity in the current session.
+
+  The list is capped at max-h-64 (16rem) with overflow-y-auto so it stays
+  usable regardless of how many productions are linked. Each row shows:
+  - A green check badge
+  - Production title and ID
+  - A "View production" external link
+  - An "Unlink" button that fires the 'unlink' event
+
+  Props:
+  - type  What page this will be used on.
+  - productions   array of ProductionView objects currently linked
+  - unlinkingId   ID of the production currently being unlinked (shows spinner)
+
+  Emits:
+  - unlink(productionId)  user clicked the Unlink button
 -->
 
 <script setup lang="ts">
@@ -36,12 +51,17 @@ const viewProdKey = computed(() => `${baseKey.value}.viewProduction`);
       {{ t(sectionLabelKey) }}
     </p>
 
+    <!--
+      Scrollable container — max-h-64 so the list never pushes the search
+      input off-screen when many productions are linked.
+    -->
     <div class="max-h-64 overflow-y-auto space-y-1.5 pr-1 overscroll-contain">
       <div
         v-for="prod in productions"
         :key="prod.id"
         class="flex items-center gap-3 rounded-lg border border-feedback-success-border bg-feedback-success-bg px-3 py-2.5"
       >
+        <!-- Green check badge -->
         <div
           class="w-6 h-6 rounded-md bg-feedback-success-text/10 flex items-center justify-center shrink-0"
         >
@@ -56,6 +76,7 @@ const viewProdKey = computed(() => `${baseKey.value}.viewProduction`);
           </svg>
         </div>
 
+        <!-- Title and ID -->
         <div class="min-w-0 flex-1">
           <p
             class="truncate text-sm font-semibold text-foreground leading-tight"
@@ -69,7 +90,9 @@ const viewProdKey = computed(() => `${baseKey.value}.viewProduction`);
           </p>
         </div>
 
+        <!-- Actions row -->
         <div class="flex items-center gap-3 shrink-0">
+          <!-- Open the production detail page in a new tab -->
           <NuxtLink
             :to="ROUTES.productions.byId(prod.id)"
             target="_blank"
@@ -97,6 +120,7 @@ const viewProdKey = computed(() => `${baseKey.value}.viewProduction`);
             {{ t(viewProdKey) }}
           </NuxtLink>
 
+          <!-- Unlink button with spinner while in flight -->
           <button
             type="button"
             :disabled="unlinkingId === prod.id"
@@ -120,6 +144,7 @@ const viewProdKey = computed(() => `${baseKey.value}.viewProduction`);
     </div>
   </div>
 
+  <!-- Empty state when no productions are linked yet -->
   <p
     v-else
     class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground/40 text-center py-1"

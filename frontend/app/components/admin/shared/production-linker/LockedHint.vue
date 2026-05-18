@@ -2,6 +2,8 @@
   components/admin/shared/production-linker/LockedHint.vue
   =========================================================
   Shown inside the ProductionLinker card when the parent entity is not saved yet.
+
+  No props or emits needed — this is a purely presentational component.
 -->
 
 <script setup lang="ts">
@@ -22,6 +24,7 @@ const hintKey = computed(() => `${baseKey.value}.linkedProductionsHint`);
   <div
     class="flex items-start gap-3 rounded-lg border border-action-warning-border bg-action-warning-hover px-4 py-3.5"
   >
+    <!-- Lock icon to reinforce "not available yet" -->
     <div
       class="w-8 h-8 rounded-lg bg-action-warning-hover border border-action-warning-border flex items-center justify-center shrink-0 mt-0.5"
     >

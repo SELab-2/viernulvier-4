@@ -286,11 +286,7 @@ onMounted(async () => {
 
           <!-- Production Linker (Step 1.5 in blog logic, here part of main form) -->
           <div class="space-y-6 xl:sticky xl:top-24">
-            <AdminSharedProductionLinker
-              v-if="mode === 'edit' && print"
-              :entity-id="printId"
-              type="print"
-            />
+            <AdminSharedProductionLinker :entity-id="printId" type="print" />
           </div>
         </div>
 
