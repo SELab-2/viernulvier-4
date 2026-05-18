@@ -12,6 +12,8 @@ import {
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
 import { UnauthorizedException } from "@nestjs/common";
+import { InvalidCredentialsException } from "../common/exceptions";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AuthService {
@@ -94,15 +96,25 @@ export class AuthService {
     apiKey: string,
     changePassword: ChangePasswordDto,
   ): Promise<PublicAccountDto> {
-    const accountId =
-      await this.accountDbService.getAccountIdFromApiKey(apiKey);
+    const account = await this.accountDbService.getAccountIdFromApiKey(apiKey);
 
-    if (!accountId) {
-      throw new UnauthorizedException("Invalid API key");
+    // Verify whether there's actually an account.
+    if (!account) {
+      throw new UnauthorizedException("Invalid API key.");
     }
 
+    // Verify password using bcrypt (check whether the old password is correct)
+    const isValid = await bcrypt.compare(
+      account.password,
+      changePassword.oldPassword,
+    );
+    if (!isValid) {
+      throw new InvalidCredentialsException();
+    }
+
+    // Update with the new password.
     return await this.accountDbService.updateAccount({
-      id: accountId,
+      id: account.id,
       password: changePassword.password,
     });
   }
