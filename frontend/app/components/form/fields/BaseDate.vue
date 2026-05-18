@@ -13,6 +13,7 @@
  *   required
  * />
  */
+import { Calendar } from "lucide-vue-next";
 
 interface Props {
   label?: string; // label displayed above the field
@@ -43,7 +44,7 @@ const model = defineModel<string>();
         v-model="model"
         :required="required"
         :class="[
-          'px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background',
+          'px-4 bg-muted border border-border h-12 font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-accent hover:bg-muted/70 focus:border-accent focus:bg-background',
           model ? 'text-foreground' : 'text-muted-foreground',
         ]"
       />
