@@ -139,10 +139,7 @@ async function save() {
     setTimeout(() => (saveSuccess.value = false), 800);
   } catch (err) {
     console.error("Batch series save failed", err);
-    saveError.value = t(
-      "admin-productions.batchEdit.series.saveError",
-      "Something went wrong while saving. Please try again.",
-    );
+    saveError.value = t("admin-productions.batch.saveError");
   } finally {
     isSaving.value = false;
   }
@@ -157,15 +154,10 @@ async function save() {
         <p
           class="text-[10px] font-black uppercase tracking-widest text-muted-foreground"
         >
-          {{ t("admin-productions.batchEdit.series.title", "Series") }}
+          {{ t("admin-productions.batch.series.title", "Series") }}
         </p>
         <p class="text-xs text-muted-foreground mt-0.5">
-          {{
-            t(
-              "admin-productions.batchEdit.series.description",
-              "Pre-linked series are common to all selected productions. Changes apply to every production on save.",
-            )
-          }}
+          {{ t("admin-productions.batch.series.description") }}
         </p>
       </div>
 
@@ -177,7 +169,7 @@ async function save() {
           @click="resetSeriesDraft"
         >
           <RotateCcw :size="10" stroke-width="2.5" />
-          {{ t("common.reset", "Reset") }}
+          {{ t("admin.reset") }}
         </button>
 
         <!-- Save -->
@@ -200,10 +192,10 @@ async function save() {
           <Save v-else :size="10" stroke-width="2.5" />
           {{
             saveSuccess
-              ? t("common.saved", "Saved!")
+              ? t("admin.saved")
               : isSaving
-                ? t("common.saving", "Saving…")
-                : t("common.save", "Save")
+                ? t("admin.saving")
+                : t("admin.save")
           }}
         </button>
       </div>
@@ -215,11 +207,9 @@ async function save() {
       class="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted/50 rounded-lg px-3 py-2"
     >
       {{
-        t(
-          "admin-productions.batchEdit.series.commonNotice",
-          { count: selectedProductions.length },
-          `Showing series common to all ${selectedProductions.length} selected productions.`,
-        )
+        t("admin-productions.batch.series.commonNotice", {
+          count: selectedProductions.length,
+        })
       }}
     </p>
 
@@ -251,7 +241,7 @@ async function save() {
           <p
             class="text-[9px] font-black uppercase tracking-widest text-muted-foreground"
           >
-            {{ t("common.saving", "Saving…") }}
+            {{ t("admin.saving") }}
           </p>
         </div>
       </Transition>

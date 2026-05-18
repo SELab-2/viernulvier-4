@@ -461,6 +461,11 @@
         "title": "Tags",
         "description": "Pre-selected tags are shared by all selected productions. Changes apply to every production on save.",
         "commonNotice": "Showing tags common to all {count} selected productions."
+      },
+      "series": {
+        "title": "Series",
+        "description": "Pre-linked series are common to all selected productions. Changes apply to every production on save.",
+        "commonNotice": "Showing series common to all {count} selected productions."
       }
     },
     "create-title": "New production",
