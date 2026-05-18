@@ -32,9 +32,13 @@ const { getAll } = useTagApi();
 
 const availableTags = ref<TagView[]>([]);
 const isLoading = ref(true);
-const newTagInput = ref("");
+
+const newTagNL = ref("");
+const newTagEN = ref("");
+const isInputtingEN = ref(false);
 const showNewTagInput = ref(false);
-const newTagInputRef = ref<HTMLInputElement | null>(null);
+const newTagInputRefNL = ref<HTMLInputElement | null>(null);
+const newTagInputRefEN = ref<HTMLInputElement | null>(null);
 
 // ─── Fetch all available tags ─────────────────────────────────────────────────
 async function fetchTags() {
@@ -94,13 +98,25 @@ const isSelected = (id: number) =>
 // ─── Create a new tag (local-only until finish) ───────────────────────────────
 function openNewTagInput() {
   showNewTagInput.value = true;
-  nextTick(() => newTagInputRef.value?.focus());
+  isInputtingEN.value = false;
+  nextTick(() => newTagInputRefNL.value?.focus());
+}
+
+function nextStage() {
+  if (!newTagNL.value.trim()) {
+    cancelNewTag();
+    return;
+  }
+  isInputtingEN.value = true;
+  nextTick(() => newTagInputRefEN.value?.focus());
 }
 
 function confirmNewTag() {
-  const label = newTagInput.value.trim();
-  if (!label) {
-    showNewTagInput.value = false;
+  const nl = newTagNL.value.trim();
+  const en = newTagEN.value.trim(); // Optional, fallback handled in orchestrator
+
+  if (!nl) {
+    cancelNewTag();
     return;
   }
 
@@ -108,30 +124,34 @@ function confirmNewTag() {
     ...availableTags.value.map((t) => t.tag.toLowerCase()),
     ...props.selected
       .filter((t): t is NewTag => t.type === "new")
-      .map((t) => t.label.toLowerCase()),
+      .map((t) => t.label.nl.toLowerCase()),
   ];
 
-  if (!allLabels.includes(label.toLowerCase())) {
+  if (!allLabels.includes(nl.toLowerCase())) {
     emit("change", [
       ...props.selected,
-      { type: "new", label } satisfies NewTag,
+      { type: "new", label: { nl, en } } satisfies NewTag,
     ]);
   }
 
-  newTagInput.value = "";
+  newTagNL.value = "";
+  newTagEN.value = "";
+  isInputtingEN.value = false;
   showNewTagInput.value = false;
 }
 
 function cancelNewTag() {
-  newTagInput.value = "";
+  newTagNL.value = "";
+  newTagEN.value = "";
+  isInputtingEN.value = false;
   showNewTagInput.value = false;
 }
 
-function removeNewTag(label: string) {
+function removeNewTag(labelNL: string) {
   emit(
     "change",
     props.selected.filter(
-      (t): boolean => !(t.type === "new" && t.label === label),
+      (t): boolean => !(t.type === "new" && t.label.nl === labelNL),
     ),
   );
 }
@@ -192,20 +212,42 @@ const newTags = computed(() =>
           v-if="showNewTagInput"
           class="flex items-center gap-1 h-8 pl-3 pr-1 rounded-full border border-accent bg-accent/10"
         >
-          <input
-            ref="newTagInputRef"
-            v-model="newTagInput"
-            class="bg-transparent outline-none text-[9px] font-black uppercase tracking-widest text-accent w-24 placeholder:text-accent/40"
-            :placeholder="t('admin-productions.tags.newPlaceholder')"
-            @keydown.enter="confirmNewTag"
-            @keydown.escape="cancelNewTag"
-          />
-          <button
-            class="w-5 h-5 rounded-full bg-accent text-white flex items-center justify-center hover:opacity-80 transition-opacity"
-            @click="confirmNewTag"
-          >
-            <Plus :size="9" stroke-width="3" />
-          </button>
+          <template v-if="!isInputtingEN">
+            <input
+              ref="newTagInputRefNL"
+              v-model="newTagNL"
+              class="bg-transparent outline-none text-[9px] font-black uppercase tracking-widest text-accent w-24 placeholder:text-accent/40"
+              :placeholder="
+                t('admin-productions.tags.newPlaceholderNL', 'NL NAME')
+              "
+              @keydown.enter="nextStage"
+              @keydown.escape="cancelNewTag"
+            />
+            <button
+              class="w-5 h-5 rounded-full bg-accent text-white flex items-center justify-center hover:opacity-80 transition-opacity"
+              @click="nextStage"
+            >
+              <Plus :size="9" stroke-width="3" />
+            </button>
+          </template>
+          <template v-else>
+            <input
+              ref="newTagInputRefEN"
+              v-model="newTagEN"
+              class="bg-transparent outline-none text-[9px] font-black uppercase tracking-widest text-accent w-24 placeholder:text-accent/40"
+              :placeholder="
+                t('admin-productions.tags.newPlaceholderEN', 'EN (OPTIONAL)')
+              "
+              @keydown.enter="confirmNewTag"
+              @keydown.escape="cancelNewTag"
+            />
+            <button
+              class="w-5 h-5 rounded-full bg-accent text-white flex items-center justify-center hover:opacity-80 transition-opacity"
+              @click="confirmNewTag"
+            >
+              <Plus :size="9" stroke-width="3" />
+            </button>
+          </template>
           <button
             class="w-5 h-5 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:opacity-80 transition-opacity"
             @click="cancelNewTag"
@@ -225,13 +267,14 @@ const newTags = computed(() =>
         <div class="flex flex-wrap gap-2">
           <div
             v-for="tag in newTags"
-            :key="tag.label"
+            :key="tag.label.nl"
             class="h-8 pl-3 pr-2 rounded-full border border-dashed border-accent bg-accent/10 text-accent text-[9px] font-black uppercase tracking-widest flex items-center gap-2"
           >
-            {{ tag.label }}
+            {{ tag.label.nl }}
+            <span v-if="tag.label.en">/ {{ tag.label.en }}</span>
             <button
               class="w-4 h-4 rounded-full hover:bg-accent/20 flex items-center justify-center transition-colors"
-              @click="removeNewTag(tag.label)"
+              @click="removeNewTag(tag.label.nl)"
             >
               <X :size="8" stroke-width="3" />
             </button>

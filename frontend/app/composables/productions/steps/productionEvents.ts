@@ -13,7 +13,7 @@ export type ExistingLocation = {
 
 export type NewLocation = {
   type: "new";
-  label: string;
+  label: { nl: string; en: string };
 };
 
 export type EventLocationDraft = ExistingLocation | NewLocation | null;
@@ -87,8 +87,8 @@ export type EventCreatePayload = {
   intermission_at: string | null;
   /** Existing location id to link after creation. */
   linkLocationId: number | null;
-  /** Label for a brand-new location to create + link after creation. */
-  createLocation: string | null;
+  /** Localized labels for a brand-new location to create + link after creation. */
+  createLocation: { nl: string; en: string } | null;
   pricesToCreate: PriceCreatePayload[];
 };
 
@@ -103,8 +103,8 @@ export type EventUpdatePayload = {
   unlinkLocationId: number | null;
   /** Existing location id to link, or null if unchanged / removed. */
   linkLocationId: number | null;
-  /** Label for a brand-new location to create + link, or null. */
-  createLocation: string | null;
+  /** Localized labels for a brand-new location to create + link, or null. */
+  createLocation: { nl: string; en: string } | null;
   pricesToCreate: PriceCreatePayload[];
   pricesToUpdate: PriceUpdatePayload[];
   pricesToDelete: number[];
