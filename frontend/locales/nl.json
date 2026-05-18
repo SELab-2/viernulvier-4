@@ -265,7 +265,9 @@
     "pagination": "Paginering",
     "page_label": "Pagina",
     "of_pages": "van {total}",
-    "new": "Nieuw drukwerk"
+    "new": "Nieuw drukwerk",
+    "description": "omschrijving",
+    "relatedProductions": "Gerelateerde producties"
   },
   "admin": {
     "finish": "Voltooien",
