@@ -44,7 +44,7 @@ CREATE TABLE events
 (
     id              SERIAL PRIMARY KEY,
     starttime       TIMESTAMP NOT NULL,
-    endtime         TIMESTAMP NOT NULL,
+    endtime         TIMESTAMP,
     doors_at        TIMESTAMP,
     intermission_at TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT now(),
