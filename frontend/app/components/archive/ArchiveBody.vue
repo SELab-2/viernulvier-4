@@ -68,14 +68,37 @@ const { remove: removeGallery } = useGalleryApi();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
 
-const { isBatchEditMode, toggleBatchEditMode, disableBatchEditMode } =
-  useProductionBatchEdit();
+const {
+  isBatchEditMode,
+  toggleBatchEditMode,
+  disableBatchEditMode,
+  selectWholeSeries,
+  selectedCount,
+} = useProductionBatchEdit();
 
 const PAGE_SIZE = 15; // number of items per page
 
 const productions = ref<ProductionView[]>([]);
 const totalItems = ref(0);
 const error = ref<string | null>(null);
+
+async function handleSeriesSelected(seriesId: number) {
+  try {
+    await selectWholeSeries(seriesId, async (id) => {
+      const resp = await getAll({
+        productionFilters: { series_id: id as any },
+        paginationFilters: { page: 0, limit: 100, descending: true },
+        languageFilters: { lang: locale.value },
+      });
+      return (resp.data?.objects as ProductionView[]) || [];
+    });
+    showSnackbarSuccess(
+      t("admin-productions.batch.selected", { count: selectedCount.value }),
+    );
+  } catch (err) {
+    showSnackbarError("Failed to select series productions");
+  }
+}
 
 async function loadPage(page: number) {
   loading.value = true;
@@ -348,6 +371,10 @@ async function deleteGallery(
               />
             </span>
           </button>
+
+          <!-- Series Quick Select -->
+          <AdminProductionsSeriesQuickSelect @selected="handleSeriesSelected" />
+
           <!-- CSV imports -->
           <NuxtLink
             :to="ROUTES.admin.productions.csvImports"

@@ -294,6 +294,10 @@
     "saved": "Opgeslagen",
     "edit": "Bewerken",
     "delete": "Verwijderen",
+    "series": {
+      "linkedProductions": "Gekoppelde producties",
+      "linkedProductionsHint": "Zoek en koppel producties aan deze reeks."
+    },
     "blogs": {
       "new": "Nieuw Verhaal",
       "edit": "Verhaal Bewerken",

@@ -292,6 +292,10 @@
     "saved": "Saved",
     "edit": "Edit",
     "delete": "Delete",
+    "series": {
+      "linkedProductions": "Linked Productions",
+      "linkedProductionsHint": "Search and link productions to this series."
+    },
     "blogs": {
       "new": "New Story",
       "edit": "Edit Story",

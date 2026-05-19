@@ -11,12 +11,13 @@ import { useGalleryApi } from "~/composables/media/useGalleryApi";
 
 const props = defineProps<{
   entityId?: number | null;
-  type: "blog" | "print";
+  type: "blog" | "print" | "series";
 }>();
 
 const { t, locale } = useI18n();
 const { getAll, linkBlog, unlinkBlog, getPrintsGallery, linkMedia } =
   useProductionApi();
+const seriesApi = useSeriesApi();
 const galleryApi = useGalleryApi();
 
 const hasEntityId = computed(() => typeof props.entityId === "number");
@@ -35,8 +36,28 @@ const linkedProductionIds = computed(
   () => new Set(linkedProductions.value.map((p) => p.id)),
 );
 
+async function loadLinkedProductions() {
+  if (!hasEntityId.value || props.type !== "series") return;
+  searching.value = true;
+  try {
+    const resp = await seriesApi.getSeriesProductions(
+      props.entityId!,
+      locale.value as any,
+    );
+    if (resp.data) {
+      linkedProductions.value = resp.data.objects;
+    }
+  } catch (err) {
+    console.error("Failed to load linked productions:", err);
+  } finally {
+    searching.value = false;
+  }
+}
+
 const storageKey = computed(() =>
-  hasEntityId.value ? `vnv-${props.type}-linked-prods-${props.entityId}` : null,
+  hasEntityId.value && props.type !== "series"
+    ? `vnv-${props.type}-linked-prods-${props.entityId}`
+    : null,
 );
 
 function persist() {
@@ -123,7 +144,7 @@ async function handleLink(production: ProductionView) {
   try {
     if (props.type === "blog") {
       await linkBlog(production.id, props.entityId!);
-    } else {
+    } else if (props.type === "print") {
       let printGallery = await getPrintsGallery(production.id);
       if (!printGallery) {
         const res = await galleryApi.create({
@@ -135,6 +156,8 @@ async function handleLink(production: ProductionView) {
         await linkMedia(production.id, printGallery.id);
       }
       await galleryApi.linkPrintToGallery(printGallery.id, props.entityId!);
+    } else if (props.type === "series") {
+      await seriesApi.linkProductionToSeries(props.entityId!, [production.id]);
     }
     linkedProductions.value = [production, ...linkedProductions.value];
     persist();
@@ -151,7 +174,7 @@ async function handleUnlink(productionId: number) {
   try {
     if (props.type === "blog") {
       await unlinkBlog(productionId, props.entityId!);
-    } else {
+    } else if (props.type === "print") {
       const printGallery = await getPrintsGallery(productionId);
       if (printGallery) {
         await galleryApi.unlinkPrintFromGallery(
@@ -159,6 +182,8 @@ async function handleUnlink(productionId: number) {
           props.entityId!,
         );
       }
+    } else if (props.type === "series") {
+      await seriesApi.unlinkProductionFromSeries(props.entityId!, productionId);
     }
     linkedProductions.value = linkedProductions.value.filter(
       (p) => p.id !== productionId,
@@ -171,11 +196,16 @@ async function handleUnlink(productionId: number) {
   }
 }
 
-onMounted(restoreFromStorage);
+onMounted(() => {
+  restoreFromStorage();
+  loadLinkedProductions();
+});
 
-const baseKey = computed(() =>
-  props.type === "blog" ? "admin.blogs" : "prints",
-);
+const baseKey = computed(() => {
+  if (props.type === "blog") return "admin.blogs";
+  if (props.type === "series") return "admin.series";
+  return "prints";
+});
 const titleKey = computed(() => `${baseKey.value}.linkedProductions`);
 const subtitleKey = computed(() => `${baseKey.value}.linkedProductionsHint`);
 </script>
