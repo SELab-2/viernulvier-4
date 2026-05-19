@@ -361,7 +361,7 @@ const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ t("general.filters") }}</span>
+          <span class="hidden sm:inline">{{ t("general.filters") }}</span>
         </button>
 
         <!-- ×-badge: one-click clear without opening the panel -->

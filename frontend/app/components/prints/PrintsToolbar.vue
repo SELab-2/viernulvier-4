@@ -76,7 +76,7 @@ function selectType(type: PrintType | null) {
               stroke-linejoin="round"
             />
           </svg>
-          <span>{{ t("general.filters") }}</span>
+          <span class="hidden sm:inline">{{ t("general.filters") }}</span>
         </button>
 
         <button
