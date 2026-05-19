@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import type { ProductionView, TagView, SeriesView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
+import { X } from "lucide-vue-next";
 
 /** validation that id is only numbers */
 definePageMeta({
@@ -264,9 +265,12 @@ const hiddenSeries = computed(() => {
             class="flex items-center gap-1 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm cursor-pointer transition-colors hover:bg-background/90 hover:text-accent"
           >
             <span v-if="!showAllSeries">+{{ hiddenSeries.length }}</span>
-            <span v-else class="transition-colors hover:text-accent">
-              &times; {{ t("general.showLess") }}
-            </span>
+            <template v-else>
+              <X :size="10" stroke-width="3" class="shrink-0" />
+              <span class="transition-colors hover:text-accent">
+                {{ t("general.showLess") }}
+              </span>
+            </template>
           </button>
         </div>
       </template>
