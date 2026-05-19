@@ -2,10 +2,10 @@
 -- PostgreSQL database dump
 --
 
-\restrict 4rS0lle0YR53AmsTrQBCCS3KQRaG4kQ7dw3P4Zq8iHGpt5u14UTjPNNm2pKFRWB
+\restrict gcLJBluXMZBRcFMSdj0jMcgTYihosq3nnAuSrfV4enhVfVNmfevpQoPaDlSoDjn
 
 -- Dumped from database version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
--- Dumped by pg_dump version 18.1
+-- Dumped by pg_dump version 18.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,6 +18,20 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- Name: pg_trgm; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+
 
 --
 -- Name: ItemPositionEnum; Type: TYPE; Schema: public; Owner: selab2
@@ -37,11 +51,11 @@ ALTER TYPE public."ItemPositionEnum" OWNER TO selab2;
 
 CREATE TYPE public.crop_name AS ENUM (
     'hd_ready',
+    'hd_ready_square',
+    'hd_ready_portrait',
     'FE3_header',
-    'thumbnail',
-    'og_image',
-    'mobile',
-    'nb_ready'
+    'FE3_2by1',
+    'FE3_grid'
 );
 
 
@@ -58,6 +72,58 @@ CREATE TYPE public.gallery_type AS ENUM (
 
 
 ALTER TYPE public.gallery_type OWNER TO selab2;
+
+--
+-- Name: print_enum; Type: TYPE; Schema: public; Owner: selab2
+--
+
+CREATE TYPE public.print_enum AS ENUM (
+    'affiche',
+    'brochure',
+    'drukwerk',
+    'programma'
+);
+
+
+ALTER TYPE public.print_enum OWNER TO selab2;
+
+--
+-- Name: check_and_delete_orphan_location(); Type: FUNCTION; Schema: public; Owner: selab2
+--
+
+CREATE FUNCTION public.check_and_delete_orphan_location() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM event_locations WHERE location_id = OLD.location_id) THEN
+        DELETE FROM locations WHERE id = OLD.location_id;
+    END IF;
+
+    RETURN OLD;
+END;
+$$;
+
+
+ALTER FUNCTION public.check_and_delete_orphan_location() OWNER TO selab2;
+
+--
+-- Name: check_and_delete_orphan_tag(); Type: FUNCTION; Schema: public; Owner: selab2
+--
+
+CREATE FUNCTION public.check_and_delete_orphan_tag() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM production_tag WHERE tag_id = OLD.tag_id) THEN
+        DELETE FROM tags WHERE id = OLD.tag_id;
+    END IF;
+
+    RETURN OLD;
+END;
+$$;
+
+
+ALTER FUNCTION public.check_and_delete_orphan_tag() OWNER TO selab2;
 
 --
 -- Name: update_updated_at(); Type: FUNCTION; Schema: public; Owner: selab2
@@ -235,7 +301,7 @@ ALTER TABLE public.event_prices OWNER TO selab2;
 CREATE TABLE public.events (
     id integer NOT NULL,
     starttime timestamp without time zone NOT NULL,
-    endtime timestamp without time zone NOT NULL,
+    endtime timestamp without time zone,
     production_id integer NOT NULL,
     doors_at timestamp without time zone,
     intermission_at timestamp without time zone,
@@ -510,7 +576,8 @@ CREATE TABLE public.print_items (
     description jsonb,
     url text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    print_type public.print_enum
 );
 
 
@@ -561,6 +628,18 @@ CREATE TABLE public.production_media_gallery (
 
 
 ALTER TABLE public.production_media_gallery OWNER TO selab2;
+
+--
+-- Name: production_series; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.production_series (
+    production_id integer NOT NULL,
+    series_id integer NOT NULL
+);
+
+
+ALTER TABLE public.production_series OWNER TO selab2;
 
 --
 -- Name: production_tag; Type: TABLE; Schema: public; Owner: selab2
@@ -650,6 +729,43 @@ ALTER SEQUENCE public.scraper_dates_id_seq OWNER TO selab2;
 --
 
 ALTER SEQUENCE public.scraper_dates_id_seq OWNED BY public.scraper_dates.id;
+
+
+--
+-- Name: series; Type: TABLE; Schema: public; Owner: selab2
+--
+
+CREATE TABLE public.series (
+    id integer NOT NULL,
+    titel jsonb NOT NULL,
+    description jsonb,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    updated_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.series OWNER TO selab2;
+
+--
+-- Name: series_id_seq; Type: SEQUENCE; Schema: public; Owner: selab2
+--
+
+CREATE SEQUENCE public.series_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.series_id_seq OWNER TO selab2;
+
+--
+-- Name: series_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: selab2
+--
+
+ALTER SEQUENCE public.series_id_seq OWNED BY public.series.id;
 
 
 --
@@ -756,6 +872,13 @@ ALTER TABLE ONLY public.productions ALTER COLUMN id SET DEFAULT nextval('public.
 --
 
 ALTER TABLE ONLY public.scraper_dates ALTER COLUMN id SET DEFAULT nextval('public.scraper_dates_id_seq'::regclass);
+
+
+--
+-- Name: series id; Type: DEFAULT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.series ALTER COLUMN id SET DEFAULT nextval('public.series_id_seq'::regclass);
 
 
 --
@@ -975,6 +1098,14 @@ ALTER TABLE ONLY public.production_media_gallery
 
 
 --
+-- Name: production_series production_series_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.production_series
+    ADD CONSTRAINT production_series_pkey PRIMARY KEY (production_id, series_id);
+
+
+--
 -- Name: production_tag production_tag_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -1004,6 +1135,14 @@ ALTER TABLE ONLY public.productions
 
 ALTER TABLE ONLY public.scraper_dates
     ADD CONSTRAINT scraper_dates_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: series series_pkey; Type: CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.series
+    ADD CONSTRAINT series_pkey PRIMARY KEY (id);
 
 
 --
@@ -1107,6 +1246,34 @@ CREATE INDEX idx_media_item_position ON public.media_item USING btree ("position
 
 
 --
+-- Name: idx_prod_artist_en_trgm; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_prod_artist_en_trgm ON public.productions USING gin (((artist ->> 'en'::text)) public.gin_trgm_ops);
+
+
+--
+-- Name: idx_prod_artist_nl_trgm; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_prod_artist_nl_trgm ON public.productions USING gin (((artist ->> 'nl'::text)) public.gin_trgm_ops);
+
+
+--
+-- Name: idx_prod_title_en_trgm; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_prod_title_en_trgm ON public.productions USING gin (((titel ->> 'en'::text)) public.gin_trgm_ops);
+
+
+--
+-- Name: idx_prod_title_nl_trgm; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_prod_title_nl_trgm ON public.productions USING gin (((titel ->> 'nl'::text)) public.gin_trgm_ops);
+
+
+--
 -- Name: idx_production_blogs_blog_id; Type: INDEX; Schema: public; Owner: selab2
 --
 
@@ -1121,10 +1288,31 @@ CREATE INDEX idx_production_media_gallery_gallery_id ON public.production_media_
 
 
 --
+-- Name: idx_production_series_series_id; Type: INDEX; Schema: public; Owner: selab2
+--
+
+CREATE INDEX idx_production_series_series_id ON public.production_series USING btree (series_id);
+
+
+--
 -- Name: idx_production_tag_tag_id; Type: INDEX; Schema: public; Owner: selab2
 --
 
 CREATE INDEX idx_production_tag_tag_id ON public.production_tag USING btree (tag_id);
+
+
+--
+-- Name: event_locations remove_orphan_location; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER remove_orphan_location AFTER DELETE OR UPDATE OF location_id ON public.event_locations FOR EACH ROW EXECUTE FUNCTION public.check_and_delete_orphan_location();
+
+
+--
+-- Name: production_tag remove_orphan_tag; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER remove_orphan_tag AFTER DELETE ON public.production_tag FOR EACH ROW EXECUTE FUNCTION public.check_and_delete_orphan_tag();
 
 
 --
@@ -1195,6 +1383,13 @@ CREATE TRIGGER trg_media_item_updated_at BEFORE UPDATE ON public.media_item FOR 
 --
 
 CREATE TRIGGER trg_print_items_updated_at BEFORE UPDATE ON public.print_items FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+
+--
+-- Name: media_gallery trg_series_updated_at; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER trg_series_updated_at BEFORE UPDATE ON public.media_gallery FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
 
 --
@@ -1286,6 +1481,22 @@ ALTER TABLE ONLY public.production_blogs
 
 
 --
+-- Name: production_series fk_production; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.production_series
+    ADD CONSTRAINT fk_production FOREIGN KEY (production_id) REFERENCES public.productions(id) ON DELETE CASCADE;
+
+
+--
+-- Name: production_series fk_series; Type: FK CONSTRAINT; Schema: public; Owner: selab2
+--
+
+ALTER TABLE ONLY public.production_series
+    ADD CONSTRAINT fk_series FOREIGN KEY (series_id) REFERENCES public.series(id) ON DELETE CASCADE;
+
+
+--
 -- Name: gallery_item gallery_item_gallery_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -1369,4 +1580,5 @@ ALTER TABLE ONLY public.production_tag
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4rS0lle0YR53AmsTrQBCCS3KQRaG4kQ7dw3P4Zq8iHGpt5u14UTjPNNm2pKFRWB
+\unrestrict gcLJBluXMZBRcFMSdj0jMcgTYihosq3nnAuSrfV4enhVfVNmfevpQoPaDlSoDjn
+
