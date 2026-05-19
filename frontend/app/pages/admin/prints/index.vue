@@ -97,7 +97,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <PageHeader :title="t('prints.title')" />
+  <PageHeader
+    :title="t('prints.title')"
+    :description="t('prints.admin-description')"
+  />
 
   <div>
     <PrintsToolbar
@@ -120,7 +123,7 @@ onMounted(() => {
         </div>
         <NuxtLink
           :to="ROUTES.admin.prints.create"
-          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent-fixed border-2 border-accent-fixed text-accent-fixed-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
         >
           <Plus :size="15" />
           {{ t("prints.new") }}

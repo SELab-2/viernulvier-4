@@ -367,7 +367,7 @@ const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
         <!-- ×-badge: one-click clear without opening the panel -->
         <button
           v-if="hasBadge"
-          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--blog-purple-strong)] bg-[var(--blog-purple-ghost)] text-[var(--blog-purple-strong)] hover:bg-[var(--blog-purple-strong)] hover:text-white transition shadow-sm"
+          class="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center border border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white transition shadow-sm"
           :aria-label="t('stories.filters.clear')"
           @click.stop="clearAllFilters"
         >

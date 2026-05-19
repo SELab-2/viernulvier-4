@@ -87,6 +87,7 @@
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
     "sortLabel": "Sorteer",
     "relatedProductions": "Gerelateerde producties",
+    "admin-description": "Beheer, bewerk en verwijder verhalen.",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -232,7 +233,9 @@
     "create": "Nieuwe reeks",
     "deleteConfirm": "Weet je zeker dat je \"{name}\" wil verwijderen?",
     "deleteSuccess": "Reeks \"{name}\" verwijderd.",
-    "no_results": "Geen reeksen"
+    "no_results": "Geen reeksen",
+    "title": "Reeksen",
+    "admin-description": "Beheer, bewerk en verwijder reeksen."
   },
   "prints": {
     "types": {
@@ -256,6 +259,7 @@
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
+    "admin-description": "Beheer, bewerk en verwijder drukwerk.",
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
     "noFiles": "Geen bestanden beschikbaar.",
@@ -501,6 +505,7 @@
     "deleteSuccess": "Productie \"{production}\" verwijderd.",
     "deleteConfirm": "Weet je zeker dat je \"{production}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
     "header_title": "Producties",
+    "description": "Beheer, bewerk en verwijder producties.",
     "new": "Nieuwe productie",
     "editTags": "Tags bewerken",
     "warning-title": "Toekomstige productie",

@@ -23,7 +23,10 @@ const { t } = useI18n();
 
 <template>
   <div>
-    <PageHeader :title="t('nav.stories')" />
+    <PageHeader
+      :title="t('stories.title')"
+      :description="t('stories.admin-description')"
+    />
     <AdminBlogsListView />
   </div>
 </template>
