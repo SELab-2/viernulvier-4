@@ -182,7 +182,7 @@ function onSave() {
           </h3>
           <div class="flex gap-2">
             <button
-              class="flex h-8 items-center gap-2 rounded-md border border-border bg-background px-3 text-[10px] font-black uppercase tracking-widest text-destructive transition-colors hover:bg-destructive hover:text-white"
+              class="hidden sm:flex h-8 items-center gap-2 rounded-md border border-border bg-background px-3 text-[10px] font-black uppercase tracking-widest text-foreground transition-colors hover:bg-primary hover:text-primary-foreground hover:border-primary"
               :disabled="isDeleting"
               @click="emit('delete')"
             >
