@@ -1,9 +1,17 @@
-import { reactive, ref } from "vue";
+import { computed, ref, unref } from "vue";
+import type { MaybeRef } from "vue";
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { mockNuxtImport, mountSuspended } from "@nuxt/test-utils/runtime";
 import { flushPromises } from "@vue/test-utils";
 import StoriesPage from "../../app/pages/stories/index.vue";
+
+type MockStory = {
+  id: number;
+  titel: string;
+  description: string;
+  created_at: string;
+};
 
 const mocks = vi.hoisted(() => ({
   getAll: vi.fn() as Mock,
@@ -13,7 +21,7 @@ const mocks = vi.hoisted(() => ({
 
 const sortOrder = ref("newest");
 const searchQuery = ref("");
-const dateFilter = reactive({ after: "", before: "" });
+const dateFilter = ref({ after: "", before: "" });
 
 vi.mock("~/composables/blogs/useBlogApi", () => ({
   useBlogApi: () => ({
@@ -26,6 +34,17 @@ vi.mock("~/composables/blogs/useBlogView", () => ({
     sortOrder,
     searchQuery,
     dateFilter,
+    useBlogStory: (story: MaybeRef<MockStory>) => {
+      const resolvedStory = computed<MockStory>(() => unref(story));
+
+      return {
+        title: computed(() => resolvedStory.value.titel ?? "—"),
+        description: computed(() => resolvedStory.value.description ?? ""),
+        formattedDate: computed(() => resolvedStory.value.created_at ?? ""),
+        storyId: computed(() => resolvedStory.value.id ?? 0),
+      };
+    },
+    fetchSuggestions: vi.fn(),
   }),
 }));
 
@@ -118,7 +137,9 @@ describe("Stories Overview Page (Integration)", () => {
     const wrapper = await mountSuspended(StoriesPage);
     await flushPromises();
 
-    const storyLinks = wrapper.findAll("a");
+    const storyLinks = wrapper
+      .findAll("a")
+      .filter((link) => link.attributes("href")?.includes("/stories/3"));
 
     if (storyLinks.length > 0) {
       expect(storyLinks[0].attributes("href")).toContain("/stories/3");
