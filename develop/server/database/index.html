@@ -1964,6 +1964,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Extra Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scraper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scraper
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2871,6 +2888,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Extra Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scraper" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scraper
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3024,6 +3058,26 @@ used to set up a clean empty database from scratch.</p>
 <p><strong>Important:</strong> If you use this method, you will need to manually create an initial admin account and API key before
 the backend will function.</p>
 </blockquote>
+<p>This can be done by running the following in the database:</p>
+<pre><code class="language-sql">INSERT INTO api_keys (&quot;key&quot;)
+VALUES ('&lt;insert-your-key&gt;');
+UPDATE api_keys
+SET super_key = 't'
+WHERE key = '&lt;insert-your-key&gt;';
+</code></pre>
+<blockquote>
+<p>after this you can create an account through the backend and link it with the key in the database by using the
+JOIN-table <code>account_api_keys</code>.
+From here onwards you can use this account through the frontend's CMS (findable under <url>/admin).</p>
+</blockquote>
+<h3 id="scraper">Scraper</h3>
+<p>It is very important to note that the scraper takes the last inserted date into the <code>scraper_dates</code> table.
+Therefore, you will need to make sure there is a date in the <code>scraper_dates</code> table before running.
+If you restored through the <code>pg.dump</code> file then this should have been set with the default values, if not, then you will
+need to set this yourself. You can do this via:</p>
+<pre><code class="language-sql">INSERT INTO scraper_dates DEFAULT
+VALUES;
+</code></pre>
 <hr />
 <p>After setting up the database, make note of the following — all four are required as backend environment variables:</p>
 <table>

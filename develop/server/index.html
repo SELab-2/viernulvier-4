@@ -1868,6 +1868,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="General Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-standard-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Standard Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-deploy-initialize-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Deploy &amp; Initialize Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2761,6 +2789,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="General Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#option-1-standard-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 1: Standard Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#option-2-deploy-initialize-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Option 2: Deploy &amp; Initialize Database
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2822,6 +2878,11 @@ detailed information.</p>
 <h2 id="database">Database</h2>
 <p>The database runs on <a href="https://www.postgresql.org/download/">PostgreSQL</a>. Install it on your server by
 following <a href="https://www.postgresql.org/download/">this guide</a>, then restore the database from the provided dump:</p>
+<blockquote>
+<p><strong>Important:</strong> you can choose to create a database in the install script (see section <code>General Deployment</code>). In such a
+case you can ignore this section and just make sure psql is running on port 5432.
+</p>
+</blockquote>
 <pre><code class="language-bash">pg_restore -U &lt;username&gt; -d &lt;database_name&gt; server/pg.dump
 </code></pre>
 <blockquote>
@@ -2836,6 +2897,10 @@ see the <a href="insert here">backend overview page</a>. For a step-by-step depl
 the <a href="backend/">backend setup page</a>.</p>
 <p>Before deploying, make sure to configure the required environment variables. An example can be found in <code>.env.example</code>
 in the project root.</p>
+<blockquote>
+<p><strong>Note:</strong> If you choose to use the <code>--init-db</code> flag in the <code>General Deployment</code> section then you need to fill the env
+vars in with the vars you will choose in the script. (before you run it!)</p>
+</blockquote>
 <hr />
 <h2 id="frontend">Frontend</h2>
 <p>The frontend is built with <a href="https://vuejs.org/">Vue</a> and <a href="https://nuxt.com/">Nuxt</a>. For implementation details, see
@@ -2850,10 +2915,26 @@ deployment steps below. See the <a href="frontend/">frontend page</a> if you run
 <li><a href="https://nodejs.org/">Node.js / npm</a></li>
 <li><a href="https://pm2.keymetrics.io/">pm2</a> (<code>npm install -g pm2</code>)</li>
 </ul>
-<p>Run the deployment script from the project root:</p>
+<blockquote>
+<p>You can choose to deploy the server in 2 different ways.</p>
+</blockquote>
+<h3 id="option-1-standard-deployment">Option 1: Standard Deployment</h3>
+<p>If you have already set up and restored your PostgreSQL database manually, run the standard deployment script from the
+project root:</p>
 <pre><code class="language-bash">bash server/server_deployment.sh
 </code></pre>
-<p>This will build and deploy both the backend and frontend. Default ports:</p>
+<h3 id="option-2-deploy-initialize-database">Option 2: Deploy &amp; Initialize Database</h3>
+<p>If you have installed PostgreSQL but haven't created the database or imported the dump yet, run the script with the
+<code>--init-db</code> flag.
+It will securely prompt you for your PostgreSQL credentials, create the database, and import the dump automatically
+before building the apps:</p>
+<pre><code class="language-bash">bash server/server_deployment.sh --init-db
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> This script does not provide a working api-key or account. You will need to set that up yourself.
+See <a href="database/">database</a>.</p>
+</blockquote>
+<p>Both commands will build and deploy the backend and frontend. Default pm2 ports (unless changed in the pm2 config):</p>
 <ul>
 <li><strong>Backend:</strong> <code>3000</code></li>
 <li><strong>Frontend:</strong> <code>3001</code></li>
