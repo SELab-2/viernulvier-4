@@ -63,6 +63,46 @@ describe("ArchiveSearchSection", () => {
     LayoutGrid: true,
     List: true,
     X: true,
+    BlogsStoryToolbar: {
+      props: [
+        "sortOrder",
+        "extraFiltersActive",
+        "sortLabel",
+        "oldestDate",
+        "newestDate",
+        "dateFilter",
+        "fetchSuggestions",
+        "storyTitles",
+      ],
+      emits: [
+        "update:sort-order",
+        "update:search",
+        "update:date-filter",
+        "clear-filters",
+      ],
+      data() {
+        return { panelOpen: false };
+      },
+      template: `
+      <div>
+        <button :aria-expanded="String(panelOpen)" @click="panelOpen = !panelOpen">Filters</button>
+        <div v-if="panelOpen">
+          <span>{{ sortLabel }}</span>
+          <select :value="sortOrder" @change="$emit('update:sort-order', $event.target.value)">
+            <option value="newest">newest</option>
+            <option value="oldest">oldest</option>
+          </select>
+          <slot name="extra-filters" />
+        </div>
+        <slot name="action" />
+        <button
+          v-if="extraFiltersActive"
+          class="absolute -top-2"
+          @click="$emit('clear-filters')"
+        >×</button>
+      </div>
+    `,
+    },
   };
 
   it("renders correctly and fetches oldest date on mount", async () => {
