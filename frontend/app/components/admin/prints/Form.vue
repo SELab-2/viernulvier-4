@@ -63,7 +63,7 @@ const fields = computed<FormField[]>(() => [
   {
     component: "BaseTextArea", // Dutch description
     name: "description_nl",
-    props: { label: t("prints.form.description") + " (nl)" },
+    props: { label: t("prints.form.description") + " (nl)", required: true },
   },
   {
     component: "BaseTextArea", // English description
