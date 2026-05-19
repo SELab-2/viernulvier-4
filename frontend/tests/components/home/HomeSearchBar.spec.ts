@@ -19,9 +19,16 @@ vi.mock("vue-router", async () => {
   return {
     ...actual,
     useRouter: () => ({
-      ...actual.useRouter(),
       push: routerPush,
+      replace: vi.fn(),
+      back: vi.fn(),
+      resolve: vi.fn(() => ({ href: "/" })),
+      beforeEach: vi.fn(),
+      beforeResolve: vi.fn(),
       afterEach: vi.fn(),
+      onError: vi.fn(),
+      isReady: vi.fn(() => Promise.resolve()),
+      currentRoute: { value: { query: {}, path: "/" } },
     }),
   };
 });
