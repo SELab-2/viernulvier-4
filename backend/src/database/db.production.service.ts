@@ -219,11 +219,10 @@ export class ProductionDatabaseService {
     }
 
     // Filter events whose endtime is after the provided date
+    // Example fallback logic: If endtime is NULL, use starttime for the comparison
     if (productionFilters.before) {
       havingConditions.push(
-        // Note: We add one day here to include the day itself too without having to cast the column.
-        // The IS NULL check ensures productions without an endtime are not filtered out.
-        `(MAX(e.endtime) IS NULL OR MAX(e.endtime) < ${param(productionFilters.before)}::date + interval '1 day')`,
+        `MAX(COALESCE(e.endtime, e.starttime)) < ${param(productionFilters.before)}::date + interval '1 day'`,
       );
     }
 
