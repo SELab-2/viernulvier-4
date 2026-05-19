@@ -188,7 +188,11 @@ const adminNavItems = [
       isTransparent
         ? 'absolute w-full bg-transparent border-transparent header-transparent text-[var(--foreground)]'
         : showAdminInterface
-          ? 'sticky bg-[var(--background)] text-[var(--foreground)]'
+          ? [
+              'sticky bg-[var(--background)] text-[var(--foreground)]',
+              'border-b-4 border-[var(--foreground)] lg:border-b-0',
+              isMenuOpen ? 'border-b-4' : '',
+            ]
           : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)] text-[var(--foreground)]',
       'top-0 z-[100] transition-all duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]',
     ]"
