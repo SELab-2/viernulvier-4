@@ -19,6 +19,8 @@
 
 import { ref, computed } from "vue";
 import type { EventWithDetails } from "../../types/EventWithDetails";
+import { formatDateShort, formatTime, formatPrice } from "~/utils/formatters";
+
 import {
   CalendarDays,
   MapPin,
@@ -53,32 +55,6 @@ const visibleEvents = computed(() => {
 
 const hasHiddenEvents = computed(() => props.events.length > props.limit);
 
-// Formatter functies
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString(locale.value, {
-    weekday: "short",
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
-const formatTime = (dateStr: string) => {
-  return new Date(dateStr).toLocaleTimeString(locale.value, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-//TODO: doors_at? intermission_at?
-
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat(locale.value, {
-    style: "currency",
-    currency: "EUR",
-  }).format(price);
-};
-
 const expandedPriceIds = ref(new Set<number>());
 
 const togglePrices = (id: number) => {
@@ -87,6 +63,34 @@ const togglePrices = (id: number) => {
   } else {
     expandedPriceIds.value.add(id);
   }
+};
+
+/**
+ * Check if doors_at is logical: same day as starttime
+ */
+const isValidDoors = (doorsStr: string, startStr: string) => {
+  const doors = new Date(doorsStr);
+  const start = new Date(startStr);
+
+  return doors.toDateString() === start.toDateString();
+};
+
+/**
+ * Check if break is logical: between start and endtime
+ */
+const isValidIntermission = (
+  intermissionStr: string,
+  event: EventWithDetails,
+) => {
+  const breakTime = new Date(intermissionStr);
+  const start = new Date(event.starttime);
+
+  if (event.endtime) {
+    const end = new Date(event.endtime);
+    return breakTime >= start && breakTime <= end;
+  }
+
+  return breakTime.toDateString() === start.toDateString();
 };
 
 // Styling constanten
@@ -141,7 +145,7 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                 <p
                   class="font-brand font-black text-sm uppercase tracking-tight truncate"
                 >
-                  {{ formatDate(event.starttime) }}
+                  {{ formatDateShort(event.starttime, locale) }}
                 </p>
 
                 <div class="mt-1 space-y-1">
@@ -150,34 +154,40 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                   >
                     <Clock :size="11" class="shrink-0" />
                     <span>
-                      {{ formatTime(event.starttime) }}
+                      {{ formatTime(event.starttime, locale) }}
                       <template
                         v-if="
                           event.endtime &&
-                          formatTime(event.starttime) !==
-                            formatTime(event.endtime)
+                          formatTime(event.starttime, locale) !==
+                            formatTime(event.endtime, locale)
                         "
                       >
-                        - {{ formatTime(event.endtime) }}
+                        - {{ formatTime(event.endtime, locale) }}
                       </template>
                     </span>
                   </p>
 
                   <div class="flex flex-wrap gap-3">
                     <p
-                      v-if="event.doors_at"
+                      v-if="
+                        event.doors_at &&
+                        isValidDoors(event.doors_at, event.starttime)
+                      "
                       class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
                       {{ t("production.doors") }}:
-                      {{ formatTime(event.doors_at) }}
+                      {{ formatTime(event.doors_at, locale) }}
                     </p>
 
                     <p
-                      v-if="event.intermission_at"
+                      v-if="
+                        event.intermission_at &&
+                        isValidIntermission(event.intermission_at, event)
+                      "
                       class="text-[10px] text-muted-foreground font-bold uppercase tracking-tight"
                     >
                       {{ t("production.break") }}:
-                      {{ formatTime(event.intermission_at) }}
+                      {{ formatTime(event.intermission_at, locale) }}
                     </p>
                   </div>
                 </div>
@@ -191,8 +201,14 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
 
               <td :class="cellNarrow">
                 <div v-if="event.prices && event.prices.length">
+                  <p
+                    class="text-[9px] uppercase font-black text-muted-foreground/60 leading-tight mb-0.5 tracking-widest truncate"
+                  >
+                    {{ event.prices[0]?.name || "" }}
+                  </p>
+
                   <p class="text-sm font-brand font-black tracking-tight">
-                    {{ formatPrice(event.prices[0]?.price || 0) }}
+                    {{ formatPrice(event.prices[0]?.price || 0, locale) }}
                   </p>
 
                   <button
@@ -202,9 +218,9 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                   >
                     {{
                       expandedPriceIds.has(event.id)
-                        ? t("production.hidePriceDetails")
-                        : t("production.showExtraPrices", {
-                            count: event.prices.length - 1,
+                        ? t("production.hidePrices")
+                        : t("production.showAll", {
+                            count: event.prices.length,
                           })
                     }}
                   </button>
@@ -233,7 +249,7 @@ const cellNarrow = "p-4 text-sm w-[20%] max-w-0";
                       {{ p.name }}
                     </span>
                     <span class="text-sm font-brand font-black">
-                      {{ formatPrice(p.price) }}
+                      {{ formatPrice(p.price, locale) }}
                     </span>
                   </div>
                 </div>

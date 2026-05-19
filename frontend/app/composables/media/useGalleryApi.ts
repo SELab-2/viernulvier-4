@@ -11,98 +11,147 @@ import type {
   PrintItemView,
   ReplaceMediaGallery,
 } from "@repo/common";
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
+
+interface GalleryListOptions {
+  paginationFilters?: PaginationFilter;
+}
 
 /**
- * Frontend API calls for media and print galleries.
+ * Composable for media galleries endpoints.
+ * All GET requests are public. All other endpoints require an API key.
  */
 export function useGalleryApi() {
   const { get, post, patch, put, del } = useApi();
 
   /**
-   * Get all media galleries.
+   * GET "/galleries{filters}"
+   *
+   * Returns a paginated list of media galleries.
    */
-  const getAll = (paginationFilters: PaginationFilter) => {
-    const params = {
-      ...paginationFilters,
-    };
-
-    const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(params).filter(([_, value]) => value != null),
-    );
-
-    const queryString = new URLSearchParams(
-      cleanParams as unknown as Record<string, string>,
-    ).toString();
-
-    const query = queryString ? `?${queryString}` : "";
+  function getAll({ paginationFilters }: GalleryListOptions = {}) {
+    const params = { ...paginationFilters };
+    const query = buildQueryString(params);
 
     return get<PaginatedResponse<MediaGallery>>(
       `${API_ROUTES.galleries.base}${query}`,
     );
-  };
+  }
 
   /**
-   * Get a specific gallery by it's ID.
+   * GET "/galleries/:galleryId"
+   *
+   * Get a specific gallery by its ID.
    */
-  const getById = (galleryId: number) =>
-    get<MediaGallery>(API_ROUTES.galleries.byId(galleryId));
+  function getById(galleryId: number) {
+    return get<MediaGallery>(API_ROUTES.galleries.byId(galleryId));
+  }
 
   /**
+   * POST "/galleries"
+   *
    * Create a new gallery.
    */
-  const create = (body: CreateMediaGallery) =>
-    post<MediaGallery, CreateMediaGallery>(API_ROUTES.galleries.base, body);
+  function create(body: CreateMediaGallery) {
+    return post<MediaGallery, CreateMediaGallery>(
+      API_ROUTES.galleries.base,
+      body,
+    );
+  }
 
   /**
+   * PUT "/galleries/:galleryId"
+   *
    * Replace a gallery.
    */
-  const replace = (galleryId: number, body: ReplaceMediaGallery) =>
-    put<MediaGallery, ReplaceMediaGallery>(
+  function replace(galleryId: number, body: ReplaceMediaGallery) {
+    return put<MediaGallery, ReplaceMediaGallery>(
       API_ROUTES.galleries.byId(galleryId),
       body,
     );
+  }
 
   /**
+   * PATCH "/galleries/:galleryId"
+   *
    * Modifies an existing gallery.
    */
-  const modify = (galleryId: number, body: ModifyMediaGallery) =>
-    patch<MediaGallery, ModifyMediaGallery>(
+  function modify(galleryId: number, body: ModifyMediaGallery) {
+    return patch<MediaGallery, ModifyMediaGallery>(
       API_ROUTES.galleries.byId(galleryId),
       body,
     );
+  }
 
   /**
+   * DELETE "/galleries/:galleryId"
+   *
    * Removes an existing gallery.
    */
-  const remove = (galleryId: number) =>
-    del(API_ROUTES.galleries.byId(galleryId));
+  function remove(galleryId: number) {
+    return del(API_ROUTES.galleries.byId(galleryId));
+  }
 
   /**
    * -- Item links.
    */
 
   /**
+   * GET "/galleries/:galleryId/items"
+   *
    * Returns all items linked to a gallery.
+   * Returns View objects if a language is passed, otherwise standard Item objects.
    */
-  const getGalleryItems = (galleryId: number, lang?: Language) => {
+  function getGalleryItems(
+    galleryId: number,
+  ): Promise<ApiResponse<MediaItem[] | PrintItem[]>>;
+  function getGalleryItems(
+    galleryId: number,
+    lang: Language,
+  ): Promise<ApiResponse<MediaItemView[] | PrintItemView[]>>;
+  function getGalleryItems(galleryId: number, lang?: Language) {
     const query = lang ? `?lang=${lang}` : "";
     return get<MediaItem[] | PrintItem[] | MediaItemView[] | PrintItemView[]>(
       `${API_ROUTES.galleries.items(galleryId)}${query}`,
     );
-  };
+  }
 
   /**
+   * PUT "/galleries/:galleryId/items/:itemId"
+   *
    * Links an item to a gallery.
    */
-  const linkItemToGallery = (galleryId: number, itemId: number) =>
-    put(API_ROUTES.galleries.itemLink(galleryId, itemId), {});
+  function linkItemToGallery(galleryId: number, itemId: number) {
+    return put(API_ROUTES.galleries.itemLink(galleryId, itemId), {});
+  }
 
   /**
+   * DELETE "/galleries/:galleryId/items/:itemId"
+   *
    * Unlinks an item from a gallery.
    */
-  const unlinkItemFromGallery = (galleryId: number, itemId: number) =>
-    del(API_ROUTES.galleries.itemLink(galleryId, itemId));
+  function unlinkItemFromGallery(galleryId: number, itemId: number) {
+    return del(API_ROUTES.galleries.itemLink(galleryId, itemId));
+  }
+
+  /**
+   * PUT "/galleries/:galleryId/prints/:itemId"
+   *
+   * Links an print to a gallery.
+   */
+  function linkPrintToGallery(galleryId: number, itemId: number) {
+    return put(API_ROUTES.galleries.printLink(galleryId, itemId), {});
+  }
+
+  /**
+   * DELETE "/galleries/:galleryId/prints/:itemId"
+   *
+   * Unlinks an print from a gallery.
+   */
+  function unlinkPrintFromGallery(galleryId: number, itemId: number) {
+    return del(API_ROUTES.galleries.printLink(galleryId, itemId));
+  }
 
   return {
     getAll,
@@ -114,5 +163,7 @@ export function useGalleryApi() {
     getGalleryItems,
     linkItemToGallery,
     unlinkItemFromGallery,
+    linkPrintToGallery,
+    unlinkPrintFromGallery,
   };
 }

@@ -1,7 +1,9 @@
 import {
+  AccountSchema,
   ApiKeySchema,
   BlogSchema,
   BlogViewSchema,
+  ChangePasswordSchema,
   CreateAccountSchema,
   CreateBlogSchema,
   CreateEventSchema,
@@ -10,14 +12,22 @@ import {
   CreateMediaGallerySchema,
   CreateMediaItemSchema,
   CreatePriceSchema,
+  CreatePrintItemSchema,
   CreateProductionSchema,
+  CreateSeriesSchema,
   CreateTagSchema,
   EventSchema,
+  FilterBlogSchema,
   FilterEventSchema,
+  FilterLocationSchema,
+  FilterPrintItemSchema,
   FilterProductionSchema,
+  FilterSeriesSchema,
+  FilterTagSchema,
   LanguageQuerySchema,
   LocationSchema,
   LocationViewSchema,
+  LoginSchema,
   MediaCropSchema,
   MediaGallerySchema,
   MediaItemSchema,
@@ -29,16 +39,15 @@ import {
   ModifyMediaGallerySchema,
   ModifyMediaItemSchema,
   ModifyPriceSchema,
+  ModifyPrintItemSchema,
   ModifyProductionSchema,
+  ModifySeriesSchema,
   ModifyTagSchema,
   PaginationFilterSchema,
   PriceSchema,
   PriceViewSchema,
   PrintItemSchema,
   PrintItemViewSchema,
-  CreatePrintItemSchema,
-  ModifyPrintItemSchema,
-  ReplacePrintItemSchema,
   ProductionSchema,
   ProductionViewSchema,
   PublicAccountSchema,
@@ -48,16 +57,15 @@ import {
   ReplaceMediaGallerySchema,
   ReplaceMediaItemSchema,
   ReplacePriceSchema,
+  ReplacePrintItemSchema,
   ReplaceProductionSchema,
+  ReplaceSeriesSchema,
+  SeriesSchema,
+  SeriesViewSchema,
   TagSchema,
   TagViewSchema,
   UpdateAccountSchema,
   VerifyApiKeySchema,
-  FilterBlogSchema,
-  AccountSchema,
-  FilterPrintItemSchema,
-  FilterTagSchema,
-  FilterLocationSchema,
 } from "@repo/common";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { createZodDto } from "nestjs-zod";
@@ -111,7 +119,9 @@ export class ReplacePriceDto extends createZodDto(ReplacePriceSchema) {}
 
 // Account Wrapper
 export class CreateAccountDto extends createZodDto(CreateAccountSchema) {}
+export class LoginDto extends createZodDto(LoginSchema) {}
 export class UpdateAccountDto extends createZodDto(UpdateAccountSchema) {}
+export class ChangePasswordDto extends createZodDto(ChangePasswordSchema) {}
 export class PublicAccountDto extends createZodDto(PublicAccountSchema) {}
 export class AccountDto extends createZodDto(AccountSchema) {}
 
@@ -153,6 +163,14 @@ export class CreatePrintItemDto extends createZodDto(CreatePrintItemSchema) {}
 export class ModifyPrintItemDto extends createZodDto(ModifyPrintItemSchema) {}
 export class ReplacePrintItemDto extends createZodDto(ReplacePrintItemSchema) {}
 export class FilterPrintItemDto extends createZodDto(FilterPrintItemSchema) {}
+
+// Series
+export class SeriesDto extends createZodDto(SeriesSchema) {}
+export class SeriesViewDto extends createZodDto(SeriesViewSchema) {}
+export class CreateSeriesDto extends createZodDto(CreateSeriesSchema) {}
+export class ModifySeriesDto extends createZodDto(ModifySeriesSchema) {}
+export class ReplaceSeriesDto extends createZodDto(ReplaceSeriesSchema) {}
+export class FilterSeriesDto extends createZodDto(FilterSeriesSchema) {}
 
 // CSV Upload DTO
 export class ParserUploadCsvBodyDto {

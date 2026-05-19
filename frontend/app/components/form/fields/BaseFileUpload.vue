@@ -8,6 +8,10 @@
  *  - Selected filenames displayed below the input
  *  - Binds File objects via v-model
  *
+ *  In contrast to other base components, this component does not handle requirement check itself !!
+ *  Please check requirement in the parent component.
+ *  "Required" here is only for rendering the required star.
+ *
  * Usage:
  * <BaseFileUpload
  *   v-model="attachment"
@@ -26,7 +30,9 @@ interface Props {
   required?: boolean; // adds a "*" if required
   accept?: string; // accepted file types
   multiple?: boolean; // if multiple files are accepted
+  existingUrl?: string; // for showing existing image if there is one
 }
+
 const props = withDefaults(defineProps<Props>(), {
   accept: "",
   multiple: false,
@@ -76,11 +82,10 @@ function removeFile(index: number) {
       <input
         :id="props.id"
         type="file"
-        :required="props.required"
         :accept="props.accept"
         :multiple="props.multiple"
         @change="handleFileChange"
-        class="pl-10 pr-4 bg-muted border border-border h-12 leading-[3rem] font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none transition-colors duration-150 hover:border-foreground/20 hover:bg-muted/70 focus:border-foreground/30 focus:bg-background file:hidden cursor-pointer text-transparent"
+        class="pl-10 pr-4 bg-muted border border-border h-12 leading-[3rem] font-bold uppercase text-[10px] tracking-widest rounded-lg w-full outline-none hover:border-accent hover:bg-muted/70 focus:border-border focus:bg-background file:hidden cursor-pointer text-transparent"
       />
 
       <!-- Paperclip icon -->
@@ -99,13 +104,25 @@ function removeFile(index: number) {
       <div
         v-for="(file, index) in model"
         :key="file.name"
-        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors duration-150 hover:bg-muted border-b border-border last:border-b-0"
+        class="group flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground border border-transparent hover:border-action-red-icon last:rounded-b-lg first:rounded-t-lg transition-colors duration-150"
       >
         <span class="truncate mr-4">{{ file.name }}</span>
         <X
-          class="w-3 h-3 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+          class="w-4 h-4 shrink-0 cursor-pointer text-action-red-icon hover:text-action-red-text-hover hover:scale-110 transition-all duration-150"
           @click="removeFile(index)"
         />
+      </div>
+    </div>
+    <!-- Existing file preview (for edit page) -->
+    <div
+      v-if="existingUrl && !model.length"
+      data-testid="file-container"
+      class="mt-2 border border-border rounded-lg overflow-hidden"
+    >
+      <div
+        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground transition-colors duration-150 hover:bg-muted border-b border-border last:border-b-0"
+      >
+        <span class="truncate mr-4">{{ existingUrl.split("/").pop() }}</span>
       </div>
     </div>
   </div>

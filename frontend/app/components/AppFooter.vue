@@ -63,29 +63,29 @@ const socials = [
 
 <template>
   <footer
-    class="bg-black dark:bg-white text-white dark:text-black border-t border-white/10 dark:border-black/10"
+    class="bg-[var(--foreground)] text-[var(--background)] border-t border-[var(--background)]/10"
   >
     <div class="page-container py-12">
       <!-- Three-column grid: brand+contact | navigation | social -->
       <div
-        class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-white/10 dark:border-black/10"
+        class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-[var(--background)]/10"
       >
         <!-- Column 1: Brand and contact information -->
         <div>
           <address
-            class="not-italic flex flex-col gap-0.5 text-sm text-white dark:text-black leading-relaxed"
+            class="not-italic flex flex-col gap-0.5 text-sm text-[var(--background)] leading-relaxed"
           >
             <span>Kunstencentrum VIERNULVIER vzw.</span>
             <span>Sint-Pietersnieuwstraat 23, 9000 Gent</span>
             <a
               href="tel:+3292672820"
-              class="mt-2 hover:text-white/60 dark:hover:text-black/60 transition-colors"
+              class="mt-2 hover:opacity-60 transition-opacity"
             >
               T. 09 267 28 20
             </a>
             <a
               href="mailto:info@viernulvier.gent"
-              class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+              class="hover:opacity-60 transition-opacity"
             >
               info@viernulvier.gent
             </a>
@@ -94,16 +94,16 @@ const socials = [
 
         <!-- Column 2: Site navigation links -->
         <div>
-          <h4 class="font-display font-bold text-base mb-4">
+          <h4 class="font-serif font-bold text-base mb-4">
             {{ t("footer.links") }}
           </h4>
-          <ul class="flex flex-col gap-2 text-sm text-white dark:text-black">
+          <ul class="flex flex-col gap-2 text-sm text-[var(--background)]">
             <li>
               <a
                 href="https://www.viernulvier.gent/"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+                class="hover:opacity-60 transition-opacity"
               >
                 {{ t("footer.mainSite") }}
               </a>
@@ -111,7 +111,7 @@ const socials = [
             <li>
               <NuxtLink
                 :to="ROUTES.productions.base"
-                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+                class="hover:opacity-60 transition-opacity"
               >
                 {{ t("footer.archive") }}
               </NuxtLink>
@@ -119,7 +119,7 @@ const socials = [
             <li>
               <NuxtLink
                 :to="ROUTES.stories.base"
-                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+                class="hover:opacity-60 transition-opacity"
               >
                 {{ t("footer.stories") }}
               </NuxtLink>
@@ -127,7 +127,7 @@ const socials = [
             <li>
               <NuxtLink
                 :to="ROUTES.prints.base"
-                class="hover:text-white/60 dark:hover:text-black/60 transition-colors"
+                class="hover:opacity-60 transition-opacity"
               >
                 {{ t("footer.prints") }}
               </NuxtLink>
@@ -137,7 +137,7 @@ const socials = [
 
         <!-- Column 3: Social media icon links (rendered from the socials array) -->
         <div>
-          <h4 class="font-display font-bold text-base mb-4">Social</h4>
+          <h4 class="font-serif font-bold text-base mb-4">Social</h4>
           <div class="flex flex-wrap gap-2">
             <a
               v-for="social in socials"
@@ -146,7 +146,7 @@ const socials = [
               :aria-label="social.label"
               target="_blank"
               rel="noopener noreferrer"
-              class="p-2 border border-white/30 dark:border-black/30 text-white dark:text-black hover:text-white/60 dark:hover:text-black/60 hover:border-white/60 dark:hover:border-black/60 transition-colors"
+              class="p-2 border border-[var(--background)]/30 text-[var(--background)] hover:opacity-60 hover:border-[var(--background)]/60 transition-all"
             >
               <component :is="social.icon" />
             </a>
@@ -156,20 +156,10 @@ const socials = [
 
       <!-- Copyright bar -->
       <p
-        class="text-center pt-6 text-[0.7rem] font-mono tracking-widest uppercase text-white dark:text-black"
+        class="text-center pt-6 text-[0.7rem] font-mono tracking-widest uppercase text-[var(--background)]"
       >
         © {{ new Date().getFullYear() }} VIERNULVIER — {{ t("footer.rights") }}
       </p>
     </div>
   </footer>
 </template>
-
-<style scoped>
-.font-display {
-  font-family: "Georgia", "Times New Roman", serif;
-}
-
-.font-mono {
-  font-family: "Courier New", Courier, monospace;
-}
-</style>

@@ -1,14 +1,21 @@
 {
+  "english": "EN",
+  "dutch": "NL",
+  "home": {
+    "title": "Doorzoek het archief"
+  },
   "nav": {
     "home": "home",
     "archive": "archief",
+    "series": "reeksen",
     "stories": "verhalen",
     "prints": "drukwerk",
     "productions": "producties",
     "events": "evenementen",
     "accounts": "accounts",
     "dashboard": "dashboard",
-    "logout": "uitloggen"
+    "logout": "uitloggen",
+    "tags": "tags"
   },
   "auth": {
     "confirmLogout": "Succesvol uitgelogd"
@@ -79,6 +86,8 @@
     "darkMode": "Donkere modus",
     "headerDescription": "ONTDEK ARTIKELS, INTERVIEWS EN VERHALEN UIT HET VIERNULVIER ARCHIEF.",
     "sortLabel": "Sorteer",
+    "relatedProductions": "Gerelateerde producties",
+    "admin-description": "Beheer, bewerk en verwijder verhalen.",
     "calendar": {
       "toggle": "Datum",
       "filtered": "Gefilterd",
@@ -150,22 +159,34 @@
     "dateAndTime": "Datum & Tijd",
     "location": "Locatie",
     "price": "Prijs",
+    "showAll": "toon alle ({count})",
+    "hidePrices": "verberg prijzen",
     "noEvents": "Deze productie bevat geen evenementen.",
     "stories": "Verhalen",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prijzen",
-    "hidePriceDetails": "verberg details",
     "doors": "deuren open",
-    "break": "pauze"
+    "break": "pauze",
+    "prints": "drukwerk",
+    "gallery": "galerij",
+    "gallery_nav": {
+      "prev": "Vorige afbeelding",
+      "next": "Volgende afbeelding",
+      "go_to_slide": "Ga naar dia {slide}"
+    }
   },
   "general": {
     "back": "Terug",
     "readMore": "Lees meer",
     "readLess": "Lees minder",
     "showMore": "Toon meer",
+    "showMoreWithCount": "Toon meer ({count})",
     "showLess": "Toon minder",
     "noStories": "Deze productie bevat geen verhalen.",
-    "filters": "filters"
+    "filters": "filters",
+    "close": "sluiten",
+    "results": "resultaten",
+    "delete": "Verwijderen",
+    "save": "Opslaan"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",
@@ -177,6 +198,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Beheer de accounts.",
+    "headerDescription": "Beheer, bewerk en controleer de accounts van de archiefbeheerders.",
     "emptyTitle": "Geen accounts gevonden",
     "emptyDescription": "Er zijn nog geen accounts beschikbaar om weer te geven.",
     "username": "Gebruikersnaam",
@@ -203,6 +225,18 @@
     "createSuccess": "Account \"{username}\" aangemaakt.",
     "deleteSuccess": "Account \"{username}\" verwijderd."
   },
+  "series": {
+    "header_title": "Reeksen",
+    "header_subtitle": "Ontdek samengebundelde reeksen van producties uit het viernulvier archief.",
+    "noProductions": "Deze reeks bevat geen producties.",
+    "noSeries": "Geen reeksen",
+    "create": "Nieuwe reeks",
+    "deleteConfirm": "Weet je zeker dat je \"{name}\" wil verwijderen?",
+    "deleteSuccess": "Reeks \"{name}\" verwijderd.",
+    "no_results": "Geen reeksen",
+    "title": "Reeksen",
+    "admin-description": "Beheer, bewerk en verwijder reeksen."
+  },
   "prints": {
     "types": {
       "all": "Alles",
@@ -213,14 +247,19 @@
     },
     "form": {
       "title": "Titel",
+      "description": "Beschrijving",
       "type": "Printtype",
       "file": "Bestand",
       "fileRequired": "Upload een bestand.",
       "uploadError": "Kan het bestand niet uploaden.",
-      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?"
+      "loadError": "Kan drukwerk niet laden.",
+      "deleteConfirm": "Weet je zeker dat je {name} wil verwijderen?",
+      "edit": "Pas wijzigingen toe",
+      "reset": "Resetten"
     },
     "title": "Drukwerk",
     "headerDescription": "ONTDEK AFFICHES, BROCHURES EN PROGRAMMABOEKJES UIT HET VIERNULVIER ARCHIEF.",
+    "admin-description": "Beheer, bewerk en verwijder drukwerk.",
     "files": "Bestanden",
     "noFilesCat": "Deze categorie bevat geen bestanden.",
     "noFiles": "Geen bestanden beschikbaar.",
@@ -228,15 +267,36 @@
     "remaining": "resterend",
     "delete": "Verwijder",
     "download": "Download",
+    "edit": "Drukwerk bewerken",
+    "create": "Upload",
     "loading": "Laden...",
     "retry": "Opnieuw proberen",
     "noPrints": "Geen drukwerk",
     "pagination": "Paginering",
     "page_label": "Pagina",
     "of_pages": "van {total}",
-    "add": "voeg toe"
+    "new": "Nieuw drukwerk",
+    "description": "omschrijving",
+    "relatedProductions": "Gerelateerde producties",
+    "linkToProduction": "Koppel aan productie",
+    "linkBtn": "Koppelen",
+    "linkToProductionSearch": "Zoek producties op titel...",
+    "linkToProductionNoResults": "Geen producties gevonden",
+    "linkToProductionCreateHint": "Sla het drukwerk eerst op om het aan een productie te koppelen.",
+    "linking": "Koppelen...",
+    "linked": "Gekoppeld",
+    "linkedProductions": "Koppel aan productie",
+    "linkedProductionsHint": "Koppel dit drukwerk aan een productie zodat het op de productiepagina verschijnt.",
+    "linkedThisSession": "Gekoppeld in deze sessie",
+    "noLinkedProductions": "Nog niet aan een productie gekoppeld",
+    "unlinkBtn": "Ontkoppelen",
+    "viewProduction": "Bekijk productiepagina"
   },
   "admin": {
+    "finish": "Voltooien",
+    "reset": "Herstellen",
+    "previous": "Vorige",
+    "next": "Volgende",
     "back": "Terug",
     "cancel": "Annuleren",
     "save": "Opslaan",
@@ -244,6 +304,10 @@
     "saved": "Opgeslagen",
     "edit": "Bewerken",
     "delete": "Verwijderen",
+    "series": {
+      "linkedProductions": "Gekoppelde producties",
+      "linkedProductionsHint": "Zoek en koppel producties aan deze reeks."
+    },
     "blogs": {
       "new": "Nieuw Verhaal",
       "edit": "Verhaal Bewerken",
@@ -256,6 +320,8 @@
       "saveBtn": "Wijzigingen Opslaan",
       "createError": "Het verhaal kon niet worden aangemaakt. Probeer het opnieuw.",
       "saveError": "De wijzigingen konden niet worden opgeslagen. Probeer het opnieuw.",
+      "createSuccess": "Verhaal aangemaakt.",
+      "saveSuccess": "Verhaal opgeslagen.",
       "sectionTitle": "Titel",
       "sectionContent": "Inhoud",
       "titleNl": "Titel (NL)",
@@ -273,6 +339,10 @@
       "deleteConfirmBtn": "Verwijderen",
       "titleEnRequired": "Engelse titel is nodig",
       "descriptionEnRequired": "Engelse beschrijving is nodig",
+      "restoreConfirm": "Ben je zeker dat je wil herstellen naar de laatste versie ?",
+      "restoreBtn": "Herstellen",
+      "deleteSuccess": "Verhaal \"{title}\" verwijderd.",
+      "deleteError": "Het verhaal kon niet worden verwijderd. Probeer het opnieuw.",
       "validation": {
         "titleNlRequired": "Een Nederlandstalige titel is verplicht.",
         "descriptionNlRequired": "Een Nederlandstalige omschrijving is verplicht."
@@ -317,24 +387,83 @@
         "cropMobile": "Mobiele crop",
         "cropMobileHint": "Portretcrop geoptimaliseerd voor smalle schermen",
         "cropNb": "NB Ready",
-        "cropNbHint": "Variant met neutrale achtergrond"
+        "cropNbHint": "Variant met neutrale achtergrond",
+        "metadataTitle": "Afbeeldingsmetadata",
+        "itemTitleNl": "Afbeeldingstitel (NL)",
+        "itemTitleEn": "Afbeeldingstitel (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata opgeslagen."
       },
       "linkToProduction": "Koppel aan productie",
       "linkBtn": "Koppelen",
-      "linkToProductionTitle": "Koppel aan productie",
       "linkToProductionSearch": "Zoek producties op titel...",
       "linkToProductionNoResults": "Geen producties gevonden",
-      "linkToProductionSuccess": "Succesvol gekoppeld aan productie",
-      "linkToProductionError": "Koppelen mislukt. Probeer opnieuw.",
-      "shareGallery": "Deel afbeeldingen met deze productie",
-      "shareGalleryHint": "De productie toont dan dezelfde foto's als dit verhaal.",
+      "linkToProductionCreateHint": "Sla het verhaal eerst op om het aan een productie te koppelen.",
       "linking": "Koppelen...",
       "linked": "Gekoppeld",
       "linkedProductions": "Koppel aan productie",
       "linkedProductionsHint": "Koppel dit verhaal aan een productie zodat het verschijnt op de productiepagina.",
       "linkedThisSession": "Gekoppeld in deze sessie",
       "noLinkedProductions": "Nog niet gekoppeld aan een productie",
+      "unlinkBtn": "Ontkoppelen",
       "viewProduction": "Bekijk productiepagina"
+    },
+    "parser": {
+      "title": "CSV parser",
+      "description": "Upload een CSV-bestand voor {target}-verwerking.",
+      "uploadCsv": "Upload {target} CSV",
+      "uploading": "Uploaden...",
+      "uploadSuccess": "{target} CSV succesvol geüpload.",
+      "uploadError": "{target} CSV kon niet worden geüpload.",
+      "headerError": "{target} CSV mist verplichte kolommen: {fields}.",
+      "headerFallbackFields": "onbekende kolommen",
+      "targets": {
+        "productions": "producties",
+        "events": "evenementen",
+        "tags": "tags",
+        "blogs": "verhalen",
+        "prices": "prijzen"
+      }
+    },
+    "dashboard": {
+      "welcome": "Welkom terug",
+      "overview": "Overzicht",
+      "quickLinks": "Snelkoppelingen",
+      "productions": "Producties",
+      "stories": "Verhalen",
+      "events": "Evenementen",
+      "prints": "Drukwerk",
+      "series": "Reeksen",
+      "tags": "Tags",
+      "accounts": "Accounts",
+      "changePassword": "Wachtwoord wijzigen",
+      "changePasswordHint": "Werk het wachtwoord van je admin-account bij",
+      "oldPassword": "Oud wachtwoord",
+      "oldPasswordPlaceholder": "Uw oud wachtwoord",
+      "oldPasswordWrong": "Oud wachtwoord is fout",
+      "newPassword": "Nieuw wachtwoord",
+      "newPasswordPlaceholder": "Minimaal 8 tekens",
+      "confirmPassword": "Bevestig nieuw wachtwoord",
+      "confirmPasswordPlaceholder": "Herhaal nieuw wachtwoord",
+      "updatePassword": "Wachtwoord bijwerken",
+      "updating": "Bijwerken…",
+      "passwordSuccess": "Wachtwoord succesvol bijgewerkt.",
+      "passwordTooShort": "Nieuw wachtwoord moet minimaal 8 tekens bevatten.",
+      "notAuthenticated": "Niet ingelogd.",
+      "productionsDesc": "Producties bekijken en bewerken",
+      "storiesDesc": "Blogberichten aanmaken en beheren",
+      "eventsDesc": "Evenementen bekijken en configureren",
+      "printsDesc": "Drukwerk uploaden en beheren",
+      "seriesDesc": "De publieke series-archief bekijken",
+      "tagsDesc": "Tag-metadata bekijken en beheren",
+      "accountsDesc": "Admin-accounts beheren"
+    },
+    "csvImport": {
+      "title": "CSV-importtools voor {target}",
+      "description": "Gebuik deze tools om {target} in bulk te importeren vanuit CSV-bestanden.",
+      "label": "CSV-import",
+      "blogDisclaimer": "Het wordt sterk aanbevolen om de aanmaaktool hierboven te gebruiken omdat opmaak gemakkelijker te bereiken is in het formulier en de CSV geen media kan toevoegen aan het verhaal. (Dit kan echter later worden toegevoegd vanaf de bewerkpagina.) "
     }
   },
   "login": {
@@ -369,6 +498,178 @@
       "sizeXXLarge": "Extra extra groot",
       "hr": "Horizontale lijn",
       "clearFormat": "Opmaak wissen"
+    }
+  },
+  "admin-productions": {
+    "deleteError": "De productie kon niet verwijderd worden.",
+    "deleteSuccess": "Productie \"{production}\" verwijderd.",
+    "deleteConfirm": "Weet je zeker dat je \"{production}\" permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "header_title": "Producties",
+    "description": "Beheer, bewerk en verwijder producties.",
+    "new": "Nieuwe productie",
+    "editTags": "Tags bewerken",
+    "warning-title": "Toekomstige productie",
+    "warning-description": "Deze productie heeft evenementen gepland in de toekomst. Wijzigingen kunnen overschreven worden wanneer externe gegevens worden gesynchroniseerd. Om onverwacht gedrag te voorkomen, zijn het bewerken en verwijderen van deze productie momenteel uitgeschakeld.",
+    "form-title": "Titel",
+    "form-description1": "Beschrijving 1",
+    "form-description2": "Beschrijving 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artiesten",
+    "form-description": "Beschrijving",
+    "preview": {
+      "title": "Voorbeeld titel",
+      "preview": "Live voorbeeld",
+      "hint": "Media & tags worden in latere stappen toegevoegd",
+      "bodyPlaceholder": "Begin met typen om live voorbeeld te zien",
+      "deleted": "Verwijderd"
+    },
+    "steps": {
+      "core": "Kerngegevens",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Evenementen",
+      "series": "Series"
+    },
+    "batch": {
+      "toggle": "Batchbewerking",
+      "mode-label": "Batchbewerkingsmodus",
+      "selected": "{count} geselecteerd",
+      "proceed": "Ga naar batchbewerking",
+      "hint": "Selecteer producties die je wilt bewerken",
+      "saveError": "Er is iets misgegaan bij het opslaan. Probeer het opnieuw.",
+      "productionsLabel": "producties",
+      "productionLabel": "productie",
+      "editingLabel": "Bewerken",
+      "backToSelection": "Terug naar selectie",
+      "tags": {
+        "title": "Tags",
+        "description": "Vooraf geselecteerde tags worden gedeeld door alle geselecteerde producties. Wijzigingen worden bij het opslaan toegepast op elke productie.",
+        "commonNotice": "Toont tags die gemeenschappelijk zijn voor alle {count} geselecteerde producties."
+      },
+      "series": {
+        "title": "Series",
+        "description": "Vooraf gekoppelde series zijn gemeenschappelijk voor alle geselecteerde producties. Wijzigingen worden bij het opslaan toegepast op elke productie.",
+        "commonNotice": "Toont series die gemeenschappelijk zijn voor alle {count} geselecteerde producties."
+      }
+    },
+    "create-title": "Nieuwe productie",
+    "edit-title": "Productie bewerken",
+    "events": {
+      "title": "Evenementen",
+      "hint": "Elk evenement is een afzonderlijke uitvoering van deze productie",
+      "emptyHint": "Een productie moet ten minste één evenement hebben",
+      "starttime": "Begin tijd",
+      "endtime": "Eind tijd",
+      "optional": "Optioneel",
+      "doors_at": "Deuren open",
+      "intermission_at": "Pauze",
+      "location": "Locatie",
+      "add": "Evenement toevoegen",
+      "new": "Nieuw",
+      "newEvent": "Nieuw evenement",
+      "searching": "Zoeken...",
+      "create": "Aanmaken",
+      "typeToSearch": "Typ om locaties te zoeken...",
+      "locationPlaceholder": "Zoek of creëer een locatie...",
+      "noDateYet": "Nog geen datum ingesteld",
+      "empty": "Nog geen evenementen",
+      "prices": {
+        "title": "Prijzen",
+        "empty": "Nog geen prijzen",
+        "add": "Nieuwe prijs"
+      }
+    },
+    "media": {
+      "title": "Titel",
+      "description": "Beschrijving",
+      "credits": "Credits",
+      "main": "Hoofdafbeelding",
+      "mainHint": "Wordt gebruikt als hoofdafbeelding op de productiepagina",
+      "new": "Nieuw",
+      "add": "Toevoegen",
+      "replaced": "Vervangen",
+      "replace": "Vervang",
+      "upload": "Upload",
+      "optional": "Optioneel",
+      "required": "Verplicht",
+      "noMain": "Nog geen hoofdafbeelding toegevoegd",
+      "carousel": "Carrouselafbeeldingen",
+      "carouselHint": "Wordt gebruikt als verzameling van extra foto’s.",
+      "carouselItem": "Carrouselafbeeldingen",
+      "noCarousel": "Nog geen Carrouselafbeeldingen toegevoegd",
+      "fallbackHint": "Valt terug op NL",
+      "prints": "Drukwerk",
+      "printsHint": "Koppel bestaand drukwerk aan deze productie",
+      "searchPrints": "Zoek drukwerk op titel...",
+      "noPrintsFound": "Geen drukwerk gevonden",
+      "searching": "Zoeken..."
+    },
+    "tags": {
+      "available": "Beschikbare tags",
+      "createNew": "Nieuwe tag",
+      "newPlaceholder": "Tag naam...",
+      "newTags": "Nieuwe tags",
+      "selected": "Geselecteerd",
+      "clearTags": "Alles wissen"
+    },
+    "series": {
+      "hint": "Beheer series voor deze productie",
+      "add": "Toevoegen",
+      "new": "Nieuw",
+      "none": "Nog geen series",
+      "search-placeholder": "Zoek bestaande series om te koppelen...",
+      "no-results": "Geen series gevonden",
+      "link": "Koppelen",
+      "linked": "Gekoppeld",
+      "unlink": "Ontkoppelen",
+      "delete": "Verwijder"
+    }
+  },
+  "error": {
+    "titleFallback": "Oeps!",
+    "subtitle": {
+      "404": "Je lijkt van het pad te zijn afgedwaald.",
+      "500": "Er is aan onze kant iets helemaal misgegaan.",
+      "default": "Nou, dit is onverwacht."
+    },
+    "message": {
+      "404": "De pagina die je zoekt bestaat niet of is verplaatst.",
+      "500": "Onze servers hebben een kleine hapering en we konden deze pagina niet laden.",
+      "default": "Er is iets misgegaan. Probeer het opnieuw."
+    },
+    "blame": "Geef in de tussentijd gerust de schuld aan een van onze developers :-)",
+    "goHome": "Breng me terug naar home",
+    "imgAlt": "Soort van geiten"
+  },
+  "csv": {
+    "templates": {
+      "productions": {
+        "description": "Gebruik dit bestand om producties aan te maken. Bevat velden voor ID, NL/EN titels en beschrijvingen, optionele artiest- en tagline-velden, credits en metadata."
+      },
+      "events": {
+        "description": "Gebruik dit bestand om evenementen toe te voegen. Bevat start-/eindtijden, optionele deur- en pauzetijden, locatievelden en verwijzing naar producties via legacy ID."
+      },
+      "tags": {
+        "description": "Gebruik dit bestand om tags aan te maken en aan producties te koppelen. Bevat Nederlandse en Engelse tag-namen en een komma-gescheiden lijst met productie-IDs."
+      },
+      "blogs": {
+        "description": "Gebruik dit bestand voor blogs (verhalen). Bevat NL/EN titels en omschrijvingen en koppeling naar een productie via legacy ID."
+      },
+      "prices": {
+        "description": "Gebruik dit bestand voor prijsinformatie. Bevat NL/EN prijsnaam, numerieke prijs en koppeling naar een evenement via legacy ID."
+      },
+      "labels": {
+        "mandatory": "Verplicht",
+        "nullable": "Optioneel",
+        "example": "Voorbeeld"
+      },
+      "general": {
+        "header": "Enkele disclaimers:",
+        "autoFill": "Als één van de taalvelden is ingevuld, wordt het andere automatisch ingevuld.",
+        "disclaimer": "Gebruik altijd de ID's uit vorige CSV-bestanden om nieuwe objecten te koppelen.",
+        "uniqueIds": "Zorg dat IDs uniek zijn voor evenementen en producties."
+      }
     }
   }
 }

@@ -20,7 +20,10 @@
     :src="formattedUrl"
     loading="lazy"
     @error="handleImageError"
-    :class="containerClass"
+    :class="[
+      containerClass,
+      props.objectFit ? `object-${props.objectFit}` : 'object-cover',
+    ]"
   />
   <ThumbnailPlaceholder
     v-else
@@ -39,6 +42,7 @@ const props = defineProps<{
   id?: number;
   src: MediaCrop | PrintItem | PrintItemView | null;
   size?: "sm" | "md" | "lg" | "fill" | number;
+  objectFit?: "contain" | "cover" | "fill" | "scale-down";
   showIcon?: boolean;
   showBorder?: boolean;
   rounded?: boolean;
@@ -66,9 +70,14 @@ const containerClass = computed(() => {
 const formattedUrl = computed(() => {
   if (!props.src) return undefined;
 
-  const url = formatUrl(props.src.url);
+  const url = props.src.url;
 
-  return url;
+  // This is necessary to handle the already formatted media from admin production form in the preview.
+  if (url.startsWith("blob:")) {
+    return url;
+  }
+
+  return formatUrl(url);
 });
 
 const isPdf = computed(() => {

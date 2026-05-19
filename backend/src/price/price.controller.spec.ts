@@ -84,7 +84,11 @@ describe("PriceController", () => {
 
   describe("getPrices", () => {
     it("should call getPrices on the service and return an array of flattened prices", async () => {
-      const filter: PaginationFilterDto = { limit: 10, page: 1 };
+      const filter: PaginationFilterDto = {
+        limit: 10,
+        page: 1,
+        descending: false,
+      };
       const langQuery: LanguageQueryDto = { lang: "en" };
 
       const rawPrices = [mockPrice];

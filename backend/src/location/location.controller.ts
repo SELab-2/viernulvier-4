@@ -14,12 +14,12 @@ import {
 import { LocationService } from "./location.service";
 import {
   CreateLocationDto,
+  FilterLocationDto,
   LanguageQueryDto,
   LocationDto,
   LocationViewDto,
-  PaginationFilterDto,
   ModifyLocationDto,
-  FilterLocationDto,
+  PaginationFilterDto,
 } from "../dto/dto";
 import {
   ApiBody,
@@ -31,11 +31,11 @@ import {
 import { ZodValidationPipe } from "nestjs-zod";
 import {
   CreateLocationSchema,
+  FilterLocationSchema,
   LanguageQuerySchema,
+  ModifyLocationSchema,
   PaginatedResponse,
   PaginationFilterSchema,
-  ModifyLocationSchema,
-  FilterLocationSchema,
 } from "@repo/common";
 import { ApiKeyGuard } from "../auth/authGuard";
 import { LanguageService } from "../util/language/language.service";
@@ -82,6 +82,7 @@ export class LocationController {
   /**
    * Responds to a GET to "/locations/:locationId"
    * @param locationId The ID of the Location we want to find.
+   * @param lang is the desired language.
    * @returns The Location with that ID.
    */
   @ApiOperation({ summary: "Fetches a Location by it's ID." })

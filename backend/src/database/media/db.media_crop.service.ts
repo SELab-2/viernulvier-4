@@ -14,21 +14,21 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "../db-utils";
-import { ResourceNotFoundException } from "../../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../../common/exceptions";
 
 @Injectable()
 export class MediaCropDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
-  // ----------------------------------------------------------------
-  // Media Crop
-  // ----------------------------------------------------------------
-
   /**
    * Get a single crop by its ID.
    * @param id The ID we're trying to fetch.
    * @returns The MediaCrop if there is one.
+   * @throws ResourceNotFoundException if there is no media crop with the given id. (404)
    */
   async getCropById(id: number): Promise<MediaCropDto> {
     const returningClause = generateReturningClause(MediaCropSchema);
@@ -83,6 +83,7 @@ export class MediaCropDatabaseService {
    * @param crop Must be of type CreateMediaCropDto.
    * (if left empty then it will not be linked to anything)
    * @returns The created crop.
+   * @throws SystemFailureException if something goes wrong while creating the object. (500)
    */
   async createCrop(crop: CreateMediaCropDto): Promise<MediaCropDto> {
     const { item_id, ...cropData } = crop;
@@ -112,9 +113,8 @@ export class MediaCropDatabaseService {
       values,
     );
 
-    // Throw BadRequest if creation failed.
     if (result.length === 0) {
-      throw new BadRequestException("Failed to create media crop.");
+      throw new SystemFailureException("Failed to create media crop.");
     }
 
     return result[0];
@@ -125,6 +125,8 @@ export class MediaCropDatabaseService {
    * @param cropId The crop to update.
    * @param crop Fields to update, all optional.
    * @returns The updated crop.
+   * @throws BadRequestException if no fields are provided to be updated. (400)
+   * @throws ResourceNotFoundException if there is no crop with the given id. (404)
    */
   async updateCrop(
     cropId: number,

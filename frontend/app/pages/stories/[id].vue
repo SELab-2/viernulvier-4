@@ -1,15 +1,29 @@
 <!--
   pages/stories/[id].vue
   ========================
-  Fetches a single blog post by ID with the current locale so the backend
-  returns a flat BlogView. Renders the HTML description from the rich-text
-  editor, including blue links, colors, headings, lists etc.
+  Public single-blog-post page.
+
+  Layout:
+  1. Hero banner  — full-width image with scrollable/fading title overlay.
+  2. Body article — rich-text content with a thin purple left accent line.
+  3. Credits bar  — image credits fetched from the linked media item, shown
+                    in a subtle strip at the bottom of the article when present.
+
+  The title uses the same scrollable + fade pattern as the admin preview
+  (AdminBlogsPreview.vue) so very long titles never overflow the hero section.
+
+  Data fetching:
+  - Blog data    : useBlogApi().getById  (lang-aware, returns BlogView)
+  - Gallery data : useBlogApi().getMediaGallery  (header crop + credits)
+  Both use useAsyncData so they are SSR-compatible and react to locale changes.
 -->
 <script lang="ts" setup>
-import { ChevronLeft } from "lucide-vue-next";
-import type { BlogView } from "@repo/common";
+import { computed, ref, watch } from "vue";
+import { ChevronLeft, ChevronDown, ChevronUp } from "lucide-vue-next";
+import type { BlogView, MediaItemView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useBlogApi } from "~/composables/blogs/useBlogApi";
+import { useProductionApi } from "~/composables/useProductionApi";
 import { useGallery } from "~/composables/media/useGallery";
 import { ROUTES } from "~/utils/routes";
 import { useBlogView } from "~/composables/blogs/useBlogView";
@@ -18,8 +32,30 @@ const route = useRoute();
 const { t, locale } = useI18n();
 const { getMainImageCrop } = useGallery();
 const { getById, getMediaGallery } = useBlogApi();
+const { getAll: getProductions } = useProductionApi();
 const { useBlogStory } = useBlogView();
+const router = useRouter();
 
+/** validation that id is only numbers */
+definePageMeta({
+  validate: async (route) => {
+    const raw = Array.isArray(route.params.id)
+      ? route.params.id[0]
+      : route.params.id;
+    return /^\d+$/.test(raw as string);
+  },
+});
+
+// Let's you go back to the previous page!
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push(ROUTES.stories.base); // Fallback
+  }
+};
+
+/** Parse the blog ID from the URL, returning null for non-numeric values. */
 const blogId = computed(() => {
   const raw = Array.isArray(route.params.id)
     ? route.params.id[0]
@@ -29,7 +65,8 @@ const blogId = computed(() => {
 });
 
 /** Get the main blog data and handle API nesting */
-const { data, pending, error } = await useAsyncData<BlogView | null>(
+const { data, status, error } = useAsyncData<BlogView | null>(
+  // Data fetching
   `blog-v3-${blogId.value}-${locale.value}`,
   async () => {
     if (blogId.value === null) return null;
@@ -42,10 +79,28 @@ const { data, pending, error } = await useAsyncData<BlogView | null>(
   { watch: [blogId, locale] },
 );
 
+// Watch the blog fetch to see if everything is fetched correctly.
+watch(
+  [status, error, data],
+  ([newStatus, newError, newBlog]) => {
+    // Once the fetch finishes, check if it failed or returned nothing
+    if (newStatus === "success" && !newBlog) {
+      showError({
+        statusCode: 404,
+        statusMessage: "Blog not found",
+        fatal: true,
+      });
+    } else if (newError) {
+      showError({ statusCode: 500, statusMessage: "API Error", fatal: true });
+    }
+  },
+  { immediate: true },
+);
+
 const blog = computed(() => data.value);
 
 /** Get the media gallery. */
-const { data: gallery } = await useAsyncData(
+const { data: gallery } = useAsyncData(
   `blog-gallery-${blogId.value}-${locale.value}`,
   async () => {
     if (!blogId.value) return null;
@@ -55,45 +110,111 @@ const { data: gallery } = await useAsyncData(
   { watch: [blogId, locale] },
 );
 
+/** Pagination state and logic for the "Show All" button.*/
+const LINKED_PRODUCTIONS_LIMIT = 3;
+const currentLimit = ref(LINKED_PRODUCTIONS_LIMIT);
+const totalLinkedProductions = ref(0);
+
+const productionListIsExpanded = computed(() => {
+  return (
+    currentLimit.value >= totalLinkedProductions.value &&
+    totalLinkedProductions.value > LINKED_PRODUCTIONS_LIMIT
+  );
+});
+
+const hasHiddenProductions = computed(() => {
+  return totalLinkedProductions.value > LINKED_PRODUCTIONS_LIMIT;
+});
+
+const toggleProductionsLimit = () => {
+  if (productionListIsExpanded.value) {
+    currentLimit.value = LINKED_PRODUCTIONS_LIMIT;
+  } else {
+    currentLimit.value = totalLinkedProductions.value;
+  }
+};
+
+/** Fetch linked productions using the blog_id filter */
+const { data: linkedProductions, status: productionsStatus } = useAsyncData(
+  `blog-productions-${blogId.value}-${locale.value}`,
+  async () => {
+    if (!blogId.value) return [];
+
+    try {
+      const resp = await getProductions({
+        productionFilters: {
+          blog_id: blogId.value,
+        },
+        paginationFilters: {
+          page: 0,
+          limit: currentLimit.value,
+          descending: false,
+        },
+        languageFilters: {
+          lang: locale.value as any,
+        },
+      });
+
+      const unwrapped = (resp as any)?.data ?? resp;
+      totalLinkedProductions.value = unwrapped?.totalItems ?? 0;
+      return unwrapped?.objects ?? [];
+    } catch (err) {
+      console.error("Failed to load related productions:", err);
+      return [];
+    }
+  },
+  { watch: [blogId, locale, currentLimit], default: () => [] },
+);
+
+// Derived values
 const { title, description: body, formattedDate } = useBlogStory(blog);
 
+/** Header crop used in the hero section. */
 const headerCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "FE3_header");
 });
 
+/**
+ * Credits string extracted from the first media item in the gallery.
+ * The backend returns credits as a localised object { nl: string, en: string }
+ * for raw MediaItem, or as a flat string for MediaItemView (when lang is passed).
+ * We handle both shapes here.
+ */
+const imageCredits = computed<string>(() => {
+  const firstItem = gallery.value?.items?.[0] as MediaItemView | undefined;
+  if (!firstItem?.credits) return "";
+
+  // Flat string (MediaItemView with lang param)
+  if (typeof firstItem.credits === "string") return firstItem.credits;
+
+  // Localised object (MediaItem without lang param, or mixed response)
+  const obj = firstItem.credits as { nl?: string; en?: string };
+  return obj[locale.value as "nl" | "en"] ?? obj.nl ?? "";
+});
+
+/** Estimated reading time in minutes (200 wpm). */
 const readingTime = computed(() => {
   if (!body.value) return 0;
   const words = body.value.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 });
 
+/** Sanitised rich-text body ready for v-html. */
 const cleanBody = computed(() => cleanText(body.value));
 </script>
 
 <template>
+  <!-- Loading skeleton-->
+  <BlogsStorySkeleton v-if="status === 'pending'" />
+
   <main
-    v-if="blog"
+    v-else-if="blog"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
-    <!-- Loading -->
-    <div v-if="pending" class="min-h-screen flex items-center justify-center">
-      <svg
-        class="w-6 h-6 animate-spin text-gray-400"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M21 12a9 9 0 1 1-6.219-8.56"
-          stroke="currentColor"
-          stroke-width="2"
-        />
-      </svg>
-    </div>
-
-    <!-- Not found -->
+    <!-- Not found / error state -->
     <div
-      v-else-if="error || !blog"
+      v-if="error || !blog"
       class="min-h-screen flex flex-col items-center justify-center gap-6 text-center px-4"
     >
       <p
@@ -109,67 +230,36 @@ const cleanBody = computed(() => cleanText(body.value));
       </NuxtLink>
     </div>
 
+    <!-- Main content -->
     <template v-else>
-      <!-- ── Hero banner ─────────────────────────────────────────── -->
-      <section
-        class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
-        :class="{ 'image-overlay text-white': headerCrop }"
+      <DetailHero
+        :id="blog.id"
+        :title="title"
+        :subtitle="formattedDate"
+        :header-crop="headerCrop"
+        :back-text="t('general.back')"
+        @back="goBack"
       >
-        <MediaDisplay
-          v-if="blog.id"
-          class="absolute inset-0 w-full h-full object-cover z-0"
-          :id="blog.id"
-          :src="headerCrop"
-        />
+        <template #meta>
+          <span
+            :class="headerCrop ? 'text-white' : 'text-foreground'"
+            class="text-[9px] font-black uppercase tracking-widest opacity-60"
+          >
+            {{ readingTime }} {{ t("stories.minRead") }}
+          </span>
+        </template>
+      </DetailHero>
 
-        <div class="relative z-10 page-container pb-12">
-          <div class="flex items-center gap-6 mb-8">
-            <NuxtLink
-              :to="ROUTES.stories.base"
-              class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
-              :class="headerCrop ? 'text-white' : 'text-foreground'"
-            >
-              <ChevronLeft :size="14" stroke-width="3" />
-              {{ t("general.back") }}
-            </NuxtLink>
-
-            <span
-              class="text-[9px] font-black uppercase tracking-widest opacity-60"
-              :class="headerCrop ? 'text-white' : 'text-foreground'"
-            >
-              {{ readingTime }} {{ t("stories.minRead") }}
-            </span>
-          </div>
-
-          <div>
-            <h1
-              class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
-              :class="[
-                title.length > 35
-                  ? 'text-4xl lg:text-6xl'
-                  : title.length > 25
-                    ? 'text-5xl lg:text-7xl'
-                    : 'text-6xl lg:text-8xl',
-              ]"
-            >
-              {{ title }}
-            </h1>
-
-            <p
-              v-if="formattedDate"
-              class="font-brand font-normal text-xl lg:text-2xl opacity-80 tracking-tight"
-            >
-              {{ formattedDate }}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="py-20">
+      <!-- Article body -->
+      <section class="pt-20 pb-10">
         <div class="page-container">
           <article class="relative w-full">
+            <!--
+              Decorative vertical line on the left (md+).
+              Uses a gradient so it fades in/out at the top and bottom.
+            -->
             <div
-              class="hidden md:block absolute left-0 top-0 bottom-0 w-px opacity-30"
+              class="hidden md:block absolute left-0 top-0 bottom-0 w-[2px] opacity-70"
               style="
                 background: linear-gradient(
                   to bottom,
@@ -182,28 +272,130 @@ const cleanBody = computed(() => cleanText(body.value));
             />
 
             <div class="md:pl-10 w-full">
+              <!-- Rich-text content (sanitised HTML from the editor) -->
               <div
                 class="description-content text-lg lg:text-xl leading-relaxed opacity-80 font-brand text-gray-800 dark:text-gray-200"
                 v-html="cleanBody"
-              ></div>
+              />
 
+              <!--
+                Image credits bar — only shown when the linked media item has credits.
+                Positioned at the bottom of the article, above the navigation footer.
+              -->
               <div
-                class="mt-20 pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
+                v-if="imageCredits"
+                class="mt-12 flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3"
               >
-                <span
-                  class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500"
+                <!-- Camera icon -->
+                <svg
+                  class="w-3.5 h-3.5 text-muted-foreground/60 mt-0.5 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
-                  {{ formattedDate }}
-                </span>
-                <NuxtLink
-                  :to="ROUTES.stories.base"
-                  class="flex items-center gap-1.5 px-4 py-2 rounded border font-brand font-black text-[9px] uppercase tracking-widest transition-all duration-150 border-gray-300 text-gray-600 hover:text-accent dark:border-[#2e3347] dark:text-gray-400"
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                  <circle cx="12" cy="13" r="4" stroke-linecap="round" />
+                </svg>
+                <p
+                  class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground/70 leading-relaxed"
                 >
-                  <ChevronLeft :size="12" /> {{ t("general.back") }}
-                </NuxtLink>
+                  {{ imageCredits }}
+                </p>
               </div>
             </div>
           </article>
+        </div>
+      </section>
+
+      <section
+        v-if="productionsStatus === 'pending' && linkedProductions.length === 0"
+        class="page-container py-10 flex justify-center"
+      >
+        <svg
+          class="w-6 h-6 animate-spin text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M21 12a9 9 0 1 1-6.219-8.56"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+        </svg>
+      </section>
+
+      <section
+        v-else-if="linkedProductions && linkedProductions.length > 0"
+        class="page-container pb-14 border-t border-gray-200 dark:border-[#2e3347] pt-10"
+      >
+        <div class="w-full">
+          <div class="mb-6">
+            <h2 class="subtitle">
+              {{ t("stories.relatedProductions") }}
+            </h2>
+          </div>
+
+          <div
+            class="flex flex-col gap-4 mb-6 transition-all duration-500 ease-in-out"
+          >
+            <ProductionListViewItem
+              v-for="production in linkedProductions"
+              :key="production.id"
+              :productionView="production"
+              :is-admin="false"
+            />
+          </div>
+
+          <div v-if="hasHiddenProductions" class="flex justify-center mt-10">
+            <button
+              @click="toggleProductionsLimit"
+              :disabled="productionsStatus === 'pending'"
+              class="text-[11px] font-black uppercase tracking-[2px] text-accent hover:underline outline-none flex items-center gap-2 disabled:opacity-50"
+            >
+              <template v-if="productionsStatus === 'pending'">
+                {{ t("stories.loading") }}
+              </template>
+              <template v-else-if="!productionListIsExpanded">
+                {{ t("general.showMore") }} ({{
+                  totalLinkedProductions - LINKED_PRODUCTIONS_LIMIT
+                }})
+                <ChevronDown :size="14" stroke-width="3" />
+              </template>
+              <template v-else>
+                {{ t("general.showLess") }}
+                <ChevronUp :size="14" stroke-width="3" />
+              </template>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Article footer: date + back link -->
+      <section class="pb-20">
+        <div class="page-container">
+          <div class="w-full">
+            <div
+              class="pt-8 border-t flex items-center justify-between border-gray-200 dark:border-[#2e3347]"
+            >
+              <span
+                class="font-brand font-black text-[9px] uppercase tracking-widest text-gray-400 dark:text-gray-500"
+              >
+                {{ formattedDate }}
+              </span>
+              <NuxtLink
+                :to="ROUTES.stories.base"
+                class="flex items-center gap-1.5 px-4 py-2 rounded border font-brand font-black text-[9px] uppercase tracking-widest transition-all duration-150 border-gray-300 text-gray-600 hover:text-accent dark:border-[#2e3347] dark:text-gray-400"
+              >
+                <ChevronLeft :size="12" /> {{ t("general.back") }}
+              </NuxtLink>
+            </div>
+          </div>
         </div>
       </section>
     </template>
@@ -211,12 +403,7 @@ const cleanBody = computed(() => cleanText(body.value));
 </template>
 
 <style scoped>
-/*
-  Rich-text body styles — applied to .description-content which wraps
-  HTML produced by the TipTap editor. The class name matches the template above.
-*/
-
-/* Links — blue + underline */
+/* Rich-text body styles */
 .description-content :deep(a) {
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -228,8 +415,6 @@ const cleanBody = computed(() => cleanText(body.value));
 .description-content :deep(a:hover) {
   opacity: 0.7;
 }
-
-/* Headings */
 .description-content :deep(h1) {
   font-size: 1.75rem;
   font-weight: 900;
@@ -247,13 +432,9 @@ const cleanBody = computed(() => cleanText(body.value));
   font-weight: 700;
   margin: 1rem 0 0.3rem;
 }
-
-/* Paragraphs */
 .description-content :deep(p) {
   margin: 0.75rem 0;
 }
-
-/* Lists */
 .description-content :deep(ul) {
   list-style: disc;
   padding-left: 1.5rem;
@@ -267,8 +448,6 @@ const cleanBody = computed(() => cleanText(body.value));
 .description-content :deep(li) {
   margin: 0.25rem 0;
 }
-
-/* Blockquote */
 .description-content :deep(blockquote) {
   border-left: 3px solid #9333ea;
   padding: 0.25rem 0 0.25rem 1rem;
@@ -279,8 +458,6 @@ const cleanBody = computed(() => cleanText(body.value));
 :global(.dark) .description-content :deep(blockquote) {
   color: #9ca3af;
 }
-
-/* Horizontal rule */
 .description-content :deep(hr) {
   border: none;
   border-top: 1px solid #e5e7eb;
@@ -289,8 +466,6 @@ const cleanBody = computed(() => cleanText(body.value));
 :global(.dark) .description-content :deep(hr) {
   border-top-color: #374151;
 }
-
-/* Inline formatting */
 .description-content :deep(strong) {
   font-weight: 700;
 }
@@ -303,19 +478,5 @@ const cleanBody = computed(() => cleanText(body.value));
 .description-content :deep(u) {
   text-decoration: underline;
   text-underline-offset: 2px;
-}
-
-.image-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
 }
 </style>

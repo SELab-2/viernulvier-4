@@ -16,26 +16,27 @@ import {
   PrintItemSchema,
 } from "@repo/common";
 import {
+  executeWithReferenceCheck,
   generateCountQuery,
   generateInsertClause,
   generateReturningClause,
   generateUpdateClause,
 } from "../db-utils";
-import { ResourceNotFoundException } from "../../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../../common/exceptions";
 
 @Injectable()
 export class MediaGalleryDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
-  // ----------------------------------------------------------------
-  // Media Gallery
-  // ----------------------------------------------------------------
-
   /**
    * Get a single gallery by its ID.
    * @param id The ID we're trying to fetch.
    * @returns The MediaGallery if there is one.
+   * @throws ResourceNotFoundException is there is no gallery with the given id. (404)
    */
   async getGalleryById(id: number): Promise<MediaGalleryDto> {
     const returningClause = generateReturningClause(MediaGallerySchema);
@@ -57,8 +58,7 @@ export class MediaGalleryDatabaseService {
 
   /**
    * Get galleries with pagination.
-   * @param amount Number of galleries per page (0 = all).
-   * @param page Page index (starts at 0).
+   * @param paginationFilter is the filter for pagination params.
    * @returns Paginated galleries.
    */
   async getGalleries(
@@ -92,6 +92,7 @@ export class MediaGalleryDatabaseService {
    * Create a new gallery.
    * @param gallery Must be of type CreateMediaGalleryDto.
    * @returns The created gallery.
+   * @throws SystemFailureException if something goes wrong while creating the object. (500)
    */
   async createGallery(
     gallery: CreateMediaGalleryDto,
@@ -108,7 +109,7 @@ export class MediaGalleryDatabaseService {
     const result = await this.db.query<MediaGalleryDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create gallery.");
+      throw new SystemFailureException("Failed to create gallery.");
     }
 
     return result[0];
@@ -119,6 +120,8 @@ export class MediaGalleryDatabaseService {
    * @param galleryId is the gallery you want to update
    * @param gallery Is the gallery object with the updates values
    * @returns the updates gallery
+   * @throws BadRequestException if there are no fields provided to be updated. (400)
+   * @throws ResourceNotFoundException if there is no gallery with the given id. (404)
    */
   async updateGallery(
     galleryId: number,
@@ -160,8 +163,6 @@ export class MediaGalleryDatabaseService {
     // * NOTE: We don't check for failures here for idempotency.
     await this.db.query(query, [id]);
   }
-
-  //--------------------- items: ------------------------//
 
   /**
    * Get all items belonging to a gallery.
@@ -219,7 +220,8 @@ export class MediaGalleryDatabaseService {
       VALUES ($1, $2) 
       ON CONFLICT DO NOTHING;
     `;
-    await this.db.query(query, [galleryId, itemId]);
+
+    await executeWithReferenceCheck(this.db.query(query, [galleryId, itemId]));
   }
 
   /**
@@ -254,7 +256,10 @@ export class MediaGalleryDatabaseService {
       VALUES ($1, $2) 
       ON CONFLICT DO NOTHING;
     `;
-    await this.db.query(query, [galleryId, printItemId]);
+
+    await executeWithReferenceCheck(
+      this.db.query(query, [galleryId, printItemId]),
+    );
   }
 
   /**

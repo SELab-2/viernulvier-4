@@ -22,6 +22,11 @@ const isDark = ref(false);
 const applyTheme = (dark: boolean) => {
   document.documentElement.classList.toggle("dark", dark);
   localStorage.setItem("theme", dark ? "dark" : "light");
+
+  // signal theme changed
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("theme-changed"));
+  }
 };
 
 const toggleDark = () => {

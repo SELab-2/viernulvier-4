@@ -1,7 +1,13 @@
 {
+  "english": "EN",
+  "dutch": "NL",
+  "home": {
+    "title": "Search the archive"
+  },
   "nav": {
     "home": "home",
     "archive": "archive",
+    "series": "series",
     "stories": "stories",
     "prints": "prints",
     "productions": "productions",
@@ -78,6 +84,9 @@
     "lightMode": "Light mode",
     "darkMode": "Dark mode",
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
+    "sortLabel": "Sort",
+    "relatedProductions": "Related productions",
+    "admin-description": "Manage, edit and delete stories.",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
@@ -149,13 +158,20 @@
     "dateAndTime": "Date & Time",
     "location": "Location",
     "price": "Price",
+    "showAll": "show all ({count})",
+    "hidePrices": "hide prices",
     "noEvents": "This production doesn't contain any events.",
     "stories": "Stories",
     "credits": "Credits",
-    "showExtraPrices": "+ {count} prices",
-    "hidePriceDetails": "hide details",
     "doors": "doors",
-    "break": "intermission"
+    "break": "intermission",
+    "prints": "prints",
+    "gallery": "gallery",
+    "gallery_nav": {
+      "prev": "Previous image",
+      "next": "Next image",
+      "go_to_slide": "Go to slide {slide}"
+    }
   },
   "general": {
     "back": "Back",
@@ -164,7 +180,11 @@
     "showMore": "Show more",
     "showLess": "Show less",
     "noStories": "This production doesn't contain any stories.",
-    "filters": "filters"
+    "filters": "filters",
+    "close": "close",
+    "results": "results",
+    "delete": "Delete",
+    "save": "Save"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -176,6 +196,7 @@
   "accounts": {
     "title": "Accounts",
     "subtitle": "Manage the accounts.",
+    "headerDescription": "Create, edit and control archive admin accounts.",
     "emptyTitle": "No accounts found",
     "emptyDescription": "There are no accounts available to display yet.",
     "username": "Username",
@@ -202,6 +223,18 @@
     "createSuccess": "Created account \"{username}\".",
     "deleteSuccess": "Deleted account \"{username}\"."
   },
+  "series": {
+    "header_title": "Series",
+    "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
+    "noProductions": "This series doesn't contain any productions.",
+    "noSeries": "No series",
+    "create": "New series",
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+    "deleteSuccess": "Deleted series \"{name}\".",
+    "no_results": "No series",
+    "title": "Series",
+    "admin-description": "Manage, edit and delete series."
+  },
   "prints": {
     "types": {
       "all": "All",
@@ -212,14 +245,19 @@
     },
     "form": {
       "title": "Title",
+      "description": "Description",
       "type": "Print type",
       "file": "File",
       "fileRequired": "Upload a file.",
       "uploadError": "Failed to upload file.",
-      "deleteConfirm": "Are you sure you want to delete {name}?"
+      "loadError": "Failed to load print.",
+      "deleteConfirm": "Are you sure you want to delete {name}?",
+      "edit": "Apply changes",
+      "reset": "Reset"
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
+    "admin-description": "Manage, edit and delete prints.",
     "files": "Files",
     "noFilesCat": "This category doesn't contain any files.",
     "noFiles": "No files available.",
@@ -227,15 +265,36 @@
     "remaining": "remaining",
     "delete": "Delete",
     "download": "Download",
+    "edit": "Edit print",
+    "create": "Upload",
     "loading": "Loading...",
     "retry": "Try again",
     "noPrints": "No prints",
     "pagination": "Pagination",
     "page_label": "Page",
     "of_pages": "of {total}",
-    "add": "add"
+    "new": "New print",
+    "description": "description",
+    "relatedProductions": "Related productions",
+    "linkToProduction": "Link to Production",
+    "linkBtn": "Link",
+    "linkToProductionSearch": "Search productions by title...",
+    "linkToProductionNoResults": "No productions found",
+    "linkToProductionCreateHint": "Save the print first to link it to a production.",
+    "linking": "Linking...",
+    "linked": "Linked",
+    "linkedProductions": "Link to Production",
+    "linkedProductionsHint": "Link this print to a production so it appears on the production page.",
+    "linkedThisSession": "Linked this session",
+    "noLinkedProductions": "Not linked to any production yet",
+    "unlinkBtn": "Unlink",
+    "viewProduction": "View production page"
   },
   "admin": {
+    "finish": "Finish",
+    "reset": "Reset",
+    "previous": "Previous",
+    "next": "Next",
     "back": "Back",
     "cancel": "Cancel",
     "save": "Save",
@@ -243,6 +302,10 @@
     "saved": "Saved",
     "edit": "Edit",
     "delete": "Delete",
+    "series": {
+      "linkedProductions": "Linked Productions",
+      "linkedProductionsHint": "Search and link productions to this series."
+    },
     "blogs": {
       "new": "New Story",
       "edit": "Edit Story",
@@ -255,6 +318,8 @@
       "saveBtn": "Save Changes",
       "createError": "Could not create the story. Please try again.",
       "saveError": "Could not save the changes. Please try again.",
+      "createSuccess": "Story created.",
+      "saveSuccess": "Story saved.",
       "sectionTitle": "Title",
       "sectionContent": "Content",
       "titleNl": "Title (NL)",
@@ -272,6 +337,10 @@
       "deleteConfirmBtn": "Delete",
       "titleEnRequired": "English title is required",
       "descriptionEnRequired": "English description is required",
+      "restoreConfirm": "Are you sure you want to restore the last version ?",
+      "restoreBtn": "Restore",
+      "deleteSuccess": "Deleted story \"{title}\".",
+      "deleteError": "Could not delete the story. Please try again.",
       "validation": {
         "titleNlRequired": "A Dutch title is required.",
         "descriptionNlRequired": "A Dutch description is required."
@@ -316,24 +385,83 @@
         "cropMobile": "Mobile crop",
         "cropMobileHint": "Portrait crop optimised for narrow screens",
         "cropNb": "NB Ready",
-        "cropNbHint": "Neutral-background variant"
+        "cropNbHint": "Neutral-background variant",
+        "metadataTitle": "Image metadata",
+        "itemTitleNl": "Image title (NL)",
+        "itemTitleEn": "Image title (EN)",
+        "itemCreditsNl": "Credits (NL)",
+        "itemCreditsEn": "Credits (EN)",
+        "metadataSaved": "Metadata saved."
       },
       "linkToProduction": "Link to Production",
       "linkBtn": "Link",
-      "linkToProductionTitle": "Link to Production",
       "linkToProductionSearch": "Search productions by title...",
       "linkToProductionNoResults": "No productions found",
-      "linkToProductionSuccess": "Successfully linked to production",
-      "linkToProductionError": "Failed to link. Please try again.",
-      "shareGallery": "Share images with this production",
-      "shareGalleryHint": "The production will show the same photos as this story.",
+      "linkToProductionCreateHint": "Save the story first to link it to a production.",
       "linking": "Linking...",
       "linked": "Linked",
       "linkedProductions": "Link to Production",
       "linkedProductionsHint": "Link this story to a production so it appears on the production page.",
       "linkedThisSession": "Linked this session",
       "noLinkedProductions": "Not linked to any production yet",
+      "unlinkBtn": "Unlink",
       "viewProduction": "View production page"
+    },
+    "parser": {
+      "title": "CSV parser",
+      "description": "Upload a CSV file for {target} parsing.",
+      "uploadCsv": "Upload {target} CSV",
+      "uploading": "Uploading...",
+      "uploadSuccess": "Successfully uploaded {target} CSV.",
+      "uploadError": "Could not upload {target} CSV.",
+      "headerError": "{target} CSV is missing required headers: {fields}.",
+      "headerFallbackFields": "unknown headers",
+      "targets": {
+        "productions": "productions",
+        "events": "events",
+        "tags": "tags",
+        "blogs": "stories",
+        "prices": "prices"
+      }
+    },
+    "dashboard": {
+      "welcome": "Welcome back",
+      "overview": "Overview",
+      "quickLinks": "Quick links",
+      "productions": "Productions",
+      "stories": "Stories",
+      "events": "Events",
+      "prints": "Prints",
+      "series": "Series",
+      "tags": "Tags",
+      "accounts": "Accounts",
+      "changePassword": "Change password",
+      "changePasswordHint": "Update your admin account password",
+      "oldPassword": "Old password",
+      "oldPasswordPlaceholder": "Your old password",
+      "oldPasswordWrong": "Old password is wrong",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "Minimum 8 characters",
+      "confirmPassword": "Confirm new password",
+      "confirmPasswordPlaceholder": "Repeat new password",
+      "updatePassword": "Update password",
+      "updating": "Updating…",
+      "passwordSuccess": "Password updated successfully.",
+      "passwordTooShort": "New password must be at least 8 characters.",
+      "notAuthenticated": "Not authenticated.",
+      "productionsDesc": "Browse and edit productions",
+      "storiesDesc": "Create and manage blog posts",
+      "eventsDesc": "View and configure events",
+      "printsDesc": "Upload and manage printed materials",
+      "seriesDesc": "Explore the public series archive",
+      "tagsDesc": "Review and manage tag metadata",
+      "accountsDesc": "Manage admin accounts"
+    },
+    "csvImport": {
+      "title": "CSV import tools for {target}",
+      "description": "Use these tools to bulk import {target} from CSV files.",
+      "label": "CSV import",
+      "blogDisclaimer": "It is highly recommended to use the creation tool above because formatting is easier to achieve in the form and the CSV cannot add media to the story. (This can however be added later from the edit page.) "
     }
   },
   "login": {
@@ -368,6 +496,178 @@
       "sizeXXLarge": "XX-Large",
       "hr": "Horizontal line",
       "clearFormat": "Clear formatting"
+    }
+  },
+  "admin-productions": {
+    "deleteError": "Could not delete production.",
+    "deleteSuccess": "Deleted production \"{production}\".",
+    "deleteConfirm": "Are you sure you want to delete \"{production}\"? This cannot be undone.",
+    "header_title": "Productions",
+    "description": "Manage, edit and delete productions.",
+    "new": "New production",
+    "editTags": "Edit tags",
+    "warning-title": "Future production",
+    "warning-description": "This production has events scheduled in the future. Any changes may be overwritten when external data is synchronized. To prevent unexpected behavior, editing and deleting this production are currently disabled.",
+    "form-title": "Title",
+    "form-description1": "Description 1",
+    "form-description2": "Description 2",
+    "form-tagline": "Tagline",
+    "form-credits": "Credits",
+    "form-artists": "Artists",
+    "form-description": "Description",
+    "preview": {
+      "title": "Title placeholder",
+      "preview": "Live preview",
+      "hint": "Images & tags added in later steps",
+      "bodyPlaceholder": "Start typing to see a live preview",
+      "deleted": "Deleted"
+    },
+    "steps": {
+      "core": "Core info",
+      "tags": "Tags",
+      "media": "Media",
+      "events": "Events",
+      "series": "Series"
+    },
+    "batch": {
+      "toggle": "Batch Edit",
+      "mode-label": "Batch Edit Mode",
+      "selected": "{count} selected",
+      "proceed": "Go to Batch Edit",
+      "hint": "Select productions you want to edit",
+      "saveError": "Something went wrong while saving. Please try again.",
+      "productionsLabel": "productions",
+      "productionLabel": "production",
+      "editingLabel": "Editing",
+      "backToSelection": "Back to selection",
+      "tags": {
+        "title": "Tags",
+        "description": "Pre-selected tags are shared by all selected productions. Changes apply to every production on save.",
+        "commonNotice": "Showing tags common to all {count} selected productions."
+      },
+      "series": {
+        "title": "Series",
+        "description": "Pre-linked series are common to all selected productions. Changes apply to every production on save.",
+        "commonNotice": "Showing series common to all {count} selected productions."
+      }
+    },
+    "create-title": "New production",
+    "edit-title": "Edit production",
+    "events": {
+      "title": "Events",
+      "hint": "Each event is a single occurrence of this production",
+      "emptyHint": "A production must have at least one event",
+      "starttime": "Start time",
+      "endtime": "End time",
+      "optional": "Optional",
+      "doors_at": "Doors open",
+      "intermission_at": "Intermission",
+      "location": "Location",
+      "add": "Add event",
+      "new": "New",
+      "newEvent": "New event",
+      "searching": "Searching...",
+      "create": "Create",
+      "typeToSearch": "Type to search locations...",
+      "locationPlaceholder": "Search or create a location...",
+      "noDateYet": "No date set yet",
+      "empty": "No events yet",
+      "prices": {
+        "title": "Prices",
+        "empty": "No prices yet",
+        "add": "New price"
+      }
+    },
+    "media": {
+      "title": "Title",
+      "description": "Description",
+      "credits": "Credits",
+      "main": "Main image",
+      "mainHint": "Used as the hero image on the production page",
+      "new": "New",
+      "add": "Add",
+      "replaced": "Replaced",
+      "replace": "Replace",
+      "upload": "Upload",
+      "optional": "Optional",
+      "required": "Required",
+      "noMain": "No main image added yet",
+      "carousel": "Carousel images",
+      "carouselHint": "Used as a collection of additional photos",
+      "carouselItem": "Carousel image",
+      "noCarousel": "No carousel images added yet",
+      "fallbackHint": "Falls back to NL",
+      "prints": "Prints",
+      "printsHint": "Link existing print items to this production",
+      "searchPrints": "Search prints by title...",
+      "noPrintsFound": "No prints found",
+      "searching": "Searching..."
+    },
+    "tags": {
+      "available": "Available tags",
+      "createNew": "New tag",
+      "newPlaceholder": "Tag name...",
+      "newTags": "New tags",
+      "selected": "Selected",
+      "clearTags": "Clear all"
+    },
+    "series": {
+      "hint": "Manage series for this production",
+      "add": "Add",
+      "new": "New",
+      "none": "No series yet",
+      "search-placeholder": "Search existing series to link...",
+      "no-results": "No series found",
+      "link": "Link",
+      "linked": "Linked",
+      "unlink": "Unlink",
+      "delete": "Delete"
+    }
+  },
+  "error": {
+    "titleFallback": "Oops!",
+    "subtitle": {
+      "404": "You seem to have wandered off the path.",
+      "500": "Something went completely wrong on our end.",
+      "default": "Well, this is unexpected."
+    },
+    "message": {
+      "404": "The page you are looking for doesn't exist or has been moved.",
+      "500": "Our servers are having a little hiccup and we couldn't load this page.",
+      "default": "Something went wrong. Please try again."
+    },
+    "blame": "Please blame one or more of our developers in the meantime :-)",
+    "goHome": "Take Me Back Home",
+    "imgAlt": "Kinda goats"
+  },
+  "csv": {
+    "templates": {
+      "productions": {
+        "description": "Use this file to create productions. Contains fields for ID, NL/EN titles and descriptions, optional artist and tagline fields, credits and metadata."
+      },
+      "events": {
+        "description": "Use this file to add events. Contains start/end times, optional doors/intermission times, location fields and a reference to productions via legacy ID."
+      },
+      "tags": {
+        "description": "Use this file to create tags and attach them to productions. Contains Dutch and English tag names and a comma-separated list of production IDs."
+      },
+      "blogs": {
+        "description": "Use this file for blogs (stories). Contains NL/EN titles and descriptions and a link to a production via legacy ID."
+      },
+      "prices": {
+        "description": "Use this file for price information. Contains NL/EN price name, numeric price and a link to an event via legacy ID."
+      },
+      "labels": {
+        "mandatory": "Mandatory",
+        "nullable": "Optional",
+        "example": "Example"
+      },
+      "general": {
+        "header": "A few disclaimers:",
+        "autoFill": "If either language field is filled in, the other will be filled automatically.",
+        "disclaimer": "Always use the IDs from previous CSV files to link to new objects.",
+        "uniqueIds": "Ensure IDs are unique for events and productions."
+      }
     }
   }
 }

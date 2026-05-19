@@ -2,11 +2,11 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreatePrintItemDto,
-  PrintItemDto,
+  FilterPrintItemDto,
   ModifyPrintItemDto,
   PaginationFilterDto,
+  PrintItemDto,
   ReplacePrintItemDto,
-  FilterPrintItemDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common/src/objects/pagination";
 import {
@@ -16,21 +16,21 @@ import {
   generateUpdateClause,
 } from "./db-utils";
 import { Language, PrintItemSchema, SUPPORTED_LANGUAGES } from "@repo/common";
-import { ResourceNotFoundException } from "../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../common/exceptions";
 
 @Injectable()
 export class PrintItemDatabaseService {
   // need to give a db service as param when used. -> see db.service.
   constructor(private db: DbService) {}
 
-  // ----------------------------------------------------------------
-  // Print Item
-  // ----------------------------------------------------------------
-
   /**
    * Get a single print item by its ID.
    * @param id The ID we're trying to fetch.
    * @returns The PrintItem if there is one.
+   * @throws ResourceNotFoundException if there is no printitem with the provided id. (404)
    */
   async getPrintItemById(id: number): Promise<PrintItemDto> {
     const returningClause = generateReturningClause(PrintItemSchema);
@@ -117,7 +117,7 @@ export class PrintItemDatabaseService {
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     // Ordering (relevance vs date)
-    let orderClause = "";
+    let orderClause: string;
     if (printItemFilters.is_suggestion && printItemFilters.title) {
       const relevanceMath = generateRelevanceClause(
         printItemFilters.title,
@@ -155,6 +155,7 @@ export class PrintItemDatabaseService {
    * Create a new print item and link it to 1 or more gallery(s).
    * @param item Must be of type CreatePrintItemDto.
    * @returns The created PrintItem.
+   * @throws SystemFailureException if something went wrong while creating the object. (500)
    */
   async createPrintItem(item: CreatePrintItemDto): Promise<PrintItemDto> {
     const { gallery_ids, ...itemData } = item;
@@ -185,7 +186,7 @@ export class PrintItemDatabaseService {
     );
 
     if (result.length === 0) {
-      throw new BadRequestException("Failed to create PrintItem.");
+      throw new SystemFailureException("Failed to create PrintItem.");
     }
 
     return result[0];
@@ -196,6 +197,8 @@ export class PrintItemDatabaseService {
    * @param itemId The item to update.
    * @param item Fields to update, all optional.
    * @returns The updated print item.
+   * @throws BadRequestException if there were no fields provided to be updated. (400)
+   * @throws ResourceNotFoundException if the provided id is not linked with a print item. (404)
    */
   async updatePrintItem(
     itemId: number,

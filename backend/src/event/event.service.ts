@@ -4,10 +4,10 @@ import {
   EventDto,
   FilterEventDto,
   LocationDto,
+  ModifyEventDto,
   PaginationFilterDto,
   PriceDto,
   ReplaceEventDto,
-  ModifyEventDto,
 } from "../dto/dto";
 import { EventDatabaseService } from "../database/db.event.service";
 import { PaginatedResponse } from "@repo/common";
@@ -34,7 +34,6 @@ export class EventService {
    * @param id ID of the event as it was in the URL.
    * @returns The EventDto object with corresponding ID
    */
-  // TODO: return multiple events with same production id
   async getEventById(id: number): Promise<EventDto> {
     return await this.eventDBService.getEventById(id);
   }
@@ -91,8 +90,8 @@ export class EventService {
   async linkEventToLocation(
     eventId: number,
     locationId: number,
-  ): Promise<boolean> {
-    return await this.eventDBService.linkEventToLocation(eventId, locationId);
+  ): Promise<void> {
+    await this.eventDBService.linkEventToLocation(eventId, locationId);
   }
 
   /**
