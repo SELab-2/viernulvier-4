@@ -45,7 +45,7 @@ const mockSuccessResponse = {
   },
 };
 
-describe.skip("Prints Overview Page (Integration)", () => {
+describe("Prints Overview Page (Integration)", () => {
   beforeEach(() => {
     // Reset mocks and window dimensions before each test
     mockGetAll.mockReset();
