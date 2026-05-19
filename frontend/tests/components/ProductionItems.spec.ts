@@ -1,5 +1,5 @@
 import { flushPromises, mount } from "@vue/test-utils";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { nextTick, ref } from "vue";
 import ProductionGridViewItem from "../../app/components/ProductionGridViewItem.vue";
 import ProductionListViewItem from "../../app/components/ProductionListViewItem.vue";
@@ -73,6 +73,10 @@ describe("production item components", () => {
     });
     getMediaGallery.mockResolvedValue(gallery);
     getMainImageCrop.mockReturnValue({ url: "/macbeth.jpg" });
+  });
+
+  afterEach(async () => {
+    await flushPromises();
   });
 
   it("loads grid item tags, events, gallery, and links to the detail page", async () => {

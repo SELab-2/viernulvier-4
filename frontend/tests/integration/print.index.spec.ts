@@ -65,6 +65,7 @@ describe("Prints Overview Page (Integration)", () => {
   });
 
   afterEach(() => {
+    await flushPromises();
     wrapper?.unmount();
     wrapper = undefined;
     consoleErrorSpy.mockRestore();
