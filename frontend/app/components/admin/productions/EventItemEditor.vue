@@ -29,13 +29,16 @@ const emit = defineEmits<{
   update: [draft: ActiveEventDraft];
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const locationApi = useLocationApi();
 
 const locationQuery = ref("");
 const locationResults = ref<ExistingLocation[]>([]);
 const isSearching = ref(false);
 const showDropdown = ref(false);
+
+const pendingLocationNL = ref("");
+const isInputtingENLocation = ref(false);
 
 const inputWrapper = ref<HTMLElement | null>(null);
 const dropdownEl = ref<HTMLElement | null>(null);
@@ -44,6 +47,8 @@ const dropdownStyles = ref<Record<string, string>>({});
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 watch(locationQuery, (val) => {
+  if (isInputtingENLocation.value) return; // Don't search when inputting translation
+
   if (searchTimeout) clearTimeout(searchTimeout);
   if (val.trim().length === 0) {
     locationResults.value = [];
@@ -58,18 +63,28 @@ async function fetchLocations(query: string) {
   try {
     const res = await locationApi.getAll({
       locationFilters: { location: query },
-      languageFilters: { lang: "nl" },
+      languageFilters: { lang: locale.value as "nl" | "en" },
     });
 
     const raw = (res && (res.data as any)) || null;
     const maybeData = raw?.data ?? raw?.objects ?? raw;
     const itemsArr = Array.isArray(maybeData) ? maybeData : [];
 
-    locationResults.value = itemsArr.map((loc: any) => ({
-      type: "existing" as const,
-      id: Number(loc.id),
-      label: loc.location ?? loc.name ?? String(loc.id ?? ""),
-    }));
+    locationResults.value = itemsArr.map((loc: any) => {
+      // Correctly extract localized label for existing location
+      let label = "";
+      if (typeof loc.location === "object" && loc.location !== null) {
+        label = loc.location[locale.value] || loc.location.nl || String(loc.id);
+      } else {
+        label = loc.location ?? loc.name ?? String(loc.id ?? "");
+      }
+
+      return {
+        type: "existing" as const,
+        id: Number(loc.id),
+        label,
+      };
+    });
 
     showDropdown.value = true;
     updateDropdownPosition();
@@ -100,6 +115,7 @@ function onClickOutside(e: MouseEvent) {
     return;
   }
   showDropdown.value = false;
+  isInputtingENLocation.value = false;
 }
 
 function updateDropdownPosition() {
@@ -125,14 +141,26 @@ function selectExistingLocation(loc: ExistingLocation) {
   emit("update", { ...props.event, location: loc });
   locationQuery.value = "";
   showDropdown.value = false;
+  isInputtingENLocation.value = false;
 }
 
 function confirmNewLocation() {
   const label = locationQuery.value.trim();
   if (!label) return;
-  const loc: EventLocationDraft = { type: "new", label };
+  pendingLocationNL.value = label;
+  isInputtingENLocation.value = true;
+  locationQuery.value = "";
+}
+
+function finalizeNewLocation() {
+  const nl = pendingLocationNL.value;
+  const en = locationQuery.value.trim(); // Optional, fallback handled in orchestrator
+
+  const loc: EventLocationDraft = { type: "new", label: { nl, en } };
   emit("update", { ...props.event, location: loc });
   locationQuery.value = "";
+  pendingLocationNL.value = "";
+  isInputtingENLocation.value = false;
   showDropdown.value = false;
 }
 
@@ -205,6 +233,9 @@ function removePrice(index: number) {
 const locationDisplay = computed(() => {
   const loc = props.event.location;
   if (!loc) return null;
+  if (loc.type === "new") {
+    return loc.label.nl + (loc.label.en ? ` / ${loc.label.en}` : "");
+  }
   return loc.label;
 });
 
@@ -212,18 +243,28 @@ const isNewLocation = computed(() => props.event.location?.type === "new");
 
 function toDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
-  return iso.slice(0, 16);
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const h = pad(d.getHours());
+  const min = pad(d.getMinutes());
+  return `${y}-${m}-${day}T${h}:${min}`;
 }
 
 function fromDatetimeLocal(val: string): string | null {
   if (!val) return null;
-  return `${val}:00.000Z`;
+  // Send as the literal local time string without 'Z' or offset.
+  // The backend schema now uses { local: true } to accept this.
+  return `${val}:00.000`;
 }
 
 function fromDatetimeLocalRequired(val: string): string {
   if (!val) return "";
-  if (val.endsWith("Z")) return val;
-  return `${val}:00.000Z`;
+  return `${val}:00.000`;
 }
 </script>
 
@@ -378,9 +419,21 @@ function fromDatetimeLocalRequired(val: string): string {
             v-model="locationQuery"
             type="text"
             class="h-9 w-full rounded-md border border-border bg-background py-0 pr-3 pl-8 text-sm text-foreground transition-colors focus:border-foreground focus:outline-none"
-            :placeholder="t('admin-productions.events.locationPlaceholder')"
+            :placeholder="
+              isInputtingENLocation
+                ? t(
+                    'admin-productions.events.locationPlaceholderEN',
+                    'EN (OPTIONAL)',
+                  )
+                : t('admin-productions.events.locationPlaceholder')
+            "
             @focus="
-              locationQuery.length > 0 ? (showDropdown = true) : undefined
+              locationQuery.length > 0 || isInputtingENLocation
+                ? (showDropdown = true)
+                : undefined
+            "
+            @keydown.enter="
+              isInputtingENLocation ? finalizeNewLocation() : undefined
             "
           />
         </div>
@@ -408,7 +461,10 @@ function fromDatetimeLocalRequired(val: string): string {
               </div>
 
               <template v-else>
-                <div class="max-h-64 overflow-auto">
+                <div
+                  v-if="!isInputtingENLocation"
+                  class="max-h-64 overflow-auto"
+                >
                   <button
                     v-for="loc in locationResults"
                     :key="loc.id"
@@ -421,24 +477,42 @@ function fromDatetimeLocalRequired(val: string): string {
                 </div>
 
                 <div
-                  v-if="locationQuery.trim().length > 0"
+                  v-if="
+                    locationQuery.trim().length > 0 || isInputtingENLocation
+                  "
                   :class="{
-                    'border-t border-border': locationResults.length > 0,
+                    'border-t border-border':
+                      locationResults.length > 0 && !isInputtingENLocation,
                   }"
                 >
                   <button
                     class="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted"
-                    @mousedown.prevent="confirmNewLocation"
+                    @mousedown.prevent="
+                      isInputtingENLocation
+                        ? finalizeNewLocation()
+                        : confirmNewLocation()
+                    "
                   >
                     <Plus
                       :size="11"
                       class="shrink-0 text-muted-foreground"
                       stroke-width="2.5"
                     />
-                    <span>
+                    <span v-if="!isInputtingENLocation">
                       {{ t("admin-productions.events.create") }}
                       <span class="font-semibold">
                         "{{ locationQuery.trim() }}"
+                      </span>
+                    </span>
+                    <span v-else>
+                      {{
+                        t(
+                          "admin-productions.events.confirmEN",
+                          "Confirm English: ",
+                        )
+                      }}
+                      <span class="font-semibold">
+                        "{{ locationQuery.trim() || pendingLocationNL }}"
                       </span>
                     </span>
                   </button>
@@ -447,7 +521,8 @@ function fromDatetimeLocalRequired(val: string): string {
                 <div
                   v-if="
                     locationResults.length === 0 &&
-                    locationQuery.trim().length === 0
+                    locationQuery.trim().length === 0 &&
+                    !isInputtingENLocation
                   "
                   class="px-4 py-3 text-[10px] font-medium text-muted-foreground"
                 >

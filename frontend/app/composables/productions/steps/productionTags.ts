@@ -8,7 +8,7 @@ export type ExistingTag = {
 
 export type NewTag = {
   type: "new";
-  label: string;
+  label: { nl: string; en: string };
 };
 
 export type ProductionTagItem = ExistingTag | NewTag;
@@ -18,7 +18,7 @@ export type ProductionTagsForm = ProductionTagItem[];
 export interface ProductionTagsPayload {
   connect: number[];
   disconnect: number[];
-  create: string[];
+  create: { nl: string; en: string }[];
 }
 
 export function useProductionTags(): ProductionFormStep<
@@ -70,28 +70,43 @@ export function useProductionTags(): ProductionFormStep<
     if (!original.value) {
       return draft.value.map((tag) => {
         if (tag.type === "new") {
-          return `new:${tag.label}`;
+          return `new:${tag.label.nl}`;
         }
-
-        return `selected:${tag.label}`;
+        // Narrowing for type safety
+        return `selected:${tag.id}`;
       });
     }
 
     const changes: string[] = [];
 
-    const current = new Map(draft.value.map((tag) => [tag.label, tag]));
+    const originalIds = new Set(
+      original.value
+        .filter((tag): tag is ExistingTag => tag.type === "existing")
+        .map((tag) => tag.id),
+    );
+    const currentIds = new Set(
+      draft.value
+        .filter((tag): tag is ExistingTag => tag.type === "existing")
+        .map((tag) => tag.id),
+    );
 
-    const previous = new Map(original.value.map((tag) => [tag.label, tag]));
-
-    for (const [label, tag] of current) {
-      if (!previous.has(label)) {
-        changes.push(tag.type === "new" ? `new:${label}` : `selected:${label}`);
+    for (const tag of draft.value) {
+      if (tag.type === "new") {
+        changes.push(`new:${tag.label.nl}`);
+      } else if (tag.type === "existing") {
+        // Tag is now narrowed to ExistingTag
+        if (!originalIds.has(tag.id)) {
+          changes.push(`selected:${tag.id}`);
+        }
       }
     }
 
-    for (const [label] of previous) {
-      if (!current.has(label)) {
-        changes.push(`unselected:${label}`);
+    for (const tag of original.value) {
+      if (tag.type === "existing") {
+        // Tag is now narrowed to ExistingTag
+        if (!currentIds.has(tag.id)) {
+          changes.push(`unselected:${tag.id}`);
+        }
       }
     }
 

@@ -36,7 +36,9 @@ const { t } = useI18n();
 
 // Flag indicating the user explicitly added blank placeholders via "Add event".
 // This allows showing new empty drafts only after the user requested them.
-const showNewPlaceholders = ref(false);
+// We initialize it to true if there are already new drafts in the model,
+// ensuring they stay visible when the user navigates back to this step.
+const showNewPlaceholders = ref(props.modelValue.some((e) => e.kind === "new"));
 
 // Update helpers (emit back to parent)
 function update(val: ProductionEventsForm) {
@@ -128,7 +130,10 @@ function eventLabel(event: ActiveEventDraft, position: number): string {
     return t("admin-productions.events.newEvent") + ` ${position}`;
   }
   try {
-    return new Date(start).toLocaleString("nl-BE", {
+    const d = new Date(start);
+    if (isNaN(d.getTime())) return start;
+
+    return d.toLocaleString("nl-BE", {
       weekday: "short",
       day: "numeric",
       month: "short",
@@ -142,7 +147,14 @@ function eventLabel(event: ActiveEventDraft, position: number): string {
 }
 
 function locationLabel(event: ActiveEventDraft): string | null {
-  return event.location?.label ?? null;
+  const loc = event.location;
+  if (!loc) return null;
+
+  if (loc.type === "new") {
+    return loc.label.nl + (loc.label.en ? ` / ${loc.label.en}` : "");
+  }
+
+  return loc.label;
 }
 </script>
 

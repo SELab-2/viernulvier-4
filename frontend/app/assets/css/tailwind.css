@@ -272,6 +272,14 @@
   }
 }
 
+/* Hiding native browser date picker icon (because we are used the one from lucide-vue) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
 /* ── Utilities ───────────────────────────────────────────────────── */
 .font-brand {
   font-family: "ABCMonumentGrotesk", sans-serif;

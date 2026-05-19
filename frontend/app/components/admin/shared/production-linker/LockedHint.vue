@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  type: "blog" | "print";
+  type: "blog" | "print" | "series";
 }>();
 
 const { t } = useI18n();
