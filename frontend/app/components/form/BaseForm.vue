@@ -234,7 +234,7 @@ function collectMultiSelectRef(el: any) {
       <!-- Submit button -->
       <button
         type="submit"
-        class="h-10 w-60 px-6 inline-flex items-center justify-center rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition cursor-pointer"
+        class="h-10 w-60 px-6 inline-flex items-center justify-center rounded-lg bg-accent-fixed border-2 border-accent-fixed text-accent-fixed-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition cursor-pointer"
       >
         {{ submitLabel ?? t("baseform.submitbutton") }}
       </button>
