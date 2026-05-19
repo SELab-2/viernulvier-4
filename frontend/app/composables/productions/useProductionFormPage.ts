@@ -205,15 +205,18 @@ export function useProductionFormPage(mode: ProductionFormMode) {
    * - Otherwise return linkLocationId (may be null).
    */
   async function resolveLocationId(
-    createLocation: string | null,
+    createLocation: { nl: string; en: string } | null,
     linkLocationId: number | null,
   ): Promise<number | null> {
     if (createLocation !== null) {
       const res = await locationApi.create({
-        location: { nl: createLocation, en: createLocation },
+        location: {
+          nl: createLocation.nl,
+          en: createLocation.en || createLocation.nl,
+        },
       });
       if (!res.data)
-        throw new Error(`Failed to create location: ${createLocation}`);
+        throw new Error(`Failed to create location: ${createLocation.nl}`);
       return res.data.id;
     }
 
@@ -299,11 +302,18 @@ export function useProductionFormPage(mode: ProductionFormMode) {
   }
 
   // ─── Refactor helpers to reduce duplication ─────────────────────────────────
-  async function createTagIds(labels: string[]): Promise<number[]> {
+  async function createTagIds(
+    labels: { nl: string; en: string }[],
+  ): Promise<number[]> {
     return Promise.all(
       labels.map(async (label) => {
-        const created = await tagApi.create({ tag: { nl: label, en: label } });
-        if (!created.data) throw new Error(`Failed to create tag: ${label}`);
+        const created = await tagApi.create({
+          tag: {
+            nl: label.nl,
+            en: label.en || label.nl,
+          },
+        });
+        if (!created.data) throw new Error(`Failed to create tag: ${label.nl}`);
         return created.data.id;
       }),
     );
