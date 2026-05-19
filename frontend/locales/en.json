@@ -86,6 +86,7 @@
     "headerDescription": "DISCOVER ARTICLES, INTERVIEWS AND STORIES FROM THE VIERNULVIER ARCHIVE.",
     "sortLabel": "Sort",
     "relatedProductions": "Related productions",
+    "admin-description": "Manage, edit and delete stories.",
     "calendar": {
       "toggle": "Date",
       "filtered": "Filtered",
@@ -230,7 +231,9 @@
     "create": "New series",
     "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
     "deleteSuccess": "Deleted series \"{name}\".",
-    "no_results": "No series"
+    "no_results": "No series",
+    "title": "Series",
+    "admin-description": "Manage, edit and delete series."
   },
   "prints": {
     "types": {
@@ -254,6 +257,7 @@
     },
     "title": "Prints",
     "headerDescription": "DISCOVER POSTERS, BROCHURES AND PROGRAM BOOKLETS FROM THE VIERNULVIER ARCHIVE.",
+    "admin-description": "Manage, edit and delete prints.",
     "files": "Files",
     "noFilesCat": "This category doesn't contain any files.",
     "noFiles": "No files available.",
@@ -499,6 +503,7 @@
     "deleteSuccess": "Deleted production \"{production}\".",
     "deleteConfirm": "Are you sure you want to delete \"{production}\"? This cannot be undone.",
     "header_title": "Productions",
+    "description": "Manage, edit and delete productions.",
     "new": "New production",
     "editTags": "Edit tags",
     "warning-title": "Future production",

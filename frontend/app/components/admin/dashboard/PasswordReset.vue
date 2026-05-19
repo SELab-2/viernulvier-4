@@ -207,7 +207,7 @@ const inputClass =
       <button
         type="submit"
         :disabled="submitting || !newPassword || !confirmPassword"
-        class="mt-1 w-full rounded-lg bg-accent text-white text-[10px] font-black uppercase tracking-[0.1em] h-9 transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed"
+        class="mt-1 w-full rounded-lg bg-accent-fixed text-white text-[10px] font-black uppercase tracking-[0.1em] h-9 transition-all hover:opacity-85 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <span v-if="submitting">{{ t("admin.dashboard.updating") }}</span>
         <span v-else>{{ t("admin.dashboard.updatePassword") }}</span>

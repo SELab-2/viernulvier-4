@@ -155,7 +155,7 @@ const activeCrop = computed(() => crops.value[currentIndex.value]);
       >
         <div class="space-y-3">
           <h1
-            class="text-8xl md:text-7xl font-extrabold tracking-tight text-foreground drop-shadow-lg transition-colors"
+            class="text-8xl md:text-7xl font-extrabold tracking-tight text-foreground drop-shadow-lg transition-colors font-brand font-black uppercase leading-[0.85] tracking-[-3px] italic"
           >
             {{ t("home.title") }}
           </h1>

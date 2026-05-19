@@ -284,7 +284,7 @@ const hiddenSeries = computed(() => {
             <button
               v-if="isValid(tag.tag)"
               type="button"
-              class="bg-accent text-white px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px] cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-110 hover:shadow-2xl hover:-translate-y-1"
+              class="bg-accent-fixed text-accent-fixed-foreground px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-[1px] cursor-pointer transition-all duration-200 hover:brightness-110 hover:scale-110 hover:shadow-2xl hover:-translate-y-1"
               @click="goToTaggedSearch(tag.id)"
             >
               {{ tag.tag }}

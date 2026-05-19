@@ -138,7 +138,7 @@ const buttonLabel = computed(() => {
       <button
         type="button"
         :disabled="!props.isValid || props.loading"
-        class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-accent text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-accent/20"
+        class="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-lg bg-accent-fixed text-white font-brand font-black text-[11px] uppercase tracking-widest transition-all duration-150 hover:opacity-80 disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-accent/20"
         @click="emit('submit')"
       >
         <!-- Spinner replaces the check icon while the API call is in flight -->
