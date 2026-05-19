@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { computed } from "vue";
-import { ChevronLeft } from "lucide-vue-next";
-import type { ProductionView, TagView } from "@repo/common";
+import { ref, computed, watch } from "vue";
+import type { ProductionView, TagView, SeriesView } from "@repo/common";
 import { cleanText } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
+import { X } from "lucide-vue-next";
 
 /** validation that id is only numbers */
 definePageMeta({
@@ -18,6 +18,7 @@ definePageMeta({
 const { t, locale } = useI18n();
 const router = useRouter();
 const { getById, getTags, getBlogs, getMediaGallery } = useProductionApi();
+const { getAll: getAllSeries } = useSeriesApi();
 const { getMainImageCrop, getCarouselImageCrops } = useGallery();
 const { tagIds } = useArchiveView();
 const route = useRoute();
@@ -77,6 +78,25 @@ watch(
     }
   },
   { immediate: true },
+);
+
+/** get series */
+const { data: linkedSeries } = useAsyncData<SeriesView[]>(
+  `prod-series-${route.params.id}-${locale.value}`,
+  async () => {
+    if (!productionId.value) return [];
+    try {
+      const resp = await getAllSeries({
+        seriesFilters: { production_id: productionId.value } as any,
+        languageFilters: { lang: locale.value },
+      });
+      return (resp.data as any)?.objects ?? resp.data ?? [];
+    } catch (err) {
+      console.error("Error loading linked series on detail page:", err);
+      return [];
+    }
+  },
+  { watch: [productionId, locale], default: () => [] },
 );
 
 /** Get tags and remove empty ones */
@@ -161,10 +181,9 @@ const headerCrop = computed(() => {
 });
 
 // carousel
-
 const carouselImages = computed(() => {
   if (!gallery.value || !gallery.value.items) return [];
-  return getCarouselImageCrops(gallery.value, "hd_ready"); // of FE3_2by1
+  return getCarouselImageCrops(gallery.value, "hd_ready");
 });
 
 /**
@@ -175,6 +194,17 @@ const isValid = (val: any) => {
   const s = String(val).trim().toUpperCase();
   return s !== "" && s !== "N/A" && s !== "UNDEFINED";
 };
+
+const showAllSeries = ref(false);
+const maxVisibleSeries = 2;
+
+const visibleSeries = computed(() => {
+  return linkedSeries.value?.slice(0, maxVisibleSeries) || [];
+});
+
+const hiddenSeries = computed(() => {
+  return linkedSeries.value?.slice(maxVisibleSeries) || [];
+});
 </script>
 
 <template>
@@ -185,65 +215,67 @@ const isValid = (val: any) => {
     v-else-if="production"
     class="min-h-screen bg-white dark:bg-[#1e2230] text-gray-900 dark:text-gray-100"
   >
-    <!-- Hero -->
-    <section
-      :class="{ 'image-overlay text-white': headerCrop }"
-      class="relative h-[400px] lg:h-[500px] w-full flex items-end overflow-hidden bg-muted"
+    <DetailHero
+      :id="production.id"
+      :title="production.titel"
+      :subtitle="
+        isValid(production.artist) && production.artist !== production.titel
+          ? production.artist
+          : null
+      "
+      :header-crop="headerCrop"
+      :back-text="t('general.back')"
+      @back="goBack"
     >
-      <MediaDisplay
-        :id="production.id"
-        :src="headerCrop"
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-
-      <div class="relative z-10 page-container pb-12">
-        <div class="flex items-center gap-4 mb-8">
-          <button
-            :class="headerCrop ? 'text-white' : 'text-foreground'"
-            class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors"
-            @click="goBack()"
-          >
-            <ChevronLeft :size="14" stroke-width="3" />
-            {{ t("general.back") }}
-          </button>
-
+      <template #meta>
+        <div class="flex flex-wrap items-center gap-2">
           <span
             v-if="isValid(production.performer_type)"
             :class="
               headerCrop
                 ? 'border-white text-white'
-                : 'border-foreground text-foreground'
+                : 'border-foreground text-foreground dark:text-gray-100'
             "
             class="border border-[1.5px] px-2 py-1 text-[10px] font-black uppercase rounded-sm"
           >
             {{ production.performer_type }}
           </span>
-        </div>
 
-        <div>
-          <h1
-            :class="[
-              production.titel.length > 35
-                ? 'text-4xl lg:text-6xl'
-                : production.titel.length > 25
-                  ? 'text-5xl lg:text-7xl'
-                  : 'text-6xl lg:text-8xl',
-            ]"
-            class="font-brand font-black uppercase leading-[0.85] tracking-[-3px] mb-4 italic"
-          >
-            {{ production.titel }}
-          </h1>
-          <p
-            v-if="
-              isValid(production.artist) &&
-              production.artist !== production.titel
-            "
-            class="text-2xl lg:text-3xl font-medium opacity-80"
-          >
-            {{ production.artist }}
-          </p>
-        </div>
+          <template v-if="visibleSeries.length">
+            <SeriesLabel
+              v-for="serie in visibleSeries"
+              :key="serie.id"
+              :serie="serie"
+            />
+          </template>
 
+          <template v-if="showAllSeries && hiddenSeries.length">
+            <SeriesLabel
+              v-for="serie in hiddenSeries"
+              :key="serie.id"
+              :serie="serie"
+              class="animate-in fade-in zoom-in-95 duration-150"
+            />
+          </template>
+
+          <button
+            v-if="hiddenSeries.length"
+            type="button"
+            @click="showAllSeries = !showAllSeries"
+            class="flex items-center gap-1 bg-background/80 backdrop-blur-md text-foreground border border-border/40 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm cursor-pointer transition-colors hover:bg-background/90 hover:text-accent"
+          >
+            <span v-if="!showAllSeries">+{{ hiddenSeries.length }}</span>
+            <template v-else>
+              <X :size="10" stroke-width="3" class="shrink-0" />
+              <span class="transition-colors hover:text-accent">
+                {{ t("general.showLess") }}
+              </span>
+            </template>
+          </button>
+        </div>
+      </template>
+
+      <template #footer>
         <div
           v-if="tags?.some((t) => isValid(t.tag))"
           class="flex flex-wrap gap-3 mt-8"
@@ -259,8 +291,8 @@ const isValid = (val: any) => {
             </button>
           </template>
         </div>
-      </div>
-    </section>
+      </template>
+    </DetailHero>
 
     <section class="py-20">
       <div class="page-container">
@@ -273,9 +305,7 @@ const isValid = (val: any) => {
             </p>
           </div>
 
-          <ProductionDescription
-            :html-content="cleanText(production.description1)"
-          />
+          <Description :html-content="cleanText(production.description1)" />
         </div>
 
         <div class="mt-12 mb-16">
@@ -291,7 +321,7 @@ const isValid = (val: any) => {
           </div>
         </div>
 
-        <ProductionDescription
+        <Description
           v-if="isValid(production.description2)"
           :html-content="cleanText(production.description2)"
           variant="boxed"
@@ -338,18 +368,4 @@ const isValid = (val: any) => {
   </main>
 </template>
 
-<style scoped>
-.image-overlay::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.2) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
-}
-</style>
+<style scoped></style>

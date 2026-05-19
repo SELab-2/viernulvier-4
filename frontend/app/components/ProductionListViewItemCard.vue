@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import type { ProductionView, TagView, SeriesView } from "@repo/common";
 import { computed } from "vue";
-import type { ProductionView, TagView } from "@repo/common";
 import type { MediaCrop } from "@repo/common";
 import { ROUTES } from "~/utils/routes";
 import { useI18n } from "vue-i18n";
 import { Check } from "lucide-vue-next";
+import SeriesDropdown from "~/components/SeriesDropdown.vue";
 
 const { t } = useI18n();
 
@@ -18,6 +19,7 @@ const props = withDefaults(
     dateRangeText: string;
     tags: TagView[];
     isFutureProduction: boolean;
+    linkedSeriesList: SeriesView[];
   }>(),
   {
     isAdmin: false,
@@ -47,39 +49,44 @@ const isSelectableInBatchMode = computed(() => !props.isFutureProduction);
         : 'border-card-border hover:border-ring hover:shadow-sm hover:bg-card-hover',
     ]"
   >
-    <MediaDisplay
-      :id="props.productionView.id"
-      :src="mainCrop"
-      size="md"
-      :rounded="true"
-      :show-icon="true"
-      class="object-cover"
-    />
+    <div class="shrink-0">
+      <MediaDisplay
+        :id="props.productionView.id"
+        :src="props.mainCrop"
+        size="md"
+        :rounded="true"
+        :show-icon="true"
+        class="object-cover"
+      />
+    </div>
 
     <div class="flex-1 min-w-0">
       <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0 max-w-[60%]">
-          <h3
-            class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate transition-colors"
-            :class="{ 'text-primary': props.isBatchMode && selected }"
-          >
-            {{ props.productionView.titel }}
-          </h3>
+        <div class="min-w-0 max-w-[70%]">
+          <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap min-w-0">
+            <h3
+              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate min-w-0 transition-colors"
+              :class="{ 'text-primary': props.isBatchMode && selected }"
+            >
+              {{ props.productionView.titel }}
+            </h3>
 
+            <SeriesDropdown :series-list="props.linkedSeriesList" />
+          </div>
           <!-- Artist -->
           <p
             v-if="
               props.productionView.artist &&
               props.productionView.artist !== 'N/A'
             "
-            class="text-sm text-muted-foreground leading-normal line-clamp-1"
+            class="mt-0.5 text-sm text-muted-foreground leading-normal line-clamp-1"
           >
             {{ props.productionView.artist }}
           </p>
 
           <p class="mt-2 text-sm text-muted-foreground flex items-center gap-2">
             <svg
-              class="w-4 h-4 text-muted-foreground"
+              class="w-4 h-4 text-muted-foreground shrink-0"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -92,7 +99,7 @@ const isSelectableInBatchMode = computed(() => !props.isFutureProduction);
                 stroke-linejoin="round"
               />
             </svg>
-            <span>{{ dateRangeText }}</span>
+            <span>{{ props.dateRangeText }}</span>
           </p>
         </div>
 
@@ -127,7 +134,7 @@ const isSelectableInBatchMode = computed(() => !props.isFutureProduction);
           <template v-else>
             <!-- WARNING -->
             <AdminWarningButton
-              v-if="isFutureProduction"
+              v-if="props.isFutureProduction"
               :title="t('admin-productions.warning-title')"
               :description="t('admin-productions.warning-description')"
             />
@@ -156,12 +163,12 @@ const isSelectableInBatchMode = computed(() => !props.isFutureProduction);
       <div class="mt-2 overflow-hidden">
         <div class="flex items-center gap-2">
           <TagPill
-            v-for="tag in tags"
+            v-for="tag in props.tags"
             :key="tag.id"
             :label="typeof tag.tag === 'string' ? tag.tag : ''"
           />
           <TagPill
-            v-if="tags.length === 0"
+            v-if="props.tags.length === 0"
             :label="'/'"
             class="opacity-0 pointer-events-none"
           />
