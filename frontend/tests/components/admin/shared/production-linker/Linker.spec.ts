@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createI18n } from "vue-i18n";
 import type { ProductionView } from "@repo/common";
-import LinkToProduction from "../../../../app/components/admin/blogs/LinkToProduction.vue";
-import * as useProductionApiModule from "../../../../app/composables/useProductionApi";
+import Linker from "../../../../../app/components/admin/shared/production-linker/Linker.vue";
+import * as useProductionApiModule from "../../../../../app/composables/useProductionApi";
 
-vi.mock("../../../../app/composables/useProductionApi", () => ({
+vi.mock("../../../../../app/composables/useProductionApi", () => ({
   useProductionApi: vi.fn(),
 }));
 
@@ -15,16 +15,17 @@ const i18n = createI18n({
   messages: {
     en: {
       admin: {
-        blogs: {
-          linkedProductions: "Linked Productions",
-          linkedProductionsHint: "Hint text",
+        shared: {
+          productionLinker: {
+            title: "Linked Productions",
+          },
         },
       },
     },
   },
 });
 
-describe("AdminBlogsLinkToProduction", () => {
+describe("AdminSharedProductionLinker", () => {
   const mockProductionApi = {
     getAll: vi.fn(),
     linkBlog: vi.fn(),
@@ -39,38 +40,38 @@ describe("AdminBlogsLinkToProduction", () => {
     localStorage.clear();
   });
 
-  it("shows locked hint if blogId is not provided", () => {
-    const wrapper = mount(LinkToProduction, {
+  it("shows locked hint if entityId is not provided", () => {
+    const wrapper = mount(Linker, {
       global: {
         plugins: [i18n],
         stubs: {
           FormSectionsSectionCard: { template: "<div><slot /></div>" },
-          AdminBlogsLinkLockedHint: {
+          AdminSharedProductionLinkerLockedHint: {
             template: '<div class="locked-hint">Locked</div>',
           },
         },
       },
-      props: { blogId: null },
+      props: { entityId: null, type: "blog" },
     });
 
     expect(wrapper.find(".locked-hint").exists()).toBe(true);
   });
 
-  it("shows search dropdown and list if blogId is provided", () => {
-    const wrapper = mount(LinkToProduction, {
+  it("shows search dropdown and list if entityId is provided", () => {
+    const wrapper = mount(Linker, {
       global: {
         plugins: [i18n],
         stubs: {
           FormSectionsSectionCard: { template: "<div><slot /></div>" },
-          AdminBlogsLinkSearchDropdown: {
+          AdminSharedProductionLinkerSearchDropdown: {
             template: '<div class="search-dropdown"></div>',
           },
-          AdminBlogsLinkLinkedList: {
+          AdminSharedProductionLinkerLinkedList: {
             template: '<div class="linked-list"></div>',
           },
         },
       },
-      props: { blogId: 123 },
+      props: { entityId: 123, type: "blog" },
     });
 
     expect(wrapper.find(".search-dropdown").exists()).toBe(true);
@@ -81,20 +82,20 @@ describe("AdminBlogsLinkToProduction", () => {
     const stored = [{ id: 1, titel: "Prod 1" }];
     localStorage.setItem("vnv-blog-linked-prods-123", JSON.stringify(stored));
 
-    const wrapper = mount(LinkToProduction, {
+    const wrapper = mount(Linker, {
       global: {
         plugins: [i18n],
         stubs: {
           FormSectionsSectionCard: { template: "<div><slot /></div>" },
-          AdminBlogsLinkSearchDropdown: true,
-          AdminBlogsLinkLinkedList: {
+          AdminSharedProductionLinkerSearchDropdown: true,
+          AdminSharedProductionLinkerLinkedList: {
             template:
               '<div class="linked-list"><div v-for="p in productions" :key="p.id" class="item">{{ p.titel }}</div></div>',
             props: ["productions"],
           },
         },
       },
-      props: { blogId: 123 },
+      props: { entityId: 123, type: "blog" },
     });
 
     await flushPromises();
@@ -103,20 +104,20 @@ describe("AdminBlogsLinkToProduction", () => {
   });
 
   it("calls linkBlog API and updates list when handleLink is called", async () => {
-    const wrapper = mount(LinkToProduction, {
+    const wrapper = mount(Linker, {
       global: {
         plugins: [i18n],
         stubs: {
           FormSectionsSectionCard: { template: "<div><slot /></div>" },
-          AdminBlogsLinkSearchDropdown: {
+          AdminSharedProductionLinkerSearchDropdown: {
             template:
               "<button @click=\"$emit('link', { id: 1, titel: 'New Prod' })\">Link</button>",
-            name: "AdminBlogsLinkSearchDropdown",
+            name: "AdminSharedProductionLinkerSearchDropdown",
           },
-          AdminBlogsLinkLinkedList: true,
+          AdminSharedProductionLinkerLinkedList: true,
         },
       },
-      props: { blogId: 123 },
+      props: { entityId: 123, type: "blog" },
     });
 
     (mockProductionApi.linkBlog as Mock).mockResolvedValue({ data: {} });
@@ -136,19 +137,19 @@ describe("AdminBlogsLinkToProduction", () => {
     const stored = [{ id: 1, titel: "Prod 1" }];
     localStorage.setItem("vnv-blog-linked-prods-123", JSON.stringify(stored));
 
-    const wrapper = mount(LinkToProduction, {
+    const wrapper = mount(Linker, {
       global: {
         plugins: [i18n],
         stubs: {
           FormSectionsSectionCard: { template: "<div><slot /></div>" },
-          AdminBlogsLinkSearchDropdown: true,
-          AdminBlogsLinkLinkedList: {
+          AdminSharedProductionLinkerSearchDropdown: true,
+          AdminSharedProductionLinkerLinkedList: {
             template: "<button @click=\"$emit('unlink', 1)\">Unlink</button>",
-            name: "AdminBlogsLinkLinkedList",
+            name: "AdminSharedProductionLinkerLinkedList",
           },
         },
       },
-      props: { blogId: 123 },
+      props: { entityId: 123, type: "blog" },
     });
 
     await flushPromises();

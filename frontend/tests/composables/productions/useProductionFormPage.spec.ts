@@ -285,7 +285,7 @@ describe("useProductionFormPage", () => {
       },
     });
     tags.extractPayload.mockReturnValue({
-      create: ["NewTag"],
+      create: [{ nl: "NewTag", en: "NewTag" }],
       connect: [1],
       disconnect: [2],
     });

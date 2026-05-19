@@ -21,7 +21,10 @@ const i18n = createI18n({
           optional: "Optional",
           location: "Location",
           locationPlaceholder: "Search location...",
+          locationPlaceholderEN: "EN (OPTIONAL)",
           prices: { title: "Prices", add: "Add Price", empty: "No prices" },
+          doors_at: "Doors At",
+          intermission_at: "Intermission At",
         },
       },
     },
@@ -89,7 +92,7 @@ describe("AdminProductionsEventItemEditor", () => {
 
     expect(wrapper.emitted("update")).toBeTruthy();
     const emitted = wrapper.emitted("update")?.[0][0] as NewEventDraft;
-    expect(emitted.starttime).toBe("2023-12-02T21:00:00.000Z");
+    expect(emitted.starttime).toBe("2023-12-02T21:00:00.000");
   });
 
   it("searches and selects a location", async () => {

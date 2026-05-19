@@ -17,7 +17,8 @@ const i18n = createI18n({
         tags: {
           available: "Available Tags",
           createNew: "Create New",
-          newPlaceholder: "New tag...",
+          newPlaceholderNL: "NL Name",
+          newPlaceholderEN: "EN Name",
           newTags: "New Tags",
           selected: "selected",
           clearTags: "Clear all",
@@ -124,14 +125,23 @@ describe("AdminProductionsTagSelector", () => {
       .find((b) => b.text().includes("Create New"));
     await createBtn?.trigger("click");
 
-    const input = wrapper.find("input");
-    expect(input.exists()).toBe(true);
+    const inputNL = wrapper.find('input[placeholder="NL Name"]');
+    expect(inputNL.exists()).toBe(true);
 
-    await input.setValue("New Custom Tag");
-    await input.trigger("keydown.enter");
+    await inputNL.setValue("New Custom Tag NL");
+    await inputNL.trigger("keydown.enter");
+
+    const inputEN = wrapper.find('input[placeholder="EN Name"]');
+    expect(inputEN.exists()).toBe(true);
+
+    await inputEN.setValue("New Custom Tag EN");
+    await inputEN.trigger("keydown.enter");
 
     expect(wrapper.emitted("change")?.[0][0]).toEqual([
-      { type: "new", label: "New Custom Tag" },
+      {
+        type: "new",
+        label: { nl: "New Custom Tag NL", en: "New Custom Tag EN" },
+      },
     ]);
   });
 
