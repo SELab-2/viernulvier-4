@@ -247,11 +247,6 @@ const hasBadge = computed(() =>
 
 /** Height class applied to interactive controls so they line up. */
 const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
-
-// Sort select hover state — CSS :hover alone can't be used because native <select>
-// keeps :focus after clicking, leaving the hover inversion stuck while the dropdown is open.
-const sortHovered = ref(false);
-const sortOpen = ref(false);
 </script>
 
 <template>
@@ -276,26 +271,63 @@ const sortOpen = ref(false);
         />
       </div>
 
-      <!-- Sort order select — same visual style as the filter button -->
-      <div class="shrink-0" :class="rowHeight">
-        <label class="sr-only">{{ sortLabel ?? t("stories.sortLabel") }}</label>
-        <select
-          v-model="activeSortOrder"
-          :class="[
-            'h-full px-5 rounded-md border-2 border-[var(--foreground)] text-[10px] font-brand font-black uppercase tracking-widest focus:outline-none cursor-pointer transition-all appearance-none',
-            sortHovered && !sortOpen
-              ? 'bg-[var(--foreground)] text-[var(--background)]'
-              : 'bg-[var(--background)] text-[var(--foreground)]',
-          ]"
-          @mouseenter="sortHovered = true"
-          @mouseleave="sortHovered = false"
-          @mousedown="sortOpen = true"
-          @blur="sortOpen = false"
+      <!-- Sort order toggle button — same visual style as the filter button -->
+      <button
+        type="button"
+        :class="['btn-outline shrink-0', rowHeight]"
+        :aria-label="
+          activeSortOrder === 'newest'
+            ? t('stories.sortNewest')
+            : t('stories.sortOldest')
+        "
+        :title="
+          activeSortOrder === 'newest'
+            ? t('stories.sortNewest')
+            : t('stories.sortOldest')
+        "
+        @click="
+          activeSortOrder = activeSortOrder === 'newest' ? 'oldest' : 'newest'
+        "
+      >
+        <!-- Newest first: bars wide→narrow + down arrow -->
+        <svg
+          v-if="activeSortOrder === 'newest'"
+          width="16"
+          height="14"
+          viewBox="0 0 16 14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
         >
-          <option value="newest">{{ t("stories.sortNewest") }}</option>
-          <option value="oldest">{{ t("stories.sortOldest") }}</option>
-        </select>
-      </div>
+          <line x1="1" y1="2" x2="9" y2="2" />
+          <line x1="1" y1="6" x2="6.5" y2="6" />
+          <line x1="1" y1="10" x2="4" y2="10" />
+          <line x1="13" y1="1" x2="13" y2="13" />
+          <polyline points="10.5,10.5 13,13 15.5,10.5" />
+        </svg>
+        <!-- Oldest first: bars narrow→wide + up arrow -->
+        <svg
+          v-else
+          width="16"
+          height="14"
+          viewBox="0 0 16 14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="1" y1="2" x2="4" y2="2" />
+          <line x1="1" y1="6" x2="6.5" y2="6" />
+          <line x1="1" y1="10" x2="9" y2="10" />
+          <line x1="13" y1="13" x2="13" y2="1" />
+          <polyline points="10.5,3.5 13,1 15.5,3.5" />
+        </svg>
+      </button>
 
       <!-- Filters toggle button with active-filter badge -->
       <div class="relative shrink-0">

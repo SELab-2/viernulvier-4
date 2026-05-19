@@ -254,6 +254,12 @@ const yearB = computed(() => fracToYear(fracB.value));
   cursor: grabbing;
 }
 
+.yr-slider--dragging .yr-handle:hover,
+.yr-slider--dragging .yr-handle:focus-visible {
+  box-shadow: none;
+  transform: translate(-50%, -50%);
+}
+
 .yr-handle-label {
   position: absolute;
   bottom: calc(100% + 6px);
