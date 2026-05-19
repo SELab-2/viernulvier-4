@@ -20,7 +20,7 @@ mockNuxtImport("useRouter", () => () => ({
   currentRoute: { value: { query: {} } },
 }));
 
-describe.skip("Archive Overview Page (Structural & Routing)", () => {
+describe("Archive Overview Page (Structural & Routing)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -29,29 +29,45 @@ describe.skip("Archive Overview Page (Structural & Routing)", () => {
     const wrapper = await mountSuspended(ArchivePage, {
       global: {
         stubs: {
-          ArchiveHeader: true,
-          ArchiveSearchSection: true,
-          ArchiveBody: true,
+          PageHeader: {
+            name: "PageHeader",
+            template: '<div data-test="page-header" />',
+          },
+          ArchiveSearchSection: {
+            name: "ArchiveSearchSection",
+            template: '<div data-test="archive-search-section" />',
+          },
+          ArchiveBody: {
+            name: "ArchiveBody",
+            template: '<div data-test="archive-body" />',
+          },
         },
       },
     });
 
-    expect(wrapper.findComponent({ name: "ArchiveHeader" }).exists()).toBe(
+    expect(wrapper.find('[data-test="page-header"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="archive-search-section"]').exists()).toBe(
       true,
     );
-    expect(
-      wrapper.findComponent({ name: "ArchiveSearchSection" }).exists(),
-    ).toBe(true);
-    expect(wrapper.findComponent({ name: "ArchiveBody" }).exists()).toBe(true);
+    expect(wrapper.find('[data-test="archive-body"]').exists()).toBe(true);
   });
 
   test("updates URL query parameters when search section emits an update", async () => {
     const wrapper = await mountSuspended(ArchivePage, {
       global: {
         stubs: {
-          ArchiveHeader: true,
-          ArchiveSearchSection: true,
-          ArchiveBody: true,
+          PageHeader: {
+            name: "PageHeader",
+            template: '<div data-test="page-header" />',
+          },
+          ArchiveSearchSection: {
+            name: "ArchiveSearchSection",
+            template: '<div data-test="archive-search-section" />',
+          },
+          ArchiveBody: {
+            name: "ArchiveBody",
+            template: '<div data-test="archive-body" />',
+          },
         },
       },
     });

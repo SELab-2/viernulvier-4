@@ -1,6 +1,14 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+  type MockInstance,
+} from "vitest";
 import { mountSuspended } from "@nuxt/test-utils/runtime";
-import { flushPromises } from "@vue/test-utils";
+import { flushPromises, type VueWrapper } from "@vue/test-utils";
 import PrintsPage from "../../app/pages/prints/index.vue";
 
 interface PrintApiPayload {
@@ -15,6 +23,9 @@ interface PrintApiPayload {
 }
 
 const mockGetAll = vi.fn();
+
+let wrapper: VueWrapper | undefined;
+let consoleErrorSpy: MockInstance<typeof console.error>;
 vi.mock("../../app/composables/media/usePrintApi", () => ({
   usePrintApi: () => ({ getAll: mockGetAll }),
 }));
@@ -45,16 +56,24 @@ const mockSuccessResponse = {
   },
 };
 
-describe.skip("Prints Overview Page (Integration)", () => {
+describe("Prints Overview Page (Integration)", () => {
   beforeEach(() => {
     // Reset mocks and window dimensions before each test
     mockGetAll.mockReset();
     vi.stubGlobal("innerWidth", 1024);
+    consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(async () => {
+    await flushPromises();
+    wrapper?.unmount();
+    wrapper = undefined;
+    consoleErrorSpy.mockRestore();
   });
 
   test("handles initial page load, shows skeleton, then displays data", async () => {
     // Delay the mock promise to catch the loading state
-    let resolveApi: (val: any) => void;
+    let resolveApi: (val: typeof mockSuccessResponse) => void;
 
     mockGetAll.mockImplementation(
       () =>
@@ -63,7 +82,7 @@ describe.skip("Prints Overview Page (Integration)", () => {
         }),
     );
 
-    const wrapper = await mountSuspended(PrintsPage);
+    wrapper = await mountSuspended(PrintsPage);
 
     // Verify Skeleton/loading pulse is visible initially
     expect(wrapper.html()).toContain("animate-pulse");
@@ -81,7 +100,7 @@ describe.skip("Prints Overview Page (Integration)", () => {
     // Force API to throw an error
     mockGetAll.mockRejectedValueOnce(new Error("Internal Server Error"));
 
-    const wrapper = await mountSuspended(PrintsPage);
+    wrapper = await mountSuspended(PrintsPage);
     await flushPromises();
 
     // Verify error UI is displayed
@@ -121,6 +140,7 @@ describe.skip("Prints Overview Page (Integration)", () => {
     // Stub window width to mobile size BEFORE mounting
     vi.stubGlobal("innerWidth", 500);
 
+    wrapper = await mountSuspended(PrintsPage);
     await flushPromises();
 
     // Trigger the resize event listener inside your onMounted hook
