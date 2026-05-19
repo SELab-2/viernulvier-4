@@ -54,7 +54,7 @@ const links = computed(() => [
       <li v-for="link in links" :key="link.to">
         <NuxtLink
           :to="link.to"
-          class="quick-link flex items-center gap-3 rounded-xl border border-card-border bg-card px-4 py-3 hover:bg-card-hover hover:border-accent/40 transition-all duration-150 group"
+          class="quick-link flex items-center gap-3 rounded-xl border border-card-border bg-card px-4 py-3 shadow-sm hover:bg-card-hover hover:border-accent/40 transition-all duration-150 group"
         >
           <!-- Icon bubble -->
           <div
@@ -101,7 +101,7 @@ const links = computed(() => [
       <li v-if="isSuperAdmin">
         <NuxtLink
           :to="ROUTES.admin.accounts.base"
-          class="quick-link flex items-center gap-3 rounded-xl border border-card-border bg-card px-4 py-3 hover:bg-card-hover hover:border-rose-400/40 transition-all duration-150 group"
+          class="quick-link flex items-center gap-3 rounded-xl border border-card-border bg-card px-4 py-3 shadow-sm hover:bg-card-hover hover:border-rose-400/40 transition-all duration-150 group"
         >
           <div
             class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-rose-500/10 dark:bg-rose-500/15"
@@ -138,3 +138,17 @@ const links = computed(() => [
     </ul>
   </nav>
 </template>
+
+<style scoped>
+.quick-link {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+.quick-link:hover {
+  box-shadow: 0 8px 28px -8px color-mix(in srgb, var(--accent) 18%, transparent);
+  transform: translateY(-1px);
+}
+</style>

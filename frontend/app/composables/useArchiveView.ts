@@ -38,6 +38,7 @@ const totalPages = ref(1);
 // Data/loading state
 const loading = ref(false);
 const oldestDate = ref("");
+const newestDate = ref(getToday());
 
 export function useArchiveView() {
   const { getAll } = useProductionApi();
@@ -100,6 +101,7 @@ export function useArchiveView() {
 
     loading,
     oldestDate,
+    newestDate,
 
     fetchSuggestions,
   };
