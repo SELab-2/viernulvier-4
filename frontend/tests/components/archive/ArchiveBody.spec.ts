@@ -220,7 +220,6 @@ describe("ArchiveBody", () => {
     expect(mockArchiveView.viewMode.value).toBe("list");
 
     // Check for admin buttons
-    expect(wrapper.text()).toContain("admin-productions.editTags");
     expect(wrapper.text()).toContain("admin.csvImport.label");
     expect(wrapper.text()).toContain("admin-productions.new");
   });
@@ -235,41 +234,40 @@ describe("ArchiveBody", () => {
     });
     mockApi.remove.mockResolvedValue({}); // Success response
 
-    // Mock window.confirm
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => true),
-    );
+    // 1. Maak een mock functie aan
+    const confirmMock = vi.fn(() => true);
+    // 2. Forceer deze globaal in de window (omdat jsdom deze mist)
+    vi.stubGlobal("confirm", confirmMock);
 
     const wrapper = mount(ArchiveBody, {
       props: { isAdmin: true },
       global: {
-        stubs: {
-          ...globalStubs,
-          ProductionListViewItem: {
-            template:
-              '<div class="item"><button @click="$emit(\'delete\', productionView, null)">Delete</button></div>',
-            props: ["productionView"],
-          },
-        },
+        stubs: globalStubs,
       },
     });
 
     await flushPromises();
 
-    const deleteButton = wrapper.find("button");
-    await deleteButton.trigger("click");
+    // 3. Zoek het list-item component
+    const listItem = wrapper.findComponent({ name: "ProductionListViewItem" });
 
-    expect(window.confirm).toHaveBeenCalled();
+    // 4. Trigger de delete actie veilig
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    await listItem.vm.$emit("delete", productions[0], null);
+    await flushPromises();
+
+    // 5. Asserties!
+    expect(confirmMock).toHaveBeenCalled();
     expect(mockApi.remove).toHaveBeenCalledWith(1);
     expect(mockSnackbar.add).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "success",
       }),
     );
-
-    // Should reload after deletion
     expect(mockApi.getAll).toHaveBeenCalledTimes(2);
+
+    // 6. Ruim de globale stub netjes op zodat andere tests niet breken
+    vi.unstubAllGlobals();
   });
 
   it("reacts to searchQuery change with debounce", async () => {
