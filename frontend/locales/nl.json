@@ -231,7 +231,8 @@
     "noSeries": "Geen reeksen",
     "create": "Nieuwe reeks",
     "deleteConfirm": "Weet je zeker dat je \"{name}\" wil verwijderen?",
-    "deleteSuccess": "Reeks \"{name}\" verwijderd."
+    "deleteSuccess": "Reeks \"{name}\" verwijderd.",
+    "no_results": "Geen reeksen"
   },
   "prints": {
     "types": {
