@@ -181,7 +181,9 @@
     "noStories": "This production doesn't contain any stories.",
     "filters": "filters",
     "close": "close",
-    "results": "results"
+    "results": "results",
+    "delete": "Delete",
+    "save": "Save"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -224,7 +226,10 @@
     "header_title": "Series",
     "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
     "noProductions": "This series doesn't contain any productions.",
-    "noSeries": "No series"
+    "noSeries": "No series",
+    "create": "New series",
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+    "deleteSuccess": "Deleted series \"{name}\"."
   },
   "prints": {
     "types": {
@@ -292,6 +297,10 @@
     "saved": "Saved",
     "edit": "Edit",
     "delete": "Delete",
+    "series": {
+      "linkedProductions": "Linked Productions",
+      "linkedProductionsHint": "Search and link productions to this series."
+    },
     "blogs": {
       "new": "New Story",
       "edit": "Edit Story",
@@ -522,6 +531,7 @@
       "hint": "Select productions you want to edit",
       "saveError": "Something went wrong while saving. Please try again.",
       "productionsLabel": "productions",
+      "productionLabel": "production",
       "editingLabel": "Editing",
       "backToSelection": "Back to selection",
       "tags": {

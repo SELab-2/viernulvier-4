@@ -65,8 +65,13 @@ const { remove: removeGallery } = useGalleryApi();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
 
-const { isBatchEditMode, toggleBatchEditMode, disableBatchEditMode } =
-  useProductionBatchEdit();
+const {
+  isBatchEditMode,
+  toggleBatchEditMode,
+  disableBatchEditMode,
+  selectWholeSeries,
+  selectedCount,
+} = useProductionBatchEdit();
 
 const PAGE_SIZE = 15; // number of items per page
 
@@ -345,6 +350,7 @@ async function deleteGallery(
               />
             </span>
           </button>
+
           <!-- CSV imports -->
           <NuxtLink
             :to="ROUTES.admin.productions.csvImports"

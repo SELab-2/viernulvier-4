@@ -147,6 +147,48 @@ export function useSeriesApi() {
   }
 
   /**
+   * Will return a list of all series productions.
+   * @param seriesId The series we want to fetch productions from.
+   * @param lang The language we want them in.
+   * @returns A list of all series productions.
+   */
+  async function getAllSeriesProductions(seriesId: number, lang?: Language) {
+    const pagination: PaginationFilter = {
+      page: 0,
+      limit: 50,
+      descending: true,
+    };
+
+    const productions: Array<Production | ProductionView> = [];
+    let hasMoreData = true;
+
+    do {
+      const params = { ...(lang ? { lang } : {}), ...pagination };
+      const query = buildQueryString(params);
+
+      const resp = await get<PaginatedResponse<Production | ProductionView>>(
+        `${API_ROUTES.series.productions(seriesId)}${query}`,
+      );
+
+      // Safely extract objects, defaulting to an empty array
+      const newObjects = resp.data?.objects ?? [];
+
+      // Push the safe array
+      productions.push(...newObjects);
+
+      // Check if we should keep looping (e.g., did we get a full page of results?)
+      if (newObjects.length > 0 && newObjects.length === pagination.limit) {
+        pagination.page += 1; // Increment the page!
+      } else {
+        hasMoreData = false; // Stop the loop
+      }
+    } while (hasMoreData);
+
+    // Return the complete list
+    return productions;
+  }
+
+  /**
    * PUT "/series/:seriesId/productions/:productionId"
    *
    * Links a production to a series.
@@ -175,6 +217,7 @@ export function useSeriesApi() {
     modify,
     remove,
     getSeriesProductions,
+    getAllSeriesProductions,
     linkProductionToSeries,
     unlinkProductionFromSeries,
   };

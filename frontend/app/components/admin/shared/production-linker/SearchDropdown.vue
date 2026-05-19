@@ -8,7 +8,7 @@
 import type { ProductionView } from "@repo/common";
 
 const props = defineProps<{
-  type: "blog" | "print";
+  type: "blog" | "print" | "series";
   search: string;
   searchResults: ProductionView[];
   linkedIds: Set<number>;

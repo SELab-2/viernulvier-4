@@ -126,6 +126,24 @@ export function useProductionBatchEdit() {
     selectedProductions.value = [];
   }
 
+  /**
+   * Fetches all productions for a given series and adds them to the batch selection.
+   * If not already in batch edit mode, it enables it.
+   */
+  async function selectWholeSeries(
+    seriesId: number,
+    fetchProductions: (seriesId: number) => Promise<ProductionView[]>,
+  ) {
+    if (!isBatchEditMode.value) {
+      enableBatchEditMode();
+    }
+
+    const productions = await fetchProductions(seriesId);
+    for (const prod of productions) {
+      selectProduction(prod);
+    }
+  }
+
   // ── Panel ─────────────────────────────────────────────────────────────────
 
   function togglePanel() {
@@ -385,6 +403,7 @@ export function useProductionBatchEdit() {
     deselectProduction,
     toggleSelection,
     clearSelection,
+    selectWholeSeries,
 
     // Panel actions
     togglePanel,
