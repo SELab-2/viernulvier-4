@@ -7,7 +7,7 @@ const { t } = useI18n();
 
 <template>
   <div class="min-h-screen bg-background">
-    <PageHeader title="Series Management" />
+    <PageHeader :title="t('admin.dashboard.series')" />
     <AdminSeriesListView />
   </div>
 </template>

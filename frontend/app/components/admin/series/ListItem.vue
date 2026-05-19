@@ -15,7 +15,8 @@ import {
   Save,
   Loader2,
 } from "lucide-vue-next";
-import type { Series, ExistingSeries } from "@repo/common";
+import type { Series } from "@repo/common";
+import type { ExistingSeries } from "~/composables/productions/steps/productionSeries";
 
 const props = defineProps<{
   series: Series;

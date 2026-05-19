@@ -183,7 +183,9 @@
     "noStories": "Deze productie bevat geen verhalen.",
     "filters": "filters",
     "close": "sluiten",
-    "results": "resultaten"
+    "results": "resultaten",
+    "delete": "Verwijderen",
+    "save": "Opslaan"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",
@@ -424,7 +426,7 @@
       "stories": "Verhalen",
       "events": "Evenementen",
       "prints": "Drukwerk",
-      "series": "Series",
+      "series": "Reeksen",
       "tags": "Tags",
       "accounts": "Accounts",
       "changePassword": "Wachtwoord wijzigen",
