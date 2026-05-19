@@ -121,12 +121,7 @@ log "Building backend..."
 
 cd backend
 
-if [ ! -d "node_modules" ]; then
-  log "Installing backend dependencies..."
-  npm install
-else
-  log "Backend dependencies already installed, skipping."
-fi
+npm ci
 
 npm run build || error "Backend build failed."
 
@@ -141,12 +136,7 @@ log "Building frontend..."
 
 cd frontend
 
-if [ ! -d "node_modules" ]; then
-  log "Installing frontend dependencies..."
-  npm install
-else
-  log "Frontend dependencies already installed, skipping."
-fi
+npm ci
 
 npm run build || error "Frontend build failed."
 
