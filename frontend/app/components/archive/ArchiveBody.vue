@@ -82,24 +82,6 @@ const productions = ref<ProductionView[]>([]);
 const totalItems = ref(0);
 const error = ref<string | null>(null);
 
-async function handleSeriesSelected(seriesId: number) {
-  try {
-    await selectWholeSeries(seriesId, async (id) => {
-      const resp = await getAll({
-        productionFilters: { series_id: id as any },
-        paginationFilters: { page: 0, limit: 100, descending: true },
-        languageFilters: { lang: locale.value },
-      });
-      return (resp.data?.objects as ProductionView[]) || [];
-    });
-    showSnackbarSuccess(
-      t("admin-productions.batch.selected", { count: selectedCount.value }),
-    );
-  } catch (err) {
-    showSnackbarError("Failed to select series productions");
-  }
-}
-
 async function loadPage(page: number) {
   loading.value = true;
   error.value = null;
@@ -371,9 +353,6 @@ async function deleteGallery(
               />
             </span>
           </button>
-
-          <!-- Series Quick Select -->
-          <AdminProductionsSeriesQuickSelect @selected="handleSeriesSelected" />
 
           <!-- CSV imports -->
           <NuxtLink

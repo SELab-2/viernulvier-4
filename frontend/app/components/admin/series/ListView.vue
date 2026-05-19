@@ -6,28 +6,32 @@
 
 <script setup lang="ts">
 import type { Series, PaginatedResponse, ProductionView } from "@repo/common";
-import { Search } from "lucide-vue-next";
 import { useSeriesApi } from "~/composables/useSeriesApi";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
-import { useArchiveView } from "~/composables/useArchiveView";
+import { useSeriesView } from "~/composables/useSeriesView";
 import { ROUTES } from "~/utils/routes";
 
-const { getAll, modify, remove, getSeriesProductions } = useSeriesApi();
+const { modify, remove, getSeriesProductions } = useSeriesApi();
 const { selectWholeSeries } = useProductionBatchEdit();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
 const router = useRouter();
 
-const { currentPage, totalPages, loading } = useArchiveView();
+const {
+  searchQuery,
+  currentPage,
+  totalPages,
+  totalItems,
+  loading,
+  fetchSuggestions,
+} = useSeriesView();
 
 // State
 const seriesList = ref<Series[]>([]);
 const error = ref<string | null>(null);
-const searchQuery = ref("");
 const expandedId = ref<number | null>(null);
 
 // Pagination
-const totalItems = ref(0);
 const PAGE_SIZE = 15;
 
 // Action state
@@ -38,7 +42,8 @@ async function loadSeries() {
   loading.value = true;
   error.value = null;
   try {
-    const resp = await getAll({
+    const { getAll: fetchAllSeries } = useSeriesApi();
+    const resp = await fetchAllSeries({
       paginationFilters: {
         page: currentPage.value - 1,
         limit: PAGE_SIZE,
@@ -65,13 +70,9 @@ async function loadSeries() {
 }
 
 // Watchers
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
 watch(searchQuery, () => {
-  if (searchTimer) clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    currentPage.value = 1; // Reset to page 1 for new search
-    loadSeries();
-  }, 350);
+  currentPage.value = 1; // Reset to page 1 for new search
+  loadSeries();
 });
 
 watch(currentPage, (newVal, oldVal) => {
@@ -152,20 +153,17 @@ onMounted(() => {
 <template>
   <div class="bg-background min-h-[calc(100vh-120px)]">
     <!-- Toolbar -->
-    <div
-      class="page-container py-5 flex items-center gap-3 border-b border-border bg-background sticky top-14 z-10"
-    >
-      <div class="flex-1 min-w-0 relative">
-        <Search
-          :size="14"
-          class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-        />
-        <input
-          v-model="searchQuery"
-          type="text"
-          :placeholder="t('archive.search_placeholder')"
-          class="w-full h-11 pl-10 pr-4 rounded-lg bg-muted border border-border text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20"
-        />
+    <div class="w-full border-b border-border bg-background">
+      <div class="py-5 flex items-stretch">
+        <div class="page-container h-12">
+          <SearchBar
+            v-model="searchQuery"
+            :fetch-suggestions="fetchSuggestions"
+            :limit="15"
+            :scroll-limit="5"
+            @update:search="searchQuery = $event"
+          />
+        </div>
       </div>
     </div>
 
