@@ -226,7 +226,10 @@
     "header_title": "Series",
     "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
     "noProductions": "This series doesn't contain any productions.",
-    "noSeries": "No series"
+    "noSeries": "No series",
+    "create": "New series",
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+    "deleteSuccess": "Deleted series \"{name}\"."
   },
   "prints": {
     "types": {

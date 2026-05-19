@@ -19,7 +19,7 @@ import type { Series, SeriesView } from "@repo/common";
 import type { ExistingSeries } from "~/composables/productions/steps/productionSeries";
 
 const props = defineProps<{
-  series: SeriesView;
+  series: Series;
   isExpanded: boolean;
   isSaving?: boolean;
   isDeleting?: boolean;
@@ -125,7 +125,7 @@ function onSave() {
           <h4
             class="truncate text-sm font-black uppercase tracking-tight text-foreground italic pr-2"
           >
-            {{ series.titel || "Untitled Series" }}
+            {{ series.titel[locale] || "Untitled Series" }}
           </h4>
           <p
             class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"

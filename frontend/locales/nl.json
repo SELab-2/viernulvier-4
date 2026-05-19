@@ -228,7 +228,10 @@
     "header_title": "Reeksen",
     "header_subtitle": "Ontdek samengebundelde reeksen van producties uit het viernulvier archief.",
     "noProductions": "Deze reeks bevat geen producties.",
-    "noSeries": "Geen reeksen"
+    "noSeries": "Geen reeksen",
+    "create": "Nieuwe reeks",
+    "deleteConfirm": "Weet je zeker dat je \"{name}\" wil verwijderen?",
+    "deleteSuccess": "Reeks \"{name}\" verwijderd."
   },
   "prints": {
     "types": {

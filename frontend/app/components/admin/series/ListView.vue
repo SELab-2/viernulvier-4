@@ -5,6 +5,7 @@
 -->
 
 <script setup lang="ts">
+import { Plus } from "lucide-vue-next";
 import type {
   Series,
   PaginatedResponse,
@@ -15,8 +16,9 @@ import { useSeriesApi } from "~/composables/useSeriesApi";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
 import { useSeriesView } from "~/composables/useSeriesView";
 import { ROUTES } from "~/utils/routes";
+import type { NewSeries } from "~/composables/productions/steps/productionSeries";
 
-const { modify, remove, getAllSeriesProductions } = useSeriesApi();
+const { create, modify, remove, getAllSeriesProductions } = useSeriesApi();
 const { selectWholeSeries } = useProductionBatchEdit();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
@@ -32,7 +34,7 @@ const {
 } = useSeriesView();
 
 // State
-const seriesList = ref<SeriesView[]>([]);
+const seriesList = ref<Series[]>([]);
 const error = ref<string | null>(null);
 const expandedId = ref<number | null>(null);
 
@@ -42,6 +44,8 @@ const PAGE_SIZE = 15;
 // Action state
 const savingIds = ref(new Set<number>());
 const deletingIds = ref(new Set<number>());
+const creating = ref(false);
+const showCreateModal = ref(false);
 
 async function loadSeries() {
   loading.value = true;
@@ -58,11 +62,10 @@ async function loadSeries() {
         title: searchQuery.value || undefined,
         is_suggestion: false,
       },
-      languageFilters: { lang: locale.value },
     });
 
     if (resp.data) {
-      const data = resp.data as PaginatedResponse<SeriesView>;
+      const data = resp.data as PaginatedResponse<Series>;
       seriesList.value = data.objects;
       totalItems.value = data.totalItems;
       totalPages.value = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE));
@@ -117,7 +120,7 @@ async function handleSave(data: { id: number; titel: any; description: any }) {
 }
 
 async function handleDelete(id: number, title: string) {
-  if (!confirm(t("general.deleteConfirm", { name: title }))) return;
+  if (!confirm(t("series.deleteConfirm", { name: title }))) return;
 
   deletingIds.value.add(id);
   try {
@@ -127,7 +130,7 @@ async function handleDelete(id: number, title: string) {
     } else {
       snackbar.add({
         type: "success",
-        text: t("general.deleteSuccess", { name: title }),
+        text: t("series.deleteSuccess", { name: title }),
       });
       await loadSeries();
     }
@@ -147,6 +150,34 @@ async function handleBatchEdit(seriesId: number) {
     router.push(ROUTES.admin.productions.batchEdit);
   } catch (err) {
     snackbar.add({ type: "error", text: "Failed to prepare batch edit" });
+  }
+}
+
+async function handleCreate(data: NewSeries) {
+  creating.value = true;
+  try {
+    const resp = await create({
+      titel: { nl: data.titel.nl, en: data.titel.en || data.titel.nl },
+      description: {
+        nl: data.description.nl,
+        en: data.description.en || data.description.nl,
+      },
+    });
+
+    if (resp.error) {
+      snackbar.add({ type: "error", text: resp.error });
+    } else {
+      snackbar.add({
+        type: "success",
+        text: t("general.createSuccess", "Series created successfully"),
+      });
+      showCreateModal.value = false;
+      await loadSeries();
+    }
+  } catch (err) {
+    snackbar.add({ type: "error", text: "Failed to create series" });
+  } finally {
+    creating.value = false;
   }
 }
 
@@ -178,6 +209,14 @@ onMounted(() => {
     </div>
 
     <div class="page-container py-6">
+      <!-- Create Modal -->
+      <AdminSeriesCreateModal
+        :show="showCreateModal"
+        :loading="creating"
+        @close="showCreateModal = false"
+        @create="handleCreate"
+      />
+
       <!-- Error -->
       <div
         v-if="error"
@@ -202,6 +241,13 @@ onMounted(() => {
         >
           {{ t("archive.no_results") }}
         </p>
+        <button
+          class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition mx-auto"
+          @click="showCreateModal = true"
+        >
+          <Plus :size="15" />
+          {{ t("series.create") }}
+        </button>
       </div>
 
       <!-- List -->
@@ -210,6 +256,14 @@ onMounted(() => {
           <p class="font-brand text-2xl font-black text-foreground">
             {{ totalItems }} {{ t("general.results") }}
           </p>
+
+          <button
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+            @click="showCreateModal = true"
+          >
+            <Plus :size="15" />
+            {{ t("series.create") }}
+          </button>
         </div>
 
         <AdminSeriesListItem
@@ -221,7 +275,7 @@ onMounted(() => {
           :is-deleting="deletingIds.has(series.id)"
           @toggle="toggleExpand(series.id)"
           @save="handleSave"
-          @delete="handleDelete(series.id, series.titel)"
+          @delete="handleDelete(series.id, series.titel[locale])"
           @batch-edit="handleBatchEdit(series.id)"
         />
 
