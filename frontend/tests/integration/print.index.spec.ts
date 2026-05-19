@@ -64,7 +64,7 @@ describe("Prints Overview Page (Integration)", () => {
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     await flushPromises();
     wrapper?.unmount();
     wrapper = undefined;
