@@ -42,7 +42,7 @@
 <script lang="ts" setup>
 import { useBlogView } from "~/composables/blogs/useBlogView";
 import type { DateFilter } from "~/types/DateFilter";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { SearchSuggestion } from "~/types/Search";
 import { isoYear } from "~/utils/formatters";
 
 const { t } = useI18n();
@@ -204,26 +204,29 @@ function clearAllFilters() {
   emit("clear-filters");
 }
 
-// Keep yearRange in sync when the parent clears or changes dateFilter externally.
+// Keep yearRange in sync when the parent clears or changes dateFilter externally (or via Calendar).
 watch(
   () => props.dateFilter,
-  (f) => {
-    if (!f.after && !f.before) {
-      yearRange.value = [oldestYear.value, newestYear.value];
-      return;
-    }
-    if (f.after?.endsWith("-01-01") && f.before?.endsWith("-12-31")) {
-      const from = parseInt(f.after.substring(0, 4));
-      const to = parseInt(f.before.substring(0, 4));
-      if (!isNaN(from) && !isNaN(to)) {
-        yearRange.value = [from, to];
-      }
-    } else if (!f.after) {
-      // Only a `before` bound (e.g. the archive default) → no year range filter
-      yearRange.value = [oldestYear.value, newestYear.value];
+  (newFilter) => {
+    // 1. Try to extract the years safely
+    const afterYear = newFilter.after ? isoYear(newFilter.after) : NaN;
+    const beforeYear = newFilter.before ? isoYear(newFilter.before) : NaN;
+
+    // 2. Fall back to our computed bounds if the year is missing or invalid
+    const from =
+      !isNaN(afterYear) && afterYear > 0 ? afterYear : oldestYear.value;
+    const to =
+      !isNaN(beforeYear) && beforeYear > 0 ? beforeYear : newestYear.value;
+
+    // 3. Update the slider array (checking first to avoid unnecessary reactivity triggers)
+    if (yearRange.value[0] !== from || yearRange.value[1] !== to) {
+      yearRange.value = [
+        Math.max(from, oldestYear.value),
+        Math.min(to, newestYear.value),
+      ];
     }
   },
-  { deep: true },
+  { deep: true, immediate: true }, // immediate ensures it syncs up on first load if a URL param is present
 );
 
 // ——— Derived UI state ———
