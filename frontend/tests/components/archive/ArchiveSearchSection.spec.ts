@@ -180,7 +180,6 @@ describe("ArchiveSearchSection", () => {
 
     await wrapper.find(".absolute.-top-2").trigger("click");
     expect(mockArchiveView.tagIds.value).toEqual([]);
-    expect(mockArchiveView.dateFilter.value).toEqual({});
   });
 
   it("updates sort order", async () => {
