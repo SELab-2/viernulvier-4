@@ -1576,6 +1576,8 @@ ALTER TABLE ONLY public.production_tag
     ADD CONSTRAINT production_tag_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE;
 
 
+INSERT INTO scraper_dates DEFAULT VALUES;
+
 --
 -- PostgreSQL database dump complete
 --

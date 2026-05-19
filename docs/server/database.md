@@ -122,6 +122,20 @@ used to set up a clean empty database from scratch.
 > **Important:** If you use this method, you will need to manually create an initial admin account and API key before
 > the backend will function.
 
+
+Besides this you will need to configure your first account and api-key.
+To do so you will need to start by adding a super-api-key to the database manually.
+
+```sql
+INSERT INTO api_keys ("key")
+VALUES ('<insert-your-key>');
+UPDATE api_keys
+SET super_key = 't'
+WHERE key = '<insert-your-key>';
+```
+
+> after this you can create an account through the backend and link it with the key in the database by using the
+> JOIN-table `account_api_keys`.
 ---
 
 After setting up the database, make note of the following — all four are required as backend environment variables:
