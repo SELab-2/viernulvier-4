@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useAuth } from "../../app/composables/useAuth";
 
 vi.mock("#app", async (importOriginal) => {
@@ -13,12 +13,17 @@ vi.mock("#app", async (importOriginal) => {
 });
 
 const mockFetch = vi.fn();
-vi.stubGlobal("$fetch", mockFetch);
 
 beforeEach(() => {
   mockFetch.mockReset();
   vi.clearAllMocks();
   sessionStorage.clear();
+  vi.stubGlobal("navigateTo", vi.fn());
+  vi.stubGlobal("$fetch", mockFetch);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("useAuth", () => {
