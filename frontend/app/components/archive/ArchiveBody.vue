@@ -9,13 +9,10 @@
   - Rendering results in grid or list view
   - (Admin) Batch edit mode: selection, visual edit-mode indicator, floating panel
 
-  Uses:
-  - useArchiveView: shared archive state (filters, pagination, view mode)
-  - useProductionApi: API communication
-  - useProductionBatchEdit: batch selection state
-  TODO: The pagination logic is not what I want to be defined here and should be changed in the future.
-        It should be defined elsewhere to be more clear and to prevent bugs that are hard to find.
-        By pagination logic I mean the logic that handles the parameters that are used to know on witch page the user is.
+Uses:
+- useArchiveView: shared archive state (filters, pagination, view mode)
+- useProductionApi: API communication
+- useProductionBatchEdit: batch selection state
 -->
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from "vue";
