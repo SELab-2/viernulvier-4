@@ -10,7 +10,6 @@
   The <slot> is where the current page component (from pages/) is injected
   by Nuxt's <NuxtLayout> + <NuxtPage> setup in app.vue.
 
-  TODO: add the header above <main> once the header component is implemented.
 -->
 
 <template>

@@ -267,18 +267,24 @@ export class AccountDatabaseService {
    * @param apiKey is the apiKey you want the accountId of.
    * @returns the accountId.
    */
-  async getAccountIdFromApiKey(apiKey: string): Promise<number | null> {
+  async getAccountIdFromApiKey(
+    apiKey: string,
+  ): Promise<(PublicAccountDto & { password: string }) | null> {
     const query = `
-      SELECT aak.account_id
-      FROM account_api_keys aak
-      JOIN api_keys ON api_keys.id = aak.api_key_id
-      WHERE api_keys.key = $1
-        AND api_keys.active = TRUE
+      SELECT accounts.*
+      FROM accounts
+      JOIN account_api_keys aak ON accounts.id = aak.account_id
+      JOIN api_keys ak ON ak.id = aak.api_key_id
+      WHERE ak.key = $1
+        AND ak.active = TRUE
       LIMIT 1
     `;
 
-    const result = await this.db.query<{ account_id: number }>(query, [apiKey]);
+    const result = await this.db.query<PublicAccountDto & { password: string }>(
+      query,
+      [apiKey],
+    );
 
-    return result[0]?.account_id ?? null;
+    return result[0] ?? null;
   }
 }

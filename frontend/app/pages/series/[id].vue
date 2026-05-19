@@ -16,6 +16,7 @@ import type {
 } from "@repo/common";
 import { useSeriesApi } from "~/composables/useSeriesApi";
 import { ROUTES } from "~/utils/routes";
+import { pickPlaceholderGradient } from "~/utils/constants";
 import {
   ref,
   computed,
@@ -40,15 +41,22 @@ const { currentPage, totalPages, totalItems, loading } =
   useSeriesProductionsView();
 const limit = 15;
 
-const isExpanded = ref(false);
-const showReadMoreButton = ref(false);
-const descriptionRef = ref<HTMLElement | null>(null);
+const titleText = ref<HTMLElement | null>(null);
+const titleScrollable = ref(false);
 
-const checkOverflow = () => {
-  if (descriptionRef.value) {
-    showReadMoreButton.value =
-      descriptionRef.value.scrollHeight > descriptionRef.value.clientHeight;
-  }
+const headerStyle = computed(() => ({
+  backgroundImage: pickPlaceholderGradient(seriesId.value),
+}));
+
+const updateTitleScrollable = () => {
+  nextTick(() => {
+    const el = titleText.value;
+    if (!el) return;
+    const lineHeight = parseFloat(getComputedStyle(el).lineHeight || "0");
+    if (!lineHeight) return;
+    const lines = Math.round(el.scrollHeight / lineHeight);
+    titleScrollable.value = lines > 3;
+  });
 };
 
 let observer: ResizeObserver | null = null;
@@ -73,7 +81,7 @@ async function loadPage() {
 
   loading.value = false;
   await nextTick(); // waiting for DOM to finish updating
-  checkOverflow();
+  updateTitleScrollable();
 }
 
 const goBack = () => {
@@ -90,9 +98,9 @@ watch(seriesId, () => {
 watch([seriesId, locale, currentPage], loadPage);
 
 onMounted(async () => {
-  observer = new ResizeObserver(() => checkOverflow());
+  observer = new ResizeObserver(() => updateTitleScrollable());
+  if (titleText.value) observer.observe(titleText.value);
   await loadPage();
-  if (descriptionRef.value) observer.observe(descriptionRef.value);
 });
 
 onBeforeUnmount(() => {
@@ -105,9 +113,11 @@ onBeforeUnmount(() => {
 
   <main v-else class="min-h-screen bg-background text-foreground">
     <!-- Header section -->
-    <section class="w-full border-b border-border bg-muted py-16 lg:py-24">
+    <section
+      :style="headerStyle"
+      class="w-full border-b border-border py-16 lg:py-24"
+    >
       <div class="page-container w-full">
-        <!-- Back arrow -->
         <button
           @click="goBack()"
           class="flex items-center gap-1 text-[11px] font-black uppercase tracking-[2px] hover:text-accent transition-colors mb-8"
@@ -118,31 +128,22 @@ onBeforeUnmount(() => {
 
         <!-- Title + description section -->
         <div class="flex flex-col gap-6">
-          <h1
-            class="font-brand font-black uppercase italic leading-[0.85] tracking-[-3px] text-5xl lg:text-7xl"
-          >
-            {{ series?.titel }}
-          </h1>
-
-          <div v-if="series?.description">
-            <p
-              ref="descriptionRef"
-              class="max-w-5xl text-lg lg:text-xl leading-relaxed text-muted-foreground whitespace-pre-line break-words transition-all duration-500"
+          <div>
+            <div
+              class="title-scroll-wrap"
               :class="[
-                isExpanded ? 'line-clamp-none' : 'line-clamp-[6]',
-                showReadMoreButton && !isExpanded ? 'should-fade' : '',
+                titleScrollable
+                  ? 'title-scroll-scrollable title-scroll-fade'
+                  : 'title-clamp-3',
               ]"
             >
-              {{ series.description }}
-            </p>
-
-            <button
-              v-if="showReadMoreButton || isExpanded"
-              @click="isExpanded = !isExpanded"
-              class="mt-6 text-[11px] font-black uppercase tracking-[2px] text-[var(--accent)] hover:underline outline-none"
-            >
-              {{ isExpanded ? t("general.readLess") : t("general.readMore") }}
-            </button>
+              <h1
+                ref="titleText"
+                class="font-brand font-black uppercase italic leading-[0.85] tracking-[-3px] text-5xl lg:text-7xl"
+              >
+                {{ series?.titel }}
+              </h1>
+            </div>
           </div>
         </div>
       </div>
@@ -151,6 +152,9 @@ onBeforeUnmount(() => {
     <!-- Content section -->
     <section class="py-20">
       <div class="page-container">
+        <div v-if="series?.description" class="w-full mb-16">
+          <Description :html-content="series.description" />
+        </div>
         <!-- Production count -->
         <div
           class="text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground font-black mb-6"
@@ -196,15 +200,3 @@ onBeforeUnmount(() => {
     </section>
   </main>
 </template>
-
-<style scoped>
-.should-fade {
-  mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-}
-
-.line-clamp-none {
-  mask-image: none !important;
-  -webkit-mask-image: none !important;
-}
-</style>

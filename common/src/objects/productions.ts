@@ -16,8 +16,8 @@ export const ProductionSchema = z.object({
   credits: LocalizedStringNullableSchema,
   performer_type: z.string().nullable(),
   attendance_mode: z.string().nullable(),
-  created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
-  updated_at: z.iso.datetime().nullable(), // TODO here too.
+  created_at: z.iso.datetime().nullable(),
+  updated_at: z.iso.datetime().nullable(),
   // Legacy ID is omitted here because the API doesn't use it.
 });
 

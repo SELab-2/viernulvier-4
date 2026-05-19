@@ -221,21 +221,22 @@ function collectMultiSelectRef(el: any) {
     />
 
     <!-- Buttons -->
-    <div v-if="props.showActions" class="p-4 flex gap-3">
-      <!-- Submit button -->
-      <button
-        type="submit"
-        class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
-      >
-        {{ submitLabel ?? t("baseform.submitbutton") }}
-      </button>
+    <div v-if="props.showActions" class="p-4 flex gap-3 justify-end">
       <!-- Reset button -->
       <button
         type="button"
         @click="reset"
-        class="flex-1 h-12 bg-primary/80 dark:bg-primary/60 text-primary-foreground font-bold uppercase text-[10px] tracking-widest rounded-lg hover:opacity-70 dark:hover:bg-primary/50 dark:text-bg-primary/80 dark:border dark:border-border cursor-pointer"
+        class="h-10 w-60 px-6 inline-flex items-center justify-center rounded-lg bg-primary border-2 border-primary text-primary-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-primary transition cursor-pointer"
       >
         {{ resetLabel ?? t("baseform.resetbutton") }}
+      </button>
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        class="h-10 w-60 px-6 inline-flex items-center justify-center rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition cursor-pointer"
+      >
+        {{ submitLabel ?? t("baseform.submitbutton") }}
       </button>
     </div>
   </form>

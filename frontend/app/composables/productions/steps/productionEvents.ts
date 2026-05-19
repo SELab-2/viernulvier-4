@@ -13,7 +13,7 @@ export type ExistingLocation = {
 
 export type NewLocation = {
   type: "new";
-  label: string;
+  label: { nl: string; en: string };
 };
 
 export type EventLocationDraft = ExistingLocation | NewLocation | null;
@@ -87,8 +87,8 @@ export type EventCreatePayload = {
   intermission_at: string | null;
   /** Existing location id to link after creation. */
   linkLocationId: number | null;
-  /** Label for a brand-new location to create + link after creation. */
-  createLocation: string | null;
+  /** Localized labels for a brand-new location to create + link after creation. */
+  createLocation: { nl: string; en: string } | null;
   pricesToCreate: PriceCreatePayload[];
 };
 
@@ -103,8 +103,8 @@ export type EventUpdatePayload = {
   unlinkLocationId: number | null;
   /** Existing location id to link, or null if unchanged / removed. */
   linkLocationId: number | null;
-  /** Label for a brand-new location to create + link, or null. */
-  createLocation: string | null;
+  /** Localized labels for a brand-new location to create + link, or null. */
+  createLocation: { nl: string; en: string } | null;
   pricesToCreate: PriceCreatePayload[];
   pricesToUpdate: PriceUpdatePayload[];
   pricesToDelete: number[];
@@ -148,6 +148,28 @@ export function newEventDraft(): NewEventDraft {
     location: null,
     prices: [],
   };
+}
+
+/**
+ * Normalizes an ISO string (likely UTC from API) to a literal local-time string (no Z).
+ * This ensures that when we send it back, the backend/DB treats it as wall-clock time.
+ */
+function toLocalString(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const y = d.getFullYear();
+  const m = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const h = pad(d.getHours());
+  const min = pad(d.getMinutes());
+  return `${y}-${m}-${day}T${h}:${min}:00.000`;
+}
+
+function toLocalStringRequired(iso: string): string {
+  return toLocalString(iso) || "";
 }
 
 // cloneLocation: small helper to copy a location draft safely
@@ -205,13 +227,19 @@ export function useProductionEvents(): ProductionFormStep<
         const locRes = await eventApi
           .getLocation(event.id, "nl")
           .catch(() => ({ data: null }));
-        const loc = locRes.data
-          ? {
-              type: "existing" as const,
-              id: locRes.data.id,
-              label: locRes.data.location,
-            }
-          : null;
+
+        let loc: ExistingLocation | null = null;
+        if (locRes.data) {
+          // Normalize label to string if it comes as a localized object
+          const rawLoc = locRes.data.location;
+          const label = rawLoc;
+
+          loc = {
+            type: "existing" as const,
+            id: locRes.data.id,
+            label,
+          };
+        }
 
         const pricesRes = await eventApi
           .getPrices(event.id)
@@ -226,10 +254,10 @@ export function useProductionEvents(): ProductionFormStep<
 
         return {
           id: event.id,
-          starttime: event.starttime,
-          endtime: event.endtime,
-          doors_at: event.doors_at,
-          intermission_at: event.intermission_at,
+          starttime: toLocalStringRequired(event.starttime),
+          endtime: toLocalString(event.endtime),
+          doors_at: toLocalString(event.doors_at),
+          intermission_at: toLocalString(event.intermission_at),
           location: loc,
           prices,
         };

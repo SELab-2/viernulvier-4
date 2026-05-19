@@ -181,7 +181,9 @@
     "noStories": "This production doesn't contain any stories.",
     "filters": "filters",
     "close": "close",
-    "results": "results"
+    "results": "results",
+    "delete": "Delete",
+    "save": "Save"
   },
   "eventlist": {
     "noEventsFound": "No events found",
@@ -224,7 +226,10 @@
     "header_title": "Series",
     "header_subtitle": "Discover bundled series of productions from the viernulvier archive.",
     "noProductions": "This series doesn't contain any productions.",
-    "noSeries": "No series"
+    "noSeries": "No series",
+    "create": "New series",
+    "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
+    "deleteSuccess": "Deleted series \"{name}\"."
   },
   "prints": {
     "types": {
@@ -265,7 +270,20 @@
     "of_pages": "of {total}",
     "new": "New print",
     "description": "description",
-    "relatedProductions": "Related productions"
+    "relatedProductions": "Related productions",
+    "linkToProduction": "Link to Production",
+    "linkBtn": "Link",
+    "linkToProductionSearch": "Search productions by title...",
+    "linkToProductionNoResults": "No productions found",
+    "linkToProductionCreateHint": "Save the print first to link it to a production.",
+    "linking": "Linking...",
+    "linked": "Linked",
+    "linkedProductions": "Link to Production",
+    "linkedProductionsHint": "Link this print to a production so it appears on the production page.",
+    "linkedThisSession": "Linked this session",
+    "noLinkedProductions": "Not linked to any production yet",
+    "unlinkBtn": "Unlink",
+    "viewProduction": "View production page"
   },
   "admin": {
     "finish": "Finish",
@@ -279,6 +297,10 @@
     "saved": "Saved",
     "edit": "Edit",
     "delete": "Delete",
+    "series": {
+      "linkedProductions": "Linked Productions",
+      "linkedProductionsHint": "Search and link productions to this series."
+    },
     "blogs": {
       "new": "New Story",
       "edit": "Edit Story",
@@ -410,6 +432,9 @@
       "accounts": "Accounts",
       "changePassword": "Change password",
       "changePasswordHint": "Update your admin account password",
+      "oldPassword": "Old password",
+      "oldPasswordPlaceholder": "Your old password",
+      "oldPasswordWrong": "Old password is wrong",
       "newPassword": "New password",
       "newPasswordPlaceholder": "Minimum 8 characters",
       "confirmPassword": "Confirm new password",
@@ -497,6 +522,28 @@
       "media": "Media",
       "events": "Events",
       "series": "Series"
+    },
+    "batch": {
+      "toggle": "Batch Edit",
+      "mode-label": "Batch Edit Mode",
+      "selected": "{count} selected",
+      "proceed": "Go to Batch Edit",
+      "hint": "Select productions you want to edit",
+      "saveError": "Something went wrong while saving. Please try again.",
+      "productionsLabel": "productions",
+      "productionLabel": "production",
+      "editingLabel": "Editing",
+      "backToSelection": "Back to selection",
+      "tags": {
+        "title": "Tags",
+        "description": "Pre-selected tags are shared by all selected productions. Changes apply to every production on save.",
+        "commonNotice": "Showing tags common to all {count} selected productions."
+      },
+      "series": {
+        "title": "Series",
+        "description": "Pre-linked series are common to all selected productions. Changes apply to every production on save.",
+        "commonNotice": "Showing series common to all {count} selected productions."
+      }
     },
     "create-title": "New production",
     "edit-title": "Edit production",

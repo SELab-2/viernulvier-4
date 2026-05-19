@@ -183,7 +183,9 @@
     "noStories": "Deze productie bevat geen verhalen.",
     "filters": "filters",
     "close": "sluiten",
-    "results": "resultaten"
+    "results": "resultaten",
+    "delete": "Verwijderen",
+    "save": "Opslaan"
   },
   "eventlist": {
     "noEventsFound": "Geen evenementen gevonden",
@@ -226,7 +228,10 @@
     "header_title": "Reeksen",
     "header_subtitle": "Ontdek samengebundelde reeksen van producties uit het viernulvier archief.",
     "noProductions": "Deze reeks bevat geen producties.",
-    "noSeries": "Geen reeksen"
+    "noSeries": "Geen reeksen",
+    "create": "Nieuwe reeks",
+    "deleteConfirm": "Weet je zeker dat je \"{name}\" wil verwijderen?",
+    "deleteSuccess": "Reeks \"{name}\" verwijderd."
   },
   "prints": {
     "types": {
@@ -267,7 +272,20 @@
     "of_pages": "van {total}",
     "new": "Nieuw drukwerk",
     "description": "omschrijving",
-    "relatedProductions": "Gerelateerde producties"
+    "relatedProductions": "Gerelateerde producties",
+    "linkToProduction": "Koppel aan productie",
+    "linkBtn": "Koppelen",
+    "linkToProductionSearch": "Zoek producties op titel...",
+    "linkToProductionNoResults": "Geen producties gevonden",
+    "linkToProductionCreateHint": "Sla het drukwerk eerst op om het aan een productie te koppelen.",
+    "linking": "Koppelen...",
+    "linked": "Gekoppeld",
+    "linkedProductions": "Koppel aan productie",
+    "linkedProductionsHint": "Koppel dit drukwerk aan een productie zodat het op de productiepagina verschijnt.",
+    "linkedThisSession": "Gekoppeld in deze sessie",
+    "noLinkedProductions": "Nog niet aan een productie gekoppeld",
+    "unlinkBtn": "Ontkoppelen",
+    "viewProduction": "Bekijk productiepagina"
   },
   "admin": {
     "finish": "Voltooien",
@@ -281,6 +299,10 @@
     "saved": "Opgeslagen",
     "edit": "Bewerken",
     "delete": "Verwijderen",
+    "series": {
+      "linkedProductions": "Gekoppelde producties",
+      "linkedProductionsHint": "Zoek en koppel producties aan deze reeks."
+    },
     "blogs": {
       "new": "Nieuw Verhaal",
       "edit": "Verhaal Bewerken",
@@ -407,11 +429,14 @@
       "stories": "Verhalen",
       "events": "Evenementen",
       "prints": "Drukwerk",
-      "series": "Series",
+      "series": "Reeksen",
       "tags": "Tags",
       "accounts": "Accounts",
       "changePassword": "Wachtwoord wijzigen",
       "changePasswordHint": "Werk het wachtwoord van je admin-account bij",
+      "oldPassword": "Oud wachtwoord",
+      "oldPasswordPlaceholder": "Uw oud wachtwoord",
+      "oldPasswordWrong": "Oud wachtwoord is fout",
       "newPassword": "Nieuw wachtwoord",
       "newPasswordPlaceholder": "Minimaal 8 tekens",
       "confirmPassword": "Bevestig nieuw wachtwoord",
@@ -499,6 +524,28 @@
       "media": "Media",
       "events": "Evenementen",
       "series": "Series"
+    },
+    "batch": {
+      "toggle": "Batchbewerking",
+      "mode-label": "Batchbewerkingsmodus",
+      "selected": "{count} geselecteerd",
+      "proceed": "Ga naar batchbewerking",
+      "hint": "Selecteer producties die je wilt bewerken",
+      "saveError": "Er is iets misgegaan bij het opslaan. Probeer het opnieuw.",
+      "productionsLabel": "producties",
+      "productionLabel": "productie",
+      "editingLabel": "Bewerken",
+      "backToSelection": "Terug naar selectie",
+      "tags": {
+        "title": "Tags",
+        "description": "Vooraf geselecteerde tags worden gedeeld door alle geselecteerde producties. Wijzigingen worden bij het opslaan toegepast op elke productie.",
+        "commonNotice": "Toont tags die gemeenschappelijk zijn voor alle {count} geselecteerde producties."
+      },
+      "series": {
+        "title": "Series",
+        "description": "Vooraf gekoppelde series zijn gemeenschappelijk voor alle geselecteerde producties. Wijzigingen worden bij het opslaan toegepast op elke productie.",
+        "commonNotice": "Toont series die gemeenschappelijk zijn voor alle {count} geselecteerde producties."
+      }
     },
     "create-title": "Nieuwe productie",
     "edit-title": "Productie bewerken",

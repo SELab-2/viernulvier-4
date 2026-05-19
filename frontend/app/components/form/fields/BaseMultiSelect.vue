@@ -98,7 +98,7 @@ defineExpose({ clear });
     </label>
 
     <!-- SearchBar -->
-    <div class="-mx-4 h-12">
+    <div class="flex-1 min-w-0 h-12">
       <SearchBar
         ref="searchBarRef"
         v-model="searchQuery"
@@ -116,15 +116,14 @@ defineExpose({ clear });
       data-testid="item-container"
       class="mt-2 border border-border rounded-lg overflow-hidden"
     >
-      <!-- testid to make it easier for testing -->
       <div
         v-for="item in model"
         :key="item"
-        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground hover:bg-muted border-b border-border last:border-b-0"
+        class="flex items-center justify-between px-4 h-10 text-[10px] font-bold uppercase tracking-widest text-foreground border border-transparent hover:border-action-red-icon last:rounded-b-lg first:rounded-t-lg transition-colors duration-150"
       >
         <span class="truncate mr-4">{{ item }}</span>
         <X
-          class="w-3 h-3 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+          class="w-4 h-4 shrink-0 cursor-pointer text-action-red-icon hover:text-action-red-text-hover hover:scale-110 transition-all duration-150"
           @click="removeItem(item)"
         />
       </div>

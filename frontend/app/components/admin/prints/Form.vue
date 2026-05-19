@@ -10,7 +10,7 @@
 -->
 
 <script setup lang="ts">
-import type { PrintItemView } from "@repo/common";
+import type { PrintItem } from "@repo/common";
 import { PrintTypeValues } from "@repo/common";
 import type { FormField } from "../../../types/FormField";
 import { usePrintApi } from "../../../composables/media/usePrintApi";
@@ -36,7 +36,7 @@ const printId = computed<number | null>(() => {
 });
 
 // State
-const print = ref<PrintItemView | null>(null);
+const print = ref<PrintItem | null>(null);
 const fetching = ref(false); // true while loading existing print data
 const loading = ref(false); // true while the form is being submitted
 const error = ref<string | null>(null); // holds error message (to display in case of error)
@@ -101,7 +101,7 @@ async function loadPrint() {
   error.value = null;
   try {
     const resp = await getById(printId.value);
-    print.value = resp.data as PrintItemView;
+    print.value = resp.data;
   } catch {
     error.value = t("admin.form.loadError");
   } finally {
@@ -249,7 +249,6 @@ onMounted(async () => {
       <div class="min-h-[720px]">
         <!-- Minimum height so the footer doesn't jump -->
         <div v-if="fetching" class="flex flex-col gap-4">
-          <!-- TODO possibly replaced by loading skeleton later on -->
           <div
             v-for="i in 6"
             :key="i"
@@ -257,32 +256,41 @@ onMounted(async () => {
           />
         </div>
 
-        <!-- Create form -->
-        <FormBaseForm
-          v-else-if="mode === 'create'"
-          :fields="fields"
-          :reset-label="t('prints.form.reset')"
-          @submit="handleSubmit"
-        />
+        <div v-else class="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+          <div class="space-y-6">
+            <!-- Create form -->
+            <FormBaseForm
+              v-if="mode === 'create'"
+              :fields="fields"
+              :reset-label="t('prints.form.reset')"
+              @submit="handleSubmit"
+            />
 
-        <!-- Edit form -->
-        <FormBaseForm
-          v-else-if="mode === 'edit' && print"
-          :fields="fields"
-          :submit-label="t('prints.form.edit')"
-          :reset-label="t('prints.form.reset')"
-          @submit="handleSubmit"
-          :initial-values="{
-            titel_nl: titel?.nl,
-            titel_en: titel?.en,
-            description_nl: description?.nl,
-            description_en: description?.en,
-            print_type: print.print_type,
-          }"
-        />
+            <!-- Edit form -->
+            <FormBaseForm
+              v-else-if="mode === 'edit' && print"
+              :fields="fields"
+              :submit-label="t('prints.form.edit')"
+              :reset-label="t('prints.form.reset')"
+              @submit="handleSubmit"
+              :initial-values="{
+                titel_nl: titel?.nl,
+                titel_en: titel?.en,
+                description_nl: description?.nl,
+                description_en: description?.en,
+                print_type: print.print_type,
+              }"
+            />
+          </div>
+
+          <!-- Production Linker -->
+          <div class="space-y-6 xl:sticky xl:top-24">
+            <AdminSharedProductionLinker :entity-id="printId" type="print" />
+          </div>
+        </div>
 
         <div
-          v-else-if="mode === 'edit' && !print && !fetching"
+          v-if="mode === 'edit' && !print && !fetching"
           class="py-16 text-center text-muted-foreground"
         >
           {{ t("admin.prints.notFound") }}

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 /**
  * A single grid item for PrintsFileGrid.
  * Thumbnailplaceholder or image, file name, category and date.
@@ -9,11 +9,10 @@
  *    :file="file"
  * />
  */
-import { ref, watch, onMounted, computed, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import type { PrintItemView, ProductionView } from "@repo/common";
 import { Info, X } from "lucide-vue-next";
 import { useProductionApi } from "~/composables/useProductionApi"; // Uses your existing production composable
-import { ROUTES } from "~/utils/routes";
 
 interface Props {
   file: PrintItemView;
@@ -21,9 +20,20 @@ interface Props {
 const props = defineProps<Props>();
 const { t, locale } = useI18n();
 const { getAll: getProductions } = useProductionApi();
+const config = useRuntimeConfig();
 
 const fileLabel = "text-[11px] font-bold uppercase truncate";
-const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
+const openFile = (src: string) => {
+  const mediaBase = config.public.mediaBaseUrl;
+
+  // Clean up slashes so we don't get double slashes (e.g., ...be//prints/...)
+  const cleanBase = mediaBase.replace(/\/$/, "");
+  const cleanSrc = src.startsWith("/") ? src : `/${src}`;
+
+  const fullUrl = `${cleanBase}${cleanSrc}`;
+
+  window.open(fullUrl, "_blank");
+}; // for opening the PDF in a new browser tab
 const showInfo = ref(false); // if the info (description) section is opened or if not
 
 const linkedProductions = ref<ProductionView[]>([]);
@@ -93,14 +103,14 @@ onUnmounted(() => {
       class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150"
       @click="openFile(file.url)"
     >
-      <div @click="openFile(file.url)" class="w-full h-full">
-        <MediaDisplay :src="file" size="fill" :show-icon="true" />
+      <div class="w-full h-full" @click="openFile(file.url)">
+        <MediaDisplay :show-icon="true" :src="file" size="fill" />
       </div>
       <!-- Info button -->
       <button
         v-if="hasInfoAvailable"
-        @click.stop="showInfo = true"
         class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors z-10"
+        @click.stop="showInfo = true"
       >
         <Info class="w-3.5 h-3.5 text-white" />
       </button>
@@ -119,8 +129,8 @@ onUnmounted(() => {
             >
               <!-- Close button -->
               <button
-                @click.stop="showInfo = false"
                 class="absolute top-3 right-3 w-7 h-7 rounded-full bg-foreground/10 hover:bg-foreground/20 border border-border flex items-center justify-center transition-colors shrink-0"
+                @click.stop="showInfo = false"
               >
                 <X class="w-3.5 h-3.5" />
               </button>
@@ -171,8 +181,8 @@ onUnmounted(() => {
                     <ProductionListViewItem
                       v-for="prod in linkedProductions"
                       :key="prod.id"
-                      :production-view="prod"
                       :is-admin="false"
+                      :production-view="prod"
                       @click="showInfo = false"
                     />
                   </div>
