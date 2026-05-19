@@ -1,28 +1,53 @@
 <script setup lang="ts">
 import type { ProductionView, TagView, SeriesView } from "@repo/common";
+import { computed } from "vue";
 import type { MediaCrop } from "@repo/common";
 import { ROUTES } from "~/utils/routes";
+import { useI18n } from "vue-i18n";
+import { Check } from "lucide-vue-next";
+import SeriesDropdown from "~/components/SeriesDropdown.vue";
 
 const { t } = useI18n();
 
-const props = defineProps<{
-  productionView: ProductionView;
-  isAdmin?: boolean;
-  mainCrop: MediaCrop | null;
-  dateRangeText: string;
-  tags: TagView[];
-  isFutureProduction: boolean;
-  linkedSeriesList: SeriesView[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    productionView: ProductionView;
+    isAdmin?: boolean;
+    isBatchMode?: boolean;
+    selected?: boolean;
+    mainCrop: MediaCrop | null;
+    dateRangeText: string;
+    tags: TagView[];
+    isFutureProduction: boolean;
+    linkedSeriesList: SeriesView[];
+  }>(),
+  {
+    isAdmin: false,
+    isBatchMode: false,
+    selected: false,
+  },
+);
 
 const emit = defineEmits<{
   (e: "delete", production: ProductionView): void;
 }>();
+
+// Future productions are not selectable in batch mode
+const isSelectableInBatchMode = computed(() => !props.isFutureProduction);
 </script>
 
 <template>
   <div
-    class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
+    class="flex items-center gap-4 p-4 rounded-xl border bg-card transition-colors transition-shadow duration-150"
+    :class="[
+      props.isBatchMode
+        ? selected
+          ? 'border-primary bg-primary/5 shadow-[0_0_0_2px_hsl(var(--primary)/0.25)]'
+          : isSelectableInBatchMode
+            ? 'border-card-border hover:border-primary/40 hover:bg-card-hover'
+            : 'border-card-border cursor-not-allowed'
+        : 'border-card-border hover:border-ring hover:shadow-sm hover:bg-card-hover',
+    ]"
   >
     <div class="shrink-0">
       <MediaDisplay
@@ -40,7 +65,8 @@ const emit = defineEmits<{
         <div class="min-w-0 max-w-[70%]">
           <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap min-w-0">
             <h3
-              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate min-w-0"
+              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate min-w-0 transition-colors"
+              :class="{ 'text-primary': props.isBatchMode && selected }"
             >
               {{ props.productionView.titel }}
             </h3>
@@ -77,30 +103,58 @@ const emit = defineEmits<{
           </p>
         </div>
 
-        <!-- Admin buttons -->
+        <!-- Right-side actions -->
         <div v-if="props.isAdmin" class="flex items-center gap-2 shrink-0">
-          <!-- WARNING -->
-          <AdminWarningButton
-            v-if="props.isFutureProduction"
-            :title="t('admin-productions.warning-title')"
-            :description="t('admin-productions.warning-description')"
-          />
-
-          <!-- NORMAL ACTIONS -->
-          <template v-else>
-            <NuxtLink
-              :to="
-                ROUTES.admin.productions.edit(Number(props.productionView.id))
+          <!-- BATCH MODE: selectable production → show checkbox -->
+          <template v-if="props.isBatchMode && isSelectableInBatchMode">
+            <div
+              class="flex items-center justify-center w-6 h-6 rounded-md border-2 transition-all duration-150"
+              :class="
+                selected
+                  ? 'bg-primary border-primary text-primary-foreground'
+                  : 'border-muted-foreground/30 bg-transparent'
               "
-              @click.stop
+              aria-hidden="true"
             >
-              <AdminEditButton label="Edit production" />
-            </NuxtLink>
+              <Transition name="check">
+                <Check v-if="selected" :size="13" stroke-width="3" />
+              </Transition>
+            </div>
+          </template>
 
-            <AdminDeleteButton
-              label="Delete production"
-              @click="emit('delete', props.productionView)"
+          <!-- BATCH MODE: future/warning production → show warning button, no checkbox -->
+          <template v-else-if="props.isBatchMode && !isSelectableInBatchMode">
+            <AdminWarningButton
+              :title="t('admin-productions.warning-title')"
+              :description="t('admin-productions.warning-description')"
             />
+          </template>
+
+          <!-- NORMAL ADMIN MODE -->
+          <template v-else>
+            <!-- WARNING -->
+            <AdminWarningButton
+              v-if="props.isFutureProduction"
+              :title="t('admin-productions.warning-title')"
+              :description="t('admin-productions.warning-description')"
+            />
+
+            <!-- NORMAL ACTIONS -->
+            <template v-else>
+              <NuxtLink
+                :to="
+                  ROUTES.admin.productions.edit(Number(props.productionView.id))
+                "
+                @click.stop
+              >
+                <AdminEditButton label="Edit production" />
+              </NuxtLink>
+
+              <AdminDeleteButton
+                label="Delete production"
+                @click="emit('delete', props.productionView)"
+              />
+            </template>
           </template>
         </div>
       </div>
@@ -123,3 +177,25 @@ const emit = defineEmits<{
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Checkmark pop-in */
+.check-enter-active {
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.1s;
+}
+.check-enter-from {
+  transform: scale(0);
+  opacity: 0;
+}
+.check-leave-active {
+  transition:
+    transform 0.1s ease,
+    opacity 0.1s;
+}
+.check-leave-to {
+  transform: scale(0);
+  opacity: 0;
+}
+</style>
