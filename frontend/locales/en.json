@@ -229,7 +229,8 @@
     "noSeries": "No series",
     "create": "New series",
     "deleteConfirm": "Are you sure you want to delete \"{name}\"?",
-    "deleteSuccess": "Deleted series \"{name}\"."
+    "deleteSuccess": "Deleted series \"{name}\".",
+    "no_results": "No series"
   },
   "prints": {
     "types": {

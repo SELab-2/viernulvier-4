@@ -193,7 +193,6 @@ onMounted(() => {
 
 <template>
   <div class="bg-background min-h-[calc(100vh-120px)]">
-    <!-- Toolbar -->
     <div class="w-full border-b border-border bg-background">
       <div class="py-5 flex items-stretch">
         <div class="page-container h-12">
@@ -209,7 +208,6 @@ onMounted(() => {
     </div>
 
     <div class="page-container py-6">
-      <!-- Create Modal -->
       <AdminSeriesCreateModal
         :show="showCreateModal"
         :loading="creating"
@@ -217,15 +215,27 @@ onMounted(() => {
         @create="handleCreate"
       />
 
-      <!-- Error -->
       <div
         v-if="error"
-        class="rounded-xl border border-feedback-error-border bg-feedback-error-bg p-4 text-center text-feedback-error-text"
+        class="rounded-xl border border-feedback-error-border bg-feedback-error-bg p-4 text-center text-feedback-error-text mb-6"
       >
         {{ error }}
       </div>
 
-      <!-- Loading -->
+      <div class="flex items-center justify-between mb-6">
+        <p class="font-brand text-2xl font-black text-foreground">
+          {{ totalItems }} {{ t("general.results") }}
+        </p>
+
+        <button
+          class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+          @click="showCreateModal = true"
+        >
+          <Plus :size="15" />
+          {{ t("series.create") }}
+        </button>
+      </div>
+
       <div v-if="loading && !seriesList.length" class="flex flex-col gap-3">
         <div
           v-for="i in 5"
@@ -234,38 +244,15 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Empty -->
       <div v-else-if="!seriesList.length" class="py-24 text-center">
         <p
           class="font-brand font-black text-4xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
         >
-          {{ t("archive.no_results") }}
+          {{ t("series.no_results") }}
         </p>
-        <button
-          class="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition mx-auto"
-          @click="showCreateModal = true"
-        >
-          <Plus :size="15" />
-          {{ t("series.create") }}
-        </button>
       </div>
 
-      <!-- List -->
       <div v-else class="space-y-3">
-        <div class="flex items-center justify-between mb-6">
-          <p class="font-brand text-2xl font-black text-foreground">
-            {{ totalItems }} {{ t("general.results") }}
-          </p>
-
-          <button
-            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
-            @click="showCreateModal = true"
-          >
-            <Plus :size="15" />
-            {{ t("series.create") }}
-          </button>
-        </div>
-
         <AdminSeriesListItem
           v-for="series in seriesList"
           :key="series.id"
@@ -279,7 +266,6 @@ onMounted(() => {
           @batch-edit="handleBatchEdit(series.id)"
         />
 
-        <!-- Pagination -->
         <div v-if="totalPages > 1" class="pt-8 flex w-full">
           <AdminSeriesPagination />
         </div>
