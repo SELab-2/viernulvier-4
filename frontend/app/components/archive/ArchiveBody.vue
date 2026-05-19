@@ -311,7 +311,9 @@ async function deleteGallery(
   <section class="w-full bg-background relative">
     <div class="page-container py-6">
       <!-- Results count + pagination -->
-      <div class="flex items-center justify-between mb-6">
+      <div
+        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6"
+      >
         <p
           v-if="!loading && totalItems > 0"
           class="font-brand text-2xl font-black text-foreground"
@@ -325,7 +327,7 @@ async function deleteGallery(
 
         <ArchivePagination v-if="!isAdmin" />
         <!-- Admin toolbar -->
-        <div v-else class="flex gap-3">
+        <div v-else class="flex flex-wrap gap-2">
           <!-- Batch edit pill toggle -->
           <button
             class="inline-flex items-center gap-2.5 px-3 py-2 rounded-lg border-2 font-brand font-black text-[11px] uppercase tracking-widest leading-none transition-colors duration-200"

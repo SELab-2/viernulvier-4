@@ -6,7 +6,7 @@
   All labels come from i18n so both NL and EN work automatically.
 -->
 <script setup lang="ts">
-import { BookOpen, Film, Printer, Users } from "lucide-vue-next";
+import { BookOpen, Film, Layers, Printer, Users } from "lucide-vue-next";
 import { ROUTES } from "~/utils/routes";
 
 defineProps<{ isSuperAdmin: boolean }>();
@@ -16,20 +16,28 @@ const { t } = useI18n();
 // Same sections as the admin header nav (minus dashboard itself)
 const links = computed(() => [
   {
-    label: t("admin.dashboard.stories"),
-    desc: t("admin.dashboard.storiesDesc"),
-    icon: BookOpen,
-    to: ROUTES.admin.stories.base,
-    accent: "text-purple-500",
-    bg: "bg-purple-500/10 dark:bg-purple-500/15",
-  },
-  {
     label: t("admin.dashboard.productions"),
     desc: t("admin.dashboard.productionsDesc"),
     icon: Film,
     to: ROUTES.admin.productions.base,
     accent: "text-blue-500",
     bg: "bg-blue-500/10 dark:bg-blue-500/15",
+  },
+  {
+    label: t("admin.dashboard.series"),
+    desc: t("admin.dashboard.seriesDesc"),
+    icon: Layers,
+    to: ROUTES.admin.series.base,
+    accent: "text-emerald-500",
+    bg: "bg-emerald-500/10 dark:bg-emerald-500/15",
+  },
+  {
+    label: t("admin.dashboard.stories"),
+    desc: t("admin.dashboard.storiesDesc"),
+    icon: BookOpen,
+    to: ROUTES.admin.stories.base,
+    accent: "text-purple-500",
+    bg: "bg-purple-500/10 dark:bg-purple-500/15",
   },
   {
     label: t("admin.dashboard.prints"),
