@@ -247,6 +247,11 @@ const hasBadge = computed(() =>
 
 /** Height class applied to interactive controls so they line up. */
 const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
+
+// Sort select hover state — CSS :hover alone can't be used because native <select>
+// keeps :focus after clicking, leaving the hover inversion stuck while the dropdown is open.
+const sortHovered = ref(false);
+const sortOpen = ref(false);
 </script>
 
 <template>
@@ -276,7 +281,16 @@ const rowHeight = computed(() => (props.dense ? "h-11" : "h-12"));
         <label class="sr-only">{{ sortLabel ?? t("stories.sortLabel") }}</label>
         <select
           v-model="activeSortOrder"
-          class="sort-select h-full px-5 rounded-md border-2 border-[var(--foreground)] bg-[var(--background)] text-[var(--foreground)] text-[10px] font-brand font-black uppercase tracking-widest focus:outline-none cursor-pointer transition-all appearance-none"
+          :class="[
+            'h-full px-5 rounded-md border-2 border-[var(--foreground)] text-[10px] font-brand font-black uppercase tracking-widest focus:outline-none cursor-pointer transition-all appearance-none',
+            sortHovered && !sortOpen
+              ? 'bg-[var(--foreground)] text-[var(--background)]'
+              : 'bg-[var(--background)] text-[var(--foreground)]',
+          ]"
+          @mouseenter="sortHovered = true"
+          @mouseleave="sortHovered = false"
+          @mousedown="sortOpen = true"
+          @blur="sortOpen = false"
         >
           <option value="newest">{{ t("stories.sortNewest") }}</option>
           <option value="oldest">{{ t("stories.sortOldest") }}</option>
