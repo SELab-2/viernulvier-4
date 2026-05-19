@@ -20,10 +20,10 @@ CREATE TABLE productions
 );
 
 -- These create GIN indexes for the fields that need them in productions
-CREATE INDEX idx_prod_title_en_trgm ON productions USING GIN ((titel->>'en') gin_trgm_ops);
-CREATE INDEX idx_prod_title_nl_trgm ON productions USING GIN ((titel->>'nl') gin_trgm_ops);
-CREATE INDEX idx_prod_artist_en_trgm ON productions USING GIN ((artist->>'en') gin_trgm_ops);
-CREATE INDEX idx_prod_artist_nl_trgm ON productions USING GIN ((artist->>'nl') gin_trgm_ops);
+CREATE INDEX idx_prod_title_en_trgm ON productions USING GIN ((titel ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_prod_title_nl_trgm ON productions USING GIN ((titel ->> 'nl') gin_trgm_ops);
+CREATE INDEX idx_prod_artist_en_trgm ON productions USING GIN ((artist ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_prod_artist_nl_trgm ON productions USING GIN ((artist ->> 'nl') gin_trgm_ops);
 
 CREATE OR REPLACE FUNCTION update_updated_at()
     RETURNS TRIGGER AS
@@ -44,7 +44,7 @@ CREATE TABLE events
 (
     id              SERIAL PRIMARY KEY,
     starttime       TIMESTAMP NOT NULL,
-    endtime         TIMESTAMP NOT NULL,
+    endtime         TIMESTAMP,
     doors_at        TIMESTAMP,
     intermission_at TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT now(),
@@ -58,6 +58,25 @@ CREATE TABLE events
 );
 CREATE INDEX idx_events_production_id ON events (production_id);
 CREATE INDEX idx_events_starttime ON events (starttime);
+
+CREATE OR REPLACE FUNCTION convert_endtime_to_null()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the incoming endtime is the 1970 epoch date (necessary for scraped data consistency)
+    IF NEW.endtime = '1970-01-01 00:00:00'::timestamp THEN
+        NEW.endtime := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_convert_endtime_to_null
+    BEFORE INSERT OR UPDATE
+    ON events
+    FOR EACH ROW
+EXECUTE FUNCTION convert_endtime_to_null();
 
 CREATE TRIGGER set_updated_at_events
     BEFORE UPDATE
@@ -75,8 +94,8 @@ CREATE TABLE blogs
 );
 
 -- These create GIN indexes for the fields that need them in blogs
-CREATE INDEX idx_blog_title_en_trgm ON blogs USING GIN ((titel->>'en') gin_trgm_ops);
-CREATE INDEX idx_blog_title_nl_trgm ON blogs USING GIN ((titel->>'nl') gin_trgm_ops);
+CREATE INDEX idx_blog_title_en_trgm ON blogs USING GIN ((titel ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_blog_title_nl_trgm ON blogs USING GIN ((titel ->> 'nl') gin_trgm_ops);
 
 CREATE TRIGGER set_updated_at_blogs
     BEFORE UPDATE
@@ -343,8 +362,8 @@ CREATE TABLE print_items
 );
 
 -- These create GIN indexes for the fields that need them in prints
-CREATE INDEX idx_print_title_en_trgm ON prints USING GIN ((titel->>'en') gin_trgm_ops);
-CREATE INDEX idx_print_title_nl_trgm ON prints USING GIN ((titel->>'nl') gin_trgm_ops);
+CREATE INDEX idx_print_title_en_trgm ON prints USING GIN ((titel ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_print_title_nl_trgm ON prints USING GIN ((titel ->> 'nl') gin_trgm_ops);
 
 CREATE TRIGGER trg_print_items_updated_at
     BEFORE UPDATE

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict gcLJBluXMZBRcFMSdj0jMcgTYihosq3nnAuSrfV4enhVfVNmfevpQoPaDlSoDjn
+\restrict BHwdQRdCxjd7wMCAgNwvHbSuj5va0ft72Ki4YQcayHfl5Zq0Sz5MeuWXidnes4B
 
 -- Dumped from database version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 18.3
@@ -124,6 +124,26 @@ $$;
 
 
 ALTER FUNCTION public.check_and_delete_orphan_tag() OWNER TO selab2;
+
+--
+-- Name: convert_endtime_to_null(); Type: FUNCTION; Schema: public; Owner: selab2
+--
+
+CREATE FUNCTION public.convert_endtime_to_null() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    -- Check if the incoming endtime is the 1970 epoch date (necessary for scraped data consistency)
+    IF NEW.endtime = '1970-01-01 00:00:00'::timestamp THEN
+        NEW.endtime := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.convert_endtime_to_null() OWNER TO selab2;
 
 --
 -- Name: update_updated_at(); Type: FUNCTION; Schema: public; Owner: selab2
@@ -1393,6 +1413,13 @@ CREATE TRIGGER trg_series_updated_at BEFORE UPDATE ON public.media_gallery FOR E
 
 
 --
+-- Name: events trigger_convert_endtime_to_null; Type: TRIGGER; Schema: public; Owner: selab2
+--
+
+CREATE TRIGGER trigger_convert_endtime_to_null BEFORE INSERT OR UPDATE ON public.events FOR EACH ROW EXECUTE FUNCTION public.convert_endtime_to_null();
+
+
+--
 -- Name: account_api_keys account_api_keys_account_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: selab2
 --
 
@@ -1582,5 +1609,5 @@ INSERT INTO scraper_dates DEFAULT VALUES;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict gcLJBluXMZBRcFMSdj0jMcgTYihosq3nnAuSrfV4enhVfVNmfevpQoPaDlSoDjn
+\unrestrict BHwdQRdCxjd7wMCAgNwvHbSuj5va0ft72Ki4YQcayHfl5Zq0Sz5MeuWXidnes4B
 
