@@ -23,6 +23,11 @@ const { sortOrder, searchQuery, dateFilter } = useBlogView();
 const oldestDate = ref("");
 const newestDate = ref("");
 
+// Show the ×-badge when tags are active or the date filter is custom (not the defaults)
+const hasActiveFilters = computed(() => {
+  return !!dateFilter.value.after || !!dateFilter.value.before;
+});
+
 async function fetchDateBounds() {
   try {
     const [oldestRaw, newestRaw] = await Promise.all([
@@ -158,6 +163,7 @@ onUnmounted(() => {
       :oldest-date="oldestDate"
       :newest-date="newestDate"
       :date-filter="dateFilter"
+      :extra-filters-active="hasActiveFilters"
       @update:search="searchQuery = $event"
       @update:date-filter="dateFilter = $event"
     />
