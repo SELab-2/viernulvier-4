@@ -10,7 +10,7 @@
  * - Sticky visibility logic (Hide on scroll down, show on scroll up)
  */
 
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { ROUTES } from "~/utils/routes";
 import { LogOut, Menu, X } from "lucide-vue-next";
 
@@ -187,7 +187,9 @@ const adminNavItems = [
       !isVisible && !isMenuOpen ? '-translate-y-full' : '',
       isTransparent
         ? 'absolute w-full bg-transparent border-transparent header-transparent text-[var(--foreground)]'
-        : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)] text-[var(--foreground)]',
+        : showAdminInterface
+          ? 'sticky bg-[var(--background)] text-[var(--foreground)]'
+          : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)] text-[var(--foreground)]',
       'top-0 z-[100] transition-all duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]',
     ]"
   >
@@ -198,7 +200,7 @@ const adminNavItems = [
       <div class="flex items-center justify-start">
         <nav
           v-if="!showAdminInterface"
-          class="hidden xl:flex gap-[20px] xl:gap-[30px]"
+          class="hidden xl:flex gap-[24px] xl:gap-[36px]"
         >
           <NuxtLink
             v-for="item in navItems"
@@ -238,7 +240,7 @@ const adminNavItems = [
           </NuxtLink>
           <span
             v-if="showAdminInterface"
-            class="text-xl lg:text-2xl font-black text-gray-400 tracking-[-1px]"
+            class="text-xl lg:text-2xl font-black text-[var(--muted-foreground)] tracking-[-1px] opacity-50"
             >ADMIN</span
           >
         </div>
@@ -267,9 +269,9 @@ const adminNavItems = [
 
     <nav
       v-if="showAdminInterface"
-      class="hidden lg:flex border-t-1 border-[var(--muted-foreground)] w-full bg-[var(--background)]"
+      class="hidden lg:flex w-full bg-[var(--accent-fixed)]"
     >
-      <div class="page-container flex justify-between items-center">
+      <div class="page-container flex justify-center items-center gap-6 py-2">
         <NuxtLink
           v-for="item in adminNavItems"
           :key="item.route"
@@ -293,7 +295,7 @@ const adminNavItems = [
     <div
       v-if="isMenuOpen"
       :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
-      class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] page-container py-8 shadow-xl"
+      class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] page-container py-8 shadow-xl text-[var(--foreground)]"
     >
       <nav class="flex flex-col gap-6">
         <template v-if="showAdminInterface">
@@ -352,7 +354,7 @@ const adminNavItems = [
 <style scoped>
 .nav-item {
   @apply no-underline text-[var(--muted-foreground)] font-[900] text-[12px] tracking-[2px]
-         transition-colors hover:text-[var(--foreground)] uppercase;
+  transition-colors hover:text-[var(--foreground)] uppercase;
 }
 
 .nav-item.router-link-active {
@@ -362,19 +364,26 @@ const adminNavItems = [
 .admin-nav-item {
   display: flex;
   align-items: center;
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-sm, 4px);
 
-  @apply no-underline text-[var(--muted-foreground)] font-[900] text-[11px] tracking-[2px] uppercase transition-all relative;
-
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
+  color: #ffffff;
+  opacity: 0.75;
 }
 
 .admin-nav-item:hover {
-  color: var(--foreground);
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .admin-nav-item.router-link-active {
-  color: var(--foreground);
-  @apply underline underline-offset-[10px] decoration-[3px];
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.25);
 }
 </style>

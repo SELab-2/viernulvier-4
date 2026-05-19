@@ -71,6 +71,8 @@
   --accent-light: #f3e8ff;
   --accent-foreground: #ffffff;
 
+  --accent-fixed: #8224e3;
+
   /* Card */
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -224,6 +226,8 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-light: var(--accent-light);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-fixed: var(--accent-fixed);
+  --color-accent-fixed-foreground: #ffffff;
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
   --color-action-blue-border: var(--action-blue-border);
