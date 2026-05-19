@@ -306,7 +306,7 @@ const adminNavItems = [
             class="nav-item text-lg"
             @click="isMenuOpen = false"
           >
-            {{ item.label }}
+            {{ t("nav." + item.label) }}
           </NuxtLink>
 
           <NuxtLink
