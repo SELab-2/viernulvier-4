@@ -7,8 +7,16 @@
 export const API_ROUTES = {
   auth: {
     login: "/auth/login",
+    changePassword: "/auth/change-password",
     base: "/auth",
     byId: (accountId: number) => `/auth/${accountId}`,
+  },
+  series: {
+    base: "/series",
+    byId: (seriesId: number) => `/series/${seriesId}`,
+    productions: (seriesId: number) => `/series/${seriesId}/productions`,
+    productionById: (seriesId: number, productionId: number) =>
+      `/series/${seriesId}/productions/${productionId}`,
   },
   productions: {
     base: "/productions",
@@ -65,6 +73,8 @@ export const API_ROUTES = {
     items: (galleryId: number) => `/media/galleries/${galleryId}/items`,
     itemLink: (galleryId: number, itemId: number) =>
       `/media/galleries/${galleryId}/items/${itemId}`,
+    printLink: (galleryId: number, itemId: number) =>
+      `/media/galleries/${galleryId}/prints/${itemId}`,
   },
   items: {
     base: "/media/items",

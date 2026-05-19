@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
 import { getToday } from "~/utils/constants";
-import type { PaginatedResponse, ProductionView } from "@repo/common";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { ProductionView } from "@repo/common";
+import type { SearchSuggestion } from "~/types/Search";
 import type { DateFilter } from "~/types/DateFilter";
 
 /**
@@ -38,6 +38,7 @@ const totalPages = ref(1);
 // Data/loading state
 const loading = ref(false);
 const oldestDate = ref("");
+const newestDate = ref(getToday());
 
 export function useArchiveView() {
   const { getAll } = useProductionApi();
@@ -51,7 +52,7 @@ export function useArchiveView() {
     query: string,
     limit: number,
   ): Promise<SearchSuggestion[]> {
-    const resp = (await getAll({
+    const resp = await getAll({
       paginationFilters: { page: 0, limit: limit, descending: true },
       productionFilters: {
         titelOrArtist: query,
@@ -60,7 +61,7 @@ export function useArchiveView() {
         tag_ids: tagIds.value,
       },
       languageFilters: { lang: locale.value },
-    })) as ApiResponse<PaginatedResponse<ProductionView>>;
+    });
 
     if (!resp.data?.objects) return [];
 
@@ -100,6 +101,7 @@ export function useArchiveView() {
 
     loading,
     oldestDate,
+    newestDate,
 
     fetchSuggestions,
   };

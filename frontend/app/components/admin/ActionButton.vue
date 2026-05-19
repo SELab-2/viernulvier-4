@@ -7,7 +7,7 @@
  *  - Color variants (blue, red, green, gray)
  *  - Icon slot for full flexibility (edit, delete, upload, ...)
  */
-type ActionButtonVariant = "blue" | "red" | "green" | "gray";
+type ActionButtonVariant = "blue" | "red" | "green" | "gray" | "warning";
 
 interface Props {
   label: string;
@@ -33,6 +33,8 @@ const variantClasses: Record<ActionButtonVariant, string> = {
   green:
     "border-action-green-border text-action-green-icon hover:bg-action-green-hover",
   gray: "border-action-gray-border text-action-gray-icon hover:bg-action-gray-hover",
+  warning:
+    "border-action-warning-border text-action-warning-icon hover:bg-action-warning-hover",
   // add more variants as needed
 };
 

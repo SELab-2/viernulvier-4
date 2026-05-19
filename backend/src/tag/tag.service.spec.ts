@@ -27,6 +27,7 @@ describe("TagService", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: false,
   };
 
   const mockTags: TagDto[] = [mockTag];
@@ -84,7 +85,7 @@ describe("TagService", () => {
 
   describe("getAllTags", () => {
     it("should return all tags from database", async () => {
-      const result = await service.getAllTags(filter);
+      const result = await service.getAllTags(filter, {});
       expect(result).toEqual(mockTags);
       expect(dbService.getTags).toHaveBeenCalled();
     });
@@ -93,7 +94,7 @@ describe("TagService", () => {
       jest
         .spyOn(dbService, "getTags")
         .mockRejectedValue(new Error("Database error"));
-      await expect(service.getAllTags(filter)).rejects.toThrow(
+      await expect(service.getAllTags(filter, {})).rejects.toThrow(
         "Database error",
       );
     });

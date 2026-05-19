@@ -17,7 +17,10 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
-import { ResourceNotFoundException } from "../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../common/exceptions";
 
 @Injectable()
 export class LocationDatabaseService {
@@ -28,6 +31,7 @@ export class LocationDatabaseService {
    * Get a single location by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The Location if there is one.
+   * @throws ResourceNotFoundException if there is no location by the provided id. (404)
    */
   async getLocationById(id: number): Promise<LocationDto> {
     const returningClause = generateReturningClause(LocationSchema);
@@ -113,6 +117,7 @@ export class LocationDatabaseService {
    * Create location function, creates a location in the database.
    * @param location must be of the type "CreateLocation" which has all fields defined besides the primary key id.
    * @returns the added location if it was successful.
+   * @throws SystemFailureException if something went wrong while creating the object. (500)
    */
   async createLocation(location: CreateLocationDto): Promise<LocationDto> {
     const { columns, placeholders, values } = generateInsertClause(location);
@@ -127,7 +132,7 @@ export class LocationDatabaseService {
     const result = await this.db.query<LocationDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create location.");
+      throw new SystemFailureException("Failed to create location.");
     }
 
     return result[0];
@@ -135,9 +140,12 @@ export class LocationDatabaseService {
 
   /**
    * Update function for locations. Updates the location in the database.
+   * @param locationId is the id of the location you want to update
    * @param location must be of the type "ModifyLocation", gives the freedom to define only what needs to be updated.
    * The id field in the location MUST be defined.
    * @returns the updated location if successful.
+   * @throws BadRequestException if no valid fields were provided to update. (400)
+   * @throws ResourceNotFoundException if there is no location by the provided id. (404)
    */
   async updateLocation(
     locationId: number,

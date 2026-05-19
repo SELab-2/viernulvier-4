@@ -40,6 +40,7 @@ describe("TagController", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: false,
   };
 
   const mockTags: TagDto[] = [mockTag];
@@ -94,7 +95,7 @@ describe("TagController", () => {
         .spyOn(languageService, "flattenByLanguage")
         .mockReturnValue(mockTagViews);
 
-      const result = await controller.getAllTags(langQuery, filter);
+      const result = await controller.getAllTags(langQuery, filter, {});
 
       expect(result).toEqual(mockTagViews);
       expect(service.getAllTags).toHaveBeenCalled();

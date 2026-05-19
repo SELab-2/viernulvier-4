@@ -4,6 +4,7 @@ import { AccountDatabaseService } from "../database/db.account.service";
 import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   UpdateAccountDto,
 } from "../dto/dto";
@@ -29,6 +30,7 @@ describe("AuthService", () => {
   const filter: PaginationFilterDto = {
     limit: 10,
     page: 1,
+    descending: true,
   };
 
   beforeEach(async () => {
@@ -73,7 +75,7 @@ describe("AuthService", () => {
 
   describe("loginAccount", () => {
     it("should login and return an account with api key", async () => {
-      const dto: CreateAccountDto = {
+      const dto: LoginDto = {
         username: "testuser",
         password: "password123",
       };
@@ -95,6 +97,7 @@ describe("AuthService", () => {
       const dto: CreateAccountDto = {
         username: "testuser",
         password: "password123",
+        superAdmin: false,
       };
       const mockAccount = { id: 10, username: "testuser", superAdmin: false };
       const mockApiKey = { id: 99, key: "super-secret-key" };
@@ -114,7 +117,6 @@ describe("AuthService", () => {
       expect(result).toEqual(mockAccount);
     });
   });
-
   describe("updateAccount", () => {
     it("should update and return the account", async () => {
       const dto: UpdateAccountDto = { id: 1, username: "updateduser" };

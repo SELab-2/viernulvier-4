@@ -20,6 +20,10 @@ export const ROUTES = {
   events: {
     base: "/events",
   },
+  series: {
+    base: "/series",
+    byId: (id: number) => `/series/${id}`,
+  },
   prints: {
     base: "/prints",
   },
@@ -35,7 +39,11 @@ export const ROUTES = {
       byId: (id: number) => `/admin/productions/${id}`,
       create: "/admin/productions/create",
       edit: (id: number) => `/admin/productions/edit/${id}`,
-      editTags: "/admin/productions/editTags",
+      batchEdit: "/admin/productions/batch-edit",
+      csvImports: "/admin/productions/csv-imports",
+    },
+    series: {
+      base: "/admin/series",
     },
     stories: {
       base: "/admin/stories",
@@ -50,6 +58,7 @@ export const ROUTES = {
     prints: {
       base: "/admin/prints",
       create: "/admin/prints/create",
+      edit: (id: number) => `/admin/prints/edit/${id}`,
     },
     accounts: {
       base: "/admin/accounts",

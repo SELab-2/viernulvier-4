@@ -69,6 +69,9 @@ describe("ProductionService", () => {
             deleteBlogFromProduction: jest.fn(),
             addTagToProduction: jest.fn(),
             removeTagFromProduction: jest.fn(),
+            getMediaFromProduction: jest.fn(),
+            linkMediaToProduction: jest.fn(),
+            unlinkMediaFromProduction: jest.fn(),
           },
         },
         {
@@ -450,6 +453,79 @@ describe("ProductionService", () => {
 
         await expect(service.removeTagFromProduction(999, 2)).rejects.toThrow(
           "No ProductionDto exists for provided ID",
+        );
+      });
+    });
+  });
+
+  describe("-- Media --", () => {
+    const mockMediaGallery = {
+      id: 1,
+      name: "Production Main Gallery",
+      type: "default",
+      created_at: "2025-06-01T22:00:00.000Z",
+      updated_at: "2025-06-01T22:00:00.000Z",
+    };
+
+    describe("getProductionMedia", () => {
+      it("should return the media gallery linked to a production", async () => {
+        const getSpy = jest
+          .spyOn(dbService as any, "getMediaFromProduction")
+          .mockResolvedValueOnce(mockMediaGallery);
+
+        const result = await service.getProductionMedia(1, "default");
+
+        expect(result).toEqual(mockMediaGallery);
+        expect(getSpy).toHaveBeenCalledWith(1, "default");
+      });
+
+      it("should handle errors if fetching media fails", async () => {
+        jest
+          .spyOn(dbService as any, "getMediaFromProduction")
+          .mockRejectedValueOnce(new Error("Database error"));
+
+        await expect(
+          service.getProductionMedia(999, "default"),
+        ).rejects.toThrow("Database error");
+      });
+    });
+
+    describe("linkMediaToProduction", () => {
+      it("shoud link a media gallery and return undefined", async () => {
+        const linkSpy = jest
+          .spyOn(dbService as any, "linkMediaToProduction")
+          .mockResolvedValueOnce(undefined);
+        const result = await service.linkMediaToProduction(1, 2);
+        expect(linkSpy).toHaveBeenCalledWith(1, 2);
+        expect(result).toBeUndefined();
+      });
+
+      it("should throw an error if the linking process fails", async () => {
+        jest
+          .spyOn(dbService as any, "linkMediaToProduction")
+          .mockRejectedValueOnce(new Error("Failed to link"));
+        await expect(service.linkMediaToProduction(1, 2)).rejects.toThrow(
+          "Failed to link",
+        );
+      });
+    });
+
+    describe("unlinkMediaFromProduction", () => {
+      it("should unlink a media gallery and return undefined", async () => {
+        const unlinkSpy = jest
+          .spyOn(dbService as any, "unlinkMediaFromProduction")
+          .mockResolvedValueOnce(undefined);
+        const result = await service.unlinkMediaFromProduction(1, 2);
+        expect(unlinkSpy).toHaveBeenCalledWith(1, 2); // productionId, galleryId
+        expect(result).toBeUndefined();
+      });
+
+      it("should throw an error if the unlinking process fails", async () => {
+        jest
+          .spyOn(dbService as any, "unlinkMediaFromProduction")
+          .mockRejectedValueOnce(new Error("Failed to unlink"));
+        await expect(service.unlinkMediaFromProduction(1, 2)).rejects.toThrow(
+          "Failed to unlink",
         );
       });
     });

@@ -5,11 +5,24 @@ import EventListView from "../../../app/components/event/EventListView.vue";
 import type { LocationView, PriceView } from "@repo/common";
 import type { EventWithDetails } from "../../../app/types/EventWithDetails";
 
+// Mock history to prevent ReferenceError in vue-router
+if (typeof history === "undefined") {
+  Object.defineProperty(global, "history", {
+    value: {
+      pushState: vi.fn(),
+      replaceState: vi.fn(),
+      state: {},
+    },
+    writable: true,
+  });
+}
+
 vi.mock("#app", async (importOriginal) => {
   const actual = await importOriginal<Record<string, any>>();
 
   return {
     ...actual,
+    navigateTo: vi.fn(), // Mocking navigateTo here as well for Nuxt auto-imports
   };
 });
 
@@ -76,6 +89,9 @@ describe("EventListView", () => {
   let wrapper: VueWrapper<InstanceType<typeof EventListView>>;
 
   beforeEach(() => {
+    // Stub global navigateTo to prevent 'history is not defined' Vue Router errors
+    vi.stubGlobal("navigateTo", vi.fn());
+
     wrapper = mount(EventListView, {
       global: {
         plugins: [i18n],

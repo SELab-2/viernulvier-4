@@ -3,12 +3,17 @@ import { AccountDatabaseService } from "../database/db.account.service";
 import { ApiKeyDatabaseService } from "../database/db.apiKey.service";
 import {
   ApiKeyDto,
+  ChangePasswordDto,
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
 } from "../dto/dto";
 import { PaginatedResponse } from "@repo/common";
+import { UnauthorizedException } from "@nestjs/common";
+import { InvalidCredentialsException } from "../common/exceptions";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class AuthService {
@@ -37,7 +42,7 @@ export class AuthService {
    * @returns An object containing the Account and ApiKey.
    */
   async loginAccount(
-    account: CreateAccountDto,
+    account: LoginDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     return await this.accountDbService.loginAccount(account);
   }
@@ -53,7 +58,9 @@ export class AuthService {
     const account: PublicAccountDto =
       await this.accountDbService.createAccount(createAccount);
 
-    const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey();
+    const apiKey: ApiKeyDto = await this.apiKeyDbService.generateApiKey(
+      createAccount.superAdmin,
+    );
     await this.accountDbService.linkAccountToKey(account.id, apiKey.id);
 
     return account;
@@ -77,5 +84,38 @@ export class AuthService {
    */
   async deleteAccount(accountId: number): Promise<boolean> {
     return await this.accountDbService.deleteAccount(accountId);
+  }
+
+  /**
+   * Changes the password of the account associated with the provided API key.
+   * @param apiKey The API key of the account.
+   * @param changePassword The new password.
+   * @returns The updated account.
+   */
+  async changePassword(
+    apiKey: string,
+    changePassword: ChangePasswordDto,
+  ): Promise<PublicAccountDto> {
+    const account = await this.accountDbService.getAccountIdFromApiKey(apiKey);
+
+    // Verify whether there's actually an account.
+    if (!account) {
+      throw new UnauthorizedException("Invalid API key.");
+    }
+
+    // Verify password using bcrypt (check whether the old password is correct)
+    const isValid = await bcrypt.compare(
+      changePassword.oldPassword,
+      account.password,
+    );
+    if (!isValid) {
+      throw new InvalidCredentialsException();
+    }
+
+    // Update with the new password.
+    return await this.accountDbService.updateAccount({
+      id: account.id,
+      password: changePassword.password,
+    });
   }
 }

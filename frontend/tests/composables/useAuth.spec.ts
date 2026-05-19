@@ -1,5 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { useAuth } from "../../app/composables/useAuth";
+
+// Mock history to prevent ReferenceError in vue-router
+if (typeof history === "undefined") {
+  Object.defineProperty(global, "history", {
+    value: {
+      pushState: vi.fn(),
+      replaceState: vi.fn(),
+      state: {},
+    },
+    writable: true,
+  });
+}
 
 vi.mock("#app", async (importOriginal) => {
   const actual = await importOriginal<Record<string, any>>();
@@ -13,12 +25,17 @@ vi.mock("#app", async (importOriginal) => {
 });
 
 const mockFetch = vi.fn();
-vi.stubGlobal("$fetch", mockFetch);
 
 beforeEach(() => {
   mockFetch.mockReset();
   vi.clearAllMocks();
   sessionStorage.clear();
+  vi.stubGlobal("navigateTo", vi.fn());
+  vi.stubGlobal("$fetch", mockFetch);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe("useAuth", () => {

@@ -33,6 +33,7 @@ export class EventPriceController {
   /**
    * Responds to GET /events/:eventId/prices
    * @param eventId ID in the URL of the request.
+   * @param lang is the desired language
    * @returns The Prices corresponding to this event.
    */
   @ApiOperation({
@@ -72,6 +73,7 @@ export class EventPriceController {
   /**
    * Responds to a DELETE to "/events/:eventId/prices/:priceId".
    * @param eventId The ID of the Event.
+   * @param priceId is the ID of the price.
    * @returns Nothing
    */
   @UseGuards(ApiKeyGuard)

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   ParseIntPipe,
   Patch,
@@ -14,7 +15,9 @@ import {
 import { AuthService } from "./auth.service";
 import {
   ApiKeyDto,
+  ChangePasswordDto,
   CreateAccountDto,
+  LoginDto,
   PaginationFilterDto,
   PublicAccountDto,
   UpdateAccountDto,
@@ -26,10 +29,12 @@ import {
   ApiOperation,
   ApiSecurity,
 } from "@nestjs/swagger";
-import { SuperApiKeyGuard } from "./authGuard";
+import { ApiKeyGuard, SuperApiKeyGuard } from "./authGuard";
 import { ZodValidationPipe } from "nestjs-zod";
 import {
+  ChangePasswordSchema,
   CreateAccountSchema,
+  LoginSchema,
   PaginatedResponse,
   PaginationFilterSchema,
   UpdateAccountSchema,
@@ -47,10 +52,10 @@ export class AuthController {
    * @returns The Account and their ApiKey.
    */
   @ApiOperation({ summary: "Logs into an existing account." })
-  @UsePipes(new ZodValidationPipe(CreateAccountSchema))
+  @UsePipes(new ZodValidationPipe(LoginSchema))
   @Post("login")
   async loginAccount(
-    @Body() account: CreateAccountDto,
+    @Body() account: LoginDto,
   ): Promise<{ account: PublicAccountDto; apiKey: ApiKeyDto | null }> {
     return await this.authService.loginAccount(account);
   }
@@ -115,6 +120,29 @@ export class AuthController {
   }
 
   /**
+   * Responds to a POST to "/auth/change-password".
+   * @param apiKey The API key of the account.
+   * @param changePassword The new password.
+   * @returns The updated account.
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Changes the password of the current account." })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiOkResponse({
+    type: PublicAccountDto,
+    description: "Password updated successfully.",
+  })
+  @UsePipes(new ZodValidationPipe(ChangePasswordSchema))
+  @Post("change-password")
+  async changePassword(
+    @Headers("x-api-key") apiKey: string,
+    @Body() changePassword: ChangePasswordDto,
+  ): Promise<PublicAccountDto> {
+    return await this.authService.changePassword(apiKey, changePassword);
+  }
+
+  /**
    * Responds to a DELETE to "/auth/:accountId"
    * @param accountId The ID of the account we want to delete.
    * @returns Whether the Account was deleted successfully.
@@ -128,5 +156,34 @@ export class AuthController {
     @Param("accountId", ParseIntPipe) accountId: number,
   ): Promise<boolean> {
     return await this.authService.deleteAccount(accountId);
+  }
+
+  /**
+   * Responds to a GET to "/auth/verify"
+   * @returns true if a valid standard key was provided
+   */
+  @UseGuards(ApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Verifies that a standard key is valid" })
+  @ApiOkResponse({ description: "Key valid" })
+  @Get("verify")
+  verifyKey(): { valid: boolean } {
+    // If the request makes it past the ApiKeyGuard, the key is strictly valid.
+    return { valid: true };
+  }
+
+  /**
+   * Responds to a GET to "/auth/verify-super"
+   * @returns true if a super api key was provided
+   */
+  @UseGuards(SuperApiKeyGuard)
+  @ApiSecurity("apiKey")
+  @ApiOperation({ summary: "Verifies that a super admin key is valid" })
+  @ApiOkResponse({ description: "Super key valid" })
+  @Get("verify-super")
+  verifySuperKey(): { valid: boolean } {
+    // If the request makes it past the SuperApiKeyGuard, the key is strictly valid
+    // and has super privileges.
+    return { valid: true };
   }
 }

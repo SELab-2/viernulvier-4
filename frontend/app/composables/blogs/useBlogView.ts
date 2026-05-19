@@ -11,8 +11,8 @@
  * image, formatted date, placeholder gradient) from a BlogView whose fields
  * are already flat strings (backend returns them localised via the lang param).
  */
-import type { BlogView, PaginatedResponse } from "@repo/common";
-import type { SearchSuggestion } from "~/components/SearchBar.vue";
+import type { BlogView } from "@repo/common";
+import type { SearchSuggestion } from "~/types/Search";
 import { formatDateShort } from "~/utils/formatters";
 import { useBlogApi } from "./useBlogApi";
 import type { DateFilter } from "~/types/DateFilter";
@@ -60,7 +60,7 @@ export function useBlogView() {
     query: string,
     limit: number,
   ): Promise<SearchSuggestion[]> {
-    const resp = (await getAll({
+    const resp = await getAll({
       paginationFilters: { page: 0, limit: limit, descending: true },
       blogFilters: {
         title: query,
@@ -68,7 +68,7 @@ export function useBlogView() {
         ...dateFilter.value,
       },
       languageFilters: { lang: locale.value },
-    })) as ApiResponse<PaginatedResponse<BlogView>>;
+    });
 
     if (!resp.data?.objects) return [];
 

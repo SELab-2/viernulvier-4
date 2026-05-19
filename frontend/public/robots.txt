@@ -1,2 +1,4 @@
+# cannot delete this file due to "reasons", however this is not used and thus can be ignored.
+# If you want to update the robots.txt file, you will have to do so in your nginx config.
 User-Agent: *
 Disallow:

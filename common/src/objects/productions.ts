@@ -16,8 +16,8 @@ export const ProductionSchema = z.object({
   credits: LocalizedStringNullableSchema,
   performer_type: z.string().nullable(),
   attendance_mode: z.string().nullable(),
-  created_at: z.iso.datetime().nullable(), // TODO remove nullable when update csv parser bcs otherwise doesnt work.
-  updated_at: z.iso.datetime().nullable(), // TODO here too.
+  created_at: z.iso.datetime().nullable(),
+  updated_at: z.iso.datetime().nullable(),
   // Legacy ID is omitted here because the API doesn't use it.
 });
 
@@ -61,6 +61,11 @@ export const FilterProductionSchema = z.object({
   after: z.iso.date().optional(),
   performer_type: z.string().optional(),
   attendance_mode: z.string().optional(),
+
+  // This will return all productions that are tied to the blog.
+  blog_id: z.coerce.number().optional(),
+  // This will return all productions that are tied to a print.
+  print_id: z.coerce.number().optional(),
 
   // Toggle for the backend to treat the request as a suggestion.
   is_suggestion: QueryBoolean.default(false),

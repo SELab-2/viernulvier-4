@@ -109,7 +109,7 @@ describe("MediaCropService", () => {
   describe("createCrop", () => {
     it("should create and return a new crop", async () => {
       const createCropDto: CreateMediaCropDto = {
-        name: "thumbnail",
+        name: "hd_ready_square",
         url: "https://example.com/thumb.jpg",
         item_id: 42,
       };
@@ -125,7 +125,7 @@ describe("MediaCropService", () => {
   describe("replaceCrop", () => {
     it("should replace and return the crop", async () => {
       const replaceCropDto: ReplaceMediaCropDto = {
-        name: "mobile",
+        name: "hd_ready_portrait",
         url: "https://example.com/mobile.jpg",
       };
       mediaDbService.updateCrop.mockResolvedValue(mockCrop);

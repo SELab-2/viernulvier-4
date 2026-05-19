@@ -9,7 +9,8 @@ import type {
   LanguageQuery,
   FilterLocation,
 } from "@repo/common";
-import { API_ROUTES } from "../utils/apiRoutes";
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
 
 interface LocationListOptions {
   paginationFilters?: PaginationFilter;
@@ -20,63 +21,95 @@ interface LocationListOptions {
 /**
  * Composable for location endpoints.
  * getAll and getById are public. All other endpoints require an API key.
- *
- * Pass a `lang` code to receive a flattened string value (LocationView) instead of
- * the full localized object (Location). Without a lang, the raw localized object is returned.
  */
 export function useLocationApi() {
   const { get, post, patch, del } = useApi();
 
-  /** GET /locations — returns a paginated list of locations. */
-  const getAll = ({
+  /**
+   * GET "/locations{filters}"
+   *
+   * Returns a paginated list of locations.
+   * Returns View objects if a language is passed, otherwise standard Location objects.
+   */
+  function getAll(options?: {
+    paginationFilters?: PaginationFilter;
+    locationFilters?: FilterLocation;
+  }): Promise<ApiResponse<PaginatedResponse<Location>>>;
+  function getAll(options: {
+    paginationFilters?: PaginationFilter;
+    locationFilters?: FilterLocation;
+    languageFilters: LanguageQuery;
+  }): Promise<ApiResponse<PaginatedResponse<LocationView>>>;
+  function getAll({
     paginationFilters,
     languageFilters,
     locationFilters,
-  }: LocationListOptions = {}) => {
+  }: LocationListOptions = {}) {
     const params = {
       ...paginationFilters,
       ...languageFilters,
       ...locationFilters,
     };
-
-    const cleanParams = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(params).filter(([_, value]) => value != null),
-    );
-
-    const queryString = new URLSearchParams(
-      cleanParams as Record<string, string>,
-    ).toString();
-
-    const query = queryString ? `?${queryString}` : "";
+    const query = buildQueryString(params);
 
     return get<PaginatedResponse<Location | LocationView>>(
       `${API_ROUTES.locations.base}${query}`,
     );
-  };
+  }
 
-  /** GET /locations/:locationId — returns a single location. */
-  const getById = (locationId: number, lang?: Language) => {
+  /**
+   * GET "/locations/:locationId"
+   *
+   * Returns a single location.
+   * Returns a View object if a language is passed, otherwise a standard Location object.
+   */
+  function getById(locationId: number): Promise<ApiResponse<Location>>;
+  function getById(
+    locationId: number,
+    lang: Language,
+  ): Promise<ApiResponse<LocationView>>;
+  function getById(locationId: number, lang?: Language) {
     const query = lang ? `?lang=${lang}` : "";
     return get<Location | LocationView>(
       `${API_ROUTES.locations.byId(locationId)}${query}`,
     );
-  };
+  }
 
-  /** POST /locations — creates a new location. */
-  const create = (body: CreateLocation) =>
-    post<Location, CreateLocation>(API_ROUTES.locations.base, body);
+  /**
+   * POST "/locations"
+   *
+   * Creates a new location.
+   */
+  function create(body: CreateLocation) {
+    return post<Location, CreateLocation>(API_ROUTES.locations.base, body);
+  }
 
-  /** PATCH /locations — updates an existing location. */
-  const modify = (locationId: number, body: ModifyLocation) =>
-    patch<Location, ModifyLocation>(
+  /**
+   * PATCH "/locations/:locationId"
+   *
+   * Updates an existing location.
+   */
+  function modify(locationId: number, body: ModifyLocation) {
+    return patch<Location, ModifyLocation>(
       API_ROUTES.locations.byId(locationId),
       body,
     );
+  }
 
-  /** DELETE /locations/:locationId — deletes a location. */
-  const remove = (locationId: number) =>
-    del(API_ROUTES.locations.byId(locationId));
+  /**
+   * DELETE "/locations/:locationId"
+   *
+   * Deletes a location.
+   */
+  function remove(locationId: number) {
+    return del(API_ROUTES.locations.byId(locationId));
+  }
 
-  return { getAll, getById, create, modify, remove };
+  return {
+    getAll,
+    getById,
+    create,
+    modify,
+    remove,
+  };
 }

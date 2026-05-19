@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 /**
  * A single grid item for PrintsFileGrid.
  * Thumbnailplaceholder or image, file name, category and date.
@@ -9,16 +9,91 @@
  *    :file="file"
  * />
  */
-import type { PrintItemView } from "@repo/common";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import type { PrintItemView, ProductionView } from "@repo/common";
+import { Info, X } from "lucide-vue-next";
+import { useProductionApi } from "~/composables/useProductionApi"; // Uses your existing production composable
 
 interface Props {
   file: PrintItemView;
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 const { t, locale } = useI18n();
+const { getAll: getProductions } = useProductionApi();
+const config = useRuntimeConfig();
 
 const fileLabel = "text-[11px] font-bold uppercase truncate";
-const openFile = (src: string) => window.open(src, "_blank"); // for opening the PDF in a new browser tab
+const openFile = (src: string) => {
+  const mediaBase = config.public.mediaBaseUrl;
+
+  // Clean up slashes so we don't get double slashes (e.g., ...be//prints/...)
+  const cleanBase = mediaBase.replace(/\/$/, "");
+  const cleanSrc = src.startsWith("/") ? src : `/${src}`;
+
+  const fullUrl = `${cleanBase}${cleanSrc}`;
+
+  window.open(fullUrl, "_blank");
+}; // for opening the PDF in a new browser tab
+const showInfo = ref(false); // if the info (description) section is opened or if not
+
+const linkedProductions = ref<ProductionView[]>([]);
+const isLoadingProductions = ref(false);
+
+const loadLinkedProductions = async () => {
+  if (!props.file?.id) return;
+
+  isLoadingProductions.value = true;
+  try {
+    const resp = await getProductions({
+      productionFilters: { print_id: props.file.id },
+      paginationFilters: { page: 0, limit: 50, descending: false }, // Request a safe layout limit
+      languageFilters: { lang: locale.value },
+    });
+
+    if (resp.data && Array.isArray(resp.data.objects)) {
+      linkedProductions.value = resp.data.objects as ProductionView[];
+    }
+  } catch (err) {
+    console.error("Error loading linked productions for print item:", err);
+  } finally {
+    isLoadingProductions.value = false;
+  }
+};
+
+const hasInfoAvailable = computed(() => {
+  const hasDescription =
+    props.file.description && props.file.description !== "";
+  const hasProductions = linkedProductions.value.length > 0;
+  return hasDescription || hasProductions || isLoadingProductions.value;
+});
+
+onMounted(() => {
+  loadLinkedProductions();
+});
+
+watch(
+  () => props.file?.id,
+  () => {
+    loadLinkedProductions();
+  },
+);
+
+watch(showInfo, (val) => {
+  // Prevents scrolling when description is opened
+  // (paddingRight compensates for the scrollbar width to prevent the layout from shifting)
+  if (val) {
+    document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
+    document.body.style.overflow = "hidden";
+  } else {
+    document.body.style.paddingRight = "";
+    document.body.style.overflow = "";
+  }
+});
+
+onUnmounted(() => {
+  document.body.style.overflow = "";
+  document.body.style.paddingRight = "";
+});
 </script>
 
 <template>
@@ -28,10 +103,97 @@ const openFile = (src: string) => window.open(src, "_blank"); // for opening the
       class="relative w-full rounded-lg overflow-hidden border border-border aspect-[3/4] group-hover:border-accent/60 transition-colors duration-150"
       @click="openFile(file.url)"
     >
-      <MediaDisplay :src="file" size="fill" :show-icon="true" />
+      <div class="w-full h-full" @click="openFile(file.url)">
+        <MediaDisplay :show-icon="true" :src="file" size="fill" />
+      </div>
+      <!-- Info button -->
+      <button
+        v-if="hasInfoAvailable"
+        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors z-10"
+        @click.stop="showInfo = true"
+      >
+        <Info class="w-3.5 h-3.5 text-white" />
+      </button>
+      <!-- Info/description section -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <!-- z-index is set to very high so the header doesn't cover it -->
+          <div
+            v-if="showInfo"
+            class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4"
+            @click="showInfo = false"
+          >
+            <div
+              class="relative bg-background border border-border rounded-lg p-6 max-w-4xl w-full shadow-xl max-h-[85vh] flex flex-col"
+              @click.stop
+            >
+              <!-- Close button -->
+              <button
+                class="absolute top-3 right-3 w-7 h-7 rounded-full bg-foreground/10 hover:bg-foreground/20 border border-border flex items-center justify-center transition-colors shrink-0"
+                @click.stop="showInfo = false"
+              >
+                <X class="w-3.5 h-3.5" />
+              </button>
+              <!-- Title -->
+              <p
+                class="font-brand text-base font-bold uppercase tracking-widest mb-6 pr-8 shrink-0"
+              >
+                {{ file.titel }}
+              </p>
+
+              <div
+                class="overflow-y-auto pr-2 space-y-6 flex-1 custom-scrollbar"
+              >
+                <div v-if="file.description && file.description !== ''">
+                  <h4
+                    class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-2 border-b border-border pb-1"
+                  >
+                    {{ t("prints.description") }}
+                  </h4>
+                  <p
+                    class="text-sm leading-relaxed text-muted-foreground break-words pt-1"
+                  >
+                    {{ file.description }}
+                  </p>
+                </div>
+
+                <div
+                  v-if="isLoadingProductions || linkedProductions.length"
+                  class="flex flex-col"
+                >
+                  <h4
+                    class="text-xs font-bold uppercase text-muted-foreground tracking-wider mb-4 border-b border-border pb-1"
+                  >
+                    {{ t("prints.relatedProductions") }}
+                  </h4>
+
+                  <div
+                    v-if="isLoadingProductions"
+                    class="text-xs text-muted-foreground animate-pulse py-1"
+                  >
+                    Loading productions...
+                  </div>
+
+                  <div
+                    v-else-if="linkedProductions.length"
+                    class="flex flex-col gap-4"
+                  >
+                    <ProductionListViewItem
+                      v-for="prod in linkedProductions"
+                      :key="prod.id"
+                      :is-admin="false"
+                      :production-view="prod"
+                      @click="showInfo = false"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
     </div>
 
-    <!-- File info -->
     <div class="mt-2">
       <p
         :class="[

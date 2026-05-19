@@ -3,11 +3,11 @@ import { DbService } from "./db.service";
 import {
   BlogDto,
   CreateBlogDto,
+  FilterBlogDto,
   MediaGalleryDto,
+  ModifyBlogDto,
   PaginationFilterDto,
   ReplaceBlogDto,
-  ModifyBlogDto,
-  FilterBlogDto,
 } from "../dto/dto";
 import {
   BlogSchema,
@@ -18,6 +18,7 @@ import {
   SUPPORTED_LANGUAGES,
 } from "@repo/common";
 import {
+  executeWithReferenceCheck,
   generateInsertClause,
   generateRelevanceClause,
   generateReturningClause,
@@ -26,6 +27,7 @@ import {
 import {
   MediaNotFoundException,
   ResourceNotFoundException,
+  SystemFailureException,
 } from "../common/exceptions";
 
 @Injectable()
@@ -37,6 +39,7 @@ export class BlogDatabaseService {
    * Get a single Blog by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The Blog if there is one.
+   * @throws ResourceNotFoundException if there is no blog with the asked id. (404)
    */
   async getBlogById(id: number): Promise<BlogDto> {
     const returningClause = generateReturningClause(BlogSchema);
@@ -132,7 +135,7 @@ export class BlogDatabaseService {
     const paginationClause = `LIMIT ${param(paginationFilters.limit)} OFFSET ${param(offset)}`;
 
     // Ordering (relevance vs date)
-    let orderClause = "";
+    let orderClause: string;
     if (blogFilters.is_suggestion && blogFilters.title) {
       const relevanceMath = generateRelevanceClause(
         blogFilters.title,
@@ -172,6 +175,7 @@ export class BlogDatabaseService {
    * Create blog function, creates a blog in the database.
    * @param blog must be of the type "CreateBlog" which has all fields defined besides the primary key id.
    * @returns the added blog if it was successful.
+   * @throws SystemFailureException if something went wrong while creating the blog.(500)
    */
   async createBlog(blog: CreateBlogDto): Promise<BlogDto> {
     const { columns, placeholders, values } = generateInsertClause(blog);
@@ -186,7 +190,7 @@ export class BlogDatabaseService {
     const result = await this.db.query<BlogDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create blog.");
+      throw new SystemFailureException("Failed to create blog.");
     }
 
     return result[0];
@@ -197,6 +201,8 @@ export class BlogDatabaseService {
    * @param blogId The ID of the blog.
    * @param blog must be of the type "ModifyBlog" or "ReplaceBlog", gives the freedom to define only what needs to be updated.
    * @returns the updated blog if successful.
+   * @throws BadRequestException if there were no fields provided for updating. (400)
+   * @throws ResourceNotFoundException if there was no blog with the provided id. (404)
    */
   async updateBlog(
     blogId: number,
@@ -244,6 +250,7 @@ export class BlogDatabaseService {
    * @param blog_id The ID of the blog you want.
    * @param type The type of gallery you want.
    * @returns The MediaGallery of given type if it exists.
+   * @throws MediaNotFoundException if there was no media linked to the blog.(404)
    */
   async getMediaFromBlog(
     blog_id: number,
@@ -286,7 +293,9 @@ export class BlogDatabaseService {
       ON CONFLICT DO NOTHING;
     `;
 
-    await this.db.query(query, [blog_id, gallery_id]);
+    await executeWithReferenceCheck(
+      this.db.query(query, [blog_id, gallery_id]),
+    );
   }
 
   /**

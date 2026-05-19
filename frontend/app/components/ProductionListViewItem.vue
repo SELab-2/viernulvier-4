@@ -1,25 +1,58 @@
 <!--
+  ProductionListViewItem.vue
+
   This component represents a single item in the production list view.
   It displays the production's title, date range, and associated tags.
+
+  Modes:
+  - Public: media display + title + artist + date range + tags
+  - Admin:
+    * same as public but the tile itself is not clickable.
+    * edit / delete buttons OR warning button if production has events from the future.
+  - Admin + Batch Edit Mode:
+    * Edit/delete actions are hidden; warning button stays visible.
+    * Selectable productions show a checkbox in place of the action buttons.
+    * Future productions remain non-selectable (consistent with non-editable/non-deletable).
+    * The card shows a highlighted selected state when chosen.
 -->
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProductionView, Tag, Event } from "@repo/common";
-import { useProductionApi } from "../composables/useProductionApi";
-import { useEventApi } from "../composables/useEventApi";
-import { ROUTES } from "../utils/routes";
-import { computeDateRangeFromEvents } from "../utils/formatters";
-import TagPill from "./TagPill.vue";
+import type { ProductionView, Event, TagView, SeriesView } from "@repo/common";
+import { useProductionApi } from "~/composables/useProductionApi";
+import { useEventApi } from "~/composables/useEventApi";
+import { useSeriesApi } from "~/composables/useSeriesApi";
+import { ROUTES } from "~/utils/routes";
+import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
+import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
 
-const { productionView } = defineProps<{
-  productionView: ProductionView;
+const props = withDefaults(
+  defineProps<{
+    productionView: ProductionView;
+    isAdmin?: boolean;
+    isBatchMode?: boolean;
+  }>(),
+  {
+    isAdmin: false,
+    isBatchMode: false,
+  },
+);
+
+const emit = defineEmits<{
+  (
+    e: "delete",
+    production: ProductionView,
+    gallery: GalleryWithItems<ItemViewWithCrops> | null,
+  ): void;
 }>();
 
-const tags = ref<Tag[]>([]);
+const { locale } = useI18n();
+const tags = ref<TagView[]>([]);
 const events = ref<Event[]>([]);
+const linkedSeriesList = ref<SeriesView[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+
 const mainCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "hd_ready");
@@ -27,17 +60,20 @@ const mainCrop = computed(() => {
 
 const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
+const { getAll: getAllSeries } = useSeriesApi();
 const { getMainImageCrop } = useGallery();
 
-const { locale } = useI18n();
+const { isSelected, toggleSelection } = useProductionBatchEdit();
+
+const selected = computed(() => isSelected(props.productionView));
 
 async function loadTags() {
-  if (!productionView?.id) return;
+  if (!props.productionView?.id) return;
 
   try {
-    const response = await getTags(productionView.id, locale.value);
+    const response = await getTags(props.productionView.id, locale.value);
     if (response.data) {
-      tags.value = (response.data as Tag[]).filter((tag) => {
+      tags.value = (response.data as TagView[]).filter((tag) => {
         const currentTag =
           typeof tag.tag === "string"
             ? tag.tag
@@ -53,11 +89,11 @@ async function loadTags() {
 }
 
 async function loadEvents() {
-  if (!productionView?.id) return;
+  if (!props.productionView?.id) return;
 
   try {
     const resp = await getAllEvents({
-      eventFilters: { production_id: productionView.id as any },
+      eventFilters: { production_id: props.productionView.id as any },
     });
     if (resp.data && Array.isArray((resp.data as any).objects)) {
       events.value = (resp.data as any).objects as Event[];
@@ -70,8 +106,28 @@ async function loadEvents() {
 }
 
 async function loadGallery() {
-  if (!productionView?.id) return;
-  gallery.value = await getMediaGallery(productionView.id, locale.value);
+  if (!props.productionView?.id) return;
+  gallery.value = await getMediaGallery(props.productionView.id, locale.value);
+}
+
+// Get series linked to productions
+async function loadLinkedSeries() {
+  if (!props.productionView?.id) return;
+
+  try {
+    const resp = await getAllSeries({
+      seriesFilters: { production_id: props.productionView.id } as any,
+      languageFilters: { lang: locale.value },
+    });
+
+    if (resp.data && Array.isArray(resp.data.objects)) {
+      linkedSeriesList.value = resp.data.objects as SeriesView[];
+    } else {
+      linkedSeriesList.value = [];
+    }
+  } catch (err) {
+    console.error("Error loading linked series:", err);
+  }
 }
 
 // Recompute dateRangeText whenever events or locale changes
@@ -79,99 +135,96 @@ const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
 
+// Determine if the production has any events in the future
+const isFutureProduction = computed(() => {
+  if (!events.value?.length) return false;
+
+  const now = Date.now();
+  const allTimes: number[] = [];
+
+  for (const e of events.value) {
+    if (e?.starttime) {
+      const t = Date.parse(e.starttime);
+      if (!Number.isNaN(t)) allTimes.push(t);
+    }
+    if (e?.endtime) {
+      const t = Date.parse(e.endtime);
+      if (!Number.isNaN(t)) allTimes.push(t);
+    }
+  }
+
+  if (!allTimes.length) return false;
+  const latest = Math.max(...allTimes);
+
+  return latest > now;
+});
+
+// Future productions are not selectable in batch mode — consistent with them being non-editable/non-deletable
+const isSelectableInBatchMode = computed(() => !isFutureProduction.value);
+const cardProps = computed(() => ({
+  productionView: props.productionView,
+  isAdmin: props.isAdmin,
+  isBatchMode: props.isBatchMode,
+  selected: selected.value,
+  mainCrop: mainCrop.value,
+  dateRangeText: dateRangeText.value,
+  tags: tags.value,
+  isFutureProduction: isFutureProduction.value,
+  linkedSeriesList: linkedSeriesList.value,
+}));
+
 onMounted(() => {
   loadEvents();
   loadTags();
   loadGallery();
+  loadLinkedSeries();
 });
 
 watch(
-  () => productionView.id,
+  () => props.productionView.id,
   () => {
     loadEvents();
     loadTags();
     loadGallery();
+    loadLinkedSeries();
   },
 );
 
-// reload tags if language changes
-watch(locale, () => loadTags());
+// reload tags and series if language changes
+watch(locale, () => {
+  loadTags();
+  loadLinkedSeries();
+});
+
+// ── Batch mode interaction ───────────────────────────────────────────────
+
+function handleClick() {
+  if (props.isBatchMode && isSelectableInBatchMode.value) {
+    toggleSelection(props.productionView);
+  }
+}
 </script>
 
 <template>
   <NuxtLink
-    :to="ROUTES.productions.byId(productionView.id)"
+    v-if="!props.isAdmin || props.isBatchMode"
+    :to="
+      !props.isAdmin && !props.isBatchMode
+        ? ROUTES.productions.byId(props.productionView.id)
+        : undefined
+    "
     class="group block"
+    :class="{ 'cursor-pointer': props.isBatchMode && isSelectableInBatchMode }"
+    @click="handleClick"
   >
-    <div
-      class="flex items-center gap-4 p-4 rounded-xl border border-card-border bg-card hover:border-ring hover:shadow-sm hover:bg-card-hover transition-colors transition-shadow duration-150"
-    >
-      <MediaDisplay
-        :id="productionView.id"
-        :src="mainCrop"
-        size="md"
-        :rounded="true"
-        :show-icon="true"
-        class="object-cover"
-      />
-
-      <div class="flex-1 min-w-0">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0 max-w-[60%]">
-            <h3
-              class="text-2xl sm:text-3xl font-semibold text-card-foreground leading-tight truncate"
-            >
-              {{ productionView.titel }}
-            </h3>
-
-            <!-- Artist -->
-            <p
-              v-if="productionView.artist && productionView.artist !== 'N/A'"
-              class="text-sm text-muted-foreground leading-normal line-clamp-1"
-            >
-              {{ productionView.artist }}
-            </p>
-
-            <p
-              class="mt-2 text-sm text-muted-foreground flex items-center gap-2"
-            >
-              <svg
-                class="w-4 h-4 text-muted-foreground"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path
-                  d="M16 2v4M8 2v4M3 10h18"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <span>{{ dateRangeText }}</span>
-            </p>
-          </div>
-        </div>
-
-        <!-- Tags container -->
-        <div class="mt-2 overflow-hidden">
-          <div class="flex items-center gap-2">
-            <TagPill
-              v-for="tag in tags"
-              :key="tag.id"
-              :label="typeof tag.tag === 'string' ? tag.tag : ''"
-            />
-            <TagPill
-              v-if="tags.length === 0"
-              :label="'/'"
-              class="opacity-0 pointer-events-none"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+    <ProductionListViewItemCard v-bind="cardProps" />
   </NuxtLink>
+  <div v-else class="group block">
+    <ProductionListViewItemCard
+      v-bind="cardProps"
+      @delete="emit('delete', $event, gallery)"
+    />
+  </div>
 </template>
 
 <style scoped>
@@ -181,5 +234,25 @@ watch(locale, () => loadTags());
 }
 .group:hover {
   text-decoration: none;
+}
+
+/* Checkmark pop-in */
+.check-enter-active {
+  transition:
+    transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.1s;
+}
+.check-enter-from {
+  transform: scale(0);
+  opacity: 0;
+}
+.check-leave-active {
+  transition:
+    transform 0.1s ease,
+    opacity 0.1s;
+}
+.check-leave-to {
+  transform: scale(0);
+  opacity: 0;
 }
 </style>

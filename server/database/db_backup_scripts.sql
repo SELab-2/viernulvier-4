@@ -20,10 +20,10 @@ CREATE TABLE productions
 );
 
 -- These create GIN indexes for the fields that need them in productions
-CREATE INDEX idx_prod_title_en_trgm ON productions USING GIN ((titel->>'en') gin_trgm_ops);
-CREATE INDEX idx_prod_title_nl_trgm ON productions USING GIN ((titel->>'nl') gin_trgm_ops);
-CREATE INDEX idx_prod_artist_en_trgm ON productions USING GIN ((artist->>'en') gin_trgm_ops);
-CREATE INDEX idx_prod_artist_nl_trgm ON productions USING GIN ((artist->>'nl') gin_trgm_ops);
+CREATE INDEX idx_prod_title_en_trgm ON productions USING GIN ((titel ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_prod_title_nl_trgm ON productions USING GIN ((titel ->> 'nl') gin_trgm_ops);
+CREATE INDEX idx_prod_artist_en_trgm ON productions USING GIN ((artist ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_prod_artist_nl_trgm ON productions USING GIN ((artist ->> 'nl') gin_trgm_ops);
 
 CREATE OR REPLACE FUNCTION update_updated_at()
     RETURNS TRIGGER AS
@@ -44,7 +44,7 @@ CREATE TABLE events
 (
     id              SERIAL PRIMARY KEY,
     starttime       TIMESTAMP NOT NULL,
-    endtime         TIMESTAMP NOT NULL,
+    endtime         TIMESTAMP,
     doors_at        TIMESTAMP,
     intermission_at TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT now(),
@@ -58,6 +58,25 @@ CREATE TABLE events
 );
 CREATE INDEX idx_events_production_id ON events (production_id);
 CREATE INDEX idx_events_starttime ON events (starttime);
+
+CREATE OR REPLACE FUNCTION convert_endtime_to_null()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the incoming endtime is the 1970 epoch date (necessary for scraped data consistency)
+    IF NEW.endtime = '1970-01-01 00:00:00'::timestamp THEN
+        NEW.endtime := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_convert_endtime_to_null
+    BEFORE INSERT OR UPDATE
+    ON events
+    FOR EACH ROW
+EXECUTE FUNCTION convert_endtime_to_null();
 
 CREATE TRIGGER set_updated_at_events
     BEFORE UPDATE
@@ -75,8 +94,8 @@ CREATE TABLE blogs
 );
 
 -- These create GIN indexes for the fields that need them in blogs
-CREATE INDEX idx_blog_title_en_trgm ON blogs USING GIN ((titel->>'en') gin_trgm_ops);
-CREATE INDEX idx_blog_title_nl_trgm ON blogs USING GIN ((titel->>'nl') gin_trgm_ops);
+CREATE INDEX idx_blog_title_en_trgm ON blogs USING GIN ((titel ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_blog_title_nl_trgm ON blogs USING GIN ((titel ->> 'nl') gin_trgm_ops);
 
 CREATE TRIGGER set_updated_at_blogs
     BEFORE UPDATE
@@ -117,6 +136,24 @@ CREATE TRIGGER set_updated_at_tags
     ON tags
     FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+
+CREATE OR REPLACE FUNCTION check_and_delete_orphan_tag()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM production_tag WHERE tag_id = OLD.tag_id) THEN
+        DELETE FROM tags WHERE id = OLD.tag_id;
+    END IF;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER remove_orphan_tag
+    AFTER DELETE
+    ON production_tag
+    FOR EACH ROW
+EXECUTE FUNCTION check_and_delete_orphan_tag();
 
 CREATE TABLE production_tag
 (
@@ -161,6 +198,24 @@ CREATE TABLE event_locations
 );
 CREATE INDEX idx_event_locations_location_id ON event_locations (location_id);
 
+CREATE OR REPLACE FUNCTION check_and_delete_orphan_location()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM event_locations WHERE location_id = OLD.location_id) THEN
+        DELETE FROM locations WHERE id = OLD.location_id;
+    END IF;
+
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER remove_orphan_location
+    AFTER DELETE OR UPDATE OF location_id
+    ON event_locations
+    FOR EACH ROW
+EXECUTE FUNCTION check_and_delete_orphan_location();
+
 CREATE TABLE accounts
 (
     id          SERIAL PRIMARY KEY,
@@ -179,8 +234,8 @@ CREATE TABLE api_keys
 
 CREATE TABLE account_api_keys
 (
-    account_id INT     NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
-    api_key_id INT     NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
+    account_id INT NOT NULL REFERENCES accounts (id) ON DELETE CASCADE,
+    api_key_id INT NOT NULL REFERENCES api_keys (id) ON DELETE CASCADE,
     PRIMARY KEY (account_id, api_key_id)
 );
 CREATE INDEX idx_account_api_keys_api_key_id ON account_api_keys (api_key_id);
@@ -216,7 +271,7 @@ CREATE TYPE crop_name AS ENUM (
     'FE3_header',
     'FE3_2by1',
     'FE3_grid'
-);
+    );
 
 CREATE TYPE gallery_type AS ENUM (
     'prints',
@@ -325,11 +380,11 @@ CREATE TABLE blog_media_gallery
 CREATE INDEX idx_blog_media_gallery_gallery_id ON blog_media_gallery (gallery_id);
 
 CREATE TYPE print_enum AS ENUM (
-    'affiche', 
+    'affiche',
     'brochure',
-    'drukwerk', 
+    'drukwerk',
     'programma'
-);
+    );
 
 CREATE TABLE print_items
 (
@@ -343,8 +398,8 @@ CREATE TABLE print_items
 );
 
 -- These create GIN indexes for the fields that need them in prints
-CREATE INDEX idx_print_title_en_trgm ON prints USING GIN ((titel->>'en') gin_trgm_ops);
-CREATE INDEX idx_print_title_nl_trgm ON prints USING GIN ((titel->>'nl') gin_trgm_ops);
+CREATE INDEX idx_print_title_en_trgm ON prints USING GIN ((titel ->> 'en') gin_trgm_ops);
+CREATE INDEX idx_print_title_nl_trgm ON prints USING GIN ((titel ->> 'nl') gin_trgm_ops);
 
 CREATE TRIGGER trg_print_items_updated_at
     BEFORE UPDATE
@@ -358,3 +413,37 @@ CREATE TABLE print_item_media_gallery
     media_gallery_id INT NOT NULL REFERENCES media_gallery (id) ON DELETE CASCADE,
     PRIMARY KEY (print_item_id, media_gallery_id)
 );
+
+-- Create the series table
+CREATE TABLE series
+(
+    id          SERIAL PRIMARY KEY,
+    titel       JSONB     NOT NULL,
+    description JSONB,
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Create the join table for productions and series
+CREATE TABLE production_series
+(
+    production_id INT NOT NULL,
+    series_id     INT NOT NULL,
+    PRIMARY KEY (production_id, series_id),
+    CONSTRAINT fk_production
+        FOREIGN KEY (production_id)
+            REFERENCES productions (id)
+            ON DELETE CASCADE,
+    CONSTRAINT fk_series
+        FOREIGN KEY (series_id)
+            REFERENCES series (id)
+            ON DELETE CASCADE
+);
+
+CREATE INDEX idx_production_series_series_id ON production_series (series_id);
+
+CREATE TRIGGER trg_series_updated_at
+    BEFORE UPDATE
+    ON media_gallery
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();

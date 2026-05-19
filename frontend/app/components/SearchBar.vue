@@ -21,6 +21,7 @@
 import { ref, computed } from "vue";
 import { Search, X } from "lucide-vue-next";
 import { useDebounceFn } from "@vueuse/core";
+import type { SearchSuggestion } from "~/types/Search";
 const { t } = useI18n();
 
 /**
@@ -62,6 +63,7 @@ const dropdownStyle = computed(() => {
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
   (e: "search", query: string): void;
+  (e: "select", item: SearchSuggestion): void; // Emits the whole object.
 }>();
 
 const internalQuery = ref(props.modelValue || "");
@@ -95,6 +97,7 @@ const moveHighlight = (direction: 1 | -1) => {
 const select = (item: SearchSuggestion) => {
   internalQuery.value = item.searchValue;
   emit("update:modelValue", item.searchValue);
+  emit("select", item);
   isFocused.value = false;
   highlightedIndex.value = -1; // reset on selection
   inputRef.value?.blur();
@@ -113,6 +116,7 @@ const submit = () => {
     select(highlighted);
   } else {
     emit("update:modelValue", internalQuery.value);
+    emit("search", internalQuery.value);
     inputRef.value?.blur();
   }
 };
@@ -120,12 +124,6 @@ const submit = () => {
 /**
  * Suggestions
  */
-
-export interface SearchSuggestion {
-  display: string; // The main text shown.
-  context?: string; // Secondary text.
-  searchValue: string; // The clean text put into the input.
-}
 
 /**
  * The internal list of suggestions fetched.

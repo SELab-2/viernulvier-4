@@ -10,7 +10,7 @@
  * - Sticky visibility logic (Hide on scroll down, show on scroll up)
  */
 
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { ROUTES } from "~/utils/routes";
 import { LogOut, Menu, X } from "lucide-vue-next";
 
@@ -21,6 +21,18 @@ const headerRef = ref(null);
 
 const { t } = useI18n();
 const route = useRoute();
+
+// Accepts an isHome prop for when to go transparent.
+const props = defineProps({
+  isHome: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const isTransparent = computed(() => {
+  return props.isHome && !isMenuOpen.value;
+});
 
 // ── Admin ────────────────────────────────────────────────────────────────
 
@@ -115,7 +127,8 @@ watch(
 
 // ── Resize — close mobile menu on desktop ────────────────────────────────────
 const handleResize = () => {
-  if (window.innerWidth >= 1024) {
+  const breakpoint = showAdminInterface.value ? 1024 : 1280;
+  if (window.innerWidth >= breakpoint) {
     isMenuOpen.value = false;
     isVisible.value = true;
   }
@@ -153,6 +166,7 @@ onUnmounted(() => {
 const navItems = [
   { label: "home", route: ROUTES.home.base },
   { label: "archive", route: ROUTES.productions.base },
+  { label: "series", route: ROUTES.series.base },
   { label: "stories", route: ROUTES.stories.base },
   { label: "prints", route: ROUTES.prints.base },
 ];
@@ -160,7 +174,7 @@ const navItems = [
 const adminNavItems = [
   { label: "dashboard", route: ROUTES.admin.dashboard.base },
   { label: "productions", route: ROUTES.admin.productions.base },
-  { label: "events", route: ROUTES.admin.events.base },
+  { label: "series", route: ROUTES.admin.series.base },
   { label: "stories", route: ROUTES.admin.stories.base },
   { label: "prints", route: ROUTES.admin.prints.base },
 ];
@@ -169,17 +183,24 @@ const adminNavItems = [
 <template>
   <header
     ref="headerRef"
-    :class="{ '-translate-y-full': !isVisible && !isMenuOpen }"
-    class="sticky top-0 z-[100] border-b-4 border-[var(--foreground)] bg-[var(--background)] transition-transform duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]"
+    :class="[
+      !isVisible && !isMenuOpen ? '-translate-y-full' : '',
+      isTransparent
+        ? 'absolute w-full bg-transparent border-transparent header-transparent text-[var(--foreground)]'
+        : showAdminInterface
+          ? 'sticky bg-[var(--background)] text-[var(--foreground)]'
+          : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)] text-[var(--foreground)]',
+      'top-0 z-[100] transition-all duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]',
+    ]"
   >
     <div
-      class="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6 px-6 lg:px-12 2xl:px-[120px]"
+      class="grid page-container grid-cols-[1fr_auto_1fr] items-center py-4 lg:py-6"
     >
-      <!-- ── Left: nav links (desktop) / hamburger (mobile) ──────────────── -->
+      <!-- ── Left: nav links (desktop) / hamburger (mobile) ────────────────-->
       <div class="flex items-center justify-start">
         <nav
           v-if="!showAdminInterface"
-          class="hidden lg:flex gap-[20px] xl:gap-[30px]"
+          class="hidden xl:flex gap-[24px] xl:gap-[36px]"
         >
           <NuxtLink
             v-for="item in navItems"
@@ -192,7 +213,8 @@ const adminNavItems = [
         </nav>
 
         <button
-          class="lg:hidden text-[var(--foreground)] outline-none"
+          class="outline-none transition-colors text-[var(--foreground)]"
+          :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
           @click.stop="toggleMenu"
         >
           <Menu v-if="!isMenuOpen" :size="28" />
@@ -218,7 +240,7 @@ const adminNavItems = [
           </NuxtLink>
           <span
             v-if="showAdminInterface"
-            class="text-xl lg:text-2xl font-black text-gray-400 tracking-[-1px]"
+            class="text-xl lg:text-2xl font-black text-[var(--muted-foreground)] tracking-[-1px] opacity-50"
             >ADMIN</span
           >
         </div>
@@ -231,7 +253,6 @@ const adminNavItems = [
           class="items-center gap-2 lg:gap-[15px]"
         >
           <LocaleSelector />
-
           <ThemeToggle :is-compact="showAdminInterface" />
         </div>
 
@@ -248,11 +269,9 @@ const adminNavItems = [
 
     <nav
       v-if="showAdminInterface"
-      class="hidden lg:flex border-t-3 border-[var(--foreground)] w-full bg-[var(--background)]"
+      class="hidden lg:flex w-full bg-[var(--accent-fixed)]"
     >
-      <div
-        class="mx-auto flex w-full max-w-[1400px] justify-between items-center px-12 lg:px-20 2xl:px-32"
-      >
+      <div class="page-container flex justify-center items-center gap-6 py-2">
         <NuxtLink
           v-for="item in adminNavItems"
           :key="item.route"
@@ -275,7 +294,8 @@ const adminNavItems = [
     <!-- ── Mobile hamburger menu ───────────────────────────────────────────── -->
     <div
       v-if="isMenuOpen"
-      class="lg:hidden absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] px-8 py-8 shadow-xl"
+      :class="showAdminInterface ? 'lg:hidden' : 'xl:hidden'"
+      class="absolute top-full left-0 w-full bg-[var(--background)] border-b-4 border-[var(--foreground)] page-container py-8 shadow-xl text-[var(--foreground)]"
     >
       <nav class="flex flex-col gap-6">
         <template v-if="showAdminInterface">
@@ -315,7 +335,6 @@ const adminNavItems = [
           class="pt-6 border-t-2 border-[var(--muted-foreground)] flex flex-wrap gap-4"
         >
           <LocaleSelector />
-
           <ThemeToggle />
 
           <button
@@ -335,7 +354,7 @@ const adminNavItems = [
 <style scoped>
 .nav-item {
   @apply no-underline text-[var(--muted-foreground)] font-[900] text-[12px] tracking-[2px]
-         transition-colors hover:text-[var(--foreground)] uppercase;
+  transition-colors hover:text-[var(--foreground)] uppercase;
 }
 
 .nav-item.router-link-active {
@@ -345,19 +364,26 @@ const adminNavItems = [
 .admin-nav-item {
   display: flex;
   align-items: center;
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: all 0.2s ease-in-out;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--radius-sm, 4px);
 
-  @apply no-underline text-[var(--muted-foreground)] font-[900] text-[11px] tracking-[2px] uppercase transition-all relative;
-
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
+  color: #ffffff;
+  opacity: 0.75;
 }
 
 .admin-nav-item:hover {
-  color: var(--foreground);
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .admin-nav-item.router-link-active {
-  color: var(--foreground);
-  @apply underline underline-offset-[10px] decoration-[3px];
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.25);
 }
 </style>

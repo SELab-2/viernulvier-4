@@ -5,21 +5,23 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { ProductionView, Tag, Event } from "@repo/common";
-import { useProductionApi } from "../composables/useProductionApi";
-import { useEventApi } from "../composables/useEventApi";
-import { ROUTES } from "../utils/routes";
-import { computeDateRangeFromEvents } from "../utils/formatters";
-import TagPill from "./TagPill.vue";
+import type { ProductionView, Event, TagView, SeriesView } from "@repo/common";
+import { useProductionApi } from "~/composables/useProductionApi";
+import { useEventApi } from "~/composables/useEventApi";
+import { useSeriesApi } from "~/composables/useSeriesApi";
+import { ROUTES } from "~/utils/routes";
+import { computeDateRangeFromEvents } from "~/utils/formatters";
 import { useGallery } from "~/composables/media/useGallery";
 
 const { productionView } = defineProps<{
   productionView: ProductionView;
 }>();
 
-const tags = ref<Tag[]>([]);
+const tags = ref<TagView[]>([]);
 const events = ref<Event[]>([]);
+const linkedSeriesList = ref<SeriesView[]>([]);
 const gallery = ref<GalleryWithItems<ItemViewWithCrops> | null>(null);
+
 const mainCrop = computed(() => {
   if (!gallery.value) return null;
   return getMainImageCrop(gallery.value, "hd_ready");
@@ -27,6 +29,7 @@ const mainCrop = computed(() => {
 
 const { getTags, getMediaGallery } = useProductionApi();
 const { getAll: getAllEvents } = useEventApi();
+const { getAll: getAllSeries } = useSeriesApi();
 const { getMainImageCrop } = useGallery();
 
 const { locale } = useI18n();
@@ -37,7 +40,7 @@ async function loadTags() {
   try {
     const response = await getTags(productionView.id, locale.value);
     if (response.data) {
-      tags.value = (response.data as Tag[]).filter((tag) => {
+      tags.value = (response.data as TagView[]).filter((tag) => {
         const currentTag =
           typeof tag.tag === "string"
             ? tag.tag
@@ -74,6 +77,26 @@ async function loadGallery() {
   gallery.value = await getMediaGallery(productionView.id, locale.value);
 }
 
+// get series linked to productions
+async function loadLinkedSeries() {
+  if (!productionView?.id) return;
+
+  try {
+    const resp = await getAllSeries({
+      seriesFilters: { production_id: productionView.id } as any,
+      languageFilters: { lang: locale.value },
+    });
+
+    if (resp.data && Array.isArray(resp.data.objects)) {
+      linkedSeriesList.value = resp.data.objects as SeriesView[];
+    } else {
+      linkedSeriesList.value = [];
+    }
+  } catch (err) {
+    console.error("Error loading linked series:", err);
+  }
+}
+
 const dateRangeText = computed(() =>
   computeDateRangeFromEvents(events.value, locale.value),
 );
@@ -82,6 +105,7 @@ onMounted(() => {
   loadEvents();
   loadTags();
   loadGallery();
+  loadLinkedSeries();
 });
 
 watch(
@@ -90,10 +114,14 @@ watch(
     loadEvents();
     loadTags();
     loadGallery();
+    loadLinkedSeries();
   },
 );
 
-watch(locale, () => loadTags());
+watch(locale, () => {
+  loadTags();
+  loadLinkedSeries();
+});
 </script>
 
 <template>
@@ -106,7 +134,7 @@ watch(locale, () => loadTags());
     >
       <!-- Thumbnail area — square bottom corners, separator line, no own border -->
       <div
-        class="w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
+        class="relative w-full aspect-video flex items-center justify-center bg-muted shrink-0 border-b border-card-border"
       >
         <MediaDisplay
           :id="productionView.id"
@@ -114,6 +142,12 @@ watch(locale, () => loadTags());
           :show-icon="true"
           size="lg"
           class="w-full h-full"
+        />
+
+        <SeriesDropdown
+          :series-list="linkedSeriesList"
+          align="right"
+          class="absolute top-2 right-2 z-20"
         />
       </div>
 

@@ -13,5 +13,6 @@ export * from "./objects/tags";
 export * from "./objects/media/media_crop";
 export * from "./objects/media/media_item";
 export * from "./objects/media/media_gallery";
+export * from "./objects/series";
 
 export { z, ZodObject } from "zod";

@@ -1,6 +1,11 @@
 import { API_ROUTES } from "../utils/apiRoutes";
 
-type ParserTarget = "productions" | "events" | "tags" | "blogs" | "prices";
+export type ParserTarget =
+  | "productions"
+  | "events"
+  | "tags"
+  | "blogs"
+  | "prices";
 
 /**
  * Composable for CSV parser upload endpoints.

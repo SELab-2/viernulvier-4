@@ -1,0 +1,224 @@
+import type {
+  CreateSeries,
+  Language,
+  LanguageQuery,
+  ModifySeries,
+  PaginatedResponse,
+  PaginationFilter,
+  Production,
+  ProductionView,
+  ReplaceSeries,
+  Series,
+  SeriesView,
+  FilterSeries,
+} from "@repo/common";
+import { API_ROUTES } from "~/utils/apiRoutes";
+import { buildQueryString } from "~/utils/formatters";
+
+interface SeriesListOptions {
+  paginationFilters?: PaginationFilter;
+  seriesFilters?: FilterSeries;
+  languageFilters?: LanguageQuery;
+}
+
+/**
+ * Frontend API calls for series.
+ * All GET requests are public. All other endpoints require an API key.
+ */
+export function useSeriesApi() {
+  const { get, post, patch, put, del } = useApi();
+
+  /**
+   * GET "/series{filters}"
+   *
+   * Returns a paginated list of series.
+   * Returns View objects if a language is passed, otherwise standard Series objects.
+   */
+  function getAll(options?: {
+    paginationFilters?: PaginationFilter;
+    seriesFilters?: FilterSeries;
+  }): Promise<ApiResponse<PaginatedResponse<Series>>>;
+  function getAll(options: {
+    paginationFilters?: PaginationFilter;
+    seriesFilters?: FilterSeries;
+    languageFilters: LanguageQuery;
+  }): Promise<ApiResponse<PaginatedResponse<SeriesView>>>;
+  function getAll({
+    paginationFilters,
+    seriesFilters,
+    languageFilters,
+  }: SeriesListOptions = {}) {
+    const params = {
+      ...paginationFilters,
+      ...languageFilters,
+      ...seriesFilters,
+    };
+    const query = buildQueryString(params);
+
+    return get<PaginatedResponse<Series | SeriesView>>(
+      `${API_ROUTES.series.base}${query}`,
+    );
+  }
+
+  /**
+   * GET "/series/:seriesId"
+   *
+   * Returns a specific series by its ID.
+   * Returns a View object if a language is passed, otherwise a standard Series object.
+   */
+  function getById(seriesId: number): Promise<ApiResponse<Series>>;
+  function getById(
+    seriesId: number,
+    lang: Language,
+  ): Promise<ApiResponse<SeriesView>>;
+  function getById(seriesId: number, lang?: Language) {
+    const query = lang ? `?lang=${lang}` : "";
+    return get<Series | SeriesView>(
+      `${API_ROUTES.series.byId(seriesId)}${query}`,
+    );
+  }
+
+  /**
+   * POST "/series"
+   *
+   * Creates a new series.
+   */
+  function create(body: CreateSeries) {
+    return post<Series, CreateSeries>(API_ROUTES.series.base, body);
+  }
+
+  /**
+   * PUT "/series/:seriesId"
+   *
+   * Replaces an existing series.
+   */
+  function replace(seriesId: number, body: ReplaceSeries) {
+    return put<Series, ReplaceSeries>(API_ROUTES.series.byId(seriesId), body);
+  }
+
+  /**
+   * PATCH "/series/:seriesId"
+   *
+   * Modifies an existing series.
+   */
+  function modify(seriesId: number, body: ModifySeries) {
+    return patch<Series, ModifySeries>(API_ROUTES.series.byId(seriesId), body);
+  }
+
+  /**
+   * DELETE "/series/:seriesId"
+   *
+   * Removes an existing series.
+   */
+  function remove(seriesId: number) {
+    return del(API_ROUTES.series.byId(seriesId));
+  }
+
+  /**
+   * ==============================
+   * Production + Series links
+   * ==============================
+   */
+
+  /**
+   * GET "/series/:seriesId/productions"
+   *
+   * Returns all productions linked to a series paginated.
+   * Returns View objects if a language is passed, otherwise standard Production objects.
+   */
+  function getSeriesProductions(
+    seriesId: number,
+  ): Promise<ApiResponse<PaginatedResponse<Production>>>;
+  function getSeriesProductions(
+    seriesId: number,
+    lang: Language,
+    paginationFilters?: PaginationFilter,
+  ): Promise<ApiResponse<PaginatedResponse<ProductionView>>>;
+  function getSeriesProductions(
+    seriesId: number,
+    lang?: Language,
+    paginationFilters?: PaginationFilter,
+  ) {
+    const params = { ...(lang ? { lang } : {}), ...paginationFilters };
+    const query = buildQueryString(params);
+    return get<PaginatedResponse<Production | ProductionView>>(
+      `${API_ROUTES.series.productions(seriesId)}${query}`,
+    );
+  }
+
+  /**
+   * Will return a list of all series productions.
+   * @param seriesId The series we want to fetch productions from.
+   * @param lang The language we want them in.
+   * @returns A list of all series productions.
+   */
+  async function getAllSeriesProductions(seriesId: number, lang?: Language) {
+    const pagination: PaginationFilter = {
+      page: 0,
+      limit: 50,
+      descending: true,
+    };
+
+    const productions: Array<Production | ProductionView> = [];
+    let hasMoreData = true;
+
+    do {
+      const params = { ...(lang ? { lang } : {}), ...pagination };
+      const query = buildQueryString(params);
+
+      const resp = await get<PaginatedResponse<Production | ProductionView>>(
+        `${API_ROUTES.series.productions(seriesId)}${query}`,
+      );
+
+      // Safely extract objects, defaulting to an empty array
+      const newObjects = resp.data?.objects ?? [];
+
+      // Push the safe array
+      productions.push(...newObjects);
+
+      // Check if we should keep looping (e.g., did we get a full page of results?)
+      if (newObjects.length > 0 && newObjects.length === pagination.limit) {
+        pagination.page += 1; // Increment the page!
+      } else {
+        hasMoreData = false; // Stop the loop
+      }
+    } while (hasMoreData);
+
+    // Return the complete list
+    return productions;
+  }
+
+  /**
+   * PUT "/series/:seriesId/productions/:productionId"
+   *
+   * Links a production to a series.
+   */
+  function linkProductionToSeries(seriesId: number, productionIds: number[]) {
+    return put(
+      API_ROUTES.series.productions(seriesId),
+      JSON.stringify(productionIds),
+    );
+  }
+
+  /**
+   * DELETE "/series/:seriesId/productions/:productionId"
+   *
+   * Unlinks a production from a series.
+   */
+  function unlinkProductionFromSeries(seriesId: number, productionId: number) {
+    return del(API_ROUTES.series.productionById(seriesId, productionId));
+  }
+
+  return {
+    getAll,
+    getById,
+    create,
+    replace,
+    modify,
+    remove,
+    getSeriesProductions,
+    getAllSeriesProductions,
+    linkProductionToSeries,
+    unlinkProductionFromSeries,
+  };
+}

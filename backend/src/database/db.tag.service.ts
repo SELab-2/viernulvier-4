@@ -2,10 +2,10 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { DbService } from "./db.service";
 import {
   CreateTagDto,
-  TagDto,
+  FilterTagDto,
   ModifyTagDto,
   PaginationFilterDto,
-  FilterTagDto,
+  TagDto,
 } from "../dto/dto";
 import {
   PaginatedResponse,
@@ -17,7 +17,10 @@ import {
   generateReturningClause,
   generateUpdateClause,
 } from "./db-utils";
-import { ResourceNotFoundException } from "../common/exceptions";
+import {
+  ResourceNotFoundException,
+  SystemFailureException,
+} from "../common/exceptions";
 
 @Injectable()
 export class TagDatabaseService {
@@ -28,6 +31,7 @@ export class TagDatabaseService {
    * Get a single tag by their ID.
    * @param id The ID we're trying to fetch.
    * @returns The tag if there is one.
+   * @throws ResourceNotFoundException if there is no tag with the provided id. (404)
    */
   async getTagById(id: number): Promise<TagDto> {
     const returningClause = generateReturningClause(TagSchema);
@@ -113,6 +117,7 @@ export class TagDatabaseService {
    * Create tag function, creates a tag in the database.
    * @param tag must be of the type "CreateTag" which has all fields defined besides the primary key id.
    * @returns the added tag if it was successful.
+   * @throws SystemFailureException if something goes wrong while creating the object. (500)
    */
   async createTag(tag: CreateTagDto): Promise<TagDto> {
     const { columns, placeholders, values } = generateInsertClause(tag);
@@ -127,7 +132,7 @@ export class TagDatabaseService {
     const result = await this.db.query<TagDto>(query, values);
 
     if (result.length === 0) {
-      throw new Error("Failed to create tag.");
+      throw new SystemFailureException("Failed to create tag.");
     }
 
     return result[0];
@@ -135,9 +140,12 @@ export class TagDatabaseService {
 
   /**
    * Update function for tags. Updates the tag in the database.
+   * @param tagId is the id of the tag you want to update.
    * @param tag must be of the type "ModifyTag", gives the freedom to define only what needs to be updated.
    * The id field in the tag MUST be defined.
    * @returns the updated tag if successful.
+   * @throws BadRequestException if no valid fields are given to be updated. (400)
+   * @throws ResourceNotFoundException if there is no tag by the given id. (404)
    */
   async updateTag(tagId: number, tag: ModifyTagDto): Promise<TagDto> {
     const { setClause, values, nextIndex } = generateUpdateClause(tag);

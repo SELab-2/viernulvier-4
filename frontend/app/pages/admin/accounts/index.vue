@@ -18,17 +18,23 @@
 <script lang="ts" setup>
 import type { CreateAccount, PublicAccount } from "@repo/common";
 
-const { account } = useAuth();
+definePageMeta({ ssr: false });
+
+const { rehydrate } = useAuth();
 const { getAll, create, remove } = useAccountApi();
 const snackbar = useSnackbar();
 const { t } = useI18n();
+
+if (import.meta.client) {
+  rehydrate();
+}
 
 const accounts = ref<PublicAccount[]>([]);
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 const accountFormRef = ref<{ reset: () => void } | null>(null);
 
-function showError(text: string) {
+function showSnackbarError(text: string) {
   snackbar.add({
     type: "error",
     text,
@@ -46,10 +52,12 @@ function showSuccess(text: string) {
 async function loadAccounts() {
   isLoading.value = true;
 
-  const response = await getAll({ page: 0, limit: 100, descending: true });
+  const response = await getAll({
+    paginationFilters: { page: 0, limit: 100, descending: true },
+  });
 
   if (response.error || !response.data) {
-    showError(response.error ?? t("accounts.loadError"));
+    showSnackbarError(response.error ?? t("accounts.loadError"));
     accounts.value = [];
     isLoading.value = false;
     return;
@@ -67,13 +75,13 @@ async function handleCreateAccount(payload: CreateAccount) {
 
   if (response.error || !response.data) {
     if (response.errorCode === "ACCOUNT_ALREADY_EXISTS") {
-      showError(
+      showSnackbarError(
         t("accounts.alreadyExists", {
           username: payload.username,
         }),
       );
     } else {
-      showError(response.error ?? t("accounts.createError"));
+      showSnackbarError(response.error ?? t("accounts.createError"));
     }
     isSubmitting.value = false;
     return;
@@ -104,7 +112,7 @@ async function handleDeleteAccount(target: PublicAccount) {
 
   const response = await remove(target.id);
   if (response.error) {
-    showError(response.error ?? t("accounts.deleteError"));
+    showSnackbarError(response.error ?? t("accounts.deleteError"));
     return;
   }
 
@@ -119,19 +127,16 @@ async function handleDeleteAccount(target: PublicAccount) {
 }
 
 onMounted(async () => {
-  // Redirect to 404 if not super admin
-  if (!account.value?.superAdmin) {
-    throw createError({ statusCode: 404, statusMessage: "Page Not Found" });
-  }
-
   await loadAccounts();
 });
 </script>
 <template>
-  <section
-    class="mx-auto min-h-screen w-full max-w-6xl space-y-4 px-4 py-6 sm:px-6"
-  >
-    <div class="space-y-4">
+  <PageHeader
+    :title="t('accounts.title')"
+    :description="t('accounts.headerDescription')"
+  />
+  <section class="bg-background w-full">
+    <div class="page-container min-h-screen space-y-4 py-12">
       <AdminAccountListView
         :accounts="accounts"
         @delete="handleDeleteAccount"
