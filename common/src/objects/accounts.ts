@@ -18,6 +18,7 @@ export const LoginSchema = AccountSchema.pick({
 });
 export const UpdateAccountSchema = AccountSchema.partial();
 export const ChangePasswordSchema = z.object({
+  oldPassword: z.string(),
   password: z.string().min(8),
 });
 

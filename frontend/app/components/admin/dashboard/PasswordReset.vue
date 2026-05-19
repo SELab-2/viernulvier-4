@@ -8,18 +8,20 @@
 <script setup lang="ts">
 import { Eye, EyeOff, KeyRound } from "lucide-vue-next";
 
-const { account } = useAuth();
-const { changePassword } = useAccountApi();
+const { account, changePassword } = useAuth();
 const { t } = useI18n();
 
+const oldPassword = ref("");
 const newPassword = ref("");
 const confirmPassword = ref("");
+const showOld = ref(false);
 const showNew = ref(false);
 const showConfirm = ref(false);
 const submitting = ref(false);
 const feedback = ref<{ type: "ok" | "err"; msg: string } | null>(null);
 
 function clearForm() {
+  oldPassword.value = "";
   newPassword.value = "";
   confirmPassword.value = "";
 }
@@ -49,29 +51,22 @@ async function handleSubmit() {
   }
 
   submitting.value = true;
-  try {
-    const resp = await changePassword({
-      password: newPassword.value,
-    });
+  const pubAccount = await changePassword({
+    oldPassword: oldPassword.value,
+    password: newPassword.value,
+  });
 
-    if (resp.error) {
-      feedback.value = { type: "err", msg: resp.error };
-    } else {
-      feedback.value = {
-        type: "ok",
-        msg: t("admin.dashboard.passwordSuccess"),
-      };
-      clearForm();
-    }
-  } catch (e) {
+  if (!pubAccount) {
     feedback.value = {
       type: "err",
-      msg:
-        e instanceof Error ? e.message : t("admin.dashboard.notAuthenticated"),
+      msg: t("admin.dashboard.oldPasswordWrong"),
     };
-  } finally {
-    submitting.value = false;
+  } else {
+    feedback.value = { type: "ok", msg: t("admin.dashboard.passwordSuccess") };
+    clearForm();
   }
+
+  submitting.value = false;
 }
 
 // Shared input class reused for both fields
@@ -121,6 +116,34 @@ const inputClass =
           {{ feedback.msg }}
         </div>
       </Transition>
+
+      <!-- Old password field -->
+      <div class="flex flex-col gap-1.5">
+        <label
+          class="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground"
+        >
+          {{ t("admin.dashboard.oldPassword") }}
+        </label>
+        <div class="relative">
+          <input
+            v-model="oldPassword"
+            :type="showOld ? 'text' : 'password'"
+            autocomplete="old-password"
+            required
+            :placeholder="t('admin.dashboard.oldPasswordPlaceholder')"
+            :class="inputClass"
+          />
+          <button
+            type="button"
+            tabindex="-1"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+            @click="showOld = !showOld"
+          >
+            <Eye v-if="!showOld" :size="15" class="text-accent/70" />
+            <EyeOff v-else :size="15" class="text-accent/70" />
+          </button>
+        </div>
+      </div>
 
       <!-- New password field -->
       <div class="flex flex-col gap-1.5">
