@@ -27,25 +27,20 @@ export default defineNuxtPlugin(() => {
       return ROUTES.admin.login.base;
     }
 
-    // now we know they have an api key
-
-    // only accounts is a limited super route.
     const isSuperRoute = to.path.startsWith("/admin/accounts");
 
     if (isSuperRoute) {
       const isSuper = await verifySuperSession();
 
       if (!isSuper) {
-        // throw a fatal 404 so they have no idea this route even exists.
-        // (Note: If the key was expired, verifySuperSession() handles the logout)
-        showError({
-          status: 404,
-          statusText: "Page Not Found",
-          fatal: true, // redirects to the error page
+        throw showError({
+          statusCode: 404,
+          statusMessage: "Page Not Found",
+          fatal: true,
         });
       }
 
-      return true; // They are a verified super admin, allow navigation
+      return true;
     }
 
     // standard auth.
