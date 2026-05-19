@@ -186,8 +186,8 @@ const adminNavItems = [
     :class="[
       !isVisible && !isMenuOpen ? '-translate-y-full' : '',
       isTransparent
-        ? 'absolute w-full bg-transparent border-transparent header-transparent'
-        : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)]',
+        ? 'absolute w-full bg-transparent border-transparent header-transparent text-[var(--foreground)]'
+        : 'sticky bg-[var(--background)] border-b-4 border-[var(--foreground)] text-[var(--foreground)]',
       'top-0 z-[100] transition-all duration-300 transform-gpu min-h-[80px] lg:min-h-[110px]',
     ]"
   >

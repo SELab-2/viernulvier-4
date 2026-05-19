@@ -135,7 +135,7 @@
   --primary-foreground: #0b0f19;
 
   /* Muted surfaces */
-  --muted: #111827;
+  --muted: #171f33;
   --muted-foreground: #9ca3af;
 
   /* Borders */
@@ -148,9 +148,9 @@
   --font-weight-normal: 400;
 
   /* Accent */
-  --accent: #8224e3;
-  --accent-hover: #9333ea;
-  --accent-light: #1f0f3d;
+  --accent: #a855f7;
+  --accent-hover: #c084fc;
+  --accent-light: #2e1065;
   --accent-foreground: #ffffff;
 
   /* Card */
