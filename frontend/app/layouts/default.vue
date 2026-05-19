@@ -14,11 +14,11 @@
 
 <template>
   <div
-    class="min-h-screen bg-white dark:bg-black text-black dark:text-white antialiased"
+    class="min-h-screen flex flex-col bg-white dark:bg-black text-black dark:text-white antialiased"
   >
     <AppHeader />
 
-    <main>
+    <main class="flex-1">
       <slot />
     </main>
     <AppFooter />
