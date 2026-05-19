@@ -7,7 +7,7 @@ module.exports = {
       cwd: "/path/to/project/frontend",
       env: {
         PORT: 3001,
-        NUXT_API_BASE: "https://sel2-4.ugent.be/api",
+        NUXT_API_BASE: "<Set-your-url-to-hosted-backend-here>",
         NUXT_BASE: "/archive/",
       },
     },
