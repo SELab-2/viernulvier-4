@@ -528,6 +528,7 @@
       "hint": "Select productions you want to edit",
       "saveError": "Something went wrong while saving. Please try again.",
       "productionsLabel": "productions",
+      "productionLabel": "production",
       "editingLabel": "Editing",
       "backToSelection": "Back to selection",
       "tags": {

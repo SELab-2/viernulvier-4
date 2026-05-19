@@ -15,11 +15,11 @@ import {
   Save,
   Loader2,
 } from "lucide-vue-next";
-import type { Series } from "@repo/common";
+import type { Series, SeriesView } from "@repo/common";
 import type { ExistingSeries } from "~/composables/productions/steps/productionSeries";
 
 const props = defineProps<{
-  series: Series;
+  series: SeriesView;
   isExpanded: boolean;
   isSaving?: boolean;
   isDeleting?: boolean;
@@ -32,7 +32,30 @@ const emit = defineEmits<{
   (e: "batchEdit"): void;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const { getSeriesProductions } = useSeriesApi();
+
+// Fetch production count for this series
+const productionCount = ref<number | null>(null);
+
+async function loadProductionCount() {
+  try {
+    const resp = await getSeriesProductions(props.series.id, locale.value, {
+      page: 0,
+      limit: 1,
+      descending: true,
+    });
+    if (resp.data) {
+      productionCount.value = resp.data.totalItems;
+    }
+  } catch (err) {
+    console.error("Failed to load production count:", err);
+  }
+}
+
+onMounted(() => {
+  loadProductionCount();
+});
 
 // Helper to ensure we have a localized object structure
 function normalizeLocalized(val: any): { nl: string; en?: string } {
@@ -100,14 +123,22 @@ function onSave() {
         </div>
         <div class="min-w-0">
           <h4
-            class="truncate text-sm font-black uppercase tracking-tight text-foreground italic"
+            class="truncate text-sm font-black uppercase tracking-tight text-foreground italic pr-2"
           >
-            {{ series.titel.nl || "Untitled Series" }}
+            {{ series.titel || "Untitled Series" }}
           </h4>
           <p
             class="text-[10px] font-brand font-black uppercase tracking-widest text-muted-foreground"
           >
             ID: {{ series.id }}
+            <template v-if="productionCount !== null">
+              • {{ productionCount }}
+              {{
+                productionCount == 1
+                  ? t("admin-productions.batch.productionLabel")
+                  : t("admin-productions.batch.productionsLabel")
+              }}
+            </template>
           </p>
         </div>
       </div>

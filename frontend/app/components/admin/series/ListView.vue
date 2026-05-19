@@ -5,7 +5,12 @@
 -->
 
 <script setup lang="ts">
-import type { Series, PaginatedResponse, ProductionView } from "@repo/common";
+import type {
+  Series,
+  PaginatedResponse,
+  ProductionView,
+  SeriesView,
+} from "@repo/common";
 import { useSeriesApi } from "~/composables/useSeriesApi";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
 import { useSeriesView } from "~/composables/useSeriesView";
@@ -27,7 +32,7 @@ const {
 } = useSeriesView();
 
 // State
-const seriesList = ref<Series[]>([]);
+const seriesList = ref<SeriesView[]>([]);
 const error = ref<string | null>(null);
 const expandedId = ref<number | null>(null);
 
@@ -53,10 +58,11 @@ async function loadSeries() {
         title: searchQuery.value || undefined,
         is_suggestion: false,
       },
+      languageFilters: { lang: locale.value },
     });
 
     if (resp.data) {
-      const data = resp.data as PaginatedResponse<Series>;
+      const data = resp.data as PaginatedResponse<SeriesView>;
       seriesList.value = data.objects;
       totalItems.value = data.totalItems;
       totalPages.value = Math.max(1, Math.ceil(data.totalItems / PAGE_SIZE));
@@ -79,6 +85,10 @@ watch(currentPage, (newVal, oldVal) => {
   if (newVal !== oldVal) loadSeries();
 });
 
+watch(locale, () => {
+  loadSeries();
+});
+
 // Actions
 async function handleSave(data: { id: number; titel: any; description: any }) {
   savingIds.value.add(data.id);
@@ -95,15 +105,15 @@ async function handleSave(data: { id: number; titel: any; description: any }) {
         type: "success",
         text: t("general.saveSuccess", "Series saved successfully"),
       });
-      // Update local state
-      const idx = seriesList.value.findIndex((s) => s.id === data.id);
-      if (idx !== -1) seriesList.value[idx] = resp.data as Series;
     }
   } catch (err) {
     snackbar.add({ type: "error", text: "Failed to save series" });
   } finally {
     savingIds.value.delete(data.id);
   }
+
+  // Re fetch.
+  loadSeries();
 }
 
 async function handleDelete(id: number, title: string) {
@@ -211,13 +221,13 @@ onMounted(() => {
           :is-deleting="deletingIds.has(series.id)"
           @toggle="toggleExpand(series.id)"
           @save="handleSave"
-          @delete="handleDelete(series.id, series.titel.nl)"
+          @delete="handleDelete(series.id, series.titel)"
           @batch-edit="handleBatchEdit(series.id)"
         />
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="pt-8 flex justify-end">
-          <ArchivePagination />
+        <div v-if="totalPages > 1" class="pt-8 flex w-full">
+          <AdminSeriesPagination />
         </div>
       </div>
     </div>

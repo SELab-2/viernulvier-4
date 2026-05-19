@@ -530,6 +530,7 @@
       "hint": "Selecteer producties die je wilt bewerken",
       "saveError": "Er is iets misgegaan bij het opslaan. Probeer het opnieuw.",
       "productionsLabel": "producties",
+      "productionLabel": "productie",
       "editingLabel": "Bewerken",
       "backToSelection": "Terug naar selectie",
       "tags": {
