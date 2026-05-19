@@ -222,11 +222,6 @@ async function handleDelete(blog: BlogView) {
 
 <template>
   <div>
-    <!--
-      Reuse the public StoryToolbar for search + sort + date filters.
-      This eliminates the large block of duplicated filter UI that was
-      previously inlined here.
-    -->
     <BlogsStoryToolbar
       v-model:sort-order="sortOrder"
       :story-titles="[]"
@@ -241,15 +236,33 @@ async function handleDelete(blog: BlogView) {
       <!-- Error banner -->
       <div
         v-if="error"
-        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text"
+        class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text mb-4"
       >
         {{ error }}
+      </div>
+
+      <div class="page-container flex items-center justify-between mb-6">
+        <div>
+          <p
+            v-if="!loading"
+            class="font-brand text-2xl font-black text-foreground"
+          >
+            {{ totalItems }} {{ t("general.results") }}
+          </p>
+        </div>
+
+        <NuxtLink
+          :to="ROUTES.admin.stories.create"
+          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent-fixed border-2 border-accent-fixed text-accent-fixed-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+        >
+          <Plus :size="15" />
+          {{ t("admin.blogs.new") }}
+        </NuxtLink>
       </div>
 
       <!-- Loading skeleton -->
       <AdminBlogsStoriesSkeleton v-if="loading" />
 
-      <!-- Empty state -->
       <div v-else-if="!blogs.length" class="py-20 text-center">
         <p
           class="font-brand font-black text-3xl uppercase italic tracking-tighter text-muted-foreground/30 mb-2"
@@ -263,28 +276,7 @@ async function handleDelete(blog: BlogView) {
         </p>
       </div>
 
-      <div v-else>
-        <!-- Story list: each item exposes edit/delete actions in the card -->
-        <div class="page-container flex items-center justify-between mb-6">
-          <div>
-            <p
-              v-if="!loading && totalItems > 0"
-              class="font-brand text-2xl font-black text-foreground"
-            >
-              {{ totalItems }} {{ t("general.results") }}
-            </p>
-          </div>
-
-          <NuxtLink
-            :to="ROUTES.admin.stories.create"
-            class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent-fixed border-2 border-accent-fixed text-accent-fixed-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
-          >
-            <Plus :size="15" />
-            {{ t("admin.blogs.new") }}
-          </NuxtLink>
-        </div>
-      </div>
-      <div class="page-container space-y-3">
+      <div v-else class="page-container space-y-3">
         <!--
           BlogsStoryListItem is the same card used on the public stories page.
           `is-admin` switches it to show edit/delete buttons instead of a link.

@@ -7,6 +7,7 @@ import { createI18n } from "vue-i18n";
 vi.useFakeTimers();
 
 const i18n = createI18n({
+  legacy: false,
   locale: "nl",
   messages: {
     nl: { searchbar: { placeholder: "Zoeken..." } },
@@ -23,13 +24,11 @@ const fruits: SearchSuggestion[] = [
   { display: "Mango", context: "Fruit", searchValue: "Mango" },
 ];
 
-// 2. Make the mock async and add actual filtering logic
-// eslint-disable-next-line @typescript-eslint/require-await
-async function mockFetchSuggestions(
+function mockFetchSuggestions(
   query: string,
   limit: number,
 ): Promise<SearchSuggestion[]> {
-  return fruits.slice(0, limit);
+  return Promise.resolve(fruits.slice(0, limit));
 }
 
 describe("SearchBar", () => {
@@ -62,9 +61,7 @@ describe("SearchBar", () => {
     const input = wrapper.find("input");
     await input.trigger("focus");
     await input.setValue("ap");
-    // normally matches Apple, Banana, Orange, Grapes, Pineapple, Mango, but only needs to show 2
 
-    // Have to advance the timer because of delay on the results.
     vi.advanceTimersByTime(150);
     await flushPromises();
 
@@ -75,17 +72,16 @@ describe("SearchBar", () => {
   it("emits `update:modelValue` when a suggestion is clicked", async () => {
     const input = wrapper.find("input");
     await input.trigger("focus");
-    await input.setValue("ap"); // matches Apple, Grapes, Pineapple
+    await input.setValue("ap");
 
-    // Have to advance the timer because of delay on the results.
     vi.advanceTimersByTime(150);
     await flushPromises();
 
     const firstSuggestion = wrapper.find("li");
     await firstSuggestion.trigger("mousedown");
 
-    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["Apple"]); // grabs the first time the event was emitted
-    expect(wrapper.find("input").element.value).toBe("Apple"); // internalQuery contains selected value
+    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["Apple"]);
+    expect(wrapper.find("input").element.value).toBe("Apple");
   });
 
   it("emits `update:modelValue` with typed value when Enter is pressed", async () => {
@@ -103,14 +99,77 @@ describe("SearchBar", () => {
     await input.trigger("focus");
     await input.setValue("ap");
 
-    // button should be visible now
     const clearButton = wrapper.find("button");
     expect(clearButton.exists()).toBe(true);
 
-    await clearButton.trigger("mousedown"); // clicking on the clear button
+    await clearButton.trigger("mousedown");
 
     expect(wrapper.find("input").element.value).toBe("");
-    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([""]); // from clear
-    expect(wrapper.find("button").exists()).toBe(false); // button disappears when empty
+    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([""]);
+    expect(wrapper.find("button").exists()).toBe(false);
+  });
+
+  it("navigates suggestions with arrow keys", async () => {
+    // Mock scrollIntoView
+    Element.prototype.scrollIntoView = vi.fn();
+
+    const input = wrapper.find("input");
+    await input.trigger("focus");
+    await input.setValue("ap");
+
+    vi.advanceTimersByTime(150);
+    await flushPromises();
+
+    await input.trigger("keydown.down"); // Highlight index 0 (Apple)
+    expect(wrapper.findAll("li")[0].classes()).toContain("bg-muted");
+
+    await input.trigger("keydown.down"); // Highlight index 1 (Banana)
+    expect(wrapper.findAll("li")[1].classes()).toContain("bg-muted");
+    expect(wrapper.findAll("li")[0].classes()).not.toContain("bg-muted");
+
+    await input.trigger("keydown.up"); // Back to index 0
+    expect(wrapper.findAll("li")[0].classes()).toContain("bg-muted");
+
+    await input.trigger("keydown.enter"); // Select highlighted
+    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual(["Apple"]);
+  });
+
+  it("searches internally if fetchSuggestions is not provided", async () => {
+    const wrapperNoFetch = mount(SearchBar, {
+      global: { plugins: [i18n] },
+      props: {
+        modelValue: "",
+        suggestions: fruits,
+        limit: 5,
+      },
+    });
+
+    const input = wrapperNoFetch.find("input");
+    await input.trigger("focus");
+    await input.setValue("Apple");
+
+    // No timers needed for sync search
+    expect(wrapperNoFetch.text()).toContain("Apple");
+    expect(wrapperNoFetch.text()).not.toContain("Banana");
+  });
+
+  it("handles fetch errors gracefully", async () => {
+    const wrapperFail = mount(SearchBar, {
+      global: { plugins: [i18n] },
+      props: {
+        modelValue: "",
+        fetchSuggestions: vi.fn().mockRejectedValue(new Error("Fail")),
+        limit: 5,
+      },
+    });
+
+    const input = wrapperFail.find("input");
+    await input.trigger("focus");
+    await input.setValue("error");
+
+    vi.advanceTimersByTime(150);
+    await flushPromises();
+
+    expect(wrapperFail.findAll("li").length).toBe(0);
   });
 });

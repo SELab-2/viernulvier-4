@@ -25,7 +25,7 @@ import ProductionListViewItem from "../ProductionListViewItem.vue";
 import { useRoute, useRouter } from "vue-router";
 import { ROUTES } from "~/utils/routes";
 import { useProductionBatchEdit } from "~/composables/productions/useProductionBatchEdit";
-import { Plus, Edit2, FileText } from "lucide-vue-next";
+import { Plus, Layers, FileText } from "lucide-vue-next";
 import { useStorageApi } from "~/composables/media/useStorageApi";
 import { useCropApi } from "~/composables/media/useCropApi";
 import { useItemApi } from "~/composables/media/useItemApi";

@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   getLocation: vi.fn() as Mock,
   getPrices: vi.fn() as Mock,
   getMainImageCrop: vi.fn() as Mock,
+  getCarouselImageCrops: vi.fn() as Mock,
   routerBack: vi.fn() as Mock,
   routerPush: vi.fn() as Mock,
 }));
@@ -56,6 +57,7 @@ mockNuxtImport("useRouter", () => () => ({
 vi.mock("~/composables/media/useGallery", () => ({
   useGallery: () => ({
     getMainImageCrop: mocks.getMainImageCrop,
+    getCarouselImageCrops: mocks.getCarouselImageCrops,
   }),
 }));
 
@@ -73,7 +75,7 @@ const mockProductionData = {
   updated_at: "2024-01-01T10:00:00.000Z",
 };
 
-describe.skip("Production Detail Page (Integration)", () => {
+describe("Production Detail Page (Integration)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -104,6 +106,7 @@ describe.skip("Production Detail Page (Integration)", () => {
       file: "/mock-header-image.jpg",
       image: "/mock-header-image.jpg",
     });
+    mocks.getCarouselImageCrops.mockReturnValue([]);
 
     mocks.getAllEvents.mockResolvedValue({
       data: { objects: [{ id: 99, name: "Opening Night" }] },

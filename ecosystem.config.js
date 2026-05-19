@@ -4,17 +4,17 @@ module.exports = {
     {
       name: "frontend",
       script: ".output/server/index.mjs",
-      cwd: "/home/selab2/project/frontend",
+      cwd: "/path/to/project/frontend",
       env: {
         PORT: 3001,
-        NUXT_API_BASE: "https://sel2-4.ugent.be/api",
+        NUXT_API_BASE: "<Set-your-url-to-hosted-backend-here>",
         NUXT_BASE: "/archive/",
       },
     },
     {
       name: "backend",
       script: "dist/main.js",
-      cwd: "/home/selab2/project/backend",
+      cwd: "/path/to/project/backend",
       env: {
         PORT: 3000,
         NODE_ENV: "production",
