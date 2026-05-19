@@ -132,7 +132,10 @@ watch(
 
 const currentFontSize = computed(() => {
   return (
-    editor.value?.getAttributes("textStyle").fontSize?.replace("px", "") || ""
+    String(editor.value?.getAttributes("textStyle").fontSize ?? "").replace(
+      "px",
+      "",
+    ) || ""
   );
 });
 
