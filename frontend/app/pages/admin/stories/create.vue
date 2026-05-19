@@ -164,10 +164,8 @@ async function handleSubmit(data: CreateBlog) {
           <template #extra>
             <!--
               No blogId is passed here because the blog does not exist yet.
-              AdminBlogsLinkToProduction will detect the missing ID and show
-              a clear "save the story first" locked hint instead.
             -->
-            <AdminBlogsLinkToProduction />
+            <AdminSharedProductionLinker type="blog" />
           </template>
         </AdminBlogsForm>
 

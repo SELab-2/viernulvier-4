@@ -265,7 +265,20 @@
     "of_pages": "of {total}",
     "new": "New print",
     "description": "description",
-    "relatedProductions": "Related productions"
+    "relatedProductions": "Related productions",
+    "linkToProduction": "Link to Production",
+    "linkBtn": "Link",
+    "linkToProductionSearch": "Search productions by title...",
+    "linkToProductionNoResults": "No productions found",
+    "linkToProductionCreateHint": "Save the print first to link it to a production.",
+    "linking": "Linking...",
+    "linked": "Linked",
+    "linkedProductions": "Link to Production",
+    "linkedProductionsHint": "Link this print to a production so it appears on the production page.",
+    "linkedThisSession": "Linked this session",
+    "noLinkedProductions": "Not linked to any production yet",
+    "unlinkBtn": "Unlink",
+    "viewProduction": "View production page"
   },
   "admin": {
     "finish": "Finish",
