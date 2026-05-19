@@ -40,13 +40,11 @@ async function loadLinkedProductions() {
   if (!hasEntityId.value || props.type !== "series") return;
   searching.value = true;
   try {
-    const resp = await seriesApi.getSeriesProductions(
+    const prods = (await seriesApi.getAllSeriesProductions(
       props.entityId!,
-      locale.value as any,
-    );
-    if (resp.data) {
-      linkedProductions.value = resp.data.objects;
-    }
+      locale.value,
+    )) as ProductionView[];
+    linkedProductions.value = prods;
   } catch (err) {
     console.error("Failed to load linked productions:", err);
   } finally {

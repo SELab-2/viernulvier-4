@@ -23,7 +23,7 @@
 import type { ProductionView } from "@repo/common";
 
 const props = defineProps<{
-  type: "blog" | "print";
+  type: "blog" | "print" | "series";
   productions: ProductionView[];
   unlinkingId: number | null;
 }>();

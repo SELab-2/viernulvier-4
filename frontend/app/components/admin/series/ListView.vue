@@ -11,7 +11,7 @@ import { useProductionBatchEdit } from "~/composables/productions/useProductionB
 import { useSeriesView } from "~/composables/useSeriesView";
 import { ROUTES } from "~/utils/routes";
 
-const { modify, remove, getSeriesProductions } = useSeriesApi();
+const { modify, remove, getAllSeriesProductions } = useSeriesApi();
 const { selectWholeSeries } = useProductionBatchEdit();
 const { t, locale } = useI18n();
 const snackbar = useSnackbar();
@@ -131,8 +131,8 @@ async function handleDelete(id: number, title: string) {
 async function handleBatchEdit(seriesId: number) {
   try {
     await selectWholeSeries(seriesId, async (id) => {
-      const resp = await getSeriesProductions(id, locale.value as any);
-      return (resp.data?.objects as ProductionView[]) || [];
+      const resp = await getAllSeriesProductions(id, locale.value);
+      return (resp as ProductionView[]) || [];
     });
     router.push(ROUTES.admin.productions.batchEdit);
   } catch (err) {
