@@ -146,7 +146,7 @@ function handleTagChange(items: ProductionTagItem[]) {
           :class="
             saveSuccess
               ? 'bg-green-500 text-white border border-green-500'
-              : 'bg-accent text-accent-foreground border border-accent hover:opacity-90'
+              : 'bg-accent-fixed text-accent-fixed-foreground border border-accent-fixed hover:opacity-90'
           "
           :disabled="isSaving || !commonTagsLoaded"
           @click="save"

@@ -158,7 +158,7 @@ async function handleLogin() {
           <button
             type="submit"
             :disabled="loading || !username || !password"
-            class="mt-2 w-full rounded-md bg-accent text-[var(--accent-foreground)] text-[11px] font-black uppercase tracking-[0.08em] h-10 transition-all hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
+            class="mt-2 w-full rounded-md bg-accent-fixed text-[var(--accent-fixed-foreground)] text-[11px] font-black uppercase tracking-[0.08em] h-10 transition-all hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <span v-if="loading">{{ t("login.signingIn") }}</span>
             <span v-else>{{ t("login.signIn") }}</span>

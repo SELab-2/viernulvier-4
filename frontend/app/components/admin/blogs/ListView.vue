@@ -233,6 +233,7 @@ async function handleDelete(blog: BlogView) {
     />
 
     <section class="bg-background pt-6 pb-6 h-full">
+      <!-- Error banner -->
       <div
         v-if="error"
         class="rounded-lg border border-feedback-error-border bg-feedback-error-bg px-4 py-3 text-sm text-feedback-error-text mb-4"
@@ -252,13 +253,14 @@ async function handleDelete(blog: BlogView) {
 
         <NuxtLink
           :to="ROUTES.admin.stories.create"
-          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent border-2 border-accent text-accent-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
+          class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-accent-fixed border-2 border-accent-fixed text-accent-fixed-foreground font-brand font-black text-[11px] uppercase tracking-widest leading-none hover:bg-transparent hover:text-accent transition"
         >
           <Plus :size="15" />
           {{ t("admin.blogs.new") }}
         </NuxtLink>
       </div>
 
+      <!-- Loading skeleton -->
       <AdminBlogsStoriesSkeleton v-if="loading" />
 
       <div v-else-if="!blogs.length" class="py-20 text-center">
@@ -275,6 +277,11 @@ async function handleDelete(blog: BlogView) {
       </div>
 
       <div v-else class="page-container space-y-3">
+        <!--
+          BlogsStoryListItem is the same card used on the public stories page.
+          `is-admin` switches it to show edit/delete buttons instead of a link.
+          `deleting` disables the delete button while the API call is in flight.
+        -->
         <BlogsStoryListItem
           v-for="blog in blogs"
           :key="blog.id"
@@ -283,7 +290,7 @@ async function handleDelete(blog: BlogView) {
           :deleting="deletingIds.has(blog.id)"
           @delete="handleDelete(blog)"
         />
-
+        <!-- Pagination bar (hidden when there is only one page and no items yet) -->
         <AdminBlogsPagination
           v-if="totalPages > 1 || totalItems > 0"
           :current-page="currentPage"

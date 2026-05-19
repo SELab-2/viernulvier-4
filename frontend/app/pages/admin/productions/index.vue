@@ -8,7 +8,10 @@ const { t } = useI18n();
 
 <template>
   <div>
-    <PageHeader :title="t('admin-productions.header_title')" />
+    <PageHeader
+      :title="t('admin-productions.header_title')"
+      :description="t('admin-productions.description')"
+    />
     <ArchiveSearchSection is-admin />
     <ArchiveBody is-admin />
   </div>

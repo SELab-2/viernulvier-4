@@ -71,6 +71,9 @@
   --accent-light: #f3e8ff;
   --accent-foreground: #ffffff;
 
+  --accent-fixed: #8224e3;
+  --accent-fixed-foreground: #ffffff;
+
   /* Card */
   --card: #ffffff;
   --card-foreground: #0f172a;
@@ -135,7 +138,7 @@
   --primary-foreground: #0b0f19;
 
   /* Muted surfaces */
-  --muted: #111827;
+  --muted: #171f33;
   --muted-foreground: #9ca3af;
 
   /* Borders */
@@ -148,9 +151,9 @@
   --font-weight-normal: 400;
 
   /* Accent */
-  --accent: #8224e3;
-  --accent-hover: #9333ea;
-  --accent-light: #1f0f3d;
+  --accent: #a855f7;
+  --accent-hover: #c084fc;
+  --accent-light: #2e1065;
   --accent-foreground: #ffffff;
 
   /* Card */
@@ -224,6 +227,8 @@
   --color-accent-hover: var(--accent-hover);
   --color-accent-light: var(--accent-light);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-fixed: var(--accent-fixed);
+  --color-accent-fixed-foreground: var(--accent-fixed-foreground);
   --color-thumbnail-bg: var(--thumbnail-bg);
   --color-thumbnail-icon: var(--thumbnail-icon);
   --color-action-blue-border: var(--action-blue-border);
