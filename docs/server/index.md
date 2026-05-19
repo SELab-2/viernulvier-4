@@ -87,6 +87,9 @@ before building the apps:
 bash server/server_deployment.sh --init-db
 ```
 
+> **Note:** This script does not provide a working api-key or account. You will need to set that up yourself.
+> See [database](database.md).
+
 Both commands will build and deploy the backend and frontend. Default pm2 ports (unless changed in the pm2 config):
 
 - **Backend:** `3000`

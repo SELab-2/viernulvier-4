@@ -135,6 +135,19 @@ WHERE key = '<insert-your-key>';
 > after this you can create an account through the backend and link it with the key in the database by using the
 > JOIN-table `account_api_keys`.
 > From here onwards you can use this account through the frontend's CMS (findable under <url>/admin).
+
+### Scraper
+
+It is very important to note that the scraper takes the last inserted date into the `scraper_dates` table.
+Therefore, you will need to make sure there is a date in the `scraper_dates` table before running.
+If you restored through the `pg.dump` file then this should have been set with the default values, if not, then you will
+need to set this yourself. You can do this via:
+
+```sql
+INSERT INTO scraper_dates DEFAULT
+VALUES;
+```
+
 ---
 
 After setting up the database, make note of the following — all four are required as backend environment variables:
