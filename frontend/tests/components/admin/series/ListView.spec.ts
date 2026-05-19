@@ -124,7 +124,7 @@ describe("AdminSeriesListView", () => {
 
     await flushPromises();
 
-    expect(wrapper.text()).toContain("archive.no_results");
+    expect(wrapper.text()).toContain("series.no_results");
   });
 
   it("handles create series", async () => {
