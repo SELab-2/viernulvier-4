@@ -5,9 +5,17 @@ vi.mock("#app", async (importOriginal) => {
   const actual = await importOriginal<Record<string, any>>();
   return {
     ...actual,
-    useRuntimeConfig: () => ({ public: { apiBase: "http://localhost:3000" } }),
     useState: vi.fn((key: string, init: () => unknown) => ({ value: init() })),
     navigateTo: vi.fn(),
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      afterEach: vi.fn(() => vi.fn()),
+      beforeEach: vi.fn(() => vi.fn()),
+      beforeResolve: vi.fn(() => vi.fn()),
+      currentRoute: { value: { params: {}, query: {}, meta: {} } },
+      isReady: vi.fn(() => Promise.resolve()),
+    }),
     computed: (fn: () => unknown) => ({ value: fn() }),
   };
 });
