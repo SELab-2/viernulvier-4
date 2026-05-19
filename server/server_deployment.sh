@@ -2,7 +2,7 @@
 
 # =============================================================================
 # Deployment script for backend and frontend
-# Run from the project root: bash server/server_deployment.sh
+# Run from the project root: bash server/server_deployment.sh [--init-db]
 # =============================================================================
 
 set -e  # Exit immediately on error
@@ -18,22 +18,93 @@ warn()   { echo -e "${YELLOW}[WARN]${NC} $1"; }
 error()  { echo -e "${RED}[ERROR]${NC} $1"; exit 1; }
 
 # =============================================================================
-# Pre-flight checks
+# Argument Parsing
+# =============================================================================
+
+INIT_DB=false
+
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --init-db) INIT_DB=true ;;
+    *) warn "Unknown parameter passed: $1"; exit 1 ;;
+  esac
+  shift
+done
+
+# =============================================================================
+# Database Initialization (Optional)
+# =============================================================================
+
+if [ "$INIT_DB" = true ]; then
+  log "Database initialization requested."
+
+  # 1. Check if psql is installed before we do anything else
+  if ! command -v psql &> /dev/null; then
+    error "psql command not found. Please install PostgreSQL client tools before initializing the DB."
+  fi
+
+  # Hardcoded path to the dump file
+  dump_file="server/database/pg.dump"
+
+  if [ ! -f "$dump_file" ]; then
+    error "Dump file not found at '$dump_file'. Ensure you are running this from the project root."
+  fi
+
+  read -p "Enter PostgreSQL username (e.g., postgres): " db_user
+  read -s -p "Enter PostgreSQL password: " db_pass
+  echo "" # Add newline after silent password prompt
+  read -p "Enter Database name to create: " db_name
+
+  log "Connecting to PostgreSQL to setup database..."
+
+  export PGPASSWORD="$db_pass"
+
+  # 2. Check if the PostgreSQL server is actually running and accepting connections
+  set +e
+  psql -U "$db_user" -h localhost -c "\q" >/dev/null 2>&1
+  SERVER_STATUS=$?
+  set -e
+
+  if [ $SERVER_STATUS -ne 0 ]; then
+    unset PGPASSWORD
+    error "Cannot connect to PostgreSQL server at localhost:5432. Is the database service running?"
+  fi
+
+  # Temporarily disable 'exit on error' just in case the DB already exists
+  set +e
+  psql -U "$db_user" -h localhost -c "CREATE DATABASE $db_name;" 2>/dev/null
+  DB_CREATE_STATUS=$?
+  set -e
+
+  if [ $DB_CREATE_STATUS -eq 0 ]; then
+    log "Database '$db_name' created successfully."
+  else
+    warn "Database '$db_name' might already exist or creation failed. Proceeding to import..."
+  fi
+
+  log "Importing dump file ($dump_file) into '$db_name'..."
+  psql -U "$db_user" -h localhost -d "$db_name" -f "$dump_file" || error "Failed to import SQL dump."
+
+  # Clear the password variable for security
+  unset PGPASSWORD
+  log "Database setup complete!"
+fi
+
+# =============================================================================
+# Pre-flight checks (General)
 # =============================================================================
 
 log "Running pre-flight checks..."
 
-# Check we're in the project root
 if [ ! -f "ecosystem.config.js" ]; then
   error "ecosystem.config.js not found. Are you running this from the project root?"
 fi
 
-# Check .env exists
 if [ ! -f ".env" ]; then
   error ".env file not found. Copy .env.example to .env and fill in your values before deploying."
 fi
 
-# Check required tools
+# Note: psql was removed from here so standard deployments don't crash without it
 for tool in npm pm2 node; do
   if ! command -v $tool &> /dev/null; then
     error "$tool is not installed or not in PATH."
@@ -50,12 +121,7 @@ log "Building backend..."
 
 cd backend
 
-if [ ! -d "node_modules" ]; then
-  log "Installing backend dependencies..."
-  npm install
-else
-  log "Backend dependencies already installed, skipping."
-fi
+npm ci
 
 npm run build || error "Backend build failed."
 
@@ -70,12 +136,7 @@ log "Building frontend..."
 
 cd frontend
 
-if [ ! -d "node_modules" ]; then
-  log "Installing frontend dependencies..."
-  npm install
-else
-  log "Frontend dependencies already installed, skipping."
-fi
+npm ci
 
 npm run build || error "Frontend build failed."
 
@@ -88,7 +149,6 @@ log "Frontend built successfully."
 
 log "Deploying with pm2..."
 
-# If already running, reload — otherwise start fresh
 if pm2 list | grep -q "backend\|frontend"; then
   log "Existing pm2 processes found, reloading..."
   pm2 reload ecosystem.config.js --update-env
@@ -97,7 +157,6 @@ else
   pm2 start ecosystem.config.js
 fi
 
-# Save pm2 process list so it survives reboots
 pm2 save
 
 log "Deployment complete."

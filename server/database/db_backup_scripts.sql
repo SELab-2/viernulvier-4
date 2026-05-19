@@ -59,6 +59,25 @@ CREATE TABLE events
 CREATE INDEX idx_events_production_id ON events (production_id);
 CREATE INDEX idx_events_starttime ON events (starttime);
 
+CREATE OR REPLACE FUNCTION convert_endtime_to_null()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the incoming endtime is the 1970 epoch date (necessary for scraped data consistency)
+    IF NEW.endtime = '1970-01-01 00:00:00'::timestamp THEN
+        NEW.endtime := NULL;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_convert_endtime_to_null
+    BEFORE INSERT OR UPDATE
+    ON events
+    FOR EACH ROW
+EXECUTE FUNCTION convert_endtime_to_null();
+
 CREATE TRIGGER set_updated_at_events
     BEFORE UPDATE
     ON events
