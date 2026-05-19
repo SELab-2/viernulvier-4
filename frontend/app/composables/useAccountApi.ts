@@ -2,7 +2,6 @@ import type {
   PublicAccount,
   CreateAccount,
   UpdateAccount,
-  ChangePassword,
   PaginationFilter,
   PaginatedResponse,
 } from "@repo/common";
@@ -53,18 +52,6 @@ export function useAccountApi() {
   }
 
   /**
-   * POST "/auth/change-password"
-   *
-   * Changes the password of the current account.
-   */
-  function changePassword(body: ChangePassword) {
-    return post<PublicAccount, ChangePassword>(
-      API_ROUTES.auth.changePassword,
-      body,
-    );
-  }
-
-  /**
    * DELETE "/auth/:accountId"
    *
    * Deletes an account.
@@ -77,7 +64,6 @@ export function useAccountApi() {
     getAll,
     create,
     modify,
-    changePassword,
     remove,
   };
 }

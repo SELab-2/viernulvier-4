@@ -39,7 +39,7 @@ export const ROUTES = {
       byId: (id: number) => `/admin/productions/${id}`,
       create: "/admin/productions/create",
       edit: (id: number) => `/admin/productions/edit/${id}`,
-      editTags: "/admin/productions/editTags",
+      batchEdit: "/admin/productions/batch-edit",
       csvImports: "/admin/productions/csv-imports",
     },
     series: {

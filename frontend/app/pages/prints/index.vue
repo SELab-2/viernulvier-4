@@ -10,10 +10,10 @@
 
 -->
 
-<script setup lang="ts">
-import type { PrintItemView, PaginatedResponse } from "@repo/common";
-import { usePrintApi } from "../../composables/media/usePrintApi";
-import { usePrintView } from "../../composables/media/usePrintView";
+<script lang="ts" setup>
+import type { PaginatedResponse, PrintItemView } from "@repo/common";
+import { usePrintApi } from "~/composables/media/usePrintApi";
+import { usePrintView } from "~/composables/media/usePrintView";
 import PrintsToolbar from "../../components/prints/PrintsToolbar.vue";
 import PrintsSkeleton from "../../components/prints/PrintsSkeleton.vue";
 import FileGrid from "../../components/prints/FileGrid.vue";
@@ -123,8 +123,8 @@ onMounted(loadPage);
     class="min-h-screen bg-background text-gray-900 dark:text-gray-100 transition-colors duration-200"
   >
     <PageHeader
-      :title="t('prints.title')"
       :description="t('prints.headerDescription')"
+      :title="t('prints.title')"
     />
     <PrintsToolbar
       @update:search="searchQuery = $event"
@@ -163,14 +163,14 @@ onMounted(loadPage);
       <div class="flex items-center justify-between mt-6">
         <PrintsPageJumper
           :currentPage="currentPage"
-          :totalPages="totalPages"
           :loading="loading"
+          :totalPages="totalPages"
           @go-to-page="currentPage = $event"
         />
         <PrintsPagination
           :currentPage="currentPage"
-          :totalPages="totalPages"
           :loading="loading"
+          :totalPages="totalPages"
           @go-to-page="currentPage = $event"
         />
       </div>
