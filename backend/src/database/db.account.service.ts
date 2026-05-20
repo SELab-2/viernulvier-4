@@ -117,7 +117,7 @@ export class AccountDatabaseService {
     const result = await this.db.query<AccountDto>(query, [account.username]);
 
     if (result.length === 0) {
-      throw new BadRequestException("Invalid username.");
+      throw new InvalidCredentialsException();
     }
 
     const dbAccount: AccountDto = result[0];

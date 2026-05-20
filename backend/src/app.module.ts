@@ -17,10 +17,28 @@ import { ScraperModule } from "./util/scraper/scraper.module";
 import { ParserModule } from "./parser/parser.module";
 import { PrintItemModule } from "./print/print_item.module";
 import { SeriesModule } from "./series/series.module";
+import { ThrottlerModule } from "@nestjs/throttler";
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([
+      {
+        name: "short",
+        ttl: 1000,
+        limit: 3,
+      },
+      {
+        name: "medium",
+        ttl: 10000,
+        limit: 20,
+      },
+      {
+        name: "long",
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: "../.env",

@@ -40,6 +40,7 @@ import {
   UpdateAccountSchema,
 } from "@repo/common";
 import { ApiOkPaginatedResponseAnyOf } from "../common/decorators/api.ok";
+import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 
 @Controller("auth")
 export class AuthController {
@@ -52,6 +53,8 @@ export class AuthController {
    * @returns The Account and their ApiKey.
    */
   @ApiOperation({ summary: "Logs into an existing account." })
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ short: { limit: 1, ttl: 1000 }, long: { limit: 5, ttl: 60000 } })
   @UsePipes(new ZodValidationPipe(LoginSchema))
   @Post("login")
   async loginAccount(
