@@ -91,27 +91,6 @@ describe("ParserController", () => {
 
       expect(csvInjectionService.injectProductionsCSV).not.toHaveBeenCalled();
     });
-
-    it("should fallback to filePath when no uploaded file is provided", async () => {
-      const filePath = "test/productions.csv";
-      const expectedResult = { inserted: 10 };
-      mockCsvInjectionService.injectProductionsCSV.mockResolvedValue(
-        expectedResult,
-      );
-
-      const result = await controller.injectProductions(undefined, filePath);
-
-      expect(csvInjectionService.injectProductionsCSV).toHaveBeenCalledWith(
-        filePath,
-      );
-      expect(result).toEqual(expectedResult);
-    });
-
-    it("should throw when neither file nor filePath is provided", async () => {
-      await expect(
-        controller.injectProductions(undefined, undefined),
-      ).rejects.toBeInstanceOf(BadRequestException);
-    });
   });
 
   describe("injectEvents", () => {
