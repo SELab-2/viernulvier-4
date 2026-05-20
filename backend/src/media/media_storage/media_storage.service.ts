@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
   MissingEnvVariableError,
@@ -38,26 +38,6 @@ export class MediaStorageService {
       );
     return url; // note: returns the relative path in case of relative saving!
     // this is important for saving the relative paths elsewhere like the db.
-  }
-
-  /**
-   * This function gets a piece of media from the storage
-   * @param url is the url you want to fetch the media from
-   * @returns the media if it exists.
-   * note: this is the production impl and thus will call the url itself.
-   * @throws NotFoundException if the media could not be found through the given url (404)
-   * @throws SystemFailureException if something else went wrong. (500)
-   */
-  async getMedia(url: string): Promise<Buffer> {
-    const newUrl = this.getFormattedUrl(url);
-    const response = await fetch(newUrl);
-    if (response.status === 404)
-      throw new NotFoundException(`Media not found: ${url}`);
-    if (!response.ok)
-      throw new SystemFailureException(
-        `Failed to get media: ${response.statusText}`,
-      );
-    return Buffer.from(await response.arrayBuffer());
   }
 
   /**
