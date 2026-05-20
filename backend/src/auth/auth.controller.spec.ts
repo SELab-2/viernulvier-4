@@ -8,6 +8,7 @@ import {
   UpdateAccountDto,
 } from "../dto/dto";
 import { ApiKeyGuard, SuperApiKeyGuard } from "./authGuard";
+import { ThrottlerGuard } from "@nestjs/throttler";
 
 describe("AuthController", () => {
   let controller: AuthController;
@@ -42,6 +43,8 @@ describe("AuthController", () => {
       .useValue({ canActivate: jest.fn(() => true) })
       .overrideGuard(ApiKeyGuard)
       .useValue({ canActivate: jest.fn(() => true) })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<AuthController>(AuthController);

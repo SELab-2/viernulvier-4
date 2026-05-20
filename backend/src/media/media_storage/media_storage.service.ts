@@ -58,15 +58,29 @@ export class MediaStorageService {
   }
 
   /**
-   * Helper method for formating the url for absolute & relative paths.
-   * note: the relative path will use your mediaBaseUrl env var as base path.
-   * @param url is the url we want formated
-   * @returns the formated url (absolute url)
+   * Helper method for formatting the url for relative paths.
+   * @param url is the url we want formatted
+   * @returns the formatted url (absolute url tied strictly to mediaBase)
    */
   getFormattedUrl(url: string): string {
-    if (url.startsWith("http")) {
-      return url;
+    let cleanPath = url;
+    if (cleanPath.startsWith("http://") || cleanPath.startsWith("https://")) {
+      try {
+        const parsed = new URL(cleanPath);
+        cleanPath = parsed.pathname; // Extracts just the "/folder/file.jpg" part
+      } catch {
+        // If it's a malformed URL, fallback to just removing the prefix roughly
+        cleanPath = cleanPath.replace(/^https?:\/\/[^/]+/, "");
+      }
     }
-    return `${this.mediaBase}${url}`;
+
+    cleanPath = cleanPath.replace(/^(\.\.(\/|\\|$))+/, "");
+
+    const base = this.mediaBase.endsWith("/")
+      ? this.mediaBase.slice(0, -1)
+      : this.mediaBase;
+    const path = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+
+    return `${base}${path}`;
   }
 }
