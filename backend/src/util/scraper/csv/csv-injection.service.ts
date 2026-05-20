@@ -9,23 +9,23 @@ export class CsvInjectionService {
     private readonly engine: InjectCsvEngine,
   ) {}
 
-  async injectProductionsCSV(input: string | Buffer) {
+  async injectProductionsCSV(input: Buffer) {
     return this.engine.injectProductionsCSV(input);
   }
 
-  async injectEventsCSV(input: string | Buffer) {
+  async injectEventsCSV(input: Buffer) {
     return this.engine.injectEventsCSV(input);
   }
 
-  async injectTagsCSV(input: string | Buffer) {
+  async injectTagsCSV(input: Buffer) {
     return this.engine.injectTagsCSV(input);
   }
 
-  async injectBlogsCSV(input: string | Buffer) {
+  async injectBlogsCSV(input: Buffer) {
     return this.engine.injectBlogsCSV(input);
   }
 
-  async injectPricesCSV(input: string | Buffer) {
+  async injectPricesCSV(input: Buffer) {
     return this.engine.injectPricesCSV(input);
   }
 
